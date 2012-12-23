@@ -13,12 +13,13 @@ basic rendering routines (also incremental rendering, multithreading) are implem
 The renderer works with the 'new' minecraft anvil worlds.
 
 mapcrafter is free software and available under the GPL license.
-You can access the latest source of mapcrafter at: http://github.com/...
+You can access the latest source of mapcrafter at: http://github.com/m0r13/mapcrafter
 
 Please feel free to report bugs and errors you find when using mapcrafter.
 
 Thanks to pigmap and Minecraft Overviewer, whose documentations and source code were 
-very helpful.
+very helpful. I also used the alpha blending code of pigmap and some maps stuff in the 
+template from Minecraft Overviewer.
 
 ## How to use the renderer ##
 
