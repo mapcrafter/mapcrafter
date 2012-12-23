@@ -73,11 +73,11 @@ bool copyDirectory(const fs::path& from, const fs::path& to) {
 }
 
 ProgressBar::ProgressBar()
-		: max(0), start(0), last_update(0), last_value(0), last_percent(0) {
+		: max(0), start(time(NULL)), last_update(0), last_value(0), last_percent(0) {
 }
 
 ProgressBar::ProgressBar(int max)
-		: max(max), start(0), last_update(0), last_value(0), last_percent(0) {
+		: max(max), start(time(NULL)), last_update(0), last_value(0), last_percent(0) {
 }
 
 void ProgressBar::setMax(int max) {
@@ -90,13 +90,9 @@ int ProgressBar::getMax() const {
 
 void ProgressBar::update(int value) {
 	int now = time(NULL);
-	if (start == 0)
-		start = now;
 	double percent = value / (double) max * 100.;
 	if (last_update + 1 > now && !(last_percent != max && value == max))
 		return;
-
-	//double speed = (double) value / (now - start);
 
 	double speed = (double) (value - last_value) / (now - last_update);
 	if(value == max)

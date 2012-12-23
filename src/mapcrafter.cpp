@@ -44,6 +44,7 @@ int main(int argc, char** argv) {
 	    ("jobs,j", po::value<int>(&opts.jobs),
 	        "the number of threads to render the map (default 1)")
 	    ("incremental,u", "renders only the changed tiles")
+	    ("batch,b", "deactivates the animated progress bar")
 
 	    ("texture-size", po::value<int>(&opts.texture_size),
 	        "size of the minecraft textures (default 12 (px))")
@@ -83,6 +84,7 @@ int main(int argc, char** argv) {
 	}
 
 	opts.incremental = vm.count("incremental");
+	opts.batch = vm.count("batch");
 	if (opts.incremental && vm.count("texture-size")) {
 		std::cout << "You can't set a texture size when incremental rendering activated!" << std::endl;
 		std::cout << all << std::endl;

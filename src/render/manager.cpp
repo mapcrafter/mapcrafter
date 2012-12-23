@@ -240,8 +240,11 @@ void RenderManager::renderBaseTiles(const TileSet& tiles) {
 			renderer.renderTile(*it, tile);
 			saveTile(Path::byTilePos(*it, depth), tile);
 			i++;
-			progress.update(i);
+			if(!opts.batch)
+				progress.update(i);
 		}
+		if(opts.batch)
+			progress.update(render_tiles.size());
 		progress.finish();
 
 		//cache.getRegionCacheStats().print("Region cache");
@@ -297,10 +300,13 @@ void RenderManager::renderBaseTiles(const TileSet& tiles) {
 				sum += worker_settings[i]->progress;
 				running = running || !worker_settings[i]->finished;
 			}
-			progress.update(sum);
+			if(!opts.batch)
+				progress.update(sum);
 			if (!running)
 				break;
 		}
+		if(opts.batch)
+			progress.update(render_tiles.size());
 		progress.finish();
 	}
 }
@@ -310,6 +316,8 @@ void RenderManager::renderCompositeTiles(const TileSet& tiles) {
 	ProgressBar progress(tiles.getRequiredCompositeTilesCount());
 	int current_progress = 0;
 	renderCompositeTile(tiles, Path(), base, progress, current_progress);
+	if(opts.batch)
+		progress.update(tiles.getRequiredCompositeTilesCount());
 	progress.finish();
 }
 
@@ -372,7 +380,8 @@ void RenderManager::renderCompositeTile(const TileSet& tiles, const Path& path,
 		}
 		saveTile(path, tile);
 		current_progress++;
-		progress.update(current_progress);
+		if(!opts.batch)
+			progress.update(current_progress);
 	}
 }
 

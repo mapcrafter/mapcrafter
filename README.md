@@ -29,13 +29,13 @@ Here is a list of available command line options:
 
 This shows a help about the command line options.
 
--i [--input-dir=] (directory)
+-i [--input-dir=] directory
 
 This is the directory of the minecraft world to render. The directory should contain a 
 directory 'region' with the *.mca region files.
 
 
--o [--output-dir=] (directory)
+-o [--output-dir=] directory
 
 This is the directory, where mapcrafter saves the rendered map. Every time you render your
 map, the renderer copies the template files into this directory and overwrites them, if 
@@ -43,7 +43,7 @@ they already exist. The renderer creates an 'index.html' file you can open with 
 webbrowser. If you want to customize this html file, you should do this directly in the 
 template (see data dir).
 
--d [--data-dir=] (directory)
+-d [--data-dir=] directory
 
 This is the directory with a template directory and the minecraft images needed for the 
 rendering. 
@@ -55,7 +55,7 @@ the images from your minecraft.jar.
 The web templates are stored inside the data directory in the directory 'template'. You 
 can make a copy of the data directory and customize the templates.
 
--j [--jobs=] (number)
+-j [--jobs=] number
 
 This is the count of threads to use (default 1), when rendering the highest zoom level 
 tiles (the tiles which are directly rendered from the world data). The rendering 
@@ -72,6 +72,9 @@ rendering of the world. It calculates then the tiles, which need to get rendered
 use this, if you already rendered your map completely. Incremental rendering is much 
 faster than a full rendering, if there are only a few changes in your minecraft world.
 
+-b [--batch]
+
+This option deactivates the animated progress bar.
 
 
 **Here are some settings you can only specifiy, if you do a full rendering. In case of 
@@ -79,7 +82,7 @@ incremental rendering, the renderer reads this settings from the file 'map.setti
 the output directory.**
 
 
---texture-size=(a number)
+--texture-size=number
 
 This is the size (in pixels) of the block textures. The default texture 
 size is 12px (16px is the size of the default minecraft textures). The size (width and 

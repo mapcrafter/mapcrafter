@@ -46,6 +46,7 @@ struct RenderOpts {
 
 	bool incremental;
 	int jobs;
+	bool batch;
 
 	int texture_size;
 	bool render_unknown_blocks;
