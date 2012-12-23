@@ -1,0 +1,15 @@
+Important things:
+	- add all blocks
+	- better documentation
+	
+Blocks:
+#	- a lot of blocks (grass, torches, transparent leaves,...) have some transparency on 
+#	  their edges after resizing, could be a performance problem
+#	  - maybe use simple nearest neighbor resizing for transparent blocks
+	- fix east ascending stairs texture bug
+	
+Other things:
+	- performance and ram improvements are always good
+	- composite tile rendering also multithreaded
+	- biome depend grass/leaves/water color?
+	- maybe more rendermodes?

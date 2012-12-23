@@ -1,0 +1,6 @@
+.cproject
+.project
+.settings
+
+*.o
+gmon.out
