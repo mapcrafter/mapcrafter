@@ -29,6 +29,7 @@
 #include <map>
 #include <boost/filesystem.hpp>
 
+// relative block values
 #define BLOCK_NORTH mc::BlockPos(0, -1, 0)
 #define BLOCK_SOUTH mc::BlockPos(0, 1, 0)
 #define BLOCK_EAST mc::BlockPos(1, 0, 0)
@@ -39,6 +40,9 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace render {
 
+/**
+ * Iterates over the top blocks of a tile.
+ */
 class TileTopBlockIterator {
 private:
 	int block_size, tile_size;
@@ -58,6 +62,10 @@ public:
 	int draw_x, draw_y;
 };
 
+/**
+ * Iterates over the blocks, which are on a tile on the same position,
+ * this means every block is (x+1, z-1 and y-1) of the last block
+ */
 class BlockRowIterator {
 public:
 	BlockRowIterator(const mc::BlockPos& block);
@@ -69,8 +77,12 @@ public:
 	mc::BlockPos current;
 };
 
+/**
+ * A block, which should get drawed on a tile.
+ */
 struct RenderBlock {
 
+	// drawing position in pixels on the tile
 	int x, y;
 	bool transparent;
 	Image image;
@@ -80,6 +92,9 @@ struct RenderBlock {
 	bool operator<(const RenderBlock& other) const;
 };
 
+/**
+ * Renders tiles from world data.
+ */
 class TileRenderer {
 private:
 	mc::WorldCache& world;

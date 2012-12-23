@@ -35,19 +35,19 @@ int main(int argc, char** argv) {
 	all.add_options()
 		("help,h", "shows a help message")
 		("input-dir,i",po::value<std::string>(&input_dir),
-	        "the path of the world to render (required)")
-	    ("output-dir,o", po::value<std::string>(&output_dir),
-	        "the path to save the rendered map (required)")
-	    ("data-dir,d", po::value<std::string>(&data_dir),
-	        "the path with templates/, terrain.png, fire.png, etc. (default data/)")
+			"the path of the world to render (required)")
+		("output-dir,o", po::value<std::string>(&output_dir),
+			"the path to save the rendered map (required)")
+		("data-dir,d", po::value<std::string>(&data_dir),
+			"the path with templates/, terrain.png, fire.png, etc. (default data/)")
 
-	    ("jobs,j", po::value<int>(&opts.jobs),
-	        "the number of threads to render the map (default 1)")
-	    ("incremental,u", "renders only the changed tiles")
-	    ("batch,b", "deactivates the animated progress bar")
+		("jobs,j", po::value<int>(&opts.jobs),
+			"the number of threads to render the map (default 1)")
+		("incremental,u", "renders only the changed tiles")
+		("batch,b", "deactivates the animated progress bar")
 
-	    ("texture-size", po::value<int>(&opts.texture_size),
-	        "size of the minecraft textures (default 12 (px))")
+		("texture-size", po::value<int>(&opts.texture_size),
+			"size of the minecraft textures (default 12 (px))")
 		("render-unknown-blocks", "renders unknown blocks as red blocks")
 		("render-leaves-transparent", "uses the transparent texture for leaves");
 

@@ -4,7 +4,7 @@ CXXFLAGS=-std=c++0x -Werror
 ifeq ($(mode),debug)
 	CXXFLAGS+= -g
 else ifeq ($(mode),profile)
-	CXXFLAGS+= -O3
+	CXXFLAGS+= -pg
 else
 	CXXFLAGS+= -O3
 endif

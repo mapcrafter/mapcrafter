@@ -35,20 +35,27 @@ namespace render {
 TileTopBlockIterator::TileTopBlockIterator(const TilePos& tile, int block_size,
         int tile_size)
 		: block_size(block_size), tile_size(tile_size), is_end(false) {
+	// at first get the chunk, whose row and column is at the top right of the tile
 	mc::ChunkPos topright_chunk = mc::ChunkPos::byRowCol(4 * tile.getY(),
 	        2 * tile.getX() + 2);
 
+	// now get the first visible block from this chunk in this tile
 	top = mc::LocalBlockPos(8, 6, 255).toGlobalPos(topright_chunk);
+	// and set this as start
 	current = top;
 
+	// calculate bounds of the tile
 	min_row = top.getRow() + 1;
-	max_row = top.getRow() + 64 + 4; // +2
+	max_row = top.getRow() + 64 + 4;
 	max_col = top.getCol() + 2;
 	min_col = max_col - 32;
 
+	// calculate position of the first block, relative row/col in this tile are needed
 	int row = current.getRow() - min_row;
 	int col = current.getCol() - min_col;
+	// every column is a 1/2 block and every row is a 1/4 block
 	draw_x = col * block_size / 2;
+	// -1/2 blocksize, because we would see the top side of the blocks in the tile if not
 	draw_y = row * block_size / 4 - block_size / 2; // -16
 }
 
@@ -60,22 +67,30 @@ void TileTopBlockIterator::next() {
 	if (is_end)
 		return;
 
+	// go one block to bottom right (z+1)
 	current += mc::BlockPos(0, 1, 0);
 
+	// check if row/col is too big
 	if (current.getCol() > max_col || current.getRow() > max_row) {
+		// move the top one block to the left
 		top -= mc::BlockPos(1, 1, 0);
+		// and set the current block to the top block
 		current = top;
 
+		// check if the current top block is out of the tile
 		if (current.getCol() < min_col - 1) {
+			// then move it by a few blocks to bottom right
 			current += mc::BlockPos(0, min_col - current.getCol() - 1, 0);
 		}
 	}
 
+	// now calculate the block position like in the constructor
 	int row = current.getRow();
 	int col = current.getCol();
 	draw_x = (col - min_col) * block_size / 2;
 	draw_y = (row - min_row) * block_size / 4 - block_size / 2; // -16
 
+	// and set end if reached
 	if (row == max_row && col == min_col)
 		is_end = true;
 	else if (row == max_row && col == min_col + 1)
@@ -113,17 +128,24 @@ TileRenderer::TileRenderer(mc::WorldCache& world, const BlockTextures& textures)
 TileRenderer::~TileRenderer() {
 }
 
+/**
+ * Looks for a block and puts the id and data in the variables.
+ */
 inline void getNeighbor(const mc::BlockPos& pos, uint16_t& id, uint16_t& data,
         mc::WorldCache& world, const mc::Chunk* current_chunk) {
 	const mc::Chunk* chunk;
+	// check if we already have the right chunk
 	mc::ChunkPos pos_chunk(pos);
 	if (current_chunk != NULL && pos_chunk == current_chunk->getPos())
 		chunk = current_chunk;
+	// if not get the chunk from cache
 	else
 		chunk = world.getChunk(pos_chunk);
+	// chunk may be NULL
 	if (chunk == NULL) {
 		id = 0;
 		data = 0;
+	// otherwise get id and data
 	} else {
 		mc::LocalBlockPos local(pos);
 		id = chunk->getBlockID(local);
@@ -131,6 +153,9 @@ inline void getNeighbor(const mc::BlockPos& pos, uint16_t& id, uint16_t& data,
 	}
 }
 
+/**
+ * This function returns the real face direction for a closed door.
+ */
 uint16_t getDoorDirectionClosed(uint16_t direction, bool flip) {
 	if (!flip) {
 		switch (direction) {
@@ -161,6 +186,9 @@ uint16_t getDoorDirectionClosed(uint16_t direction, bool flip) {
 	}
 }
 
+/**
+ * Checks for a specific block the neighbors and sets extra block data if necessary.
+ */
 uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data,
         const mc::Chunk* chunk) {
 
@@ -170,16 +198,18 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 	if ((id == 8 || id == 9) && data == 0) { // full water blocks
 		getNeighbor(pos + BLOCK_WEST, id_west, data_west, world, chunk);
 		getNeighbor(pos + BLOCK_SOUTH, id_south, data_south, world, chunk);
+
+		// check if west and south neighbors are also full water blocks
 		if ((id_west == 8 || id_west == 9) && data_west == 0) {
 			data |= FACE_WEST;
-		}
-		if ((id_south == 8 || id_south == 9) && data_south == 0) {
+		} if ((id_south == 8 || id_south == 9) && data_south == 0) {
 			data |= FACE_SOUTH;
 		}
 	} else if(id == 64 || id == 71) {
 		/* doors */
 		uint16_t top = data & 8 ? DOOR_TOP : 0;
 		uint16_t tmp, top_data, bottom_data;
+		// at first get the data of both parts of the door, top and bottom
 		if(top) {
 			top_data = data;
 			getNeighbor(pos + mc::BlockPos(0, 0, -1), tmp, bottom_data, world,chunk);
@@ -190,11 +220,14 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			bottom_data = data;
 		}
 
+		// then find out if this door is the left door of a double door
 		bool door_flip = top_data & 1;
 		if(door_flip)
-		data |= DOOR_FLIP_X;
+			data |= DOOR_FLIP_X;
+		// find out if the door is openend
 		bool opened = !(bottom_data & 4);
 
+		// get the direction of the door
 		uint16_t direction = bottom_data & 3;
 		if(direction == 0) {
 			direction = DOOR_WEST;
@@ -206,6 +239,7 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			direction = DOOR_SOUTH;
 		}
 
+		// if the door is closed, the direction need to get changed
 		if(!opened) {
 			data |= getDoorDirectionClosed(direction, door_flip);
 		} else {
@@ -219,6 +253,7 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		getNeighbor(pos + BLOCK_EAST, id_east, data_east, world, chunk);
 		getNeighbor(pos + BLOCK_WEST, id_west, data_west, world, chunk);
 
+		// check for same neighbors
 		if(id_north != 0 && (id_north == id || !textures.isBlockTransparent(id_north,data_north)))
 			data |= FACE_NORTH;
 		if(id_south != 0 && (id_south == id || !textures.isBlockTransparent(id_south, data_south)))
@@ -230,23 +265,25 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 	}
 
 	if (!textures.isBlockTransparent(id, data)) {
-		/* add shadow edges */
+		/* add shadow edges on opaque blockes */
 		getNeighbor(pos + BLOCK_NORTH, id_north, data_north, world, chunk);
 		getNeighbor(pos + BLOCK_EAST, id_east, data_east, world, chunk);
 		getNeighbor(pos + mc::BlockPos(0, 0, -1), id_bottom, data_bottom, world, chunk);
 
+		// check if neighbors are opaque
 		if(id_north == 0 || textures.isBlockTransparent(id_north, data_north))
-		data |= EDGE_NORTH;
+			data |= EDGE_NORTH;
 		if(id_east == 0 || textures.isBlockTransparent(id_east, data_east))
-		data |= EDGE_EAST;
+			data |= EDGE_EAST;
 		if(id_bottom == 0 || textures.isBlockTransparent(id_bottom, data_bottom))
-		data |= EDGE_BOTTOM;
+			data |= EDGE_BOTTOM;
 	}
 
 	return data;
 }
 
 void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
+	// some vars, set right image size
 	int block_size = textures.getBlockImageSize();
 	int tile_size = textures.getTileSize();
 	tile.setSize(tile_size, tile_size);
