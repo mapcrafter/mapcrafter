@@ -69,6 +69,8 @@ var MCMapOptions = {
 	isPng: true
 };
 
+var map;
+
 function init() {
 	var MCMapType = new google.maps.ImageMapType(MCMapOptions);
 	MCMapType.name = "Minecraft Map";
@@ -85,7 +87,7 @@ function init() {
 		streetViewControl: false,
 	};
 	
-	var map = new google.maps.Map(document.getElementById("mcmap"), mapOptions);
+	map = new google.maps.Map(document.getElementById("mcmap"), mapOptions);
 	map.mapTypes.set("mcmap", MCMapType);
 	map.setMapTypeId("mcmap");
 }
