@@ -46,20 +46,34 @@ bool copyDirectory(const fs::path& from, const fs::path& to);
 
 void replaceAll(std::string& str, const std::string& from, const std::string& to);
 
+/**
+ * Shows a nice command line progress bar.
+ */
 class ProgressBar {
 private:
+	// the maximum value of the progress
 	int max;
+	// animated? if yes, it updates the progress bar and makes it "animated"
+	// but not good if you pipe the output in a file, so you can disable it
+	bool animated;
 
+	// the time of the start of progress
 	int start;
+	// time of last update
 	int last_update;
+	// value of last update
 	int last_value;
+	// current percentage of last update
 	int last_percent;
 public:
 	ProgressBar();
-	ProgressBar(int max);
+	ProgressBar(int max, bool animated);
 
 	void setMax(int max);
 	int getMax() const;
+
+	void setAnimated(bool animated);
+	bool isAnimated() const;
 
 	void update(int value);
 	void finish();

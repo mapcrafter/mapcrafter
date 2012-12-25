@@ -94,7 +94,7 @@ RenderManager::RenderManager(const RenderOpts& opts)
 }
 
 bool RenderManager::copyTemplateFile(const std::string& filename,
-        std::map<std::string, std::string> vars) {
+		std::map<std::string, std::string> vars) {
 	std::ifstream file(opts.dataPath("template/" + filename).c_str());
 	if (!file)
 		return false;
@@ -104,7 +104,7 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
 	std::string data = ss.str();
 
 	for (std::map<std::string, std::string>::iterator it = vars.begin(); it != vars.end();
-	        ++it) {
+			++it) {
 		replaceAll(data, "{" + it->first + "}", it->second);
 	}
 
@@ -134,7 +134,7 @@ void RenderManager::writeTemplates(const TileSet& tiles) {
 	fs::path to(opts.output_dir);
 	fs::directory_iterator end;
 	for (fs::directory_iterator it(fs::path(opts.dataPath("template"))); it != end;
-	        ++it) {
+			++it) {
 		std::string filename = it->path().filename().string();
 		if (filename.compare("index.html") == 0 || filename.compare("markers.js") == 0)
 			continue;
@@ -144,45 +144,45 @@ void RenderManager::writeTemplates(const TileSet& tiles) {
 		} else if (fs::is_directory(*it)) {
 			if (!copyDirectory(*it, to / filename))
 				std::cout << "Warning: Unable to copy directory " << filename
-				        << std::endl;
+						<< std::endl;
 		}
 	}
 }
 
 void RenderManager::writeStats(int time_took) {
 	/*
-	std::cout << "Writing stats..." << std::endl;
+	 std::cout << "Writing stats..." << std::endl;
 
-	std::ofstream file(opts.outputPath("statistics.html").c_str(), std::ios::trunc);
-	if (!file) {
-		std::cerr << "Error: Can't open file " << opts.outputPath("statistics.html")
-		        << " for the statistics!" << std::endl;
-		return;
-	}
-	// TODO use strftime here
-	//boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
-	file << "<h1>Statistics</h1>";
-	file << "<h2>Render statistics</h2><table>";
-	//file << "<tr><th>Last render: </th><td>" << now << "</td></tr>";
-	file << "<tr><th>Time took: </th><td>" << time_took << " seconds</td></tr>";
-	file << "</table>";
+	 std::ofstream file(opts.outputPath("statistics.html").c_str(), std::ios::trunc);
+	 if (!file) {
+	 std::cerr << "Error: Can't open file " << opts.outputPath("statistics.html")
+	 << " for the statistics!" << std::endl;
+	 return;
+	 }
+	 // TODO use strftime here
+	 //boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
+	 file << "<h1>Statistics</h1>";
+	 file << "<h2>Render statistics</h2><table>";
+	 //file << "<tr><th>Last render: </th><td>" << now << "</td></tr>";
+	 file << "<tr><th>Time took: </th><td>" << time_took << " seconds</td></tr>";
+	 file << "</table>";
 
-	int chunks = 42;
-	file << "<h2>World statistics</h2>";
-	file << "<table>";
-	file << "<tr><th>Regions: </th><td>" << world.getRegionCount() << "</td></tr>";
-	file << "<tr><th>Chunks: </th><td>" << chunks << "</td></tr>";
-	file << "<tr><th>Area: </th><td>" << (chunks * 16 * 16) / 1000000.
-	        << " km^2</td></tr>";
-	file << "</table><br />";
-	file.close();
-	*/
+	 int chunks = 42;
+	 file << "<h2>World statistics</h2>";
+	 file << "<table>";
+	 file << "<tr><th>Regions: </th><td>" << world.getRegionCount() << "</td></tr>";
+	 file << "<tr><th>Chunks: </th><td>" << chunks << "</td></tr>";
+	 file << "<tr><th>Area: </th><td>" << (chunks * 16 * 16) / 1000000.
+	 << " km^2</td></tr>";
+	 file << "</table><br />";
+	 file.close();
+	 */
 }
 
 void RenderManager::render(const TileSet& tiles) {
 	if (tiles.getRequiredCompositeTilesCount() != 0) {
 		std::cout << "Rendering " << tiles.getRequiredRenderTilesCount()
-		        << " tiles on zoom level " << tiles.getMaxZoom() << "." << std::endl;
+				<< " tiles on zoom level " << tiles.getMaxZoom() << "." << std::endl;
 		renderBaseTiles(tiles);
 	} else {
 		std::cout << "No render tiles need to get rendered." << std::endl;
@@ -190,7 +190,7 @@ void RenderManager::render(const TileSet& tiles) {
 
 	if (tiles.getRequiredCompositeTilesCount() != 0) {
 		std::cout << "Rendering " << tiles.getRequiredCompositeTilesCount()
-		        << " tiles on other zoom levels." << std::endl;
+				<< " tiles on other zoom levels." << std::endl;
 		renderCompositeTiles(tiles);
 	} else {
 		std::cout << "No composite tiles need to get rendered." << std::endl;
@@ -203,7 +203,7 @@ void* runWorker(void* settings_ptr) {
 	Image tile;
 	TileRenderer renderer(*settings->worldcache, *settings->textures);
 	for (std::set<TilePos>::const_iterator it = settings->render_tiles.begin();
-	        it != settings->render_tiles.end(); ++it) {
+			it != settings->render_tiles.end(); ++it) {
 		renderer.renderTile(*it, tile);
 
 		Path path = Path::byTilePos(*it, settings->depth);
@@ -232,19 +232,16 @@ void RenderManager::renderBaseTiles(const TileSet& tiles) {
 	if (opts.jobs == 1) {
 		mc::WorldCache cache(world);
 		TileRenderer renderer(cache, textures);
-		ProgressBar progress(render_tiles.size());
+		ProgressBar progress(render_tiles.size(), !opts.batch);
 		int i = 0;
 		for (std::set<TilePos>::const_iterator it = render_tiles.begin();
-		        it != render_tiles.end(); ++it) {
+				it != render_tiles.end(); ++it) {
 			Image tile;
 			renderer.renderTile(*it, tile);
 			saveTile(Path::byTilePos(*it, depth), tile);
 			i++;
-			if(!opts.batch)
-				progress.update(i);
+			progress.update(i);
 		}
-		if(opts.batch)
-			progress.update(render_tiles.size());
 		progress.finish();
 
 		//cache.getRegionCacheStats().print("Region cache");
@@ -260,7 +257,7 @@ void RenderManager::renderBaseTiles(const TileSet& tiles) {
 		int progress_count = 0;
 
 		for (std::set<TilePos>::iterator it = render_tiles.begin();
-		        it != render_tiles.end(); ++it)
+				it != render_tiles.end(); ++it)
 			render_tiles_list.push_back(*it);
 
 		int size = render_tiles.size() / opts.jobs;
@@ -274,7 +271,7 @@ void RenderManager::renderBaseTiles(const TileSet& tiles) {
 				worker_tiles.insert(render_tiles_list[j]);
 			pthread_mutex_lock(&testmutex);
 			std::cout << "Thread " << i << " renders [" << start << ":" << end << "] = "
-			        << (end - start) << " tiles" << std::endl;
+					<< (end - start) << " tiles" << std::endl;
 			pthread_mutex_unlock(&testmutex);
 
 			mc::WorldCache* worldcache = new mc::WorldCache(world);
@@ -290,7 +287,7 @@ void RenderManager::renderBaseTiles(const TileSet& tiles) {
 			pthread_create(&threads[i], NULL, runWorker, (void*) settings);
 		}
 
-		ProgressBar progress(render_tiles.size());
+		ProgressBar progress(render_tiles.size(), !opts.batch);
 		while (1) {
 			sleep(1);
 
@@ -300,29 +297,24 @@ void RenderManager::renderBaseTiles(const TileSet& tiles) {
 				sum += worker_settings[i]->progress;
 				running = running || !worker_settings[i]->finished;
 			}
-			if(!opts.batch)
-				progress.update(sum);
+			progress.update(sum);
 			if (!running)
 				break;
 		}
-		if(opts.batch)
-			progress.update(render_tiles.size());
 		progress.finish();
 	}
 }
 
 void RenderManager::renderCompositeTiles(const TileSet& tiles) {
 	Image base;
-	ProgressBar progress(tiles.getRequiredCompositeTilesCount());
+	ProgressBar progress(tiles.getRequiredCompositeTilesCount(), !opts.batch);
 	int current_progress = 0;
 	renderCompositeTile(tiles, Path(), base, progress, current_progress);
-	if(opts.batch)
-		progress.update(tiles.getRequiredCompositeTilesCount());
 	progress.finish();
 }
 
 void RenderManager::renderCompositeTile(const TileSet& tiles, const Path& path,
-        Image& tile, ProgressBar& progress, int& current_progress) {
+		Image& tile, ProgressBar& progress, int& current_progress) {
 	if (path.getDepth() == tiles.getMaxZoom()) {
 		TilePos pos = path.getTilePos();
 		std::string file = opts.outputPath(path.toString()) + ".png";
@@ -330,7 +322,7 @@ void RenderManager::renderCompositeTile(const TileSet& tiles, const Path& path,
 			//auto available = tiles.getAvailableRenderTiles();
 			//auto required = tiles.getRequiredRenderTiles();
 			std::cerr << "Unable to read tile " << path.toString() << " at " << pos.getX()
-			        << ":" << pos.getY() << " from " << file << std::endl;
+					<< ":" << pos.getY() << " from " << file << std::endl;
 			//std::cout << "avail=" << available.count(path.getTilePos()) << " required=" << required.count(path.getTilePos()) << std::endl;
 		}
 
@@ -346,7 +338,7 @@ void RenderManager::renderCompositeTile(const TileSet& tiles, const Path& path,
 			//auto available = tiles.getAvailableCompositeTiles();
 			//auto required = tiles.getRequiredCompositeTiles();
 			std::cerr << "Unable to read composite tile " << path.toString() << " from "
-			        << file << std::endl;
+					<< file << std::endl;
 			//std::cout << "avail=" << available.count(path) << " required=" << required.count(path) << std::endl;
 		}
 	} else {
@@ -380,8 +372,7 @@ void RenderManager::renderCompositeTile(const TileSet& tiles, const Path& path,
 		}
 		saveTile(path, tile);
 		current_progress++;
-		if(!opts.batch)
-			progress.update(current_progress);
+		progress.update(current_progress);
 	}
 }
 
@@ -428,14 +419,14 @@ bool RenderManager::run() {
 	}
 
 	textures.setSettings(settings.texture_size, settings.render_unknown_blocks,
-	        settings.render_leaves_transparent);
+			settings.render_leaves_transparent);
 	if (!textures.loadChests(opts.dataPath("chest.png"), opts.dataPath("largechest.png"),
-	        opts.dataPath("enderchest.png"))) {
+			opts.dataPath("enderchest.png"))) {
 		std::cerr << "Error Unable to load chest.png, largechest.png or enderchest.png!"
-		        << std::endl;
+				<< std::endl;
 		return false;
 	} else if (!textures.loadOther(opts.dataPath("fire.png"),
-	        opts.dataPath("endportal.png"))) {
+			opts.dataPath("endportal.png"))) {
 		std::cerr << "Error Unable to load fire.png or endportal.png!" << std::endl;
 		return false;
 	} else if (!textures.loadBlocks(opts.dataPath("terrain.png"))) {
