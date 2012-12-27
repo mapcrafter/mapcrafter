@@ -1,12 +1,23 @@
-Important things:
+TODO:
 	- add all blocks
 	- better documentation
 	
 Blocks:
-#	- a lot of blocks (grass, torches, transparent leaves,...) have some transparency on 
-#	  their edges after resizing, could be a performance problem
-#	  - maybe use simple nearest neighbor resizing for transparent blocks
-	- fix east ascending stairs texture bug
+	- piston extension
+	- redstone
+	- sign post / wall sign
+	- lever
+	- fences / fence gate
+	- pumpkin / melon stem
+	- dragon egg
+	- tripwire / -hook
+	- cobblestone wall
+	- flower pot
+	- heads
+	- anvil
+	
+	- properly beacon
+	- corner stairs?
 	
 Other things:
 	- performance and ram improvements are always good

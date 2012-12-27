@@ -21,23 +21,19 @@
 
 #include <iostream>
 
-#include "util.h"
-#include <boost/filesystem.hpp>
-
-namespace fs = boost::filesystem;
-
 int main(int argc, char **argv) {
 	mapcrafter::render::BlockTextures textures;
-	if (!textures.loadOther("data/fire.png", "data/endportal.png")) {
-		std::cerr << "Unable to load fire.png or endportal.png!" << std::endl;
-		return 1;
-	}
 
 	textures.setSettings(16, true, true);
-	if (!textures.loadBlocks("data/terrain.png")) {
+	if(!textures.loadChests("data/chest.png", "data/largechest.png", "data/enderchest.png"))
+		std::cerr << "Unable to load chest.png, largechest.png or enderchest.png" << std::endl;
+	else if (!textures.loadOther("data/fire.png", "data/endportal.png"))
+		std::cerr << "Unable to load fire.png or endportal.png!" << std::endl;
+	else if (!textures.loadBlocks("data/terrain.png"))
 		std::cerr << "Unable to load terrain.png!" << std::endl;
-		return 1;
+	else {
+		textures.saveBlocks("blocks.png");
+		return 0;
 	}
-
-	textures.saveBlocks("blocks.png");
+	return 1;
 }

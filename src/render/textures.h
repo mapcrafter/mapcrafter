@@ -35,10 +35,12 @@
 #define FACE_EAST 64
 #define FACE_WEST 128
 
+// the last three bits of 2 bytes
 #define EDGE_NORTH 8192
 #define EDGE_EAST 16384
 #define EDGE_BOTTOM 32768
 
+// some data values and stuff for special blocks
 #define DOOR_NORTH 16
 #define DOOR_SOUTH 32
 #define DOOR_EAST 64
@@ -46,9 +48,28 @@
 #define DOOR_TOP 256
 #define DOOR_FLIP_X 512
 
+#define CHEST_FRONT 0
+#define CHEST_SIDE 1
+#define CHEST_TOP 2
+
+#define LARGECHEST_FRONT_LEFT 0
+#define LARGECHEST_FRONT_RIGHT 1
+#define LARGECHEST_SIDE 2
+#define LARGECHEST_TOP_LEFT 3
+#define LARGECHEST_TOP_RIGHT 4
+#define LARGECHEST_BACK_LEFT 5
+#define LARGECHEST_BACK_RIGHT 6
+
+#define LARGECHEST_DATA_LARGE 32
+#define LARGECHEST_DATA_LEFT 16
+
 namespace mapcrafter {
 namespace render {
 
+/**
+ * The base for an iterator to transform the pixels of a source image to the pixels of a
+ * destination image.
+ */
 class FaceIterator {
 private:
 	bool is_end;
@@ -62,12 +83,17 @@ public:
 	void next();
 	bool end() const;
 
+	// current position in the source image
 	int src_x;
 	int src_y;
+	// current position in the destination image
 	int dest_x;
 	int dest_y;
 };
 
+/**
+ * Transforms a texture to the left or right face of a block image.
+ */
 class SideFaceIterator: public FaceIterator {
 private:
 	int side;
@@ -82,6 +108,9 @@ public:
 	static const int RIGHT = -1;
 };
 
+/**
+ * Transforms a texture to the top face of a block image.
+ */
 class TopFaceIterator: public FaceIterator {
 private:
 	int next_x;
@@ -93,24 +122,32 @@ public:
 	void next();
 };
 
+/**
+ * This class is responsible for reading the Minecraft textures and creating the block
+ * images.
+ */
 class BlockTextures {
 private:
 	int texture_size;
+	bool render_unknown_blocks;
+	bool render_leaves_transparent;
+
 	Image textures[16 * 16];
+	Image empty_texture;
 	Image fire_texture;
 	Image endportal_texture;
 
-	Image empty_texture;
-	bool render_unknown_blocks;
-	bool render_leaves_transparent;
-	Image unknown_block;
+	Image chest[3];
+	Image largechest[7];
+	Image enderchest[3];
 
 	int max_water;
 	Image opaque_water[4];
 	Image shadow_edge_masks[4];
 
-	std::unordered_map<uint32_t, Image > block_images;
+	std::unordered_map<uint32_t, Image> block_images;
 	std::unordered_set<uint32_t> block_transparency;
+	Image unknown_block;
 
 	void splitTerrain(const Image& terrain);
 	const Image& getTexture(int x, int y) const;
@@ -158,7 +195,10 @@ private:
 	        bool moveOnlyTop = false);
 	void createSmallerBlock(uint16_t id, uint16_t data, const Image& side_face,
 	        const Image& upper_texture, int y1, int y2, bool moveOnlyTop = false);
-	void createRotatedBlock(uint16_t id, const Image& front_face, const Image& side_face,
+	void createRotatedBlock(uint16_t id, uint16_t extra_data, const Image& front_texture,
+	        const Image& side_texture, const Image& upper_texture);
+	void createRotatedBlock(uint16_t id, uint16_t extra_data, const Image& front_texture,
+	        const Image& back_texture, const Image& side_texture,
 	        const Image& upper_texture);
 	void createItemStyleBlock(uint16_t id, uint16_t data, const Image& texture);
 	void createItemStyleBlock(uint16_t id, uint16_t data, const Image& north_south,
@@ -177,6 +217,8 @@ private:
 	void createSlabs(uint16_t id, bool stone_slabs, bool double_slabs); // id 43, 44, 125, 126
 	void createTorch(uint16_t, const Image& texture); // id 50, 75, 76
 	void createStairs(uint16_t id, const Image& texture); // id 53, 67, 108, 109, 114, 128, 134, 135, 136
+	void createChest(uint16_t id, Image* textures); // id 54, 95, 130
+	void createDoubleChest(uint16_t id, Image* textures); // id 54
 	void createDoor(uint16_t id, const Image& bottom, const Image& top); // id 64, 71
 	void createRails(); // id 66
 	void createButton(uint16_t id, const Image& tex); // id 77, 143
@@ -206,7 +248,7 @@ public:
 	bool saveBlocks(const std::string& filename);
 
 	bool isBlockTransparent(uint16_t id, uint16_t data) const;
-	bool hasBlock(uint16_t id, uint16_t ) const;
+	bool hasBlock(uint16_t id, uint16_t) const;
 	const Image& getBlock(uint16_t id, uint16_t data) const;
 
 	int getMaxWaterNeededOpaque() const;

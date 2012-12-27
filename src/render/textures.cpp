@@ -41,12 +41,16 @@ FaceIterator::~FaceIterator() {
 }
 
 void FaceIterator::next() {
+	// just iterate over the source pixels
 	if (src_x == size - 1 && src_y == size - 1) {
+		// set end if we are on bottom right
 		is_end = true;
 	} else if (src_y == size - 1) {
+		// go one to the right (x+1) if we reached the bottom edge of the texture
 		src_x++;
 		src_y = 0;
 	} else {
+		// else just go one pixel forward
 		src_y++;
 	}
 }
@@ -125,13 +129,94 @@ void BlockTextures::setSettings(int texture_size, bool render_unknown_blocks,
 	this->render_leaves_transparent = render_leaves_transparent;
 }
 
+/**
+ * This function converts the chest image to usable chest textures and stores them
+ * in the textures array.
+ */
+bool loadChestTexture(const Image& image, Image* textures, int texture_size) {
+	if (image.getWidth() != image.getHeight())
+		return false;
+	// if the image is 64px wide, the chest images are 14x14
+	int ratio = image.getHeight() / 64;
+	int size = ratio * 14;
+
+	Image front = image.clip(size, 29 * ratio, size, size);
+	front.alphablit(image.clip(size, size, size, 4 * ratio), 0, 0);
+	front.alphablit(image.clip(ratio, ratio, 2 * ratio, 4 * ratio), 6 * ratio, 3 * ratio);
+	Image side = image.clip(0, 29 * ratio, size, size);
+	side.alphablit(image.clip(0, size, size, 4 * ratio), 0, 0);
+	Image top = image.clip(size, 0, size, size);
+
+	// resize the chest images to texture size
+	front.resizeInterpolated(texture_size, texture_size, textures[CHEST_FRONT]);
+	side.resizeInterpolated(texture_size, texture_size, textures[CHEST_SIDE]);
+	top.resizeInterpolated(texture_size, texture_size, textures[CHEST_TOP]);
+
+	return true;
+}
+
+/**
+ * This function converts the large chest image to usable chest textures and stores them
+ * in the textures array.
+ */
+bool loadLargeChestTexture(const Image& image, Image* textures, int texture_size) {
+	if (image.getWidth() != image.getHeight() * 2)
+		return false;
+	int ratio = image.getHeight() / 64;
+	int size = ratio * 14;
+
+	// note here that a whole chest is 30*ratio pixels wide, but our
+	// chest textures are only 14x14 * ratio pixels, so we need to omit two rows in the middle
+	// => the second image starts not at x*size, it starts at x*size+2*ratio
+	Image front_left = image.clip(size, 29 * ratio, size, size);
+	front_left.alphablit(image.clip(size, size, size, 4 * ratio), 0, 0);
+	front_left.alphablit(image.clip(ratio, ratio, 2 * ratio, 4 * ratio), 13 * ratio,
+	        3 * ratio);
+	Image front_right = image.clip(2 * size + 2 * ratio, 29 * ratio, size, size);
+	front_right.alphablit(image.clip(2 * size + 2 * ratio, size, size, 4 * ratio), 0, 0);
+	front_right.alphablit(image.clip(ratio, ratio, 2 * ratio, 4 * ratio), -ratio,
+	        3 * ratio);
+
+	Image side = image.clip(0, 29 * ratio, size, size);
+	side.alphablit(image.clip(0, size, size, 4 * ratio), 0, 0);
+
+	Image top_left = image.clip(size, 0, size, size);
+	Image top_right = image.clip(2 * size + 2 * ratio, 0, size, size);
+
+	Image back_left = image.clip(4 * size + 2, 29 * ratio, size, size);
+	back_left.alphablit(image.clip(4 * size + 2, size, size, 4 * ratio), 0, 0);
+	Image back_right = image.clip(5 * size + 4, 29 * ratio, size, size);
+	back_right.alphablit(image.clip(5 * size + 4, size, size, 4 * ratio), 0, 0);
+
+	// resize the chest images to texture size
+	front_left.resizeInterpolated(texture_size, texture_size,
+	        textures[LARGECHEST_FRONT_LEFT]);
+	front_right.resizeInterpolated(texture_size, texture_size,
+	        textures[LARGECHEST_FRONT_RIGHT]);
+	side.resizeInterpolated(texture_size, texture_size, textures[LARGECHEST_SIDE]);
+	top_left.resizeInterpolated(texture_size, texture_size,
+	        textures[LARGECHEST_TOP_LEFT]);
+	top_right.resizeInterpolated(texture_size, texture_size,
+	        textures[LARGECHEST_TOP_RIGHT]);
+	back_left.resizeInterpolated(texture_size, texture_size,
+	        textures[LARGECHEST_BACK_LEFT]);
+	back_right.resizeInterpolated(texture_size, texture_size,
+	        textures[LARGECHEST_BACK_RIGHT]);
+
+	return true;
+}
+
 bool BlockTextures::loadChests(const std::string& normal, const std::string& large,
         const std::string& ender) {
-	Image img_normal, img_large, img_ender;
-	if (!img_normal.readPNG(normal) || !img_large.readPNG(large)
-	        || !img_ender.readPNG(ender))
+	Image img_chest, img_largechest, img_enderchest;
+	if (!img_chest.readPNG(normal) || !img_largechest.readPNG(large)
+	        || !img_enderchest.readPNG(ender))
 		return false;
 
+	if (!loadChestTexture(img_chest, chest, texture_size)
+	        || !loadChestTexture(img_enderchest, enderchest, texture_size)
+	        || !loadLargeChestTexture(img_largechest, largechest, texture_size))
+		return false;
 	return true;
 }
 
@@ -159,30 +244,34 @@ bool BlockTextures::loadBlocks(const std::string& terrain_filename) {
 	return true;
 }
 
+/**
+ * Comparator to sort the block int's with id and data.
+ */
+struct block_comparator {
+	bool operator()(uint32_t b1, uint32_t b2) const {
+		uint16_t id1 = b1 & 0xffff;
+		uint16_t id2 = b2 & 0xffff;
+		if (id1 != id2)
+			return id1 < id2;
+		uint16_t data1 = (b1 & 0xffff0000) >> 16;
+		uint16_t data2 = (b2 & 0xffff0000) >> 16;
+		return data1 < data2;
+	}
+};
+
 bool BlockTextures::saveBlocks(const std::string& filename) {
-	/*
-	 int blocksize = getBlockImageSize();
-	 Image img(blocksize * 16, blocksize * block_images.size());
-	 int y = 0;
-	 std::map<uint16_t, std::map<uint16_t, Image> >::const_iterator it =
-	 block_images.begin();
-	 for (; it != block_images.end(); ++it) {
-	 std::map<uint16_t, Image>::const_iterator it2 = it->second.begin();
-	 for (; it2 != it->second.end(); ++it2) {
-	 img.alphablit(it2->second, it2->first * blocksize, y * blocksize);
-	 }
-	 y++;
-	 }
-	 return img.writePNG("blocks.png");
-	 */
+	std::map<uint32_t, Image, block_comparator> blocks_sorted;
+	for (std::unordered_map<uint32_t, Image>::const_iterator it = block_images.begin();
+	        it != block_images.end(); ++it) {
+		uint16_t data = (it->first & 0xffff0000) >> 16;
+		if ((data & (EDGE_NORTH | EDGE_EAST | EDGE_BOTTOM)) == 0)
+			blocks_sorted[it->first] = it->second;
+	}
 
 	std::vector<Image> blocks;
-	std::unordered_map<uint32_t, Image>::const_iterator it = block_images.begin();
-	for (; it != block_images.end(); ++it) {
-		uint16_t data = (it->first & 0xff00) >> 16;
-		if ((data & (EDGE_NORTH | EDGE_EAST | EDGE_BOTTOM)) == 0)
-			blocks.push_back(it->second);
-	}
+	for (std::map<uint32_t, Image>::const_iterator it = blocks_sorted.begin();
+	        it != blocks_sorted.end(); ++it)
+		blocks.push_back(it->second);
 
 	blocks.push_back(opaque_water[0]);
 	blocks.push_back(opaque_water[1]);
@@ -204,16 +293,6 @@ bool BlockTextures::saveBlocks(const std::string& filename) {
 	}
 	std::cout << block_images.size() << " blocks" << std::endl;
 	std::cout << "all: " << blocks.size() << std::endl;
-
-	/*
-	 Image terrain(texture_size * 16, texture_size * 16);
-	 for (int x = 0; x < 16; x++) {
-	 for (int y = 0; y < 16; y++) {
-	 terrain.alphablit(getTexture(x, y), x * texture_size, y * texture_size);
-	 }
-	 }
-	 terrain.writePNG("myterrain.png");
-	 */
 
 	return img.writePNG(filename);
 }
@@ -304,15 +383,6 @@ void BlockTextures::addBlockShadowEdges(uint16_t id, uint16_t data, const Image&
 }
 
 void BlockTextures::setBlockImage(uint16_t id, uint16_t data, const Image& block) {
-	/*
-	 if (block_images.count(id) == 0) {
-	 std::map<uint16_t, Image> map;
-	 map[data] = block;
-	 block_images[id] = map;
-	 } else
-	 block_images[id][data] = block;
-	 */
-
 	block_images[id | (data << 16)] = block;
 
 	if (checkImageTransparency(block))
@@ -507,6 +577,11 @@ Image BlockTextures::buildStairsEast(const Image& texture) {
 	Image block(texture_size * 2, texture_size * 2);
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
 		int y = it.src_y > texture_size / 2 ? texture_size / 2 : 0;
+		// fix to prevent a transparent gap
+		if (it.src_y == texture_size / 2 && it.src_x % 2 == 0)
+			y = texture_size / 2;
+		if (it.src_y == texture_size / 2 - 1 && it.src_x % 2 == 0)
+			y = texture_size / 2;
 		block.setPixel(it.dest_x, it.dest_y + y, texture.getPixel(it.src_x, it.src_y));
 	}
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
@@ -651,12 +726,24 @@ void BlockTextures::createSmallerBlock(uint16_t id, uint16_t data, const Image& 
 	                move_only_top));
 }
 
-void BlockTextures::createRotatedBlock(uint16_t id, const Image& front_texture,
-        const Image& side_texture, const Image& upper_texture) {
-	createBlock(id, 2, side_texture, side_texture, upper_texture);
-	createBlock(id, 3, side_texture, front_texture, upper_texture);
-	createBlock(id, 4, front_texture, side_texture, upper_texture);
-	createBlock(id, 5, side_texture, side_texture, upper_texture);
+void BlockTextures::createRotatedBlock(uint16_t id, uint16_t extra_data,
+        const Image& front_texture, const Image& side_texture,
+        const Image& upper_texture) {
+	createRotatedBlock(id, extra_data, front_texture, side_texture, side_texture,
+	        upper_texture);
+}
+
+void BlockTextures::createRotatedBlock(uint16_t id, uint16_t extra_data,
+        const Image& front_texture, const Image& back_texture, const Image& side_texture,
+        const Image& upper_texture) {
+
+	createBlock(id, 2 | extra_data, side_texture, back_texture,
+	        upper_texture.rotate(ROTATE_270));
+	createBlock(id, 3 | extra_data, side_texture, front_texture,
+	        upper_texture.rotate(ROTATE_90));
+	createBlock(id, 4 | extra_data, front_texture, side_texture,
+	        upper_texture.rotate(ROTATE_180));
+	createBlock(id, 5 | extra_data, back_texture, side_texture, upper_texture);
 }
 
 void BlockTextures::createItemStyleBlock(uint16_t id, uint16_t data,
@@ -911,9 +998,23 @@ void BlockTextures::createStairs(uint16_t id, const Image& texture) { // id 53, 
 	setBlockImage(id, 3 | 4, buildUpsideDownStairsNorth(texture));
 }
 
+void BlockTextures::createChest(uint16_t id, Image* textures) { // id 54, 95, 130
+	createRotatedBlock(id, 0, textures[CHEST_FRONT], textures[CHEST_SIDE],
+	        textures[CHEST_TOP]);
+}
+
+void BlockTextures::createDoubleChest(uint16_t id, Image* textures) { // id 54
+	createRotatedBlock(id, LARGECHEST_DATA_LARGE | LARGECHEST_DATA_LEFT,
+	        textures[LARGECHEST_FRONT_LEFT], textures[LARGECHEST_BACK_RIGHT],
+	        textures[LARGECHEST_SIDE], textures[LARGECHEST_TOP_RIGHT]);
+	createRotatedBlock(id, LARGECHEST_DATA_LARGE, textures[LARGECHEST_FRONT_RIGHT],
+	        textures[LARGECHEST_BACK_LEFT], textures[LARGECHEST_SIDE],
+	        textures[LARGECHEST_TOP_LEFT]);
+}
+
 void BlockTextures::createDoor(uint16_t id, const Image& texture_bottom,
         const Image& texture_top) { // id 64, 71
-// TODO sometimes the texture needs to get x flipped when door is opened
+	// TODO sometimes the texture needs to get x flipped when door is opened
 	for (int top = 0; top <= 1; top++) {
 		for (int flip_x = 0; flip_x <= 1; flip_x++) {
 			for (int d = 0; d < 4; d++) {
@@ -1135,17 +1236,17 @@ void BlockTextures::loadBlocks() {
 	createGrassBlock(); // id 2
 	createBlock(3, 0, getTexture(2, 0)); // dirt
 	createBlock(4, 0, getTexture(0, 1)); // cobblestone
-// -- wooden planks
+	// -- wooden planks
 	createBlock(5, 0, getTexture(4, 0)); // oak
 	createBlock(5, 1, getTexture(6, 12)); // pine/spruce
 	createBlock(5, 2, getTexture(6, 13)); // birch
 	createBlock(5, 3, getTexture(7, 12)); // jungle
-// -- saplings
+	// -- saplings
 	createItemStyleBlock(6, 0, getTexture(15, 0)); // oak
 	createItemStyleBlock(6, 1, getTexture(15, 3)); // spruce
 	createItemStyleBlock(6, 2, getTexture(15, 4)); // birch
 	createItemStyleBlock(6, 3, getTexture(14, 1)); // jungle
-// --
+	// --
 	createBlock(7, 0, getTexture(1, 1)); // bedrock
 	createWater(); // id 8, 9
 	createLava(); // id 10, 11
@@ -1154,27 +1255,22 @@ void BlockTextures::loadBlocks() {
 	createBlock(14, 0, getTexture(0, 2)); // gold ore
 	createBlock(15, 0, getTexture(1, 2)); // iron ore
 	createBlock(16, 0, getTexture(2, 2)); // coal ore
-// -- wood
+	// -- wood
 	createWood(0, getTexture(4, 1)); // oak
 	createWood(1, getTexture(4, 7)); // pine/spruce
 	createWood(2, getTexture(5, 7)); // birch
 	createWood(3, getTexture(9, 9)); // jungle
-
-//buildNormalBlock(17, 0, getTexture(4, 1), getTexture(5, 1)); // oak
-//buildNormalBlock(17, 1, getTexture(4, 7), getTexture(5, 1)); // pine/spruce
-//buildNormalBlock(17, 2, getTexture(5, 7), getTexture(5, 1)); // birch
-//buildNormalBlock(17, 3, getTexture(9, 9), getTexture(5, 1)); // jungle
 	createLeaves(); // id 18
 	createBlock(19, 0, getTexture(0, 3)); // sponge
 	createBlock(20, 0, getTexture(1, 3)); // glass
 	createBlock(21, 0, getTexture(0, 10)); // lapis lazuli ore
 	createBlock(22, 0, getTexture(0, 9)); // lapis lazuli block
-	createRotatedBlock(23, getTexture(14, 2), getTexture(13, 2), getTexture(14, 3)); // dispenser
-// -- sandstone
+	createRotatedBlock(23, 0, getTexture(14, 2), getTexture(13, 2), getTexture(14, 3)); // dispenser
+	// -- sandstone
 	createBlock(24, 0, getTexture(0, 12), getTexture(0, 11)); // normal
 	createBlock(24, 1, getTexture(5, 14), getTexture(0, 11)); // chiseled
 	createBlock(24, 2, getTexture(6, 14), getTexture(0, 11)); // smooth
-// --
+	// --
 	createBlock(25, 0, getTexture(10, 4)); // noteblock
 	createBed(); // id 26 bed
 	createStraightRails(27, 0, getTexture(3, 10)); // id 27 powered rail (unpowered)
@@ -1182,15 +1278,15 @@ void BlockTextures::loadBlocks() {
 	createStraightRails(28, 0, getTexture(3, 12)); // id 28 detector rail
 	createPiston(29, true); // sticky piston
 	createItemStyleBlock(30, 0, getTexture(11, 0)); // cobweb
-// -- tall grass
+	// -- tall grass
 	createItemStyleBlock(31, 0, getTexture(7, 3)); // dead bush style
 	createItemStyleBlock(31, 1, getTexture(7, 2).colorize(0.3, 0.95, 0.3)); // tall grass
 	createItemStyleBlock(31, 2, getTexture(8, 3).colorize(0.3, 0.95, 0.3)); // fern
-// --
+	// --
 	createItemStyleBlock(32, 0, getTexture(7, 3)); // dead bush
 	createPiston(33, false); // piston
-// id 34 // piston extension
-// -- wool
+	// id 34 // piston extension
+	// -- wool
 	createBlock(35, 0, getTexture(0, 4)); // white
 	createBlock(35, 1, getTexture(2, 13)); // orange
 	createBlock(35, 2, getTexture(2, 12)); // magenta
@@ -1207,7 +1303,7 @@ void BlockTextures::loadBlocks() {
 	createBlock(35, 13, getTexture(1, 9)); // green
 	createBlock(35, 14, getTexture(1, 8)); // red
 	createBlock(35, 15, getTexture(1, 7)); // black
-// --
+	// --
 	createBlock(36, 0, unknown_block); // block moved by piston aka 'block 36'
 	createItemStyleBlock(37, 0, getTexture(13, 0)); // dandelion
 	createItemStyleBlock(38, 0, getTexture(12, 0)); // rose
@@ -1226,12 +1322,13 @@ void BlockTextures::loadBlocks() {
 	createItemStyleBlock(51, 0, fire_texture); // fire
 	createBlock(52, 0, getTexture(1, 4)); // monster spawner
 	createStairs(53, getTexture(4, 0)); // oak wood stairs
-// id 54 // chest
-// id 55 // redstone wire
+	createChest(54, chest); // chest
+	createDoubleChest(54, largechest); // chest
+	// id 55 // redstone wire
 	createBlock(56, 0, getTexture(2, 3)); // diamond ore
 	createBlock(57, 0, getTexture(8, 1)); // block of diamond
 	createBlock(58, 0, getTexture(11, 3), getTexture(12, 3), getTexture(11, 2)); // crafting table
-// -- wheat
+	// -- wheat
 	createItemStyleBlock(59, 0, getTexture(8, 5)); //
 	createItemStyleBlock(59, 1, getTexture(9, 5)); //
 	createItemStyleBlock(59, 2, getTexture(10, 5)); //
@@ -1240,22 +1337,22 @@ void BlockTextures::loadBlocks() {
 	createItemStyleBlock(59, 5, getTexture(13, 5)); //
 	createItemStyleBlock(59, 6, getTexture(14, 5)); //
 	createItemStyleBlock(59, 7, getTexture(15, 5)); //
-// --
+	// --
 	createBlock(60, 0, getTexture(2, 0), getTexture(6, 5)); // farmland
-	createRotatedBlock(61, getTexture(12, 2), getTexture(13, 2), getTexture(14, 3)); // furnace
-	createRotatedBlock(62, getTexture(13, 3), getTexture(13, 2), getTexture(14, 3)); // burning furnace
-// id 63 // sign post
+	createRotatedBlock(61, 0, getTexture(12, 2), getTexture(13, 2), getTexture(14, 3)); // furnace
+	createRotatedBlock(62, 0, getTexture(13, 3), getTexture(13, 2), getTexture(14, 3)); // burning furnace
+	// id 63 // sign post
 	createDoor(64, getTexture(1, 6), getTexture(1, 5)); // wooden door
-// -- ladders
+	// -- ladders
 	createSingleFaceBlock(65, 2, FACE_SOUTH, getTexture(3, 5));
 	createSingleFaceBlock(65, 3, FACE_NORTH, getTexture(3, 5));
 	createSingleFaceBlock(65, 4, FACE_EAST, getTexture(3, 5));
 	createSingleFaceBlock(65, 5, FACE_WEST, getTexture(3, 5));
-// --
+	// --
 	createRails(); // id 66
 	createStairs(67, getTexture(0, 1)); // cobblestone stairs
-// id 68 // wall sign
-// id 69 // lever
+	// id 68 // wall sign
+	// id 69 // lever
 	createSmallerBlock(70, 0, getTexture(1, 0), getTexture(1, 0), 0, 1); // stone pressure plate
 	createDoor(71, getTexture(2, 6), getTexture(2, 5)); // iron door
 	createSmallerBlock(72, 0, getTexture(4, 0), getTexture(4, 0), 0, 1); // wooden pressure plate
@@ -1271,7 +1368,7 @@ void BlockTextures::loadBlocks() {
 	createBlock(82, 0, getTexture(8, 4)); // clay block
 	createItemStyleBlock(83, 0, getTexture(9, 4)); // sugar cane
 	createBlock(84, 0, getTexture(10, 4), getTexture(11, 4)); // jukebox
-// id 85 // fence
+	// id 85 // fence
 	createPumkin(86, getTexture(7, 7)); // pumpkin
 	createBlock(87, 0, getTexture(7, 6)); // netherrack
 	createBlock(88, 0, getTexture(8, 6)); // soul sand
@@ -1281,68 +1378,68 @@ void BlockTextures::loadBlocks() {
 	createCake(); // id 92
 	createRedstoneRepeater(93, getTexture(3, 8)); // redstone repeater off
 	createRedstoneRepeater(94, getTexture(3, 9)); // redstone repeater on
-// id 95 // locked chest
+	createChest(95, chest); // locked chest
 	createTrapdoor(); // id 96 // trapdoor
-// -- monster egg
+	// -- monster egg
 	createBlock(97, 0, getTexture(1, 0)); // stone
 	createBlock(97, 1, getTexture(0, 1)); // cobblestone
 	createBlock(97, 2, getTexture(6, 3)); // sonte brick
-// --
-// -- stone bricks
+	// --
+	// -- stone bricks
 	createBlock(98, 0, getTexture(6, 3)); // normal
 	createBlock(98, 1, getTexture(4, 6)); // mossy
 	createBlock(98, 2, getTexture(5, 6)); // cracked
 	createBlock(98, 3, getTexture(5, 13)); // chiseled
-// --
+	// --
 	createHugeMushroom(99, getTexture(14, 7)); // huge brown mushroom
 	createHugeMushroom(100, getTexture(13, 7)); // huge red mushroom
 	createBarsPane(101, getTexture(5, 5)); // iron bars
 	createBarsPane(102, getTexture(1, 3)); // glass pane
 	createBlock(103, 0, getTexture(8, 8), getTexture(9, 8)); // melon
-// id 104 // pumpkin stem
-// id 105 // melon stem
+	// id 104 // pumpkin stem
+	// id 105 // melon stem
 	createVines(); // id 106 // vines
-// id 107 // fence gate
+	// id 107 // fence gate
 	createStairs(108, getTexture(7, 0)); // brick stairs
 	createStairs(109, getTexture(6, 3)); // stone brick stairs
 	createBlock(110, 0, getTexture(13, 4), getTexture(14, 4)); // mycelium
 	createSingleFaceBlock(111, 0, FACE_BOTTOM,
 	        getTexture(12, 4).colorize(0.3, 0.95, 0.3)); // lily pad
 	createBlock(112, 0, getTexture(0, 14)); // nether brick
-// id 113 // nether brick fence
+	// id 113 // nether brick fence
 	createStairs(114, getTexture(0, 14)); // nether brick stairs
-// -- nether wart
+	// -- nether wart
 	createItemStyleBlock(115, 0, getTexture(2, 14)); //
 	createItemStyleBlock(115, 1, getTexture(3, 14)); //
 	createItemStyleBlock(115, 2, getTexture(3, 14)); //
 	createItemStyleBlock(115, 3, getTexture(4, 14)); //
-// --
+	// --
 	createSmallerBlock(116, 0, getTexture(6, 11), getTexture(6, 10), 0, 12, true); // enchantment table
 	createItemStyleBlock(117, 0, getTexture(13, 9)); // brewing stand
 	createCauldron(); // id 118 // cauldron
 	createSmallerBlock(119, 0, endportal_texture, endportal_texture, 4, 12, false);
 	createSmallerBlock(120, 0, getTexture(15, 9), getTexture(14, 9), 0, 13, true); // end portal fram
 	createBlock(121, 0, getTexture(15, 10)); // end stone
-// id 122 // dragon egg
+	// id 122 // dragon egg
 	createBlock(123, 0, getTexture(3, 13)); // redstone lamp inactive
 	createBlock(124, 0, getTexture(4, 13)); // redstone lamp active
 	createSlabs(125, false, true); // wooden double slabs
 	createSlabs(126, false, false); // wooden normal slabs
-// id 127 // cocoa plant
+	// id 127 // cocoa plant
 	createStairs(128, getTexture(0, 12)); // sandstone stairs
 	createBlock(129, 0, getTexture(11, 10)); // emerald ore
-// id 130 // ender chest
-// id 131 // tripwire hook
-// id 132 // tripwire
+	createChest(130, enderchest); // ender chest
+	// id 131 // tripwire hook
+	// id 132 // tripwire
 	createBlock(133, 0, getTexture(9, 1)); // block of emerald
 	createStairs(134, getTexture(6, 12)); // spruce wood stairs
 	createStairs(135, getTexture(6, 13)); // birch wood stairs
 	createStairs(136, getTexture(7, 12)); // jungle wood stairs
 	createBlock(137, 0, getTexture(8, 11)); // command block
 	createBlock(138, 0, getTexture(9, 2)); // beacon
-// id 139 // cobblestone wall
-// id 140 // flower pot
-// carrots --
+	// id 139 // cobblestone wall
+	// id 140 // flower pot
+	// carrots --
 	createItemStyleBlock(141, 0, getTexture(8, 12));
 	createItemStyleBlock(141, 1, getTexture(8, 12));
 	createItemStyleBlock(141, 2, getTexture(9, 12));
@@ -1351,8 +1448,8 @@ void BlockTextures::loadBlocks() {
 	createItemStyleBlock(141, 5, getTexture(10, 12));
 	createItemStyleBlock(141, 6, getTexture(10, 12));
 	createItemStyleBlock(141, 7, getTexture(11, 12));
-// --
-// potatoes --
+	// --
+	// potatoes --
 	createItemStyleBlock(142, 0, getTexture(8, 12));
 	createItemStyleBlock(142, 1, getTexture(8, 12));
 	createItemStyleBlock(142, 2, getTexture(9, 12));
@@ -1361,10 +1458,10 @@ void BlockTextures::loadBlocks() {
 	createItemStyleBlock(142, 5, getTexture(10, 12));
 	createItemStyleBlock(142, 6, getTexture(10, 12));
 	createItemStyleBlock(142, 7, getTexture(12, 12));
-// --
+	// --
 	createButton(143, getTexture(4, 0)); // wooden button
-// id 144 // head
-// id 145 // anvil
+	// id 144 // head
+	// id 145 // anvil
 }
 
 bool BlockTextures::isBlockTransparent(uint16_t id, uint16_t data) const {
