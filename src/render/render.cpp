@@ -312,7 +312,7 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 	std::set<RenderBlock> blocks;
 
 	// our current chunk, have it also here to access it faster
-	mc::Chunk* chunk;
+	mc::Chunk* chunk = NULL;
 
 	// iterate over the highest blocks in the tile
 	for (TileTopBlockIterator it(pos, block_size, tile_size); !it.end(); it.next()) {
