@@ -57,6 +57,8 @@ bool MapSettings::read(const std::string& filename) {
 			texture_size = atoi(value.c_str());
 		else if (key.compare("tile_size") == 0)
 			tile_size = atoi(value.c_str());
+		else if (key.compare("max_zoom") == 0)
+			max_zoom = atoi(value.c_str());
 		else if (key.compare("render_unknown_blocks") == 0) {
 			if (value.compare("1") == 0)
 				render_unknown_blocks = true;
@@ -81,6 +83,7 @@ bool MapSettings::write(const std::string& filename) const {
 
 	file << "texture_size " << texture_size << std::endl;
 	file << "tile_size " << tile_size << std::endl;
+	file << "max_zoom " << max_zoom << std::endl;
 	file << "render_unknown_blocks " << render_unknown_blocks << std::endl;
 	file << "render_leaves_transparent " << render_leaves_transparent << std::endl;
 	file << "last_render " << last_render << std::endl;
@@ -177,6 +180,69 @@ void RenderManager::writeStats(int time_took) {
 	 file << "</table><br />";
 	 file.close();
 	 */
+}
+
+/**
+ * This method increases the max zoom of a rendered map and makes the necessary changes
+ * on the tile tree.
+ */
+void RenderManager::increaseMaxZoom() {
+	fs::path out = opts.output_dir;
+
+	// at first rename the directories 1 2 3 4 (zoom level 0) and make new directories
+	for (int i = 1; i <= 4; i++) {
+		moveFile(out / str(i), out / (str(i) + "_"));
+		fs::create_directory(out / str(i));
+	}
+
+	// then move the old tile trees one zoom level deeper
+	moveFile(out / "1_", out / "1/4");
+	moveFile(out / "2_", out / "2/3");
+	moveFile(out / "3_", out / "3/2");
+	moveFile(out / "4_", out / "4/1");
+	// also move the images of the directories
+	moveFile(out / "1.png", out / "1/4.png");
+	moveFile(out / "2.png", out / "2/3.png");
+	moveFile(out / "3.png", out / "3/2.png");
+	moveFile(out / "4.png", out / "4/1.png");
+
+	// now read the images, which belong to the new directories
+	Image img1, img2, img3, img4;
+	img1.readPNG((out / "1/4.png").string());
+	img2.readPNG((out / "2/3.png").string());
+	img3.readPNG((out / "3/2.png").string());
+	img4.readPNG((out / "4/1.png").string());
+
+	int s = settings.tile_size;
+	// create images for the new directories
+	Image new1(s, s), new2(s, s), new3(s, s), new4(s, s);
+	Image old1, old2, old3, old4;
+	// resize the old images...
+	img1.resizeHalf(old1);
+	img2.resizeHalf(old2);
+	img3.resizeHalf(old3);
+	img4.resizeHalf(old4);
+
+	// ...to blit them to the images of the new directories
+	new1.simpleblit(old1, s/2, s/2);
+	new2.simpleblit(old2, 0, s/2);
+	new3.simpleblit(old3, s/2, 0);
+	new4.simpleblit(old4, 0, 0);
+
+	// now save the new images in the output directory
+	new1.writePNG((out / "1.png").string());
+	new2.writePNG((out / "2.png").string());
+	new3.writePNG((out / "3.png").string());
+	new4.writePNG((out / "4.png").string());
+
+	// don't forget the base.png
+	Image base_big(2*s, 2*s), base;
+	base_big.simpleblit(new1, 0, 0);
+	base_big.simpleblit(new2, s, 0);
+	base_big.simpleblit(new3, 0, s);
+	base_big.simpleblit(new4, s, s);
+	base_big.resizeHalf(base);
+	base.writePNG((out / "base.png").string());
 }
 
 void RenderManager::render(const TileSet& tiles) {
@@ -433,13 +499,21 @@ bool RenderManager::run() {
 		std::cerr << "Error: Unable to load terrain.png!" << std::endl;
 		return false;
 	}
-	std::cout << "Setting texture size to " << settings.texture_size << "." << std::endl;
 
+	std::cout << "Setting texture size to " << settings.texture_size << "." << std::endl;
 	settings.tile_size = textures.getTileSize();
-	settings.write(opts.outputPath("map.settings"));
+
 	int render_start = time(NULL);
 
+	std::cout << "Scanning world..." << std::endl;
 	TileSet tiles(world, settings.last_render);
+	if (opts.incremental && tiles.getMaxZoom() > settings.max_zoom) {
+		std::cout << "The max zoom has changed since last render, let's move some files around.";
+		for (int i = 0; i < tiles.getMaxZoom() - settings.max_zoom; i++)
+			increaseMaxZoom();
+	}
+	settings.tile_size = tiles.getMaxZoom();
+	settings.write(opts.outputPath("map.settings"));
 	writeTemplates(tiles);
 
 	render(tiles);

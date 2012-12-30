@@ -43,6 +43,7 @@ std::string str(T value) {
 
 bool copyFile(const fs::path& from, const fs::path& to);
 bool copyDirectory(const fs::path& from, const fs::path& to);
+bool moveFile(const fs::path& from, const fs::path& to);
 
 void replaceAll(std::string& str, const std::string& from, const std::string& to);
 

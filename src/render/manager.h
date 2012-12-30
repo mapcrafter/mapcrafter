@@ -59,6 +59,7 @@ struct RenderOpts {
 struct MapSettings {
 	int texture_size;
 	int tile_size;
+	int max_zoom;
 
 	bool render_unknown_blocks;
 	bool render_leaves_transparent;
@@ -101,6 +102,7 @@ private:
 
 	void writeTemplates(const TileSet& tiles);
 	void writeStats(int time_took);
+	void increaseMaxZoom();
 
 	void render(const TileSet& tiles);
 	void renderBaseTiles(const TileSet& tiles);

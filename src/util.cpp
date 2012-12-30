@@ -72,14 +72,21 @@ bool copyDirectory(const fs::path& from, const fs::path& to) {
 	return true;
 }
 
+bool moveFile(const fs::path& from, const fs::path& to) {
+	if (fs::exists(to) && !!fs::remove(to))
+		return false;
+	fs::rename(from, to);
+	return true;
+}
+
 ProgressBar::ProgressBar()
-		: max(0), animated(true), start(time(NULL)), last_update(0), last_value(0), last_percent(
-				0) {
+		: max(0), animated(true), start(time(NULL)), last_update(0), last_value(0),
+		  last_percent(0) {
 }
 
 ProgressBar::ProgressBar(int max, bool animated)
-		: max(max), animated(animated), start(time(NULL)), last_update(0), last_value(0), last_percent(
-				0) {
+		: max(max), animated(animated), start(time(NULL)), last_update(0), last_value(0),
+		  last_percent(0) {
 }
 
 void ProgressBar::setMax(int max) {
@@ -104,7 +111,7 @@ void ProgressBar::update(int value) {
 	// now calculate the speed
 	double speed = (double) (value - last_value) / (now - last_update);
 	if (value == max)
-		// at the calculate an average speed
+		// at the end an average speed
 		speed = (double) value / (now - start);
 
 	if (animated)
