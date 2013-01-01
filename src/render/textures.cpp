@@ -1107,8 +1107,10 @@ Image createFenceTexture(bool left, bool right, Image texture) {
 	// the main post
 	mask.fill(0, 6 * ratio, 0, 4 * ratio, 16 * ratio);
 	// if set, left and right connection posts
+	// note here when filling the width +2, it's because to make sure we fill enough
+	// and don't forget a pixel
 	if(left)
-		mask.fill(0, 0, 4 * ratio, 6 * ratio + 2, 4 * ratio);
+		mask.fill(0, 0, 4 * ratio, 6 * ratio, 4 * ratio);
 	if(right)
 		mask.fill(0, 10 * ratio, 4 * ratio, 6 * ratio + 2, 4 * ratio);
 
@@ -1132,7 +1134,7 @@ void BlockTextures::createFence(uint16_t id, const Image& texture) { // id 85, 1
 	Image fence_both = createFenceTexture(true, true, texture);
 
 	// go through all neighbor combinations
-	for (uint8_t i = 1; i < 16; i++) {
+	for (uint8_t i = 0; i < 16; i++) {
 		Image left = fence_empty, right = fence_empty;
 
 		uint16_t data = i << 4;
