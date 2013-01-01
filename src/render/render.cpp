@@ -262,8 +262,8 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			data |= direction;
 		}
 
-	} else if(id == 101 || id == 102) {
-		/* iron bars, glas panes */
+	} else if(id == 85 || id == 101 || id == 102 || id == 113) {
+		// fence, iron bars, glas panes, nether fence
 		getNeighbor(pos + BLOCK_NORTH, id_north, data_north, world, chunk);
 		getNeighbor(pos + BLOCK_SOUTH, id_south, data_south, world, chunk);
 		getNeighbor(pos + BLOCK_EAST, id_east, data_east, world, chunk);

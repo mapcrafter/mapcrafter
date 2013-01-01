@@ -1094,6 +1094,73 @@ void BlockTextures::createCactus() { // id 81
 	setBlockImage(81, 0, block);
 }
 
+/**
+ * Creates the texture for a fence. The texture looks like a cross, you can set if you
+ * want the left or/and right connection posts.
+ */
+Image createFenceTexture(bool left, bool right, Image texture) {
+	int size = texture.getWidth();
+	double ratio = (double) size / 16;
+
+	Image mask(size, size);
+	mask.fill(rgba(255, 255, 255, 255), 0, 0, size, size);
+	// the main post
+	mask.fill(0, 6 * ratio, 0, 4 * ratio, 16 * ratio);
+	// if set, left and right connection posts
+	if(left)
+		mask.fill(0, 0, 4 * ratio, 6 * ratio + 2, 4 * ratio);
+	if(right)
+		mask.fill(0, 10 * ratio, 4 * ratio, 6 * ratio + 2, 4 * ratio);
+
+	// then apply mask to the texture
+	for(int x = 0; x < size; x++)
+		for(int y = 0; y < size; y++)
+			if(mask.getPixel(x, y) != 0)
+				texture.setPixel(x, y, 0);
+
+	return texture;
+}
+
+/**
+ * This method creates the fence block images. It generates textures for fences and makes
+ * with this textures item style block images.
+ */
+void BlockTextures::createFence(uint16_t id, const Image& texture) { // id 85, 113
+	Image fence_empty = createFenceTexture(false, false, texture);
+	Image fence_left = createFenceTexture(true, false, texture);
+	Image fence_right = createFenceTexture(false, true, texture);
+	Image fence_both = createFenceTexture(true, true, texture);
+
+	// go through all neighbor combinations
+	for (uint8_t i = 1; i < 16; i++) {
+		Image left = fence_empty, right = fence_empty;
+
+		uint16_t data = i << 4;
+		// special data set by the tile renderer
+		bool north = (data & FACE_NORTH) == FACE_NORTH;
+		bool south = (data & FACE_SOUTH) == FACE_SOUTH;
+		bool east = (data & FACE_EAST) == FACE_EAST;
+		bool west = (data & FACE_WEST) == FACE_WEST;
+
+		// now select the needed textures for this neighbors
+		if (north && south)
+			left = fence_both;
+		else if (north)
+			left = fence_left;
+		else if (south)
+			left = fence_right;
+
+		if (east && west)
+			right = fence_both;
+		else if (east)
+			right = fence_right;
+		else if (west)
+			right = fence_left;
+
+		createItemStyleBlock(id, data, left, right);
+	}
+}
+
 void BlockTextures::createPumkin(uint16_t id, const Image& front) { // id 86, 91
 	Image side = getTexture(6, 7);
 	Image top = getTexture(6, 6);
@@ -1368,7 +1435,7 @@ void BlockTextures::loadBlocks() {
 	createBlock(82, 0, getTexture(8, 4)); // clay block
 	createItemStyleBlock(83, 0, getTexture(9, 4)); // sugar cane
 	createBlock(84, 0, getTexture(10, 4), getTexture(11, 4)); // jukebox
-	// id 85 // fence
+	createFence(85, getTexture(4, 0)); // fence
 	createPumkin(86, getTexture(7, 7)); // pumpkin
 	createBlock(87, 0, getTexture(7, 6)); // netherrack
 	createBlock(88, 0, getTexture(8, 6)); // soul sand
@@ -1406,7 +1473,7 @@ void BlockTextures::loadBlocks() {
 	createSingleFaceBlock(111, 0, FACE_BOTTOM,
 	        getTexture(12, 4).colorize(0.3, 0.95, 0.3)); // lily pad
 	createBlock(112, 0, getTexture(0, 14)); // nether brick
-	// id 113 // nether brick fence
+	createFence(113, getTexture(0, 14)); // nether brick fence
 	createStairs(114, getTexture(0, 14)); // nether brick stairs
 	// -- nether wart
 	createItemStyleBlock(115, 0, getTexture(2, 14)); //
