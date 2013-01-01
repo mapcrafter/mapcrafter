@@ -37,8 +37,9 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace render {
 
-static pthread_mutex_t testmutex = PTHREAD_MUTEX_INITIALIZER;
-
+/**
+ * This are the render options from the command line.
+ */
 struct RenderOpts {
 	fs::path input_dir;
 	fs::path output_dir;
@@ -56,6 +57,9 @@ struct RenderOpts {
 	std::string outputPath(const std::string& path) const;
 };
 
+/**
+ * This informations are stored with the rendered map and used for incremental rendering.
+ */
 struct MapSettings {
 	int texture_size;
 	int tile_size;
@@ -70,6 +74,9 @@ struct MapSettings {
 	bool write(const std::string& filename) const;
 };
 
+/**
+ * This are the options for a render worker.
+ */
 struct RenderWorkerSettings {
 
 	RenderWorkerSettings()
@@ -88,6 +95,9 @@ struct RenderWorkerSettings {
 	bool finished;
 };
 
+/**
+ * This renders the whole rendering process.
+ */
 class RenderManager {
 private:
 	RenderOpts opts;

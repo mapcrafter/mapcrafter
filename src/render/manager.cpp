@@ -39,6 +39,9 @@ std::string RenderOpts::outputPath(const std::string& path) const {
 	return (output_dir / path).string();
 }
 
+/**
+ * This method reads the map settings from a file.
+ */
 bool MapSettings::read(const std::string& filename) {
 	std::ifstream file;
 	file.open(filename.c_str());
@@ -46,13 +49,15 @@ bool MapSettings::read(const std::string& filename) {
 		return false;
 
 	std::string line;
+	// read line for line
 	while (std::getline(file, line)) {
 		std::string::size_type i = line.find(" ", 0);
 		if (i == std::string::npos)
 			continue;
+		// split line by a ' ' into key and value
+		// and save the value
 		std::string key = line.substr(0, i);
 		std::string value = line.substr(i + 1, line.size() - 1);
-		//std::cout << "read config " << key << ":" << value << std::endl;
 		if (key.compare("texture_size") == 0)
 			texture_size = atoi(value.c_str());
 		else if (key.compare("tile_size") == 0)
@@ -76,6 +81,9 @@ bool MapSettings::read(const std::string& filename) {
 	return true;
 }
 
+/**
+ * This method writes the map settings to a file.
+ */
 bool MapSettings::write(const std::string& filename) const {
 	std::ofstream file(filename.c_str());
 	if (!file)
@@ -96,6 +104,10 @@ RenderManager::RenderManager(const RenderOpts& opts)
 		: opts(opts) {
 }
 
+/**
+ * This method copies a file from the template directory to the output directory and
+ * replaces the variables from the map.
+ */
 bool RenderManager::copyTemplateFile(const std::string& filename,
 		std::map<std::string, std::string> vars) {
 	std::ifstream file(opts.dataPath("template/" + filename).c_str());
@@ -119,7 +131,11 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
 	return true;
 }
 
+/**
+ * This method copies all template files to the output directory.
+ */
 void RenderManager::writeTemplates(const TileSet& tiles) {
+	// the variables for the index.html
 	std::map<std::string, std::string> vars;
 	vars["textureSize"] = str(textures.getTextureSize());
 	vars["tileSize"] = str(textures.getTileSize());
@@ -129,11 +145,13 @@ void RenderManager::writeTemplates(const TileSet& tiles) {
 	if (!copyTemplateFile("index.html", vars))
 		std::cout << "Warning: Unable to copy template file index.html!" << std::endl;
 
+	// the variables for the markers.js - still in work
 	vars.clear();
 	vars["markers"] = "";
 	if (!copyTemplateFile("markers.js", vars))
 		std::cout << "Warning: Unable to copy template file markers.js!" << std::endl;
 
+	// copy all other files and directories
 	fs::path to(opts.output_dir);
 	fs::directory_iterator end;
 	for (fs::directory_iterator it(fs::path(opts.dataPath("template"))); it != end;
@@ -245,8 +263,12 @@ void RenderManager::increaseMaxZoom() {
 	base.writePNG((out / "base.png").string());
 }
 
+/**
+ * Renders render tiles and composite tiles.
+ */
 void RenderManager::render(const TileSet& tiles) {
-	if (tiles.getRequiredCompositeTilesCount() != 0) {
+	// check if there are render tiles and render them
+	if (tiles.getRequiredRenderTilesCount() != 0) {
 		std::cout << "Rendering " << tiles.getRequiredRenderTilesCount()
 				<< " tiles on zoom level " << tiles.getMaxZoom() << "." << std::endl;
 		renderBaseTiles(tiles);
@@ -254,6 +276,7 @@ void RenderManager::render(const TileSet& tiles) {
 		std::cout << "No render tiles need to get rendered." << std::endl;
 	}
 
+	// check if there are composite tiles and render them
 	if (tiles.getRequiredCompositeTilesCount() != 0) {
 		std::cout << "Rendering " << tiles.getRequiredCompositeTilesCount()
 				<< " tiles on other zoom levels." << std::endl;
@@ -263,15 +286,23 @@ void RenderManager::render(const TileSet& tiles) {
 	}
 }
 
+/**
+ * This function runs a worker thread.
+ */
 void* runWorker(void* settings_ptr) {
+	// get the worker settings
 	RenderWorkerSettings* settings = (RenderWorkerSettings*) settings_ptr;
 
 	Image tile;
+	// create a tile renderer
 	TileRenderer renderer(*settings->worldcache, *settings->textures);
+	// iterate through the render tiles
 	for (std::set<TilePos>::const_iterator it = settings->render_tiles.begin();
 			it != settings->render_tiles.end(); ++it) {
+		// render the tile
 		renderer.renderTile(*it, tile);
 
+		// get the filename of the tile and save it
 		Path path = Path::byTilePos(*it, settings->depth);
 		std::string filename = path.toString() + ".png";
 		if (path.getDepth() == 0)
@@ -283,7 +314,6 @@ void* runWorker(void* settings_ptr) {
 			std::cout << "Unable to write " << file.string() << std::endl;
 
 		tile.clear();
-
 		settings->progress++;
 	}
 
@@ -291,15 +321,22 @@ void* runWorker(void* settings_ptr) {
 	pthread_exit(NULL);
 }
 
+/**
+ * This method renders the render tiles.
+ */
 void RenderManager::renderBaseTiles(const TileSet& tiles) {
+	// get the required render tiles and the max zoom level
 	std::set<TilePos> render_tiles = tiles.getRequiredRenderTiles();
 	int depth = tiles.getMaxZoom();
 
+	// if the render should only render with one thread
 	if (opts.jobs == 1) {
+		// create cache, tile renderer, and a nice progress bar
 		mc::WorldCache cache(world);
 		TileRenderer renderer(cache, textures);
 		ProgressBar progress(render_tiles.size(), !opts.batch);
 		int i = 0;
+		// go through all required tiles and just render, save them
 		for (std::set<TilePos>::const_iterator it = render_tiles.begin();
 				it != render_tiles.end(); ++it) {
 			Image tile;
@@ -309,25 +346,25 @@ void RenderManager::renderBaseTiles(const TileSet& tiles) {
 			progress.update(i);
 		}
 		progress.finish();
-
-		//cache.getRegionCacheStats().print("Region cache");
-		//cache.getChunkCacheStats().print("Chunk cache");
 	} else {
+		// a list with render tiles converted from the set
 		std::vector<TilePos> render_tiles_list;
+		for (std::set<TilePos>::iterator it = render_tiles.begin();
+					it != render_tiles.end(); ++it)
+				render_tiles_list.push_back(*it);
 
+		// a list of threads and their worker settings
 		std::vector<pthread_t> threads;
 		std::vector<RenderWorkerSettings*> worker_settings;
 		threads.resize(opts.jobs);
 		worker_settings.resize(opts.jobs);
 
-		int progress_count = 0;
-
-		for (std::set<TilePos>::iterator it = render_tiles.begin();
-				it != render_tiles.end(); ++it)
-			render_tiles_list.push_back(*it);
-
+		// count of tiles, a thread has to render
 		int size = render_tiles.size() / opts.jobs;
+		// go through all threads
 		for (int i = 0; i < opts.jobs; i++) {
+			// get the render tiles for this thread
+			// TODO here maybe some better assignment
 			std::set<TilePos> worker_tiles;
 			int start = size * i;
 			int end = size * i + size;
@@ -335,11 +372,11 @@ void RenderManager::renderBaseTiles(const TileSet& tiles) {
 				end = render_tiles.size();
 			for (int j = start; j < end; j++)
 				worker_tiles.insert(render_tiles_list[j]);
-			pthread_mutex_lock(&testmutex);
 			std::cout << "Thread " << i << " renders [" << start << ":" << end << "] = "
 					<< (end - start) << " tiles" << std::endl;
-			pthread_mutex_unlock(&testmutex);
 
+			// create all informations needed for the worker
+			// every thread has an own cache
 			mc::WorldCache* worldcache = new mc::WorldCache(world);
 			RenderWorkerSettings* settings = new RenderWorkerSettings;
 			settings->thread = i;
@@ -350,13 +387,16 @@ void RenderManager::renderBaseTiles(const TileSet& tiles) {
 			settings->render_tiles = worker_tiles;
 
 			worker_settings[i] = settings;
+			// start thread
 			pthread_create(&threads[i], NULL, runWorker, (void*) settings);
 		}
 
 		ProgressBar progress(render_tiles.size(), !opts.batch);
+		// loop while the render threads are running
 		while (1) {
 			sleep(1);
 
+			// check if threads are running and update progress
 			int sum = 0;
 			bool running = false;
 			for (int i = 0; i < opts.jobs; i++) {
@@ -371,43 +411,42 @@ void RenderManager::renderBaseTiles(const TileSet& tiles) {
 	}
 }
 
+/**
+ * This method renders the composite tiles.
+ */
 void RenderManager::renderCompositeTiles(const TileSet& tiles) {
 	Image base;
 	ProgressBar progress(tiles.getRequiredCompositeTilesCount(), !opts.batch);
 	int current_progress = 0;
+	// start recursively rendering with the base tile at zoom level 0
 	renderCompositeTile(tiles, Path(), base, progress, current_progress);
 	progress.finish();
 }
 
+/**
+ * This method does the main composite tile rendering work.
+ */
 void RenderManager::renderCompositeTile(const TileSet& tiles, const Path& path,
 		Image& tile, ProgressBar& progress, int& current_progress) {
+	// if this tile is a render tile, read it from disk
 	if (path.getDepth() == tiles.getMaxZoom()) {
 		TilePos pos = path.getTilePos();
 		std::string file = opts.outputPath(path.toString()) + ".png";
 		if (!tile.readPNG(file)) {
-			//auto available = tiles.getAvailableRenderTiles();
-			//auto required = tiles.getRequiredRenderTiles();
 			std::cerr << "Unable to read tile " << path.toString() << " at " << pos.getX()
 					<< ":" << pos.getY() << " from " << file << std::endl;
-			//std::cout << "avail=" << available.count(path.getTilePos()) << " required=" << required.count(path.getTilePos()) << std::endl;
 		}
-
-		//for(int x = 0; x < tileSize; x++) {
-		//	for(int y = 0; y < tileSize; y++) {
-		//		if(x < 10 || tileSize-10 < x || y < 10 || tileSize-10 < y)
-		//			tile.setPixel(x, y, rgba(0, 0, 0, 255));
-		//	}
-		//}
+	// if this tile is a composite tile, but not required, read it also from disk
 	} else if (!tiles.isTileRequired(path)) {
 		std::string file = opts.outputPath(path.toString()) + ".png";
 		if (!tile.readPNG(file)) {
-			//auto available = tiles.getAvailableCompositeTiles();
-			//auto required = tiles.getRequiredCompositeTiles();
 			std::cerr << "Unable to read composite tile " << path.toString() << " from "
 					<< file << std::endl;
-			//std::cout << "avail=" << available.count(path) << " required=" << required.count(path) << std::endl;
 		}
 	} else {
+		// this tile is a composite tile, we need to compose it from its children
+		// just check, if children 1, 2, 3, 4 exists, render it, resize it to the half size
+		// and blit it to the properly position
 		int tile_size = textures.getTileSize();
 		tile.setSize(tile_size, tile_size);
 
@@ -436,42 +475,58 @@ void RenderManager::renderCompositeTile(const TileSet& tiles, const Path& path,
 			other.resizeHalf(resized);
 			tile.simpleblit(resized, tile_size / 2, tile_size / 2);
 		}
+		// then save tile, increase progress
 		saveTile(path, tile);
 		current_progress++;
 		progress.update(current_progress);
 	}
 }
 
+/**
+ * This method saves a tile image to a file.
+ */
 void RenderManager::saveTile(const Path& path, Image& tile) const {
+	// get the filename
 	std::string filename = path.toString() + ".png";
+	// zoom level 0 is "base.png"
 	if (path.getDepth() == 0)
 		filename = "base.png";
+	// then add output directory
 	fs::path file = opts.output_dir / filename;
+	// check if directory exists, if not, create it
 	if (!fs::exists(file.branch_path()))
 		fs::create_directories(file.branch_path());
+	// then save it
 	if (!tile.writePNG(file.string()))
 		std::cout << "Unable to write " << file.string() << std::endl;
 }
 
+/**
+ * Starts the render manager.
+ */
 bool RenderManager::run() {
 	std::cout << "Starting renderer for world " << opts.input_dir << "." << std::endl;
 
+	// load world
 	if (!world.load(opts.input_dir.string())) {
 		std::cerr << "Error: Unable to load the world!" << std::endl;
 		return false;
 	}
 
+	// make sure, output directory exists
 	if (!fs::exists(opts.output_dir) && !fs::create_directories(opts.output_dir)) {
 		std::cerr << "Error: Unable to create output dir!" << std::endl;
 		return false;
 	}
 
+	// load map settings if this a incremental render
 	if (opts.incremental && !settings.read(opts.outputPath("map.settings"))) {
 		std::cerr << "Error: Unable to read map.settings file.";
 		std::cerr << "Can't render incrementally.";
 		return false;
 	}
 
+	// if not incremental, set default map settings
 	if (!opts.incremental) {
 		settings.last_render = -1;
 		settings.texture_size = opts.texture_size;
@@ -484,8 +539,10 @@ bool RenderManager::run() {
 		std::cout << "Rendering incrementally since " << buffer << "." << std::endl;
 	}
 
+	// give the textures some settings
 	textures.setSettings(settings.texture_size, settings.render_unknown_blocks,
 			settings.render_leaves_transparent);
+	// try to load all textures
 	if (!textures.loadChests(opts.dataPath("chest.png"), opts.dataPath("largechest.png"),
 			opts.dataPath("enderchest.png"))) {
 		std::cerr << "Error Unable to load chest.png, largechest.png or enderchest.png!"
@@ -505,19 +562,24 @@ bool RenderManager::run() {
 
 	int render_start = time(NULL);
 
+	// scan world for tiles
 	std::cout << "Scanning world..." << std::endl;
 	TileSet tiles(world, settings.last_render);
+	// check if zoom level has changed, do some tile movements if yes
 	if (opts.incremental && tiles.getMaxZoom() > settings.max_zoom) {
 		std::cout << "The max zoom has changed since last render, let's move some files around.";
 		for (int i = 0; i < tiles.getMaxZoom() - settings.max_zoom; i++)
 			increaseMaxZoom();
 	}
+	// save settings, templates
 	settings.tile_size = tiles.getMaxZoom();
 	settings.write(opts.outputPath("map.settings"));
 	writeTemplates(tiles);
 
+	// start the real rendering
 	render(tiles);
 
+	// in the end, get needed time and set the start time to last render time
 	int took = time(NULL) - render_start;
 	settings.last_render = render_start;
 	settings.write(opts.outputPath("map.settings"));
