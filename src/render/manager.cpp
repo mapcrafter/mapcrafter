@@ -567,12 +567,13 @@ bool RenderManager::run() {
 	TileSet tiles(world, settings.last_render);
 	// check if zoom level has changed, do some tile movements if yes
 	if (opts.incremental && tiles.getMaxZoom() > settings.max_zoom) {
-		std::cout << "The max zoom has changed since last render, let's move some files around.";
+		std::cout << "The max zoom has changed since last render, let's move some files around."
+				<< std::endl;
 		for (int i = 0; i < tiles.getMaxZoom() - settings.max_zoom; i++)
 			increaseMaxZoom();
 	}
 	// save settings, templates
-	settings.tile_size = tiles.getMaxZoom();
+	settings.max_zoom = tiles.getMaxZoom();
 	settings.write(opts.outputPath("map.settings"));
 	writeTemplates(tiles);
 
