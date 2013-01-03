@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Moritz Hilscher
+ * Copyright 2012, 2013 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -26,6 +26,62 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <stdint.h>
+
+/**
+ * For the rendering we need to transform the Minecraft textures to some kind of block
+ * images.
+ *
+ * Here you can see an example of a block image (with texture size = 6)
+ *
+ * L = left texture
+ * R = right texture
+ * T = top texture
+ *
+ *                                       TT       |
+ * LLLLLL     RRRRRR     TTTTTT        TTTTTT     |
+ * LLLLLL     RRRRRR     TTTTTT      TTTTTTTTTT   |
+ * LLLLLL  +  RRRRRR  +  TTTTTT  =  LTTTTTTTTTTR  |
+ * LLLLLL     RRRRRR     TTTTTT     LLLTTTTTTRRR  |
+ * LLLLLL     RRRRRR     TTTTTT     LLLLLTTRRRRR  | 2*texture-size
+ * LLLLLL     RRRRRR     TTTTTT     LLLLLLRRRRRR  |
+ *                                  LLLLLLRRRRRR  |
+ * ------                           LLLLLLRRRRRR  |
+ * texture size                      LLLLLRRRRR   |
+ *                                     LLLRRR     |
+ *                                       LR       |
+ *
+ *                                  ------------
+ *                                  2*texture size
+ *
+ * On a normal map, the left side of a block image is west and the right side is south.
+ * The block images have a size of 2*texture size x 2*texture size (this is called block
+ * size).
+ *
+ * To transform the pixels from a texture to the pixels of a block image side, iterators
+ * are used. The iterators iterate through the pixels of the source image and
+ * calculate the position of the pixel in the block image.
+ *
+ * The SideFaceIterator class is used to transform the textures to the sides:
+ *
+ * ABCDEF      A                F
+ * ABCDEF      ABC            DEF
+ * ABCDEF      ABCDE        BCDEF
+ * ABCDEF  =>  ABCDEF  or  ABCDEF
+ * ABCDEF      ABCDEF      ABCDEF
+ * ABCDEF      ABCDEF      ABCDEF
+ *              BCDEF      ABCDE
+ *                DEF      ABC
+ *                  F      A
+ *
+ * The TopFaceIterator class is used to transform the textures to the top side:
+ *
+ * ABCDEF          AB
+ * ABCDEF        AABBCD
+ * ABCDEF  =>  AABBCCDDEF
+ * ABCDEF      ABCCDDEEFF
+ * ABCDEF        CDEEFF
+ * ABCDEF          EF
+ */
 
 #define FACE_TOP 1
 #define FACE_BOTTOM 2
@@ -145,7 +201,10 @@ private:
 	Image opaque_water[4];
 	Image shadow_edge_masks[4];
 
+	// map of block images
+	// key is a 32 bit integer, first two bytes id, second two bytes data
 	std::unordered_map<uint32_t, Image> block_images;
+	// set of id/data block combinations, which contain transparency
 	std::unordered_set<uint32_t> block_transparency;
 	Image unknown_block;
 

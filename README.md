@@ -1,5 +1,7 @@
 # mapcrafter #
 
+by Moritz Hilscher
+
 mapcrafter is a fast minecraft world renderer written in C++. It renders minecraft
 worlds to a bunch of images which are viewable in any webbrowser using the Google Maps API.
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Moritz Hilscher
+ * Copyright 2012, 2013 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -38,6 +38,9 @@ World::World() {
 World::~World() {
 }
 
+/**
+ * Loads a world from a directory.
+ */
 bool World::load(const std::string& dir) {
 	fs::path world_dir(dir);
 	fs::path region_dir = world_dir / "region";
@@ -51,6 +54,9 @@ bool World::load(const std::string& dir) {
 	return false;
 }
 
+/**
+ * Scans the region directory for available Anvil region files.
+ */
 bool World::readRegions(const std::string& path) {
 	fs::path region_dir(path);
 	if(!fs::exists(region_dir))
@@ -85,6 +91,9 @@ const std::unordered_set<RegionPos, hash_function>& World::getAvailableRegions()
 	return available_regions;
 }
 
+/**
+ * Returns a region file with a specific position.
+ */
 bool World::getRegion(const RegionPos& pos, RegionFile& region) const {
 	if(available_regions.count(pos) == 0)
 		return false;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Moritz Hilscher
+ * Copyright 2012, 2013 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -294,11 +294,27 @@ bool BlockTextures::saveBlocks(const std::string& filename) {
 	std::cout << block_images.size() << " blocks" << std::endl;
 	std::cout << "all: " << blocks.size() << std::endl;
 
+	/*
+	Image terrain(texture_size * 16, texture_size * 16);
+	for (int x = 0; x < 16; x++) {
+		for (int y = 0; y < 16; y++) {
+			terrain.simpleblit(getTexture(x, y), texture_size * x, texture_size * y);
+		}
+	}
+	terrain.writePNG("test.png");
+	*/
+
 	return img.writePNG(filename);
 }
 
 #define POS(_x, _y) (x == _x && y == _y)
 
+/**
+ * Splits the terrain.png image into 16x16 images and resizes them to texture size.
+ * The image resizing is done with bilinear interpolation, except the transparent leaves
+ * textures, because with interpolation we would have half transparent pixels, what could
+ * make the rendering process slower.
+ */
 void BlockTextures::splitTerrain(const Image& terrain) {
 	int size = terrain.getWidth() / 16;
 	for (int x = 0; x < 16; x++) {
@@ -317,6 +333,9 @@ const Image& BlockTextures::getTexture(int x, int y) const {
 	return textures[y * 16 + x];
 }
 
+/**
+ * This method filters unnecessary block data, for example the leaves decay counter.
+ */
 uint16_t BlockTextures::filterBlockData(uint16_t id, uint16_t data) const {
 	if (id == 6)
 		return data & (0xff00 | 0b00000011);
@@ -341,6 +360,9 @@ uint16_t BlockTextures::filterBlockData(uint16_t id, uint16_t data) const {
 	return data;
 }
 
+/**
+ * Checks, if a block images has transparent pixels.
+ */
 bool BlockTextures::checkImageTransparency(const Image& image) const {
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
@@ -360,6 +382,10 @@ bool BlockTextures::checkImageTransparency(const Image& image) const {
 	return false;
 }
 
+/**
+ * This method adds to the block image the dark shadow edges by blitting the shadow edge
+ * masks and then stores the block image with the special data.
+ */
 void BlockTextures::addBlockShadowEdges(uint16_t id, uint16_t data, const Image& block) {
 	for (int n = 0; n <= 1; n++)
 		for (int e = 0; e <= 1; e++)
@@ -382,39 +408,57 @@ void BlockTextures::addBlockShadowEdges(uint16_t id, uint16_t data, const Image&
 			}
 }
 
+/**
+ * Sets a block image in the block image list.
+ */
 void BlockTextures::setBlockImage(uint16_t id, uint16_t data, const Image& block) {
 	block_images[id | (data << 16)] = block;
 
+	// check if block contains transparency
 	if (checkImageTransparency(block))
 		block_transparency.insert(id | (data << 16));
+	// if block is not transparent, add shadow edges
 	else
 		addBlockShadowEdges(id, data, block);
 }
 
+/**
+ * This method is very important for the rendering performance. It preblits transparent
+ * water blocks until they are nearly opaque.
+ */
 void BlockTextures::testWaterTransparency() {
 	Image water = getTexture(13, 12);
 
+	// opaque_water[0] is water block when water texture is only on the top
 	opaque_water[0].setSize(getBlockImageSize(), getBlockImageSize());
 	blitFace(opaque_water[0], FACE_TOP, water, 0, 0, false);
+	// same, water top and south (right)
 	opaque_water[1] = opaque_water[0];
+	// water top and west (left)
 	opaque_water[2] = opaque_water[0];
+	// water top, south and west
 	opaque_water[3] = opaque_water[0];
 
+	// now blit actual faces
 	blitFace(opaque_water[1], FACE_SOUTH, water, 0, 0, false);
 	blitFace(opaque_water[2], FACE_WEST, water, 0, 0, false);
 	blitFace(opaque_water[3], FACE_SOUTH, water, 0, 0, false);
 	blitFace(opaque_water[3], FACE_WEST, water, 0, 0, false);
 
 	for (max_water = 2; max_water < 10; max_water++) {
-
+		// make a copy of the first images
 		Image tmp = opaque_water[0];
+		// blit it over
 		tmp.alphablit(tmp, 0, 0);
 
+		// then check alpha
 		uint16_t min_alpha = 255;
 		for (TopFaceIterator it(texture_size); !it.end(); it.next())
 			min_alpha = MIN(min_alpha, ALPHA(tmp.getPixel(it.dest_x, it.dest_y)));
 
+		// images are "enough" opaque
 		if (min_alpha == 255) {
+			// do a last blit
 			blitFace(opaque_water[0], FACE_TOP, water, 0, 0, false);
 			blitFace(opaque_water[1], FACE_TOP, water, 0, 0, false);
 			blitFace(opaque_water[2], FACE_TOP, water, 0, 0, false);
@@ -425,13 +469,13 @@ void BlockTextures::testWaterTransparency() {
 			blitFace(opaque_water[3], FACE_SOUTH, water);
 			blitFace(opaque_water[3], FACE_WEST, water);
 			break;
+		// when images are too transparent
 		} else {
+			// blit all images over
 			for (int i = 0; i < 4; i++)
 				opaque_water[i].alphablit(opaque_water[i], 0, 0);
 		}
 	}
-
-//std::cout << "Max water: " << max_water << std::endl;
 }
 
 uint32_t BlockTextures::darkenLeft(uint32_t pixel) const {
@@ -442,6 +486,9 @@ uint32_t BlockTextures::darkenRight(uint32_t pixel) const {
 	return rgba_multiply(pixel, 0.6, 0.6, 0.6);
 }
 
+/**
+ * This methods blits a specific face on an image.
+ */
 void BlockTextures::blitFace(Image& image, int face, const Image& texture, int xoff,
         int yoff, bool darken) const {
 	double d = 1;
@@ -1004,6 +1051,7 @@ void BlockTextures::createChest(uint16_t id, Image* textures) { // id 54, 95, 13
 }
 
 void BlockTextures::createDoubleChest(uint16_t id, Image* textures) { // id 54
+	// note here back and top textures are swapped
 	createRotatedBlock(id, LARGECHEST_DATA_LARGE | LARGECHEST_DATA_LEFT,
 	        textures[LARGECHEST_FRONT_LEFT], textures[LARGECHEST_BACK_RIGHT],
 	        textures[LARGECHEST_SIDE], textures[LARGECHEST_TOP_RIGHT]);

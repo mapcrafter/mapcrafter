@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Moritz Hilscher
+ * Copyright 2012, 2013 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -21,6 +21,17 @@
 #define POS_H_
 
 #include "util.h"
+
+/**
+ * Here are some Minecraft position things. In Minecraft, x/z are the horizontal axes
+ * and y is the vertical axis.
+ *
+ * Here are the Minecraft directions (also on the bottom of this file):
+ * north = -z
+ * south = +z
+ * east = +x
+ * west = -x
+ */
 
 namespace mapcrafter {
 namespace mc {
@@ -103,6 +114,13 @@ std::ostream& operator<<(std::ostream& stream, const RegionPos& region);
 std::ostream& operator<<(std::ostream& stream, const ChunkPos& chunk);
 std::ostream& operator<<(std::ostream& stream, const BlockPos& block);
 std::ostream& operator<<(std::ostream& stream, const LocalBlockPos& block);
+
+#define DIR_NORTH mc::BlockPos(0, -1, 0)
+#define DIR_SOUTH mc::BlockPos(0, 1, 0)
+#define DIR_EAST mc::BlockPos(1, 0, 0)
+#define DIR_WEST mc::BlockPos(-1, 0, 0)
+#define DIR_TOP mc::BlockPos(0, 0, 1)
+#define DIR_BOTTOM mc::BlockPos(0, 0, -1)
 
 }
 }

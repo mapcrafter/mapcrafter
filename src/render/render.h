@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Moritz Hilscher
+ * Copyright 2012, 2013 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -20,6 +20,7 @@
 #ifndef RENDER_H_
 #define RENDER_H_
 
+#include "mc/pos.h"
 #include "mc/cache.h"
 
 #include "render/image.h"
@@ -28,12 +29,6 @@
 
 #include <map>
 #include <boost/filesystem.hpp>
-
-// relative block values
-#define BLOCK_NORTH mc::BlockPos(0, -1, 0)
-#define BLOCK_SOUTH mc::BlockPos(0, 1, 0)
-#define BLOCK_EAST mc::BlockPos(1, 0, 0)
-#define BLOCK_WEST mc::BlockPos(-1, 0, 0)
 
 namespace fs = boost::filesystem;
 

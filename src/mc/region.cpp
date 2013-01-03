@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Moritz Hilscher
+ * Copyright 2012, 2013 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -35,6 +35,9 @@ RegionFile::RegionFile(const std::string& filename)
 RegionFile::~RegionFile() {
 }
 
+/**
+ * Reads the headers of a region file: chunk offsets/timestamps
+ */
 bool RegionFile::readHeaders(std::ifstream& file) {
 	if (!file)
 		return false;
@@ -70,6 +73,9 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 	return true;
 }
 
+/**
+ * Reads the whole region file.
+ */
 bool RegionFile::loadAll() {
 	std::ifstream file(filename.c_str(), std::ios_base::binary);
 	if (!readHeaders(file))
@@ -109,16 +115,22 @@ int RegionFile::getChunkTimestamp(const ChunkPos& chunk) const {
 	return chunk_timestamps[chunk.getLocalZ() * 32 + chunk.getLocalX()];
 }
 
+/**
+ * This method tries to load a chunk from the region data and returns a status.
+ */
 int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 	if (!hasChunk(pos))
 		return CHUNK_DOES_NOT_EXISTS;
 
+	// get the offsets, where the chunk data starts
 	int offset = chunk_offsets[pos.getLocalZ() * 32 + pos.getLocalX()];
 
+	// get data size and compression type
 	int size = *((int*) &regiondata[offset]);
 	uint8_t compression = regiondata[offset + 4];
 	size = be32toh(size) - 1;
 
+	// try to load the chunk
 	try {
 		if(!chunk.readNBT((char*) &regiondata[offset + 5], size))
 			return CHUNK_INVALID;

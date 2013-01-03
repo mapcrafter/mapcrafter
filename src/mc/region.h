@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Moritz Hilscher
+ * Copyright 2012, 2013 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -35,15 +35,22 @@
 namespace mapcrafter {
 namespace mc {
 
+/**
+ * This class represents a Minecraft region file.
+ */
 class RegionFile {
 private:
 	std::string filename;
 	RegionPos regionpos;
 
+	// a set with all available chunks
 	std::set<ChunkPos> containing_chunks;
 
+	// the offsets, where the chunkdata starts
 	int chunk_offsets[1024];
+	// timestamps of the chunks
 	int chunk_timestamps[1024];
+	// data from the region file
 	std::vector<uint8_t> regiondata;
 
 	bool readHeaders(std::ifstream& file);

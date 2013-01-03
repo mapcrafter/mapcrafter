@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Moritz Hilscher
+ * Copyright 2012, 2013 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -28,18 +28,27 @@
 namespace mapcrafter {
 namespace mc {
 
+/**
+ * A 16x16x16 section of a chunk.
+ */
 struct ChunkSection {
 	uint8_t y;
-	bool used;
 	uint8_t blocks[16 * 16 * 16];
 	uint8_t data[16 * 16 * 8];
 };
 
+/**
+ * This is a Minecraft chunk from the Anvil world format. The class stores only the
+ * sections, which exist in the nbt data, to save memory.
+ */
 class Chunk {
 private:
 	ChunkPos pos;
 
+	// the index of the chunk sections in the sections array
+	// or -1 if section does not exists
 	int section_offsets[16];
+	// the array with the sections, see indexes above
 	std::vector<ChunkSection> sections;
 public:
 	Chunk();

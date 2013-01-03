@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Moritz Hilscher
+ * Copyright 2012, 2013 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -32,10 +32,16 @@ WorldCache::WorldCache(World& world)
 	}
 }
 
+/**
+ * Calculates the position of a region position in the cache.
+ */
 int WorldCache::getRegionCacheIndex(const RegionPos& pos) {
 	return ((pos.x + 4096) & RMASK) * RWIDTH + (pos.z + 4096) & RMASK;
 }
 
+/**
+ * Calculates the position of a chunk position in the cache.
+ */
 int WorldCache::getChunkCacheIndex(const ChunkPos& pos) {
 	//                4096*32
 	return ((pos.x + 131072) & CMASK) * CWIDTH + (pos.z + 131072) & CMASK;
@@ -43,6 +49,7 @@ int WorldCache::getChunkCacheIndex(const ChunkPos& pos) {
 
 RegionFile* WorldCache::getRegion(const RegionPos& pos) {
 	CacheEntry<RegionPos, RegionFile>& entry = regioncache[getRegionCacheIndex(pos)];
+	// check if region is already in cache
 	if (entry.used && entry.key == pos) {
 		//regionstats.hits++;
 		return &entry.value;
@@ -52,6 +59,7 @@ RegionFile* WorldCache::getRegion(const RegionPos& pos) {
 	//	regionstats.unavailable++;
 	//	return NULL;
 	//}
+	// if not try to load the region
 	if (!world.getRegion(pos, entry.value) || !entry.value.loadAll()) {
 		//regionstats.unavailable++;
 		entry.used = false;
@@ -66,17 +74,20 @@ RegionFile* WorldCache::getRegion(const RegionPos& pos) {
 
 Chunk* WorldCache::getChunk(const ChunkPos& pos) {
 	CacheEntry<ChunkPos, Chunk>& entry = chunkcache[getChunkCacheIndex(pos)];
+	// check if chunk is already in cache
 	if (entry.used && entry.key == pos) {
 		//chunkstats.hits++;
 		return &entry.value;
 	}
 
+	// if not try to get the region of the chunk from the cache
 	RegionFile* region = getRegion(pos.getRegion());
 	if (region == NULL) {
 		//chunkstats.unavailable++;
 		return NULL;
 	}
 
+	// then try to load the chunk
 	int status = region->loadChunk(pos, entry.value);
 	if(status != CHUNK_OK) {
 		//chunkstats.unavailable++;

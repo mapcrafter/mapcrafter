@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Moritz Hilscher
+ * Copyright 2012, 2013 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -196,8 +196,8 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 	uint16_t data_north, data_south, data_east, data_west, data_top, data_bottom;
 
 	if ((id == 8 || id == 9) && data == 0) { // full water blocks
-		getNeighbor(pos + BLOCK_WEST, id_west, data_west, world, chunk);
-		getNeighbor(pos + BLOCK_SOUTH, id_south, data_south, world, chunk);
+		getNeighbor(pos + DIR_WEST, id_west, data_west, world, chunk);
+		getNeighbor(pos + DIR_SOUTH, id_south, data_south, world, chunk);
 
 		// check if west and south neighbors are also full water blocks
 		if ((id_west == 8 || id_west == 9) && data_west == 0) {
@@ -207,10 +207,10 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		}
 	} else if (id == 54) { // largechest
 		// at first get all neighbor blocks
-		getNeighbor(pos + BLOCK_NORTH, id_north, data_north, world, chunk);
-		getNeighbor(pos + BLOCK_SOUTH, id_south, data_south, world, chunk);
-		getNeighbor(pos + BLOCK_EAST, id_east, data_east, world, chunk);
-		getNeighbor(pos + BLOCK_WEST, id_west, data_west, world, chunk);
+		getNeighbor(pos + DIR_NORTH, id_north, data_north, world, chunk);
+		getNeighbor(pos + DIR_SOUTH, id_south, data_south, world, chunk);
+		getNeighbor(pos + DIR_EAST, id_east, data_east, world, chunk);
+		getNeighbor(pos + DIR_WEST, id_west, data_west, world, chunk);
 
 		// in data is the direction of the chest
 		// now check with the neighbor data if this chest is a large chest
@@ -228,11 +228,11 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		// at first get the data of both parts of the door, top and bottom
 		if(top) {
 			top_data = data;
-			getNeighbor(pos + mc::BlockPos(0, 0, -1), tmp, bottom_data, world,chunk);
+			getNeighbor(pos + DIR_BOTTOM, tmp, bottom_data, world,chunk);
 
 			data |= DOOR_TOP;
 		} else {
-			getNeighbor(pos + mc::BlockPos(0, 0, 1), tmp, top_data, world, chunk);
+			getNeighbor(pos + DIR_TOP, tmp, top_data, world, chunk);
 			bottom_data = data;
 		}
 
@@ -264,10 +264,10 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 
 	} else if(id == 85 || id == 101 || id == 102 || id == 113) {
 		// fence, iron bars, glas panes, nether fence
-		getNeighbor(pos + BLOCK_NORTH, id_north, data_north, world, chunk);
-		getNeighbor(pos + BLOCK_SOUTH, id_south, data_south, world, chunk);
-		getNeighbor(pos + BLOCK_EAST, id_east, data_east, world, chunk);
-		getNeighbor(pos + BLOCK_WEST, id_west, data_west, world, chunk);
+		getNeighbor(pos + DIR_NORTH, id_north, data_north, world, chunk);
+		getNeighbor(pos + DIR_SOUTH, id_south, data_south, world, chunk);
+		getNeighbor(pos + DIR_EAST, id_east, data_east, world, chunk);
+		getNeighbor(pos + DIR_WEST, id_west, data_west, world, chunk);
 
 		// check for same neighbors
 		if(id_north != 0 && (id_north == id || !textures.isBlockTransparent(id_north,data_north)))
@@ -282,9 +282,9 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 
 	if (!textures.isBlockTransparent(id, data)) {
 		/* add shadow edges on opaque blockes */
-		getNeighbor(pos + BLOCK_NORTH, id_north, data_north, world, chunk);
-		getNeighbor(pos + BLOCK_EAST, id_east, data_east, world, chunk);
-		getNeighbor(pos + mc::BlockPos(0, 0, -1), id_bottom, data_bottom, world, chunk);
+		getNeighbor(pos + DIR_NORTH, id_north, data_north, world, chunk);
+		getNeighbor(pos + DIR_EAST, id_east, data_east, world, chunk);
+		getNeighbor(pos + DIR_BOTTOM, id_bottom, data_bottom, world, chunk);
 
 		// check if neighbors are opaque
 		if(id_north == 0 || textures.isBlockTransparent(id_north, data_north))
@@ -299,8 +299,8 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 }
 
 void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
-	// some vars, set right image size
-	int block_size = textures.getBlockImageSize();
+	// some vars, set correct image size
+	int DIR_size = textures.getBlockImageSize();
 	int tile_size = textures.getTileSize();
 	tile.setSize(tile_size, tile_size);
 
@@ -315,7 +315,7 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 	mc::Chunk* chunk = NULL;
 
 	// iterate over the highest blocks in the tile
-	for (TileTopBlockIterator it(pos, block_size, tile_size); !it.end(); it.next()) {
+	for (TileTopBlockIterator it(pos, DIR_size, tile_size); !it.end(); it.next()) {
 		// water counter
 		int water = 0;
 
@@ -366,8 +366,8 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 
 							// check for neighbors
 							uint16_t south, west, data_south, data_west;
-							getNeighbor(top.pos + BLOCK_SOUTH, south, data_south, world,chunk);
-							getNeighbor(top.pos + BLOCK_WEST, west, data_west, world, chunk);
+							getNeighbor(top.pos + DIR_SOUTH, south, data_south, world,chunk);
+							getNeighbor(top.pos + DIR_WEST, west, data_west, world, chunk);
 
 							bool neighbor_south = (south == 8 || south == 9);
 							bool neighbor_west = (west == 8 || west == 9);

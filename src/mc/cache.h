@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Moritz Hilscher
+ * Copyright 2012, 2013 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -32,6 +32,11 @@
 namespace mapcrafter {
 namespace mc {
 
+/**
+ * Some cache statistics for debugging. Not used at the moment.
+ *
+ * Maybe add a set of corrupt chunks/regions to dump them at the end of the rendering.
+ */
 struct CacheStats {
 	CacheStats()
 			: hits(0), misses(0), unavailable(0) {
@@ -51,7 +56,17 @@ struct CacheStats {
 	int unavailable;
 };
 
-#define RBITS 3
+/**
+ * An entry in the cache with a Key and a Value type. Used with regions and chunks.
+ */
+template<typename Key, typename Value>
+struct CacheEntry {
+	Key key;
+	Value value;
+	bool used;
+};
+
+#define RBITS 2
 #define RWIDTH (1 << RBITS)
 #define RSIZE (RWIDTH*RWIDTH)
 #define RMASK (RSIZE-1)
@@ -61,13 +76,27 @@ struct CacheStats {
 #define CSIZE (CWIDTH*CWIDTH)
 #define CMASK (CSIZE-1)
 
-template<typename Key, typename Value>
-struct CacheEntry {
-	Key key;
-	Value value;
-	bool used;
-};
-
+/**
+ * This is a world cache with regions and chunks.
+ *
+ * Every region and chunk has a fixed position in the cache. The position in the cache is
+ * calculated by using the first few bits of the region/chunk coordinates. Then the
+ * regions/chunks are stored with the "smaller" coordinates in a 2D-like array.
+ *
+ * For the regions the first 2 bits are used, this are 4x4 regions (4 = 1 << 2) in the
+ * cache. The regions store only the raw region file data and are used to read the chunks
+ * when necessary.
+ *
+ * For the chunks the first 5 bits are used, this are 16x16 chunk (also the size of a
+ * region) in the cache.
+ *
+ * When someone is trying to access the cache, the cache calculates the position of a
+ * region/chunk coordinate in the cache. Then the cache checks if there is already
+ * something stored on this position and if the real coordinate of this cache entry is
+ * the coordinate of the requested region/chunk. If yes, the cache returns the objects.
+ * If not, the cache tries to load the chunk/region and puts it in this cache entry
+ * (overwrites an already loaded region/chunk at this cache position).
+ */
 class WorldCache {
 private:
 	World& world;

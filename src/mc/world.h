@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Moritz Hilscher
+ * Copyright 2012, 2013 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -31,12 +31,22 @@
 namespace mapcrafter {
 namespace mc {
 
+/**
+ * Simple hash function to use regions in unordered_set/map.
+ * This just assumes that there are maximal 8096 regions on x/z axis, this are
+ * all in all 8096^2=67108864 regions. I think this should be enough.
+ */
 struct hash_function {
 	long operator()(const RegionPos& region) const {
 		return (region.x+4096) * 2048 + region.z + 4096;
 	}
 };
 
+/**
+ * This class represents a Minecraft world. It manages only the available region files.
+ * Access to the chunks is with the region files possible. If you want full reading
+ * access to the world, use the WorldCache class.
+ */
 class World {
 private:
 	std::unordered_set<RegionPos, hash_function> available_regions;
@@ -50,11 +60,8 @@ public:
 	bool load(const std::string& dir);
 
 	int getRegionCount() const;
-	int getChunkCount() const;
 
 	bool hasRegion(const RegionPos& pos) const;
-	bool hasChunk(const ChunkPos& pos) const;
-
 	const std::unordered_set<RegionPos, hash_function>& getAvailableRegions() const;
 
 	bool getRegion(const RegionPos& pos, RegionFile& region) const;

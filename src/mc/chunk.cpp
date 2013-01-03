@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Moritz Hilscher
+ * Copyright 2012, 2013 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -35,18 +35,23 @@ Chunk::Chunk()
 Chunk::~Chunk() {
 }
 
+/**
+ * Reads the chunk from (compressed) nbt data.
+ */
 bool Chunk::readNBT(const char* data, size_t len, nbt::CompressionType compression) {
 	clear();
 
 	nbt::NBTFile nbt;
 	nbt.readNBT(data, len, compression);
 
+	// find "level" tag
 	nbt::TagCompound* level = nbt.findTag<nbt::TagCompound>("Level", nbt::TAG_COMPOUND);
 	if (level == NULL) {
 		std::cerr << "Warning: Corrupt chunk (No level tag)!" << std::endl;
 		return false;
 	}
 
+	// then find x/z pos of the chunk
 	nbt::TagInt* xpos = level->findTag<nbt::TagInt>("xPos", nbt::TAG_INT);
 	nbt::TagInt* zpos = level->findTag<nbt::TagInt>("zPos", nbt::TAG_INT);
 	if (xpos == NULL || zpos == NULL) {
@@ -55,6 +60,7 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::CompressionType compressi
 	}
 	pos = ChunkPos(xpos->payload, zpos->payload);
 
+	// find sections list
 	nbt::TagList* tagSections = level->findTag<nbt::TagList>("Sections", nbt::TAG_LIST);
 	if (tagSections == NULL || tagSections->tag_type != nbt::TAG_COMPOUND) {
 		std::cerr << "Warning: Corrupt chunk at " << pos.x << ":" << pos.z
@@ -62,6 +68,7 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::CompressionType compressi
 		return false;
 	}
 
+	// go through all sections
 	for (std::vector<nbt::NBTTag*>::const_iterator it = tagSections->payload.begin();
 	        it != tagSections->payload.end(); ++it) {
 		nbt::TagCompound* tagSection = (nbt::TagCompound*) *it;
@@ -70,15 +77,17 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::CompressionType compressi
 		        nbt::TAG_BYTE_ARRAY);
 		nbt::TagByteArray* data = tagSection->findTag<nbt::TagByteArray>("Data",
 		        nbt::TAG_BYTE_ARRAY);
+		// make sure section is valid
 		if (y == NULL || blocks == NULL || data == NULL || blocks->payload.size() != 4096
 		        || data->payload.size() != 2048)
 			continue;
 
+		// add it
 		ChunkSection section;
 		section.y = y->payload;
-		section.used = true;
 		std::copy(blocks->payload.begin(), blocks->payload.end(), section.blocks);
 		std::copy(data->payload.begin(), data->payload.end(), section.data);
+		// set the position of this section
 		section_offsets[section.y] = sections.size();
 		sections.push_back(section);
 	}
@@ -86,6 +95,9 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::CompressionType compressi
 	return true;
 }
 
+/**
+ * Clears the whole chunk data.
+ */
 void Chunk::clear() {
 	sections.clear();
 	for (int i = 0; i < 16; i++)
@@ -96,6 +108,9 @@ bool Chunk::hasSection(int section) const {
 	return section_offsets[section] != -1;
 }
 
+/**
+ * Returns the block id at a position.
+ */
 uint8_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 	int section = pos.y / 16;
 	if (section_offsets[section] == -1)
@@ -108,6 +123,9 @@ uint8_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 	return sections[section_offsets[section]].blocks[offset];
 }
 
+/**
+ * Returns the block data at a position.
+ */
 uint8_t Chunk::getBlockData(const LocalBlockPos& pos) const {
 	int section = pos.y / 16;
 	if (section_offsets[section] == -1)
