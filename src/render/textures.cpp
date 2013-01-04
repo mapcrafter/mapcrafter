@@ -1325,6 +1325,55 @@ void BlockTextures::createVines() { // id 106
 	}
 }
 
+/**
+ * Creates the texture for a fence gate, opened or closed.
+ */
+Image createFenceGateTexture(bool opened, Image texture) {
+	int size = texture.getWidth();
+	double ratio = (double) size / 16;
+
+	Image mask(size, size);
+	mask.fill(rgba(255, 255, 255, 255), 0, 0, size, size);
+
+	// left and right post
+	mask.fill(0, 0, 0, 4 * ratio, 12 * ratio);
+	mask.fill(0, 12 * ratio, 0, 4 * ratio, 12 * ratio);
+	// if closed this middle part
+	if(!opened)
+		mask.fill(0, 4 * ratio, 3 * ratio, 8 * ratio, 6 * ratio);
+
+	// then apply mask to the texture
+	for(int x = 0; x < size; x++)
+		for(int y = 0; y < size; y++)
+			if(mask.getPixel(x, y) != 0)
+				texture.setPixel(x, y, 0);
+
+	return texture;
+}
+
+void BlockTextures::createFenceGate() { // id 107
+	Image texture = getTexture(4, 0);
+	Image opened = createFenceGateTexture(true, texture);
+	Image closed = createFenceGateTexture(false, texture);
+
+	// go through states opened and closed
+	for(int open = 0; open <= 1; open++) {
+		Image tex = open ? opened : closed;
+		Image north(texture_size * 2, texture_size * 2);
+		Image east = north;
+		// north and south block images are same
+		// (because we ignore the direction of opened fence gates)
+		blitFace(north, FACE_NORTH, tex, texture_size * 0.5, texture_size * 0.25, false);
+		// also east and west
+		blitFace(east, FACE_EAST, tex, -texture_size * 0.5, texture_size * 0.25, false);
+		uint8_t extra = open ? 4 : 0;
+		setBlockImage(107, 2 | extra, north);
+		setBlockImage(107, 0 | extra, north);
+		setBlockImage(107, 3 | extra, east);
+		setBlockImage(107, 1 | extra, east);
+	}
+}
+
 void BlockTextures::createCauldron() { // id 118
 	Image side = getTexture(10, 9);
 	Image water = getTexture(14, 12);
@@ -1516,7 +1565,7 @@ void BlockTextures::loadBlocks() {
 	// id 104 // pumpkin stem
 	// id 105 // melon stem
 	createVines(); // id 106 // vines
-	// id 107 // fence gate
+	createFenceGate(); // id 107 // fence gate
 	createStairs(108, getTexture(7, 0)); // brick stairs
 	createStairs(109, getTexture(6, 3)); // stone brick stairs
 	createBlock(110, 0, getTexture(13, 4), getTexture(14, 4)); // mycelium
@@ -1531,11 +1580,11 @@ void BlockTextures::loadBlocks() {
 	createItemStyleBlock(115, 2, getTexture(3, 14)); //
 	createItemStyleBlock(115, 3, getTexture(4, 14)); //
 	// --
-	createSmallerBlock(116, 0, getTexture(6, 11), getTexture(6, 10), 0, 12, true); // enchantment table
+	createSmallerBlock(116, 0, getTexture(6, 11), getTexture(6, 10), 0, texture_size * 0.75, true); // enchantment table
 	createItemStyleBlock(117, 0, getTexture(13, 9)); // brewing stand
 	createCauldron(); // id 118 // cauldron
-	createSmallerBlock(119, 0, endportal_texture, endportal_texture, 4, 12, false);
-	createSmallerBlock(120, 0, getTexture(15, 9), getTexture(14, 9), 0, 13, true); // end portal fram
+	createSmallerBlock(119, 0, endportal_texture, endportal_texture, 4, texture_size * 0.75, false);
+	createSmallerBlock(120, 0, getTexture(15, 9), getTexture(14, 9), 0, texture_size * 0.8125, true); // end portal fram
 	createBlock(121, 0, getTexture(15, 10)); // end stone
 	// id 122 // dragon egg
 	createBlock(123, 0, getTexture(3, 13)); // redstone lamp inactive

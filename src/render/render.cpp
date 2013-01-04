@@ -278,6 +278,16 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			data |= FACE_EAST;
 		if(id_west != 0 && (id_west == id || !textures.isBlockTransparent(id_west, data_west)))
 			data |= FACE_WEST;
+
+		// check fences, they can also connect with fence gates
+		if(id == 85 && id_north == 107)
+			data |= FACE_NORTH;
+		if(id == 85 && id_south == 107)
+			data |= FACE_SOUTH;
+		if(id == 85 && id_east == 107)
+			data |= FACE_EAST;
+		if(id == 85 && id_west == 107)
+			data |= FACE_WEST;
 	}
 
 	if (!textures.isBlockTransparent(id, data)) {
