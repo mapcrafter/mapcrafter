@@ -2,10 +2,10 @@
 
 by Moritz Hilscher
 
-mapcrafter is a fast minecraft world renderer written in C++. It renders minecraft
+mapcrafter is a fast Minecraft world renderer written in C++. It renders Minecraft
 worlds to a bunch of images which are viewable in any webbrowser using the Google Maps API.
 
-mapcrafter runs on linux (maybe also Mac OS or w****** with cygwin) and needs libpng, 
+mapcrafter runs on linux (maybe also Mac OS or W****** with cygwin) and needs libpng, 
 libpthread, libboost-iostreams,libboost-system, libboost-filesystem, and 
 libboost-program-options (and libboost-test if you want to use the tests). 
 You can build it with g++ and the supplied makefile.
@@ -106,6 +106,13 @@ textures. This option can make the renderer a bit slower, because the renderer h
 the blocks after the leaves to the ground also.
 
 ## Version history ##
+
+**v.0.2**
+
+* Added support for chests, fences, fence gates
+* Added option --batch, to render without the animated progress bar
+* Small fixes for end portal frame, enchantment table to work with all texture sizes
+* Some code reworking, more comments
 
 **v.0.1 (December 2012)**
 
