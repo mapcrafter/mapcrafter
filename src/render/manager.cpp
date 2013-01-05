@@ -346,6 +346,11 @@ void RenderManager::increaseMaxZoom() {
  * Renders render tiles and composite tiles.
  */
 void RenderManager::render(const TileSet& tiles) {
+	if(tiles.getRequiredCompositeTilesCount() == 0) {
+		std::cout << "No tiles need to get rendered." << std::endl;
+		return;
+	}
+
 	// check if only one thread
 	if (opts.jobs == 1) {
 		std::cout << "Rendering " << tiles.getRequiredRenderTilesCount()
