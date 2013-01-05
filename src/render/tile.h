@@ -153,6 +153,8 @@ public:
 	const std::set<Path>& getAvailableCompositeTiles() const;
 	const std::set<TilePos>& getRequiredRenderTiles() const;
 	const std::set<Path>& getRequiredCompositeTiles() const;
+
+	int findRenderTasks(int worker_count, std::vector<std::map<Path, int> >& workers) const;
 };
 
 }

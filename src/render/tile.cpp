@@ -27,6 +27,7 @@
 #include <sstream>
 #include <cmath>
 #include <cstdlib>
+#include <algorithm>
 #include <stdint.h>
 #include <set>
 #include <boost/filesystem.hpp>
@@ -154,19 +155,7 @@ bool Path::operator==(const Path& other) const {
 }
 
 bool Path::operator<(const Path& other) const {
-	if (getDepth() == other.getDepth()
-	        && std::equal(path.begin(), path.end(), other.path.begin()))
-		return false;
-	int maxsize = MAX(getDepth(), other.getDepth());
-	for (int i = 0; i < maxsize; i++) {
-		if (i == getDepth())
-			return true;
-		if (i == other.getDepth())
-			return false;
-		if (path[i] != other.path[i])
-			return path[i] < other.path[i];
-	}
-	return false;
+	return path < other.path;
 }
 
 /**
@@ -366,6 +355,8 @@ bool TileSet::hasTile(const Path& path) const {
 }
 
 bool TileSet::isTileRequired(const Path& path) const {
+	if(path.getDepth() == depth)
+		return required_render_tiles.count(path.getTilePos()) != 0;
 	return required_composite_tiles.count(path) != 0;
 }
 
@@ -395,6 +386,176 @@ const std::set<TilePos>& TileSet::getRequiredRenderTiles() const {
 
 const std::set<Path>& TileSet::getRequiredCompositeTiles() const {
 	return required_composite_tiles;
+}
+
+/**
+ * This function counts the render tiles, which are in composite tile. The childs map is a map
+ * with tiles and a list of their childs.
+ */
+int countTiles(const Path& tile, std::map<Path, std::set<Path> >& childs, int level) {
+	int count = 0;
+	if (tile.getDepth() == level)
+		return 1;
+	for (std::set<Path>::const_iterator it = childs[tile].begin(); it != childs[tile].end();
+			++it) {
+		count += countTiles(*it, childs, level);
+	}
+	return count;
+}
+
+/**
+ * A render task with costs (count of render tiles) and a start composite tile to begin
+ * then recursive rendering.
+ */
+struct Task {
+	Path tile;
+	int costs;
+};
+
+/**
+ * A worker with assigned render tasks.
+ */
+struct Worker {
+	int work;
+	std::vector<Task> tasks;
+};
+
+bool compareTasks(const Task& t1, const Task& t2) {
+	return t1.costs < t2.costs;
+}
+
+bool compareWorkers(const Worker& w1, const Worker& w2) {
+	return w1.work < w2.work;
+}
+
+int sumTasks(std::vector<Task>& vec) {
+	int s = 0;
+	for (int i = 0; i < vec.size(); i++)
+		s += vec[i].costs;
+	return s;
+}
+
+/**
+ * This function assigns a list of tasks with specific costs to a list of workers. It uses
+ * a simple greedy algorithm. It orders the tasks by their costs (ascending), iterates
+ * through them and adds the task to the worker with the lowest work.
+ *
+ * The function returns the maximum difference from the average work as percentage.
+ */
+double assignTasks(std::vector<Task> tasks, std::vector<Worker>& workers) {
+	// sort the tasks ascending
+	std::sort(tasks.begin(), tasks.end(), compareTasks);
+
+	// create a list of workers
+	int worker_count = workers.size();
+	for (int i = 0; i < worker_count; i++)
+		workers[i].work = 0;
+
+	// create a heap of the workers
+	std::make_heap(workers.begin(), workers.end(), compareWorkers);
+
+	// go through all tasks
+	for (int i = 0; i < tasks.size(); i++) {
+		// get the worker with the lowest work and add this ask
+		workers.front().work += tasks[i].costs;
+		workers.front().tasks.push_back(tasks[i]);
+
+		// sort heap
+		std::sort_heap(workers.begin(), workers.end(), compareWorkers);
+	}
+
+	// calculate the max difference from the average
+	int max_diff = 0;
+	int avg = sumTasks(tasks) / worker_count;
+	for (int i = 0; i < worker_count; i++)
+		max_diff = MAX(max_diff, std::abs(workers[i].work - avg));
+	return (double) max_diff / sumTasks(tasks);
+}
+
+/**
+ * This method tries to find an assignment of render tasks to a specific count of workers.
+ * The workers should do the same amount of work.
+ */
+int TileSet::findRenderTasks(int worker_count,
+		std::vector<std::map<Path, int> >& workers) const {
+	//std::cout << "Render tiles: " << required_render_tiles.size() << std::endl;
+	//std::cout << "Composite tiles: " << required_composite_tiles.size() << std::endl;
+
+	// at first create two lists:
+	// a list with tiles and their childs
+	std::map<Path, std::set<Path> > tile_childs;
+	// for every zoom level a list with tiles on it
+	std::vector<std::set<Path> > tiles_by_zoom;
+	tiles_by_zoom.resize(depth + 1);
+	// go through all required composite tiles
+	for (std::set<Path>::iterator it = required_composite_tiles.begin();
+			it != required_composite_tiles.end(); ++it) {
+		std::set<Path> childs;
+		// check if we're at the level before the render tiles
+		if (it->getDepth() == depth - 1) {
+			// then check render tile childs
+			for (int i = 1; i <= 4; i++) {
+				TilePos pos = (*it + i).getTilePos();
+				if (required_render_tiles.count(pos))
+					childs.insert(*it + i);
+			}
+		} else {
+			// else check composite tile childs
+			for (int i = 1; i <= 4; i++) {
+				if(required_composite_tiles.count(*it + i))
+					childs.insert(*it + i);
+			}
+		}
+		// now insert into lists
+		tile_childs[*it] = childs;
+		tiles_by_zoom[it->getDepth()].insert(*it);
+	}
+
+	// the count of composite tiles, the renderer needs to render at the end
+	int composite_tiles = 1;
+	// go through all zoom levels
+	for (int zoom = 1; zoom < depth; zoom++) {
+		// a list of "tasks" - composite tiles to start rendering
+		std::vector<Task> tasks;
+		for (std::set<Path>::iterator it = tiles_by_zoom[zoom].begin();
+				it != tiles_by_zoom[zoom].end(); ++it) {
+			// create tasks
+			Task task;
+			task.tile = *it;
+			// count render tiles for this task
+			task.costs = countTiles(*it, tile_childs, depth);
+			tasks.push_back(task);
+		}
+
+		// create a list of workers
+		std::vector<Worker> workers_zoomlevel;
+		workers_zoomlevel.resize(worker_count);
+		// assign tasks, get maximum difference from the average
+		double difference = assignTasks(tasks, workers_zoomlevel);
+
+		// difference should smaller than 5% or 50 tiles
+		if (difference < 0.05 || difference * sumTasks(tasks) < 50) {
+			// assign now tasks to real workers list
+			workers.resize(worker_count);
+			for (int i = 0; i < worker_count; i++) {
+				Worker w = workers_zoomlevel[i];
+				for (int j = 0; j < w.tasks.size(); j++)
+					workers[i][w.tasks[j].tile] = countTiles(w.tasks[j].tile,
+							tile_childs, depth);
+			}
+
+			break;
+		}
+
+		// then go to the next zoom level
+		// but before, add all composite tiles on this level to the composite tiles,
+		// which are rendered at the end
+		for (std::set<Path>::iterator it = tiles_by_zoom[zoom].begin();
+						it != tiles_by_zoom[zoom].end(); ++it)
+			composite_tiles++;
+	}
+
+	return composite_tiles;
 }
 
 }

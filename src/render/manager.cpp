@@ -100,6 +100,85 @@ bool MapSettings::write(const std::string& filename) const {
 	return true;
 }
 
+/**
+ * Saves a tile image.
+ */
+void saveTile(const fs::path& output_dir, const Path& path, const Image& tile) {
+	std::string filename = path.toString() + ".png";
+	if (path.getDepth() == 0)
+		filename = "base.png";
+	fs::path file = output_dir / filename;
+	if (!fs::exists(file.branch_path()))
+		fs::create_directories(file.branch_path());
+	if (!tile.writePNG(file.string()))
+		std::cout << "Unable to write " << file.string() << std::endl;
+}
+
+/**
+ * This function renders tiles recursive.
+ */
+void renderRecursive(RecursiveRenderSettings& settings, const Path& path, Image& tile) {
+	// if this is tile is not required or we should skip it, load it from file
+	if (!settings.tiles.isTileRequired(path)
+			|| settings.skip_tiles.count(path) == 1) {
+		fs::path file = settings.output_dir / (path.toString() + ".png");
+		if (!tile.readPNG(file.string()))
+			std::cerr << "Unable to read tile " << path.toString()
+				<< " from " << file << std::endl;
+	} else if (path.getDepth() == settings.tiles.getMaxZoom()) {
+		// this tile is a render tile, render it (if we have a renderer)
+		if (settings.renderer == NULL)
+			return;
+		settings.renderer->renderTile(path.getTilePos(), tile);
+		// save it
+		saveTile(settings.output_dir, path, tile);
+
+		// update progress
+		settings.progress++;
+		if (settings.show_progress) {
+			settings.progress_bar.update(settings.progress);
+		}
+	} else {
+		// this tile is a composite tile, we need to compose it from its children
+		// just check, if children 1, 2, 3, 4 exists, render it, resize it to the half size
+		// and blit it to the properly position
+		int size = settings.tile_size;
+		tile.setSize(size, size);
+
+		Image other;
+		Image resized;
+		if (settings.tiles.hasTile(path + 1)) {
+			renderRecursive(settings, path + 1, other);
+			//renderCompositeTile(tiles, path + 1, other, progress_bar, current_progress);
+			other.resizeHalf(resized);
+			tile.simpleblit(resized, 0, 0);
+			other.clear();
+		}
+		if (settings.tiles.hasTile(path + 2)) {
+			renderRecursive(settings, path + 2, other);
+			//renderCompositeTile(tiles, path + 2, other, progress_bar, current_progress);
+			other.resizeHalf(resized);
+			tile.simpleblit(resized, size / 2, 0);
+			other.clear();
+		}
+		if (settings.tiles.hasTile(path + 3)) {
+			renderRecursive(settings, path + 3, other);
+			//renderCompositeTile(tiles, path + 3, other, progress_bar, current_progress);
+			other.resizeHalf(resized);
+			tile.simpleblit(resized, 0, size / 2);
+			other.clear();
+		}
+		if (settings.tiles.hasTile(path + 4)) {
+			renderRecursive(settings, path + 4, other);
+			//renderCompositeTile(tiles, path + 4, other, progress_bar, current_progress);
+			other.resizeHalf(resized);
+			tile.simpleblit(resized, size / 2, size / 2);
+		}
+		// then save tile
+		saveTile(settings.output_dir, path, tile);
+	}
+}
+
 RenderManager::RenderManager(const RenderOpts& opts)
 		: opts(opts) {
 }
@@ -267,22 +346,29 @@ void RenderManager::increaseMaxZoom() {
  * Renders render tiles and composite tiles.
  */
 void RenderManager::render(const TileSet& tiles) {
-	// check if there are render tiles and render them
-	if (tiles.getRequiredRenderTilesCount() != 0) {
+	// check if only one thread
+	if (opts.jobs == 1) {
 		std::cout << "Rendering " << tiles.getRequiredRenderTilesCount()
-				<< " tiles on zoom level " << tiles.getMaxZoom() << "." << std::endl;
-		renderBaseTiles(tiles);
-	} else {
-		std::cout << "No render tiles need to get rendered." << std::endl;
-	}
+				<< " tiles on max zoom level " << tiles.getMaxZoom()
+				<< "." << std::endl;
 
-	// check if there are composite tiles and render them
-	if (tiles.getRequiredCompositeTilesCount() != 0) {
-		std::cout << "Rendering " << tiles.getRequiredCompositeTilesCount()
-				<< " tiles on other zoom levels." << std::endl;
-		renderCompositeTiles(tiles);
+		// create needed things for recursiv render method
+		mc::WorldCache cache(world);
+		TileRenderer renderer(cache, textures);
+		RecursiveRenderSettings settings(tiles, &renderer);
+
+		settings.tile_size = textures.getTileSize();
+		settings.output_dir = opts.output_dir;
+
+		settings.show_progress = true;
+		settings.progress_bar = ProgressBar(tiles.getRequiredRenderTilesCount(), !opts.batch);
+
+		Image tile;
+		// then render just everything recursive
+		renderRecursive(settings, Path(), tile);
+		settings.progress_bar.finish();
 	} else {
-		std::cout << "No composite tiles need to get rendered." << std::endl;
+		renderMultithreaded(tiles);
 	}
 }
 
@@ -294,27 +380,17 @@ void* runWorker(void* settings_ptr) {
 	RenderWorkerSettings* settings = (RenderWorkerSettings*) settings_ptr;
 
 	Image tile;
-	// create a tile renderer
-	TileRenderer renderer(*settings->worldcache, *settings->textures);
-	// iterate through the render tiles
-	for (std::set<TilePos>::const_iterator it = settings->render_tiles.begin();
-			it != settings->render_tiles.end(); ++it) {
-		// render the tile
-		renderer.renderTile(*it, tile);
+	// iterate through the start composite tiles
+	for (std::set<Path>::const_iterator it = settings->tiles.begin();
+			it != settings->tiles.end(); ++it) {
 
-		// get the filename of the tile and save it
-		Path path = Path::byTilePos(*it, settings->depth);
-		std::string filename = path.toString() + ".png";
-		if (path.getDepth() == 0)
-			filename = "base.png";
-		fs::path file = settings->output_dir / filename;
-		if (!fs::exists(file.branch_path()))
-			fs::create_directories(file.branch_path());
-		if (!tile.writePNG(file.string()))
-			std::cout << "Unable to write " << file.string() << std::endl;
+		// render this composite tile
+		renderRecursive(*settings->render_settings, *it, tile);
 
+		// clear image, increase progress
 		tile.clear();
-		settings->progress++;
+		settings->base_progress += settings->render_settings->progress;
+		settings->render_settings->progress = 0;
 	}
 
 	settings->finished = true;
@@ -322,187 +398,86 @@ void* runWorker(void* settings_ptr) {
 }
 
 /**
- * This method renders the render tiles.
+ * This method starts the render threads when multithreading is enabled.
  */
-void RenderManager::renderBaseTiles(const TileSet& tiles) {
-	// get the required render tiles and the max zoom level
-	std::set<TilePos> render_tiles = tiles.getRequiredRenderTiles();
-	int depth = tiles.getMaxZoom();
+void RenderManager::renderMultithreaded(const TileSet& tiles) {
+	// a list of workers
+	std::vector<std::map<Path, int> > workers;
+	// find task/worker assignemt
+	int remaining = tiles.findRenderTasks(opts.jobs, workers);
 
-	// if the render should only render with one thread
-	if (opts.jobs == 1) {
-		// create cache, tile renderer, and a nice progress bar
-		mc::WorldCache cache(world);
-		TileRenderer renderer(cache, textures);
-		ProgressBar progress(render_tiles.size(), !opts.batch);
-		int i = 0;
-		// go through all required tiles and just render, save them
-		for (std::set<TilePos>::const_iterator it = render_tiles.begin();
-				it != render_tiles.end(); ++it) {
-			Image tile;
-			renderer.renderTile(*it, tile);
-			saveTile(Path::byTilePos(*it, depth), tile);
-			i++;
-			progress.update(i);
+	// create render settings for the remaining composite tiles at the end
+	RecursiveRenderSettings remaining_settings(tiles, NULL);
+	remaining_settings.tile_size = textures.getTileSize();
+	remaining_settings.output_dir = opts.output_dir;
+	remaining_settings.show_progress = true;
+
+	// list of threads
+	std::vector<pthread_t> threads;
+	std::vector<RenderWorkerSettings*> worker_settings;
+	threads.resize(opts.jobs);
+	worker_settings.resize(opts.jobs);
+	for (int i = 0; i < opts.jobs; i++) {
+		// create all informations needed for the worker
+		// every thread has his own cache
+		mc::WorldCache* cache = new mc::WorldCache(world);
+		TileRenderer* renderer = new TileRenderer(*cache, textures);
+		RecursiveRenderSettings* render_settings =
+				new RecursiveRenderSettings(tiles, renderer);
+		render_settings->tile_size = textures.getTileSize();
+		render_settings->output_dir = opts.output_dir;
+		render_settings->show_progress = false;
+
+		RenderWorkerSettings* settings = new RenderWorkerSettings;
+		settings->thread = i;
+		settings->render_settings = render_settings;
+
+		// add tasks to thread
+		int sum = 0;
+		for (std::map<Path, int>::iterator it = workers[i].begin(); it != workers[i].end();
+				++it) {
+			sum += it->second;
+			settings->tiles.insert(it->first);
+			remaining_settings.skip_tiles.insert(it->first);
 		}
-		progress.finish();
-	} else {
-		// a list with render tiles converted from the set
-		std::vector<TilePos> render_tiles_list;
-		for (std::set<TilePos>::iterator it = render_tiles.begin();
-					it != render_tiles.end(); ++it)
-				render_tiles_list.push_back(*it);
 
-		// a list of threads and their worker settings
-		std::vector<pthread_t> threads;
-		std::vector<RenderWorkerSettings*> worker_settings;
-		threads.resize(opts.jobs);
-		worker_settings.resize(opts.jobs);
+		std::cout << "Thread " << i << " renders " << sum
+				<< " tiles on max zoom level " << tiles.getMaxZoom() << "." << std::endl;
 
-		// count of tiles, a thread has to render
-		int size = render_tiles.size() / opts.jobs;
-		// go through all threads
+		worker_settings[i] = settings;
+		// start thread
+		pthread_create(&threads[i], NULL, runWorker, (void*) settings);
+	}
+
+	ProgressBar progress(tiles.getRequiredRenderTilesCount(), !opts.batch);
+	// loop while the render threads are running
+	while (1) {
+		sleep(1);
+
+		// check if threads are running and update progress_bar
+		int sum = 0;
+		bool running = false;
 		for (int i = 0; i < opts.jobs; i++) {
-			// get the render tiles for this thread
-			// TODO here maybe some better assignment
-			std::set<TilePos> worker_tiles;
-			int start = size * i;
-			int end = size * i + size;
-			if (i == opts.jobs - 1)
-				end = render_tiles.size();
-			for (int j = start; j < end; j++)
-				worker_tiles.insert(render_tiles_list[j]);
-			std::cout << "Thread " << i << " renders [" << start << ":" << end << "] = "
-					<< (end - start) << " tiles" << std::endl;
-
-			// create all informations needed for the worker
-			// every thread has an own cache
-			mc::WorldCache* worldcache = new mc::WorldCache(world);
-			RenderWorkerSettings* settings = new RenderWorkerSettings;
-			settings->thread = i;
-			settings->worldcache = worldcache;
-			settings->textures = &textures;
-			settings->depth = depth;
-			settings->output_dir = opts.output_dir;
-			settings->render_tiles = worker_tiles;
-
-			worker_settings[i] = settings;
-			// start thread
-			pthread_create(&threads[i], NULL, runWorker, (void*) settings);
+			sum += worker_settings[i]->base_progress
+					+ worker_settings[i]->render_settings->progress;
+			running = running || !worker_settings[i]->finished;
 		}
-
-		ProgressBar progress(render_tiles.size(), !opts.batch);
-		// loop while the render threads are running
-		while (1) {
-			sleep(1);
-
-			// check if threads are running and update progress
-			int sum = 0;
-			bool running = false;
-			for (int i = 0; i < opts.jobs; i++) {
-				sum += worker_settings[i]->progress;
-				running = running || !worker_settings[i]->finished;
-			}
-			progress.update(sum);
-			if (!running)
-				break;
-		}
-		progress.finish();
+		progress.update(sum);
+		if (!running)
+			break;
 	}
-}
-
-/**
- * This method renders the composite tiles.
- */
-void RenderManager::renderCompositeTiles(const TileSet& tiles) {
-	Image base;
-	ProgressBar progress(tiles.getRequiredCompositeTilesCount(), !opts.batch);
-	int current_progress = 0;
-	// start recursively rendering with the base tile at zoom level 0
-	renderCompositeTile(tiles, Path(), base, progress, current_progress);
 	progress.finish();
+
+	// render remaining composite tiles
+	std::cout << "Rendering remaining " << remaining << " composite tiles" << std::endl;
+	Image tile;
+	remaining_settings.progress_bar = ProgressBar(remaining, !opts.batch);
+	renderRecursive(remaining_settings, Path(), tile);
+	remaining_settings.progress_bar.finish();
 }
 
 /**
- * This method does the main composite tile rendering work.
- */
-void RenderManager::renderCompositeTile(const TileSet& tiles, const Path& path,
-		Image& tile, ProgressBar& progress, int& current_progress) {
-	// if this tile is a render tile, read it from disk
-	if (path.getDepth() == tiles.getMaxZoom()) {
-		TilePos pos = path.getTilePos();
-		std::string file = opts.outputPath(path.toString()) + ".png";
-		if (!tile.readPNG(file)) {
-			std::cerr << "Unable to read tile " << path.toString() << " at " << pos.getX()
-					<< ":" << pos.getY() << " from " << file << std::endl;
-		}
-	// if this tile is a composite tile, but not required, read it also from disk
-	} else if (!tiles.isTileRequired(path)) {
-		std::string file = opts.outputPath(path.toString()) + ".png";
-		if (!tile.readPNG(file)) {
-			std::cerr << "Unable to read composite tile " << path.toString() << " from "
-					<< file << std::endl;
-		}
-	} else {
-		// this tile is a composite tile, we need to compose it from its children
-		// just check, if children 1, 2, 3, 4 exists, render it, resize it to the half size
-		// and blit it to the properly position
-		int tile_size = textures.getTileSize();
-		tile.setSize(tile_size, tile_size);
-
-		Image other;
-		Image resized;
-		if (tiles.hasTile(path + 1)) {
-			renderCompositeTile(tiles, path + 1, other, progress, current_progress);
-			other.resizeHalf(resized);
-			tile.simpleblit(resized, 0, 0);
-			other.clear();
-		}
-		if (tiles.hasTile(path + 2)) {
-			renderCompositeTile(tiles, path + 2, other, progress, current_progress);
-			other.resizeHalf(resized);
-			tile.simpleblit(resized, tile_size / 2, 0);
-			other.clear();
-		}
-		if (tiles.hasTile(path + 3)) {
-			renderCompositeTile(tiles, path + 3, other, progress, current_progress);
-			other.resizeHalf(resized);
-			tile.simpleblit(resized, 0, tile_size / 2);
-			other.clear();
-		}
-		if (tiles.hasTile(path + 4)) {
-			renderCompositeTile(tiles, path + 4, other, progress, current_progress);
-			other.resizeHalf(resized);
-			tile.simpleblit(resized, tile_size / 2, tile_size / 2);
-		}
-		// then save tile, increase progress
-		saveTile(path, tile);
-		current_progress++;
-		progress.update(current_progress);
-	}
-}
-
-/**
- * This method saves a tile image to a file.
- */
-void RenderManager::saveTile(const Path& path, Image& tile) const {
-	// get the filename
-	std::string filename = path.toString() + ".png";
-	// zoom level 0 is "base.png"
-	if (path.getDepth() == 0)
-		filename = "base.png";
-	// then add output directory
-	fs::path file = opts.output_dir / filename;
-	// check if directory exists, if not, create it
-	if (!fs::exists(file.branch_path()))
-		fs::create_directories(file.branch_path());
-	// then save it
-	if (!tile.writePNG(file.string()))
-		std::cout << "Unable to write " << file.string() << std::endl;
-}
-
-/**
- * Starts the render manager.
+ * Starts the whole rendering thing.
  */
 bool RenderManager::run() {
 	std::cout << "Starting renderer for world " << opts.input_dir << "." << std::endl;

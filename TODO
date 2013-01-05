@@ -20,8 +20,7 @@ Blocks:
 	
 Other things:
 	- performance and ram improvements are always good
-	- composite tile rendering also multithreaded
-	  - maybe create tile tree, then get subtrees of the same size for the threads
-	    to render then everything recursively by a few threads
 	- biome depend grass/leaves/water color?
+	- add ability to choose map direction (with world, region, chunk wrapper classes, which
+	  rotate the world)
 	- maybe more rendermodes?

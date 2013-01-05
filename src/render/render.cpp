@@ -190,7 +190,7 @@ uint16_t getDoorDirectionClosed(uint16_t direction, bool flip) {
  * Checks for a specific block the neighbors and sets extra block data if necessary.
  */
 uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data,
-        const mc::Chunk* chunk) {
+        const mc::Chunk* chunk) const {
 
 	uint16_t id_north, id_south, id_east, id_west, id_top, id_bottom;
 	uint16_t data_north, data_south, data_east, data_west, data_top, data_bottom;
@@ -308,9 +308,9 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 	return data;
 }
 
-void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
+void TileRenderer::renderTile(const TilePos& pos, Image& tile) const {
 	// some vars, set correct image size
-	int DIR_size = textures.getBlockImageSize();
+	int block_size = textures.getBlockImageSize();
 	int tile_size = textures.getTileSize();
 	tile.setSize(tile_size, tile_size);
 
@@ -325,7 +325,7 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 	mc::Chunk* chunk = NULL;
 
 	// iterate over the highest blocks in the tile
-	for (TileTopBlockIterator it(pos, DIR_size, tile_size); !it.end(); it.next()) {
+	for (TileTopBlockIterator it(pos, block_size, tile_size); !it.end(); it.next()) {
 		// water counter
 		int water = 0;
 

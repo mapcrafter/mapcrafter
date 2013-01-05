@@ -99,8 +99,8 @@ public:
 	~TileRenderer();
 
 	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data,
-	        const mc::Chunk* chunk);
-	void renderTile(const TilePos& pos, Image& tile);
+	        const mc::Chunk* chunk) const;
+	void renderTile(const TilePos& pos, Image& tile) const;
 };
 
 }

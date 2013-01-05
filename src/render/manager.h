@@ -24,6 +24,7 @@
 #include "mc/world.h"
 
 #include "render/tile.h"
+#include "render/render.h"
 
 #include "util.h"
 
@@ -75,28 +76,47 @@ struct MapSettings {
 };
 
 /**
+ * This are the options for the recursive rendering, i.e. function parameters, but this
+ * are a lot of parameters and most of them don't change, so let's put them into a struct.
+ */
+struct RecursiveRenderSettings {
+	const TileSet& tiles;
+	const TileRenderer* renderer;
+
+	int tile_size;
+	fs::path output_dir;
+	std::set<Path> skip_tiles;
+
+	int progress;
+	bool show_progress;
+	ProgressBar progress_bar;
+
+	RecursiveRenderSettings(const TileSet& tiles, const TileRenderer* renderer)
+		: tiles(tiles), renderer(renderer), progress(0) {}
+};
+
+/**
  * This are the options for a render worker.
  */
 struct RenderWorkerSettings {
 
 	RenderWorkerSettings()
-			: worldcache(NULL), textures(NULL), depth(0), progress(0), finished(false) {
-	}
+			: thread(-1), render_settings(NULL), base_progress(0), finished(false) {}
 
 	int thread;
-	mc::WorldCache* worldcache;
-	const BlockTextures* textures;
+	RecursiveRenderSettings* render_settings;
 
-	int depth;
-	fs::path output_dir;
-	std::set<TilePos> render_tiles;
+	std::set<Path> tiles;
 
-	int progress;
+	int base_progress;
 	bool finished;
 };
 
+void saveTile(const fs::path& output_dir, const Path& path, const Image& tile);
+void renderRecursive(RecursiveRenderSettings& settings, const Path& path, Image& tile);
+
 /**
- * This renders the whole rendering process.
+ * This does the whole rendering process.
  */
 class RenderManager {
 private:
@@ -115,11 +135,7 @@ private:
 	void increaseMaxZoom();
 
 	void render(const TileSet& tiles);
-	void renderBaseTiles(const TileSet& tiles);
-	void renderCompositeTiles(const TileSet& tiles);
-	void renderCompositeTile(const TileSet& tiles, const Path& path, Image& tile,
-	        ProgressBar& progress, int& current_progress);
-	void saveTile(const Path& path, Image& tile) const;
+	void renderMultithreaded(const TileSet& tiles);
 public:
 	RenderManager(const RenderOpts& opts);
 
