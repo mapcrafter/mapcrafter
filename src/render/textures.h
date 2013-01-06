@@ -290,9 +290,11 @@ private:
 	void createTrapdoor(); // id 96
 	void createHugeMushroom(uint16_t id, const Image& cap_texture); // id 99, 100
 	void createBarsPane(uint16_t id, const Image& texture); // id 101, 102
+	void createStem(uint16_t id); // id 104, 105
 	void createVines(); // id 106
 	void createFenceGate(); // id 107
 	void createCauldron(); // id 118
+	void createBeacon(); // id 138
 
 	void loadBlocks();
 public:

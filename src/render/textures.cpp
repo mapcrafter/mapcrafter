@@ -234,10 +234,10 @@ bool BlockTextures::loadBlocks(const std::string& terrain_filename) {
 	splitTerrain(terrain);
 
 	empty_texture.setSize(texture_size, texture_size);
-	unknown_block.setSize(texture_size * 2, texture_size * 2);
+	unknown_block.setSize(texture_size, texture_size);
 	if (render_unknown_blocks)
-		unknown_block.fill(rgba(255, 0, 0, 255), 0, 0, texture_size * 2,
-		        texture_size * 2);
+		unknown_block.fill(rgba(255, 0, 0, 255), 0, 0, texture_size,
+		        texture_size);
 
 	loadBlocks();
 	testWaterTransparency();
@@ -499,10 +499,12 @@ void BlockTextures::blitFace(Image& image, int face, const Image& texture, int x
 			d = 0.75;
 	}
 
+	int size = texture.getWidth();
+
 	if (face == FACE_BOTTOM || face == FACE_TOP) {
 		if (face == FACE_BOTTOM)
-			yoff += texture_size;
-		for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
+			yoff += size;
+		for (TopFaceIterator it(size); !it.end(); it.next()) {
 			uint32_t pixel = texture.getPixel(it.src_x, it.src_y);
 			image.blendPixel(rgba_multiply(pixel, d, d, d), it.dest_x + xoff,
 			        it.dest_y + yoff);
@@ -513,10 +515,10 @@ void BlockTextures::blitFace(Image& image, int face, const Image& texture, int x
 			itside = SideFaceIterator::RIGHT;
 
 		if (face == FACE_EAST || face == FACE_SOUTH)
-			xoff += texture_size;
+			xoff += size;
 		if (face == FACE_WEST || face == FACE_SOUTH)
-			yoff += texture_size / 2;
-		for (SideFaceIterator it(texture_size, itside); !it.end(); it.next()) {
+			yoff += size / 2;
+		for (SideFaceIterator it(size, itside); !it.end(); it.next()) {
 			uint32_t pixel = texture.getPixel(it.src_x, it.src_y);
 			image.blendPixel(rgba_multiply(pixel, d, d, d), it.dest_x + xoff,
 			        it.dest_y + yoff);
@@ -583,7 +585,7 @@ Image BlockTextures::buildStairsNorth(const Image& texture) {
 	}
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
-		if (it.src_x <= texture_size / 2 || it.src_y >= texture_size / 2 - 1) {
+		if (it.src_x <= texture_size / 2 || it.src_y >= texture_size / 2) {
 			uint32_t pixel = darkenLeft(texture.getPixel(it.src_x, it.src_y));
 			block.setPixel(it.dest_x, it.dest_y + texture_size / 2, pixel);
 		}
@@ -1307,6 +1309,21 @@ void BlockTextures::createBarsPane(uint16_t id, const Image& texture_left_right)
 	}
 }
 
+void BlockTextures::createStem(uint16_t id) { // id 104, 105
+	// build here only growing normal stem
+	Image texture = getTexture(15, 6);
+
+	for (int i = 0; i <= 7; i++) {
+		double percentage = 1 - ((double) i / 7);
+		int move = percentage * texture_size;
+
+		if (i == 7)
+			createItemStyleBlock(id, i, texture.move(0, move).colorize(0.6, 0.7, 0.01));
+		else
+			createItemStyleBlock(id, i, texture.move(0, move).colorize(0.3, 0.7, 0.01));
+	}
+}
+
 void BlockTextures::createVines() { // id 106
 	Image texture = getTexture(15, 8).colorize(0.3, 1, 0.1);
 
@@ -1394,6 +1411,36 @@ void BlockTextures::createCauldron() { // id 118
 	}
 }
 
+void BlockTextures::createBeacon() { // id 138
+	Image beacon(texture_size * 2, texture_size * 2);
+
+	// at first create this little block in the middle
+	Image beacon_texture;
+	getTexture(9, 2).resizeInterpolated(texture_size * 0.75, texture_size * 0.75,
+			beacon_texture);
+	Image smallblock(texture_size * 2, texture_size * 2);
+	blitFace(smallblock, FACE_WEST, beacon_texture);
+	blitFace(smallblock, FACE_SOUTH, beacon_texture);
+	blitFace(smallblock, FACE_TOP, beacon_texture);
+
+	// then create the obsidian ground
+	Image obsidian_texture = getTexture(5, 2);
+	Image obsidian = buildSmallerImage(obsidian_texture, obsidian_texture,
+			obsidian_texture, 0, texture_size / 4, false);
+
+	// blit block and obsidian ground
+	beacon.simpleblit(obsidian, 0, 0);
+	beacon.simpleblit(smallblock, texture_size / 4, texture_size / 4);
+
+	// then blit outside glass
+	Image glass_texture = getTexture(1, 3);
+	blitFace(beacon, FACE_WEST, glass_texture);
+	blitFace(beacon, FACE_SOUTH, glass_texture);
+	blitFace(beacon, FACE_TOP, glass_texture);
+
+	setBlockImage(138, 0, beacon);
+}
+
 void BlockTextures::loadBlocks() {
 	buildCustomTextures();
 	unknown_block = buildImage(unknown_block, unknown_block, unknown_block);
@@ -1470,7 +1517,7 @@ void BlockTextures::loadBlocks() {
 	createBlock(35, 14, getTexture(1, 8)); // red
 	createBlock(35, 15, getTexture(1, 7)); // black
 	// --
-	createBlock(36, 0, unknown_block); // block moved by piston aka 'block 36'
+	createBlock(36, 0, empty_texture); // block moved by piston aka 'block 36'
 	createItemStyleBlock(37, 0, getTexture(13, 0)); // dandelion
 	createItemStyleBlock(38, 0, getTexture(12, 0)); // rose
 	createItemStyleBlock(39, 0, getTexture(13, 1)); // brown mushroom
@@ -1562,8 +1609,8 @@ void BlockTextures::loadBlocks() {
 	createBarsPane(101, getTexture(5, 5)); // iron bars
 	createBarsPane(102, getTexture(1, 3)); // glass pane
 	createBlock(103, 0, getTexture(8, 8), getTexture(9, 8)); // melon
-	// id 104 // pumpkin stem
-	// id 105 // melon stem
+	createStem(104); // pumpkin stem
+	createStem(105); // melon stem
 	createVines(); // id 106 // vines
 	createFenceGate(); // id 107 // fence gate
 	createStairs(108, getTexture(7, 0)); // brick stairs
@@ -1602,7 +1649,7 @@ void BlockTextures::loadBlocks() {
 	createStairs(135, getTexture(6, 13)); // birch wood stairs
 	createStairs(136, getTexture(7, 12)); // jungle wood stairs
 	createBlock(137, 0, getTexture(8, 11)); // command block
-	createBlock(138, 0, getTexture(9, 2)); // beacon
+	createBeacon(); // beacon
 	// id 139 // cobblestone wall
 	// id 140 // flower pot
 	// carrots --
@@ -1628,6 +1675,15 @@ void BlockTextures::loadBlocks() {
 	createButton(143, getTexture(4, 0)); // wooden button
 	// id 144 // head
 	// id 145 // anvil
+	// id 146 // trapped chest
+	// id 147 // weighted pressure plate (light)
+	// id 147 // weighted pressure plate (heavy)
+	// id 149 // redstone comparator (inactive)
+	// id 149 // redstone comparator (active)
+	// id 151 // daylight sensor
+	// id 152 // block of redstone
+	// id 153 // nether quartz ore
+	// id 154 // hopper
 }
 
 bool BlockTextures::isBlockTransparent(uint16_t id, uint16_t data) const {

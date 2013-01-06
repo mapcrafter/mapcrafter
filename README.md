@@ -10,7 +10,7 @@ libpthread, libboost-iostreams,libboost-system, libboost-filesystem, and
 libboost-program-options (and libboost-test if you want to use the tests). 
 You can build it with g++ and the supplied makefile.
 
-mapcrafter is not yet finished. At the moment not all blocks are supported, but the
+mapcrafter is not yet finished. At the moment a few blocks are not supported, but the
 basic rendering routines (also incremental rendering, multithreading) are implemented.
 The renderer works with the 'new' minecraft anvil worlds.
 
@@ -62,10 +62,9 @@ can make a copy of the data directory and customize the templates.
 This is the count of threads to use (default 1), when rendering the highest zoom level 
 tiles (the tiles which are directly rendered from the world data). The rendering 
 performance also depends heavily on your disk. You can render the map to a solid state 
-disk or a ramdisk to improve the performance. 
+disk or a ramdisk to improve the performance.
 
-At the moment the other tiles (composite tiles), which are composed of the top level 
-tiles and other composite tiles, are rendered by a single thread.
+Every thread needs around 150MB ram.
 
 -u [--incremental]
 
