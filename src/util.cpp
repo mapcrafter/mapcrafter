@@ -40,8 +40,8 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
 }
 
 bool copyFile(const fs::path& from, const fs::path& to) {
-	std::ifstream in(from.c_str());
-	std::ofstream out(to.c_str());
+	std::ifstream in(from.string().c_str());
+	std::ofstream out(to.string().c_str());
 
 	if (!in || !out)
 		return false;
