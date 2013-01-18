@@ -110,7 +110,10 @@ BlockRowIterator::~BlockRowIterator() {
 }
 
 void BlockRowIterator::next() {
-	current += mc::BlockPos(1, -1, -1);
+	//current += mc::BlockPos(1, -1, -1);
+	current.x++;
+	current.z--;
+	current.y--;
 }
 
 bool BlockRowIterator::end() const {
@@ -201,9 +204,9 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 
 		// check if west and south neighbors are also full water blocks
 		if ((id_west == 8 || id_west == 9) && data_west == 0) {
-			data |= FACE_WEST;
+			data |= DATA_WEST;
 		} if ((id_south == 8 || id_south == 9) && data_south == 0) {
-			data |= FACE_SOUTH;
+			data |= DATA_SOUTH;
 		}
 	} else if (id == 54) { // largechest
 		// at first get all neighbor blocks
@@ -271,23 +274,23 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 
 		// check for same neighbors
 		if(id_north != 0 && (id_north == id || !textures.isBlockTransparent(id_north,data_north)))
-			data |= FACE_NORTH;
+			data |= DATA_NORTH;
 		if(id_south != 0 && (id_south == id || !textures.isBlockTransparent(id_south, data_south)))
-			data |= FACE_SOUTH;
+			data |= DATA_SOUTH;
 		if(id_east != 0 && (id_east == id || !textures.isBlockTransparent(id_east, data_east)))
-			data |= FACE_EAST;
+			data |= DATA_EAST;
 		if(id_west != 0 && (id_west == id || !textures.isBlockTransparent(id_west, data_west)))
-			data |= FACE_WEST;
+			data |= DATA_WEST;
 
 		// check fences, they can also connect with fence gates
 		if(id == 85 && id_north == 107)
-			data |= FACE_NORTH;
+			data |= DATA_NORTH;
 		if(id == 85 && id_south == 107)
-			data |= FACE_SOUTH;
+			data |= DATA_SOUTH;
 		if(id == 85 && id_east == 107)
-			data |= FACE_EAST;
+			data |= DATA_EAST;
 		if(id == 85 && id_west == 107)
-			data |= FACE_WEST;
+			data |= DATA_WEST;
 	}
 
 	if (!textures.isBlockTransparent(id, data)) {

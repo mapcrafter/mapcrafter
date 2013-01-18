@@ -83,13 +83,26 @@
  * ABCDEF          EF
  */
 
-#define FACE_TOP 1
-#define FACE_BOTTOM 2
+// count of rotation needed for the block images needed
+// depending on the north direction
+#define NORTH_TOP_LEFT 0
+#define NORTH_TOP_RIGHT 1
+#define NORTH_BOTTOM_RIGHT 2
+#define NORTH_BOTTOM_LEFT 3
 
-#define FACE_NORTH 16
-#define FACE_SOUTH 32
-#define FACE_EAST 64
-#define FACE_WEST 128
+#define FACE_NORTH 1
+#define FACE_EAST 2
+#define FACE_SOUTH 4
+#define FACE_WEST 8
+
+#define FACE_TOP 16
+#define FACE_BOTTOM 32
+
+// extra data starting at the 5. bit
+#define DATA_NORTH 16
+#define DATA_SOUTH 32
+#define DATA_EAST 64
+#define DATA_WEST 128
 
 // the last three bits of 2 bytes
 #define EDGE_NORTH 8192
@@ -178,6 +191,32 @@ public:
 	void next();
 };
 
+void blitFace(Image& image, int face, const Image& texture, int xoff = 0, int yoff = 0,
+		bool darken = true);
+void blitItemStyleBlock(Image& image, const Image& north_south, const Image& east_west);
+
+/**
+ * A block with 6 face textures, used to create the block images and also rotate them.
+ */
+class BlockImage {
+private:
+	int type;
+	Image faces[6];
+	Image empty;
+public:
+	BlockImage(int type = NORMAL);
+	~BlockImage();
+
+	BlockImage& setFace(int face, const Image& texture);
+	const Image& getFace(int face) const;
+
+	BlockImage rotate(int count) const;
+	Image buildImage() const;
+
+	static const int NORMAL = 1;
+	static const int ITEM_STYLE = 2;
+};
+
 /**
  * This class is responsible for reading the Minecraft textures and creating the block
  * images.
@@ -220,9 +259,6 @@ private:
 
 	uint32_t darkenLeft(uint32_t pixel) const;
 	uint32_t darkenRight(uint32_t pixel) const;
-
-	void blitFace(Image& image, int face, const Image& texture, int xoff = 0,
-	        int yoff = 0, bool darken = true) const;
 
 	Image buildImage(const Image& left_texture, const Image& right_texture,
 	        const Image& upper_texture);

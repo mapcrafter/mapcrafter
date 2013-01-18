@@ -41,6 +41,10 @@ FaceIterator::~FaceIterator() {
 }
 
 void FaceIterator::next() {
+	if(size == 0) {
+		is_end = true;
+		return;
+	}
 	// just iterate over the source pixels
 	if (src_x == size - 1 && src_y == size - 1) {
 		// set end if we are on bottom right
@@ -112,6 +116,144 @@ void TopFaceIterator::next() {
 		}
 		dest_x -= 1;
 	}
+}
+
+/**
+ * Blits a face on a block image.
+ */
+void blitFace(Image& image, int face, const Image& texture, int xoff, int yoff,
+		bool darken) {
+	double d = 1;
+	if (darken) {
+		if (face == FACE_SOUTH || face == FACE_NORTH)
+			d = 0.6;
+		else if (face == FACE_WEST || face == FACE_EAST)
+			d = 0.75;
+	}
+
+	int size = texture.getWidth();
+
+	if (face == FACE_BOTTOM || face == FACE_TOP) {
+		if (face == FACE_BOTTOM)
+			yoff += size;
+		for (TopFaceIterator it(size); !it.end(); it.next()) {
+			uint32_t pixel = texture.getPixel(it.src_x, it.src_y);
+			image.blendPixel(rgba_multiply(pixel, d, d, d), it.dest_x + xoff,
+					it.dest_y + yoff);
+		}
+	} else {
+		int itside = SideFaceIterator::LEFT;
+		if (face == FACE_NORTH || face == FACE_SOUTH)
+			itside = SideFaceIterator::RIGHT;
+
+		if (face == FACE_EAST || face == FACE_SOUTH)
+			xoff += size;
+		if (face == FACE_WEST || face == FACE_SOUTH)
+			yoff += size / 2;
+		for (SideFaceIterator it(size, itside); !it.end(); it.next()) {
+			uint32_t pixel = texture.getPixel(it.src_x, it.src_y);
+			image.blendPixel(rgba_multiply(pixel, d, d, d), it.dest_x + xoff,
+					it.dest_y + yoff);
+		}
+	}
+}
+
+/**
+ * Blits the two faces (like a cross from top) to make an item-style block.
+ */
+void blitItemStyleBlock(Image& image, const Image& north_south, const Image& east_west) {
+	int size = MAX(north_south.getWidth(), east_west.getWidth());
+	SideFaceIterator it(size, SideFaceIterator::RIGHT);
+	for (; !it.end(); it.next()) {
+		if (it.src_x > size / 2) {
+			uint32_t pixel = east_west.getPixel(it.src_x, it.src_y);
+			image.blendPixel(pixel, size / 2 + it.dest_x, size / 4 + it.dest_y);
+		}
+	}
+	it = SideFaceIterator(size, SideFaceIterator::LEFT);
+	for (; !it.end(); it.next()) {
+		uint32_t pixel = north_south.getPixel(it.src_x, it.src_y);
+		image.blendPixel(pixel, size / 2 + it.dest_x, size / 4 + it.dest_y);
+	}
+	it = SideFaceIterator(size, SideFaceIterator::RIGHT);
+	for (; !it.end(); it.next()) {
+		if (it.src_x <= size / 2) {
+			uint32_t pixel = east_west.getPixel(it.src_x, it.src_y);
+			image.blendPixel(pixel, size / 2 + it.dest_x, size / 4 + it.dest_y);
+		}
+	}
+}
+
+BlockImage::BlockImage(int type)
+		: type(type) {
+}
+
+BlockImage::~BlockImage() {
+}
+
+/**
+ * Sets a face of a block image. You can use this method also to set more than one face
+ * to the same texture.
+ */
+BlockImage& BlockImage::setFace(int face, const Image& texture) {
+	for(int i = 0; i < 6; i++)
+		if(face & (1 << i))
+			faces[i] = texture;
+	return *this;
+}
+
+/**
+ * Returns the texture of a face.
+ */
+const Image& BlockImage::getFace(int face) const {
+	for(int i = 0; i < 6; i++)
+		if(face & 1 << i)
+			return faces[i];
+	return empty;
+}
+
+/**
+ * Returns this block count*90 degrees rotated.
+ */
+BlockImage BlockImage::rotate(int count) const {
+	BlockImage rotated(type);
+	for(int i = 0; i < 4; i++) {
+		int face = 1 << i;
+		rotated.setFace(rotate_shift_l(face, count % 4, 4), getFace(face));
+	}
+	if(count % 4 != 0) {
+		rotated.setFace(FACE_TOP, getFace(FACE_TOP).rotate(count % 4));
+		rotated.setFace(FACE_BOTTOM, getFace(FACE_BOTTOM).rotate(count % 4));
+	} else {
+		rotated.setFace(FACE_TOP, getFace(FACE_TOP));
+		rotated.setFace(FACE_BOTTOM, getFace(FACE_BOTTOM));
+	}
+	return rotated;
+}
+
+/**
+ * Creates the block image from the textures.
+ */
+Image BlockImage::buildImage() const {
+	Image image;
+
+	int size = 0;
+	for(int i = 0; i < 6; i++)
+		size = MAX(size, faces[i].getWidth());
+	image.setSize(size * 2, size * 2);
+
+	if(type == NORMAL) {
+		blitFace(image, FACE_BOTTOM, getFace(FACE_BOTTOM));
+		blitFace(image, FACE_NORTH, getFace(FACE_NORTH).flip(true, false));
+		blitFace(image, FACE_EAST, getFace(FACE_EAST).flip(true, false));
+		blitFace(image, FACE_WEST, getFace(FACE_WEST));
+		blitFace(image, FACE_SOUTH, getFace(FACE_SOUTH));
+		blitFace(image, FACE_TOP, getFace(FACE_TOP));
+	} else if(type == ITEM_STYLE) {
+		blitItemStyleBlock(image, getFace(FACE_NORTH), getFace(FACE_EAST));
+	}
+
+	return image;
 }
 
 BlockTextures::BlockTextures()
@@ -221,7 +363,12 @@ bool BlockTextures::loadChests(const std::string& normal, const std::string& lar
 }
 
 bool BlockTextures::loadOther(const std::string& fire, const std::string& endportal) {
-	return fire_texture.readPNG(fire) && endportal_texture.readPNG(endportal);
+	Image fire_img, endportal_img;
+	if(!fire_img.readPNG(fire) || !endportal_img.readPNG(endportal))
+		return false;
+	fire_img.resizeInterpolated(texture_size, texture_size, fire_texture);
+	endportal_img.resizeInterpolated(texture_size, texture_size, endportal_texture);
+	return true;
 }
 
 bool BlockTextures::loadBlocks(const std::string& terrain_filename) {
@@ -293,6 +440,23 @@ bool BlockTextures::saveBlocks(const std::string& filename) {
 	}
 	std::cout << block_images.size() << " blocks" << std::endl;
 	std::cout << "all: " << blocks.size() << std::endl;
+
+	/*
+	srand(time(NULL));
+	BlockImage test(BlockImage::ITEM_STYLE);
+	//for(int i = 0; i < 6; i++)
+	//	test.setFace(1 << i, getTexture(rand() % 15, rand() % 15));
+	test.setFace(FACE_NORTH | FACE_SOUTH, getTexture(rand() % 15, rand() % 15));
+	test.setFace(FACE_EAST | FACE_WEST, getTexture(rand() % 15, rand() % 15));
+
+	Image testimg(32*5, 32);
+	for(int i = 0; i < 5; i++) {
+		BlockImage block = test.rotate(i);
+		Image test = block.buildImage();
+		testimg.simpleblit(test, i*32, 0);
+	}
+	testimg.writePNG("test.png");
+	*/
 
 	/*
 	Image terrain(texture_size * 16, texture_size * 16);
@@ -484,47 +648,6 @@ uint32_t BlockTextures::darkenLeft(uint32_t pixel) const {
 
 uint32_t BlockTextures::darkenRight(uint32_t pixel) const {
 	return rgba_multiply(pixel, 0.6, 0.6, 0.6);
-}
-
-/**
- * This methods blits a specific face on an image.
- */
-void BlockTextures::blitFace(Image& image, int face, const Image& texture, int xoff,
-        int yoff, bool darken) const {
-	double d = 1;
-	if (darken) {
-		if (face == FACE_SOUTH || face == FACE_NORTH)
-			d = 0.6;
-		else if (face == FACE_WEST || face == FACE_EAST)
-			d = 0.75;
-	}
-
-	int size = texture.getWidth();
-
-	if (face == FACE_BOTTOM || face == FACE_TOP) {
-		if (face == FACE_BOTTOM)
-			yoff += size;
-		for (TopFaceIterator it(size); !it.end(); it.next()) {
-			uint32_t pixel = texture.getPixel(it.src_x, it.src_y);
-			image.blendPixel(rgba_multiply(pixel, d, d, d), it.dest_x + xoff,
-			        it.dest_y + yoff);
-		}
-	} else {
-		int itside = SideFaceIterator::LEFT;
-		if (face == FACE_NORTH || face == FACE_SOUTH)
-			itside = SideFaceIterator::RIGHT;
-
-		if (face == FACE_EAST || face == FACE_SOUTH)
-			xoff += size;
-		if (face == FACE_WEST || face == FACE_SOUTH)
-			yoff += size / 2;
-		for (SideFaceIterator it(size, itside); !it.end(); it.next()) {
-			uint32_t pixel = texture.getPixel(it.src_x, it.src_y);
-			image.blendPixel(rgba_multiply(pixel, d, d, d), it.dest_x + xoff,
-			        it.dest_y + yoff);
-		}
-	}
-
 }
 
 Image BlockTextures::buildImage(const Image& left_texture, const Image& right_texture,
@@ -803,27 +926,7 @@ void BlockTextures::createItemStyleBlock(uint16_t id, uint16_t data,
 void BlockTextures::createItemStyleBlock(uint16_t id, uint16_t data,
         const Image& north_south, const Image& east_west) {
 	Image block(texture_size * 2, texture_size * 2);
-
-	SideFaceIterator it(texture_size, SideFaceIterator::RIGHT);
-	for (; !it.end(); it.next()) {
-		if (it.src_x > texture_size / 2)
-			block.setPixel(texture_size / 2 + it.dest_x, texture_size / 4 + it.dest_y,
-			        east_west.getPixel(it.src_x, it.src_y));
-	}
-	it = SideFaceIterator(texture_size, SideFaceIterator::LEFT);
-	for (; !it.end(); it.next()) {
-		uint32_t pixel = north_south.getPixel(it.src_x, it.src_y);
-		if (ALPHA(pixel) != 0)
-			block.setPixel(texture_size / 2 + it.dest_x, texture_size / 4 + it.dest_y,
-			        pixel);
-	}
-	it = SideFaceIterator(texture_size, SideFaceIterator::RIGHT);
-	for (; !it.end(); it.next()) {
-		uint32_t pixel = east_west.getPixel(it.src_x, it.src_y);
-		if (it.src_x <= texture_size / 2 && ALPHA(pixel) != 0)
-			block.setPixel(texture_size / 2 + it.dest_x, texture_size / 4 + it.dest_y,
-			        pixel);
-	}
+	blitItemStyleBlock(block, north_south, east_west);
 	setBlockImage(id, data, block);
 }
 
@@ -868,12 +971,12 @@ void BlockTextures::createWater() { // id 8, 9
 			if (w == 1)
 				blitFace(block, FACE_WEST, water);
 			else
-				extra_data |= FACE_WEST;
+				extra_data |= DATA_WEST;
 
 			if (s == 1)
 				blitFace(block, FACE_SOUTH, water);
 			else
-				extra_data |= FACE_SOUTH;
+				extra_data |= DATA_SOUTH;
 			blitFace(block, FACE_TOP, water);
 			setBlockImage(8, extra_data, block);
 			setBlockImage(9, extra_data, block);
@@ -1189,10 +1292,10 @@ void BlockTextures::createFence(uint16_t id, const Image& texture) { // id 85, 1
 
 		uint16_t data = i << 4;
 		// special data set by the tile renderer
-		bool north = (data & FACE_NORTH) == FACE_NORTH;
-		bool south = (data & FACE_SOUTH) == FACE_SOUTH;
-		bool east = (data & FACE_EAST) == FACE_EAST;
-		bool west = (data & FACE_WEST) == FACE_WEST;
+		bool north = data & DATA_NORTH;
+		bool south = data & DATA_SOUTH;
+		bool east = data & DATA_EAST;
+		bool west = data & DATA_WEST;
 
 		// now select the needed textures for this neighbors
 		if (north && south)
@@ -1286,10 +1389,10 @@ void BlockTextures::createBarsPane(uint16_t id, const Image& texture_left_right)
 		Image left = empty_texture, right = empty_texture;
 
 		uint16_t data = i << 4;
-		bool north = (data & FACE_NORTH) == FACE_NORTH;
-		bool south = (data & FACE_SOUTH) == FACE_SOUTH;
-		bool east = (data & FACE_EAST) == FACE_EAST;
-		bool west = (data & FACE_WEST) == FACE_WEST;
+		bool north = data & DATA_NORTH;
+		bool south = data & DATA_SOUTH;
+		bool east = data & DATA_EAST;
+		bool west = data & DATA_WEST;
 
 		if (north && south)
 			left = texture_left_right;

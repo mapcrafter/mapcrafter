@@ -41,6 +41,24 @@ std::string str(T value) {
 	return ss.str();
 }
 
+/**
+ * Does a rotated shift by m bytes to the right. n is the length of the bits.
+ * Example: 0b0010 >> 2 = 0b1000
+ */
+template<typename T>
+T rotate_shift_r(T x, int m, int n) {
+	return (x >> m) | (x << (n - m));
+}
+
+/**
+ * Does a rotated shift by m bytes to the left. n is the length of the bits.
+ * Example: 0b0100 << 2 = 0b0001
+ */
+template<typename T>
+T rotate_shift_l(T x, int m, int n) {
+	return ((x << m) & ((1 << n) - 1)) | (x >> (n - m));
+}
+
 bool copyFile(const fs::path& from, const fs::path& to);
 bool copyDirectory(const fs::path& from, const fs::path& to);
 bool moveFile(const fs::path& from, const fs::path& to);
