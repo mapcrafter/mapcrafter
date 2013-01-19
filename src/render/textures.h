@@ -202,13 +202,16 @@ class BlockImage {
 private:
 	int type;
 	Image faces[6];
-	Image empty;
+	int x_offsets[6], y_offsets[6];
+	Image empty_image;
 public:
 	BlockImage(int type = NORMAL);
 	~BlockImage();
 
-	BlockImage& setFace(int face, const Image& texture);
+	BlockImage& setFace(int face, const Image& texture, int xoff = 0, int yoff = 0);
 	const Image& getFace(int face) const;
+	int getXOffset(int face) const;
+	int getYOffset(int face) const;
 
 	BlockImage rotate(int count) const;
 	Image buildImage() const;
@@ -253,6 +256,7 @@ private:
 	uint16_t filterBlockData(uint16_t id, uint16_t data) const;
 	bool checkImageTransparency(const Image& block) const;
 	void addBlockShadowEdges(uint16_t id, uint16_t data, const Image& block);
+	void setBlockImage(uint16_t id, uint16_t data, const BlockImage& block);
 	void setBlockImage(uint16_t id, uint16_t data, const Image& block);
 
 	void testWaterTransparency();
@@ -260,13 +264,8 @@ private:
 	uint32_t darkenLeft(uint32_t pixel) const;
 	uint32_t darkenRight(uint32_t pixel) const;
 
-	Image buildImage(const Image& left_texture, const Image& right_texture,
-	        const Image& upper_texture);
-	Image buildImage(const Image& left_texture, const Image& right_texture,
-	        const Image& upper_texture, int left_xoff, int left_yoff, int right_xoff,
-	        int right_yoff, int upper_xoff, int upper_yoff);
-	Image buildSmallerImage(const Image& left_texture, const Image& right_texture,
-	        const Image& upper_texture, int y1, int y2, bool move_only_top);
+	BlockImage buildSmallerBlock(const Image& left_texture, const Image& right_texture,
+	        const Image& top_texture, int y1, int y2);
 
 	Image buildStairsSouth(const Image& texture);
 	Image buildStairsNorth(const Image& texture);
@@ -281,20 +280,19 @@ private:
 
 	void createBlock(uint16_t id, uint16_t data, const Image& texture);
 	void createBlock(uint16_t id, uint16_t data, const Image& side_texture,
-	        const Image& upper_texture);
+	        const Image& top_texture);
 	void createBlock(uint16_t id, uint16_t data, const Image& left_texture,
-	        const Image& right_texture, const Image& upper_texture);
+	        const Image& right_texture, const Image& top_texture);
 
 	void createSmallerBlock(uint16_t id, uint16_t data, const Image& left_texture,
-	        const Image& right_texture, const Image& upper_texture, int y1, int y2,
-	        bool moveOnlyTop = false);
+	        const Image& right_texture, const Image& top_texture, int y1, int y2);
 	void createSmallerBlock(uint16_t id, uint16_t data, const Image& side_face,
-	        const Image& upper_texture, int y1, int y2, bool moveOnlyTop = false);
+	        const Image& top_texture, int y1, int y2);
 	void createRotatedBlock(uint16_t id, uint16_t extra_data, const Image& front_texture,
-	        const Image& side_texture, const Image& upper_texture);
+	        const Image& side_texture, const Image& top_texture);
 	void createRotatedBlock(uint16_t id, uint16_t extra_data, const Image& front_texture,
 	        const Image& back_texture, const Image& side_texture,
-	        const Image& upper_texture);
+	        const Image& top_texture);
 	void createItemStyleBlock(uint16_t id, uint16_t data, const Image& texture);
 	void createItemStyleBlock(uint16_t id, uint16_t data, const Image& north_south,
 	        const Image& east_west);
