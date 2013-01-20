@@ -237,19 +237,19 @@ int BlockImage::getYOffset(int face) const {
  * Returns this block count*90 degrees rotated.
  */
 BlockImage BlockImage::rotate(int count) const {
+	count = count % 4;
+	if (count == 0)
+		return BlockImage(*this);
+
 	BlockImage rotated(type);
 	for (int i = 0; i < 4; i++) {
 		int face = 1 << i;
-		int new_face = rotate_shift_l(face, count % 4, 4);
+		int new_face = rotate_shift_l(face, count, 4);
 		rotated.setFace(new_face, getFace(face), getXOffset(face), getYOffset(face));
 	}
 
-	Image top = getFace(FACE_TOP);
-	Image bottom = getFace(FACE_BOTTOM);
-	if (count % 4 != 0) {
-		top = top.rotate(count % 4);
-		bottom = bottom.rotate(count % 4);
-	}
+	Image top = getFace(FACE_TOP).rotate(count);
+	Image bottom = getFace(FACE_BOTTOM).rotate(count);
 	rotated.setFace(FACE_TOP, top, getXOffset(FACE_TOP), getYOffset(FACE_TOP));
 	rotated.setFace(FACE_BOTTOM, bottom, getXOffset(FACE_BOTTOM), getYOffset(FACE_BOTTOM));
 	return rotated;
@@ -1048,26 +1048,41 @@ void BlockTextures::createLeaves() { // id 18
 	}
 }
 
+BlockImage buildBed(const Image& top, const Image& north_south, const Image& east_west,
+		int face_skip) {
+	BlockImage block;
+
+	block.setFace(FACE_TOP, top, 0, top.getHeight() / 16. * 7.0);
+	if (face_skip != FACE_NORTH)
+		block.setFace(FACE_NORTH, north_south.flip(true, false));
+	if (face_skip != FACE_SOUTH)
+		block.setFace(FACE_SOUTH, north_south);
+	if (face_skip != FACE_EAST)
+		block.setFace(FACE_EAST, east_west.flip(true, false));
+	if (face_skip != FACE_WEST)
+		block.setFace(FACE_WEST, east_west);
+
+	return block;
+}
+
 void BlockTextures::createBed() { // id 26
 	Image front = getTexture(5, 9);
 	Image side = getTexture(6, 9);
 	Image top = getTexture(6, 8);
 
-	int yoff = texture_size / 16.0 * 9.0;
-	createSmallerBlock(26, 0, side, empty_texture, top.rotate(ROTATE_90), 0, yoff);
-	createSmallerBlock(26, 1, empty_texture, side.flip(true, false), top, 0, yoff);
-	createSmallerBlock(26, 2, side.flip(true, false), front, top.rotate(ROTATE_270), 0, yoff);
-	createSmallerBlock(26, 3, front, side, top.flip(true, false), 0, yoff);
+	setBlockImage(26, 0, buildBed(top.rotate(1), front, side, FACE_SOUTH));
+	setBlockImage(26, 1, buildBed(top.rotate(2), side.flip(true, false), front, FACE_WEST));
+	setBlockImage(26, 2, buildBed(top.rotate(3), front, side.flip(true, false), FACE_NORTH));
+	setBlockImage(26, 3, buildBed(top, side, front, FACE_EAST));
 
 	front = getTexture(8, 9);
 	side = getTexture(7, 9);
 	top = getTexture(7, 8);
 
-	createSmallerBlock(26, /*0 |*/8, side, front, top, 0, yoff);
-	createSmallerBlock(26, 1 | 8, front, side.flip(true, false), top.rotate(ROTATE_90), 0, yoff);
-	createSmallerBlock(26, 2 | 8, side.flip(true, false), empty_texture,
-			top.flip(true, false), 0, yoff);
-	createSmallerBlock(26, 3 | 8, empty_texture, side, top.rotate(ROTATE_270), 0, yoff);
+	setBlockImage(26, 8, buildBed(top, front, side, FACE_NORTH));
+	setBlockImage(26, 1 | 8, buildBed(top.rotate(1), side.flip(true, false), front, FACE_EAST));
+	setBlockImage(26, 2 | 8, buildBed(top.rotate(2), front, side.flip(true, false), FACE_SOUTH));
+	setBlockImage(26, 3 | 8, buildBed(top.rotate(3), side, front, FACE_WEST));
 }
 
 void BlockTextures::createStraightRails(uint16_t id, uint16_t extra_data,
@@ -1145,13 +1160,15 @@ void BlockTextures::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs
 	}
 	for (std::map<int, Image>::const_iterator it = slab_textures.begin();
 	        it != slab_textures.end(); ++it) {
+		Image side = it->second;
+		Image top = it->second;
+		if (it->first == 0 && stone_slabs)
+			top = getTexture(6, 0);
 		if (double_slabs) {
-			createBlock(id, it->first, it->second);
+			createBlock(id, it->first, side, top);
 		} else {
-			createSmallerBlock(id, it->first, it->second, it->second, 0,
-			        texture_size / 2);
-			createSmallerBlock(id, 0x8 | it->first, it->second, it->second,
-			        texture_size / 2, texture_size);
+			createSmallerBlock(id, it->first, side, top, 0, texture_size / 2);
+			createSmallerBlock(id, 0x8 | it->first, side, top, texture_size / 2, texture_size);
 		}
 	}
 }
@@ -1202,21 +1219,21 @@ void BlockTextures::createDoor(uint16_t id, const Image& texture_bottom,
 				Image texture = (top ? texture_top : texture_bottom);
 				if (flip_x)
 					texture = texture.flip(true, false);
-				Image block(getBlockImageSize(), getBlockImageSize());
+				BlockImage block;
 
 				uint16_t direction = 0;
 				if (d == 0) {
 					direction = DOOR_NORTH;
-					blitFace(block, FACE_NORTH, texture);
+					block.setFace(FACE_NORTH, texture);
 				} else if (d == 1) {
 					direction = DOOR_SOUTH;
-					blitFace(block, FACE_SOUTH, texture);
+					block.setFace(FACE_SOUTH, texture);
 				} else if (d == 2) {
 					direction = DOOR_EAST;
-					blitFace(block, FACE_EAST, texture);
+					block.setFace(FACE_EAST, texture);
 				} else if (d == 3) {
 					direction = DOOR_WEST;
-					blitFace(block, FACE_WEST, texture);
+					block.setFace(FACE_WEST, texture);
 				}
 				uint16_t data = (top ? DOOR_TOP : 0) | (flip_x ? DOOR_FLIP_X : 0)
 				        | direction;
@@ -1262,7 +1279,7 @@ void BlockTextures::createButton(uint16_t id, const Image& tex) { // id 77, 143
 void BlockTextures::createSnow() { // id 78
 	Image snow = getTexture(2, 4);
 	for (int data = 0; data < 8; data++) {
-		int height = texture_size - (data / 8.0 * texture_size);
+		int height = data / 8.0 * texture_size;
 		setBlockImage(78, data, buildSmallerBlock(snow, snow, snow, 0, height));
 	}
 }
@@ -1340,7 +1357,10 @@ void BlockTextures::createFence(uint16_t id, const Image& texture) { // id 85, 1
 		else if (west)
 			right = fence_left;
 
-		createItemStyleBlock(id, data, left, right);
+		BlockImage block(BlockImage::ITEM_STYLE);
+		block.setFace(FACE_NORTH | FACE_SOUTH, left);
+		block.setFace(FACE_EAST | FACE_WEST, right);
+		setBlockImage(id, data, block.buildImage());
 	}
 }
 
@@ -1439,8 +1459,8 @@ void BlockTextures::createBarsPane(uint16_t id, const Image& texture_left_right)
 			right = texture_left;
 
 		BlockImage block(BlockImage::ITEM_STYLE);
-		block.setFace(FACE_EAST | FACE_WEST, left);
-		block.setFace(FACE_NORTH | FACE_SOUTH, right);
+		block.setFace(FACE_NORTH | FACE_SOUTH, left);
+		block.setFace(FACE_EAST | FACE_WEST, right);
 		setBlockImage(id, data, block.buildImage());
 	}
 }
@@ -1520,10 +1540,17 @@ void BlockTextures::createFenceGate() { // id 107
 		// also east and west
 		blitFace(east, FACE_EAST, tex, -texture_size * 0.5, texture_size * 0.25, false);
 		uint8_t extra = open ? 4 : 0;
-		setBlockImage(107, 2 | extra, north);
-		setBlockImage(107, 0 | extra, north);
-		setBlockImage(107, 3 | extra, east);
-		setBlockImage(107, 1 | extra, east);
+		if (rotation == 0 || rotation == 2) {
+			setBlockImage(107, 0 | extra, north);
+			setBlockImage(107, 1 | extra, east);
+			setBlockImage(107, 2 | extra, north);
+			setBlockImage(107, 3 | extra, east);
+		} else {
+			setBlockImage(107, 0 | extra, east);
+			setBlockImage(107, 1 | extra, north);
+			setBlockImage(107, 2 | extra, east);
+			setBlockImage(107, 3 | extra, north);
+		}
 	}
 }
 
