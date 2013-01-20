@@ -28,11 +28,15 @@ namespace mapcrafter {
 namespace mc {
 
 Chunk::Chunk()
-		: pos(42, 42) {
+		: pos(42, 42), rotation(0) {
 	clear();
 }
 
 Chunk::~Chunk() {
+}
+
+void Chunk::setRotation(int rotation) {
+	this->rotation = rotation;
 }
 
 /**
@@ -59,6 +63,8 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::CompressionType compressi
 		return false;
 	}
 	pos = ChunkPos(xpos->payload, zpos->payload);
+	if (rotation)
+		pos.rotate(rotation);
 
 	// find sections list
 	nbt::TagList* tagSections = level->findTag<nbt::TagList>("Sections", nbt::TAG_LIST);
@@ -108,6 +114,16 @@ bool Chunk::hasSection(int section) const {
 	return section_offsets[section] != -1;
 }
 
+void rotateBlockPos(int& x, int& z, int rotation) {
+	int nx = x, nz = z;
+	for (int i = 0; i < rotation; i++) {
+		nx = z;
+		nz = 15 - x;
+		x = nx;
+		z = nz;
+	}
+}
+
 /**
  * Returns the block id at a position.
  */
@@ -119,7 +135,13 @@ uint8_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 	if (sections.size() > 16 || sections.size() <= section_offsets[section]) {
 		return 0;
 	}
-	int offset = ((pos.y % 16) * 16 + pos.z) * 16 + pos.x;
+
+	int x = pos.x;
+	int z = pos.z;
+	if (rotation)
+		rotateBlockPos(x, z, rotation);
+
+	int offset = ((pos.y % 16) * 16 + z) * 16 + x;
 	return sections[section_offsets[section]].blocks[offset];
 }
 
@@ -130,7 +152,13 @@ uint8_t Chunk::getBlockData(const LocalBlockPos& pos) const {
 	int section = pos.y / 16;
 	if (section_offsets[section] == -1)
 		return 0;
-	int offset = ((pos.y % 16) * 16 + pos.z) * 16 + pos.x;
+
+	int x = pos.x;
+	int z = pos.z;
+	if (rotation)
+		rotateBlockPos(x, z, rotation);
+
+	int offset = ((pos.y % 16) * 16 + z) * 16 + x;
 	if ((offset % 2) == 0)
 		return sections[section_offsets[section]].data[offset / 2] & 0xf;
 	return (sections[section_offsets[section]].data[offset / 2] >> 4) & 0x0f;

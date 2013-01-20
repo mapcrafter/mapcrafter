@@ -24,12 +24,15 @@
 namespace mapcrafter {
 namespace mc {
 
-RegionFile::RegionFile() {
+RegionFile::RegionFile()
+		: rotation(0) {
 }
 
-RegionFile::RegionFile(const std::string& filename)
-		: filename(filename) {
+RegionFile::RegionFile(const std::string& filename, int rotation)
+		: rotation(rotation), filename(filename) {
 	regionpos = RegionPos::byFilename(filename);
+	if (rotation)
+		regionpos.rotate(rotation);
 }
 
 RegionFile::~RegionFile() {
@@ -64,6 +67,9 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 			timestamp = be32toh(timestamp);
 
 			ChunkPos pos(x + regionpos.x * 32, z + regionpos.z * 32);
+			if (rotation)
+				pos.rotate(rotation);
+
 			containing_chunks.insert(pos);
 
 			chunk_offsets[z * 32 + x] = offset;
@@ -108,31 +114,45 @@ const std::set<ChunkPos>& RegionFile::getContainingChunks() const {
 }
 
 bool RegionFile::hasChunk(const ChunkPos& chunk) const {
-	return chunk_offsets[chunk.getLocalZ() * 32 + chunk.getLocalX()] != 0;
+	ChunkPos unrotated = chunk;
+	if (rotation)
+		unrotated.rotate(4 - rotation);
+	return chunk_offsets[unrotated.getLocalZ() * 32 + unrotated.getLocalX()] != 0;
 }
 
 int RegionFile::getChunkTimestamp(const ChunkPos& chunk) const {
-	return chunk_timestamps[chunk.getLocalZ() * 32 + chunk.getLocalX()];
+	ChunkPos unrotated = chunk;
+	if (rotation)
+		unrotated.rotate(4 - rotation);
+	return chunk_timestamps[unrotated.getLocalZ() * 32 + unrotated.getLocalX()];
 }
 
 /**
  * This method tries to load a chunk from the region data and returns a status.
  */
 int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
+	// unrotate the chunk position, because the chunks are stored interna with their
+	// original positions
+	ChunkPos unrotated = pos;
+	if (rotation)
+		unrotated.rotate(4 - rotation);
+
 	if (!hasChunk(pos))
 		return CHUNK_DOES_NOT_EXISTS;
 
 	// get the offsets, where the chunk data starts
-	int offset = chunk_offsets[pos.getLocalZ() * 32 + pos.getLocalX()];
+	int offset = chunk_offsets[unrotated.getLocalZ() * 32 + unrotated.getLocalX()];
 
 	// get data size and compression type
 	int size = *((int*) &regiondata[offset]);
 	uint8_t compression = regiondata[offset + 4];
 	size = be32toh(size) - 1;
 
+	// set the chunk rotation
+	chunk.setRotation(rotation);
 	// try to load the chunk
 	try {
-		if(!chunk.readNBT((char*) &regiondata[offset + 5], size))
+		if (!chunk.readNBT((char*) &regiondata[offset + 5], size))
 			return CHUNK_INVALID;
 	} catch (const nbt::NBTError& err) {
 		std::cout << "Error: Unable to read chunk at " << pos.x << ":" << pos.z

@@ -51,6 +51,7 @@ struct RenderOpts {
 	bool batch;
 
 	int texture_size;
+	int rotation;
 	bool render_unknown_blocks;
 	bool render_leaves_transparent;
 
@@ -63,6 +64,7 @@ struct RenderOpts {
  */
 struct MapSettings {
 	int texture_size;
+	int rotation;
 	int tile_size;
 	int max_zoom;
 
@@ -70,6 +72,8 @@ struct MapSettings {
 	bool render_leaves_transparent;
 
 	int last_render;
+
+	MapSettings();
 
 	bool read(const std::string& filename);
 	bool write(const std::string& filename) const;

@@ -93,6 +93,12 @@ The size of a tile is 32*texturesize, so the higher the texture size, the more i
 the renderer has to process. If you want a high detail, use texture size 16, but texture
 size 12 looks still good and is faster to render.
 
+--north-dir=direction
+
+With this setting, you can rotate the world by n*90 degrees. Possible values are:
+top-left, top-right, bottom-right, bottom-left. Top left means that north is on the top
+left side on the map (same thing for other directions).
+
 --render-unknown-blocks
 
 With this setting the renderer renders unknown blocks as red blocks (for debugging 

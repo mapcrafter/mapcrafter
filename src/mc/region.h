@@ -43,6 +43,8 @@ private:
 	std::string filename;
 	RegionPos regionpos;
 
+	int rotation;
+
 	// a set with all available chunks
 	std::set<ChunkPos> containing_chunks;
 
@@ -56,7 +58,7 @@ private:
 	bool readHeaders(std::ifstream& file);
 public:
 	RegionFile();
-	RegionFile(const std::string& filename);
+	RegionFile(const std::string& filename, int rotation = 0);
 	virtual ~RegionFile();
 
 	bool loadAll();

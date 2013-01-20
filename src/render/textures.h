@@ -227,6 +227,7 @@ public:
 class BlockTextures {
 private:
 	int texture_size;
+	int rotation;
 	bool render_unknown_blocks;
 	bool render_leaves_transparent;
 
@@ -335,7 +336,7 @@ public:
 	BlockTextures();
 	~BlockTextures();
 
-	void setSettings(int texture_size, bool render_unknown_blocks,
+	void setSettings(int texture_size, int rotation, bool render_unknown_blocks,
 	        bool render_leaves_transparent);
 
 	bool loadChests(const std::string& normal, const std::string& large,

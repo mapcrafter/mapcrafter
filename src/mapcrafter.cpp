@@ -31,6 +31,8 @@ int main(int argc, char** argv) {
 	std::string output_dir;
 	std::string data_dir;
 
+	std::string north_dir;
+
 	po::options_description all("Allowed options");
 	all.add_options()
 		("help,h", "shows a help message")
@@ -48,6 +50,9 @@ int main(int argc, char** argv) {
 
 		("texture-size", po::value<int>(&opts.texture_size),
 			"size of the minecraft textures (default 12 (px))")
+		("north-dir", po::value<std::string>(&north_dir),
+			"rotation of the map: top-left, top-right, bottom-right, bottom-left"
+			"\ntop-left means, that north is on the top left, this is default")
 		("render-unknown-blocks", "renders unknown blocks as red blocks")
 		("render-leaves-transparent", "uses the transparent texture for leaves");
 
@@ -94,12 +99,31 @@ int main(int argc, char** argv) {
 	opts.input_dir = fs::path(input_dir);
 	opts.output_dir = fs::path(output_dir);
 	opts.data_dir = fs::path(data_dir);
-	if(!vm.count("data-dir"))
+	if (!vm.count("data-dir"))
 		opts.data_dir = fs::path("data");
-	if(!vm.count("jobs"))
+	if (!vm.count("jobs"))
 		opts.jobs = 1;
-	if(!vm.count("texture-size"))
+	if (!vm.count("texture-size"))
 		opts.texture_size = 12;
+
+	if (!vm.count("north-dir"))
+		north_dir = "top-left";
+
+	std::string directions[] = {"top-left", "top-right", "bottom-right", "bottom-left"};
+	for (int i = 0; i < 4; i++) {
+		if (north_dir.compare(directions[i]) == 0) {
+			opts.rotation = i;
+			break;
+		}
+
+		if (i == 3) {
+			std::cout << "Invalid north direction: '" << north_dir << "'" << std::endl;
+			std::cout << "Possible directions are: top-left, top-right, bottom-right, bottom-left" << std::endl;
+			std::cout << all << std::endl;
+			return 1;
+		}
+	}
+
 	opts.render_unknown_blocks = vm.count("render-unknown-blocks");
 	opts.render_leaves_transparent = vm.count("render-leaves-transparent");
 

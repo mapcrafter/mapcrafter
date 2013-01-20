@@ -45,6 +45,8 @@ class Chunk {
 private:
 	ChunkPos pos;
 
+	int rotation;
+
 	// the index of the chunk sections in the sections array
 	// or -1 if section does not exists
 	int section_offsets[16];
@@ -53,6 +55,8 @@ private:
 public:
 	Chunk();
 	virtual ~Chunk();
+
+	void setRotation(int rotation);
 
 	bool readNBT(const char* data, size_t len, nbt::CompressionType compression =
 	        nbt::ZLIB);

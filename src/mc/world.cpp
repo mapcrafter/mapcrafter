@@ -19,6 +19,7 @@
 
 #include "mc/world.h"
 
+#include "util.h"
 #include "mc/chunk.h"
 
 #include <iostream>
@@ -32,7 +33,8 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace mc {
 
-World::World() {
+World::World()
+	: rotation(0) {
 }
 
 World::~World() {
@@ -41,7 +43,8 @@ World::~World() {
 /**
  * Loads a world from a directory.
  */
-bool World::load(const std::string& dir) {
+bool World::load(const std::string& dir, int rotation) {
+	this->rotation = rotation;
 	fs::path world_dir(dir);
 	fs::path region_dir = world_dir / "region";
 	if(!fs::exists(world_dir)) {
@@ -73,6 +76,8 @@ bool World::readRegions(const std::string& path) {
 		if(sscanf(filename.c_str(), "r.%d.%d.mca", &x, &z) != 2)
 			continue;
 		RegionPos pos(x, z);
+		if (rotation)
+			pos.rotate(rotation);
 		available_regions.insert(pos);
 		region_files[pos] = it->path().string();
 	}
@@ -97,7 +102,7 @@ const std::unordered_set<RegionPos, hash_function>& World::getAvailableRegions()
 bool World::getRegion(const RegionPos& pos, RegionFile& region) const {
 	if(available_regions.count(pos) == 0)
 		return false;
-	region = RegionFile(region_files.at(pos));
+	region = RegionFile(region_files.at(pos), rotation);
 	return true;
 }
 

@@ -186,7 +186,7 @@ void blitItemStyleBlock(Image& image, const Image& north_south, const Image& eas
 
 BlockImage::BlockImage(int type)
 		: type(type) {
-	for(int i = 0; i < 6; i++) {
+	for (int i = 0; i < 6; i++) {
 		x_offsets[i] = 0;
 		y_offsets[i] = 0;
 	}
@@ -200,8 +200,8 @@ BlockImage::~BlockImage() {
  * to the same texture.
  */
 BlockImage& BlockImage::setFace(int face, const Image& texture, int xoff, int yoff) {
-	for(int i = 0; i < 6; i++)
-		if(face & (1 << i)) {
+	for (int i = 0; i < 6; i++)
+		if (face & (1 << i)) {
 			faces[i] = texture;
 			x_offsets[i] = xoff;
 			y_offsets[i] = yoff;
@@ -213,22 +213,22 @@ BlockImage& BlockImage::setFace(int face, const Image& texture, int xoff, int yo
  * Returns the texture of a face.
  */
 const Image& BlockImage::getFace(int face) const {
-	for(int i = 0; i < 6; i++)
-		if(face == (1 << i))
+	for (int i = 0; i < 6; i++)
+		if (face == (1 << i))
 			return faces[i];
 	return empty_image;
 }
 
 int BlockImage::getXOffset(int face) const {
-	for(int i = 0; i < 6; i++)
-		if(face == (1 << i))
+	for (int i = 0; i < 6; i++)
+		if (face == (1 << i))
 			return x_offsets[i];
 	return 0;
 }
 
 int BlockImage::getYOffset(int face) const {
-	for(int i = 0; i < 6; i++)
-		if(face == (1 << i))
+	for (int i = 0; i < 6; i++)
+		if (face == (1 << i))
 			return y_offsets[i];
 	return 0;
 }
@@ -238,7 +238,7 @@ int BlockImage::getYOffset(int face) const {
  */
 BlockImage BlockImage::rotate(int count) const {
 	BlockImage rotated(type);
-	for(int i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
 		int face = 1 << i;
 		int new_face = rotate_shift_l(face, count % 4, 4);
 		rotated.setFace(new_face, getFace(face), getXOffset(face), getYOffset(face));
@@ -246,7 +246,7 @@ BlockImage BlockImage::rotate(int count) const {
 
 	Image top = getFace(FACE_TOP);
 	Image bottom = getFace(FACE_BOTTOM);
-	if(count % 4 != 0) {
+	if (count % 4 != 0) {
 		top = top.rotate(count % 4);
 		bottom = bottom.rotate(count % 4);
 	}
@@ -266,18 +266,18 @@ Image BlockImage::buildImage() const {
 		size = MAX(size, faces[i].getWidth());
 	image.setSize(size * 2, size * 2);
 
-	if(type == NORMAL) {
+	if (type == NORMAL) {
 		int order[] = {FACE_BOTTOM, FACE_NORTH, FACE_EAST, FACE_WEST, FACE_SOUTH, FACE_TOP};
 
 		for(int i = 0; i < 6; i++) {
 			int face = order[i];
 			int xoff = getXOffset(face), yoff = getYOffset(face);
-			if(face == FACE_NORTH || face == FACE_EAST)
+			if (face == FACE_NORTH || face == FACE_EAST)
 				blitFace(image, face, getFace(face).flip(true, false), xoff, yoff);
 			else
 				blitFace(image, face, getFace(face), xoff, yoff);
 		}
-	} else if(type == ITEM_STYLE) {
+	} else if (type == ITEM_STYLE) {
 		blitItemStyleBlock(image, getFace(FACE_NORTH), getFace(FACE_EAST));
 	}
 
@@ -285,16 +285,17 @@ Image BlockImage::buildImage() const {
 }
 
 BlockTextures::BlockTextures()
-		: texture_size(16), render_unknown_blocks(false), render_leaves_transparent(
-		        false), max_water(99) {
+		: texture_size(16), rotation(0), render_unknown_blocks(false),
+		  render_leaves_transparent(false), max_water(99) {
 }
 
 BlockTextures::~BlockTextures() {
 }
 
-void BlockTextures::setSettings(int texture_size, bool render_unknown_blocks,
+void BlockTextures::setSettings(int texture_size, int rotation, bool render_unknown_blocks,
         bool render_leaves_transparent) {
 	this->texture_size = texture_size;
+	this->rotation = rotation;
 	this->render_unknown_blocks = render_unknown_blocks;
 	this->render_leaves_transparent = render_leaves_transparent;
 }
@@ -603,7 +604,7 @@ void BlockTextures::addBlockShadowEdges(uint16_t id, uint16_t data, const Image&
  * Sets a block image in the block image list (and rotates it if necessary (later)).
  */
 void BlockTextures::setBlockImage(uint16_t id, uint16_t data, const BlockImage& block) {
-	setBlockImage(id, data, block.buildImage());
+	setBlockImage(id, data, block.rotate(rotation).buildImage());
 }
 
 /**

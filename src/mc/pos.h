@@ -48,6 +48,8 @@ public:
 	bool operator<(const RegionPos& other) const;
 
 	static RegionPos byFilename(const std::string& filename);
+
+	void rotate(int count);
 };
 
 class BlockPos;
@@ -72,6 +74,8 @@ public:
 	int getRow() const;
 	int getCol() const;
 	static ChunkPos byRowCol(int row, int col);
+
+	void rotate(int count);
 };
 
 class LocalBlockPos;

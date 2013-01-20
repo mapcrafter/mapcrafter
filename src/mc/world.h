@@ -49,6 +49,8 @@ struct hash_function {
  */
 class World {
 private:
+	int rotation;
+
 	std::unordered_set<RegionPos, hash_function> available_regions;
 	std::unordered_map<RegionPos, std::string, hash_function> region_files;
 
@@ -57,7 +59,7 @@ public:
 	World();
 	~World();
 
-	bool load(const std::string& dir);
+	bool load(const std::string& dir, int rotation = 0);
 
 	int getRegionCount() const;
 

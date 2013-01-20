@@ -19,6 +19,4 @@ Blocks:
 Other things:
 	- performance and ram improvements are always good
 	- biome depend grass/leaves/water color?
-	- add ability to choose map direction (with world, region, chunk wrapper classes, which
-	  rotate the world)
 	- maybe more rendermodes?

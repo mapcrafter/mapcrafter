@@ -24,7 +24,7 @@
 int main(int argc, char **argv) {
 	mapcrafter::render::BlockTextures textures;
 
-	textures.setSettings(16, true, true);
+	textures.setSettings(16, 0, true, true);
 	if(!textures.loadChests("data/chest.png", "data/largechest.png", "data/enderchest.png"))
 		std::cerr << "Unable to load chest.png, largechest.png or enderchest.png" << std::endl;
 	else if (!textures.loadOther("data/fire.png", "data/endportal.png"))

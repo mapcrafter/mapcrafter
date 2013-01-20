@@ -39,6 +39,11 @@ std::string RenderOpts::outputPath(const std::string& path) const {
 	return (output_dir / path).string();
 }
 
+MapSettings::MapSettings()
+		: texture_size(12), rotation(0), tile_size(0), max_zoom(0),
+		  render_leaves_transparent(0), render_unknown_blocks(0), last_render(-1) {
+}
+
 /**
  * This method reads the map settings from a file.
  */
@@ -60,6 +65,8 @@ bool MapSettings::read(const std::string& filename) {
 		std::string value = line.substr(i + 1, line.size() - 1);
 		if (key.compare("texture_size") == 0)
 			texture_size = atoi(value.c_str());
+		else if (key.compare("rotation") == 0)
+			rotation = atoi(value.c_str());
 		else if (key.compare("tile_size") == 0)
 			tile_size = atoi(value.c_str());
 		else if (key.compare("max_zoom") == 0)
@@ -90,6 +97,7 @@ bool MapSettings::write(const std::string& filename) const {
 		return false;
 
 	file << "texture_size " << texture_size << std::endl;
+	file << "rotation " << rotation << std::endl;
 	file << "tile_size " << tile_size << std::endl;
 	file << "max_zoom " << max_zoom << std::endl;
 	file << "render_unknown_blocks " << render_unknown_blocks << std::endl;
@@ -487,18 +495,6 @@ void RenderManager::renderMultithreaded(const TileSet& tiles) {
 bool RenderManager::run() {
 	std::cout << "Starting renderer for world " << opts.input_dir << "." << std::endl;
 
-	// load world
-	if (!world.load(opts.input_dir.string())) {
-		std::cerr << "Error: Unable to load the world!" << std::endl;
-		return false;
-	}
-
-	// make sure, output directory exists
-	if (!fs::exists(opts.output_dir) && !fs::create_directories(opts.output_dir)) {
-		std::cerr << "Error: Unable to create output dir!" << std::endl;
-		return false;
-	}
-
 	// load map settings if this a incremental render
 	if (opts.incremental && !settings.read(opts.outputPath("map.settings"))) {
 		std::cerr << "Error: Unable to read map.settings file.";
@@ -510,6 +506,7 @@ bool RenderManager::run() {
 	if (!opts.incremental) {
 		settings.last_render = -1;
 		settings.texture_size = opts.texture_size;
+		settings.rotation = opts.rotation;
 		settings.render_unknown_blocks = opts.render_unknown_blocks;
 		settings.render_leaves_transparent = opts.render_leaves_transparent;
 	} else {
@@ -519,9 +516,21 @@ bool RenderManager::run() {
 		std::cout << "Rendering incrementally since " << buffer << "." << std::endl;
 	}
 
+	// load world
+	if (!world.load(opts.input_dir.string(), settings.rotation)) {
+		std::cerr << "Error: Unable to load the world!" << std::endl;
+		return false;
+	}
+
+	// make sure, output directory exists
+	if (!fs::exists(opts.output_dir) && !fs::create_directories(opts.output_dir)) {
+		std::cerr << "Error: Unable to create output dir!" << std::endl;
+		return false;
+	}
+
 	// give the textures some settings
-	textures.setSettings(settings.texture_size, settings.render_unknown_blocks,
-			settings.render_leaves_transparent);
+	textures.setSettings(settings.texture_size, settings.rotation,
+			settings.render_unknown_blocks, settings.render_leaves_transparent);
 	// try to load all textures
 	if (!textures.loadChests(opts.dataPath("chest.png"), opts.dataPath("largechest.png"),
 			opts.dataPath("enderchest.png"))) {
