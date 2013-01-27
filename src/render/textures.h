@@ -100,8 +100,8 @@
 
 // extra data starting at the 5. bit
 #define DATA_NORTH 16
-#define DATA_SOUTH 32
-#define DATA_EAST 64
+#define DATA_EAST 32
+#define DATA_SOUTH 64
 #define DATA_WEST 128
 
 // the last three bits of 2 bytes
@@ -129,8 +129,8 @@
 #define LARGECHEST_BACK_LEFT 5
 #define LARGECHEST_BACK_RIGHT 6
 
-#define LARGECHEST_DATA_LARGE 32
-#define LARGECHEST_DATA_LEFT 16
+#define LARGECHEST_DATA_LARGE 256
+#define LARGECHEST_DATA_LEFT 512
 
 namespace mapcrafter {
 namespace render {

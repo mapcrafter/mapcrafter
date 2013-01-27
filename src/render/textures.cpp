@@ -554,7 +554,29 @@ uint16_t BlockTextures::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & (0xff00 | 0b00000011);
 	else if (id == 26) // bed
 		return data & (0xff00 | 0b00001011);
-	else if (id == 60) // farmland
+	else if (id == 54 || id == 95 || id == 130) { // chests
+		// at first get the direction of the chest and rotate if needed
+		uint16_t dir_rotate = (data >> 4) & 0xf;
+		uint16_t dir = rotate_shift_l(dir_rotate, rotation, 4) << 4;
+		// then get the neighbor chests
+		uint16_t neighbors = (data >> 4) & 0xf0;
+
+		// if no neighbors, this is a small chest
+		// the data contains only the direction
+		if (neighbors == 0 || id == 95 || id == 130)
+			return dir;
+
+		// this is a double chest
+		// the data contains the direction and a bit, which shows that this is a large chest
+		// check also if this is the left part of the large chest
+		uint16_t new_data = dir | LARGECHEST_DATA_LARGE;
+		if ((dir == DATA_NORTH && neighbors == DATA_WEST)
+				|| (dir == DATA_SOUTH && neighbors == DATA_EAST)
+				|| (dir == DATA_EAST && neighbors == DATA_NORTH)
+				|| (dir == DATA_WEST && neighbors == DATA_SOUTH))
+			new_data |= LARGECHEST_DATA_LEFT;
+		return new_data;
+	} else if (id == 60) // farmland
 		return data & 0xff00;
 	else if (id == 64 || id == 71) // doors
 		return data & 0b1111110000;
@@ -1241,33 +1263,42 @@ void BlockTextures::createStairs(uint16_t id, const Image& texture) { // id 53, 
 }
 
 void BlockTextures::createChest(uint16_t id, Image* textures) { // id 54, 95, 130
-	createRotatedBlock(id, 0, textures[CHEST_FRONT], textures[CHEST_SIDE],
-	        textures[CHEST_TOP]);
+	BlockImage chest;
+	chest.setFace(FACE_SOUTH, textures[CHEST_FRONT]);
+	chest.setFace(FACE_NORTH | FACE_EAST | FACE_WEST, textures[CHEST_SIDE]);
+	chest.setFace(FACE_TOP, textures[CHEST_TOP]);
+
+	setBlockImage(id, DATA_NORTH, chest.rotate(2).buildImage());
+	setBlockImage(id, DATA_SOUTH, chest.buildImage());
+	setBlockImage(id, DATA_EAST, chest.rotate(3).buildImage());
+	setBlockImage(id, DATA_WEST, chest.rotate(1).buildImage());
 }
 
 void BlockTextures::createDoubleChest(uint16_t id, Image* textures) { // id 54
 	BlockImage left, right;
 
+	// left side of the chest, south orientation
 	left.setFace(FACE_SOUTH, textures[LARGECHEST_FRONT_LEFT]);
 	left.setFace(FACE_NORTH, textures[LARGECHEST_BACK_LEFT].flip(true, false));
 	left.setFace(FACE_WEST, textures[LARGECHEST_SIDE]);
 	left.setFace(FACE_TOP, textures[LARGECHEST_TOP_LEFT].rotate(3));
 
+	// right side of the chest, south orientation
 	right.setFace(FACE_SOUTH, textures[LARGECHEST_FRONT_RIGHT]);
 	right.setFace(FACE_NORTH, textures[LARGECHEST_BACK_RIGHT].flip(true, false));
 	right.setFace(FACE_EAST, textures[LARGECHEST_SIDE]);
 	right.setFace(FACE_TOP, textures[LARGECHEST_TOP_RIGHT].rotate(3));
 
 	int l = LARGECHEST_DATA_LARGE;
-	setBlockImage(id, 2 | l | LARGECHEST_DATA_LEFT, left.rotate(2));
-	setBlockImage(id, 3 | l | LARGECHEST_DATA_LEFT, left);
-	setBlockImage(id, 4 | l | LARGECHEST_DATA_LEFT, left.rotate(1));
-	setBlockImage(id, 5 | l | LARGECHEST_DATA_LEFT, left.rotate(3));
+	setBlockImage(id, DATA_NORTH | l | LARGECHEST_DATA_LEFT, left.rotate(2).buildImage());
+	setBlockImage(id, DATA_SOUTH | l | LARGECHEST_DATA_LEFT, left.buildImage());
+	setBlockImage(id, DATA_EAST | l | LARGECHEST_DATA_LEFT, left.rotate(3).buildImage());
+	setBlockImage(id, DATA_WEST | l | LARGECHEST_DATA_LEFT, left.rotate(1).buildImage());
 
-	setBlockImage(id, 2 | l, right.rotate(2));
-	setBlockImage(id, 3 | l, right);
-	setBlockImage(id, 4 | l, right.rotate(1));
-	setBlockImage(id, 5 | l, right.rotate(3));
+	setBlockImage(id, DATA_NORTH | l, right.rotate(2).buildImage());
+	setBlockImage(id, DATA_SOUTH | l, right.buildImage());
+	setBlockImage(id, DATA_EAST | l, right.rotate(3).buildImage());
+	setBlockImage(id, DATA_WEST | l, right.rotate(1).buildImage());
 }
 
 void BlockTextures::createDoor(uint16_t id, const Image& texture_bottom,

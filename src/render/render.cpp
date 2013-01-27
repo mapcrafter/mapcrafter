@@ -208,22 +208,33 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		} if ((id_south == 8 || id_south == 9) && data_south == 0) {
 			data |= DATA_SOUTH;
 		}
-	} else if (id == 54) { // largechest
+	} else if (id == 54 || id == 95 || id == 130) { // chests
 		// at first get all neighbor blocks
 		getNeighbor(pos + DIR_NORTH, id_north, data_north, world, chunk);
 		getNeighbor(pos + DIR_SOUTH, id_south, data_south, world, chunk);
 		getNeighbor(pos + DIR_EAST, id_east, data_east, world, chunk);
 		getNeighbor(pos + DIR_WEST, id_west, data_west, world, chunk);
 
-		// in data is the direction of the chest
-		// now check with the neighbor data if this chest is a large chest
-		if (id_north == 54 || id_south == 54 || id_east == 54 || id_west == 54) {
-			// and if this is the left part of the large chest
-			if ((data == 2 && id_west == 54) || (data == 3 && id_east == 54)
-					|| (data == 4 && id_south == 54) || (data == 5 && id_north == 54))
-				data |= LARGECHEST_DATA_LEFT;
-			data |= LARGECHEST_DATA_LARGE;
-		}
+		// we put here in the data the direction of the chest
+		// and if there are neighbor chests
+
+		if (data == 2)
+			data = DATA_NORTH;
+		else if (data == 3)
+			data = DATA_SOUTH;
+		else if (data == 4)
+			data = DATA_WEST;
+		else
+			data = DATA_EAST;
+
+		if (id_north == 54)
+			data |= DATA_NORTH << 4;
+		if (id_south == 54)
+			data |= DATA_SOUTH << 4;
+		if (id_east == 54)
+			data |= DATA_EAST << 4;
+		if (id_west == 54)
+			data |= DATA_WEST << 4;
 	} else if(id == 64 || id == 71) {
 		/* doors */
 		uint16_t top = data & 8 ? DOOR_TOP : 0;
