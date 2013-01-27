@@ -195,6 +195,8 @@ void blitFace(Image& image, int face, const Image& texture, int xoff = 0, int yo
 		bool darken = true);
 void blitItemStyleBlock(Image& image, const Image& north_south, const Image& east_west);
 
+void rotateImages(Image& north, Image& south, Image& east, Image& west, int rotation);
+
 /**
  * A block with 6 face textures, used to create the block images and also rotate them.
  */

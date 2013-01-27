@@ -184,6 +184,23 @@ void blitItemStyleBlock(Image& image, const Image& north_south, const Image& eas
 	}
 }
 
+/**
+ * This function rotates the north-, south-, east- and west-oriented block images
+ * by swapping their images. Used for special block images: stairs, rails
+ */
+void rotateImages(Image& north, Image& south, Image& east, Image& west, int rotation) {
+	std::map<int, Image> images;
+	images[rotate_shift_r(FACE_NORTH, rotation, 4)] = north;
+	images[rotate_shift_r(FACE_SOUTH, rotation, 4)] = south;
+	images[rotate_shift_r(FACE_EAST, rotation, 4)] = east;
+	images[rotate_shift_r(FACE_WEST, rotation, 4)] = west;
+
+	north = images[FACE_NORTH];
+	south = images[FACE_SOUTH];
+	east = images[FACE_EAST];
+	west = images[FACE_WEST];
+}
+
 BlockImage::BlockImage(int type)
 		: type(type) {
 	for (int i = 0; i < 6; i++) {
@@ -936,8 +953,10 @@ void BlockTextures::createRotatedBlock(uint16_t id, uint16_t extra_data,
         const Image& front_texture, const Image& back_texture, const Image& side_texture,
         const Image& top_texture) {
 	BlockImage block;
-	block.setFace(FACE_NORTH, front_texture);
-	block.setFace(FACE_SOUTH | FACE_EAST | FACE_WEST, side_texture);
+	block.setFace(FACE_NORTH, front_texture.flip(true, false));
+	block.setFace(FACE_SOUTH, back_texture);
+	block.setFace(FACE_EAST, side_texture.flip(true, false));
+	block.setFace(FACE_WEST, side_texture);
 	block.setFace(FACE_TOP, top_texture);
 
 	setBlockImage(id, 2 | extra_data, block);
@@ -1091,56 +1110,72 @@ void BlockTextures::createStraightRails(uint16_t id, uint16_t extra_data,
 	createSingleFaceBlock(id, 1 | extra_data, FACE_BOTTOM, texture);
 
 	Image rotated_texture = texture.rotate(ROTATE_90);
-	Image ascending_east(getBlockImageSize(), getBlockImageSize());
-	Image ascending_west(getBlockImageSize(), getBlockImageSize());
-	Image ascending_north(getBlockImageSize(), getBlockImageSize());
-	Image ascending_south(getBlockImageSize(), getBlockImageSize());
+	Image north(getBlockImageSize(), getBlockImageSize()),
+			south(getBlockImageSize(), getBlockImageSize()),
+			east(getBlockImageSize(), getBlockImageSize()),
+			west(getBlockImageSize(), getBlockImageSize());
 
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
-		ascending_east.setPixel(it.dest_x, it.dest_y + it.src_y,
-		        texture.getPixel(it.src_x, it.src_y));
-		ascending_east.setPixel(it.dest_x + 1, it.dest_y + it.src_y,
+		east.setPixel(it.dest_x, it.dest_y + it.src_y,
+				texture.getPixel(it.src_x, it.src_y));
+		east.setPixel(it.dest_x + 1, it.dest_y + it.src_y,
 		        texture.getPixel(it.src_x, it.src_y));
 
-		ascending_west.setPixel(it.dest_x, it.dest_y + (texture_size - it.src_y),
+		west.setPixel(it.dest_x, it.dest_y + (texture_size - it.src_y),
 		        texture.getPixel(it.src_x, it.src_y));
-		ascending_west.setPixel(it.dest_x, it.dest_y + (texture_size - it.src_y),
+		west.setPixel(it.dest_x, it.dest_y + (texture_size - it.src_y),
 		        texture.getPixel(it.src_x, it.src_y));
 	}
 
-	ascending_north = ascending_east.flip(true, false);
-	ascending_south = ascending_west.flip(true, false);
+	north = east.flip(true, false);
+	south = west.flip(true, false);
 
-	setBlockImage(id, 2 | extra_data, ascending_east);
-	setBlockImage(id, 3 | extra_data, ascending_west);
-	setBlockImage(id, 4 | extra_data, ascending_north);
-	setBlockImage(id, 5 | extra_data, ascending_south);
+	rotateImages(north, south, east, west, rotation);
+
+	setBlockImage(id, 2 | extra_data, east);
+	setBlockImage(id, 3 | extra_data, west);
+	setBlockImage(id, 4 | extra_data, north);
+	setBlockImage(id, 5 | extra_data, south);
+}
+
+BlockImage buildPiston(int frontface, const Image& front, const Image& back,
+		const Image& side, const Image& top) {
+	BlockImage block;
+
+	block.setFace(FACE_TOP, top);
+	block.setFace(frontface, front);
+	if(frontface == FACE_NORTH || frontface == FACE_SOUTH) {
+		block.setFace(FACE_EAST, side.flip(true, false));
+		block.setFace(FACE_WEST, side);
+	} else {
+		block.setFace(FACE_NORTH, side.flip(true, false));
+		block.setFace(FACE_SOUTH, side);
+	}
+
+	if(frontface == FACE_NORTH)
+		block.setFace(FACE_SOUTH, back);
+	else if(frontface == FACE_SOUTH)
+		block.setFace(FACE_NORTH, back);
+	else if(frontface == FACE_EAST)
+		block.setFace(FACE_WEST, back);
+	else
+		block.setFace(FACE_EAST, back);
+
+	return block;
 }
 
 void BlockTextures::createPiston(uint16_t id, bool sticky) { //  id 29, 33
-	Image pistonFace = sticky ? getTexture(10, 6) : getTexture(11, 6);
-	Image empty_piston_face = getTexture(14, 6);
-	Image side_face = getTexture(12, 6);
-	Image smallerside_face = side_face.move(0, 4);
-	Image bottom_face = getTexture(13, 6);
-	createBlock(id, 0, side_face.rotate(ROTATE_180), bottom_face);
-	createBlock(id, 1, side_face, pistonFace);
-	createBlock(id, 2, side_face.rotate(ROTATE_270), bottom_face,
-	        side_face.rotate(ROTATE_270));
-	createBlock(id, 3, bottom_face, side_face.rotate(ROTATE_90), side_face);
-	createBlock(id, 4, pistonFace, side_face.rotate(ROTATE_270),
-	        side_face.rotate(ROTATE_180));
-	createBlock(id, 5, side_face.rotate(ROTATE_90), pistonFace,
-	        side_face.rotate(ROTATE_90));
+	Image front = sticky ? getTexture(10, 6) : getTexture(11, 6);
+	Image side = getTexture(12, 6);
+	Image back = getTexture(13, 6);
 
-	/*
-	 buildSimpleBlock(id, 0 | 8, side_face.rotate(ROTATE_180), bottomFace);
-	 buildSimpleBlock(id, 1 | 8, side_face, pistonFace);
-	 buildSimpleBlock(id, 2 | 8, side_face.rotate(ROTATE_270), bottomFace, side_face.rotate(ROTATE_270));
-	 buildSimpleBlock(id, 3 | 8, bottomFace, side_face.rotate(ROTATE_90), side_face);
-	 buildSimpleBlock(id, 4 | 8, pistonFace, side_face.rotate(ROTATE_270), side_face.rotate(ROTATE_180));
-	 buildSimpleBlock(id, 5 | 8, side_face.rotate(ROTATE_90), pistonFace, side_face.rotate(ROTATE_90));
-	 */
+	createBlock(id, 0, side.rotate(ROTATE_180), back);
+	createBlock(id, 1, side, front);
+
+	setBlockImage(id, 2, buildPiston(FACE_NORTH, front, back, side.rotate(3), side.rotate(3)));
+	setBlockImage(id, 3, buildPiston(FACE_EAST, front, back, side.rotate(1), side));
+	setBlockImage(id, 4, buildPiston(FACE_WEST, front, back, side.rotate(3), side.rotate(2)));
+	setBlockImage(id, 5, buildPiston(FACE_SOUTH, front, back, side.rotate(1), side.rotate(1)));
 }
 
 void BlockTextures::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) { // id 43, 44, 125, 126
@@ -1184,15 +1219,25 @@ void BlockTextures::createTorch(uint16_t id, const Image& texture) { // id 50, 7
 }
 
 void BlockTextures::createStairs(uint16_t id, const Image& texture) { // id 53, 67, 108, 109, 114, 128, 134, 135, 136
-	setBlockImage(id, 0, buildStairsEast(texture));
-	setBlockImage(id, 1, buildStairsWest(texture));
-	setBlockImage(id, 2, buildStairsSouth(texture));
-	setBlockImage(id, 3, buildStairsNorth(texture));
+	Image north = buildStairsNorth(texture), south = buildStairsSouth(texture),
+			east = buildStairsEast(texture), west = buildStairsWest(texture);
+	rotateImages(north, south, east, west, rotation);
 
-	setBlockImage(id, 0 | 4, buildUpsideDownStairsEast(texture));
-	setBlockImage(id, 1 | 4, buildUpsideDownStairsWest(texture));
-	setBlockImage(id, 2 | 4, buildUpsideDownStairsSouth(texture));
-	setBlockImage(id, 3 | 4, buildUpsideDownStairsNorth(texture));
+	setBlockImage(id, 0, east);
+	setBlockImage(id, 1, west);
+	setBlockImage(id, 2, south);
+	setBlockImage(id, 3, north);
+
+	north = buildUpsideDownStairsNorth(texture);
+	south = buildUpsideDownStairsSouth(texture);
+	east = buildUpsideDownStairsEast(texture);
+	west = buildUpsideDownStairsWest(texture);
+	rotateImages(north, south, east, west, rotation);
+
+	setBlockImage(id, 0 | 4, east);
+	setBlockImage(id, 1 | 4, west);
+	setBlockImage(id, 2 | 4, south);
+	setBlockImage(id, 3 | 4, north);
 }
 
 void BlockTextures::createChest(uint16_t id, Image* textures) { // id 54, 95, 130
@@ -1201,13 +1246,28 @@ void BlockTextures::createChest(uint16_t id, Image* textures) { // id 54, 95, 13
 }
 
 void BlockTextures::createDoubleChest(uint16_t id, Image* textures) { // id 54
-	// note here back and top textures are swapped
-	createRotatedBlock(id, LARGECHEST_DATA_LARGE | LARGECHEST_DATA_LEFT,
-	        textures[LARGECHEST_FRONT_LEFT], textures[LARGECHEST_BACK_RIGHT],
-	        textures[LARGECHEST_SIDE], textures[LARGECHEST_TOP_RIGHT]);
-	createRotatedBlock(id, LARGECHEST_DATA_LARGE, textures[LARGECHEST_FRONT_RIGHT],
-	        textures[LARGECHEST_BACK_LEFT], textures[LARGECHEST_SIDE],
-	        textures[LARGECHEST_TOP_LEFT]);
+	BlockImage left, right;
+
+	left.setFace(FACE_SOUTH, textures[LARGECHEST_FRONT_LEFT]);
+	left.setFace(FACE_NORTH, textures[LARGECHEST_BACK_LEFT].flip(true, false));
+	left.setFace(FACE_WEST, textures[LARGECHEST_SIDE]);
+	left.setFace(FACE_TOP, textures[LARGECHEST_TOP_LEFT].rotate(3));
+
+	right.setFace(FACE_SOUTH, textures[LARGECHEST_FRONT_RIGHT]);
+	right.setFace(FACE_NORTH, textures[LARGECHEST_BACK_RIGHT].flip(true, false));
+	right.setFace(FACE_EAST, textures[LARGECHEST_SIDE]);
+	right.setFace(FACE_TOP, textures[LARGECHEST_TOP_RIGHT].rotate(3));
+
+	int l = LARGECHEST_DATA_LARGE;
+	setBlockImage(id, 2 | l | LARGECHEST_DATA_LEFT, left.rotate(2));
+	setBlockImage(id, 3 | l | LARGECHEST_DATA_LEFT, left);
+	setBlockImage(id, 4 | l | LARGECHEST_DATA_LEFT, left.rotate(1));
+	setBlockImage(id, 5 | l | LARGECHEST_DATA_LEFT, left.rotate(3));
+
+	setBlockImage(id, 2 | l, right.rotate(2));
+	setBlockImage(id, 3 | l, right);
+	setBlockImage(id, 4 | l, right.rotate(1));
+	setBlockImage(id, 5 | l, right.rotate(3));
 }
 
 void BlockTextures::createDoor(uint16_t id, const Image& texture_bottom,

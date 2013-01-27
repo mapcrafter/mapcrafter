@@ -47,7 +47,7 @@ std::string str(T value) {
  */
 template<typename T>
 T rotate_shift_r(T x, int m, int n) {
-	return (x >> m) | (x << (n - m));
+	return (x >> m) | ((x & ((1 << m) - 1)) << (n - m));
 }
 
 /**

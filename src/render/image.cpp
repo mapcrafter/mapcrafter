@@ -288,6 +288,10 @@ void Image::resizeInterpolated(int new_width, int new_height, Image& dest) const
 
 	double x_ratio = (double) width / new_width;
 	double y_ratio = (double) height / new_height;
+	if(width < new_width)
+		x_ratio = (double) (width - 1) / new_width;
+	if(height < new_height)
+		y_ratio = (double) (height - 1) / new_height;
 
 	for (int x = 0; x < new_width; x++) {
 		for (int y = 0; y < new_height; y++) {
