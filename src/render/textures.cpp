@@ -1502,21 +1502,37 @@ void BlockTextures::createTrapdoor() { // id 96
 	}
 }
 
-void BlockTextures::createHugeMushroom(uint16_t id, const Image& capTexture) { // id 99, 100
+BlockImage buildHugeMushroom(const Image& pores, const Image& cap = Image(),
+		int cap_sides = 0, const Image& stem = Image(), int stem_sides = 0) {
+	BlockImage block;
+	block.setFace(FACE_NORTH | FACE_SOUTH | FACE_EAST | FACE_WEST | FACE_TOP, pores);
+	for (int i = 0; i < 6; i++) {
+		int side = 1 << i;
+		if (cap_sides & side)
+			block.setFace(side, cap);
+		else if (stem_sides & side)
+			block.setFace(side, stem);
+	}
+	return block;
+}
+
+void BlockTextures::createHugeMushroom(uint16_t id, const Image& cap) { // id 99, 100
 	Image pores = getTexture(14, 8);
 	Image stem = getTexture(13, 8);
 
-	createBlock(id, 0, pores, pores, pores);
-	createBlock(id, 1, capTexture, pores, capTexture);
-	createBlock(id, 2, pores, pores, capTexture);
-	createBlock(id, 3, pores, pores, capTexture);
-	createBlock(id, 4, capTexture, pores, capTexture);
-	createBlock(id, 5, pores, pores, capTexture);
-	createBlock(id, 6, pores, pores, capTexture);
-	createBlock(id, 7, capTexture, capTexture, capTexture);
-	createBlock(id, 8, pores, capTexture, capTexture);
-	createBlock(id, 9, pores, capTexture, capTexture);
-	createBlock(id, 10, stem, stem, stem);
+	setBlockImage(id, 0, buildHugeMushroom(pores));
+	setBlockImage(id, 1, buildHugeMushroom(pores, cap, FACE_TOP | FACE_WEST | FACE_NORTH));
+	setBlockImage(id, 2, buildHugeMushroom(pores, cap, FACE_TOP | FACE_NORTH));
+	setBlockImage(id, 3, buildHugeMushroom(pores, cap, FACE_TOP | FACE_NORTH | FACE_EAST));
+	setBlockImage(id, 4, buildHugeMushroom(pores, cap, FACE_TOP | FACE_WEST));
+	setBlockImage(id, 5, buildHugeMushroom(pores, cap, FACE_TOP));
+	setBlockImage(id, 6, buildHugeMushroom(pores, cap, FACE_TOP | FACE_EAST));
+	setBlockImage(id, 7, buildHugeMushroom(pores, cap, FACE_TOP | FACE_SOUTH | FACE_WEST));
+	setBlockImage(id, 8, buildHugeMushroom(pores, cap, FACE_TOP | FACE_SOUTH));
+	setBlockImage(id, 9, buildHugeMushroom(pores, cap, FACE_TOP | FACE_EAST | FACE_SOUTH));
+	setBlockImage(id, 10, buildHugeMushroom(pores, cap, 0, stem, 0b1111));
+	setBlockImage(id, 14, buildHugeMushroom(pores, cap, 0b111111));
+	setBlockImage(id, 15, buildHugeMushroom(pores, cap, 0, stem, 0b111111));
 }
 
 void BlockTextures::createBarsPane(uint16_t id, const Image& texture_left_right) { // id 101, 102
