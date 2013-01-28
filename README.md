@@ -112,6 +112,13 @@ the blocks after the leaves to the ground also.
 
 ## Version history ##
 
+**v.0.3**
+
+* Reworked multithreading
+* Added possibility to render the world rotated
+* Reworked block image generation to work with the rotated worlds, fixed rotation of blocks
+* Added nicer beacon, fixed wrong stone slab texture
+
 **v.0.2**
 
 * Added support for chests, fences, fence gates
