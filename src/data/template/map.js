@@ -22,6 +22,14 @@ MapProjection.prototype.fromPointToLatLng = function(point) {
 };
 
 function convertMCtoLatLng(x, z, y) {
+	// rotate the position to the map rotation
+	for(var i = 0; i < MapConfig.rotation; i++) {
+		var nx = -z+512; // 512 blocks = one region
+		var nz = x;
+		x = nx;
+		z = nz;
+	}
+	
 	// the size of a 1/4 block image divided by the total size of all render tiles 
 	// on the highest zoom level
 	var block = (MapConfig.textureSize/2.0) / (MapConfig.tileSize * Math.pow(2, MapConfig.maxZoom));
@@ -41,7 +49,6 @@ function convertMCtoLatLng(x, z, y) {
 	
 	return new google.maps.LatLng(lat, lng);
 }
-
 
 var MCMapOptions = {
 	/**
