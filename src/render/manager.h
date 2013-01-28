@@ -134,7 +134,7 @@ private:
 	        std::map<std::string, std::string> vars =
 	                std::map<std::string, std::string>());
 
-	void writeTemplates(const TileSet& tiles);
+	void writeTemplates(const MapSettings& settings);
 	void writeStats(int time_took);
 	void increaseMaxZoom();
 

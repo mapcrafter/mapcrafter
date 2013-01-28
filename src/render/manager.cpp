@@ -221,12 +221,13 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
 /**
  * This method copies all template files to the output directory.
  */
-void RenderManager::writeTemplates(const TileSet& tiles) {
+void RenderManager::writeTemplates(const MapSettings& settings) {
 	// the variables for the index.html
 	std::map<std::string, std::string> vars;
-	vars["textureSize"] = str(textures.getTextureSize());
-	vars["tileSize"] = str(textures.getTileSize());
-	vars["maxZoom"] = str(tiles.getMaxZoom());
+	vars["textureSize"] = str(settings.texture_size);
+	vars["tileSize"] = str(settings.tile_size);
+	vars["rotation"] = str(settings.rotation);
+	vars["maxZoom"] = str(settings.max_zoom);
 	vars["lastRender"] = str(time(NULL));
 
 	if (!copyTemplateFile("index.html", vars))
@@ -564,7 +565,7 @@ bool RenderManager::run() {
 	// save settings, templates
 	settings.max_zoom = tiles.getMaxZoom();
 	settings.write(opts.outputPath("map.settings"));
-	writeTemplates(tiles);
+	writeTemplates(settings);
 
 	// start the real rendering
 	render(tiles);
