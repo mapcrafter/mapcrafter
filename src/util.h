@@ -41,6 +41,15 @@ std::string str(T value) {
 	return ss.str();
 }
 
+template<typename T>
+T as(const std::string& from) {
+	T to;
+	std::stringstream ss(from);
+	ss << from;
+	ss >> to;
+	return to;
+}
+
 /**
  * Does a rotated shift by m bytes to the right. n is the length of the bits.
  * Example: 0b0010 >> 2 = 0b1000
