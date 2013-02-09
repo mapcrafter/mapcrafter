@@ -50,6 +50,9 @@ T as(const std::string& from) {
 	return to;
 }
 
+void trim(std::string& str);
+void replaceAll(std::string& str, const std::string& from, const std::string& to);
+
 /**
  * Does a rotated shift by m bytes to the right. n is the length of the bits.
  * Example: 0b0010 >> 2 = 0b1000
@@ -71,8 +74,6 @@ T rotate_shift_l(T x, int m, int n) {
 bool copyFile(const fs::path& from, const fs::path& to);
 bool copyDirectory(const fs::path& from, const fs::path& to);
 bool moveFile(const fs::path& from, const fs::path& to);
-
-void replaceAll(std::string& str, const std::string& from, const std::string& to);
 
 /**
  * Shows a nice command line progress bar.

@@ -23,23 +23,45 @@
 #include "util.h"
 
 #include <string>
+#include <vector>
+#include <map>
 
 namespace mapcrafter {
 namespace render {
+
+struct ConfigSection {
+	std::string name;
+	std::vector<std::pair<std::string, std::string> > entries;
+
+	int getEntryIndex(const std::string& key) const;
+
+	bool has(const std::string& key) const;
+
+	void set(const std::string& key, const std::string& value);
+	std::string get(const std::string& key) const;
+};
 
 /**
  * A simple INI-like config file parser.
  */
 class ConfigFile {
+private:
+	ConfigSection root;
+	std::vector<ConfigSection> sections;
+	std::vector<std::string> section_names;
+
+	int getSectionIndex(const std::string& section) const;
+
+	bool load(std::istream& stream);
 public:
 	ConfigFile();
 	~ConfigFile();
 
 	bool loadFile(const std::string& filename);
 
-	bool hasSection(const std::string& section) const;
-	bool has(const std::string& section, const std::string& key);
+	const std::vector<std::string>& getSections() const;
 
+	bool has(const std::string& section, const std::string& key) const;
 	std::string get(const std::string& section, const std::string& key) const;
 
 	template<typename T>
