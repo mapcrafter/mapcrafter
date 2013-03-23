@@ -726,7 +726,6 @@ uint32_t BlockTextures::darkenRight(uint32_t pixel) const {
 
 BlockImage BlockTextures::buildSmallerBlock(const Image& left_texture,
         const Image& right_texture, const Image& top_texture, int y1, int y2) {
-	int size = y2 - y1;
 	Image left = left_texture;
 	Image right = right_texture;
 	left.fill(0, 0, 0, texture_size, texture_size - y2);

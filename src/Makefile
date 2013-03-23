@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-std=c++0x -Werror
+CXXFLAGS=-std=c++0x -Wall
 
 ifeq ($(mode),debug)
 	CXXFLAGS+= -g

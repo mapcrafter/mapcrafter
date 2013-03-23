@@ -430,7 +430,7 @@ bool compareWorkers(const Worker& w1, const Worker& w2) {
 
 int sumTasks(std::vector<Task>& vec) {
 	int s = 0;
-	for (int i = 0; i < vec.size(); i++)
+	for (size_t i = 0; i < vec.size(); i++)
 		s += vec[i].costs;
 	return s;
 }
@@ -455,7 +455,7 @@ double assignTasks(std::vector<Task> tasks, std::vector<Worker>& workers) {
 	std::make_heap(workers.begin(), workers.end(), compareWorkers);
 
 	// go through all tasks
-	for (int i = 0; i < tasks.size(); i++) {
+	for (size_t i = 0; i < tasks.size(); i++) {
 		// get the worker with the lowest work and add this ask
 		workers.front().work += tasks[i].costs;
 		workers.front().tasks.push_back(tasks[i]);
@@ -539,7 +539,7 @@ int TileSet::findRenderTasks(int worker_count,
 			workers.resize(worker_count);
 			for (int i = 0; i < worker_count; i++) {
 				Worker w = workers_zoomlevel[i];
-				for (int j = 0; j < w.tasks.size(); j++)
+				for (size_t j = 0; j < w.tasks.size(); j++)
 					workers[i][w.tasks[j].tile] = countTiles(w.tasks[j].tile,
 							tile_childs, depth);
 			}

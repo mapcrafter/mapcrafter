@@ -195,8 +195,8 @@ uint16_t getDoorDirectionClosed(uint16_t direction, bool flip) {
 uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data,
         const mc::Chunk* chunk) const {
 
-	uint16_t id_north, id_south, id_east, id_west, id_top, id_bottom;
-	uint16_t data_north, data_south, data_east, data_west, data_top, data_bottom;
+	uint16_t id_north, id_south, id_east, id_west, id_bottom;
+	uint16_t data_north, data_south, data_east, data_west, data_bottom;
 
 	if ((id == 8 || id == 9) && data == 0) { // full water blocks
 		getNeighbor(pos + DIR_WEST, id_west, data_west, world, chunk);

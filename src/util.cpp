@@ -27,8 +27,8 @@
 namespace mapcrafter {
 
 bool isBigEndian() {
-	int test = 0xff00;
-	return *((char*) &test) == 0xff;
+	int test = 1;
+	return *((char*) &test) != 1;
 }
 
 void replaceAll(std::string& str, const std::string& from, const std::string& to) {

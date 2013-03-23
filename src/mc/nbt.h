@@ -48,12 +48,12 @@ enum TagType {
 };
 
 enum CompressionType {
-	NO_COMPRESSION, GZIP, ZLIB
+	NO_COMPRESSION = 0, GZIP = 1, ZLIB = 2
 };
 
 template<typename T>
-void dumpTag(const char* type, bool named, const std::string& name,
-        const std::string& indendation, T payload);
+void dumpTag(std::ostream& stream, const char* type, bool named,
+		const std::string& name, const std::string& indendation, T payload);
 
 class NBTError: public std::exception {
 private:

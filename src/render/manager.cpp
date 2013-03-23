@@ -41,7 +41,7 @@ std::string RenderOpts::outputPath(const std::string& path) const {
 
 MapSettings::MapSettings()
 		: texture_size(12), rotation(0), tile_size(0), max_zoom(0),
-		  render_leaves_transparent(0), render_unknown_blocks(0), last_render(-1) {
+		  render_unknown_blocks(0), render_leaves_transparent(0), last_render(-1) {
 }
 
 /**
