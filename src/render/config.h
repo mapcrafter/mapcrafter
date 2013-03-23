@@ -25,15 +25,22 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 namespace mapcrafter {
 namespace render {
 
-struct ConfigSection {
+class ConfigSection {
+private:
 	std::string name;
 	std::vector<std::pair<std::string, std::string> > entries;
 
 	int getEntryIndex(const std::string& key) const;
+public:
+	ConfigSection(const std::string& name = "");
+	~ConfigSection();
+
+	const std::string& getName() const;
 
 	bool has(const std::string& key) const;
 
@@ -68,6 +75,37 @@ public:
 	T get(const std::string& section, const std::string& key) const {
 		return as<T>(get(section, key));
 	}
+};
+
+struct RenderWorldConfig {
+	std::string name_short, name_long;
+
+	std::string input_dir;
+	std::string templates_dir, images_dir;
+
+	std::set<int> rotation;
+	int texture_size;
+
+	RenderWorldConfig();
+
+	void readFromConfig(const ConfigFile& config, const std::string& section);
+
+	void print(std::ostream& stream) const;
+};
+
+class RenderConfigParser {
+private:
+	ConfigFile config;
+	RenderWorldConfig default_world;
+	std::vector<RenderWorldConfig> worlds;
+
+public:
+	RenderConfigParser();
+	~RenderConfigParser();
+
+	bool loadFile(const std::string& filename);
+
+	const std::vector<RenderWorldConfig>& getWorlds();
 };
 
 }
