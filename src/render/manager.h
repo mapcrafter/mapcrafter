@@ -96,7 +96,7 @@ struct RecursiveRenderSettings {
 	ProgressBar progress_bar;
 
 	RecursiveRenderSettings(const TileSet& tiles, const TileRenderer* renderer)
-		: tiles(tiles), renderer(renderer), progress(0) {}
+		: tiles(tiles), renderer(renderer), tile_size(0), progress(0), show_progress(true) {}
 };
 
 /**
@@ -128,7 +128,7 @@ private:
 	MapSettings settings;
 
 	mc::World world;
-	BlockTextures textures;
+	BlockImages images;
 
 	bool copyTemplateFile(const std::string& filename,
 	        std::map<std::string, std::string> vars =

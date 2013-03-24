@@ -83,57 +83,57 @@
  * ABCDEF          EF
  */
 
-// count of rotation needed for the block images needed
-// depending on the north direction
-#define NORTH_TOP_LEFT 0
-#define NORTH_TOP_RIGHT 1
-#define NORTH_BOTTOM_RIGHT 2
-#define NORTH_BOTTOM_LEFT 3
-
-#define FACE_NORTH 1
-#define FACE_EAST 2
-#define FACE_SOUTH 4
-#define FACE_WEST 8
-
-#define FACE_TOP 16
-#define FACE_BOTTOM 32
-
-// extra data starting at the 5. bit
-#define DATA_NORTH 16
-#define DATA_EAST 32
-#define DATA_SOUTH 64
-#define DATA_WEST 128
-
-// the last three bits of 2 bytes
-#define EDGE_NORTH 8192
-#define EDGE_EAST 16384
-#define EDGE_BOTTOM 32768
-
-// some data values and stuff for special blocks
-#define DOOR_NORTH 16
-#define DOOR_SOUTH 32
-#define DOOR_EAST 64
-#define DOOR_WEST 128
-#define DOOR_TOP 256
-#define DOOR_FLIP_X 512
-
-#define CHEST_FRONT 0
-#define CHEST_SIDE 1
-#define CHEST_TOP 2
-
-#define LARGECHEST_FRONT_LEFT 0
-#define LARGECHEST_FRONT_RIGHT 1
-#define LARGECHEST_SIDE 2
-#define LARGECHEST_TOP_LEFT 3
-#define LARGECHEST_TOP_RIGHT 4
-#define LARGECHEST_BACK_LEFT 5
-#define LARGECHEST_BACK_RIGHT 6
-
-#define LARGECHEST_DATA_LARGE 256
-#define LARGECHEST_DATA_LEFT 512
-
 namespace mapcrafter {
 namespace render {
+
+// count of rotations needed for the block images
+// depending on the north direction
+const int NORTH_TOP_LEFT = 0;
+const int NORTH_TOP_RIGHT = 1;
+const int NORTH_BOTTOM_RIGHT = 2;
+const int NORTH_BOTTOM_LEFT = 3;
+
+const int FACE_NORTH = 1;
+const int FACE_EAST = 2;
+const int FACE_SOUTH = 4;
+const int FACE_WEST = 8;
+
+const int FACE_TOP = 16;
+const int FACE_BOTTOM = 32;
+
+// extra data starting at the 5. bit
+const int DATA_NORTH = 16;
+const int DATA_EAST = 32;
+const int DATA_SOUTH = 64;
+const int DATA_WEST = 128;
+
+// the last three bits of 2 bytes
+const int EDGE_NORTH = 8192;
+const int EDGE_EAST = 16384;
+const int EDGE_BOTTOM = 32768;
+
+// some data values and stuff for special blocks
+const int DOOR_NORTH = 16;
+const int DOOR_SOUTH = 32;
+const int DOOR_EAST = 64;
+const int DOOR_WEST = 128;
+const int DOOR_TOP = 256;
+const int DOOR_FLIP_X = 512;
+
+const int CHEST_FRONT = 0;
+const int CHEST_SIDE = 1;
+const int CHEST_TOP = 2;
+
+const int LARGECHEST_FRONT_LEFT = 0;
+const int LARGECHEST_FRONT_RIGHT = 1;
+const int LARGECHEST_SIDE = 2;
+const int LARGECHEST_TOP_LEFT = 3;
+const int LARGECHEST_TOP_RIGHT = 4;
+const int LARGECHEST_BACK_LEFT = 5;
+const int LARGECHEST_BACK_RIGHT = 6;
+
+const int LARGECHEST_DATA_LARGE = 256;
+const int LARGECHEST_DATA_LEFT = 512;
 
 /**
  * The base for an iterator to transform the pixels of a source image to the pixels of a
@@ -226,7 +226,7 @@ public:
  * This class is responsible for reading the Minecraft textures and creating the block
  * images.
  */
-class BlockTextures {
+class BlockImages {
 private:
 	int texture_size;
 	int rotation;
@@ -335,8 +335,8 @@ private:
 
 	void loadBlocks();
 public:
-	BlockTextures();
-	~BlockTextures();
+	BlockImages();
+	~BlockImages();
 
 	void setSettings(int texture_size, int rotation, bool render_unknown_blocks,
 	        bool render_leaves_transparent);

@@ -124,8 +124,8 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 	return pos < other.pos;
 }
 
-TileRenderer::TileRenderer(mc::WorldCache& world, const BlockTextures& textures)
-		: world(world), textures(textures) {
+TileRenderer::TileRenderer(mc::WorldCache& world, const BlockImages& textures)
+		: world(world), images(textures) {
 }
 
 TileRenderer::~TileRenderer() {
@@ -284,13 +284,13 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		getNeighbor(pos + DIR_WEST, id_west, data_west, world, chunk);
 
 		// check for same neighbors
-		if(id_north != 0 && (id_north == id || !textures.isBlockTransparent(id_north,data_north)))
+		if(id_north != 0 && (id_north == id || !images.isBlockTransparent(id_north,data_north)))
 			data |= DATA_NORTH;
-		if(id_south != 0 && (id_south == id || !textures.isBlockTransparent(id_south, data_south)))
+		if(id_south != 0 && (id_south == id || !images.isBlockTransparent(id_south, data_south)))
 			data |= DATA_SOUTH;
-		if(id_east != 0 && (id_east == id || !textures.isBlockTransparent(id_east, data_east)))
+		if(id_east != 0 && (id_east == id || !images.isBlockTransparent(id_east, data_east)))
 			data |= DATA_EAST;
-		if(id_west != 0 && (id_west == id || !textures.isBlockTransparent(id_west, data_west)))
+		if(id_west != 0 && (id_west == id || !images.isBlockTransparent(id_west, data_west)))
 			data |= DATA_WEST;
 
 		// check fences, they can also connect with fence gates
@@ -304,18 +304,18 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			data |= DATA_WEST;
 	}
 
-	if (!textures.isBlockTransparent(id, data)) {
+	if (!images.isBlockTransparent(id, data)) {
 		/* add shadow edges on opaque blockes */
 		getNeighbor(pos + DIR_NORTH, id_north, data_north, world, chunk);
 		getNeighbor(pos + DIR_EAST, id_east, data_east, world, chunk);
 		getNeighbor(pos + DIR_BOTTOM, id_bottom, data_bottom, world, chunk);
 
 		// check if neighbors are opaque
-		if(id_north == 0 || textures.isBlockTransparent(id_north, data_north))
+		if(id_north == 0 || images.isBlockTransparent(id_north, data_north))
 			data |= EDGE_NORTH;
-		if(id_east == 0 || textures.isBlockTransparent(id_east, data_east))
+		if(id_east == 0 || images.isBlockTransparent(id_east, data_east))
 			data |= EDGE_EAST;
-		if(id_bottom == 0 || textures.isBlockTransparent(id_bottom, data_bottom))
+		if(id_bottom == 0 || images.isBlockTransparent(id_bottom, data_bottom))
 			data |= EDGE_BOTTOM;
 	}
 
@@ -324,13 +324,13 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 
 void TileRenderer::renderTile(const TilePos& pos, Image& tile) const {
 	// some vars, set correct image size
-	int block_size = textures.getBlockImageSize();
-	int tile_size = textures.getTileSize();
+	int block_size = images.getBlockImageSize();
+	int tile_size = images.getTileSize();
 	tile.setSize(tile_size, tile_size);
 
 	// get the maximum count of water blocks,
 	// blitted about each over, until they are nearly opaque
-	int max_water = textures.getMaxWaterNeededOpaque();
+	int max_water = images.getMaxWaterNeededOpaque();
 
 	// all visible blocks, which are rendered in this tile
 	std::set<RenderBlock> blocks;
@@ -397,7 +397,7 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) const {
 							bool neighbor_west = (west == 8 || west == 9);
 
 							// get image and replace the old render block with this
-							top.image = textures.getOpaqueWater(neighbor_south,
+							top.image = images.getOpaqueWater(neighbor_south,
 							        neighbor_west);
 							row_nodes.insert(top);
 							break;
@@ -417,8 +417,8 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) const {
 			// check for special data (neighbor related)
 			// get block image, check for transparency, create render block...
 			data = checkNeighbors(block.current, id, data, chunk);
-			Image image = textures.getBlock(id, data);
-			bool transparent = textures.isBlockTransparent(id, data);
+			Image image = images.getBlock(id, data);
+			bool transparent = images.isBlockTransparent(id, data);
 
 			RenderBlock node;
 			node.x = it.draw_x;

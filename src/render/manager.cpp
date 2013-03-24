@@ -368,10 +368,10 @@ void RenderManager::render(const TileSet& tiles) {
 
 		// create needed things for recursiv render method
 		mc::WorldCache cache(world);
-		TileRenderer renderer(cache, textures);
+		TileRenderer renderer(cache, images);
 		RecursiveRenderSettings settings(tiles, &renderer);
 
-		settings.tile_size = textures.getTileSize();
+		settings.tile_size = images.getTileSize();
 		settings.output_dir = opts.output_dir;
 
 		settings.show_progress = true;
@@ -422,7 +422,7 @@ void RenderManager::renderMultithreaded(const TileSet& tiles) {
 
 	// create render settings for the remaining composite tiles at the end
 	RecursiveRenderSettings remaining_settings(tiles, NULL);
-	remaining_settings.tile_size = textures.getTileSize();
+	remaining_settings.tile_size = images.getTileSize();
 	remaining_settings.output_dir = opts.output_dir;
 	remaining_settings.show_progress = true;
 
@@ -435,10 +435,10 @@ void RenderManager::renderMultithreaded(const TileSet& tiles) {
 		// create all informations needed for the worker
 		// every thread has his own cache
 		mc::WorldCache* cache = new mc::WorldCache(world);
-		TileRenderer* renderer = new TileRenderer(*cache, textures);
+		TileRenderer* renderer = new TileRenderer(*cache, images);
 		RecursiveRenderSettings* render_settings =
 				new RecursiveRenderSettings(tiles, renderer);
-		render_settings->tile_size = textures.getTileSize();
+		render_settings->tile_size = images.getTileSize();
 		render_settings->output_dir = opts.output_dir;
 		render_settings->show_progress = false;
 
@@ -530,25 +530,25 @@ bool RenderManager::run() {
 	}
 
 	// give the textures some settings
-	textures.setSettings(settings.texture_size, settings.rotation,
+	images.setSettings(settings.texture_size, settings.rotation,
 			settings.render_unknown_blocks, settings.render_leaves_transparent);
 	// try to load all textures
-	if (!textures.loadChests(opts.dataPath("chest.png"), opts.dataPath("largechest.png"),
+	if (!images.loadChests(opts.dataPath("chest.png"), opts.dataPath("largechest.png"),
 			opts.dataPath("enderchest.png"))) {
 		std::cerr << "Error Unable to load chest.png, largechest.png or enderchest.png!"
 				<< std::endl;
 		return false;
-	} else if (!textures.loadOther(opts.dataPath("fire.png"),
+	} else if (!images.loadOther(opts.dataPath("fire.png"),
 			opts.dataPath("endportal.png"))) {
 		std::cerr << "Error Unable to load fire.png or endportal.png!" << std::endl;
 		return false;
-	} else if (!textures.loadBlocks(opts.dataPath("terrain.png"))) {
+	} else if (!images.loadBlocks(opts.dataPath("terrain.png"))) {
 		std::cerr << "Error: Unable to load terrain.png!" << std::endl;
 		return false;
 	}
 
 	std::cout << "Setting texture size to " << settings.texture_size << "." << std::endl;
-	settings.tile_size = textures.getTileSize();
+	settings.tile_size = images.getTileSize();
 
 	int render_start = time(NULL);
 

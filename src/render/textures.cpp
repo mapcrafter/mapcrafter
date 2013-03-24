@@ -301,15 +301,15 @@ Image BlockImage::buildImage() const {
 	return image;
 }
 
-BlockTextures::BlockTextures()
+BlockImages::BlockImages()
 		: texture_size(16), rotation(0), render_unknown_blocks(false),
 		  render_leaves_transparent(false), max_water(99) {
 }
 
-BlockTextures::~BlockTextures() {
+BlockImages::~BlockImages() {
 }
 
-void BlockTextures::setSettings(int texture_size, int rotation, bool render_unknown_blocks,
+void BlockImages::setSettings(int texture_size, int rotation, bool render_unknown_blocks,
         bool render_leaves_transparent) {
 	this->texture_size = texture_size;
 	this->rotation = rotation;
@@ -394,7 +394,7 @@ bool loadLargeChestTexture(const Image& image, Image* textures, int texture_size
 	return true;
 }
 
-bool BlockTextures::loadChests(const std::string& normal, const std::string& large,
+bool BlockImages::loadChests(const std::string& normal, const std::string& large,
         const std::string& ender) {
 	Image img_chest, img_largechest, img_enderchest;
 	if (!img_chest.readPNG(normal) || !img_largechest.readPNG(large)
@@ -408,7 +408,7 @@ bool BlockTextures::loadChests(const std::string& normal, const std::string& lar
 	return true;
 }
 
-bool BlockTextures::loadOther(const std::string& fire, const std::string& endportal) {
+bool BlockImages::loadOther(const std::string& fire, const std::string& endportal) {
 	Image fire_img, endportal_img;
 	if(!fire_img.readPNG(fire) || !endportal_img.readPNG(endportal))
 		return false;
@@ -417,7 +417,7 @@ bool BlockTextures::loadOther(const std::string& fire, const std::string& endpor
 	return true;
 }
 
-bool BlockTextures::loadBlocks(const std::string& terrain_filename) {
+bool BlockImages::loadBlocks(const std::string& terrain_filename) {
 	Image terrain;
 	if (!terrain.readPNG(terrain_filename))
 		return false;
@@ -451,7 +451,7 @@ struct block_comparator {
 	}
 };
 
-bool BlockTextures::saveBlocks(const std::string& filename) {
+bool BlockImages::saveBlocks(const std::string& filename) {
 	std::map<uint32_t, Image, block_comparator> blocks_sorted;
 	for (std::unordered_map<uint32_t, Image>::const_iterator it = block_images.begin();
 	        it != block_images.end(); ++it) {
@@ -524,7 +524,7 @@ bool BlockTextures::saveBlocks(const std::string& filename) {
  * textures, because with interpolation we would have half transparent pixels, what could
  * make the rendering process slower.
  */
-void BlockTextures::splitTerrain(const Image& terrain) {
+void BlockImages::splitTerrain(const Image& terrain) {
 	int size = terrain.getWidth() / 16;
 	for (int x = 0; x < 16; x++) {
 		for (int y = 0; y < 16; y++) {
@@ -538,14 +538,14 @@ void BlockTextures::splitTerrain(const Image& terrain) {
 	}
 }
 
-const Image& BlockTextures::getTexture(int x, int y) const {
+const Image& BlockImages::getTexture(int x, int y) const {
 	return textures[y * 16 + x];
 }
 
 /**
  * This method filters unnecessary block data, for example the leaves decay counter.
  */
-uint16_t BlockTextures::filterBlockData(uint16_t id, uint16_t data) const {
+uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	if (id == 6)
 		return data & (0xff00 | 0b00000011);
 	else if (id >= 8 && id <= 11) // water, lava
@@ -594,7 +594,7 @@ uint16_t BlockTextures::filterBlockData(uint16_t id, uint16_t data) const {
 /**
  * Checks, if a block images has transparent pixels.
  */
-bool BlockTextures::checkImageTransparency(const Image& image) const {
+bool BlockImages::checkImageTransparency(const Image& image) const {
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
 		if (ALPHA(image.getPixel(it.dest_x, it.dest_y + texture_size/2)) < 255)
@@ -617,7 +617,7 @@ bool BlockTextures::checkImageTransparency(const Image& image) const {
  * This method adds to the block image the dark shadow edges by blitting the shadow edge
  * masks and then stores the block image with the special data.
  */
-void BlockTextures::addBlockShadowEdges(uint16_t id, uint16_t data, const Image& block) {
+void BlockImages::addBlockShadowEdges(uint16_t id, uint16_t data, const Image& block) {
 	for (int n = 0; n <= 1; n++)
 		for (int e = 0; e <= 1; e++)
 			for (int b = 0; b <= 1; b++) {
@@ -642,14 +642,14 @@ void BlockTextures::addBlockShadowEdges(uint16_t id, uint16_t data, const Image&
 /**
  * Sets a block image in the block image list (and rotates it if necessary (later)).
  */
-void BlockTextures::setBlockImage(uint16_t id, uint16_t data, const BlockImage& block) {
+void BlockImages::setBlockImage(uint16_t id, uint16_t data, const BlockImage& block) {
 	setBlockImage(id, data, block.rotate(rotation).buildImage());
 }
 
 /**
  * Sets a block image in the block image list.
  */
-void BlockTextures::setBlockImage(uint16_t id, uint16_t data, const Image& block) {
+void BlockImages::setBlockImage(uint16_t id, uint16_t data, const Image& block) {
 	block_images[id | (data << 16)] = block;
 
 	// check if block contains transparency
@@ -664,7 +664,7 @@ void BlockTextures::setBlockImage(uint16_t id, uint16_t data, const Image& block
  * This method is very important for the rendering performance. It preblits transparent
  * water blocks until they are nearly opaque.
  */
-void BlockTextures::testWaterTransparency() {
+void BlockImages::testWaterTransparency() {
 	Image water = getTexture(13, 12);
 
 	// opaque_water[0] is water block when water texture is only on the top
@@ -716,15 +716,15 @@ void BlockTextures::testWaterTransparency() {
 	}
 }
 
-uint32_t BlockTextures::darkenLeft(uint32_t pixel) const {
+uint32_t BlockImages::darkenLeft(uint32_t pixel) const {
 	return rgba_multiply(pixel, 0.75, 0.75, 0.75);
 }
 
-uint32_t BlockTextures::darkenRight(uint32_t pixel) const {
+uint32_t BlockImages::darkenRight(uint32_t pixel) const {
 	return rgba_multiply(pixel, 0.6, 0.6, 0.6);
 }
 
-BlockImage BlockTextures::buildSmallerBlock(const Image& left_texture,
+BlockImage BlockImages::buildSmallerBlock(const Image& left_texture,
         const Image& right_texture, const Image& top_texture, int y1, int y2) {
 	Image left = left_texture;
 	Image right = right_texture;
@@ -741,7 +741,7 @@ BlockImage BlockTextures::buildSmallerBlock(const Image& left_texture,
 	return block;
 }
 
-Image BlockTextures::buildStairsSouth(const Image& texture) {
+Image BlockImages::buildStairsSouth(const Image& texture) {
 	Image block(texture_size * 2, texture_size * 2);
 
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
@@ -763,7 +763,7 @@ Image BlockTextures::buildStairsSouth(const Image& texture) {
 	return block;
 }
 
-Image BlockTextures::buildStairsNorth(const Image& texture) {
+Image BlockImages::buildStairsNorth(const Image& texture) {
 	Image block(texture_size * 2, texture_size * 2);
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
 		int y = it.src_x >= texture_size / 2 ? texture_size / 2 : 0;
@@ -786,7 +786,7 @@ Image BlockTextures::buildStairsNorth(const Image& texture) {
 	return block;
 }
 
-Image BlockTextures::buildStairsWest(const Image& texture) {
+Image BlockImages::buildStairsWest(const Image& texture) {
 	Image block(texture_size * 2, texture_size * 2);
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
 		int y = it.src_y > texture_size / 2 ? 0 : texture_size / 2;
@@ -808,7 +808,7 @@ Image BlockTextures::buildStairsWest(const Image& texture) {
 	return block;
 }
 
-Image BlockTextures::buildStairsEast(const Image& texture) {
+Image BlockImages::buildStairsEast(const Image& texture) {
 	Image block(texture_size * 2, texture_size * 2);
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
 		int y = it.src_y > texture_size / 2 ? texture_size / 2 : 0;
@@ -837,7 +837,7 @@ Image BlockTextures::buildStairsEast(const Image& texture) {
 	return block;
 }
 
-Image BlockTextures::buildUpsideDownStairsNorth(const Image& texture) {
+Image BlockImages::buildUpsideDownStairsNorth(const Image& texture) {
 	Image block(getBlockImageSize(), getBlockImageSize());
 
 	blitFace(block, FACE_TOP, texture);
@@ -860,7 +860,7 @@ Image BlockTextures::buildUpsideDownStairsNorth(const Image& texture) {
 	return block;
 }
 
-Image BlockTextures::buildUpsideDownStairsSouth(const Image& texture) {
+Image BlockImages::buildUpsideDownStairsSouth(const Image& texture) {
 	Image block(getBlockImageSize(), getBlockImageSize());
 
 	blitFace(block, FACE_SOUTH, texture);
@@ -876,7 +876,7 @@ Image BlockTextures::buildUpsideDownStairsSouth(const Image& texture) {
 	return block;
 }
 
-Image BlockTextures::buildUpsideDownStairsEast(const Image& texture) {
+Image BlockImages::buildUpsideDownStairsEast(const Image& texture) {
 	Image block(getBlockImageSize(), getBlockImageSize());
 
 	blitFace(block, FACE_TOP, texture);
@@ -900,7 +900,7 @@ Image BlockTextures::buildUpsideDownStairsEast(const Image& texture) {
 	return block;
 }
 
-Image BlockTextures::buildUpsideDownStairsWest(const Image& texture) {
+Image BlockImages::buildUpsideDownStairsWest(const Image& texture) {
 	Image block(getBlockImageSize(), getBlockImageSize());
 
 	blitFace(block, FACE_WEST, texture);
@@ -916,7 +916,7 @@ Image BlockTextures::buildUpsideDownStairsWest(const Image& texture) {
 	return block;
 }
 
-void BlockTextures::buildCustomTextures() {
+void BlockImages::buildCustomTextures() {
 	shadow_edge_masks[0].setSize(getBlockImageSize(), getBlockImageSize());
 	shadow_edge_masks[1].setSize(getBlockImageSize(), getBlockImageSize());
 	shadow_edge_masks[2].setSize(getBlockImageSize(), getBlockImageSize());
@@ -932,16 +932,16 @@ void BlockTextures::buildCustomTextures() {
 	}
 }
 
-void BlockTextures::createBlock(uint16_t id, uint16_t data, const Image& texture) {
+void BlockImages::createBlock(uint16_t id, uint16_t data, const Image& texture) {
 	createBlock(id, data, texture, texture);
 }
 
-void BlockTextures::createBlock(uint16_t id, uint16_t data, const Image& side_texture,
+void BlockImages::createBlock(uint16_t id, uint16_t data, const Image& side_texture,
         const Image& top_texture) {
 	createBlock(id, data, side_texture, side_texture, top_texture);
 }
 
-void BlockTextures::createBlock(uint16_t id, uint16_t data, const Image& left_texture,
+void BlockImages::createBlock(uint16_t id, uint16_t data, const Image& left_texture,
         const Image& right_texture, const Image& top_texture) {
 	BlockImage block;
 	block.setFace(FACE_EAST | FACE_WEST, left_texture);
@@ -950,27 +950,27 @@ void BlockTextures::createBlock(uint16_t id, uint16_t data, const Image& left_te
 	setBlockImage(id, data, block);
 }
 
-void BlockTextures::createSmallerBlock(uint16_t id, uint16_t data,
+void BlockImages::createSmallerBlock(uint16_t id, uint16_t data,
         const Image& left_texture, const Image& right_texture, const Image& top_texture,
         int y1, int y2) {
 	setBlockImage(id, data,
 	        buildSmallerBlock(left_texture, right_texture, top_texture, y1, y2));
 }
 
-void BlockTextures::createSmallerBlock(uint16_t id, uint16_t data, const Image& side_face,
+void BlockImages::createSmallerBlock(uint16_t id, uint16_t data, const Image& side_face,
         const Image& top_texture, int y1, int y2) {
 	setBlockImage(id, data,
 	        buildSmallerBlock(side_face, side_face, top_texture, y1, y2));
 }
 
-void BlockTextures::createRotatedBlock(uint16_t id, uint16_t extra_data,
+void BlockImages::createRotatedBlock(uint16_t id, uint16_t extra_data,
         const Image& front_texture, const Image& side_texture,
         const Image& top_texture) {
 	createRotatedBlock(id, extra_data, front_texture, side_texture, side_texture,
 	        top_texture);
 }
 
-void BlockTextures::createRotatedBlock(uint16_t id, uint16_t extra_data,
+void BlockImages::createRotatedBlock(uint16_t id, uint16_t extra_data,
         const Image& front_texture, const Image& back_texture, const Image& side_texture,
         const Image& top_texture) {
 	BlockImage block;
@@ -986,12 +986,12 @@ void BlockTextures::createRotatedBlock(uint16_t id, uint16_t extra_data,
 	setBlockImage(id, 5 | extra_data, block.rotate(1));
 }
 
-void BlockTextures::createItemStyleBlock(uint16_t id, uint16_t data,
+void BlockImages::createItemStyleBlock(uint16_t id, uint16_t data,
         const Image& texture) {
 	createItemStyleBlock(id, data, texture, texture);
 }
 
-void BlockTextures::createItemStyleBlock(uint16_t id, uint16_t data,
+void BlockImages::createItemStyleBlock(uint16_t id, uint16_t data,
         const Image& north_south, const Image& east_west) {
 	BlockImage block(BlockImage::ITEM_STYLE);
 	block.setFace(FACE_NORTH | FACE_SOUTH, north_south);
@@ -999,12 +999,12 @@ void BlockTextures::createItemStyleBlock(uint16_t id, uint16_t data,
 	setBlockImage(id, data, block);
 }
 
-void BlockTextures::createSingleFaceBlock(uint16_t id, uint16_t data, int face,
+void BlockImages::createSingleFaceBlock(uint16_t id, uint16_t data, int face,
         const Image& texture) {
 	setBlockImage(id, data, BlockImage().setFace(face, texture));
 }
 
-void BlockTextures::createGrassBlock() { // id 2
+void BlockImages::createGrassBlock() { // id 2
 	Image dirt = getTexture(2, 0);
 
 	Image grass(dirt);
@@ -1019,7 +1019,7 @@ void BlockTextures::createGrassBlock() { // id 2
 	setBlockImage(2, 0, block);
 }
 
-void BlockTextures::createWater() { // id 8, 9
+void BlockImages::createWater() { // id 8, 9
 	Image water = getTexture(13, 12);
 	for (int data = 0; data < 8; data++) {
 		int smaller = data / 8.0 * texture_size;
@@ -1052,7 +1052,7 @@ void BlockTextures::createWater() { // id 8, 9
 		}
 }
 
-void BlockTextures::createLava() { // id 10, 11
+void BlockImages::createLava() { // id 10, 11
 	Image lava = getTexture(13, 14);
 	for (int data = 0; data < 7; data += 2) {
 		int smaller = data / 8.0 * texture_size;
@@ -1066,7 +1066,7 @@ void BlockTextures::createLava() { // id 10, 11
 	}
 }
 
-void BlockTextures::createWood(uint16_t data, const Image& side) { // id 17
+void BlockImages::createWood(uint16_t data, const Image& side) { // id 17
 	Image top = getTexture(5, 1);
 	createBlock(17, data | 4, top, side, side);
 	createBlock(17, data | 8, side, top, side);
@@ -1074,7 +1074,7 @@ void BlockTextures::createWood(uint16_t data, const Image& side) { // id 17
 	createBlock(17, data | 4 | 8, side, side, top);
 }
 
-void BlockTextures::createLeaves() { // id 18
+void BlockImages::createLeaves() { // id 18
 	if (render_leaves_transparent) {
 		createBlock(18, 0, getTexture(4, 3).colorize(0.3 * 0.8, 1 * 0.8, 0.1 * 0.8)); // oak
 		createBlock(18, 1, getTexture(4, 8).colorize(0.3 * 0.8, 1 * 0.8, 0.45 * 0.8)); // pine/spruce
@@ -1105,7 +1105,7 @@ BlockImage buildBed(const Image& top, const Image& north_south, const Image& eas
 	return block;
 }
 
-void BlockTextures::createBed() { // id 26
+void BlockImages::createBed() { // id 26
 	Image front = getTexture(5, 9);
 	Image side = getTexture(6, 9);
 	Image top = getTexture(6, 8);
@@ -1125,7 +1125,7 @@ void BlockTextures::createBed() { // id 26
 	setBlockImage(26, 3 | 8, buildBed(top.rotate(3), side, front, FACE_WEST));
 }
 
-void BlockTextures::createStraightRails(uint16_t id, uint16_t extra_data,
+void BlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
         const Image& texture) { // id 27, 28, 66
 	createSingleFaceBlock(id, 0 | extra_data, FACE_BOTTOM, texture.rotate(ROTATE_90));
 	createSingleFaceBlock(id, 1 | extra_data, FACE_BOTTOM, texture);
@@ -1185,7 +1185,7 @@ BlockImage buildPiston(int frontface, const Image& front, const Image& back,
 	return block;
 }
 
-void BlockTextures::createPiston(uint16_t id, bool sticky) { //  id 29, 33
+void BlockImages::createPiston(uint16_t id, bool sticky) { //  id 29, 33
 	Image front = sticky ? getTexture(10, 6) : getTexture(11, 6);
 	Image side = getTexture(12, 6);
 	Image back = getTexture(13, 6);
@@ -1199,7 +1199,7 @@ void BlockTextures::createPiston(uint16_t id, bool sticky) { //  id 29, 33
 	setBlockImage(id, 5, buildPiston(FACE_SOUTH, front, back, side.rotate(1), side.rotate(1)));
 }
 
-void BlockTextures::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) { // id 43, 44, 125, 126
+void BlockImages::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) { // id 43, 44, 125, 126
 	std::map<int, Image> slab_textures;
 	if (stone_slabs) {
 		slab_textures[0x0] = getTexture(5, 0);
@@ -1229,7 +1229,7 @@ void BlockTextures::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs
 	}
 }
 
-void BlockTextures::createTorch(uint16_t id, const Image& texture) { // id 50, 75, 76
+void BlockImages::createTorch(uint16_t id, const Image& texture) { // id 50, 75, 76
 	createSingleFaceBlock(id, 1, FACE_WEST, texture);
 	createSingleFaceBlock(id, 2, FACE_EAST, texture);
 	createSingleFaceBlock(id, 3, FACE_NORTH, texture);
@@ -1239,7 +1239,7 @@ void BlockTextures::createTorch(uint16_t id, const Image& texture) { // id 50, 7
 	createItemStyleBlock(id, 6, texture);
 }
 
-void BlockTextures::createStairs(uint16_t id, const Image& texture) { // id 53, 67, 108, 109, 114, 128, 134, 135, 136
+void BlockImages::createStairs(uint16_t id, const Image& texture) { // id 53, 67, 108, 109, 114, 128, 134, 135, 136
 	Image north = buildStairsNorth(texture), south = buildStairsSouth(texture),
 			east = buildStairsEast(texture), west = buildStairsWest(texture);
 	rotateImages(north, south, east, west, rotation);
@@ -1261,7 +1261,7 @@ void BlockTextures::createStairs(uint16_t id, const Image& texture) { // id 53, 
 	setBlockImage(id, 3 | 4, north);
 }
 
-void BlockTextures::createChest(uint16_t id, Image* textures) { // id 54, 95, 130
+void BlockImages::createChest(uint16_t id, Image* textures) { // id 54, 95, 130
 	BlockImage chest;
 	chest.setFace(FACE_SOUTH, textures[CHEST_FRONT]);
 	chest.setFace(FACE_NORTH | FACE_EAST | FACE_WEST, textures[CHEST_SIDE]);
@@ -1273,7 +1273,7 @@ void BlockTextures::createChest(uint16_t id, Image* textures) { // id 54, 95, 13
 	setBlockImage(id, DATA_WEST, chest.rotate(1).buildImage());
 }
 
-void BlockTextures::createDoubleChest(uint16_t id, Image* textures) { // id 54
+void BlockImages::createDoubleChest(uint16_t id, Image* textures) { // id 54
 	BlockImage left, right;
 
 	// left side of the chest, south orientation
@@ -1300,7 +1300,7 @@ void BlockTextures::createDoubleChest(uint16_t id, Image* textures) { // id 54
 	setBlockImage(id, DATA_WEST | l, right.rotate(1).buildImage());
 }
 
-void BlockTextures::createDoor(uint16_t id, const Image& texture_bottom,
+void BlockImages::createDoor(uint16_t id, const Image& texture_bottom,
         const Image& texture_top) { // id 64, 71
 	// TODO sometimes the texture needs to get x flipped when door is opened
 	for (int top = 0; top <= 1; top++) {
@@ -1333,7 +1333,7 @@ void BlockTextures::createDoor(uint16_t id, const Image& texture_bottom,
 	}
 }
 
-void BlockTextures::createRails() { // id 66
+void BlockImages::createRails() { // id 66
 	Image texture = getTexture(0, 8);
 	Image corner_texture = getTexture(0, 7);
 
@@ -1344,7 +1344,7 @@ void BlockTextures::createRails() { // id 66
 	createSingleFaceBlock(66, 9, FACE_BOTTOM, corner_texture.flip(true, true));
 }
 
-void BlockTextures::createButton(uint16_t id, const Image& tex) { // id 77, 143
+void BlockImages::createButton(uint16_t id, const Image& tex) { // id 77, 143
 	Image texture = tex;
 	int s = texture.getWidth();
 	for (int x = 0; x < s; x++) {
@@ -1366,7 +1366,7 @@ void BlockTextures::createButton(uint16_t id, const Image& tex) { // id 77, 143
 	createSingleFaceBlock(id, 4, FACE_SOUTH, texture);
 }
 
-void BlockTextures::createSnow() { // id 78
+void BlockImages::createSnow() { // id 78
 	Image snow = getTexture(2, 4);
 	for (int data = 0; data < 8; data++) {
 		int height = data / 8.0 * texture_size;
@@ -1374,7 +1374,7 @@ void BlockTextures::createSnow() { // id 78
 	}
 }
 
-void BlockTextures::createCactus() { // id 81
+void BlockImages::createCactus() { // id 81
 	BlockImage block;
 	block.setFace(FACE_WEST, getTexture(6, 4), 2, 0);
 	block.setFace(FACE_SOUTH, getTexture(6, 4), -2, 0);
@@ -1415,7 +1415,7 @@ Image createFenceTexture(bool left, bool right, Image texture) {
  * This method creates the fence block images. It generates textures for fences and makes
  * with this textures item style block images.
  */
-void BlockTextures::createFence(uint16_t id, const Image& texture) { // id 85, 113
+void BlockImages::createFence(uint16_t id, const Image& texture) { // id 85, 113
 	Image fence_empty = createFenceTexture(false, false, texture);
 	Image fence_left = createFenceTexture(true, false, texture);
 	Image fence_right = createFenceTexture(false, true, texture);
@@ -1454,7 +1454,7 @@ void BlockTextures::createFence(uint16_t id, const Image& texture) { // id 85, 1
 	}
 }
 
-void BlockTextures::createPumkin(uint16_t id, const Image& front) { // id 86, 91
+void BlockImages::createPumkin(uint16_t id, const Image& front) { // id 86, 91
 	Image side = getTexture(6, 7);
 	Image top = getTexture(6, 6);
 	createBlock(id, 0, side, front, top);
@@ -1464,7 +1464,7 @@ void BlockTextures::createPumkin(uint16_t id, const Image& front) { // id 86, 91
 	createBlock(id, 4, side, side, top);
 }
 
-void BlockTextures::createCake() { // id 92
+void BlockImages::createCake() { // id 92
 	BlockImage block;
 	block.setFace(FACE_WEST, getTexture(10, 7), 1, 0);
 	block.setFace(FACE_SOUTH, getTexture(10, 7), -1, 0);
@@ -1472,14 +1472,14 @@ void BlockTextures::createCake() { // id 92
 	setBlockImage(92, 0, block.buildImage());
 }
 
-void BlockTextures::createRedstoneRepeater(uint16_t id, const Image& texture) { // id 93, 94
+void BlockImages::createRedstoneRepeater(uint16_t id, const Image& texture) { // id 93, 94
 	createSingleFaceBlock(id, 0, FACE_BOTTOM, texture.rotate(ROTATE_270));
 	createSingleFaceBlock(id, 1, FACE_BOTTOM, texture);
 	createSingleFaceBlock(id, 2, FACE_BOTTOM, texture.rotate(ROTATE_90));
 	createSingleFaceBlock(id, 3, FACE_BOTTOM, texture.rotate(ROTATE_180));
 }
 
-void BlockTextures::createTrapdoor() { // id 96
+void BlockImages::createTrapdoor() { // id 96
 	Image texture = getTexture(4, 5);
 	for (uint16_t i = 0; i < 16; i++) {
 		if (i & 4) {
@@ -1515,7 +1515,7 @@ BlockImage buildHugeMushroom(const Image& pores, const Image& cap = Image(),
 	return block;
 }
 
-void BlockTextures::createHugeMushroom(uint16_t id, const Image& cap) { // id 99, 100
+void BlockImages::createHugeMushroom(uint16_t id, const Image& cap) { // id 99, 100
 	Image pores = getTexture(14, 8);
 	Image stem = getTexture(13, 8);
 
@@ -1534,7 +1534,7 @@ void BlockTextures::createHugeMushroom(uint16_t id, const Image& cap) { // id 99
 	setBlockImage(id, 15, buildHugeMushroom(pores, cap, 0, stem, 0b111111));
 }
 
-void BlockTextures::createBarsPane(uint16_t id, const Image& texture_left_right) { // id 101, 102
+void BlockImages::createBarsPane(uint16_t id, const Image& texture_left_right) { // id 101, 102
 	Image texture_left = texture_left_right;
 	Image texture_right = texture_left_right;
 	texture_left.fill(0, texture_size / 2, 0, texture_size / 2, texture_size);
@@ -1571,7 +1571,7 @@ void BlockTextures::createBarsPane(uint16_t id, const Image& texture_left_right)
 	}
 }
 
-void BlockTextures::createStem(uint16_t id) { // id 104, 105
+void BlockImages::createStem(uint16_t id) { // id 104, 105
 	// build here only growing normal stem
 	Image texture = getTexture(15, 6);
 
@@ -1586,7 +1586,7 @@ void BlockTextures::createStem(uint16_t id) { // id 104, 105
 	}
 }
 
-void BlockTextures::createVines() { // id 106
+void BlockImages::createVines() { // id 106
 	Image texture = getTexture(15, 8).colorize(0.3, 1, 0.1);
 
 	createSingleFaceBlock(106, 0, FACE_TOP, texture);
@@ -1630,7 +1630,7 @@ Image createFenceGateTexture(bool opened, Image texture) {
 	return texture;
 }
 
-void BlockTextures::createFenceGate() { // id 107
+void BlockImages::createFenceGate() { // id 107
 	Image texture = getTexture(4, 0);
 	Image opened = createFenceGateTexture(true, texture);
 	Image closed = createFenceGateTexture(false, texture);
@@ -1660,7 +1660,7 @@ void BlockTextures::createFenceGate() { // id 107
 	}
 }
 
-void BlockTextures::createCauldron() { // id 118
+void BlockImages::createCauldron() { // id 118
 	Image side = getTexture(10, 9);
 	Image water = getTexture(14, 12);
 
@@ -1680,7 +1680,7 @@ void BlockTextures::createCauldron() { // id 118
 	}
 }
 
-void BlockTextures::createBeacon() { // id 138
+void BlockImages::createBeacon() { // id 138
 	Image beacon(texture_size * 2, texture_size * 2);
 
 	// at first create this little block in the middle
@@ -1710,7 +1710,7 @@ void BlockTextures::createBeacon() { // id 138
 	setBlockImage(138, 0, beacon);
 }
 
-void BlockTextures::loadBlocks() {
+void BlockImages::loadBlocks() {
 	buildCustomTextures();
 	unknown_block = BlockImage().setFace(0b11111, unknown_block).buildImage();
 
@@ -1958,7 +1958,7 @@ void BlockTextures::loadBlocks() {
 	// id 154 // hopper
 }
 
-bool BlockTextures::isBlockTransparent(uint16_t id, uint16_t data) const {
+bool BlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
 	data = filterBlockData(id, data);
 	// remove edge data
 	data &= ~(EDGE_NORTH | EDGE_EAST | EDGE_BOTTOM);
@@ -1967,35 +1967,35 @@ bool BlockTextures::isBlockTransparent(uint16_t id, uint16_t data) const {
 	return block_transparency.count(id | (data << 16)) != 0;
 }
 
-bool BlockTextures::hasBlock(uint16_t id, uint16_t data) const {
+bool BlockImages::hasBlock(uint16_t id, uint16_t data) const {
 	return block_images.count(id | (data << 16)) != 0;
 }
 
-const Image& BlockTextures::getBlock(uint16_t id, uint16_t data) const {
+const Image& BlockImages::getBlock(uint16_t id, uint16_t data) const {
 	data = filterBlockData(id, data);
 	if (!hasBlock(id, data))
 		return unknown_block;
 	return block_images.at(id | (data << 16));
 }
 
-int BlockTextures::getMaxWaterNeededOpaque() const {
+int BlockImages::getMaxWaterNeededOpaque() const {
 	return max_water;
 }
 
-const Image& BlockTextures::getOpaqueWater(bool south, bool west) const {
+const Image& BlockImages::getOpaqueWater(bool south, bool west) const {
 	int index = ((south ? 0 : 1) | ((west ? 0 : 1) << 1));
 	return opaque_water[index];
 }
 
-int BlockTextures::getBlockImageSize() const {
+int BlockImages::getBlockImageSize() const {
 	return texture_size * 2;
 }
 
-int BlockTextures::getTextureSize() const {
+int BlockImages::getTextureSize() const {
 	return texture_size;
 }
 
-int BlockTextures::getTileSize() const {
+int BlockImages::getTileSize() const {
 	return texture_size * 2 * 16;
 }
 

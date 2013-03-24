@@ -93,9 +93,9 @@ struct RenderBlock {
 class TileRenderer {
 private:
 	mc::WorldCache& world;
-	const BlockTextures& textures;
+	const BlockImages& images;
 public:
-	TileRenderer(mc::WorldCache& world, const BlockTextures& textures);
+	TileRenderer(mc::WorldCache& world, const BlockImages& textures);
 	~TileRenderer();
 
 	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data,
