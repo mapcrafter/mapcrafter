@@ -103,7 +103,8 @@ function MousePosControl(div, map) {
 	
 	var text = document.createElement("span");
 	text.setAttribute("id", "mouse-move-div");
-	text.innerHTML = "test";
+	text.innerHTML = "";
+	
 	google.maps.event.addListener(map, "mousemove", function(event) {
 		var xzy = convertLatLngToMC(event.latLng, 64);
 		document.getElementById("mouse-move-div").innerHTML = "x: " + Math.round(xzy[0]) + " z: " + Math.round(xzy[1]) + " y: " + Math.round(xzy[2]);
@@ -141,6 +142,37 @@ var MCMapOptions = {
 
 var map;
 
+function updatePosHash() {
+	var xzy = convertLatLngToMC(map.getCenter(), 64);
+	for(var i = 0; i < 3; i++)
+		xzy[i] = Math.round(xzy[i]);
+	var zoom = map.getZoom();
+	location.hash = "#" + xzy[0] + ":" + xzy[1] + ":" + xzy[2] + ":" + zoom;
+}
+
+function parsePosHash() {
+	if(!location.hash)
+		return null;
+	
+	var url = location.hash.substr(1);
+	var split = url.split(":");
+	
+	if(split.length != 4)
+		return null;
+	for(var i = 0; i < 4; i++)
+		split[i] = parseInt(split[i]);
+	return split;
+}
+
+function gotoPosHash(hash) {
+	if(!hash)
+		return;
+		
+	var latlng = convertMCtoLatLng(hash[0], hash[1], hash[2]);
+	map.setCenter(latlng);
+	map.setZoom(hash[3]);
+}
+
 function init() {
 	var MCMapType = new google.maps.ImageMapType(MCMapOptions);
 	MCMapType.name = "Minecraft Map";
@@ -160,6 +192,12 @@ function init() {
 	map = new google.maps.Map(document.getElementById("mcmap"), mapOptions);
 	map.mapTypes.set("mcmap", MCMapType);
 	map.setMapTypeId("mcmap");
+	
+	google.maps.event.addListener(map, "dragend", updatePosHash);
+	google.maps.event.addListener(map, "zoom_changed", updatePosHash);
+	
+	gotoPosHash(parsePosHash());
+	updatePosHash();
 	
 	var mouseDiv = document.createElement("div");
 	var mousePos = new MousePosControl(mouseDiv, map);
