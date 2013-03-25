@@ -44,7 +44,7 @@ namespace render {
 struct RenderOpts {
 	fs::path input_dir;
 	fs::path output_dir;
-	fs::path data_dir;
+	fs::path template_dir, textures_dir;
 
 	bool incremental;
 	int jobs;
@@ -55,8 +55,9 @@ struct RenderOpts {
 	bool render_unknown_blocks;
 	bool render_leaves_transparent;
 
-	std::string dataPath(const std::string& path) const;
 	std::string outputPath(const std::string& path) const;
+	std::string templatePath(const std::string& path) const;
+	std::string texturePath(const std::string& path) const;
 };
 
 /**

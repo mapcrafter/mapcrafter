@@ -31,12 +31,16 @@
 namespace mapcrafter {
 namespace render {
 
-std::string RenderOpts::dataPath(const std::string& path) const {
-	return (data_dir / path).string();
-}
-
 std::string RenderOpts::outputPath(const std::string& path) const {
 	return (output_dir / path).string();
+}
+
+std::string RenderOpts::templatePath(const std::string& path) const {
+	return (template_dir / path).string();
+}
+
+std::string RenderOpts::texturePath(const std::string& path) const {
+	return (textures_dir / path).string();
 }
 
 MapSettings::MapSettings()
@@ -197,7 +201,7 @@ RenderManager::RenderManager(const RenderOpts& opts)
  */
 bool RenderManager::copyTemplateFile(const std::string& filename,
 		std::map<std::string, std::string> vars) {
-	std::ifstream file(opts.dataPath("template/" + filename).c_str());
+	std::ifstream file(opts.templatePath(filename).c_str());
 	if (!file)
 		return false;
 	std::stringstream ss;
@@ -242,7 +246,7 @@ void RenderManager::writeTemplates(const MapSettings& settings) {
 	// copy all other files and directories
 	fs::path to(opts.output_dir);
 	fs::directory_iterator end;
-	for (fs::directory_iterator it(fs::path(opts.dataPath("template"))); it != end;
+	for (fs::directory_iterator it(opts.template_dir); it != end;
 			++it) {
 		std::string filename = it->path().filename().string();
 		if (filename.compare("index.html") == 0 || filename.compare("markers.js") == 0)
@@ -533,16 +537,16 @@ bool RenderManager::run() {
 	images.setSettings(settings.texture_size, settings.rotation,
 			settings.render_unknown_blocks, settings.render_leaves_transparent);
 	// try to load all textures
-	if (!images.loadChests(opts.dataPath("chest.png"), opts.dataPath("largechest.png"),
-			opts.dataPath("enderchest.png"))) {
+	if (!images.loadChests(opts.texturePath("chest.png"), opts.texturePath("largechest.png"),
+			opts.texturePath("enderchest.png"))) {
 		std::cerr << "Error Unable to load chest.png, largechest.png or enderchest.png!"
 				<< std::endl;
 		return false;
-	} else if (!images.loadOther(opts.dataPath("fire.png"),
-			opts.dataPath("endportal.png"))) {
+	} else if (!images.loadOther(opts.texturePath("fire.png"),
+			opts.texturePath("endportal.png"))) {
 		std::cerr << "Error Unable to load fire.png or endportal.png!" << std::endl;
 		return false;
-	} else if (!images.loadBlocks(opts.dataPath("terrain.png"))) {
+	} else if (!images.loadBlocks(opts.texturePath("terrain.png"))) {
 		std::cerr << "Error: Unable to load terrain.png!" << std::endl;
 		return false;
 	}
