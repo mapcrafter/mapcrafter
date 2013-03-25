@@ -45,17 +45,19 @@ they already exist. The renderer creates an 'index.html' file you can open with 
 webbrowser. If you want to customize this html file, you should do this directly in the 
 template (see data dir).
 
--d [--data-dir=] directory
+--template=directory
 
-This is the directory with a template directory and the minecraft images needed for the 
-rendering. 
+This is the directory with the web template files (defaults to data/template). The renderer 
+copies all files, which are in this directory, to the output directory and replaces the 
+variables in the index.html file. The index.html file is also the file in the output 
+directory, you can open with your webbrowser after the rendering. 
 
+--textures=directory
+
+This is the directory with the Minecraft texture files (defaults to data/textures).
 You need here the terrain.png, chest.png, enderchest.png and largechest.png (probably 
 from your minecraft.jar). You can use the python script in the data directory to extract 
 the images from your minecraft.jar. 
-
-The web templates are stored inside the data directory in the directory 'template'. You 
-can make a copy of the data directory and customize the templates.
 
 -j [--jobs=] number
 
