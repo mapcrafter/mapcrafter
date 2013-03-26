@@ -55,9 +55,11 @@ directory, you can open with your webbrowser after the rendering.
 --textures=directory
 
 This is the directory with the Minecraft texture files (defaults to data/textures).
-You need here the terrain.png, chest.png, enderchest.png and largechest.png (probably 
-from your minecraft.jar). You can use the python script in the data directory to extract 
-the images from your minecraft.jar. 
+The renderer works with the new Minecraft 1.5 texture files. You need here the chest.png, 
+enderchest.png, largechest.png and the blocks/ directory from your texture pack, probably 
+everything from your minecraft.jar. You can use the python script 'find_images.py' in the 
+data directory to extract the single images from your minecraft.jar. At the moment, the
+script can't extract the blocks directory.
 
 -j [--jobs=] number
 

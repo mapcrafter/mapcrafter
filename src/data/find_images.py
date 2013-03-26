@@ -5,7 +5,6 @@ import os
 import zipfile
 
 files = {
-	"terrain.png" : "terrain.png",
 	"chest.png" : "item/chest.png",
 	"enderchest.png" : "item/enderchest.png",
 	"largechest.png" : "item/largechest.png",

@@ -546,8 +546,8 @@ bool RenderManager::run() {
 			opts.texturePath("endportal.png"))) {
 		std::cerr << "Error Unable to load fire.png or endportal.png!" << std::endl;
 		return false;
-	} else if (!images.loadBlocks(opts.texturePath("terrain.png"))) {
-		std::cerr << "Error: Unable to load terrain.png!" << std::endl;
+	} else if (!images.loadBlocks(opts.texturePath("blocks"))) {
+		std::cerr << "Error: Unable to load block textures!" << std::endl;
 		return false;
 	}
 

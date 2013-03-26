@@ -29,9 +29,9 @@
 #define ROTATE_180 2
 #define ROTATE_270 3
 
-#define ALPHA(value) (value >> 24)
-#define BLUE(value) (value >> 16)
-#define GREEN(value) (value >> 8)
+#define ALPHA(value) ((value & 0xff000000) >> 24)
+#define BLUE(value) ((value & 0xff0000) >> 16)
+#define GREEN(value) ((value & 0xff00) >> 8)
 #define RED(value) (value & 0xff)
 
 # ifndef UINT64_C

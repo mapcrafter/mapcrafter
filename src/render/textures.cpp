@@ -25,6 +25,9 @@
 #include <map>
 #include <cmath>
 #include <cstdlib>
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace render {
@@ -116,6 +119,66 @@ void TopFaceIterator::next() {
 		}
 		dest_x -= 1;
 	}
+}
+
+TextureImage::TextureImage() {
+}
+
+TextureImage::TextureImage(const std::string& name)
+		: name(name) {
+}
+
+TextureImage::~TextureImage() {
+}
+
+/**
+ * Loads a single block texture image.
+ */
+bool TextureImage::load(const std::string& path, int size) {
+	Image tmp;
+	if (!tmp.readPNG(path + "/" + name + ".png"))
+		return false;
+
+	// check if this is an animated texture
+	// -> use only the first frame
+	if (tmp.getWidth() < tmp.getHeight())
+		tmp = tmp.clip(0, 0, tmp.getWidth(), tmp.getWidth());
+
+	// we resize the transparent version of the leaves without interpolation,
+	// because this can cause half-transparent pixels, which aren't good for performance
+	if (name == "leaves" || name == "leaves_jungle" || name == "leaves_spruce")
+		tmp.resizeSimple(size, size, *this);
+	else
+		tmp.resizeInterpolated(size, size, *this);
+	return true;
+}
+
+const std::string& TextureImage::getName() const {
+	return name;
+}
+
+BlockTextures::BlockTextures() {
+}
+
+BlockTextures::~BlockTextures() {
+}
+
+/**
+ * Loads all block textures from the 'blocks' directory.
+ */
+bool BlockTextures::load(const std::string& block_dir, int size) {
+	if (!fs::exists(block_dir) || !fs::is_directory(block_dir)) {
+		std::cout << "Error: Directory 'blocks' with block textures does not exists." << std::endl;;
+		return false;
+	}
+
+	// go through all textures and load them
+	for (int i = 0; i < texture_count; i++) {
+		if (!textures[i]->load(block_dir, size))
+			std::cout << "Warning: Unable to load block texture "
+				<< textures[i]->getName() << ".png ." << std::endl;
+	}
+	return true;
 }
 
 /**
@@ -417,14 +480,9 @@ bool BlockImages::loadOther(const std::string& fire, const std::string& endporta
 	return true;
 }
 
-bool BlockImages::loadBlocks(const std::string& terrain_filename) {
-	Image terrain;
-	if (!terrain.readPNG(terrain_filename))
+bool BlockImages::loadBlocks(const std::string& block_dir) {
+	if (!textures.load(block_dir, texture_size))
 		return false;
-	if (terrain.getWidth() % 16 != 0 || terrain.getHeight() % 16 != 0
-	        || terrain.getWidth() != terrain.getHeight())
-		return false;
-	splitTerrain(terrain);
 
 	empty_texture.setSize(texture_size, texture_size);
 	unknown_block.setSize(texture_size, texture_size);
@@ -514,32 +572,6 @@ bool BlockImages::saveBlocks(const std::string& filename) {
 	*/
 
 	return img.writePNG(filename);
-}
-
-#define POS(_x, _y) (x == _x && y == _y)
-
-/**
- * Splits the terrain.png image into 16x16 images and resizes them to texture size.
- * The image resizing is done with bilinear interpolation, except the transparent leaves
- * textures, because with interpolation we would have half transparent pixels, what could
- * make the rendering process slower.
- */
-void BlockImages::splitTerrain(const Image& terrain) {
-	int size = terrain.getWidth() / 16;
-	for (int x = 0; x < 16; x++) {
-		for (int y = 0; y < 16; y++) {
-			Image texture = terrain.clip(x * size, y * size, size, size);
-			if (POS(4, 3) || POS(4, 8) || POS(4, 12)/* || POS(1, 3)*//* <- glass */)
-				texture.resizeSimple(texture_size, texture_size, textures[y * 16 + x]);
-			else
-				texture.resizeInterpolated(texture_size, texture_size,
-				        textures[y * 16 + x]);
-		}
-	}
-}
-
-const Image& BlockImages::getTexture(int x, int y) const {
-	return textures[y * 16 + x];
 }
 
 /**
@@ -665,7 +697,7 @@ void BlockImages::setBlockImage(uint16_t id, uint16_t data, const Image& block) 
  * water blocks until they are nearly opaque.
  */
 void BlockImages::testWaterTransparency() {
-	Image water = getTexture(13, 12);
+	Image water = textures.WATER;
 
 	// opaque_water[0] is water block when water texture is only on the top
 	opaque_water[0].setSize(getBlockImageSize(), getBlockImageSize());
@@ -1005,13 +1037,13 @@ void BlockImages::createSingleFaceBlock(uint16_t id, uint16_t data, int face,
 }
 
 void BlockImages::createGrassBlock() { // id 2
-	Image dirt = getTexture(2, 0);
+	Image dirt = textures.DIRT;
 
 	Image grass(dirt);
-	Image grass_mask = getTexture(6, 2).colorize(0.3, 0.95, 0.3);
+	Image grass_mask = textures.GRASS_SIDE_OVERLAY.colorize(0.3, 0.95, 0.3);
 	grass.alphablit(grass_mask, 0, 0);
 
-	Image top = getTexture(8, 2).colorize(0.3, 0.95, 0.3);
+	Image top = textures.GRASS_TOP.colorize(0.3, 0.95, 0.3);
 
 	BlockImage block;
 	block.setFace(FACE_NORTH | FACE_SOUTH | FACE_EAST | FACE_WEST, grass);
@@ -1020,7 +1052,7 @@ void BlockImages::createGrassBlock() { // id 2
 }
 
 void BlockImages::createWater() { // id 8, 9
-	Image water = getTexture(13, 12);
+	Image water = textures.WATER;
 	for (int data = 0; data < 8; data++) {
 		int smaller = data / 8.0 * texture_size;
 		Image side_texture = water.move(0, smaller);
@@ -1053,7 +1085,7 @@ void BlockImages::createWater() { // id 8, 9
 }
 
 void BlockImages::createLava() { // id 10, 11
-	Image lava = getTexture(13, 14);
+	Image lava = textures.LAVA;
 	for (int data = 0; data < 7; data += 2) {
 		int smaller = data / 8.0 * texture_size;
 		Image side_texture = lava.move(0, smaller);
@@ -1067,7 +1099,7 @@ void BlockImages::createLava() { // id 10, 11
 }
 
 void BlockImages::createWood(uint16_t data, const Image& side) { // id 17
-	Image top = getTexture(5, 1);
+	Image top = textures.TREE_TOP;
 	createBlock(17, data | 4, top, side, side);
 	createBlock(17, data | 8, side, top, side);
 	createBlock(17, data, side, side, top); // old format
@@ -1076,15 +1108,15 @@ void BlockImages::createWood(uint16_t data, const Image& side) { // id 17
 
 void BlockImages::createLeaves() { // id 18
 	if (render_leaves_transparent) {
-		createBlock(18, 0, getTexture(4, 3).colorize(0.3 * 0.8, 1 * 0.8, 0.1 * 0.8)); // oak
-		createBlock(18, 1, getTexture(4, 8).colorize(0.3 * 0.8, 1 * 0.8, 0.45 * 0.8)); // pine/spruce
-		createBlock(18, 2, getTexture(4, 3).colorize(0.55 * 0.8, 0.9 * 0.8, 0.1 * 0.8)); // birch
-		createBlock(18, 3, getTexture(4, 12).colorize(0.35 * 0.9, 1 * 0.9, 0.05 * 0.9)); // jungle
+		createBlock(18, 0, textures.LEAVES.colorize(0.3 * 0.8, 1 * 0.8, 0.1 * 0.8)); // oak
+		createBlock(18, 1, textures.LEAVES_SPRUCE.colorize(0.3 * 0.8, 1 * 0.8, 0.45 * 0.8)); // pine/spruce
+		createBlock(18, 2, textures.LEAVES.colorize(0.55 * 0.8, 0.9 * 0.8, 0.1 * 0.8)); // birch
+		createBlock(18, 3, textures.LEAVES_JUNGLE.colorize(0.35 * 0.9, 1 * 0.9, 0.05 * 0.9)); // jungle
 	} else {
-		createBlock(18, 0, getTexture(5, 3).colorize(0.3, 1, 0.1)); // oak
-		createBlock(18, 1, getTexture(5, 8).colorize(0.3, 1, 0.45)); // pine/spruce
-		createBlock(18, 2, getTexture(5, 3).colorize(0.55, 0.9, 0.1)); // birch
-		createBlock(18, 3, getTexture(5, 12).colorize(0.35, 1, 0.05)); // jungle
+		createBlock(18, 0, textures.LEAVES_OPAQUE.colorize(0.3, 1, 0.1)); // oak
+		createBlock(18, 1, textures.LEAVES_SPRUCE_OPAQUE.colorize(0.3, 1, 0.45)); // pine/spruce
+		createBlock(18, 2, textures.LEAVES_OPAQUE.colorize(0.55, 0.9, 0.1)); // birch
+		createBlock(18, 3, textures.LEAVES_JUNGLE_OPAQUE.colorize(0.35, 1, 0.05)); // jungle
 	}
 }
 
@@ -1106,18 +1138,18 @@ BlockImage buildBed(const Image& top, const Image& north_south, const Image& eas
 }
 
 void BlockImages::createBed() { // id 26
-	Image front = getTexture(5, 9);
-	Image side = getTexture(6, 9);
-	Image top = getTexture(6, 8);
+	Image front = textures.BED_FEET_END;
+	Image side = textures.BED_FEET_SIDE;
+	Image top = textures.BED_FEET_TOP;
 
 	setBlockImage(26, 0, buildBed(top.rotate(1), front, side, FACE_SOUTH));
 	setBlockImage(26, 1, buildBed(top.rotate(2), side.flip(true, false), front, FACE_WEST));
 	setBlockImage(26, 2, buildBed(top.rotate(3), front, side.flip(true, false), FACE_NORTH));
 	setBlockImage(26, 3, buildBed(top, side, front, FACE_EAST));
 
-	front = getTexture(8, 9);
-	side = getTexture(7, 9);
-	top = getTexture(7, 8);
+	front = textures.BED_HEAD_END;
+	side = textures.BED_HEAD_SIDE;
+	top = textures.BED_HEAD_TOP;
 
 	setBlockImage(26, 8, buildBed(top, front, side, FACE_NORTH));
 	setBlockImage(26, 1 | 8, buildBed(top.rotate(1), side.flip(true, false), front, FACE_EAST));
@@ -1186,9 +1218,9 @@ BlockImage buildPiston(int frontface, const Image& front, const Image& back,
 }
 
 void BlockImages::createPiston(uint16_t id, bool sticky) { //  id 29, 33
-	Image front = sticky ? getTexture(10, 6) : getTexture(11, 6);
-	Image side = getTexture(12, 6);
-	Image back = getTexture(13, 6);
+	Image front = sticky ? textures.PISTON_TOP_STICKY : textures.PISTON_TOP;
+	Image side = textures.PISTON_SIDE;
+	Image back = textures.PISTON_BOTTOM;
 
 	createBlock(id, 0, side.rotate(ROTATE_180), back);
 	createBlock(id, 1, side, front);
@@ -1202,24 +1234,24 @@ void BlockImages::createPiston(uint16_t id, bool sticky) { //  id 29, 33
 void BlockImages::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) { // id 43, 44, 125, 126
 	std::map<int, Image> slab_textures;
 	if (stone_slabs) {
-		slab_textures[0x0] = getTexture(5, 0);
-		slab_textures[0x1] = getTexture(0, 12);
-		slab_textures[0x2] = getTexture(4, 0);
-		slab_textures[0x3] = getTexture(0, 1);
-		slab_textures[0x4] = getTexture(7, 0);
-		slab_textures[0x5] = getTexture(6, 3);
+		slab_textures[0x0] = textures.STONESLAB_SIDE;
+		slab_textures[0x1] = textures.SANDSTONE_SIDE;
+		slab_textures[0x2] = textures.WOOD;
+		slab_textures[0x3] = textures.STONEBRICK;
+		slab_textures[0x4] = textures.BRICK;
+		slab_textures[0x5] = textures.STONEBRICKSMOOTH;
 	} else {
-		slab_textures[0x0] = getTexture(4, 0);
-		slab_textures[0x1] = getTexture(6, 12);
-		slab_textures[0x2] = getTexture(6, 13);
-		slab_textures[0x3] = getTexture(7, 12);
+		slab_textures[0x0] = textures.WOOD;
+		slab_textures[0x1] = textures.WOOD_SPRUCE;
+		slab_textures[0x2] = textures.WOOD_BIRCH;
+		slab_textures[0x3] = textures.WOOD_JUNGLE;
 	}
 	for (std::map<int, Image>::const_iterator it = slab_textures.begin();
 	        it != slab_textures.end(); ++it) {
 		Image side = it->second;
 		Image top = it->second;
 		if (it->first == 0 && stone_slabs)
-			top = getTexture(6, 0);
+			top = textures.STONESLAB_TOP;
 		if (double_slabs) {
 			createBlock(id, it->first, side, top);
 		} else {
@@ -1334,8 +1366,8 @@ void BlockImages::createDoor(uint16_t id, const Image& texture_bottom,
 }
 
 void BlockImages::createRails() { // id 66
-	Image texture = getTexture(0, 8);
-	Image corner_texture = getTexture(0, 7);
+	Image texture = textures.RAIL;
+	Image corner_texture = textures.RAIL_TURN;
 
 	createStraightRails(66, 0, texture);
 	createSingleFaceBlock(66, 6, FACE_BOTTOM, corner_texture.flip(false, true));
@@ -1367,7 +1399,7 @@ void BlockImages::createButton(uint16_t id, const Image& tex) { // id 77, 143
 }
 
 void BlockImages::createSnow() { // id 78
-	Image snow = getTexture(2, 4);
+	Image snow = textures.SNOW;
 	for (int data = 0; data < 8; data++) {
 		int height = data / 8.0 * texture_size;
 		setBlockImage(78, data, buildSmallerBlock(snow, snow, snow, 0, height));
@@ -1376,9 +1408,9 @@ void BlockImages::createSnow() { // id 78
 
 void BlockImages::createCactus() { // id 81
 	BlockImage block;
-	block.setFace(FACE_WEST, getTexture(6, 4), 2, 0);
-	block.setFace(FACE_SOUTH, getTexture(6, 4), -2, 0);
-	block.setFace(FACE_TOP, getTexture(5, 4));
+	block.setFace(FACE_WEST, textures.CACTUS_SIDE, 2, 0);
+	block.setFace(FACE_SOUTH, textures.CACTUS_SIDE, -2, 0);
+	block.setFace(FACE_TOP, textures.CACTUS_TOP);
 	setBlockImage(81, 0, block.buildImage());
 }
 
@@ -1455,8 +1487,8 @@ void BlockImages::createFence(uint16_t id, const Image& texture) { // id 85, 113
 }
 
 void BlockImages::createPumkin(uint16_t id, const Image& front) { // id 86, 91
-	Image side = getTexture(6, 7);
-	Image top = getTexture(6, 6);
+	Image side = textures.PUMPKIN_SIDE;
+	Image top = textures.PUMPKIN_TOP;
 	createBlock(id, 0, side, front, top);
 	createBlock(id, 1, front, side, top);
 	createBlock(id, 2, side, side, top);
@@ -1466,9 +1498,9 @@ void BlockImages::createPumkin(uint16_t id, const Image& front) { // id 86, 91
 
 void BlockImages::createCake() { // id 92
 	BlockImage block;
-	block.setFace(FACE_WEST, getTexture(10, 7), 1, 0);
-	block.setFace(FACE_SOUTH, getTexture(10, 7), -1, 0);
-	block.setFace(FACE_TOP, getTexture(9, 7), 0, 9);
+	block.setFace(FACE_WEST, textures.CAKE_SIDE, 1, 0);
+	block.setFace(FACE_SOUTH, textures.CAKE_SIDE, -1, 0);
+	block.setFace(FACE_TOP, textures.CAKE_TOP, 0, 9);
 	setBlockImage(92, 0, block.buildImage());
 }
 
@@ -1480,7 +1512,7 @@ void BlockImages::createRedstoneRepeater(uint16_t id, const Image& texture) { //
 }
 
 void BlockImages::createTrapdoor() { // id 96
-	Image texture = getTexture(4, 5);
+	Image texture = textures.TRAPDOOR;
 	for (uint16_t i = 0; i < 16; i++) {
 		if (i & 4) {
 			int data = i & 0b00000011;
@@ -1516,8 +1548,8 @@ BlockImage buildHugeMushroom(const Image& pores, const Image& cap = Image(),
 }
 
 void BlockImages::createHugeMushroom(uint16_t id, const Image& cap) { // id 99, 100
-	Image pores = getTexture(14, 8);
-	Image stem = getTexture(13, 8);
+	Image pores = textures.MUSHROOM_INSIDE;
+	Image stem = textures.MUSHROOM_SKIN_STEM;
 
 	setBlockImage(id, 0, buildHugeMushroom(pores));
 	setBlockImage(id, 1, buildHugeMushroom(pores, cap, FACE_TOP | FACE_WEST | FACE_NORTH));
@@ -1573,7 +1605,7 @@ void BlockImages::createBarsPane(uint16_t id, const Image& texture_left_right) {
 
 void BlockImages::createStem(uint16_t id) { // id 104, 105
 	// build here only growing normal stem
-	Image texture = getTexture(15, 6);
+	Image texture = textures.STEM_STRAIGHT;
 
 	for (int i = 0; i <= 7; i++) {
 		double percentage = 1 - ((double) i / 7);
@@ -1587,7 +1619,7 @@ void BlockImages::createStem(uint16_t id) { // id 104, 105
 }
 
 void BlockImages::createVines() { // id 106
-	Image texture = getTexture(15, 8).colorize(0.3, 1, 0.1);
+	Image texture = textures.VINE.colorize(0.3, 1, 0.1);
 
 	createSingleFaceBlock(106, 0, FACE_TOP, texture);
 	for (int i = 1; i < 16; i++) {
@@ -1631,7 +1663,7 @@ Image createFenceGateTexture(bool opened, Image texture) {
 }
 
 void BlockImages::createFenceGate() { // id 107
-	Image texture = getTexture(4, 0);
+	Image texture = textures.WOOD;
 	Image opened = createFenceGateTexture(true, texture);
 	Image closed = createFenceGateTexture(false, texture);
 
@@ -1661,8 +1693,8 @@ void BlockImages::createFenceGate() { // id 107
 }
 
 void BlockImages::createCauldron() { // id 118
-	Image side = getTexture(10, 9);
-	Image water = getTexture(14, 12);
+	Image side = textures.CAULDRON_SIDE;
+	Image water = textures.WATER;
 
 	for (int i = 0; i < 4; i++) {
 		Image block(getBlockImageSize(), getBlockImageSize());
@@ -1685,7 +1717,7 @@ void BlockImages::createBeacon() { // id 138
 
 	// at first create this little block in the middle
 	Image beacon_texture;
-	getTexture(9, 2).resizeInterpolated(texture_size * 0.75, texture_size * 0.75,
+	textures.BEACON.resizeInterpolated(texture_size * 0.75, texture_size * 0.75,
 			beacon_texture);
 	Image smallblock(texture_size * 2, texture_size * 2);
 	blitFace(smallblock, FACE_WEST, beacon_texture);
@@ -1693,7 +1725,7 @@ void BlockImages::createBeacon() { // id 138
 	blitFace(smallblock, FACE_TOP, beacon_texture);
 
 	// then create the obsidian ground
-	Image obsidian_texture = getTexture(5, 2);
+	Image obsidian_texture = textures.OBSIDIAN;
 	Image obsidian = buildSmallerBlock(obsidian_texture, obsidian_texture,
 			obsidian_texture, 0, texture_size / 4).buildImage();
 
@@ -1702,7 +1734,7 @@ void BlockImages::createBeacon() { // id 138
 	beacon.simpleblit(smallblock, texture_size / 4, texture_size / 4);
 
 	// then blit outside glass
-	Image glass_texture = getTexture(1, 3);
+	Image glass_texture = textures.GLASS;
 	blitFace(beacon, FACE_WEST, glass_texture);
 	blitFace(beacon, FACE_SOUTH, glass_texture);
 	blitFace(beacon, FACE_TOP, glass_texture);
@@ -1714,237 +1746,239 @@ void BlockImages::loadBlocks() {
 	buildCustomTextures();
 	unknown_block = BlockImage().setFace(0b11111, unknown_block).buildImage();
 
-	createBlock(1, 0, getTexture(1, 0)); // stone
+	BlockTextures& t = textures;
+
+	createBlock(1, 0, t.STONE); // stone
 	createGrassBlock(); // id 2
-	createBlock(3, 0, getTexture(2, 0)); // dirt
-	createBlock(4, 0, getTexture(0, 1)); // cobblestone
+	createBlock(3, 0, t.DIRT); // dirt
+	createBlock(4, 0, t.STONEBRICK); // cobblestone
 	// -- wooden planks
-	createBlock(5, 0, getTexture(4, 0)); // oak
-	createBlock(5, 1, getTexture(6, 12)); // pine/spruce
-	createBlock(5, 2, getTexture(6, 13)); // birch
-	createBlock(5, 3, getTexture(7, 12)); // jungle
+	createBlock(5, 0, t.WOOD); // oak
+	createBlock(5, 1, t.WOOD_SPRUCE); // pine/spruce
+	createBlock(5, 2, t.WOOD_BIRCH); // birch
+	createBlock(5, 3, t.WOOD_BIRCH); // jungle
 	// -- saplings
-	createItemStyleBlock(6, 0, getTexture(15, 0)); // oak
-	createItemStyleBlock(6, 1, getTexture(15, 3)); // spruce
-	createItemStyleBlock(6, 2, getTexture(15, 4)); // birch
-	createItemStyleBlock(6, 3, getTexture(14, 1)); // jungle
+	createItemStyleBlock(6, 0, t.SAPLING); // oak
+	createItemStyleBlock(6, 1, t.SAPLING_SPRUCE); // spruce
+	createItemStyleBlock(6, 2, t.SAPLING_BIRCH); // birch
+	createItemStyleBlock(6, 3, t.SAPLING_JUNGLE); // jungle
 	// --
-	createBlock(7, 0, getTexture(1, 1)); // bedrock
+	createBlock(7, 0, t.BEDROCK); // bedrock
 	createWater(); // id 8, 9
 	createLava(); // id 10, 11
-	createBlock(12, 0, getTexture(2, 1)); // sand
-	createBlock(13, 0, getTexture(3, 1)); // gravel
-	createBlock(14, 0, getTexture(0, 2)); // gold ore
-	createBlock(15, 0, getTexture(1, 2)); // iron ore
-	createBlock(16, 0, getTexture(2, 2)); // coal ore
+	createBlock(12, 0, t.SAND); // sand
+	createBlock(13, 0, t.GRAVEL); // gravel
+	createBlock(14, 0, t.ORE_GOLD); // gold ore
+	createBlock(15, 0, t.ORE_IRON); // iron ore
+	createBlock(16, 0, t.ORE_COAL); // coal ore
 	// -- wood
-	createWood(0, getTexture(4, 1)); // oak
-	createWood(1, getTexture(4, 7)); // pine/spruce
-	createWood(2, getTexture(5, 7)); // birch
-	createWood(3, getTexture(9, 9)); // jungle
+	createWood(0, t.TREE_SIDE); // oak
+	createWood(1, t.TREE_SPRUCE); // pine/spruce
+	createWood(2, t.TREE_BIRCH); // birch
+	createWood(3, t.TREE_JUNGLE); // jungle
 	createLeaves(); // id 18
-	createBlock(19, 0, getTexture(0, 3)); // sponge
-	createBlock(20, 0, getTexture(1, 3)); // glass
-	createBlock(21, 0, getTexture(0, 10)); // lapis lazuli ore
-	createBlock(22, 0, getTexture(0, 9)); // lapis lazuli block
-	createRotatedBlock(23, 0, getTexture(14, 2), getTexture(13, 2), getTexture(14, 3)); // dispenser
+	createBlock(19, 0, t.SPONGE); // sponge
+	createBlock(20, 0, t.GLASS); // glass
+	createBlock(21, 0, t.ORE_LAPIS); // lapis lazuli ore
+	createBlock(22, 0, t.BLOCK_LAPIS); // lapis lazuli block
+	createRotatedBlock(23, 0, t.DISPENSER_FRONT, t.FURNACE_SIDE, t.FURNACE_TOP); // dispenser
 	// -- sandstone
-	createBlock(24, 0, getTexture(0, 12), getTexture(0, 11)); // normal
-	createBlock(24, 1, getTexture(5, 14), getTexture(0, 11)); // chiseled
-	createBlock(24, 2, getTexture(6, 14), getTexture(0, 11)); // smooth
+	createBlock(24, 0, t.SANDSTONE_SIDE, t.SANDSTONE_TOP); // normal
+	createBlock(24, 1, t.SANDSTONE_CARVED, t.SANDSTONE_TOP); // chiseled
+	createBlock(24, 2, t.SANDSTONE_SMOOTH, t.SANDSTONE_TOP); // smooth
 	// --
-	createBlock(25, 0, getTexture(10, 4)); // noteblock
+	createBlock(25, 0, t.MUSIC_BLOCK); // noteblock
 	createBed(); // id 26 bed
-	createStraightRails(27, 0, getTexture(3, 10)); // id 27 powered rail (unpowered)
-	createStraightRails(27, 8, getTexture(3, 11)); // id 27 powered rail (powered)
-	createStraightRails(28, 0, getTexture(3, 12)); // id 28 detector rail
+	createStraightRails(27, 0, t.GOLDEN_RAIL); // id 27 powered rail (unpowered)
+	createStraightRails(27, 8, t.GOLDEN_RAIL_POWERED); // id 27 powered rail (powered)
+	createStraightRails(28, 0, t.ACTIVATOR_RAIL); // id 28 detector rail
 	createPiston(29, true); // sticky piston
-	createItemStyleBlock(30, 0, getTexture(11, 0)); // cobweb
+	createItemStyleBlock(30, 0, t.WEB); // cobweb
 	// -- tall grass
-	createItemStyleBlock(31, 0, getTexture(7, 3)); // dead bush style
-	createItemStyleBlock(31, 1, getTexture(7, 2).colorize(0.3, 0.95, 0.3)); // tall grass
-	createItemStyleBlock(31, 2, getTexture(8, 3).colorize(0.3, 0.95, 0.3)); // fern
+	createItemStyleBlock(31, 0, t.DEADBUSH); // dead bush style
+	createItemStyleBlock(31, 1, t.TALLGRASS.colorize(0.3, 0.95, 0.3)); // tall grass
+	createItemStyleBlock(31, 2, t.FERN.colorize(0.3, 0.95, 0.3)); // fern
 	// --
-	createItemStyleBlock(32, 0, getTexture(7, 3)); // dead bush
+	createItemStyleBlock(32, 0, t.DEADBUSH); // dead bush
 	createPiston(33, false); // piston
 	// id 34 // piston extension
 	// -- wool
-	createBlock(35, 0, getTexture(0, 4)); // white
-	createBlock(35, 1, getTexture(2, 13)); // orange
-	createBlock(35, 2, getTexture(2, 12)); // magenta
-	createBlock(35, 3, getTexture(2, 11)); // light blue
-	createBlock(35, 4, getTexture(2, 10)); // yellow
-	createBlock(35, 5, getTexture(2, 9)); // lime
-	createBlock(35, 6, getTexture(2, 8)); // pink
-	createBlock(35, 7, getTexture(2, 7)); // gray
-	createBlock(35, 8, getTexture(1, 14)); // light gray
-	createBlock(35, 9, getTexture(1, 13)); // cyan
-	createBlock(35, 10, getTexture(1, 12)); // purple
-	createBlock(35, 11, getTexture(1, 11)); // blue
-	createBlock(35, 12, getTexture(1, 10)); // brown
-	createBlock(35, 13, getTexture(1, 9)); // green
-	createBlock(35, 14, getTexture(1, 8)); // red
-	createBlock(35, 15, getTexture(1, 7)); // black
+	createBlock(35, 0, t.CLOTH_0); // white
+	createBlock(35, 1, t.CLOTH_1); // orange
+	createBlock(35, 2, t.CLOTH_2); // magenta
+	createBlock(35, 3, t.CLOTH_3); // light blue
+	createBlock(35, 4, t.CLOTH_4); // yellow
+	createBlock(35, 5, t.CLOTH_5); // lime
+	createBlock(35, 6, t.CLOTH_6); // pink
+	createBlock(35, 7, t.CLOTH_7); // gray
+	createBlock(35, 8, t.CLOTH_8); // light gray
+	createBlock(35, 9, t.CLOTH_9); // cyan
+	createBlock(35, 10, t.CLOTH_10); // purple
+	createBlock(35, 11, t.CLOTH_11); // blue
+	createBlock(35, 12, t.CLOTH_12); // brown
+	createBlock(35, 13, t.CLOTH_13); // green
+	createBlock(35, 14, t.CLOTH_14); // red
+	createBlock(35, 15, t.CLOTH_15); // black
 	// --
 	createBlock(36, 0, empty_texture); // block moved by piston aka 'block 36'
-	createItemStyleBlock(37, 0, getTexture(13, 0)); // dandelion
-	createItemStyleBlock(38, 0, getTexture(12, 0)); // rose
-	createItemStyleBlock(39, 0, getTexture(13, 1)); // brown mushroom
-	createItemStyleBlock(40, 0, getTexture(12, 1)); // red mushroom
-	createBlock(41, 0, getTexture(7, 1)); // block of gold
-	createBlock(42, 0, getTexture(6, 1)); // block of iron
+	createItemStyleBlock(37, 0, t.FLOWER); // dandelion
+	createItemStyleBlock(38, 0, t.ROSE); // rose
+	createItemStyleBlock(39, 0, t.MUSHROOM_BROWN); // brown mushroom
+	createItemStyleBlock(40, 0, t.MUSHROOM_RED); // red mushroom
+	createBlock(41, 0, t.BLOCK_GOLD); // block of gold
+	createBlock(42, 0, t.BLOCK_IRON); // block of iron
 	createSlabs(43, true, true); // double stone slabs
 	createSlabs(44, true, false); // normal stone slabs
-	createBlock(45, 0, getTexture(7, 0)); // bricks
-	createBlock(46, 0, getTexture(8, 0), getTexture(9, 0)); // tnt
-	createBlock(47, 0, getTexture(3, 2), getTexture(4, 0)); // bookshelf
-	createBlock(48, 0, getTexture(4, 2)); // moss stone
-	createBlock(49, 0, getTexture(5, 2)); // obsidian
-	createTorch(50, getTexture(0, 5)); // torch
+	createBlock(45, 0, t.BRICK); // bricks
+	createBlock(46, 0, t.TNT_SIDE, t.TNT_TOP); // tnt
+	createBlock(47, 0, t.BOOKSHELF, t.WOOD); // bookshelf
+	createBlock(48, 0, t.STONE_MOSS); // moss stone
+	createBlock(49, 0, t.OBSIDIAN); // obsidian
+	createTorch(50, t.TORCH); // torch
 	createItemStyleBlock(51, 0, fire_texture); // fire
-	createBlock(52, 0, getTexture(1, 4)); // monster spawner
-	createStairs(53, getTexture(4, 0)); // oak wood stairs
+	createBlock(52, 0, t.MOB_SPAWNER); // monster spawner
+	createStairs(53, t.WOOD); // oak wood stairs
 	createChest(54, chest); // chest
 	createDoubleChest(54, largechest); // chest
 	// id 55 // redstone wire
-	createBlock(56, 0, getTexture(2, 3)); // diamond ore
-	createBlock(57, 0, getTexture(8, 1)); // block of diamond
-	createBlock(58, 0, getTexture(11, 3), getTexture(12, 3), getTexture(11, 2)); // crafting table
+	createBlock(56, 0, t.ORE_DIAMOND); // diamond ore
+	createBlock(57, 0, t.BLOCK_DIAMOND); // block of diamond
+	createBlock(58, 0, t.WORKBENCH_SIDE, t.WORKBENCH_FRONT, t.WORKBENCH_TOP); // crafting table
 	// -- wheat
-	createItemStyleBlock(59, 0, getTexture(8, 5)); //
-	createItemStyleBlock(59, 1, getTexture(9, 5)); //
-	createItemStyleBlock(59, 2, getTexture(10, 5)); //
-	createItemStyleBlock(59, 3, getTexture(11, 5)); //
-	createItemStyleBlock(59, 4, getTexture(12, 5)); //
-	createItemStyleBlock(59, 5, getTexture(13, 5)); //
-	createItemStyleBlock(59, 6, getTexture(14, 5)); //
-	createItemStyleBlock(59, 7, getTexture(15, 5)); //
+	createItemStyleBlock(59, 0, t.CROPS_0); //
+	createItemStyleBlock(59, 1, t.CROPS_1); //
+	createItemStyleBlock(59, 2, t.CROPS_2); //
+	createItemStyleBlock(59, 3, t.CROPS_3); //
+	createItemStyleBlock(59, 4, t.CROPS_4); //
+	createItemStyleBlock(59, 5, t.CROPS_5); //
+	createItemStyleBlock(59, 6, t.CROPS_6); //
+	createItemStyleBlock(59, 7, t.CROPS_7); //
 	// --
-	createBlock(60, 0, getTexture(2, 0), getTexture(6, 5)); // farmland
-	createRotatedBlock(61, 0, getTexture(12, 2), getTexture(13, 2), getTexture(14, 3)); // furnace
-	createRotatedBlock(62, 0, getTexture(13, 3), getTexture(13, 2), getTexture(14, 3)); // burning furnace
+	createBlock(60, 0, t.DIRT, t.FARMLAND_WET); // farmland
+	createRotatedBlock(61, 0, t.FURNACE_FRONT, t.FURNACE_SIDE, t.FURNACE_TOP); // furnace
+	createRotatedBlock(62, 0, t.FURNACE_FRONT_LIT, t.FURNACE_SIDE, t.FURNACE_TOP); // burning furnace
 	// id 63 // sign post
-	createDoor(64, getTexture(1, 6), getTexture(1, 5)); // wooden door
+	createDoor(64, t.DOOR_WOOD_LOWER, t.DOOR_WOOD_UPPER); // wooden door
 	// -- ladders
-	createSingleFaceBlock(65, 2, FACE_SOUTH, getTexture(3, 5));
-	createSingleFaceBlock(65, 3, FACE_NORTH, getTexture(3, 5));
-	createSingleFaceBlock(65, 4, FACE_EAST, getTexture(3, 5));
-	createSingleFaceBlock(65, 5, FACE_WEST, getTexture(3, 5));
+	createSingleFaceBlock(65, 2, FACE_SOUTH, t.LADDER);
+	createSingleFaceBlock(65, 3, FACE_NORTH, t.LADDER);
+	createSingleFaceBlock(65, 4, FACE_EAST, t.LADDER);
+	createSingleFaceBlock(65, 5, FACE_WEST, t.LADDER);
 	// --
 	createRails(); // id 66
-	createStairs(67, getTexture(0, 1)); // cobblestone stairs
+	createStairs(67, t.STONEBRICK); // cobblestone stairs
 	// id 68 // wall sign
 	// id 69 // lever
-	createSmallerBlock(70, 0, getTexture(1, 0), getTexture(1, 0), 0, 1); // stone pressure plate
-	createDoor(71, getTexture(2, 6), getTexture(2, 5)); // iron door
-	createSmallerBlock(72, 0, getTexture(4, 0), getTexture(4, 0), 0, 1); // wooden pressure plate
-	createBlock(73, 0, getTexture(3, 3)); // redstone ore
-	createBlock(74, 0, getTexture(3, 3)); // glowing redstone ore
-	createTorch(75, getTexture(3, 6)); // redstone torch off
-	createTorch(76, getTexture(3, 7)); // redstone torch on
-	createButton(77, getTexture(0, 0)); // stone button
+	createSmallerBlock(70, 0, t.STONE, t.STONE, 0, 1); // stone pressure plate
+	createDoor(71, t.DOOR_IRON_LOWER, t.DOOR_IRON_UPPER); // iron door
+	createSmallerBlock(72, 0, t.WOOD, t.WOOD, 0, 1); // wooden pressure plate
+	createBlock(73, 0, t.ORE_REDSTONE); // redstone ore
+	createBlock(74, 0, t.ORE_REDSTONE); // glowing redstone ore
+	createTorch(75, t.REDTORCH); // redstone torch off
+	createTorch(76, t.REDTORCH_LIT); // redstone torch on
+	createButton(77, t.STONE); // stone button
 	createSnow(); // id 78
-	createBlock(79, 0, getTexture(3, 4)); // ice
-	createBlock(80, 0, getTexture(2, 4)); // snow block
+	createBlock(79, 0, t.ICE); // ice
+	createBlock(80, 0, t.SNOW); // snow block
 	createCactus(); // id 81
-	createBlock(82, 0, getTexture(8, 4)); // clay block
-	createItemStyleBlock(83, 0, getTexture(9, 4)); // sugar cane
-	createBlock(84, 0, getTexture(10, 4), getTexture(11, 4)); // jukebox
-	createFence(85, getTexture(4, 0)); // fence
-	createPumkin(86, getTexture(7, 7)); // pumpkin
-	createBlock(87, 0, getTexture(7, 6)); // netherrack
-	createBlock(88, 0, getTexture(8, 6)); // soul sand
-	createBlock(89, 0, getTexture(9, 6)); // glowstone block
-	createBlock(90, 0, getTexture(14, 0).colorize(1, 1, 1, 0.5)); // nether portal block
-	createPumkin(91, getTexture(8, 7)); // jack-o-lantern
+	createBlock(82, 0, t.CLAY); // clay block
+	createItemStyleBlock(83, 0, t.REEDS); // sugar cane
+	createBlock(84, 0, t.MUSIC_BLOCK, t.JUKEBOX_TOP); // jukebox
+	createFence(85, t.WOOD); // fence
+	createPumkin(86, t.PUMPKIN_FACE); // pumpkin
+	createBlock(87, 0, t.HELLROCK); // netherrack
+	createBlock(88, 0, t.HELLSAND); // soul sand
+	createBlock(89, 0, t.LIGHTGEM); // glowstone block
+	createBlock(90, 0, t.PORTAL); // nether portal block
+	createPumkin(91, t.PUMPKIN_JACK); // jack-o-lantern
 	createCake(); // id 92
-	createRedstoneRepeater(93, getTexture(3, 8)); // redstone repeater off
-	createRedstoneRepeater(94, getTexture(3, 9)); // redstone repeater on
+	createRedstoneRepeater(93, t.REPEATER); // redstone repeater off
+	createRedstoneRepeater(94, t.REPEATER_LIT); // redstone repeater on
 	createChest(95, chest); // locked chest
 	createTrapdoor(); // id 96 // trapdoor
 	// -- monster egg
-	createBlock(97, 0, getTexture(1, 0)); // stone
-	createBlock(97, 1, getTexture(0, 1)); // cobblestone
-	createBlock(97, 2, getTexture(6, 3)); // sonte brick
+	createBlock(97, 0, t.STONE); // stone
+	createBlock(97, 1, t.STONEBRICK); // cobblestone
+	createBlock(97, 2, t.STONEBRICKSMOOTH); // stone brick
 	// --
 	// -- stone bricks
-	createBlock(98, 0, getTexture(6, 3)); // normal
-	createBlock(98, 1, getTexture(4, 6)); // mossy
-	createBlock(98, 2, getTexture(5, 6)); // cracked
-	createBlock(98, 3, getTexture(5, 13)); // chiseled
+	createBlock(98, 0, t.STONEBRICKSMOOTH); // normal
+	createBlock(98, 1, t.STONEBRICKSMOOTH_MOSSY); // mossy
+	createBlock(98, 2, t.STONEBRICKSMOOTH_CRACKED); // cracked
+	createBlock(98, 3, t.STONEBRICKSMOOTH_CARVED); // chiseled
 	// --
-	createHugeMushroom(99, getTexture(14, 7)); // huge brown mushroom
-	createHugeMushroom(100, getTexture(13, 7)); // huge red mushroom
-	createBarsPane(101, getTexture(5, 5)); // iron bars
-	createBarsPane(102, getTexture(1, 3)); // glass pane
-	createBlock(103, 0, getTexture(8, 8), getTexture(9, 8)); // melon
+	createHugeMushroom(99, t.MUSHROOM_SKIN_BROWN); // huge brown mushroom
+	createHugeMushroom(100, t.MUSHROOM_SKIN_RED); // huge red mushroom
+	createBarsPane(101, t.FENCE_IRON); // iron bars
+	createBarsPane(102, t.GLASS); // glass pane
+	createBlock(103, 0, t.MELON_SIDE, t.MELON_TOP); // melon
 	createStem(104); // pumpkin stem
 	createStem(105); // melon stem
 	createVines(); // id 106 // vines
 	createFenceGate(); // id 107 // fence gate
-	createStairs(108, getTexture(7, 0)); // brick stairs
-	createStairs(109, getTexture(6, 3)); // stone brick stairs
-	createBlock(110, 0, getTexture(13, 4), getTexture(14, 4)); // mycelium
+	createStairs(108, t.BRICK); // brick stairs
+	createStairs(109, t.STONEBRICKSMOOTH); // stone brick stairs
+	createBlock(110, 0, t.MYCEL_SIDE, t.MYCEL_TOP); // mycelium
 	createSingleFaceBlock(111, 0, FACE_BOTTOM,
-	        getTexture(12, 4).colorize(0.3, 0.95, 0.3)); // lily pad
-	createBlock(112, 0, getTexture(0, 14)); // nether brick
-	createFence(113, getTexture(0, 14)); // nether brick fence
-	createStairs(114, getTexture(0, 14)); // nether brick stairs
+	        t.WATERLILY.colorize(0.3, 0.95, 0.3)); // lily pad
+	createBlock(112, 0, t.NETHER_BRICK); // nether brick
+	createFence(113, t.NETHER_BRICK); // nether brick fence
+	createStairs(114, t.NETHER_BRICK); // nether brick stairs
 	// -- nether wart
-	createItemStyleBlock(115, 0, getTexture(2, 14)); //
-	createItemStyleBlock(115, 1, getTexture(3, 14)); //
-	createItemStyleBlock(115, 2, getTexture(3, 14)); //
-	createItemStyleBlock(115, 3, getTexture(4, 14)); //
+	createItemStyleBlock(115, 0, t.NETHER_STALK_0); //
+	createItemStyleBlock(115, 1, t.NETHER_STALK_1); //
+	createItemStyleBlock(115, 2, t.NETHER_STALK_1); //
+	createItemStyleBlock(115, 3, t.NETHER_STALK_2); //
 	// --
-	createSmallerBlock(116, 0, getTexture(6, 11), getTexture(6, 10), 0,
+	createSmallerBlock(116, 0, t.ENCHANTMENT_SIDE, t.ENCHANTMENT_TOP, 0,
 			texture_size * 0.75); // enchantment table
-	createItemStyleBlock(117, 0, getTexture(13, 9)); // brewing stand
+	createItemStyleBlock(117, 0, t.BREWING_STAND); // brewing stand
 	createCauldron(); // id 118 // cauldron
 	createSmallerBlock(119, 0, endportal_texture, endportal_texture,
 			texture_size * 0.25, texture_size * 0.75); // end portal
-	createSmallerBlock(120, 0, getTexture(15, 9), getTexture(14, 9), 0,
+	createSmallerBlock(120, 0, t.ENDFRAME_SIDE, t.ENDFRAME_TOP, 0,
 			texture_size * 0.8125); // end portal frame
-	createBlock(121, 0, getTexture(15, 10)); // end stone
+	createBlock(121, 0, t.WHITE_STONE); // end stone
 	// id 122 // dragon egg
-	createBlock(123, 0, getTexture(3, 13)); // redstone lamp inactive
-	createBlock(124, 0, getTexture(4, 13)); // redstone lamp active
+	createBlock(123, 0, t.REDSTONE_LIGHT); // redstone lamp inactive
+	createBlock(124, 0, t.REDSTONE_LIGHT_LIT); // redstone lamp active
 	createSlabs(125, false, true); // wooden double slabs
 	createSlabs(126, false, false); // wooden normal slabs
 	// id 127 // cocoa plant
-	createStairs(128, getTexture(0, 12)); // sandstone stairs
-	createBlock(129, 0, getTexture(11, 10)); // emerald ore
+	createStairs(128, t.SANDSTONE_SIDE); // sandstone stairs
+	createBlock(129, 0, t.ORE_EMERALD); // emerald ore
 	createChest(130, enderchest); // ender chest
 	// id 131 // tripwire hook
 	// id 132 // tripwire
-	createBlock(133, 0, getTexture(9, 1)); // block of emerald
-	createStairs(134, getTexture(6, 12)); // spruce wood stairs
-	createStairs(135, getTexture(6, 13)); // birch wood stairs
-	createStairs(136, getTexture(7, 12)); // jungle wood stairs
-	createBlock(137, 0, getTexture(8, 11)); // command block
+	createBlock(133, 0, t.BLOCK_EMERALD); // block of emerald
+	createStairs(134, t.WOOD_SPRUCE); // spruce wood stairs
+	createStairs(135, t.WOOD_BIRCH); // birch wood stairs
+	createStairs(136, t.WOOD_JUNGLE); // jungle wood stairs
+	createBlock(137, 0, t.COMMAND_BLOCK); // command block
 	createBeacon(); // beacon
 	// id 139 // cobblestone wall
 	// id 140 // flower pot
 	// carrots --
-	createItemStyleBlock(141, 0, getTexture(8, 12));
-	createItemStyleBlock(141, 1, getTexture(8, 12));
-	createItemStyleBlock(141, 2, getTexture(9, 12));
-	createItemStyleBlock(141, 3, getTexture(9, 12));
-	createItemStyleBlock(141, 4, getTexture(10, 12));
-	createItemStyleBlock(141, 5, getTexture(10, 12));
-	createItemStyleBlock(141, 6, getTexture(10, 12));
-	createItemStyleBlock(141, 7, getTexture(11, 12));
+	createItemStyleBlock(141, 0, t.CARROTS_0);
+	createItemStyleBlock(141, 1, t.CARROTS_0);
+	createItemStyleBlock(141, 2, t.CARROTS_1);
+	createItemStyleBlock(141, 3, t.CARROTS_1);
+	createItemStyleBlock(141, 4, t.CARROTS_2);
+	createItemStyleBlock(141, 5, t.CARROTS_2);
+	createItemStyleBlock(141, 6, t.CARROTS_2);
+	createItemStyleBlock(141, 7, t.CARROTS_3);
 	// --
 	// potatoes --
-	createItemStyleBlock(142, 0, getTexture(8, 12));
-	createItemStyleBlock(142, 1, getTexture(8, 12));
-	createItemStyleBlock(142, 2, getTexture(9, 12));
-	createItemStyleBlock(142, 3, getTexture(9, 12));
-	createItemStyleBlock(142, 4, getTexture(10, 12));
-	createItemStyleBlock(142, 5, getTexture(10, 12));
-	createItemStyleBlock(142, 6, getTexture(10, 12));
-	createItemStyleBlock(142, 7, getTexture(12, 12));
+	createItemStyleBlock(142, 0, t.POTATOES_0);
+	createItemStyleBlock(142, 1, t.POTATOES_0);
+	createItemStyleBlock(142, 2, t.POTATOES_1);
+	createItemStyleBlock(142, 3, t.POTATOES_1);
+	createItemStyleBlock(142, 4, t.POTATOES_2);
+	createItemStyleBlock(142, 5, t.POTATOES_2);
+	createItemStyleBlock(142, 6, t.POTATOES_2);
+	createItemStyleBlock(142, 7, t.POTATOES_3);
 	// --
-	createButton(143, getTexture(4, 0)); // wooden button
+	createButton(143, t.WOOD); // wooden button
 	// id 144 // head
 	// id 145 // anvil
 	// id 146 // trapped chest
@@ -1956,6 +1990,10 @@ void BlockImages::loadBlocks() {
 	// id 152 // block of redstone
 	// id 153 // nether quartz ore
 	// id 154 // hopper
+	// id 155 // block of quartz
+	// id 156 // quartz stairs
+	// id 157 // activator rail
+	// id 158 // dropper
 }
 
 bool BlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
