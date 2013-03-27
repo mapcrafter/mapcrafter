@@ -157,7 +157,157 @@ const std::string& TextureImage::getName() const {
 	return name;
 }
 
-BlockTextures::BlockTextures() {
+// generated code by texture_code.py
+BlockTextures::BlockTextures()
+		: ACTIVATOR_RAIL("activatorRail"), ACTIVATOR_RAIL_POWERED(
+		        "activatorRail_powered"), ANVIL_BASE("anvil_base"), ANVIL_TOP(
+		        "anvil_top"), ANVIL_TOP_DAMAGED_1("anvil_top_damaged_1"), ANVIL_TOP_DAMAGED_2(
+		        "anvil_top_damaged_2"), BEACON("beacon"), BED_FEET_END("bed_feet_end"), BED_FEET_SIDE(
+		        "bed_feet_side"), BED_FEET_TOP("bed_feet_top"), BED_HEAD_END(
+		        "bed_head_end"), BED_HEAD_SIDE("bed_head_side"), BED_HEAD_TOP(
+		        "bed_head_top"), BEDROCK("bedrock"), BLOCK_DIAMOND("blockDiamond"), BLOCK_EMERALD(
+		        "blockEmerald"), BLOCK_GOLD("blockGold"), BLOCK_IRON("blockIron"), BLOCK_LAPIS(
+		        "blockLapis"), BLOCK_REDSTONE("blockRedstone"), BOOKSHELF("bookshelf"), BREWING_STAND(
+		        "brewingStand"), BREWING_STAND_BASE("brewingStand_base"), BRICK("brick"), CACTUS_BOTTOM(
+		        "cactus_bottom"), CACTUS_SIDE("cactus_side"), CACTUS_TOP("cactus_top"), CAKE_BOTTOM(
+		        "cake_bottom"), CAKE_INNER("cake_inner"), CAKE_SIDE("cake_side"), CAKE_TOP(
+		        "cake_top"), CARROTS_0("carrots_0"), CARROTS_1("carrots_1"), CARROTS_2(
+		        "carrots_2"), CARROTS_3("carrots_3"), CAULDRON_BOTTOM("cauldron_bottom"), CAULDRON_INNER(
+		        "cauldron_inner"), CAULDRON_SIDE("cauldron_side"), CAULDRON_TOP(
+		        "cauldron_top"), CLAY("clay"), CLOTH_0("cloth_0"), CLOTH_1("cloth_1"), CLOTH_10(
+		        "cloth_10"), CLOTH_11("cloth_11"), CLOTH_12("cloth_12"), CLOTH_13(
+		        "cloth_13"), CLOTH_14("cloth_14"), CLOTH_15("cloth_15"), CLOTH_2(
+		        "cloth_2"), CLOTH_3("cloth_3"), CLOTH_4("cloth_4"), CLOTH_5("cloth_5"), CLOTH_6(
+		        "cloth_6"), CLOTH_7("cloth_7"), CLOTH_8("cloth_8"), CLOTH_9("cloth_9"), COCOA_0(
+		        "cocoa_0"), COCOA_1("cocoa_1"), COCOA_2("cocoa_2"), COMMAND_BLOCK(
+		        "commandBlock"), COMPARATOR("comparator"), COMPARATOR_LIT(
+		        "comparator_lit"), CROPS_0("crops_0"), CROPS_1("crops_1"), CROPS_2(
+		        "crops_2"), CROPS_3("crops_3"), CROPS_4("crops_4"), CROPS_5("crops_5"), CROPS_6(
+		        "crops_6"), CROPS_7("crops_7"), DAYLIGHT_DETECTOR_SIDE(
+		        "daylightDetector_side"), DAYLIGHT_DETECTOR_TOP("daylightDetector_top"), DEADBUSH(
+		        "deadbush"), DESTROY_0("destroy_0"), DESTROY_1("destroy_1"), DESTROY_2(
+		        "destroy_2"), DESTROY_3("destroy_3"), DESTROY_4("destroy_4"), DESTROY_5(
+		        "destroy_5"), DESTROY_6("destroy_6"), DESTROY_7("destroy_7"), DESTROY_8(
+		        "destroy_8"), DESTROY_9("destroy_9"), DETECTOR_RAIL("detectorRail"), DETECTOR_RAIL_ON(
+		        "detectorRail_on"), DIRT("dirt"), DISPENSER_FRONT("dispenser_front"), DISPENSER_FRONT_VERTICAL(
+		        "dispenser_front_vertical"), DOOR_IRON_LOWER("doorIron_lower"), DOOR_IRON_UPPER(
+		        "doorIron_upper"), DOOR_WOOD_LOWER("doorWood_lower"), DOOR_WOOD_UPPER(
+		        "doorWood_upper"), DRAGON_EGG("dragonEgg"), DROPPER_FRONT(
+		        "dropper_front"), DROPPER_FRONT_VERTICAL("dropper_front_vertical"), ENCHANTMENT_BOTTOM(
+		        "enchantment_bottom"), ENCHANTMENT_SIDE("enchantment_side"), ENCHANTMENT_TOP(
+		        "enchantment_top"), ENDFRAME_EYE("endframe_eye"), ENDFRAME_SIDE(
+		        "endframe_side"), ENDFRAME_TOP("endframe_top"), FARMLAND_DRY(
+		        "farmland_dry"), FARMLAND_WET("farmland_wet"), FENCE_IRON("fenceIron"), FERN(
+		        "fern"), FIRE_0("fire_0"), FIRE_1("fire_1"), FLOWER("flower"), FLOWER_POT(
+		        "flowerPot"), FURNACE_FRONT("furnace_front"), FURNACE_FRONT_LIT(
+		        "furnace_front_lit"), FURNACE_SIDE("furnace_side"), FURNACE_TOP(
+		        "furnace_top"), GLASS("glass"), GOLDEN_RAIL("goldenRail"), GOLDEN_RAIL_POWERED(
+		        "goldenRail_powered"), GRASS_SIDE("grass_side"), GRASS_SIDE_OVERLAY(
+		        "grass_side_overlay"), GRASS_TOP("grass_top"), GRAVEL("gravel"), HELLROCK(
+		        "hellrock"), HELLSAND("hellsand"), HOPPER("hopper"), HOPPER_INSIDE(
+		        "hopper_inside"), HOPPER_TOP("hopper_top"), ICE("ice"), ITEMFRAME_BACK(
+		        "itemframe_back"), JUKEBOX_TOP("jukebox_top"), LADDER("ladder"), LAVA(
+		        "lava"), LAVA_FLOW("lava_flow"), LEAVES("leaves"), LEAVES_JUNGLE(
+		        "leaves_jungle"), LEAVES_JUNGLE_OPAQUE("leaves_jungle_opaque"), LEAVES_OPAQUE(
+		        "leaves_opaque"), LEAVES_SPRUCE("leaves_spruce"), LEAVES_SPRUCE_OPAQUE(
+		        "leaves_spruce_opaque"), LEVER("lever"), LIGHTGEM("lightgem"), MELON_SIDE(
+		        "melon_side"), MELON_TOP("melon_top"), MOB_SPAWNER("mobSpawner"), MUSHROOM_BROWN(
+		        "mushroom_brown"), MUSHROOM_INSIDE("mushroom_inside"), MUSHROOM_RED(
+		        "mushroom_red"), MUSHROOM_SKIN_BROWN("mushroom_skin_brown"), MUSHROOM_SKIN_RED(
+		        "mushroom_skin_red"), MUSHROOM_SKIN_STEM("mushroom_skin_stem"), MUSIC_BLOCK(
+		        "musicBlock"), MYCEL_SIDE("mycel_side"), MYCEL_TOP("mycel_top"), NETHER_BRICK(
+		        "netherBrick"), NETHER_STALK_0("netherStalk_0"), NETHER_STALK_1(
+		        "netherStalk_1"), NETHER_STALK_2("netherStalk_2"), NETHERQUARTZ(
+		        "netherquartz"), OBSIDIAN("obsidian"), ORE_COAL("oreCoal"), ORE_DIAMOND(
+		        "oreDiamond"), ORE_EMERALD("oreEmerald"), ORE_GOLD("oreGold"), ORE_IRON(
+		        "oreIron"), ORE_LAPIS("oreLapis"), ORE_REDSTONE("oreRedstone"), PISTON_BOTTOM(
+		        "piston_bottom"), PISTON_INNER_TOP("piston_inner_top"), PISTON_SIDE(
+		        "piston_side"), PISTON_TOP("piston_top"), PISTON_TOP_STICKY(
+		        "piston_top_sticky"), PORTAL("portal"), POTATOES_0("potatoes_0"), POTATOES_1(
+		        "potatoes_1"), POTATOES_2("potatoes_2"), POTATOES_3("potatoes_3"), PUMPKIN_FACE(
+		        "pumpkin_face"), PUMPKIN_JACK("pumpkin_jack"), PUMPKIN_SIDE(
+		        "pumpkin_side"), PUMPKIN_TOP("pumpkin_top"), QUARTZBLOCK_BOTTOM(
+		        "quartzblock_bottom"), QUARTZBLOCK_CHISELED("quartzblock_chiseled"), QUARTZBLOCK_CHISELED_TOP(
+		        "quartzblock_chiseled_top"), QUARTZBLOCK_LINES("quartzblock_lines"), QUARTZBLOCK_LINES_TOP(
+		        "quartzblock_lines_top"), QUARTZBLOCK_SIDE("quartzblock_side"), QUARTZBLOCK_TOP(
+		        "quartzblock_top"), RAIL("rail"), RAIL_TURN("rail_turn"), REDSTONE_DUST_CROSS(
+		        "redstoneDust_cross"), REDSTONE_DUST_CROSS_OVERLAY(
+		        "redstoneDust_cross_overlay"), REDSTONE_DUST_LINE("redstoneDust_line"), REDSTONE_DUST_LINE_OVERLAY(
+		        "redstoneDust_line_overlay"), REDSTONE_LIGHT("redstoneLight"), REDSTONE_LIGHT_LIT(
+		        "redstoneLight_lit"), REDTORCH("redtorch"), REDTORCH_LIT("redtorch_lit"), REEDS(
+		        "reeds"), REPEATER("repeater"), REPEATER_LIT("repeater_lit"), ROSE(
+		        "rose"), SAND("sand"), SANDSTONE_BOTTOM("sandstone_bottom"), SANDSTONE_CARVED(
+		        "sandstone_carved"), SANDSTONE_SIDE("sandstone_side"), SANDSTONE_SMOOTH(
+		        "sandstone_smooth"), SANDSTONE_TOP("sandstone_top"), SAPLING("sapling"), SAPLING_BIRCH(
+		        "sapling_birch"), SAPLING_JUNGLE("sapling_jungle"), SAPLING_SPRUCE(
+		        "sapling_spruce"), SNOW("snow"), SNOW_SIDE("snow_side"), SPONGE("sponge"), STEM_BENT(
+		        "stem_bent"), STEM_STRAIGHT("stem_straight"), STONE("stone"), STONE_MOSS(
+		        "stoneMoss"), STONEBRICK("stonebrick"), STONEBRICKSMOOTH(
+		        "stonebricksmooth"), STONEBRICKSMOOTH_CARVED("stonebricksmooth_carved"), STONEBRICKSMOOTH_CRACKED(
+		        "stonebricksmooth_cracked"), STONEBRICKSMOOTH_MOSSY(
+		        "stonebricksmooth_mossy"), STONESLAB_SIDE("stoneslab_side"), STONESLAB_TOP(
+		        "stoneslab_top"), TALLGRASS("tallgrass"), THINGLASS_TOP("thinglass_top"), TNT_BOTTOM(
+		        "tnt_bottom"), TNT_SIDE("tnt_side"), TNT_TOP("tnt_top"), TORCH("torch"), TRAPDOOR(
+		        "trapdoor"), TREE_BIRCH("tree_birch"), TREE_JUNGLE("tree_jungle"), TREE_SIDE(
+		        "tree_side"), TREE_SPRUCE("tree_spruce"), TREE_TOP("tree_top"), TRIP_WIRE(
+		        "tripWire"), TRIP_WIRE_SOURCE("tripWireSource"), VINE("vine"), WATER(
+		        "water"), WATER_FLOW("water_flow"), WATERLILY("waterlily"), WEB("web"), WHITE_STONE(
+		        "whiteStone"), WOOD("wood"), WOOD_BIRCH("wood_birch"), WOOD_JUNGLE(
+		        "wood_jungle"), WOOD_SPRUCE("wood_spruce"), WORKBENCH_FRONT(
+		        "workbench_front"), WORKBENCH_SIDE("workbench_side"), WORKBENCH_TOP(
+		        "workbench_top"), textures( { &ACTIVATOR_RAIL, &ACTIVATOR_RAIL_POWERED,
+		        &ANVIL_BASE, &ANVIL_TOP, &ANVIL_TOP_DAMAGED_1, &ANVIL_TOP_DAMAGED_2,
+		        &BEACON, &BED_FEET_END, &BED_FEET_SIDE, &BED_FEET_TOP, &BED_HEAD_END,
+		        &BED_HEAD_SIDE, &BED_HEAD_TOP, &BEDROCK, &BLOCK_DIAMOND, &BLOCK_EMERALD,
+		        &BLOCK_GOLD, &BLOCK_IRON, &BLOCK_LAPIS, &BLOCK_REDSTONE, &BOOKSHELF,
+		        &BREWING_STAND, &BREWING_STAND_BASE, &BRICK, &CACTUS_BOTTOM, &CACTUS_SIDE,
+		        &CACTUS_TOP, &CAKE_BOTTOM, &CAKE_INNER, &CAKE_SIDE, &CAKE_TOP, &CARROTS_0,
+		        &CARROTS_1, &CARROTS_2, &CARROTS_3, &CAULDRON_BOTTOM, &CAULDRON_INNER,
+		        &CAULDRON_SIDE, &CAULDRON_TOP, &CLAY, &CLOTH_0, &CLOTH_1, &CLOTH_10,
+		        &CLOTH_11, &CLOTH_12, &CLOTH_13, &CLOTH_14, &CLOTH_15, &CLOTH_2, &CLOTH_3,
+		        &CLOTH_4, &CLOTH_5, &CLOTH_6, &CLOTH_7, &CLOTH_8, &CLOTH_9, &COCOA_0,
+		        &COCOA_1, &COCOA_2, &COMMAND_BLOCK, &COMPARATOR, &COMPARATOR_LIT,
+		        &CROPS_0, &CROPS_1, &CROPS_2, &CROPS_3, &CROPS_4, &CROPS_5, &CROPS_6,
+		        &CROPS_7, &DAYLIGHT_DETECTOR_SIDE, &DAYLIGHT_DETECTOR_TOP, &DEADBUSH,
+		        &DESTROY_0, &DESTROY_1, &DESTROY_2, &DESTROY_3, &DESTROY_4, &DESTROY_5,
+		        &DESTROY_6, &DESTROY_7, &DESTROY_8, &DESTROY_9, &DETECTOR_RAIL,
+		        &DETECTOR_RAIL_ON, &DIRT, &DISPENSER_FRONT, &DISPENSER_FRONT_VERTICAL,
+		        &DOOR_IRON_LOWER, &DOOR_IRON_UPPER, &DOOR_WOOD_LOWER, &DOOR_WOOD_UPPER,
+		        &DRAGON_EGG, &DROPPER_FRONT, &DROPPER_FRONT_VERTICAL, &ENCHANTMENT_BOTTOM,
+		        &ENCHANTMENT_SIDE, &ENCHANTMENT_TOP, &ENDFRAME_EYE, &ENDFRAME_SIDE,
+		        &ENDFRAME_TOP, &FARMLAND_DRY, &FARMLAND_WET, &FENCE_IRON, &FERN, &FIRE_0,
+		        &FIRE_1, &FLOWER, &FLOWER_POT, &FURNACE_FRONT, &FURNACE_FRONT_LIT,
+		        &FURNACE_SIDE, &FURNACE_TOP, &GLASS, &GOLDEN_RAIL, &GOLDEN_RAIL_POWERED,
+		        &GRASS_SIDE, &GRASS_SIDE_OVERLAY, &GRASS_TOP, &GRAVEL, &HELLROCK,
+		        &HELLSAND, &HOPPER, &HOPPER_INSIDE, &HOPPER_TOP, &ICE, &ITEMFRAME_BACK,
+		        &JUKEBOX_TOP, &LADDER, &LAVA, &LAVA_FLOW, &LEAVES, &LEAVES_JUNGLE,
+		        &LEAVES_JUNGLE_OPAQUE, &LEAVES_OPAQUE, &LEAVES_SPRUCE,
+		        &LEAVES_SPRUCE_OPAQUE, &LEVER, &LIGHTGEM, &MELON_SIDE, &MELON_TOP,
+		        &MOB_SPAWNER, &MUSHROOM_BROWN, &MUSHROOM_INSIDE, &MUSHROOM_RED,
+		        &MUSHROOM_SKIN_BROWN, &MUSHROOM_SKIN_RED, &MUSHROOM_SKIN_STEM,
+		        &MUSIC_BLOCK, &MYCEL_SIDE, &MYCEL_TOP, &NETHER_BRICK, &NETHER_STALK_0,
+		        &NETHER_STALK_1, &NETHER_STALK_2, &NETHERQUARTZ, &OBSIDIAN, &ORE_COAL,
+		        &ORE_DIAMOND, &ORE_EMERALD, &ORE_GOLD, &ORE_IRON, &ORE_LAPIS,
+		        &ORE_REDSTONE, &PISTON_BOTTOM, &PISTON_INNER_TOP, &PISTON_SIDE,
+		        &PISTON_TOP, &PISTON_TOP_STICKY, &PORTAL, &POTATOES_0, &POTATOES_1,
+		        &POTATOES_2, &POTATOES_3, &PUMPKIN_FACE, &PUMPKIN_JACK, &PUMPKIN_SIDE,
+		        &PUMPKIN_TOP, &QUARTZBLOCK_BOTTOM, &QUARTZBLOCK_CHISELED,
+		        &QUARTZBLOCK_CHISELED_TOP, &QUARTZBLOCK_LINES, &QUARTZBLOCK_LINES_TOP,
+		        &QUARTZBLOCK_SIDE, &QUARTZBLOCK_TOP, &RAIL, &RAIL_TURN,
+		        &REDSTONE_DUST_CROSS, &REDSTONE_DUST_CROSS_OVERLAY, &REDSTONE_DUST_LINE,
+		        &REDSTONE_DUST_LINE_OVERLAY, &REDSTONE_LIGHT, &REDSTONE_LIGHT_LIT,
+		        &REDTORCH, &REDTORCH_LIT, &REEDS, &REPEATER, &REPEATER_LIT, &ROSE, &SAND,
+		        &SANDSTONE_BOTTOM, &SANDSTONE_CARVED, &SANDSTONE_SIDE, &SANDSTONE_SMOOTH,
+		        &SANDSTONE_TOP, &SAPLING, &SAPLING_BIRCH, &SAPLING_JUNGLE,
+		        &SAPLING_SPRUCE, &SNOW, &SNOW_SIDE, &SPONGE, &STEM_BENT, &STEM_STRAIGHT,
+		        &STONE, &STONE_MOSS, &STONEBRICK, &STONEBRICKSMOOTH,
+		        &STONEBRICKSMOOTH_CARVED, &STONEBRICKSMOOTH_CRACKED,
+		        &STONEBRICKSMOOTH_MOSSY, &STONESLAB_SIDE, &STONESLAB_TOP, &TALLGRASS,
+		        &THINGLASS_TOP, &TNT_BOTTOM, &TNT_SIDE, &TNT_TOP, &TORCH, &TRAPDOOR,
+		        &TREE_BIRCH, &TREE_JUNGLE, &TREE_SIDE, &TREE_SPRUCE, &TREE_TOP,
+		        &TRIP_WIRE, &TRIP_WIRE_SOURCE, &VINE, &WATER, &WATER_FLOW, &WATERLILY,
+		        &WEB, &WHITE_STONE, &WOOD, &WOOD_BIRCH, &WOOD_JUNGLE, &WOOD_SPRUCE,
+		        &WORKBENCH_FRONT, &WORKBENCH_SIDE, &WORKBENCH_TOP }) {
 }
 
 BlockTextures::~BlockTextures() {
@@ -168,12 +318,12 @@ BlockTextures::~BlockTextures() {
  */
 bool BlockTextures::load(const std::string& block_dir, int size) {
 	if (!fs::exists(block_dir) || !fs::is_directory(block_dir)) {
-		std::cout << "Error: Directory 'blocks' with block textures does not exists." << std::endl;;
+		std::cout << "Error: Directory 'blocks' with block textures does not exists." << std::endl;
 		return false;
 	}
 
 	// go through all textures and load them
-	for (int i = 0; i < texture_count; i++) {
+	for (int i = 0; i < textures.size(); i++) {
 		if (!textures[i]->load(block_dir, size))
 			std::cout << "Warning: Unable to load block texture "
 				<< textures[i]->getName() << ".png ." << std::endl;

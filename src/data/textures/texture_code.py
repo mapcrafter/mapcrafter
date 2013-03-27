@@ -19,15 +19,15 @@ for filename in os.listdir("blocks"):
 
 files.sort()
 
-print "\tTextureImage"
-for name, const_name in files:
-	last = ","
-	if name == files[-1][0]:
-		last = ";"
-	print "\t\t%s = TextureImage(\"%s\")%s" % (const_name, name, last)
+# code for textures.h
+
+print "\tTextureImage %s;" % ", ".join(map(lambda f: f[1], files))
+print "\tstd::vector<TextureImage*> textures;"
 
 print ""
-print "\tstatic const int texture_count = %d;" % len(files)
-print "\tTextureImage *textures[texture_count] = {"
-print "\t\t&%s" % ", &".join(map(lambda f: f[1], files))
-print "\t};"
+
+# code for textures.cpp
+
+print ""
+print ": " + ", ".join(map(lambda f: "%s(\"%s\")" % (f[1], f[0]), files)) \
+		 + ", textures({" + ", ".join(map(lambda f: "&%s" % f[1], files)) + "}) {"
