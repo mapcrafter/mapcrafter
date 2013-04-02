@@ -56,7 +56,8 @@ int main(int argc, char** argv) {
 			"rotation of the map: top-left, top-right, bottom-right, bottom-left"
 			"\ntop-left means, that north is on the top left, this is default")
 		("render-unknown-blocks", "renders unknown blocks as red blocks")
-		("render-leaves-transparent", "uses the transparent texture for leaves");
+		("render-leaves-transparent", "uses the transparent texture for leaves")
+		("render-biomes", "uses the original biome colors for some blocks");
 
 	po::variables_map vm;
 	try {
@@ -131,6 +132,7 @@ int main(int argc, char** argv) {
 
 	opts.render_unknown_blocks = vm.count("render-unknown-blocks");
 	opts.render_leaves_transparent = vm.count("render-leaves-transparent");
+	opts.render_biomes = vm.count("render-biomes");
 
 	mapcrafter::render::RenderManager manager(opts);
 	if (!manager.run())

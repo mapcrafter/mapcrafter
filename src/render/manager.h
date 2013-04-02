@@ -54,6 +54,7 @@ struct RenderOpts {
 	int rotation;
 	bool render_unknown_blocks;
 	bool render_leaves_transparent;
+	bool render_biomes;
 
 	std::string outputPath(const std::string& path) const;
 	std::string templatePath(const std::string& path) const;
@@ -71,6 +72,7 @@ struct MapSettings {
 
 	bool render_unknown_blocks;
 	bool render_leaves_transparent;
+	bool render_biomes;
 
 	int last_render;
 

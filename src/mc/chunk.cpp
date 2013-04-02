@@ -66,6 +66,14 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::CompressionType compressi
 	if (rotation)
 		pos.rotate(rotation);
 
+	nbt::TagByteArray* tagBiomes = level->findTag<nbt::TagByteArray>("Biomes",
+			nbt::TAG_BYTE_ARRAY);
+	if (tagBiomes != NULL || tagBiomes->payload.size() == 256)
+		std::copy(tagBiomes->payload.begin(), tagBiomes->payload.end(), biomes);
+	else
+		std::cerr << "Warning: Corrupt chunk at " << pos.x << ":" << pos.z
+				<< " (No biome data found)!" << std::endl;
+
 	// find sections list
 	nbt::TagList* tagSections = level->findTag<nbt::TagList>("Sections", nbt::TAG_LIST);
 	if (tagSections == NULL || tagSections->tag_type != nbt::TAG_COMPOUND) {
@@ -162,6 +170,11 @@ uint8_t Chunk::getBlockData(const LocalBlockPos& pos) const {
 	if ((offset % 2) == 0)
 		return sections[section_offsets[section]].data[offset / 2] & 0xf;
 	return (sections[section_offsets[section]].data[offset / 2] >> 4) & 0x0f;
+}
+
+uint8_t Chunk::getBiomeAt(const LocalBlockPos& pos) const {
+	int offset = pos.z * 16 + pos.x;
+	return biomes[offset];
 }
 
 const ChunkPos& Chunk::getPos() const {

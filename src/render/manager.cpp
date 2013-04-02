@@ -45,7 +45,8 @@ std::string RenderOpts::texturePath(const std::string& path) const {
 
 MapSettings::MapSettings()
 		: texture_size(12), rotation(0), tile_size(0), max_zoom(0),
-		  render_unknown_blocks(0), render_leaves_transparent(0), last_render(-1) {
+		  render_unknown_blocks(0), render_leaves_transparent(0),
+		  render_biomes(false), last_render(-1) {
 }
 
 /**
@@ -67,25 +68,21 @@ bool MapSettings::read(const std::string& filename) {
 		// and save the value
 		std::string key = line.substr(0, i);
 		std::string value = line.substr(i + 1, line.size() - 1);
-		if (key.compare("texture_size") == 0)
+		if (key == "texture_size")
 			texture_size = atoi(value.c_str());
-		else if (key.compare("rotation") == 0)
+		else if (key == "rotation")
 			rotation = atoi(value.c_str());
-		else if (key.compare("tile_size") == 0)
+		else if (key == "tile_size")
 			tile_size = atoi(value.c_str());
-		else if (key.compare("max_zoom") == 0)
+		else if (key == "max_zoom")
 			max_zoom = atoi(value.c_str());
-		else if (key.compare("render_unknown_blocks") == 0) {
-			if (value.compare("1") == 0)
-				render_unknown_blocks = true;
-			else
-				render_unknown_blocks = false;
-		} else if (key.compare("render_leaves_transparent") == 0) {
-			if (value.compare("1") == 0)
-				render_leaves_transparent = true;
-			else
-				render_leaves_transparent = false;
-		} else if (key.compare("last_render") == 0)
+		else if (key == "render_unknown_blocks") {
+			render_unknown_blocks = value == "1";
+		} else if (key == "render_leaves_transparent") {
+			render_leaves_transparent = value == "1";
+		} else if (key == "render_biomes") {
+			render_biomes = value == "1";
+		} else if (key == "last_render")
 			last_render = atoi(value.c_str());
 	}
 
@@ -106,6 +103,7 @@ bool MapSettings::write(const std::string& filename) const {
 	file << "max_zoom " << max_zoom << std::endl;
 	file << "render_unknown_blocks " << render_unknown_blocks << std::endl;
 	file << "render_leaves_transparent " << render_leaves_transparent << std::endl;
+	file << "render_biomes " << render_biomes << std::endl;
 	file << "last_render " << last_render << std::endl;
 	file.close();
 
@@ -226,6 +224,11 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
  * This method copies all template files to the output directory.
  */
 void RenderManager::writeTemplates(const MapSettings& settings) {
+	if (!fs::is_directory(opts.template_dir)) {
+		std::cout << "Warning: The template directory does not exists!" << std::endl;
+		return;
+	}
+
 	// the variables for the index.html
 	std::map<std::string, std::string> vars;
 	vars["textureSize"] = str(settings.texture_size);
@@ -372,7 +375,7 @@ void RenderManager::render(const TileSet& tiles) {
 
 		// create needed things for recursiv render method
 		mc::WorldCache cache(world);
-		TileRenderer renderer(cache, images);
+		TileRenderer renderer(cache, images, settings.render_biomes);
 		RecursiveRenderSettings settings(tiles, &renderer);
 
 		settings.tile_size = images.getTileSize();
@@ -439,7 +442,7 @@ void RenderManager::renderMultithreaded(const TileSet& tiles) {
 		// create all informations needed for the worker
 		// every thread has his own cache
 		mc::WorldCache* cache = new mc::WorldCache(world);
-		TileRenderer* renderer = new TileRenderer(*cache, images);
+		TileRenderer* renderer = new TileRenderer(*cache, images, settings.render_biomes);
 		RecursiveRenderSettings* render_settings =
 				new RecursiveRenderSettings(tiles, renderer);
 		render_settings->tile_size = images.getTileSize();
@@ -502,8 +505,8 @@ bool RenderManager::run() {
 
 	// load map settings if this a incremental render
 	if (opts.incremental && !settings.read(opts.outputPath("map.settings"))) {
-		std::cerr << "Error: Unable to read map.settings file.";
-		std::cerr << "Can't render incrementally.";
+		std::cerr << "Error: Unable to read map.settings file." << std::endl;
+		std::cerr << "Can't render incrementally." << std::endl;
 		return false;
 	}
 
@@ -514,6 +517,7 @@ bool RenderManager::run() {
 		settings.rotation = opts.rotation;
 		settings.render_unknown_blocks = opts.render_unknown_blocks;
 		settings.render_leaves_transparent = opts.render_leaves_transparent;
+		settings.render_biomes = opts.render_biomes;
 	} else {
 		time_t now = settings.last_render;
 		char buffer[100];
@@ -539,12 +543,17 @@ bool RenderManager::run() {
 	// try to load all textures
 	if (!images.loadChests(opts.texturePath("chest.png"), opts.texturePath("largechest.png"),
 			opts.texturePath("enderchest.png"))) {
-		std::cerr << "Error Unable to load chest.png, largechest.png or enderchest.png!"
+		std::cerr << "Error: Unable to load chest.png, largechest.png or enderchest.png!"
+				<< std::endl;
+		return false;
+	} else if (!images.loadColors(opts.texturePath("foliagecolor.png"),
+			opts.texturePath("grasscolor.png"))) {
+		std::cerr << "Error: Unable to load foliagecolor.png or grasscolor.png!"
 				<< std::endl;
 		return false;
 	} else if (!images.loadOther(opts.texturePath("fire.png"),
 			opts.texturePath("endportal.png"))) {
-		std::cerr << "Error Unable to load fire.png or endportal.png!" << std::endl;
+		std::cerr << "Error: Unable to load fire.png or endportal.png!" << std::endl;
 		return false;
 	} else if (!images.loadBlocks(opts.texturePath("blocks"))) {
 		std::cerr << "Error: Unable to load block textures!" << std::endl;

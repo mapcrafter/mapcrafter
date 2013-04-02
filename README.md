@@ -55,11 +55,16 @@ directory, you can open with your webbrowser after the rendering.
 --textures=directory
 
 This is the directory with the Minecraft texture files (defaults to data/textures).
-The renderer works with the new Minecraft 1.5 texture files. You need here the chest.png, 
-enderchest.png, largechest.png and the blocks/ directory from your texture pack, probably 
-everything from your minecraft.jar. You can use the python script 'find_images.py' in the 
-data directory to extract the single images from your minecraft.jar. At the moment, the
-script can't extract the blocks directory.
+The renderer works with the new Minecraft 1.5 texture files. You need here: 
+* chest.png
+* enderchest.png
+* largechest.png
+* foliagecolor.png
+* grasscolor.png
+* the blocks/ directory from your texture pack
+
+Probably you can get everything from your minecraft.jar. You can use the python script 
+'find_images.py' in the data directory to extract the images from your minecraft.jar.
 
 -j [--jobs=] number
 
@@ -113,6 +118,14 @@ purposes). Per default the renderer just ignores unknown blocks and doesn't rend
 You can specifiy this to use the transparent leaves textures instead of the opaque
 textures. This option can make the renderer a bit slower, because the renderer has to scan
 the blocks after the leaves to the ground also.
+
+--render-biomes
+
+This setting makes the renderer to use the original biome colors for blocks like grass and
+leaves. At the moment, the renderer does not use the biome colors for water, because the 
+renderer preblits the water blocks (great performance improvement) and it is not very easy
+to preblit all biome color variants. And also, there is not a big difference with
+different water colors. 
 
 ## Version history ##
 

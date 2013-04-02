@@ -124,8 +124,9 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 	return pos < other.pos;
 }
 
-TileRenderer::TileRenderer(mc::WorldCache& world, const BlockImages& textures)
-		: world(world), images(textures) {
+TileRenderer::TileRenderer(mc::WorldCache& world, const BlockImages& textures,
+        bool render_biomes)
+		: world(world), images(textures), render_biomes(render_biomes) {
 }
 
 TileRenderer::~TileRenderer() {
@@ -304,8 +305,9 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			data |= DATA_WEST;
 	}
 
+
 	if (!images.isBlockTransparent(id, data)) {
-		/* add shadow edges on opaque blockes */
+		// add shadow edges on opaque blockes
 		getNeighbor(pos + DIR_NORTH, id_north, data_north, world, chunk);
 		getNeighbor(pos + DIR_EAST, id_east, data_east, world, chunk);
 		getNeighbor(pos + DIR_BOTTOM, id_bottom, data_bottom, world, chunk);
@@ -417,8 +419,47 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) const {
 			// check for special data (neighbor related)
 			// get block image, check for transparency, create render block...
 			data = checkNeighbors(block.current, id, data, chunk);
-			Image image = images.getBlock(id, data);
+			Image image;
 			bool transparent = images.isBlockTransparent(id, data);
+
+			// check for biome data
+			if (id == 2 || id == 18 || id == 31 || id == 106 || id == 111) {
+				uint8_t biome_id = chunk->getBiomeAt(local);
+				Biome biome = BIOMES[DEFAULT_BIOME];
+				if (render_biomes && biome_id < BIOMES_SIZE)
+					biome = BIOMES[biome_id];
+				int count = 1;
+
+				// get average biome data to make smooth edges between
+				// different biomes
+				if (render_biomes) {
+					for (int dx = -1; dx <= 1; dx++)
+						for (int dz = -1; dz <= 1; dz++) {
+							if (dx == 0 && dz == 0)
+								continue;
+
+							mc::BlockPos other = block.current + mc::BlockPos(dx, dz, 0);
+							mc::ChunkPos other_chunk_pos(other);
+							uint8_t other_id = chunk->getBiomeAt(mc::LocalBlockPos(other));
+							if (other_chunk_pos != chunk->getPos()) {
+								mc::Chunk* other_chunk = world.getChunk(other_chunk_pos);
+								if (other_chunk == NULL)
+									continue;
+								other_id = other_chunk->getBiomeAt(mc::LocalBlockPos(other));
+							}
+
+							Biome other_biome = BIOMES[other_id];
+							if (other_id < BIOMES_SIZE)
+								other_biome = BIOMES[other_id];
+							biome += other_biome;
+							count++;
+						}
+				}
+
+				biome /= count;
+				image = images.getBiomeDependBlock(id, data, biome_id, biome);
+			} else
+				image = images.getBlock(id, data);
 
 			RenderBlock node;
 			node.x = it.draw_x;

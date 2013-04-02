@@ -157,6 +157,68 @@ const std::string& TextureImage::getName() const {
 	return name;
 }
 
+Biome& Biome::operator+=(const Biome& other) {
+	rainfall += other.rainfall;
+	temperature += other.temperature;
+
+	r += other.r;
+	g += other.g;
+	b += other.b;
+
+	return *this;
+}
+
+/**
+ * Used to calculate average biome data, to create smooth biome edges.
+ */
+Biome& Biome::operator/=(int n) {
+	rainfall /= n;
+	temperature /= n;
+
+	r /= n;
+	g /= n;
+	b /= n;
+
+	return *this;
+}
+
+/**
+ * Checks, if two biomes are the same.
+ */
+bool Biome::operator==(const Biome& other) const {
+	double epsilon = 0.1;
+	return std::abs(other.rainfall - rainfall) <= epsilon
+			&& std::abs(other.temperature - temperature) <= epsilon
+			&& r == other.r && g == other.g && b == other.b;
+}
+
+uint32_t Biome::getColor(const Image& colors, bool flip_xy) const {
+	// x is temperature
+	double tmp_temperature = temperature;
+	// y is temperature * rainfall
+	double tmp_rainfall = rainfall * temperature;
+
+	// check if temperature and rainfall are valid
+	if(tmp_temperature > 1)
+		tmp_temperature = 1;
+	if(tmp_rainfall > 1)
+		tmp_rainfall = 1;
+
+	// calculate positions
+	int x = 255 - (255 * tmp_temperature);
+	int y = 255 - (255 * tmp_rainfall);
+
+	// flip them, if needed
+	if (flip_xy) {
+		int tmp = x;
+		x = 255 - y;
+		y = 255 - tmp;
+	}
+
+	// return color at this position
+	return colors.getPixel(x, y);
+}
+
 // generated code by texture_code.py
 BlockTextures::BlockTextures()
 		: ACTIVATOR_RAIL("activatorRail"), ACTIVATOR_RAIL_POWERED(
@@ -323,7 +385,7 @@ bool BlockTextures::load(const std::string& block_dir, int size) {
 	}
 
 	// go through all textures and load them
-	for (int i = 0; i < textures.size(); i++) {
+	for (size_t i = 0; i < textures.size(); i++) {
 		if (!textures[i]->load(block_dir, size))
 			std::cout << "Warning: Unable to load block texture "
 				<< textures[i]->getName() << ".png ." << std::endl;
@@ -621,6 +683,11 @@ bool BlockImages::loadChests(const std::string& normal, const std::string& large
 	return true;
 }
 
+bool BlockImages::loadColors(const std::string& foliagecolor,
+        const std::string& grasscolor) {
+	return foliagecolors.readPNG(foliagecolor) && grasscolors.readPNG(grasscolor);
+}
+
 bool BlockImages::loadOther(const std::string& fire, const std::string& endportal) {
 	Image fire_img, endportal_img;
 	if(!fire_img.readPNG(fire) || !endportal_img.readPNG(endportal))
@@ -641,6 +708,7 @@ bool BlockImages::loadBlocks(const std::string& block_dir) {
 
 	loadBlocks();
 	testWaterTransparency();
+	createBiomeBlocks();
 	return true;
 }
 
@@ -677,6 +745,12 @@ bool BlockImages::saveBlocks(const std::string& filename) {
 	blocks.push_back(opaque_water[1]);
 	blocks.push_back(opaque_water[2]);
 	blocks.push_back(opaque_water[3]);
+
+	/*
+	for (std::unordered_map<uint64_t, Image>::const_iterator it = biome_images.begin();
+			it != biome_images.end(); ++it)
+		blocks.push_back(it->second);
+	*/
 
 	int blocksize = getBlockImageSize();
 	int width = 16;
@@ -842,12 +916,75 @@ void BlockImages::setBlockImage(uint16_t id, uint16_t data, const Image& block) 
 		addBlockShadowEdges(id, data, block);
 }
 
+Image BlockImages::createBiomeBlock(uint16_t id, uint16_t data,
+        const Biome& biome_data) const {
+	if (!block_images.count(id | (data << 16)))
+		return unknown_block;
+
+	uint32_t color;
+	// leaves have the foliage colors
+	// for birches, the color x/y coordinate is flipped
+	if (id == 18)
+		color = biome_data.getColor(foliagecolors, (data & 0b11) == 2);
+	else
+		color = biome_data.getColor(grasscolors, false);
+
+	double r = (double) RED(color) / 255;
+	double g = (double) GREEN(color) / 255;
+	double b = (double) BLUE(color) / 255;
+	
+	// multiply with fixed biome color values
+	// necessary for the Swampland biome
+	r *= (double) biome_data.r / 255;
+	g *= (double) biome_data.g / 255;
+	b *= (double) biome_data.b / 255;
+
+	// grass block needs something special
+	if (id == 2) {
+		Image block = block_images.at(id | (data << 16));
+		Image side = textures.GRASS_SIDE_OVERLAY.colorize(r, g, b);
+
+		// blit the side overlay over the block
+		blitFace(block, FACE_WEST, side, 0, 0, false);
+		blitFace(block, FACE_SOUTH, side, 0, 0, false);
+		
+		// now tint the top of the block
+		for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
+			uint32_t pixel = block.getPixel(it.dest_x, it.dest_y);
+			block.setPixel(it.dest_x, it.dest_y, rgba_multiply(pixel, r, g, b));
+		}
+
+		return block;
+	}
+
+	return block_images.at(id | (data << 16)).colorize(r, g, b);
+}
+
+void BlockImages::createBiomeBlocks() {
+	for (std::unordered_map<uint32_t, Image>::iterator it = block_images.begin();
+			it != block_images.end(); ++it) {
+		uint16_t id = it->first & 0xffff;
+		uint16_t data = (it->first & 0xffff0000) >> 16;
+
+		// grass block, leaves, grass, vines, lily pad
+		if (id != 2 && id != 18 && id != 31 && id != 106 && id != 111)
+			continue;
+
+		for (uint64_t b = 0; b < BIOMES_SIZE; b++) {
+			Biome biome = BIOMES[b];
+			biome_images[id | ((uint64_t) data << 16) | (b << 32)] =
+					createBiomeBlock(id, data, biome);
+		}
+	}
+}
+
 /**
  * This method is very important for the rendering performance. It preblits transparent
  * water blocks until they are nearly opaque.
  */
 void BlockImages::testWaterTransparency() {
-	Image water = textures.WATER;
+	// just use the Ocean biome watercolor
+	Image water = textures.WATER.colorize(0, 0.39, 0.89);
 
 	// opaque_water[0] is water block when water texture is only on the top
 	opaque_water[0].setSize(getBlockImageSize(), getBlockImageSize());
@@ -1189,11 +1326,11 @@ void BlockImages::createSingleFaceBlock(uint16_t id, uint16_t data, int face,
 void BlockImages::createGrassBlock() { // id 2
 	Image dirt = textures.DIRT;
 
-	Image grass(dirt);
-	Image grass_mask = textures.GRASS_SIDE_OVERLAY.colorize(0.3, 0.95, 0.3);
+	Image grass = dirt;
+	Image grass_mask = textures.GRASS_SIDE_OVERLAY;
 	grass.alphablit(grass_mask, 0, 0);
 
-	Image top = textures.GRASS_TOP.colorize(0.3, 0.95, 0.3);
+	Image top = textures.GRASS_TOP;
 
 	BlockImage block;
 	block.setFace(FACE_NORTH | FACE_SOUTH | FACE_EAST | FACE_WEST, grass);
@@ -1202,7 +1339,7 @@ void BlockImages::createGrassBlock() { // id 2
 }
 
 void BlockImages::createWater() { // id 8, 9
-	Image water = textures.WATER;
+	Image water = textures.WATER.colorize(0, 0.39, 0.89);
 	for (int data = 0; data < 8; data++) {
 		int smaller = data / 8.0 * texture_size;
 		Image side_texture = water.move(0, smaller);
@@ -1258,15 +1395,15 @@ void BlockImages::createWood(uint16_t data, const Image& side) { // id 17
 
 void BlockImages::createLeaves() { // id 18
 	if (render_leaves_transparent) {
-		createBlock(18, 0, textures.LEAVES.colorize(0.3 * 0.8, 1 * 0.8, 0.1 * 0.8)); // oak
-		createBlock(18, 1, textures.LEAVES_SPRUCE.colorize(0.3 * 0.8, 1 * 0.8, 0.45 * 0.8)); // pine/spruce
-		createBlock(18, 2, textures.LEAVES.colorize(0.55 * 0.8, 0.9 * 0.8, 0.1 * 0.8)); // birch
-		createBlock(18, 3, textures.LEAVES_JUNGLE.colorize(0.35 * 0.9, 1 * 0.9, 0.05 * 0.9)); // jungle
+		createBlock(18, 0, textures.LEAVES); // oak
+		createBlock(18, 1, textures.LEAVES_SPRUCE); // pine/spruce
+		createBlock(18, 2, textures.LEAVES); // birch
+		createBlock(18, 3, textures.LEAVES_JUNGLE); // jungle
 	} else {
-		createBlock(18, 0, textures.LEAVES_OPAQUE.colorize(0.3, 1, 0.1)); // oak
-		createBlock(18, 1, textures.LEAVES_SPRUCE_OPAQUE.colorize(0.3, 1, 0.45)); // pine/spruce
-		createBlock(18, 2, textures.LEAVES_OPAQUE.colorize(0.55, 0.9, 0.1)); // birch
-		createBlock(18, 3, textures.LEAVES_JUNGLE_OPAQUE.colorize(0.35, 1, 0.05)); // jungle
+		createBlock(18, 0, textures.LEAVES_OPAQUE); // oak
+		createBlock(18, 1, textures.LEAVES_SPRUCE_OPAQUE); // pine/spruce
+		createBlock(18, 2, textures.LEAVES_OPAQUE); // birch
+		createBlock(18, 3, textures.LEAVES_JUNGLE_OPAQUE); // jungle
 	}
 }
 
@@ -1769,7 +1906,7 @@ void BlockImages::createStem(uint16_t id) { // id 104, 105
 }
 
 void BlockImages::createVines() { // id 106
-	Image texture = textures.VINE.colorize(0.3, 1, 0.1);
+	Image texture = textures.VINE;
 
 	createSingleFaceBlock(106, 0, FACE_TOP, texture);
 	for (int i = 1; i < 16; i++) {
@@ -1946,8 +2083,8 @@ void BlockImages::loadBlocks() {
 	createItemStyleBlock(30, 0, t.WEB); // cobweb
 	// -- tall grass
 	createItemStyleBlock(31, 0, t.DEADBUSH); // dead bush style
-	createItemStyleBlock(31, 1, t.TALLGRASS.colorize(0.3, 0.95, 0.3)); // tall grass
-	createItemStyleBlock(31, 2, t.FERN.colorize(0.3, 0.95, 0.3)); // fern
+	createItemStyleBlock(31, 1, t.TALLGRASS); // tall grass
+	createItemStyleBlock(31, 2, t.FERN); // fern
 	// --
 	createItemStyleBlock(32, 0, t.DEADBUSH); // dead bush
 	createPiston(33, false); // piston
@@ -2164,6 +2301,27 @@ const Image& BlockImages::getBlock(uint16_t id, uint16_t data) const {
 	if (!hasBlock(id, data))
 		return unknown_block;
 	return block_images.at(id | (data << 16));
+}
+
+Image BlockImages::getBiomeDependBlock(uint16_t id, uint16_t data, uint8_t biome,
+        const Biome& biome_data) const {
+	data = filterBlockData(id, data);
+	if (biome >= BIOMES_SIZE)
+		return getBlock(id, data);
+
+	if (!hasBlock(id, data))
+		return unknown_block;
+
+	// check if this biome block is precalculated
+	if (biome_data == BIOMES[biome]) {
+		int64_t key = id | (((int64_t) data) << 16) | (((int64_t) biome) << 32);
+		if (!biome_images.count(key))
+			return unknown_block;
+		return biome_images.at(key);
+	}
+
+	// create the block if not
+	return createBiomeBlock(id, data, biome_data);
 }
 
 int BlockImages::getMaxWaterNeededOpaque() const {

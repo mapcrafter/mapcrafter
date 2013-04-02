@@ -94,8 +94,10 @@ class TileRenderer {
 private:
 	mc::WorldCache& world;
 	const BlockImages& images;
+
+	bool render_biomes;
 public:
-	TileRenderer(mc::WorldCache& world, const BlockImages& textures);
+	TileRenderer(mc::WorldCache& world, const BlockImages& textures, bool render_biomes);
 	~TileRenderer();
 
 	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data,

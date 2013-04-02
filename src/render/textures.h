@@ -208,6 +208,64 @@ public:
 };
 
 /**
+ * A Minecraft biome with data to tint the biome-depend blocks.
+ */
+struct Biome {
+	Biome(double temperature, double rainfall)
+		: temperature(temperature), rainfall(rainfall), r(255), g(255), b(255) {};
+	Biome(double temperature, double rainfall, uint8_t r, uint8_t g, uint8_t b)
+		: temperature(temperature), rainfall(rainfall), r(r), g(g), b(b) {};
+
+	Biome& operator+=(const Biome& other);
+	Biome& operator/=(int n);
+	bool operator==(const Biome& other) const;
+
+	uint32_t getColor(const Image& colors, bool flip_xy = false) const;
+
+	// temperature and rainfall
+	// used to calculate the position of the tinting color in the color image
+	double temperature;
+	double rainfall;
+
+	int r, g, b;
+};
+
+// different Minecraft biomes
+// from Minecraft Overviewer (from Minecraft MCP source code)
+static const Biome BIOMES[] = {
+	{0.5, 0.5}, // Ocean
+	{0.8, 0.4}, // Plains
+	{2.0, 0.0}, // Desert
+	{0.2, 0.3}, // Extreme Hills
+	{0.7, 0.8}, // Forest
+
+	{0.05, 0.8}, // Taiga
+	{0.8, 0.9, 205, 128, 255}, // Swampland
+	{0.5, 0.5}, // River
+	{2.0, 0.0}, // Hell
+	{0.5, 0.5}, // Sky
+
+	{0.0, 0.5}, // Frozen Ocean
+	{0.0, 0.5}, // Frozen River
+	{0.0, 0.5}, // Ice Plains
+	{0.0, 0.5}, // Ice Mountains
+	{0.9, 1.0}, // Mushroom Island
+
+	{0.9, 1.0}, // Mushroom Island Shore
+	{0.8, 0.4}, // Beach
+	{2.0, 0.0}, // Desert Hills
+	{0.7, 0.8}, // Forest Hills
+	{0.05, 0.8}, // Taiga Hills
+
+	{0.2, 0.3}, // Extreme Hills Edge
+	{2.0, 0.45}, // Jungle
+	{2.0, 0.25}, // Jungle Mountains
+};
+
+static const size_t BIOMES_SIZE = sizeof(BIOMES) / sizeof(Biome);
+static const int DEFAULT_BIOME = 21; // Jungle
+
+/**
  * Collection of Minecraft block textures.
  */
 class BlockTextures {
@@ -320,6 +378,8 @@ private:
 	Image largechest[7];
 	Image enderchest[3];
 
+	Image foliagecolors, grasscolors;
+
 	int max_water;
 	Image opaque_water[4];
 	Image shadow_edge_masks[4];
@@ -327,6 +387,10 @@ private:
 	// map of block images
 	// key is a 32 bit integer, first two bytes id, second two bytes data
 	std::unordered_map<uint32_t, Image> block_images;
+
+	// map of biome block images, first four bytes id+data, next byte is the biome id
+	std::unordered_map<uint64_t, Image> biome_images;
+
 	// set of id/data block combinations, which contain transparency
 	std::unordered_set<uint32_t> block_transparency;
 	Image unknown_block;
@@ -334,8 +398,12 @@ private:
 	uint16_t filterBlockData(uint16_t id, uint16_t data) const;
 	bool checkImageTransparency(const Image& block) const;
 	void addBlockShadowEdges(uint16_t id, uint16_t data, const Image& block);
+
 	void setBlockImage(uint16_t id, uint16_t data, const BlockImage& block);
 	void setBlockImage(uint16_t id, uint16_t data, const Image& block);
+
+	Image createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome_data) const;
+	void createBiomeBlocks();
 
 	void testWaterTransparency();
 
@@ -418,6 +486,7 @@ public:
 
 	bool loadChests(const std::string& normal, const std::string& large,
 	        const std::string& ender);
+	bool loadColors(const std::string& foliagecolor, const std::string& grasscolor);
 	bool loadOther(const std::string& fire, const std::string& endportal);
 	bool loadBlocks(const std::string& block_dir);
 	bool saveBlocks(const std::string& filename);
@@ -425,6 +494,8 @@ public:
 	bool isBlockTransparent(uint16_t id, uint16_t data) const;
 	bool hasBlock(uint16_t id, uint16_t) const;
 	const Image& getBlock(uint16_t id, uint16_t data) const;
+	Image getBiomeDependBlock(uint16_t id, uint16_t data, uint8_t biome,
+	        const Biome& biome_data) const;
 
 	int getMaxWaterNeededOpaque() const;
 	const Image& getOpaqueWater(bool south, bool west) const;
