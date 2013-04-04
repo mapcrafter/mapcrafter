@@ -173,6 +173,28 @@ function gotoPosHash(hash) {
 	map.setZoom(hash[3]);
 }
 
+function setMarkers(map, locations){
+
+	var infowindow = new google.maps.InfoWindow();
+
+	var marker, i;
+
+	for (i = 0; i < locations.length; i++) {  
+		marker = new google.maps.Marker({
+		position: convertMCtoLatLng(locations[i][1], locations[i][2], locations[i][3]),
+		map: map
+	});
+
+      	google.maps.event.addListener(marker, 'click', (function(marker, i) {
+		return function() {
+			infowindow.setContent(locations[i][0]);
+			infowindow.open(map, marker);
+        	}
+	})(marker, i));
+    }
+
+}
+
 function init() {
 	var MCMapType = new google.maps.ImageMapType(MCMapOptions);
 	MCMapType.name = "Minecraft Map";
@@ -193,6 +215,8 @@ function init() {
 	map.mapTypes.set("mcmap", MCMapType);
 	map.setMapTypeId("mcmap");
 	
+	setMarkers(map, MARKERS);
+
 	google.maps.event.addListener(map, "dragend", updatePosHash);
 	google.maps.event.addListener(map, "zoom_changed", updatePosHash);
 	
