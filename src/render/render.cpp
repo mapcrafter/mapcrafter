@@ -209,7 +209,7 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		} if ((id_south == 8 || id_south == 9) && data_south == 0) {
 			data |= DATA_SOUTH;
 		}
-	} else if (id == 54 || id == 95 || id == 130) { // chests
+	} else if (id == 54 || id == 95 || id == 130 || id == 146) { // chests
 		// at first get all neighbor blocks
 		getNeighbor(pos + DIR_NORTH, id_north, data_north, world, chunk);
 		getNeighbor(pos + DIR_SOUTH, id_south, data_south, world, chunk);
@@ -228,14 +228,16 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		else
 			data = DATA_EAST;
 
-		if (id_north == 54)
-			data |= DATA_NORTH << 4;
-		if (id_south == 54)
-			data |= DATA_SOUTH << 4;
-		if (id_east == 54)
-			data |= DATA_EAST << 4;
-		if (id_west == 54)
-			data |= DATA_WEST << 4;
+		if (id == 54) {
+			if (id_north == 54)
+				data |= DATA_NORTH << 4;
+			if (id_south == 54)
+				data |= DATA_SOUTH << 4;
+			if (id_east == 54)
+				data |= DATA_EAST << 4;
+			if (id_west == 54)
+				data |= DATA_WEST << 4;
+		}
 	} else if(id == 64 || id == 71) {
 		/* doors */
 		uint16_t top = data & 8 ? DOOR_TOP : 0;

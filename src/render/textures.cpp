@@ -844,6 +844,9 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & 0xff00;
 	else if (id == 119 || id == 120) // end portal, end portal frame
 		return data & 0xff00;
+	// the light sensor shouldn't have any data, but I had problems with it...
+	else if (id == 151)
+		return 0;
 	return data;
 }
 
@@ -1407,6 +1410,15 @@ void BlockImages::createLeaves() { // id 18
 	}
 }
 
+void BlockImages::createDispenserDropper(uint16_t id, const Image& front) { // id 23, 158
+	Image side = textures.FURNACE_SIDE;
+	Image top = textures.FURNACE_TOP;
+
+	createRotatedBlock(id, 0, front, side, top);
+	createBlock(id, 0, side, top);
+	createBlock(id, 1, side, front);
+}
+
 BlockImage buildBed(const Image& top, const Image& north_south, const Image& east_west,
 		int face_skip) {
 	BlockImage block;
@@ -1527,6 +1539,8 @@ void BlockImages::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) 
 		slab_textures[0x3] = textures.STONEBRICK;
 		slab_textures[0x4] = textures.BRICK;
 		slab_textures[0x5] = textures.STONEBRICKSMOOTH;
+		slab_textures[0x6] = textures.NETHER_BRICK;
+		slab_textures[0x7] = textures.QUARTZBLOCK_SIDE;
 	} else {
 		slab_textures[0x0] = textures.WOOD;
 		slab_textures[0x1] = textures.WOOD_SPRUCE;
@@ -2068,7 +2082,7 @@ void BlockImages::loadBlocks() {
 	createBlock(20, 0, t.GLASS); // glass
 	createBlock(21, 0, t.ORE_LAPIS); // lapis lazuli ore
 	createBlock(22, 0, t.BLOCK_LAPIS); // lapis lazuli block
-	createRotatedBlock(23, 0, t.DISPENSER_FRONT, t.FURNACE_SIDE, t.FURNACE_TOP); // dispenser
+	createDispenserDropper(23, t.DISPENSER_FRONT); // dispenser
 	// -- sandstone
 	createBlock(24, 0, t.SANDSTONE_SIDE, t.SANDSTONE_TOP); // normal
 	createBlock(24, 1, t.SANDSTONE_CARVED, t.SANDSTONE_TOP); // chiseled
@@ -2206,8 +2220,7 @@ void BlockImages::loadBlocks() {
 	createStairs(108, t.BRICK); // brick stairs
 	createStairs(109, t.STONEBRICKSMOOTH); // stone brick stairs
 	createBlock(110, 0, t.MYCEL_SIDE, t.MYCEL_TOP); // mycelium
-	createSingleFaceBlock(111, 0, FACE_BOTTOM,
-	        t.WATERLILY.colorize(0.3, 0.95, 0.3)); // lily pad
+	createSingleFaceBlock(111, 0, FACE_BOTTOM, t.WATERLILY); // lily pad
 	createBlock(112, 0, t.NETHER_BRICK); // nether brick
 	createFence(113, t.NETHER_BRICK); // nether brick fence
 	createStairs(114, t.NETHER_BRICK); // nether brick stairs
@@ -2217,8 +2230,7 @@ void BlockImages::loadBlocks() {
 	createItemStyleBlock(115, 2, t.NETHER_STALK_1); //
 	createItemStyleBlock(115, 3, t.NETHER_STALK_2); //
 	// --
-	createSmallerBlock(116, 0, t.ENCHANTMENT_SIDE, t.ENCHANTMENT_TOP, 0,
-			texture_size * 0.75); // enchantment table
+	createSmallerBlock(116, 0, t.ENCHANTMENT_SIDE, t.ENCHANTMENT_TOP, 0, texture_size * 0.75); // enchantment table
 	createItemStyleBlock(117, 0, t.BREWING_STAND); // brewing stand
 	createCauldron(); // id 118 // cauldron
 	createSmallerBlock(119, 0, endportal_texture, endportal_texture,
@@ -2268,19 +2280,25 @@ void BlockImages::loadBlocks() {
 	createButton(143, t.WOOD); // wooden button
 	// id 144 // head
 	// id 145 // anvil
-	// id 146 // trapped chest
-	// id 147 // weighted pressure plate (light)
-	// id 147 // weighted pressure plate (heavy)
-	// id 149 // redstone comparator (inactive)
-	// id 149 // redstone comparator (active)
-	// id 151 // daylight sensor
-	// id 152 // block of redstone
-	// id 153 // nether quartz ore
+	createChest(146, chest); // trapped chest
+	createSmallerBlock(147, 0, t.BLOCK_GOLD, t.BLOCK_GOLD, 0, 1); // weighted pressure plate (light)
+	createSmallerBlock(148, 0, t.QUARTZBLOCK_LINES, t.QUARTZBLOCK_LINES, 0, 1); // weighted pressure plate (heavy)
+	createRedstoneRepeater(149, t.COMPARATOR); // redstone comparator (inactive)
+	createRedstoneRepeater(150, t.COMPARATOR_LIT); // redstone comparator (active)
+	createSmallerBlock(151, 0, t.DAYLIGHT_DETECTOR_SIDE, t.DAYLIGHT_DETECTOR_TOP, 0, 8); // daylight sensor
+	createBlock(152, 0, t.BLOCK_REDSTONE); // block of redstone
+	createBlock(153, 0, t.NETHERQUARTZ); // nether quartz ore
 	// id 154 // hopper
-	// id 155 // block of quartz
-	// id 156 // quartz stairs
-	// id 157 // activator rail
-	// id 158 // dropper
+	// block of quartz --
+	createBlock(155, 0, t.QUARTZBLOCK_SIDE, t.QUARTZBLOCK_TOP);
+	createBlock(155, 1, t.QUARTZBLOCK_CHISELED, t.QUARTZBLOCK_CHISELED_TOP);
+	createBlock(155, 2, t.QUARTZBLOCK_LINES, t.QUARTZBLOCK_LINES_TOP);
+	createBlock(155, 3, t.QUARTZBLOCK_LINES_TOP, t.QUARTZBLOCK_LINES.rotate(ROTATE_90), t.QUARTZBLOCK_LINES);
+	createBlock(155, 4, t.QUARTZBLOCK_LINES.rotate(ROTATE_90), t.QUARTZBLOCK_LINES_TOP, t.QUARTZBLOCK_LINES.rotate(ROTATE_90));
+	// --
+	createStairs(156, t.QUARTZBLOCK_SIDE); // quartz stairs
+	createStraightRails(157, 0, t.ACTIVATOR_RAIL); // activator rail
+	createDispenserDropper(158, t.DISPENSER_FRONT); // dropper
 }
 
 bool BlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
