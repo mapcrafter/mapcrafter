@@ -93,27 +93,6 @@ function convertLatLngToMC(latlng, y) {
 	return [x, z, y];
 }
 
-function MousePosControl(div, map) {
-	div.style.padding = "5px";
-	
-	var wrapper = document.createElement("div");
-	wrapper.style.padding = "3px";
-	wrapper.style.border = "1px solid gray";
-	wrapper.style.backgroundColor = "white";
-	
-	var text = document.createElement("span");
-	text.setAttribute("id", "mouse-move-div");
-	text.innerHTML = "";
-	
-	google.maps.event.addListener(map, "mousemove", function(event) {
-		var xzy = convertLatLngToMC(event.latLng, 64);
-		document.getElementById("mouse-move-div").innerHTML = "x: " + Math.round(xzy[0]) + " z: " + Math.round(xzy[1]) + " y: " + Math.round(xzy[2]);
-	});
-	
-	wrapper.appendChild(text);
-	div.appendChild(wrapper);
-}
-
 var MCMapOptions = {
 	/**
 	 * From Minecraft Overviewer.
@@ -140,14 +119,79 @@ var MCMapOptions = {
 	isPng: true
 };
 
+function MousePosControl(div, map) {
+	div.style.padding = "5px";
+	
+	var wrapper = document.createElement("div");
+	wrapper.style.padding = "3px";
+	wrapper.style.border = "1px solid gray";
+	wrapper.style.backgroundColor = "white";
+	
+	var text = document.createElement("span");
+	text.setAttribute("id", "mouse-move-div");
+	text.innerHTML = "";
+	
+	google.maps.event.addListener(map, "mousemove", function(event) {
+		var xzy = convertLatLngToMC(event.latLng, 64);
+		document.getElementById("mouse-move-div").innerHTML = "x: " + Math.round(xzy[0]) + " z: " + Math.round(xzy[1]) + " y: " + Math.round(xzy[2]);
+	});
+	
+	wrapper.appendChild(text);
+	div.appendChild(wrapper);
+}
+
 var map;
+
+function addControl(pos, index, func) {
+	var wrapper = document.createElement("div");
+	wrapper.style.margin = "5px";
+	wrapper.style.padding = "3px";
+	wrapper.style.border = "1px solid gray";
+	wrapper.style.backgroundColor = "white";
+	
+	func(wrapper);
+	wrapper.index = pos;
+	
+	map.controls[pos].push(wrapper);
+}
+
+function initMarkers() {
+	var infowindow = new google.maps.InfoWindow();
+	var current = {};
+
+	for(var i = 0; i < MARKERS.length; i++) {  
+		var location = MARKERS[i];
+		
+		var markerOptions = {
+			position: convertMCtoLatLng(location.x, location.z, location.y),
+			map: map,
+			title: location.title,
+		};
+		if(location.icon)
+			markerOptions["icon"] = location.icon;
+		var marker = new google.maps.Marker(markerOptions);
+
+		google.maps.event.addListener(marker, "click", (function(marker, location) {
+			return function() {
+				if(current == location) {
+					infowindow.close();
+					current = {};
+					return;
+				}
+				infowindow.setContent(location.text ? location.text : location.title);
+				infowindow.open(map, marker);
+				current = location;
+			}
+		})(marker, location));
+	}
+}
 
 function updatePosHash() {
 	var xzy = convertLatLngToMC(map.getCenter(), 64);
 	for(var i = 0; i < 3; i++)
 		xzy[i] = Math.round(xzy[i]);
 	var zoom = map.getZoom();
-	location.hash = "#" + xzy[0] + ":" + xzy[1] + ":" + xzy[2] + ":" + zoom;
+	window.location.replace("#" + xzy[0] + ":" + xzy[1] + ":" + xzy[2] + ":" + zoom);
 }
 
 function parsePosHash() {
@@ -173,28 +217,6 @@ function gotoPosHash(hash) {
 	map.setZoom(hash[3]);
 }
 
-function setMarkers(map, locations){
-
-	var infowindow = new google.maps.InfoWindow();
-
-	var marker, i;
-
-	for (i = 0; i < locations.length; i++) {  
-		marker = new google.maps.Marker({
-		position: convertMCtoLatLng(locations[i][1], locations[i][2], locations[i][3]),
-		map: map
-	});
-
-      	google.maps.event.addListener(marker, 'click', (function(marker, i) {
-		return function() {
-			infowindow.setContent(locations[i][0]);
-			infowindow.open(map, marker);
-        	}
-	})(marker, i));
-    }
-
-}
-
 function init() {
 	var MCMapType = new google.maps.ImageMapType(MCMapOptions);
 	MCMapType.name = "Minecraft Map";
@@ -215,16 +237,23 @@ function init() {
 	map.mapTypes.set("mcmap", MCMapType);
 	map.setMapTypeId("mcmap");
 	
-	setMarkers(map, MARKERS);
-
-	google.maps.event.addListener(map, "dragend", updatePosHash);
-	google.maps.event.addListener(map, "zoom_changed", updatePosHash);
+	initMarkers();
 	
 	gotoPosHash(parsePosHash());
 	updatePosHash();
 	
-	var mouseDiv = document.createElement("div");
-	var mousePos = new MousePosControl(mouseDiv, map);
-	mouseDiv.index = 1;
-	map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(mouseDiv);
+	google.maps.event.addListener(map, "dragend", updatePosHash);
+	google.maps.event.addListener(map, "zoom_changed", updatePosHash);
+	
+	addControl(google.maps.ControlPosition.BOTTOM_LEFT, 1, function(wrapper) {
+		var text = document.createElement("span");
+		text.setAttribute("id", "mouse-move-div");
+		
+		google.maps.event.addListener(map, "mousemove", function(event) {
+			var xzy = convertLatLngToMC(event.latLng, 64);
+			document.getElementById("mouse-move-div").innerHTML = "x: " + Math.round(xzy[0]) + " z: " + Math.round(xzy[1]) + " y: " + Math.round(xzy[2]);
+		});
+		
+		wrapper.appendChild(text);
+	});
 }

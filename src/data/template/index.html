@@ -5,18 +5,20 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 		<link rel="stylesheet" type="text/css" href="style.css" />
 		<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
-		<script type="text/javascript" src="markers.js"></script>
 		<script type="text/javascript">
 		var MapConfig = {
 			textureSize: {textureSize},
-	   		tileSize: {tileSize},
-	   		rotation: {rotation},
-	   		
-	   		minZoom: 0,
-	   		defaultZoom: 0,
-	   		maxZoom: {maxZoom}
-	 	};
+			tileSize: {tileSize},
+			rotation: {rotation},
+			
+			minZoom: 0,
+			defaultZoom: 0,
+			maxZoom: {maxZoom},
+			
+			lastRender: {lastRender}
+		};
 		</script>
+		<script type="text/javascript" src="markers.js"></script>
 		<script type="text/javascript" src="map.js"></script>
 	</head>
 	<body onload="init()">
