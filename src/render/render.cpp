@@ -450,11 +450,10 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) const {
 								other_id = other_chunk->getBiomeAt(mc::LocalBlockPos(other));
 							}
 
-							Biome other_biome = BIOMES[other_id];
-							if (other_id < BIOMES_SIZE)
-								other_biome = BIOMES[other_id];
-							biome += other_biome;
-							count++;
+							if (other_id < BIOMES_SIZE) {
+								biome +=  BIOMES[other_id];
+								count++;
+							}
 						}
 				}
 
