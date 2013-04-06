@@ -430,6 +430,8 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) const {
 				Biome biome = BIOMES[DEFAULT_BIOME];
 				if (render_biomes && biome_id < BIOMES_SIZE)
 					biome = BIOMES[biome_id];
+				else
+					biome_id = DEFAULT_BIOME;
 				int count = 1;
 
 				// get average biome data to make smooth edges between
