@@ -386,17 +386,16 @@ bool Image::readPNG(const std::string& filename) {
 	setSize(png_get_image_width(png, info), png_get_image_height(png, info));
 
 	png_set_interlace_handling(png);
+	// add alpha channel, if needed
+	if ((color & PNG_COLOR_MASK_ALPHA) == 0) {
+		png_set_add_alpha(png, 0xff, PNG_FILLER_AFTER);
+	}
 	png_read_update_info(png, info);
 
 	png_bytep* rows = new png_bytep[height];
 	uint32_t* p = &data[0];
 	for (int32_t i = 0; i < height; i++, p += width)
 		rows[i] = (png_bytep) p;
-
-	// add alpha channel, if needed
-	if ((color & PNG_COLOR_MASK_ALPHA) == 0) {
-		png_set_add_alpha(png, 0xff, PNG_FILLER_AFTER);
-	}
 
 	if (mapcrafter::isBigEndian()) {
 		png_set_bgr(png);
@@ -405,6 +404,7 @@ bool Image::readPNG(const std::string& filename) {
 	png_read_image(png, rows);
 	png_read_end(png, NULL);
 	png_destroy_read_struct(&png, &info, NULL);
+	delete[] rows;
 
 	return true;
 }
