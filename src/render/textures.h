@@ -211,16 +211,18 @@ public:
  * A Minecraft biome with data to tint the biome-depend blocks.
  */
 struct Biome {
-	Biome(double temperature, double rainfall)
-		: temperature(temperature), rainfall(rainfall), r(255), g(255), b(255) {};
-	Biome(double temperature, double rainfall, uint8_t r, uint8_t g, uint8_t b)
-		: temperature(temperature), rainfall(rainfall), r(r), g(g), b(b) {};
+	Biome(uint8_t id, double temperature, double rainfall, uint8_t r, uint8_t g, uint8_t b)
+		: id(id), temperature(temperature), rainfall(rainfall), r(r), g(g), b(b) {};
+	Biome(uint8_t id, double temperature, double rainfall)
+		: Biome(id, temperature, rainfall, 255, 255, 255) {};
 
 	Biome& operator+=(const Biome& other);
 	Biome& operator/=(int n);
 	bool operator==(const Biome& other) const;
 
 	uint32_t getColor(const Image& colors, bool flip_xy = false) const;
+
+	uint8_t id;
 
 	// temperature and rainfall
 	// used to calculate the position of the tinting color in the color image
@@ -233,33 +235,33 @@ struct Biome {
 // different Minecraft biomes
 // from Minecraft Overviewer (from Minecraft MCP source code)
 static const Biome BIOMES[] = {
-	{0.5, 0.5}, // Ocean
-	{0.8, 0.4}, // Plains
-	{2.0, 0.0}, // Desert
-	{0.2, 0.3}, // Extreme Hills
-	{0.7, 0.8}, // Forest
+	{0, 0.5, 0.5}, // Ocean
+	{1, 0.8, 0.4}, // Plains
+	{2, 2.0, 0.0}, // Desert
+	{3, 0.2, 0.3}, // Extreme Hills
+	{4, 0.7, 0.8}, // Forest
 
-	{0.05, 0.8}, // Taiga
-	{0.8, 0.9, 205, 128, 255}, // Swampland
-	{0.5, 0.5}, // River
-	{2.0, 0.0}, // Hell
-	{0.5, 0.5}, // Sky
+	{5, 0.05, 0.8}, // Taiga
+	{6, 0.8, 0.9, 205, 128, 255}, // Swampland
+	{7, 0.5, 0.5}, // River
+	{8, 2.0, 0.0}, // Hell
+	{9, 0.5, 0.5}, // Sky
 
-	{0.0, 0.5}, // Frozen Ocean
-	{0.0, 0.5}, // Frozen River
-	{0.0, 0.5}, // Ice Plains
-	{0.0, 0.5}, // Ice Mountains
-	{0.9, 1.0}, // Mushroom Island
+	{10, 0.0, 0.5}, // Frozen Ocean
+	{11, 0.0, 0.5}, // Frozen River
+	{12, 0.0, 0.5}, // Ice Plains
+	{13, 0.0, 0.5}, // Ice Mountains
+	{14, 0.9, 1.0}, // Mushroom Island
 
-	{0.9, 1.0}, // Mushroom Island Shore
-	{0.8, 0.4}, // Beach
-	{2.0, 0.0}, // Desert Hills
-	{0.7, 0.8}, // Forest Hills
-	{0.05, 0.8}, // Taiga Hills
+	{15, 0.9, 1.0}, // Mushroom Island Shore
+	{16, 0.8, 0.4}, // Beach
+	{17, 2.0, 0.0}, // Desert Hills
+	{18, 0.7, 0.8}, // Forest Hills
+	{19, 0.05, 0.8}, // Taiga Hills
 
-	{0.2, 0.3}, // Extreme Hills Edge
-	{2.0, 0.45}, // Jungle
-	{2.0, 0.25}, // Jungle Mountains
+	{20, 0.2, 0.3}, // Extreme Hills Edge
+	{21, 2.0, 0.45}, // Jungle
+	{22, 2.0, 0.25}, // Jungle Mountains
 };
 
 static const size_t BIOMES_SIZE = sizeof(BIOMES) / sizeof(Biome);
@@ -495,8 +497,7 @@ public:
 	bool isBlockTransparent(uint16_t id, uint16_t data) const;
 	bool hasBlock(uint16_t id, uint16_t) const;
 	const Image& getBlock(uint16_t id, uint16_t data) const;
-	Image getBiomeDependBlock(uint16_t id, uint16_t data, uint8_t biome,
-	        const Biome& biome_data) const;
+	Image getBiomeDependBlock(uint16_t id, uint16_t data, const Biome& biome) const;
 
 	int getMaxWaterNeededOpaque() const;
 	const Image& getOpaqueWater(bool south, bool west) const;

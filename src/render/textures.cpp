@@ -2321,25 +2321,25 @@ const Image& BlockImages::getBlock(uint16_t id, uint16_t data) const {
 	return block_images.at(id | (data << 16));
 }
 
-Image BlockImages::getBiomeDependBlock(uint16_t id, uint16_t data, uint8_t biome,
-        const Biome& biome_data) const {
+Image BlockImages::getBiomeDependBlock(uint16_t id, uint16_t data,
+        const Biome& biome) const {
 	data = filterBlockData(id, data);
-	if (biome >= BIOMES_SIZE)
+	if (biome.id >= BIOMES_SIZE)
 		return getBlock(id, data);
 
 	if (!hasBlock(id, data))
 		return unknown_block;
 
 	// check if this biome block is precalculated
-	if (biome_data == BIOMES[biome]) {
-		int64_t key = id | (((int64_t) data) << 16) | (((int64_t) biome) << 32);
+	if (biome == BIOMES[biome.id]) {
+		int64_t key = id | (((int64_t) data) << 16) | (((int64_t) biome.id) << 32);
 		if (!biome_images.count(key))
 			return unknown_block;
 		return biome_images.at(key);
 	}
 
 	// create the block if not
-	return createBiomeBlock(id, data, biome_data);
+	return createBiomeBlock(id, data, biome);
 }
 
 int BlockImages::getMaxWaterNeededOpaque() const {
