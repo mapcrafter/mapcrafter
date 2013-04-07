@@ -185,6 +185,13 @@ bool BlockPos::operator<(const BlockPos& other) const {
 	return y < other.y;
 }
 
+extern const mc::BlockPos DIR_NORTH(0, -1, 0);
+extern const mc::BlockPos DIR_SOUTH(0, 1, 0);
+extern const mc::BlockPos DIR_EAST(1, 0, 0);
+extern const mc::BlockPos DIR_WEST(-1, 0, 0);
+extern const mc::BlockPos DIR_TOP(0, 0, 1);
+extern const mc::BlockPos DIR_BOTTOM(0, 0, -1);
+
 LocalBlockPos::LocalBlockPos()
 		: x(0), z(0), y(0) {
 }

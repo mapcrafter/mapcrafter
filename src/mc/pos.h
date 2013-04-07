@@ -26,7 +26,7 @@
  * Here are some Minecraft position things. In Minecraft, x/z are the horizontal axes
  * and y is the vertical axis.
  *
- * Here are the Minecraft directions (also on the bottom of this file):
+ * Here are the Minecraft directions (also available as constants):
  * north = -z
  * south = +z
  * east = +x
@@ -98,6 +98,8 @@ public:
 	bool operator<(const BlockPos& other) const;
 };
 
+extern const mc::BlockPos DIR_NORTH, DIR_SOUTH, DIR_EAST, DIR_WEST, DIR_TOP, DIR_BOTTOM;
+
 class LocalBlockPos {
 public:
 	int x, z, y;
@@ -118,13 +120,6 @@ std::ostream& operator<<(std::ostream& stream, const RegionPos& region);
 std::ostream& operator<<(std::ostream& stream, const ChunkPos& chunk);
 std::ostream& operator<<(std::ostream& stream, const BlockPos& block);
 std::ostream& operator<<(std::ostream& stream, const LocalBlockPos& block);
-
-#define DIR_NORTH mc::BlockPos(0, -1, 0)
-#define DIR_SOUTH mc::BlockPos(0, 1, 0)
-#define DIR_EAST mc::BlockPos(1, 0, 0)
-#define DIR_WEST mc::BlockPos(-1, 0, 0)
-#define DIR_TOP mc::BlockPos(0, 0, 1)
-#define DIR_BOTTOM mc::BlockPos(0, 0, -1)
 
 }
 }
