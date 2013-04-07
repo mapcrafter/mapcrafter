@@ -100,9 +100,11 @@ const std::unordered_set<RegionPos, hash_function>& World::getAvailableRegions()
  * Returns a region file with a specific position.
  */
 bool World::getRegion(const RegionPos& pos, RegionFile& region) const {
-	if(available_regions.count(pos) == 0)
+	std::unordered_map<RegionPos, std::string, hash_function>::const_iterator it
+		= region_files.find(pos);
+	if (it == region_files.end())
 		return false;
-	region = RegionFile(region_files.at(pos), rotation);
+	region = it->second;
 	return true;
 }
 

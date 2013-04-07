@@ -159,7 +159,7 @@ int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 	// try to load the chunk
 	try {
 		if (!chunk.readNBT((char*) &regiondata[offset + 5], size, comp))
-			return CHUNK_INVALID;
+			return CHUNK_DATA_INVALID;
 	} catch (const nbt::NBTError& err) {
 		std::cout << "Error: Unable to read chunk at " << pos.x << ":" << pos.z
 		        << " : " << err.what() << std::endl;
