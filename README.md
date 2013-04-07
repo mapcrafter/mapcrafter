@@ -3,7 +3,7 @@
 by Moritz Hilscher
 
 mapcrafter is a fast Minecraft world renderer written in C++. It renders
-Minecraft worlds to a bunch of images which are viewable in any webbrowser
+Minecraft worlds to a bunch of images, which are viewable in any webbrowser
 using the Google Maps API.
 
 mapcrafter runs on linux (maybe also Mac OS or W****** with cygwin) and needs
@@ -29,7 +29,7 @@ Please feel free to report bugs and errors you find when using mapcrafter.
 
 Thanks to pigmap and Minecraft Overviewer, whose documentations and source code
 were very helpful. I also used the alpha blending code of pigmap and some maps
-stuff of template from Minecraft Overviewer.
+stuff of the template from Minecraft Overviewer.
 
 ## How to use the renderer ##
 
@@ -63,7 +63,7 @@ after the rendering.
 --textures=directory
 
 This is the directory with the Minecraft texture files (defaults to
-data/textures).  The renderer works with the Minecraft 1.5 texture files. You
+data/textures). The renderer works with the Minecraft 1.5 texture files. You
 need here: 
 * chest.png
 * enderchest.png
@@ -140,6 +140,13 @@ variants. And also, there is not a big difference with different water colors.
 
 ## Version history ##
 
+**v.0.4**
+
+* Added support for biomes
+* Added support for Minecraft 1.5 texture packs
+* Added some new blocks
+* Some template things: url hash with current view, better support for markers
+
 **v.0.3**
 
 * Reworked multithreading
@@ -158,7 +165,7 @@ variants. And also, there is not a big difference with different water colors.
 
 **v.0.1 (December 2012)**
 
-* first version on github, features:
-* rendering minecraft worlds to tiles and an html file to view them like a
+* First version on github, features:
+* Rendering minecraft worlds to tiles and an html file to view them like a
   Google Map
-* incremental rendering, multithreading
+* Incremental rendering, multithreading
