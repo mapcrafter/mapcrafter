@@ -104,7 +104,7 @@ bool World::getRegion(const RegionPos& pos, RegionFile& region) const {
 		= region_files.find(pos);
 	if (it == region_files.end())
 		return false;
-	region = it->second;
+	region = RegionFile(it->second, rotation);
 	return true;
 }
 
