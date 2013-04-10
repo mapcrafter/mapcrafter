@@ -214,7 +214,7 @@ struct Biome {
 	Biome(uint8_t id, double temperature, double rainfall, uint8_t r, uint8_t g, uint8_t b)
 		: id(id), temperature(temperature), rainfall(rainfall), r(r), g(g), b(b) {};
 	Biome(uint8_t id, double temperature, double rainfall)
-		: Biome(id, temperature, rainfall, 255, 255, 255) {};
+		: id(id), temperature(temperature), rainfall(rainfall), r(255), g(255), b(255) {};
 
 	Biome& operator+=(const Biome& other);
 	Biome& operator/=(int n);
