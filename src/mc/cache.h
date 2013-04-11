@@ -25,10 +25,6 @@
 #include "mc/region.h"
 #include "mc/world.h"
 
-#include <functional>
-#include <boost/unordered_map.hpp>
-#include <boost/functional.hpp>
-
 namespace mapcrafter {
 namespace mc {
 

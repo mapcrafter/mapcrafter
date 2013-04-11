@@ -380,14 +380,14 @@ BlockTextures::~BlockTextures() {
  */
 bool BlockTextures::load(const std::string& block_dir, int size) {
 	if (!fs::exists(block_dir) || !fs::is_directory(block_dir)) {
-		std::cout << "Error: Directory 'blocks' with block textures does not exists." << std::endl;
+		std::cerr << "Error: Directory 'blocks' with block textures does not exist." << std::endl;
 		return false;
 	}
 
 	// go through all textures and load them
 	for (size_t i = 0; i < textures.size(); i++) {
 		if (!textures[i]->load(block_dir, size))
-			std::cout << "Warning: Unable to load block texture "
+			std::cerr << "Warning: Unable to load block texture "
 				<< textures[i]->getName() << ".png ." << std::endl;
 	}
 	return true;

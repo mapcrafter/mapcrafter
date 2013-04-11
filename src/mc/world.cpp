@@ -19,12 +19,12 @@
 
 #include "mc/world.h"
 
-#include "util.h"
 #include "mc/chunk.h"
+
+#include "util.h"
 
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <cstdio>
 #include <boost/filesystem.hpp>
 

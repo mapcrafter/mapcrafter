@@ -21,11 +21,11 @@
 #define TILE_H_
 
 #include "mc/world.h"
+
 #include "render/textures.h"
 
 #include <set>
 #include <vector>
-#include <string>
 
 /**
  * The renderer renders the world to tiles, which are arranged in a quadtree. Every node

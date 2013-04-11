@@ -19,13 +19,8 @@
 
 #include "render/manager.h"
 
-#include "render/render.h"
-#include "render/tile.h"
-#include "util.h"
-
 #include <fstream>
 #include <ctime>
-#include <boost/date_time.hpp>
 #include <pthread.h>
 
 namespace mapcrafter {

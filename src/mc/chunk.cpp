@@ -22,7 +22,7 @@
 #include "mc/nbt.h"
 
 #include <iostream>
-#include <math.h>
+#include <cmath>
 
 namespace mapcrafter {
 namespace mc {

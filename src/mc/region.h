@@ -23,7 +23,6 @@
 #include "mc/pos.h"
 #include "mc/chunk.h"
 
-#include <fstream>
 #include <string>
 #include <set>
 
@@ -69,7 +68,7 @@ public:
 	int loadChunk(const ChunkPos& pos, Chunk& chunk);
 
 	static const int CHUNK_OK = 1;
-	static const int CHUNK_DOES_NOT_EXISTS = 2;
+	static const int CHUNK_DOES_NOT_EXIST = 2;
 	static const int CHUNK_DATA_INVALID = 3;
 	static const int CHUNK_NBT_ERROR = 4;
 };

@@ -19,9 +19,10 @@
 
 #include "mc/pos.h"
 
+#include "util.h"
+
 #include <cmath>
 #include <cstdio>
-#include <boost/filesystem.hpp>
 
 namespace mapcrafter {
 namespace mc {

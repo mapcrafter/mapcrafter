@@ -20,7 +20,7 @@
 #ifndef POS_H_
 #define POS_H_
 
-#include "util.h"
+#include <iostream>
 
 /**
  * Here are some Minecraft position things. In Minecraft, x/z are the horizontal axes

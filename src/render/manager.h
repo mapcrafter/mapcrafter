@@ -29,9 +29,6 @@
 #include "util.h"
 
 #include <boost/filesystem.hpp>
-#include <boost/date_time.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <pthread.h>
 
 namespace fs = boost::filesystem;
 

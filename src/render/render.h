@@ -27,7 +27,6 @@
 #include "render/textures.h"
 #include "render/tile.h"
 
-#include <map>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;

@@ -31,7 +31,6 @@
 #include <stdint.h>
 #include <set>
 #include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
 
 namespace fs = boost::filesystem;
 

@@ -19,6 +19,7 @@
 
 #include "mc/region.h"
 
+#include <fstream>
 #include <cstdlib>
 
 namespace mapcrafter {
@@ -138,7 +139,7 @@ int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 		unrotated.rotate(4 - rotation);
 
 	if (!hasChunk(pos))
-		return CHUNK_DOES_NOT_EXISTS;
+		return CHUNK_DOES_NOT_EXIST;
 
 	// get the offsets, where the chunk data starts
 	int offset = chunk_offsets[unrotated.getLocalZ() * 32 + unrotated.getLocalX()];

@@ -26,7 +26,6 @@
 #include <stdint.h>
 #include <string>
 #include <sstream>
-#include <iostream>
 
 namespace mapcrafter {
 namespace mc {
