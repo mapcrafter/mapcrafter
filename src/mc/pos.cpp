@@ -50,7 +50,12 @@ bool RegionPos::operator<(const RegionPos& other) const {
 }
 
 RegionPos RegionPos::byFilename(const std::string& filename) {
+#ifdef OLD_BOOST
+	std::string name = boost::filesystem::path(filename).filename();
+#else
 	std::string name = boost::filesystem::path(filename).filename().string();
+#endif
+
 	int x, z;
 	if (sscanf(name.c_str(), "r.%d.%d.mca", &x, &z) != 2)
 		throw std::runtime_error("Invalid filename " + name + "!");

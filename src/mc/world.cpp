@@ -68,7 +68,13 @@ bool World::readRegions(const std::string& path) {
 	for(fs::directory_iterator it(region_dir); it != fs::directory_iterator();
 			++it) {
 		std::string region_file = (*it).path().string();
+
+#ifdef OLD_BOOST
+		std::string filename = (*it).path().filename();
+#else
 		std::string filename = (*it).path().filename().string();
+#endif
+
 		if(!std::equal(ending.rbegin(), ending.rend(), filename.rbegin()))
 			continue;
 		int x = 0;

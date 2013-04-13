@@ -246,7 +246,11 @@ void RenderManager::writeTemplates(const MapSettings& settings) {
 	fs::directory_iterator end;
 	for (fs::directory_iterator it(opts.template_dir); it != end;
 			++it) {
+#ifdef OLD_BOOST
+		std::string filename = it->path().filename();
+#else
 		std::string filename = it->path().filename().string();
+#endif
 		if (filename.compare("index.html") == 0 || filename.compare("markers.js") == 0)
 			continue;
 		if (fs::is_regular_file(*it)) {

@@ -30,6 +30,14 @@ namespace fs = boost::filesystem;
 #define MIN(a, b) (a < b ? a : b)
 #define MAX(a, b) (a > b ? a : b)
 
+#if BOOST_FILESYSTEM_VERSION == 2
+	#define OLD_BOOST 42
+#endif
+
+#ifndef BOOST_FILESYSTEM_VERSION
+	#define OLD_BOOST 42
+#endif
+
 namespace mapcrafter {
 
 bool isBigEndian();
