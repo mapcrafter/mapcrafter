@@ -140,6 +140,14 @@ variants. And also, there is not a big difference with different water colors.
 
 ## Version history ##
 
+**v.0.4.1**
+
+* Fixed a bug preventing rotated worlds
+* Fixed a small compiler error for some gcc versions
+* Fixed the problem with the world scanning (world scanning seems to be stuck)
+  when the max zoom level is higher
+* Added compatibility for older boost filesystem versions
+
 **v.0.4**
 
 * Added support for biomes
