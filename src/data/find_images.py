@@ -25,29 +25,46 @@ if __name__ == "__main__":
 	
 	if not os.path.exists("blocks"):
 		os.mkdir("blocks")
-	
+		
 	jar = zipfile.ZipFile(path)
+		
+	print "Extracting block images:"
+	found, extracted, skipped = 0, 0, 0
 	for info in jar.infolist():
-		filename = info.filename
 		if info.filename.startswith("textures/blocks/"):
 			filename = info.filename.replace("textures/", "")
-		else:
-			extract = False
-			for name, path in files.items():
-				if filename == name:
-					extract = True
-			if not extract:
+			found += 1
+			
+			if os.path.exists(filename) and not force:
+				skipped += 1
 				continue
-				
-		print "found", filename, "...",
-		if os.path.exists(filename) and not force:
-			print "skipping"
-		else:
+			
 			fin = jar.open(info)
 			fout = open(filename, "w")
 			fout.write(fin.read())
 			fin.close()
 			fout.close()
-			print "ok"
-			
-	print "use -f to overwrite already existing files"
+			extracted += 1
+	
+	print " - Found %d block images." % found
+	print " - Extracted %d." % extracted
+	print " - Skipped %d (Use -f to force overwrite)." % skipped
+	
+	print ""
+	print "Extracting other textures:"
+	for filename, zipname in files.items():
+		try:
+			print " - Extracting" , filename , "...",
+			info = jar.getinfo(zipname)
+			if os.path.exists(filename) and not force:
+				print "skipped."
+			else:
+				fin = jar.open(info)
+				fout = open(filename, "w")
+				fout.write(fin.read())
+				fin.close()
+				fout.close()
+				print "extracted."
+		except KeyError:
+			print "not found!"
+		
