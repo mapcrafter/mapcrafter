@@ -1,6 +1,9 @@
 TODO:
+	- for the next big version:
+	- config files to allow to render multiple worlds/different rotations/rendermodes 
+	  to the same output file
+	
 	- add all blocks
-	- better documentation
 	
 Blocks:
 	- piston extension
@@ -15,8 +18,3 @@ Blocks:
 	- anvil
 	
 	- corner stairs?
-	
-Other things:
-	- performance and ram improvements are always good
-	- biome depend grass/leaves/water color?
-	- maybe more rendermodes?
