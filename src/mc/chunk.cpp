@@ -68,7 +68,7 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::CompressionType compressi
 
 	nbt::TagByteArray* tagBiomes = level->findTag<nbt::TagByteArray>("Biomes",
 			nbt::TAG_BYTE_ARRAY);
-	if (tagBiomes != NULL || tagBiomes->payload.size() == 256)
+	if (tagBiomes != NULL && tagBiomes->payload.size() == 256)
 		std::copy(tagBiomes->payload.begin(), tagBiomes->payload.end(), biomes);
 	else
 		std::cerr << "Warning: Corrupt chunk at " << pos.x << ":" << pos.z
