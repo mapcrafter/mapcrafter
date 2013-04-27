@@ -27,6 +27,8 @@
 #include <map>
 #include <set>
 
+namespace fs = boost::filesystem;
+
 namespace mapcrafter {
 namespace render {
 
@@ -81,9 +83,9 @@ struct RenderWorldConfig {
 	std::string name_short, name_long;
 
 	std::string input_dir;
-	std::string templates_dir, images_dir;
+	std::string textures_dir;
 
-	std::set<int> rotation;
+	std::set<int> rotations;
 	int texture_size;
 
 	RenderWorldConfig();
@@ -96,8 +98,12 @@ struct RenderWorldConfig {
 class RenderConfigParser {
 private:
 	ConfigFile config;
-	RenderWorldConfig default_world;
+
+	RenderWorldConfig default_config;
 	std::vector<RenderWorldConfig> worlds;
+
+	fs::path output_dir;
+	fs::path template_dir;
 
 public:
 	RenderConfigParser();
@@ -105,7 +111,12 @@ public:
 
 	bool loadFile(const std::string& filename);
 
-	const std::vector<RenderWorldConfig>& getWorlds();
+	const std::vector<RenderWorldConfig>& getWorlds() const;
+	const fs::path& getOutputDir() const;
+	const fs::path& getTemplateDir() const;
+
+	std::string outputPath(std::string file) const;
+	std::string templatePath(std::string file) const;
 };
 
 }

@@ -23,6 +23,7 @@
 #include "mc/cache.h"
 #include "mc/world.h"
 
+#include "render/config.h"
 #include "render/tile.h"
 #include "render/render.h"
 
@@ -39,23 +40,10 @@ namespace render {
  * This are the render options from the command line.
  */
 struct RenderOpts {
-	fs::path input_dir;
-	fs::path output_dir;
-	fs::path template_dir, textures_dir;
+	std::string config_file;
 
-	bool incremental;
 	int jobs;
 	bool batch;
-
-	int texture_size;
-	int rotation;
-	bool render_unknown_blocks;
-	bool render_leaves_transparent;
-	bool render_biomes;
-
-	std::string outputPath(const std::string& path) const;
-	std::string templatePath(const std::string& path) const;
-	std::string texturePath(const std::string& path) const;
 };
 
 /**
@@ -125,10 +113,7 @@ void renderRecursive(RecursiveRenderSettings& settings, const Path& path, Image&
 class RenderManager {
 private:
 	RenderOpts opts;
-	MapSettings settings;
-
-	mc::World world;
-	BlockImages images;
+	RenderConfigParser config;
 
 	bool copyTemplateFile(const std::string& filename,
 	        std::map<std::string, std::string> vars =
@@ -138,8 +123,12 @@ private:
 	void writeStats(int time_took);
 	void increaseMaxZoom();
 
-	void render(const TileSet& tiles);
-	void renderMultithreaded(const TileSet& tiles);
+	void render(const mc::World& world, const TileSet& tiles,
+			const BlockImages& images, const std::string& output_dir);
+	void renderMultithreaded(const mc::World& world, const TileSet& tiles,
+			const BlockImages& images, const std::string& output_dir);
+
+	bool renderWorld(const RenderWorldConfig& world, int rotation);
 public:
 	RenderManager(const RenderOpts& opts);
 

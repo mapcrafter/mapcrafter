@@ -492,6 +492,7 @@ public:
 	bool loadColors(const std::string& foliagecolor, const std::string& grasscolor);
 	bool loadOther(const std::string& fire, const std::string& endportal);
 	bool loadBlocks(const std::string& block_dir);
+	bool loadAll(const std::string& textures_dir);
 	bool saveBlocks(const std::string& filename);
 
 	bool isBlockTransparent(uint16_t id, uint16_t data) const;

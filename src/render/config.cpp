@@ -39,7 +39,7 @@ const std::string& ConfigSection::getName() const {
 }
 
 int ConfigSection::getEntryIndex(const std::string& key) const {
-	for (int i = 0; i < entries.size(); i++)
+	for (size_t i = 0; i < entries.size(); i++)
 		if (entries[i].first == key)
 			return i;
 	return -1;
@@ -71,7 +71,7 @@ ConfigFile::~ConfigFile() {
 }
 
 int ConfigFile::getSectionIndex(const std::string& section) const {
-	for (int i = 0; i < sections.size(); i++)
+	for (size_t i = 0; i < sections.size(); i++)
 		if (sections[i].getName() == section)
 			return i;
 	return -1;
@@ -98,7 +98,7 @@ bool ConfigFile::load(std::istream& stream) {
 		} else {
 			// just a line with key = value
 			std::string key, value;
-			for (int i = 0; i < line.size(); i++) {
+			for (size_t i = 0; i < line.size(); i++) {
 				if (line[i] == '=') {
 					key = line.substr(0, i);
 					value = line.substr(i + 1, line.size() - i - 1);
@@ -151,8 +151,8 @@ std::string ConfigFile::get(const std::string& section, const std::string& key) 
 }
 
 RenderWorldConfig::RenderWorldConfig()
-		: templates_dir("data/templates"), images_dir("data/images"), texture_size(12) {
-	rotation.insert(0);
+		: textures_dir("data/images"), texture_size(12) {
+	rotations.insert(0);
 }
 
 int stringToRotation(const std::string& str) {
@@ -171,21 +171,19 @@ void RenderWorldConfig::readFromConfig(const ConfigFile& config, const std::stri
 
 	if (config.has(section, "world"))
 		input_dir = config.get(section, "world");
-	if (config.has(section, "templates_dir"))
-		templates_dir = config.get(section, "templates_dir");
-	if (config.has(section, "images_dir"))
-		images_dir = config.get(section, "images_dir");
+	if (config.has(section, "textures_dir"))
+		textures_dir = config.get(section, "textures_dir");
 
-	if (config.has(section, "rotation")) {
-		rotation.clear();
-		std::string str = config.get(section, "rotation");
+	if (config.has(section, "rotations")) {
+		rotations.clear();
+		std::string str = config.get(section, "rotations");
 		std::stringstream ss;
 		ss << str;
 		std::string elem;
 		while (ss >> elem) {
 			int r = stringToRotation(elem);
 			if (r != -1)
-				rotation.insert(r);
+				rotations.insert(r);
 		}
 		std::cout << std::endl;
 	}
@@ -196,11 +194,10 @@ void RenderWorldConfig::readFromConfig(const ConfigFile& config, const std::stri
 void RenderWorldConfig::print(std::ostream& stream) const {
 		std::cout << name_short << " '" << name_long << "'" << std::endl;
 		std::cout << "  input_dir " << input_dir << std::endl;
-		std::cout << "  template_dir " << templates_dir << std::endl;
-		std::cout << "  images_dir " << images_dir << std::endl;
+		std::cout << "  textures_dir " << textures_dir << std::endl;
 		std::cout << "  texture_size " << texture_size << std::endl;
 		std::cout << "  rotations ";
-		for (auto it = rotation.begin(); it != rotation.end(); ++it)
+		for (auto it = rotations.begin(); it != rotations.end(); ++it)
 			std::cout << *it << " ";
 		std::cout << std::endl;
 }
@@ -215,15 +212,18 @@ bool RenderConfigParser::loadFile(const std::string& filename) {
 	if (!config.loadFile(filename))
 		return false;
 
-	default_world.readFromConfig(config, "");
+	default_config.readFromConfig(config, "");
 
 	std::vector<std::string> sections = config.getSections();
-	for (int i = 0; i < sections.size(); i++) {
-		RenderWorldConfig world = default_world;
+	for (size_t i = 0; i < sections.size(); i++) {
+		RenderWorldConfig world = default_config;
 		world.name_short = sections[i];
 		world.readFromConfig(config, sections[i]);
 		worlds.push_back(world);
 	}
+
+	output_dir = config.get("", "output_dir");
+	template_dir = config.get("", "template_dir");
 
 	/*
 	std::cout << "Loaded " << worlds.size() << " worlds." << std::endl;
@@ -235,8 +235,24 @@ bool RenderConfigParser::loadFile(const std::string& filename) {
 	return true;
 }
 
-const std::vector<RenderWorldConfig>& RenderConfigParser::getWorlds() {
+const std::vector<RenderWorldConfig>& RenderConfigParser::getWorlds() const {
 	return worlds;
+}
+
+const fs::path& RenderConfigParser::getOutputDir() const {
+	return output_dir;
+}
+
+const fs::path& RenderConfigParser::getTemplateDir() const {
+	return template_dir;
+}
+
+std::string RenderConfigParser::outputPath(std::string file) const {
+	return (output_dir / file).string();
+}
+
+std::string RenderConfigParser::templatePath(std::string file) const {
+	return (template_dir / file).string();
 }
 
 }

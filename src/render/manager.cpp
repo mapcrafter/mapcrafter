@@ -26,18 +26,6 @@
 namespace mapcrafter {
 namespace render {
 
-std::string RenderOpts::outputPath(const std::string& path) const {
-	return (output_dir / path).string();
-}
-
-std::string RenderOpts::templatePath(const std::string& path) const {
-	return (template_dir / path).string();
-}
-
-std::string RenderOpts::texturePath(const std::string& path) const {
-	return (textures_dir / path).string();
-}
-
 MapSettings::MapSettings()
 		: texture_size(12), rotation(0), tile_size(0), max_zoom(0),
 		  render_unknown_blocks(0), render_leaves_transparent(0),
@@ -127,9 +115,11 @@ void renderRecursive(RecursiveRenderSettings& settings, const Path& path, Image&
 	if (!settings.tiles.isTileRequired(path)
 			|| settings.skip_tiles.count(path) == 1) {
 		fs::path file = settings.output_dir / (path.toString() + ".png");
-		if (!tile.readPNG(file.string()))
+		if (!tile.readPNG(file.string())) {
 			std::cerr << "Unable to read tile " << path.toString()
 				<< " from " << file << std::endl;
+			std::cerr << settings.tiles.isTileRequired(path) << " " << settings.skip_tiles.count(path) << std::endl;
+		}
 	} else if (path.getDepth() == settings.tiles.getMaxZoom()) {
 		// this tile is a render tile, render it (if we have a renderer)
 		if (settings.renderer == NULL)
@@ -194,7 +184,7 @@ RenderManager::RenderManager(const RenderOpts& opts)
  */
 bool RenderManager::copyTemplateFile(const std::string& filename,
 		std::map<std::string, std::string> vars) {
-	std::ifstream file(opts.templatePath(filename).c_str());
+	std::ifstream file(config.templatePath(filename).c_str());
 	if (!file)
 		return false;
 	std::stringstream ss;
@@ -207,7 +197,7 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
 		replaceAll(data, "{" + it->first + "}", it->second);
 	}
 
-	std::ofstream out(opts.outputPath(filename).c_str());
+	std::ofstream out(config.outputPath(filename).c_str());
 	if (!out)
 		return false;
 	out << data;
@@ -219,7 +209,7 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
  * This method copies all template files to the output directory.
  */
 void RenderManager::writeTemplates(const MapSettings& settings) {
-	if (!fs::is_directory(opts.template_dir)) {
+	if (!fs::is_directory(config.getTemplateDir())) {
 		std::cout << "Warning: The template directory does not exists!" << std::endl;
 		return;
 	}
@@ -242,9 +232,8 @@ void RenderManager::writeTemplates(const MapSettings& settings) {
 		std::cout << "Warning: Unable to copy template file markers.js!" << std::endl;
 
 	// copy all other files and directories
-	fs::path to(opts.output_dir);
 	fs::directory_iterator end;
-	for (fs::directory_iterator it(opts.template_dir); it != end;
+	for (fs::directory_iterator it(config.getTemplateDir()); it != end;
 			++it) {
 #ifdef OLD_BOOST
 		std::string filename = it->path().filename();
@@ -254,10 +243,10 @@ void RenderManager::writeTemplates(const MapSettings& settings) {
 		if (filename.compare("index.html") == 0 || filename.compare("markers.js") == 0)
 			continue;
 		if (fs::is_regular_file(*it)) {
-			if (!copyFile(*it, to / filename))
+			if (!copyFile(*it, config.outputPath(filename)))
 				std::cout << "Warning: Unable to copy file " << filename << std::endl;
 		} else if (fs::is_directory(*it)) {
-			if (!copyDirectory(*it, to / filename))
+			if (!copyDirectory(*it, config.outputPath(filename)))
 				std::cout << "Warning: Unable to copy directory " << filename
 						<< std::endl;
 		}
@@ -299,7 +288,7 @@ void RenderManager::writeStats(int time_took) {
  * on the tile tree.
  */
 void RenderManager::increaseMaxZoom() {
-	fs::path out = opts.output_dir;
+	fs::path out = config.getOutputDir();
 
 	// at first rename the directories 1 2 3 4 (zoom level 0) and make new directories
 	for (int i = 1; i <= 4; i++) {
@@ -325,7 +314,8 @@ void RenderManager::increaseMaxZoom() {
 	img3.readPNG((out / "3/2.png").string());
 	img4.readPNG((out / "4/1.png").string());
 
-	int s = settings.tile_size;
+	//int s = settings.tile_size;
+	int s = 12;
 	// create images for the new directories
 	Image new1(s, s), new2(s, s), new3(s, s), new4(s, s);
 	Image old1, old2, old3, old4;
@@ -360,7 +350,8 @@ void RenderManager::increaseMaxZoom() {
 /**
  * Renders render tiles and composite tiles.
  */
-void RenderManager::render(const TileSet& tiles) {
+void RenderManager::render(const mc::World& world, const TileSet& tiles,
+		const BlockImages& images, const std::string& output_dir) {
 	if(tiles.getRequiredCompositeTilesCount() == 0) {
 		std::cout << "No tiles need to get rendered." << std::endl;
 		return;
@@ -374,11 +365,11 @@ void RenderManager::render(const TileSet& tiles) {
 
 		// create needed things for recursiv render method
 		mc::WorldCache cache(world);
-		TileRenderer renderer(cache, images, settings.render_biomes);
+		TileRenderer renderer(cache, images, true);
 		RecursiveRenderSettings settings(tiles, &renderer);
 
 		settings.tile_size = images.getTileSize();
-		settings.output_dir = opts.output_dir;
+		settings.output_dir = output_dir;
 
 		settings.show_progress = true;
 		settings.progress_bar = ProgressBar(tiles.getRequiredRenderTilesCount(), !opts.batch);
@@ -388,7 +379,7 @@ void RenderManager::render(const TileSet& tiles) {
 		renderRecursive(settings, Path(), tile);
 		settings.progress_bar.finish();
 	} else {
-		renderMultithreaded(tiles);
+		renderMultithreaded(world, tiles, images, output_dir);
 	}
 }
 
@@ -420,7 +411,8 @@ void* runWorker(void* settings_ptr) {
 /**
  * This method starts the render threads when multithreading is enabled.
  */
-void RenderManager::renderMultithreaded(const TileSet& tiles) {
+void RenderManager::renderMultithreaded(const mc::World& world, const TileSet& tiles,
+		const BlockImages& images, const std::string& output_dir) {
 	// a list of workers
 	std::vector<std::map<Path, int> > workers;
 	// find task/worker assignemt
@@ -429,7 +421,7 @@ void RenderManager::renderMultithreaded(const TileSet& tiles) {
 	// create render settings for the remaining composite tiles at the end
 	RecursiveRenderSettings remaining_settings(tiles, NULL);
 	remaining_settings.tile_size = images.getTileSize();
-	remaining_settings.output_dir = opts.output_dir;
+	remaining_settings.output_dir = output_dir;
 	remaining_settings.show_progress = true;
 
 	// list of threads
@@ -441,11 +433,11 @@ void RenderManager::renderMultithreaded(const TileSet& tiles) {
 		// create all informations needed for the worker
 		// every thread has his own cache
 		mc::WorldCache* cache = new mc::WorldCache(world);
-		TileRenderer* renderer = new TileRenderer(*cache, images, settings.render_biomes);
+		TileRenderer* renderer = new TileRenderer(*cache, images, true);
 		RecursiveRenderSettings* render_settings =
 				new RecursiveRenderSettings(tiles, renderer);
 		render_settings->tile_size = images.getTileSize();
-		render_settings->output_dir = opts.output_dir;
+		render_settings->output_dir = output_dir;
 		render_settings->show_progress = false;
 
 		RenderWorkerSettings* settings = new RenderWorkerSettings;
@@ -496,10 +488,71 @@ void RenderManager::renderMultithreaded(const TileSet& tiles) {
 	remaining_settings.progress_bar.finish();
 }
 
+bool RenderManager::renderWorld(const RenderWorldConfig& world_config, int rotation) {
+	mc::World world;
+	if (!world.load(world_config.input_dir, rotation)) {
+		std::cerr << "Unable to load the world!" << std::endl;
+		return false;
+	}
+
+	std::cout << "Creating block images..." << std::endl;
+	BlockImages images;
+	images.setSettings(world_config.texture_size, rotation, true, true);
+	if (!images.loadAll(world_config.textures_dir)) {
+		std::cerr << "Unable to create block images!" << std::endl;
+		return false;
+	}
+
+	std::cout << "Scanning world..." << std::endl;
+	TileSet tileset(world, 0);
+	std::cout << "Start rendering..." << std::endl;
+
+	std::string rotations[] = {"tl", "tr", "br", "bl"};
+	std::string output_dir = config.outputPath(world_config.name_short + "/" + rotations[rotation]);
+	render(world, tileset, images, output_dir);
+
+	std::cout << std::endl;
+	return true;
+}
+
 /**
  * Starts the whole rendering thing.
  */
 bool RenderManager::run() {
+	if (!config.loadFile(opts.config_file)) {
+		std::cerr << "Error: Unable to read config file!" << std::endl;
+		return false;
+	}
+
+	std::vector<RenderWorldConfig> worlds = config.getWorlds();
+
+	std::string rotations[] = {"top left", "top right", "bottom right", "bottom left"};
+	int i_to = worlds.size();
+
+	for (size_t i = 0; i < worlds.size(); i++) {
+		RenderWorldConfig world = worlds[i];
+		int i_from = i+1;
+		std::cout << "(" << i_from << "/" << i_to << ") Rendering world "
+				<< world.name_short << " (" << world.name_long << "):"
+				<< std::endl;
+		int j_from = 1;
+		int j_to = world.rotations.size();
+		for (std::set<int>::iterator it = world.rotations.begin();
+				it != world.rotations.end(); ++it) {
+			std::cout << "(" << i_from << "." << j_from << "/" << i_from << "."
+					<< j_to << ") Rendering rotation " << rotations[*it]
+					<< ":" << std::endl;
+			if (!renderWorld(worlds[i], *it)) {
+				std::cerr << "Skipping remaining rotations." << std::endl;
+				break;
+			}
+			j_from++;
+		}
+	}
+
+	return true;
+
+	/*
 	std::cout << "Starting renderer for world " << opts.input_dir << "." << std::endl;
 
 	// load map settings if this a incremental render
@@ -592,6 +645,7 @@ bool RenderManager::run() {
 	//writeStats(took);
 	std::cout << std::endl << "Finished.....aaand it's gone!" << std::endl;
 	return true;
+	*/
 }
 
 }

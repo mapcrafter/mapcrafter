@@ -300,7 +300,7 @@ void TileSet::findRequiredRenderTiles() {
 
 				// insert the tile in the set of available render tiles
 				render_tiles.insert(*tile_it);
-				if (changed)
+				if (changed || last_check_time == 0)
 					// if changed also in the list of required render tiles
 					required_render_tiles.insert(*tile_it);
 			}

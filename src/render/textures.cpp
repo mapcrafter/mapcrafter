@@ -712,6 +712,28 @@ bool BlockImages::loadBlocks(const std::string& block_dir) {
 	return true;
 }
 
+bool BlockImages::loadAll(const std::string& textures_dir) {
+	if (!loadChests(textures_dir + "/chest.png", textures_dir + "/largechest.png",
+			textures_dir + "/enderchest.png")) {
+		std::cerr << "Error: Unable to load chest.png, largechest.png or enderchest.png!"
+				<< std::endl;
+		return false;
+	} else if (!loadColors(textures_dir + "/foliagecolor.png",
+			textures_dir + "/grasscolor.png")) {
+		std::cerr << "Error: Unable to load foliagecolor.png or grasscolor.png!"
+				<< std::endl;
+		return false;
+	} else if (!loadOther(textures_dir + "/fire.png",
+			textures_dir + "/endportal.png")) {
+		std::cerr << "Error: Unable to load fire.png or endportal.png!" << std::endl;
+		return false;
+	} else if (!loadBlocks(textures_dir + "/blocks")) {
+		std::cerr << "Error: Unable to load block textures!" << std::endl;
+		return false;
+	}
+	return true;
+}
+
 /**
  * Comparator to sort the block int's with id and data.
  */

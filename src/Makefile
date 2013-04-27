@@ -42,7 +42,7 @@ mc/world.o: mc/world.cpp mc/pos.h mc/chunk.h mc/region.h
 render/config.o: render/config.cpp
 render/image.o: render/image.cpp
 render/manager.o: render/manager.cpp mc/cache.h mc/pos.h mc/chunk.h mc/region.h mc/world.h render/render.h
-render/render.o: render/render.cpp mc/pos.h mc/cache.h render/textures.h render/tile.h
+render/render.o: render/render.cpp  mc/pos.h mc/cache.h render/config.h render/textures.h render/tile.h
 render/textures.o: render/textures.cpp render/image.o
 render/tile.o: render/tile.cpp mc/pos.h mc/chunk.h mc/cache.h
 
