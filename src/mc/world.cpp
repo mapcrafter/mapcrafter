@@ -19,12 +19,12 @@
 
 #include "mc/world.h"
 
-#include "util.h"
 #include "mc/chunk.h"
+
+#include "util.h"
 
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <cstdio>
 #include <boost/filesystem.hpp>
 
@@ -68,7 +68,13 @@ bool World::readRegions(const std::string& path) {
 	for(fs::directory_iterator it(region_dir); it != fs::directory_iterator();
 			++it) {
 		std::string region_file = (*it).path().string();
+
+#ifdef OLD_BOOST
+		std::string filename = (*it).path().filename();
+#else
 		std::string filename = (*it).path().filename().string();
+#endif
+
 		if(!std::equal(ending.rbegin(), ending.rend(), filename.rbegin()))
 			continue;
 		int x = 0;
@@ -100,9 +106,11 @@ const std::unordered_set<RegionPos, hash_function>& World::getAvailableRegions()
  * Returns a region file with a specific position.
  */
 bool World::getRegion(const RegionPos& pos, RegionFile& region) const {
-	if(available_regions.count(pos) == 0)
+	std::unordered_map<RegionPos, std::string, hash_function>::const_iterator it
+		= region_files.find(pos);
+	if (it == region_files.end())
 		return false;
-	region = RegionFile(region_files.at(pos), rotation);
+	region = RegionFile(it->second, rotation);
 	return true;
 }
 

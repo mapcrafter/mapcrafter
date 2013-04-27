@@ -19,29 +19,29 @@
 
 #include "render/manager.h"
 
-#include "render/render.h"
-#include "render/tile.h"
-#include "util.h"
-
 #include <fstream>
 #include <ctime>
-#include <boost/date_time.hpp>
 #include <pthread.h>
 
 namespace mapcrafter {
 namespace render {
 
-std::string RenderOpts::dataPath(const std::string& path) const {
-	return (data_dir / path).string();
-}
-
 std::string RenderOpts::outputPath(const std::string& path) const {
 	return (output_dir / path).string();
 }
 
+std::string RenderOpts::templatePath(const std::string& path) const {
+	return (template_dir / path).string();
+}
+
+std::string RenderOpts::texturePath(const std::string& path) const {
+	return (textures_dir / path).string();
+}
+
 MapSettings::MapSettings()
 		: texture_size(12), rotation(0), tile_size(0), max_zoom(0),
-		  render_leaves_transparent(0), render_unknown_blocks(0), last_render(-1) {
+		  render_unknown_blocks(0), render_leaves_transparent(0),
+		  render_biomes(false), last_render(-1) {
 }
 
 /**
@@ -63,25 +63,21 @@ bool MapSettings::read(const std::string& filename) {
 		// and save the value
 		std::string key = line.substr(0, i);
 		std::string value = line.substr(i + 1, line.size() - 1);
-		if (key.compare("texture_size") == 0)
+		if (key == "texture_size")
 			texture_size = atoi(value.c_str());
-		else if (key.compare("rotation") == 0)
+		else if (key == "rotation")
 			rotation = atoi(value.c_str());
-		else if (key.compare("tile_size") == 0)
+		else if (key == "tile_size")
 			tile_size = atoi(value.c_str());
-		else if (key.compare("max_zoom") == 0)
+		else if (key == "max_zoom")
 			max_zoom = atoi(value.c_str());
-		else if (key.compare("render_unknown_blocks") == 0) {
-			if (value.compare("1") == 0)
-				render_unknown_blocks = true;
-			else
-				render_unknown_blocks = false;
-		} else if (key.compare("render_leaves_transparent") == 0) {
-			if (value.compare("1") == 0)
-				render_leaves_transparent = true;
-			else
-				render_leaves_transparent = false;
-		} else if (key.compare("last_render") == 0)
+		else if (key == "render_unknown_blocks") {
+			render_unknown_blocks = value == "1";
+		} else if (key == "render_leaves_transparent") {
+			render_leaves_transparent = value == "1";
+		} else if (key == "render_biomes") {
+			render_biomes = value == "1";
+		} else if (key == "last_render")
 			last_render = atoi(value.c_str());
 	}
 
@@ -102,6 +98,7 @@ bool MapSettings::write(const std::string& filename) const {
 	file << "max_zoom " << max_zoom << std::endl;
 	file << "render_unknown_blocks " << render_unknown_blocks << std::endl;
 	file << "render_leaves_transparent " << render_leaves_transparent << std::endl;
+	file << "render_biomes " << render_biomes << std::endl;
 	file << "last_render " << last_render << std::endl;
 	file.close();
 
@@ -197,7 +194,7 @@ RenderManager::RenderManager(const RenderOpts& opts)
  */
 bool RenderManager::copyTemplateFile(const std::string& filename,
 		std::map<std::string, std::string> vars) {
-	std::ifstream file(opts.dataPath("template/" + filename).c_str());
+	std::ifstream file(opts.templatePath(filename).c_str());
 	if (!file)
 		return false;
 	std::stringstream ss;
@@ -222,6 +219,11 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
  * This method copies all template files to the output directory.
  */
 void RenderManager::writeTemplates(const MapSettings& settings) {
+	if (!fs::is_directory(opts.template_dir)) {
+		std::cout << "Warning: The template directory does not exists!" << std::endl;
+		return;
+	}
+
 	// the variables for the index.html
 	std::map<std::string, std::string> vars;
 	vars["textureSize"] = str(settings.texture_size);
@@ -242,9 +244,13 @@ void RenderManager::writeTemplates(const MapSettings& settings) {
 	// copy all other files and directories
 	fs::path to(opts.output_dir);
 	fs::directory_iterator end;
-	for (fs::directory_iterator it(fs::path(opts.dataPath("template"))); it != end;
+	for (fs::directory_iterator it(opts.template_dir); it != end;
 			++it) {
+#ifdef OLD_BOOST
+		std::string filename = it->path().filename();
+#else
 		std::string filename = it->path().filename().string();
+#endif
 		if (filename.compare("index.html") == 0 || filename.compare("markers.js") == 0)
 			continue;
 		if (fs::is_regular_file(*it)) {
@@ -368,10 +374,10 @@ void RenderManager::render(const TileSet& tiles) {
 
 		// create needed things for recursiv render method
 		mc::WorldCache cache(world);
-		TileRenderer renderer(cache, textures);
+		TileRenderer renderer(cache, images, settings.render_biomes);
 		RecursiveRenderSettings settings(tiles, &renderer);
 
-		settings.tile_size = textures.getTileSize();
+		settings.tile_size = images.getTileSize();
 		settings.output_dir = opts.output_dir;
 
 		settings.show_progress = true;
@@ -422,7 +428,7 @@ void RenderManager::renderMultithreaded(const TileSet& tiles) {
 
 	// create render settings for the remaining composite tiles at the end
 	RecursiveRenderSettings remaining_settings(tiles, NULL);
-	remaining_settings.tile_size = textures.getTileSize();
+	remaining_settings.tile_size = images.getTileSize();
 	remaining_settings.output_dir = opts.output_dir;
 	remaining_settings.show_progress = true;
 
@@ -435,10 +441,10 @@ void RenderManager::renderMultithreaded(const TileSet& tiles) {
 		// create all informations needed for the worker
 		// every thread has his own cache
 		mc::WorldCache* cache = new mc::WorldCache(world);
-		TileRenderer* renderer = new TileRenderer(*cache, textures);
+		TileRenderer* renderer = new TileRenderer(*cache, images, settings.render_biomes);
 		RecursiveRenderSettings* render_settings =
 				new RecursiveRenderSettings(tiles, renderer);
-		render_settings->tile_size = textures.getTileSize();
+		render_settings->tile_size = images.getTileSize();
 		render_settings->output_dir = opts.output_dir;
 		render_settings->show_progress = false;
 
@@ -498,8 +504,8 @@ bool RenderManager::run() {
 
 	// load map settings if this a incremental render
 	if (opts.incremental && !settings.read(opts.outputPath("map.settings"))) {
-		std::cerr << "Error: Unable to read map.settings file.";
-		std::cerr << "Can't render incrementally.";
+		std::cerr << "Error: Unable to read map.settings file." << std::endl;
+		std::cerr << "Can't render incrementally." << std::endl;
 		return false;
 	}
 
@@ -510,6 +516,7 @@ bool RenderManager::run() {
 		settings.rotation = opts.rotation;
 		settings.render_unknown_blocks = opts.render_unknown_blocks;
 		settings.render_leaves_transparent = opts.render_leaves_transparent;
+		settings.render_biomes = opts.render_biomes;
 	} else {
 		time_t now = settings.last_render;
 		char buffer[100];
@@ -530,25 +537,30 @@ bool RenderManager::run() {
 	}
 
 	// give the textures some settings
-	textures.setSettings(settings.texture_size, settings.rotation,
+	images.setSettings(settings.texture_size, settings.rotation,
 			settings.render_unknown_blocks, settings.render_leaves_transparent);
 	// try to load all textures
-	if (!textures.loadChests(opts.dataPath("chest.png"), opts.dataPath("largechest.png"),
-			opts.dataPath("enderchest.png"))) {
-		std::cerr << "Error Unable to load chest.png, largechest.png or enderchest.png!"
+	if (!images.loadChests(opts.texturePath("chest.png"), opts.texturePath("largechest.png"),
+			opts.texturePath("enderchest.png"))) {
+		std::cerr << "Error: Unable to load chest.png, largechest.png or enderchest.png!"
 				<< std::endl;
 		return false;
-	} else if (!textures.loadOther(opts.dataPath("fire.png"),
-			opts.dataPath("endportal.png"))) {
-		std::cerr << "Error Unable to load fire.png or endportal.png!" << std::endl;
+	} else if (!images.loadColors(opts.texturePath("foliagecolor.png"),
+			opts.texturePath("grasscolor.png"))) {
+		std::cerr << "Error: Unable to load foliagecolor.png or grasscolor.png!"
+				<< std::endl;
 		return false;
-	} else if (!textures.loadBlocks(opts.dataPath("terrain.png"))) {
-		std::cerr << "Error: Unable to load terrain.png!" << std::endl;
+	} else if (!images.loadOther(opts.texturePath("fire.png"),
+			opts.texturePath("endportal.png"))) {
+		std::cerr << "Error: Unable to load fire.png or endportal.png!" << std::endl;
+		return false;
+	} else if (!images.loadBlocks(opts.texturePath("blocks"))) {
+		std::cerr << "Error: Unable to load block textures!" << std::endl;
 		return false;
 	}
 
 	std::cout << "Setting texture size to " << settings.texture_size << "." << std::endl;
-	settings.tile_size = textures.getTileSize();
+	settings.tile_size = images.getTileSize();
 
 	int render_start = time(NULL);
 

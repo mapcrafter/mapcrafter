@@ -33,13 +33,12 @@ namespace mc {
 namespace nbt {
 
 template<typename T>
-void dumpTag(const char* type, bool named, const std::string& name,
-        const std::string& indendation, T payload) {
-	std::cout << indendation << type;
-	if (named) {
-		std::cout << "(\"" << name << "\")";
-	}
-	std::cout << ": " << payload << std::endl;
+void dumpTag(std::ostream& stream, const char* type, bool named,
+		const std::string& name, const std::string& indendation, T payload) {
+	stream << indendation << type;
+	if (named)
+		stream << "(\"" << name << "\")";
+	stream << ": " << payload << std::endl;
 }
 
 NBTError::NBTError(const char* message)
@@ -127,7 +126,7 @@ void TagByte::write(std::ostream& stream) const {
 }
 
 void TagByte::dump(std::ostream& stream, const std::string& indendation) const {
-	dumpTag("TAG_Byte", isNamed(), getName(), indendation, (int) payload);
+	dumpTag(stream, "TAG_Byte", isNamed(), getName(), indendation, (int) payload);
 }
 
 NBTTag& TagShort::read(std::istream& stream) {
@@ -143,7 +142,7 @@ void TagShort::write(std::ostream& stream) const {
 }
 
 void TagShort::dump(std::ostream& stream, const std::string& indendation) const {
-	dumpTag("TAG_Short", isNamed(), getName(), indendation, payload);
+	dumpTag(stream, "TAG_Short", isNamed(), getName(), indendation, payload);
 }
 
 NBTTag& TagInt::read(std::istream& stream) {
@@ -159,7 +158,7 @@ void TagInt::write(std::ostream& stream) const {
 }
 
 void TagInt::dump(std::ostream& stream, const std::string& indendation) const {
-	dumpTag("TAG_Int", isNamed(), getName(), indendation, payload);
+	dumpTag(stream, "TAG_Int", isNamed(), getName(), indendation, payload);
 }
 
 NBTTag& TagLong::read(std::istream& stream) {
@@ -175,7 +174,7 @@ void TagLong::write(std::ostream& stream) const {
 }
 
 void TagLong::dump(std::ostream& stream, const std::string& indendation) const {
-	dumpTag("TAG_Long", isNamed(), getName(), indendation, payload);
+	dumpTag(stream, "TAG_Long", isNamed(), getName(), indendation, payload);
 }
 
 NBTTag& TagFloat::read(std::istream& stream) {
@@ -193,7 +192,7 @@ void TagFloat::write(std::ostream& stream) const {
 }
 
 void TagFloat::dump(std::ostream& stream, const std::string& indendation) const {
-	dumpTag("TAG_Float", isNamed(), getName(), indendation, payload);
+	dumpTag(stream, "TAG_Float", isNamed(), getName(), indendation, payload);
 }
 
 NBTTag& TagDouble::read(std::istream& stream) {
@@ -211,7 +210,7 @@ void TagDouble::write(std::ostream& stream) const {
 }
 
 void TagDouble::dump(std::ostream& stream, const std::string& indendation) const {
-	dumpTag("TAG_Double", isNamed(), getName(), indendation, payload);
+	dumpTag(stream, "TAG_Double", isNamed(), getName(), indendation, payload);
 }
 
 NBTTag& TagByteArray::read(std::istream& stream) {
@@ -258,7 +257,7 @@ void TagString::write(std::ostream& stream) const {
 }
 
 void TagString::dump(std::ostream& stream, const std::string& indendation) const {
-	dumpTag("TAG_String", isNamed(), getName(), indendation, payload);
+	dumpTag(stream, "TAG_String", isNamed(), getName(), indendation, payload);
 }
 
 TagList::~TagList() {

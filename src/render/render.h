@@ -27,7 +27,6 @@
 #include "render/textures.h"
 #include "render/tile.h"
 
-#include <map>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
@@ -73,6 +72,15 @@ public:
 };
 
 /**
+ * A combination of id/data.
+ */
+struct Block {
+	Block(uint16_t id = 0, uint16_t data = 0);
+
+	uint16_t id, data;
+};
+
+/**
  * A block, which should get drawed on a tile.
  */
 struct RenderBlock {
@@ -93,13 +101,19 @@ struct RenderBlock {
 class TileRenderer {
 private:
 	mc::WorldCache& world;
-	const BlockTextures& textures;
+	const BlockImages& images;
+
+	bool render_biomes;
+
+	Block getBlock(const mc::BlockPos& pos, mc::Chunk* chunk) const;
+	Biome getBiome(const mc::BlockPos& pos, const mc::Chunk* chunk) const;
+
+	uint16_t checkNeighbors(const mc::BlockPos& pos, mc::Chunk* chunk, uint16_t id,
+			uint16_t data) const;
 public:
-	TileRenderer(mc::WorldCache& world, const BlockTextures& textures);
+	TileRenderer(mc::WorldCache& world, const BlockImages& textures, bool render_biomes);
 	~TileRenderer();
 
-	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data,
-	        const mc::Chunk* chunk) const;
 	void renderTile(const TilePos& pos, Image& tile) const;
 };
 

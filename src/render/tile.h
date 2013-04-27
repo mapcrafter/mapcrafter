@@ -21,11 +21,11 @@
 #define TILE_H_
 
 #include "mc/world.h"
+
 #include "render/textures.h"
 
 #include <set>
 #include <vector>
-#include <string>
 
 /**
  * The renderer renders the world to tiles, which are arranged in a quadtree. Every node
@@ -103,6 +103,8 @@ public:
 	Path& operator+=(int node);
 	Path operator+(int node) const;
 
+	Path parent() const;
+
 	bool operator==(const Path& other) const;
 	bool operator<(const Path& other) const;
 
@@ -136,8 +138,8 @@ private:
 
 	void initMapSize();
 	void findRequiredRenderTiles();
-	int findRequiredCompositeTiles(const Path& path,
-	        const std::set<TilePos>& render_tiles, std::set<Path>& tiles);
+	void findRequiredCompositeTiles(const std::set<TilePos>& render_tiles,
+			std::set<Path>& tiles);
 public:
 	TileSet(mc::World& World, int last_check_time);
 	virtual ~TileSet();

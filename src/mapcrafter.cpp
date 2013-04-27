@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
 	mapcrafter::render::RenderOpts opts;
 	std::string input_dir;
 	std::string output_dir;
-	std::string data_dir;
+	std::string template_dir, textures_dir;
 
 	std::string north_dir;
 
@@ -40,8 +40,10 @@ int main(int argc, char** argv) {
 			"the path of the world to render (required)")
 		("output-dir,o", po::value<std::string>(&output_dir),
 			"the path to save the rendered map (required)")
-		("data-dir,d", po::value<std::string>(&data_dir),
-			"the path with templates/, terrain.png, fire.png, etc. (default data/)")
+		("template", po::value<std::string>(&template_dir),
+			"the path with the template files (default data/template)")
+		("textures", po::value<std::string>(&textures_dir),
+			"the path with the texture images (default data/textures)")
 
 		("jobs,j", po::value<int>(&opts.jobs),
 			"the number of threads to render the map (default 1)")
@@ -54,7 +56,8 @@ int main(int argc, char** argv) {
 			"rotation of the map: top-left, top-right, bottom-right, bottom-left"
 			"\ntop-left means, that north is on the top left, this is default")
 		("render-unknown-blocks", "renders unknown blocks as red blocks")
-		("render-leaves-transparent", "uses the transparent texture for leaves");
+		("render-leaves-transparent", "uses the transparent texture for leaves")
+		("render-biomes", "uses the original biome colors for some blocks");
 
 	po::variables_map vm;
 	try {
@@ -98,9 +101,12 @@ int main(int argc, char** argv) {
 
 	opts.input_dir = fs::path(input_dir);
 	opts.output_dir = fs::path(output_dir);
-	opts.data_dir = fs::path(data_dir);
-	if (!vm.count("data-dir"))
-		opts.data_dir = fs::path("data");
+	opts.template_dir = fs::path(template_dir);
+	opts.textures_dir = fs::path(textures_dir);
+	if (!vm.count("template"))
+		opts.template_dir = fs::path("data/template");
+	if (!vm.count("textures"))
+		opts.textures_dir = fs::path("data/textures");
 	if (!vm.count("jobs"))
 		opts.jobs = 1;
 	if (!vm.count("texture-size"))
@@ -126,6 +132,7 @@ int main(int argc, char** argv) {
 
 	opts.render_unknown_blocks = vm.count("render-unknown-blocks");
 	opts.render_leaves_transparent = vm.count("render-leaves-transparent");
+	opts.render_biomes = vm.count("render-biomes");
 
 	mapcrafter::render::RenderManager manager(opts);
 	if (!manager.run())

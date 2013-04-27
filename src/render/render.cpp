@@ -19,7 +19,6 @@
 
 #include "render/render.h"
 
-#include "render/tile.h"
 #include "util.h"
 
 #include <iostream>
@@ -120,40 +119,75 @@ bool BlockRowIterator::end() const {
 	return current.y < 0;
 }
 
+Block::Block(uint16_t id, uint16_t data)
+		: id(id), data(data) {
+}
+
 bool RenderBlock::operator<(const RenderBlock& other) const {
 	return pos < other.pos;
 }
 
-TileRenderer::TileRenderer(mc::WorldCache& world, const BlockTextures& textures)
-		: world(world), textures(textures) {
+TileRenderer::TileRenderer(mc::WorldCache& world, const BlockImages& textures,
+        bool render_biomes)
+		: world(world), images(textures), render_biomes(render_biomes) {
 }
 
 TileRenderer::~TileRenderer() {
 }
 
-/**
- * Looks for a block and puts the id and data in the variables.
- */
-inline void getNeighbor(const mc::BlockPos& pos, uint16_t& id, uint16_t& data,
-        mc::WorldCache& world, const mc::Chunk* current_chunk) {
-	const mc::Chunk* chunk;
-	// check if we already have the right chunk
-	mc::ChunkPos pos_chunk(pos);
-	if (current_chunk != NULL && pos_chunk == current_chunk->getPos())
-		chunk = current_chunk;
-	// if not get the chunk from cache
-	else
-		chunk = world.getChunk(pos_chunk);
+Block TileRenderer::getBlock(const mc::BlockPos& pos, mc::Chunk* chunk) const {
+	mc::ChunkPos chunk_pos(pos);
+	mc::Chunk* mychunk = chunk;
+	if (chunk == NULL || chunk_pos != chunk->getPos())
+		mychunk = world.getChunk(chunk_pos);
 	// chunk may be NULL
-	if (chunk == NULL) {
-		id = 0;
-		data = 0;
+	if (mychunk == NULL) {
+		return Block(0, 0);
 	// otherwise get id and data
 	} else {
 		mc::LocalBlockPos local(pos);
-		id = chunk->getBlockID(local);
-		data = chunk->getBlockData(local);
+		uint16_t id = mychunk->getBlockID(local);
+		// assume that air does not have any data
+		if (id == 0)
+			return Block(0, 0);
+		return Block(id, mychunk->getBlockData(local));
 	}
+}
+
+Biome TileRenderer::getBiome(const mc::BlockPos& pos, const mc::Chunk* chunk) const {
+	uint8_t biome_id = chunk->getBiomeAt(mc::LocalBlockPos(pos));
+	Biome biome = BIOMES[DEFAULT_BIOME];
+	if (render_biomes && biome_id < BIOMES_SIZE)
+		biome = BIOMES[biome_id];
+	else
+		return biome;
+	int count = 1;
+
+	// get average biome data to make smooth edges between
+	// different biomes
+	for (int dx = -1; dx <= 1; dx++)
+		for (int dz = -1; dz <= 1; dz++) {
+			if (dx == 0 && dz == 0)
+				continue;
+
+			mc::BlockPos other = pos + mc::BlockPos(dx, dz, 0);
+			mc::ChunkPos chunk_pos(other);
+			uint8_t other_id = chunk->getBiomeAt(mc::LocalBlockPos(other));
+			if (chunk_pos != chunk->getPos()) {
+				mc::Chunk* other_chunk = world.getChunk(chunk_pos);
+				if (other_chunk == NULL)
+					continue;
+				other_id = other_chunk->getBiomeAt(mc::LocalBlockPos(other));
+			}
+
+			if (other_id < BIOMES_SIZE) {
+				biome += BIOMES[other_id];
+				count++;
+			}
+		}
+
+	biome /= count;
+	return biome;
 }
 
 /**
@@ -192,28 +226,27 @@ uint16_t getDoorDirectionClosed(uint16_t direction, bool flip) {
 /**
  * Checks for a specific block the neighbors and sets extra block data if necessary.
  */
-uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data,
-        const mc::Chunk* chunk) const {
+uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, mc::Chunk* chunk,
+        uint16_t id, uint16_t data) const {
 
-	uint16_t id_north, id_south, id_east, id_west, id_top, id_bottom;
-	uint16_t data_north, data_south, data_east, data_west, data_top, data_bottom;
+	Block north, south, east, west, top, bottom;
 
 	if ((id == 8 || id == 9) && data == 0) { // full water blocks
-		getNeighbor(pos + DIR_WEST, id_west, data_west, world, chunk);
-		getNeighbor(pos + DIR_SOUTH, id_south, data_south, world, chunk);
+		west = getBlock(pos + mc::DIR_WEST, chunk);
+		south = getBlock(pos + mc::DIR_SOUTH, chunk);
 
 		// check if west and south neighbors are also full water blocks
-		if ((id_west == 8 || id_west == 9) && data_west == 0) {
+		if ((west.id == 8 || west.id == 9) && west.data == 0) {
 			data |= DATA_WEST;
-		} if ((id_south == 8 || id_south == 9) && data_south == 0) {
+		} if ((south.id == 8 || south.id == 9) && south.data == 0) {
 			data |= DATA_SOUTH;
 		}
-	} else if (id == 54 || id == 95 || id == 130) { // chests
+	} else if (id == 54 || id == 95 || id == 130 || id == 146) { // chests
 		// at first get all neighbor blocks
-		getNeighbor(pos + DIR_NORTH, id_north, data_north, world, chunk);
-		getNeighbor(pos + DIR_SOUTH, id_south, data_south, world, chunk);
-		getNeighbor(pos + DIR_EAST, id_east, data_east, world, chunk);
-		getNeighbor(pos + DIR_WEST, id_west, data_west, world, chunk);
+		north = getBlock(pos + mc::DIR_NORTH, chunk);
+		south = getBlock(pos + mc::DIR_SOUTH, chunk);
+		east = getBlock(pos + mc::DIR_EAST, chunk);
+		west = getBlock(pos + mc::DIR_WEST, chunk);
 
 		// we put here in the data the direction of the chest
 		// and if there are neighbor chests
@@ -227,39 +260,41 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		else
 			data = DATA_EAST;
 
-		if (id_north == 54)
-			data |= DATA_NORTH << 4;
-		if (id_south == 54)
-			data |= DATA_SOUTH << 4;
-		if (id_east == 54)
-			data |= DATA_EAST << 4;
-		if (id_west == 54)
-			data |= DATA_WEST << 4;
-	} else if(id == 64 || id == 71) {
-		/* doors */
+		if (id == 54) {
+			if (north.id == 54)
+				data |= DATA_NORTH << 4;
+			if (south.id == 54)
+				data |= DATA_SOUTH << 4;
+			if (east.id == 54)
+				data |= DATA_EAST << 4;
+			if (west.id == 54)
+				data |= DATA_WEST << 4;
+		}
+	} else if (id == 64 || id == 71) {
+		// doors
 		uint16_t top = data & 8 ? DOOR_TOP : 0;
-		uint16_t tmp, top_data, bottom_data;
+		uint16_t top_data, bottom_data;
 		// at first get the data of both parts of the door, top and bottom
-		if(top) {
+		if (top) {
 			top_data = data;
-			getNeighbor(pos + DIR_BOTTOM, tmp, bottom_data, world,chunk);
+			bottom_data = getBlock(pos + mc::DIR_BOTTOM, chunk).data;
 
 			data |= DOOR_TOP;
 		} else {
-			getNeighbor(pos + DIR_TOP, tmp, top_data, world, chunk);
+			top_data = getBlock(pos + mc::DIR_TOP, chunk).data;
 			bottom_data = data;
 		}
 
 		// then find out if this door is the left door of a double door
 		bool door_flip = top_data & 1;
-		if(door_flip)
+		if (door_flip)
 			data |= DOOR_FLIP_X;
 		// find out if the door is openend
 		bool opened = !(bottom_data & 4);
 
 		// get the direction of the door
 		uint16_t direction = bottom_data & 3;
-		if(direction == 0) {
+		if (direction == 0) {
 			direction = DOOR_WEST;
 		} else if(direction == 1) {
 			direction = DOOR_NORTH;
@@ -270,52 +305,53 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		}
 
 		// if the door is closed, the direction need to get changed
-		if(!opened) {
+		if (!opened) {
 			data |= getDoorDirectionClosed(direction, door_flip);
 		} else {
 			data |= direction;
 		}
 
-	} else if(id == 85 || id == 101 || id == 102 || id == 113) {
+	} else if (id == 85 || id == 101 || id == 102 || id == 113) {
 		// fence, iron bars, glas panes, nether fence
-		getNeighbor(pos + DIR_NORTH, id_north, data_north, world, chunk);
-		getNeighbor(pos + DIR_SOUTH, id_south, data_south, world, chunk);
-		getNeighbor(pos + DIR_EAST, id_east, data_east, world, chunk);
-		getNeighbor(pos + DIR_WEST, id_west, data_west, world, chunk);
+		north = getBlock(pos + mc::DIR_NORTH, chunk);
+		south = getBlock(pos + mc::DIR_SOUTH, chunk);
+		east = getBlock(pos + mc::DIR_EAST, chunk);
+		west = getBlock(pos + mc::DIR_WEST, chunk);
 
 		// check for same neighbors
-		if(id_north != 0 && (id_north == id || !textures.isBlockTransparent(id_north,data_north)))
+		if (north.id != 0 && (north.id == id || !images.isBlockTransparent(north.id, north.data)))
 			data |= DATA_NORTH;
-		if(id_south != 0 && (id_south == id || !textures.isBlockTransparent(id_south, data_south)))
+		if (south.id != 0 && (south.id == id || !images.isBlockTransparent(south.id, south.data)))
 			data |= DATA_SOUTH;
-		if(id_east != 0 && (id_east == id || !textures.isBlockTransparent(id_east, data_east)))
+		if (east.id != 0 && (east.id == id || !images.isBlockTransparent(east.id, east.data)))
 			data |= DATA_EAST;
-		if(id_west != 0 && (id_west == id || !textures.isBlockTransparent(id_west, data_west)))
+		if (west.id != 0 && (west.id == id || !images.isBlockTransparent(west.id, west.data)))
 			data |= DATA_WEST;
 
 		// check fences, they can also connect with fence gates
-		if(id == 85 && id_north == 107)
+		if (id == 85 && north.id == 107)
 			data |= DATA_NORTH;
-		if(id == 85 && id_south == 107)
+		if (id == 85 && south.id == 107)
 			data |= DATA_SOUTH;
-		if(id == 85 && id_east == 107)
+		if (id == 85 && east.id == 107)
 			data |= DATA_EAST;
-		if(id == 85 && id_west == 107)
+		if (id == 85 && west.id == 107)
 			data |= DATA_WEST;
 	}
 
-	if (!textures.isBlockTransparent(id, data)) {
-		/* add shadow edges on opaque blockes */
-		getNeighbor(pos + DIR_NORTH, id_north, data_north, world, chunk);
-		getNeighbor(pos + DIR_EAST, id_east, data_east, world, chunk);
-		getNeighbor(pos + DIR_BOTTOM, id_bottom, data_bottom, world, chunk);
+
+	if (!images.isBlockTransparent(id, data)) {
+		// add shadow edges on opaque blockes
+		north = getBlock(pos + mc::DIR_NORTH, chunk);
+		east = getBlock(pos + mc::DIR_EAST, chunk);
+		bottom = getBlock(pos + mc::DIR_BOTTOM, chunk);
 
 		// check if neighbors are opaque
-		if(id_north == 0 || textures.isBlockTransparent(id_north, data_north))
+		if (north.id == 0 || images.isBlockTransparent(north.id, north.data))
 			data |= EDGE_NORTH;
-		if(id_east == 0 || textures.isBlockTransparent(id_east, data_east))
+		if (east.id == 0 || images.isBlockTransparent(east.id, east.data))
 			data |= EDGE_EAST;
-		if(id_bottom == 0 || textures.isBlockTransparent(id_bottom, data_bottom))
+		if (bottom.id == 0 || images.isBlockTransparent(bottom.id, bottom.data))
 			data |= EDGE_BOTTOM;
 	}
 
@@ -324,13 +360,13 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 
 void TileRenderer::renderTile(const TilePos& pos, Image& tile) const {
 	// some vars, set correct image size
-	int block_size = textures.getBlockImageSize();
-	int tile_size = textures.getTileSize();
+	int block_size = images.getBlockImageSize();
+	int tile_size = images.getTileSize();
 	tile.setSize(tile_size, tile_size);
 
 	// get the maximum count of water blocks,
 	// blitted about each over, until they are nearly opaque
-	int max_water = textures.getMaxWaterNeededOpaque();
+	int max_water = images.getMaxWaterNeededOpaque();
 
 	// all visible blocks, which are rendered in this tile
 	std::set<RenderBlock> blocks;
@@ -389,15 +425,15 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) const {
 							row_nodes.erase(current);
 
 							// check for neighbors
-							uint16_t south, west, data_south, data_west;
-							getNeighbor(top.pos + DIR_SOUTH, south, data_south, world,chunk);
-							getNeighbor(top.pos + DIR_WEST, west, data_west, world, chunk);
+							Block south, west;
+							south = getBlock(top.pos + mc::DIR_SOUTH, chunk);
+							west = getBlock(top.pos + mc::DIR_WEST, chunk);
 
-							bool neighbor_south = (south == 8 || south == 9);
-							bool neighbor_west = (west == 8 || west == 9);
+							bool neighbor_south = (south.id == 8 || south.id == 9);
+							bool neighbor_west = (west.id == 8 || west.id == 9);
 
 							// get image and replace the old render block with this
-							top.image = textures.getOpaqueWater(neighbor_south,
+							top.image = images.getOpaqueWater(neighbor_south,
 							        neighbor_west);
 							row_nodes.insert(top);
 							break;
@@ -416,9 +452,15 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) const {
 
 			// check for special data (neighbor related)
 			// get block image, check for transparency, create render block...
-			data = checkNeighbors(block.current, id, data, chunk);
-			Image image = textures.getBlock(id, data);
-			bool transparent = textures.isBlockTransparent(id, data);
+			data = checkNeighbors(block.current, chunk, id, data);
+			Image image;
+			bool transparent = images.isBlockTransparent(id, data);
+
+			// check for biome data
+			if (id == 2 || id == 18 || id == 31 || id == 106 || id == 111)
+				image = images.getBiomeDependBlock(id, data, getBiome(block.current, chunk));
+			else
+				image = images.getBlock(id, data);
 
 			RenderBlock node;
 			node.x = it.draw_x;
@@ -455,7 +497,7 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) const {
 
 	// now blit all blocks
 	for (std::set<RenderBlock>::const_iterator it = blocks.begin(); it != blocks.end();
-	        ++it) {
+			++it) {
 		tile.alphablit(it->image, it->x, it->y);
 	}
 }

@@ -29,9 +29,6 @@
 #include "util.h"
 
 #include <boost/filesystem.hpp>
-#include <boost/date_time.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <pthread.h>
 
 namespace fs = boost::filesystem;
 
@@ -44,7 +41,7 @@ namespace render {
 struct RenderOpts {
 	fs::path input_dir;
 	fs::path output_dir;
-	fs::path data_dir;
+	fs::path template_dir, textures_dir;
 
 	bool incremental;
 	int jobs;
@@ -54,9 +51,11 @@ struct RenderOpts {
 	int rotation;
 	bool render_unknown_blocks;
 	bool render_leaves_transparent;
+	bool render_biomes;
 
-	std::string dataPath(const std::string& path) const;
 	std::string outputPath(const std::string& path) const;
+	std::string templatePath(const std::string& path) const;
+	std::string texturePath(const std::string& path) const;
 };
 
 /**
@@ -70,6 +69,7 @@ struct MapSettings {
 
 	bool render_unknown_blocks;
 	bool render_leaves_transparent;
+	bool render_biomes;
 
 	int last_render;
 
@@ -96,7 +96,7 @@ struct RecursiveRenderSettings {
 	ProgressBar progress_bar;
 
 	RecursiveRenderSettings(const TileSet& tiles, const TileRenderer* renderer)
-		: tiles(tiles), renderer(renderer), progress(0) {}
+		: tiles(tiles), renderer(renderer), tile_size(0), progress(0), show_progress(true) {}
 };
 
 /**
@@ -128,7 +128,7 @@ private:
 	MapSettings settings;
 
 	mc::World world;
-	BlockTextures textures;
+	BlockImages images;
 
 	bool copyTemplateFile(const std::string& filename,
 	        std::map<std::string, std::string> vars =

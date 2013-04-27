@@ -22,7 +22,7 @@
 #include "mc/nbt.h"
 
 #include <iostream>
-#include <math.h>
+#include <cmath>
 
 namespace mapcrafter {
 namespace mc {
@@ -66,6 +66,14 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::CompressionType compressi
 	if (rotation)
 		pos.rotate(rotation);
 
+	nbt::TagByteArray* tagBiomes = level->findTag<nbt::TagByteArray>("Biomes",
+			nbt::TAG_BYTE_ARRAY);
+	if (tagBiomes != NULL && tagBiomes->payload.size() == 256)
+		std::copy(tagBiomes->payload.begin(), tagBiomes->payload.end(), biomes);
+	else
+		std::cerr << "Warning: Corrupt chunk at " << pos.x << ":" << pos.z
+				<< " (No biome data found)!" << std::endl;
+
 	// find sections list
 	nbt::TagList* tagSections = level->findTag<nbt::TagList>("Sections", nbt::TAG_LIST);
 	if (tagSections == NULL || tagSections->tag_type != nbt::TAG_COMPOUND) {
@@ -79,19 +87,23 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::CompressionType compressi
 	        it != tagSections->payload.end(); ++it) {
 		nbt::TagCompound* tagSection = (nbt::TagCompound*) *it;
 		nbt::TagByte* y = tagSection->findTag<nbt::TagByte>("Y", nbt::TAG_BYTE);
-		nbt::TagByteArray* blocks = tagSection->findTag<nbt::TagByteArray>("Blocks",
-		        nbt::TAG_BYTE_ARRAY);
-		nbt::TagByteArray* data = tagSection->findTag<nbt::TagByteArray>("Data",
-		        nbt::TAG_BYTE_ARRAY);
+		nbt::TagByteArray* blocks = tagSection->findTag<nbt::TagByteArray>("Blocks", nbt::TAG_BYTE_ARRAY);
+		nbt::TagByteArray* add = tagSection->findTag<nbt::TagByteArray>("Add", nbt::TAG_BYTE_ARRAY);
+		nbt::TagByteArray* data = tagSection->findTag<nbt::TagByteArray>("Data", nbt::TAG_BYTE_ARRAY);
 		// make sure section is valid
-		if (y == NULL || blocks == NULL || data == NULL || blocks->payload.size() != 4096
-		        || data->payload.size() != 2048)
+		if (y == NULL || blocks == NULL || data == NULL
+				|| blocks->payload.size() != 4096
+				|| data->payload.size() != 2048)
 			continue;
 
 		// add it
 		ChunkSection section;
 		section.y = y->payload;
 		std::copy(blocks->payload.begin(), blocks->payload.end(), section.blocks);
+		if (add == NULL || add->payload.size() != 2048)
+			std::fill(&section.add[0], &section.add[2048], 0);
+		else
+			std::copy(add->payload.begin(), add->payload.end(), section.add);
 		std::copy(data->payload.begin(), data->payload.end(), section.data);
 		// set the position of this section
 		section_offsets[section.y] = sections.size();
@@ -127,7 +139,7 @@ void rotateBlockPos(int& x, int& z, int rotation) {
 /**
  * Returns the block id at a position.
  */
-uint8_t Chunk::getBlockID(const LocalBlockPos& pos) const {
+uint16_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 	int section = pos.y / 16;
 	if (section_offsets[section] == -1)
 		return 0;
@@ -142,7 +154,12 @@ uint8_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 		rotateBlockPos(x, z, rotation);
 
 	int offset = ((pos.y % 16) * 16 + z) * 16 + x;
-	return sections[section_offsets[section]].blocks[offset];
+	uint16_t add = 0;
+	if ((offset % 2) == 0)
+		add = sections[section_offsets[section]].add[offset / 2] & 0xf;
+	else
+		add = (sections[section_offsets[section]].add[offset / 2] >> 4) & 0x0f;
+	return sections[section_offsets[section]].blocks[offset] + (add << 8);
 }
 
 /**
@@ -162,6 +179,15 @@ uint8_t Chunk::getBlockData(const LocalBlockPos& pos) const {
 	if ((offset % 2) == 0)
 		return sections[section_offsets[section]].data[offset / 2] & 0xf;
 	return (sections[section_offsets[section]].data[offset / 2] >> 4) & 0x0f;
+}
+
+uint8_t Chunk::getBiomeAt(const LocalBlockPos& pos) const {
+	int x = pos.x;
+	int z = pos.z;
+	if (rotation)
+		rotateBlockPos(x, z, rotation);
+
+	return biomes[z * 16 + x];
 }
 
 const ChunkPos& Chunk::getPos() const {

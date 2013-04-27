@@ -36,7 +36,7 @@ WorldCache::WorldCache(World& world)
  * Calculates the position of a region position in the cache.
  */
 int WorldCache::getRegionCacheIndex(const RegionPos& pos) {
-	return ((pos.x + 4096) & RMASK) * RWIDTH + (pos.z + 4096) & RMASK;
+	return (((pos.x + 4096) & RMASK) * RWIDTH + (pos.z + 4096)) & RMASK;
 }
 
 /**
@@ -44,7 +44,7 @@ int WorldCache::getRegionCacheIndex(const RegionPos& pos) {
  */
 int WorldCache::getChunkCacheIndex(const ChunkPos& pos) {
 	//                4096*32
-	return ((pos.x + 131072) & CMASK) * CWIDTH + (pos.z + 131072) & CMASK;
+	return (((pos.x + 131072) & CMASK) * CWIDTH + (pos.z + 131072)) & CMASK;
 }
 
 RegionFile* WorldCache::getRegion(const RegionPos& pos) {
@@ -55,13 +55,14 @@ RegionFile* WorldCache::getRegion(const RegionPos& pos) {
 		return &entry.value;
 	}
 
-	//if (!world.hasRegion(pos)) {
-	//	regionstats.unavailable++;
-	//	return NULL;
-	//}
 	// if not try to load the region
-	if (!world.getRegion(pos, entry.value) || !entry.value.loadAll()) {
-		//regionstats.unavailable++;
+
+	// region does not exist, region in cache was not modified
+	if (!world.getRegion(pos, entry.value))
+		return NULL;
+
+	if (!entry.value.loadAll()) {
+		// the region is not valid, region in cache was probably modified
 		entry.used = false;
 		return NULL;
 	}
@@ -89,8 +90,13 @@ Chunk* WorldCache::getChunk(const ChunkPos& pos) {
 
 	// then try to load the chunk
 	int status = region->loadChunk(pos, entry.value);
-	if(status != CHUNK_OK) {
+	// the chunk does not exist, chunk in cache was not modified
+	if (status == RegionFile::CHUNK_DOES_NOT_EXIST)
+		return NULL;
+
+	if (status != RegionFile::CHUNK_OK) {
 		//chunkstats.unavailable++;
+		// the chunk is not valid, chunk in cache was probably modified
 		entry.used = false;
 		return NULL;
 	}

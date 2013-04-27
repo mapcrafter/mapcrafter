@@ -19,6 +19,7 @@
 
 #include "mc/region.h"
 
+#include <fstream>
 #include <cstdlib>
 
 namespace mapcrafter {
@@ -29,7 +30,7 @@ RegionFile::RegionFile()
 }
 
 RegionFile::RegionFile(const std::string& filename, int rotation)
-		: rotation(rotation), filename(filename) {
+		: filename(filename), rotation(rotation) {
 	regionpos = RegionPos::byFilename(filename);
 	if (rotation)
 		regionpos.rotate(rotation);
@@ -59,7 +60,7 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 			if (tmp == 0)
 				continue;
 			int offset = be32toh(tmp << 8) * 4096;
-			uint8_t sectors = ((uint8_t*) &tmp)[3];
+			//uint8_t sectors = ((uint8_t*) &tmp)[3];
 
 			file.seekg(4096, std::ios::cur);
 			int timestamp;
@@ -138,7 +139,7 @@ int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 		unrotated.rotate(4 - rotation);
 
 	if (!hasChunk(pos))
-		return CHUNK_DOES_NOT_EXISTS;
+		return CHUNK_DOES_NOT_EXIST;
 
 	// get the offsets, where the chunk data starts
 	int offset = chunk_offsets[unrotated.getLocalZ() * 32 + unrotated.getLocalX()];
@@ -146,14 +147,20 @@ int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 	// get data size and compression type
 	int size = *((int*) &regiondata[offset]);
 	uint8_t compression = regiondata[offset + 4];
+	nbt::CompressionType comp = nbt::NO_COMPRESSION;
+	if (compression == 1)
+		comp = nbt::GZIP;
+	else if (compression == 2)
+		comp = nbt::ZLIB;
+
 	size = be32toh(size) - 1;
 
 	// set the chunk rotation
 	chunk.setRotation(rotation);
 	// try to load the chunk
 	try {
-		if (!chunk.readNBT((char*) &regiondata[offset + 5], size))
-			return CHUNK_INVALID;
+		if (!chunk.readNBT((char*) &regiondata[offset + 5], size, comp))
+			return CHUNK_DATA_INVALID;
 	} catch (const nbt::NBTError& err) {
 		std::cout << "Error: Unable to read chunk at " << pos.x << ":" << pos.z
 		        << " : " << err.what() << std::endl;

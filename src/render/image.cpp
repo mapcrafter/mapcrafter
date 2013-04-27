@@ -23,7 +23,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <png.h>
 #include <algorithm>
 
 namespace mapcrafter {
@@ -209,8 +208,8 @@ void Image::clear() {
 
 Image Image::clip(int x, int y, int width, int height) const {
 	Image image(width, height);
-	for (int xx = 0; xx < width && xx + width < this->width; xx++) {
-		for (int yy = 0; yy < height && yy + height < this->height; yy++) {
+	for (int xx = 0; xx < width && xx + x < this->width; xx++) {
+		for (int yy = 0; yy < height && yy + y < this->height; yy++) {
 			image.setPixel(xx, yy, getPixel(x + xx, y + yy));
 		}
 	}
@@ -379,11 +378,17 @@ bool Image::readPNG(const std::string& filename) {
 
 	png_read_info(png, info);
 	int color = png_get_color_type(png, info);
-	if (color != PNG_COLOR_TYPE_RGBA || png_get_bit_depth(png, info) != 8)
+	if (png_get_bit_depth(png, info) != 8 || (color & PNG_COLOR_TYPE_RGB) == 0) {
 		return false;
+	}
+
 	setSize(png_get_image_width(png, info), png_get_image_height(png, info));
 
 	png_set_interlace_handling(png);
+	// add alpha channel, if needed
+	if ((color & PNG_COLOR_MASK_ALPHA) == 0) {
+		png_set_add_alpha(png, 0xff, PNG_FILLER_AFTER);
+	}
 	png_read_update_info(png, info);
 
 	png_bytep* rows = new png_bytep[height];
@@ -398,6 +403,8 @@ bool Image::readPNG(const std::string& filename) {
 	png_read_image(png, rows);
 	png_read_end(png, NULL);
 	png_destroy_read_struct(&png, &info, NULL);
+	delete[] rows;
+
 	return true;
 }
 

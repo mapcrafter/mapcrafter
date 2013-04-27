@@ -31,7 +31,6 @@
 #include <stdint.h>
 #include <set>
 #include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
 
 namespace fs = boost::filesystem;
 
@@ -150,6 +149,12 @@ Path Path::operator+(int node) const {
 	return copy;
 }
 
+Path Path::parent() const {
+	Path copy(path);
+	copy.path.pop_back();
+	return copy;
+}
+
 bool Path::operator==(const Path& other) const {
 	return path == other.path;
 }
@@ -234,8 +239,8 @@ TileSet::TileSet(mc::World& world, int last_check_time)
 		: world(world), last_check_time(last_check_time), depth(0) {
 	// find the available/required tiles
 	findRequiredRenderTiles();
-	findRequiredCompositeTiles(Path(), render_tiles, composite_tiles);
-	findRequiredCompositeTiles(Path(), required_render_tiles, required_composite_tiles);
+	findRequiredCompositeTiles(render_tiles, composite_tiles);
+	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
 }
 
 TileSet::~TileSet() {
@@ -313,39 +318,31 @@ void TileSet::findRequiredRenderTiles() {
 }
 
 /**
- * This recursive used method finds out, if a composite tile is needed, depending on a
- * list of available/required render tiles and puts them into a set. So we can find out
+ * This method finds out, which composite tiles are needed, depending on a
+ * list of available/required render tiles, and puts them into a set. So we can find out
  * which composite tiles are available and which composite tiles need to get rendered.
  */
-int TileSet::findRequiredCompositeTiles(const Path &path,
-        const std::set<TilePos>& render_tiles, std::set<Path>& tiles) {
-	int count = 0;
-	// check if this composite tile is on the zoom level above the render tiles
-	if (path.getDepth() == depth - 1) {
-		// then check if the associated render tiles exist
-		if (render_tiles.count((path + 1).getTilePos()) != 0)
-			count++;
-		if (render_tiles.count((path + 2).getTilePos()) != 0)
-			count++;
-		if (render_tiles.count((path + 3).getTilePos()) != 0)
-			count++;
-		if (render_tiles.count((path + 4).getTilePos()) != 0)
-			count++;
-	} else {
-		// else check the other composite tiles
-		if (findRequiredCompositeTiles(path + 1, render_tiles, tiles) > 0)
-			count++;
-		if (findRequiredCompositeTiles(path + 2, render_tiles, tiles) > 0)
-			count++;
-		if (findRequiredCompositeTiles(path + 3, render_tiles, tiles) > 0)
-			count++;
-		if (findRequiredCompositeTiles(path + 4, render_tiles, tiles) > 0)
-			count++;
+void TileSet::findRequiredCompositeTiles(const std::set<TilePos>& render_tiles,
+		std::set<Path>& tiles) {
+
+	// iterate through the render tiles on the max zoom level
+	// add their parent composite tiles
+	for (std::set<TilePos>::iterator it = render_tiles.begin(); it != render_tiles.end(); ++it) {
+		Path path = Path::byTilePos(*it, depth);
+		tiles.insert(path.parent());
 	}
-	// if other tiles are found, insert this tile in the set
-	if (count > 0)
-		tiles.insert(path);
-	return count;
+
+	// now iterate through the composite tiles from bottom to top
+	// and also add their parent composite tiles
+	for (int d = depth - 1; d > 0; d--) {
+		std::set<Path> tmp;
+		for (std::set<Path>::iterator it = tiles.begin(); it != tiles.end(); ++it) {
+			if (it->getDepth() == d)
+				tmp.insert(it->parent());
+		}
+		for (std::set<Path>::iterator it = tmp.begin(); it != tmp.end(); ++it)
+			tiles.insert(*it);
+	}
 }
 
 bool TileSet::hasTile(const Path& path) const {
@@ -430,7 +427,7 @@ bool compareWorkers(const Worker& w1, const Worker& w2) {
 
 int sumTasks(std::vector<Task>& vec) {
 	int s = 0;
-	for (int i = 0; i < vec.size(); i++)
+	for (size_t i = 0; i < vec.size(); i++)
 		s += vec[i].costs;
 	return s;
 }
@@ -455,7 +452,7 @@ double assignTasks(std::vector<Task> tasks, std::vector<Worker>& workers) {
 	std::make_heap(workers.begin(), workers.end(), compareWorkers);
 
 	// go through all tasks
-	for (int i = 0; i < tasks.size(); i++) {
+	for (size_t i = 0; i < tasks.size(); i++) {
 		// get the worker with the lowest work and add this ask
 		workers.front().work += tasks[i].costs;
 		workers.front().tasks.push_back(tasks[i]);
@@ -539,7 +536,7 @@ int TileSet::findRenderTasks(int worker_count,
 			workers.resize(worker_count);
 			for (int i = 0; i < worker_count; i++) {
 				Worker w = workers_zoomlevel[i];
-				for (int j = 0; j < w.tasks.size(); j++)
+				for (size_t j = 0; j < w.tasks.size(); j++)
 					workers[i][w.tasks[j].tile] = countTiles(w.tasks[j].tile,
 							tile_childs, depth);
 			}

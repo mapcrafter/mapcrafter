@@ -23,14 +23,8 @@
 #include "mc/pos.h"
 #include "mc/chunk.h"
 
-#include <fstream>
 #include <string>
 #include <set>
-
-#define CHUNK_OK 1
-#define CHUNK_DOES_NOT_EXISTS 2
-#define CHUNK_INVALID 3
-#define CHUNK_NBT_ERROR 4
 
 namespace mapcrafter {
 namespace mc {
@@ -72,6 +66,11 @@ public:
 
 	int getChunkTimestamp(const ChunkPos& chunk) const;
 	int loadChunk(const ChunkPos& pos, Chunk& chunk);
+
+	static const int CHUNK_OK = 1;
+	static const int CHUNK_DOES_NOT_EXIST = 2;
+	static const int CHUNK_DATA_INVALID = 3;
+	static const int CHUNK_NBT_ERROR = 4;
 };
 
 }

@@ -34,6 +34,7 @@ namespace mc {
 struct ChunkSection {
 	uint8_t y;
 	uint8_t blocks[16 * 16 * 16];
+	uint8_t add[16 * 16 * 8];
 	uint8_t data[16 * 16 * 8];
 };
 
@@ -52,6 +53,8 @@ private:
 	int section_offsets[16];
 	// the array with the sections, see indexes above
 	std::vector<ChunkSection> sections;
+
+	uint8_t biomes[256];
 public:
 	Chunk();
 	virtual ~Chunk();
@@ -63,8 +66,10 @@ public:
 	void clear();
 
 	bool hasSection(int section) const;
-	uint8_t getBlockID(const LocalBlockPos& pos) const;
+	uint16_t getBlockID(const LocalBlockPos& pos) const;
 	uint8_t getBlockData(const LocalBlockPos& pos) const;
+
+	uint8_t getBiomeAt(const LocalBlockPos& pos) const;
 
 	const ChunkPos& getPos() const;
 };

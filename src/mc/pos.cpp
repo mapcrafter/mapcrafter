@@ -19,9 +19,10 @@
 
 #include "mc/pos.h"
 
+#include "util.h"
+
 #include <cmath>
 #include <cstdio>
-#include <boost/filesystem.hpp>
 
 namespace mapcrafter {
 namespace mc {
@@ -49,7 +50,12 @@ bool RegionPos::operator<(const RegionPos& other) const {
 }
 
 RegionPos RegionPos::byFilename(const std::string& filename) {
+#ifdef OLD_BOOST
+	std::string name = boost::filesystem::path(filename).filename();
+#else
 	std::string name = boost::filesystem::path(filename).filename().string();
+#endif
+
 	int x, z;
 	if (sscanf(name.c_str(), "r.%d.%d.mca", &x, &z) != 2)
 		throw std::runtime_error("Invalid filename " + name + "!");
@@ -184,6 +190,13 @@ bool BlockPos::operator<(const BlockPos& other) const {
 	}
 	return y < other.y;
 }
+
+extern const mc::BlockPos DIR_NORTH(0, -1, 0);
+extern const mc::BlockPos DIR_SOUTH(0, 1, 0);
+extern const mc::BlockPos DIR_EAST(1, 0, 0);
+extern const mc::BlockPos DIR_WEST(-1, 0, 0);
+extern const mc::BlockPos DIR_TOP(0, 0, 1);
+extern const mc::BlockPos DIR_BOTTOM(0, 0, -1);
 
 LocalBlockPos::LocalBlockPos()
 		: x(0), z(0), y(0) {
