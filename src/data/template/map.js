@@ -150,7 +150,7 @@ function setMapType(type, rotation) {
 	
 	xzy = convertLatLngToMC(map.getCenter(), 64);
 	currentType = type;
-	currentRotation = rotation;
+	currentRotation = parseInt(rotation);
 	
 	map.setMapTypeId(type + "-" + rotation);
 	if(oldType.worldName != newType.worldName) {
@@ -182,6 +182,7 @@ function updateRotationSelect(text) {
 			elem.setAttribute("data-rotation", i);
 			elem.onclick = function() {
 				setMapType(currentType, this.getAttribute("data-rotation"));
+				updatePosHash();
 				return false;
 			};
 		} else {
@@ -240,11 +241,13 @@ function initMarkers() {
 }
 
 function updatePosHash() {
+	var type = currentType;
+	var rotation = currentRotation;
 	var xzy = convertLatLngToMC(map.getCenter(), 64);
 	for(var i = 0; i < 3; i++)
 		xzy[i] = Math.round(xzy[i]);
 	var zoom = map.getZoom();
-	window.location.replace("#" + xzy[0] + ":" + xzy[1] + ":" + xzy[2] + ":" + zoom);
+	window.location.replace("#" + type + "/" + rotation + "/" + zoom + "/" + xzy[0] + "/" + xzy[1] + "/" + xzy[2]);
 }
 
 function parsePosHash() {
@@ -252,11 +255,11 @@ function parsePosHash() {
 		return null;
 	
 	var url = location.hash.substr(1);
-	var split = url.split(":");
+	var split = url.split("/");
 	
-	if(split.length != 4)
+	if(split.length != 6)
 		return null;
-	for(var i = 0; i < 4; i++)
+	for(var i = 1; i < 6; i++)
 		split[i] = parseInt(split[i]);
 	return split;
 }
@@ -265,9 +268,11 @@ function gotoPosHash(hash) {
 	if(!hash)
 		return;
 		
-	var latlng = convertMCtoLatLng(hash[0], hash[1], hash[2]);
+	setMapType(hash[0], hash[1]);
+		
+	var latlng = convertMCtoLatLng(hash[3], hash[4], hash[5]);
 	map.setCenter(latlng);
-	map.setZoom(hash[3]);
+	map.setZoom(hash[2]);
 }
 
 function init() {
@@ -296,9 +301,11 @@ function init() {
 		}
 	}
 	
-	// init url hash here
-	// google.maps.event.addListener(map, "dragend", updatePosHash);
-	// google.maps.event.addListener(map, "zoom_changed", updatePosHash);
+	// init position hash and register event handlers
+	gotoPosHash(parsePosHash())
+	updatePosHash();
+	google.maps.event.addListener(map, "dragend", updatePosHash);
+	google.maps.event.addListener(map, "zoom_changed", updatePosHash);
 
 	// widget to select the world
 	addControl(google.maps.ControlPosition.TOP_RIGHT, 1, function(wrapper) {
@@ -317,6 +324,7 @@ function init() {
 		select.onchange = function() {
 			for(rotation in getConfig(select.value).zoomLevels) {
 				setMapType(select.value, rotation);
+				updatePosHash();
 				break;
 			}
 		};
