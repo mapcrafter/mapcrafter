@@ -64,7 +64,7 @@ function convertLatLngToMC(latlng, y) {
 	var x = (0.5 - tile - lng + 2*z*block) / (-2*block);
 	
 	// rotate the position in the other direction
-	for(var i = 0; i < currentRotation.rotation; i++) {
+	for(var i = 0; i < currentRotation; i++) {
 		var nx = z; // 512 blocks = one region
 		var nz = -x+512;
 		x = nx;
