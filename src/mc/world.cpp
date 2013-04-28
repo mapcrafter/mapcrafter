@@ -48,9 +48,9 @@ bool World::load(const std::string& dir, int rotation) {
 	fs::path world_dir(dir);
 	fs::path region_dir = world_dir / "region";
 	if(!fs::exists(world_dir)) {
-		std::cerr << "World directory " << world_dir << " does not exists!" << std::endl;
+		std::cerr << "Error: World directory " << world_dir << " does not exists!" << std::endl;
 	} else if(!fs::exists(region_dir)) {
-		std::cerr << "Region directory " << region_dir << " does not exists!" << std::endl;
+		std::cerr << "Error: Region directory " << region_dir << " does not exists!" << std::endl;
 	} else {
 		return readRegions(region_dir.string());
 	}

@@ -184,22 +184,51 @@ void RenderWorldConfig::readFromConfig(const ConfigFile& config, const std::stri
 			int r = stringToRotation(elem);
 			if (r != -1)
 				rotations.insert(r);
+			else
+				unknown_rotations.push_back(elem);
 		}
-		std::cout << std::endl;
 	}
+
 	if (config.has(section, "texture_size"))
 		texture_size = config.get<int>(section, "texture_size");
 }
 
+bool RenderWorldConfig::checkValid(std::vector<std::string>& errors) const {
+	bool count = errors.size();
+
+	std::string prefix = "[" + name_short + "] ";
+	if (input_dir.empty())
+		errors.push_back(prefix + "You have to specify a world directory (input_dir)!");
+	else if (!fs::is_directory(input_dir))
+		errors.push_back(prefix + "The world directory " + input_dir + " does not exist!");
+
+	if (textures_dir.empty())
+		errors.push_back(prefix + "You have to specify a textures directory (textures_dir)!");
+	else if (!fs::is_directory(textures_dir))
+		errors.push_back(prefix + "The textures directory " + textures_dir + " does not exist!");
+
+	if (rotations.size() == 0)
+		errors.push_back(prefix + "You have to specify a world rotation (rotations)!");
+	else if (unknown_rotations.size() != 0) {
+		for (size_t i = 0; i < unknown_rotations.size(); i++)
+			errors.push_back(prefix + "Unknown rotation '" + unknown_rotations[i] + "'!");
+	}
+
+	if (texture_size <= 0 || texture_size > 32)
+		errors.push_back(prefix + "You have to specify a sane texture size (0 < texture_size <= 32)!");
+
+	return errors.size() == count;
+}
+
 void RenderWorldConfig::print(std::ostream& stream) const {
-		std::cout << name_short << " '" << name_long << "'" << std::endl;
-		std::cout << "  input_dir " << input_dir << std::endl;
-		std::cout << "  textures_dir " << textures_dir << std::endl;
-		std::cout << "  texture_size " << texture_size << std::endl;
-		std::cout << "  rotations ";
-		for (auto it = rotations.begin(); it != rotations.end(); ++it)
-			std::cout << *it << " ";
-		std::cout << std::endl;
+	std::cout << name_short << " '" << name_long << "'" << std::endl;
+	std::cout << "  input_dir " << input_dir << std::endl;
+	std::cout << "  textures_dir " << textures_dir << std::endl;
+	std::cout << "  texture_size " << texture_size << std::endl;
+	std::cout << "  rotations ";
+	for (auto it = rotations.begin(); it != rotations.end(); ++it)
+		std::cout << *it << " ";
+	std::cout << std::endl;
 }
 
 RenderConfigParser::RenderConfigParser() {
@@ -212,6 +241,9 @@ bool RenderConfigParser::loadFile(const std::string& filename) {
 	if (!config.loadFile(filename))
 		return false;
 
+	output_dir = config.get("", "output_dir");
+	template_dir = config.get("", "template_dir");
+
 	default_config.readFromConfig(config, "");
 
 	std::vector<std::string> sections = config.getSections();
@@ -222,8 +254,7 @@ bool RenderConfigParser::loadFile(const std::string& filename) {
 		worlds.push_back(world);
 	}
 
-	output_dir = config.get("", "output_dir");
-	template_dir = config.get("", "template_dir");
+	world_zoomlevels.resize(worlds.size(), std::vector<int>(4, 0));
 
 	/*
 	std::cout << "Loaded " << worlds.size() << " worlds." << std::endl;
@@ -235,24 +266,74 @@ bool RenderConfigParser::loadFile(const std::string& filename) {
 	return true;
 }
 
+bool RenderConfigParser::checkValid() const {
+	std::vector<std::string> errors;
+
+	if (output_dir.empty())
+		errors.push_back("You have to specify an output directory!");
+	if (template_dir.empty())
+		errors.push_back("You have to specify a template directory!");
+	else if (!fs::is_directory(template_dir))
+		errors.push_back("The template directory " + template_dir + " does not exist!");
+
+	for (size_t i = 0; i < worlds.size(); i++) {
+		worlds[i].checkValid(errors);
+	}
+
+	if (errors.size() != 0) {
+		std::cerr << "The config file contains some errors:" << std::endl;
+		for (size_t i = 0; i < errors.size(); i++)
+			std::cerr << errors[i] << std::endl;
+		return false;
+	}
+	return true;
+}
+
 const std::vector<RenderWorldConfig>& RenderConfigParser::getWorlds() const {
 	return worlds;
 }
 
-const fs::path& RenderConfigParser::getOutputDir() const {
+fs::path RenderConfigParser::getOutputDir() const {
 	return output_dir;
 }
 
-const fs::path& RenderConfigParser::getTemplateDir() const {
+fs::path RenderConfigParser::getTemplateDir() const {
 	return template_dir;
 }
 
-std::string RenderConfigParser::outputPath(std::string file) const {
-	return (output_dir / file).string();
+std::string RenderConfigParser::getOutputPath(std::string file) const {
+	return (fs::path(output_dir) / file).string();
 }
 
-std::string RenderConfigParser::templatePath(std::string file) const {
-	return (template_dir / file).string();
+std::string RenderConfigParser::getTemplatePath(std::string file) const {
+	return (fs::path(template_dir) / file).string();
+}
+
+void RenderConfigParser::setMapZoomlevel(size_t world, int rotation, int zoomlevel) {
+	if (world >= worlds.size() || rotation >= 4)
+		return;
+	world_zoomlevels[world][rotation] = zoomlevel;
+}
+
+std::string RenderConfigParser::generateJavascript() const {
+	std::string js = "";
+
+	for (size_t i = 0; i < worlds.size(); i++) {
+		RenderWorldConfig world = worlds[i];
+		js += "\"" + world.name_short + "\" : {\n";
+		js += "\tname: \"" + world.name_long + "\",\n";
+		js += "\ttextureSize: " + str(world.texture_size) + ",\n";
+		js += "\ttileSize: " + str(32*world.texture_size) + ",\n";
+		js += "\tzoomLevels : {\n";
+		for (size_t j = 0; j <= 4; j++) {
+			if (world.rotations.count(j))
+				js += "\t\t" + str(j) + " : " + str(world_zoomlevels[i][j]) + ",\n";
+		}
+		js += "\t}\n";
+		js += "},";
+	}
+
+	return js;
 }
 
 }

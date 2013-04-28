@@ -86,11 +86,14 @@ struct RenderWorldConfig {
 	std::string textures_dir;
 
 	std::set<int> rotations;
+	std::vector<std::string> unknown_rotations;
+
 	int texture_size;
 
 	RenderWorldConfig();
 
 	void readFromConfig(const ConfigFile& config, const std::string& section);
+	bool checkValid(std::vector<std::string>& errors) const;
 
 	void print(std::ostream& stream) const;
 };
@@ -99,24 +102,29 @@ class RenderConfigParser {
 private:
 	ConfigFile config;
 
+	std::string output_dir;
+	std::string template_dir;
+
 	RenderWorldConfig default_config;
 	std::vector<RenderWorldConfig> worlds;
-
-	fs::path output_dir;
-	fs::path template_dir;
+	std::vector<std::vector<int> > world_zoomlevels;
 
 public:
 	RenderConfigParser();
 	~RenderConfigParser();
 
 	bool loadFile(const std::string& filename);
+	bool checkValid() const;
 
 	const std::vector<RenderWorldConfig>& getWorlds() const;
-	const fs::path& getOutputDir() const;
-	const fs::path& getTemplateDir() const;
+	
+	fs::path getOutputDir() const;
+	fs::path getTemplateDir() const;
+	std::string getOutputPath(std::string file) const;
+	std::string getTemplatePath(std::string file) const;
 
-	std::string outputPath(std::string file) const;
-	std::string templatePath(std::string file) const;
+	void setMapZoomlevel(size_t world, int rotation, int zoomlevel);
+	std::string generateJavascript() const;
 };
 
 }

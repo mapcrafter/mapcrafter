@@ -34,11 +34,14 @@ bool isBigEndian() {
 void trim(std::string& str) {
 	// removes trailing and leading whitespaces
 	size_t end = str.find_last_not_of(" \t");
-	if(end != std::string::npos)
-	    str = str.substr(0, end+1);
+	if (end != std::string::npos)
+		str = str.substr(0, end+1);
 	size_t start = str.find_first_not_of(" \t");
-	if( start != std::string::npos )
-	    str = str.substr( start );
+	if (start != std::string::npos)
+		str = str.substr(start);
+	else if (str.find_first_of(" \t") != std::string::npos)
+		// special case if all characters are whitespaces
+		str = "";
 }
 
 void replaceAll(std::string& str, const std::string& from, const std::string& to) {

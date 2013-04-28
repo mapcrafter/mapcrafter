@@ -128,7 +128,7 @@ private:
 	void renderMultithreaded(const mc::World& world, const TileSet& tiles,
 			const BlockImages& images, const std::string& output_dir);
 
-	bool renderWorld(const RenderWorldConfig& world, int rotation);
+	bool renderWorld(size_t index, const RenderWorldConfig& world, int rotation);
 public:
 	RenderManager(const RenderOpts& opts);
 

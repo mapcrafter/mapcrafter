@@ -22,7 +22,7 @@
 namespace mapcrafter {
 namespace mc {
 
-WorldCache::WorldCache(World& world)
+WorldCache::WorldCache(const World& world)
 		: world(world) {
 	for (int i = 0; i < RSIZE; i++) {
 		regioncache[i].used = false;

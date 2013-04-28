@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
 	opts.config_file = config_file;
 	opts.jobs = jobs;
 	if (!vm.count("jobs"))
-		jobs = 1;
+		opts.jobs = 1;
 
 	opts.batch = vm.count("batch");
 	mapcrafter::render::RenderManager manager(opts);

@@ -184,7 +184,7 @@ RenderManager::RenderManager(const RenderOpts& opts)
  */
 bool RenderManager::copyTemplateFile(const std::string& filename,
 		std::map<std::string, std::string> vars) {
-	std::ifstream file(config.templatePath(filename).c_str());
+	std::ifstream file(config.getTemplatePath(filename).c_str());
 	if (!file)
 		return false;
 	std::stringstream ss;
@@ -197,7 +197,7 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
 		replaceAll(data, "{" + it->first + "}", it->second);
 	}
 
-	std::ofstream out(config.outputPath(filename).c_str());
+	std::ofstream out(config.getOutputPath(filename).c_str());
 	if (!out)
 		return false;
 	out << data;
@@ -243,10 +243,10 @@ void RenderManager::writeTemplates(const MapSettings& settings) {
 		if (filename.compare("index.html") == 0 || filename.compare("markers.js") == 0)
 			continue;
 		if (fs::is_regular_file(*it)) {
-			if (!copyFile(*it, config.outputPath(filename)))
+			if (!copyFile(*it, config.getOutputPath(filename)))
 				std::cout << "Warning: Unable to copy file " << filename << std::endl;
 		} else if (fs::is_directory(*it)) {
-			if (!copyDirectory(*it, config.outputPath(filename)))
+			if (!copyDirectory(*it, config.getOutputPath(filename)))
 				std::cout << "Warning: Unable to copy directory " << filename
 						<< std::endl;
 		}
@@ -488,7 +488,8 @@ void RenderManager::renderMultithreaded(const mc::World& world, const TileSet& t
 	remaining_settings.progress_bar.finish();
 }
 
-bool RenderManager::renderWorld(const RenderWorldConfig& world_config, int rotation) {
+bool RenderManager::renderWorld(size_t index, const RenderWorldConfig& world_config,
+		int rotation) {
 	mc::World world;
 	if (!world.load(world_config.input_dir, rotation)) {
 		std::cerr << "Unable to load the world!" << std::endl;
@@ -508,10 +509,11 @@ bool RenderManager::renderWorld(const RenderWorldConfig& world_config, int rotat
 	std::cout << "Start rendering..." << std::endl;
 
 	std::string rotations[] = {"tl", "tr", "br", "bl"};
-	std::string output_dir = config.outputPath(world_config.name_short + "/" + rotations[rotation]);
+	std::string output_dir = config.getOutputPath(world_config.name_short + "/" + rotations[rotation]);
 	render(world, tileset, images, output_dir);
 
-	std::cout << std::endl;
+	config.setMapZoomlevel(index, rotation, tileset.getMaxZoom());
+
 	return true;
 }
 
@@ -523,11 +525,15 @@ bool RenderManager::run() {
 		std::cerr << "Error: Unable to read config file!" << std::endl;
 		return false;
 	}
+	if (!config.checkValid())
+		return false;
 
 	std::vector<RenderWorldConfig> worlds = config.getWorlds();
 
 	std::string rotations[] = {"top left", "top right", "bottom right", "bottom left"};
 	int i_to = worlds.size();
+
+	int start_all = time(NULL);
 
 	for (size_t i = 0; i < worlds.size(); i++) {
 		RenderWorldConfig world = worlds[i];
@@ -542,14 +548,25 @@ bool RenderManager::run() {
 			std::cout << "(" << i_from << "." << j_from << "/" << i_from << "."
 					<< j_to << ") Rendering rotation " << rotations[*it]
 					<< ":" << std::endl;
-			if (!renderWorld(worlds[i], *it)) {
-				std::cerr << "Skipping remaining rotations." << std::endl;
+
+			int start = time(NULL);
+			if (!renderWorld(i, worlds[i], *it)) {
+				std::cerr << "Skipping remaining rotations." << std::endl << std::endl;
 				break;
 			}
+
+			int took = time(NULL) - start;
+			std::cout << "Rendering rotation " << rotations[*it] << " took " << took
+					<< " seconds." << std::endl << std::endl;
+
 			j_from++;
 		}
 	}
 
+	int took_all = time(NULL) - start_all;
+	std::cout << "Rendering all worlds took " << took_all << " seconds." << std::endl;
+
+	std::cout << std::endl << "Finished.....aaand it's gone!" << std::endl;
 	return true;
 
 	/*
