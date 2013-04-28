@@ -183,7 +183,7 @@ RenderManager::RenderManager(const RenderOpts& opts)
  * replaces the variables from the map.
  */
 bool RenderManager::copyTemplateFile(const std::string& filename,
-		std::map<std::string, std::string> vars) {
+		const std::map<std::string, std::string>& vars) const {
 	std::ifstream file(config.getTemplatePath(filename).c_str());
 	if (!file)
 		return false;
@@ -192,8 +192,8 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
 	file.close();
 	std::string data = ss.str();
 
-	for (std::map<std::string, std::string>::iterator it = vars.begin(); it != vars.end();
-			++it) {
+	for (std::map<std::string, std::string>::const_iterator it = vars.begin();
+			it != vars.end(); ++it) {
 		replaceAll(data, "{" + it->first + "}", it->second);
 	}
 
@@ -205,30 +205,26 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
 	return true;
 }
 
+bool RenderManager::writeTemplateIndexHtml() const {
+	std::map<std::string, std::string> vars;
+	vars["worlds"] = config.generateJavascript();
+
+	return copyTemplateFile("index.html", vars);
+}
+
 /**
  * This method copies all template files to the output directory.
  */
-void RenderManager::writeTemplates(const MapSettings& settings) {
+void RenderManager::writeTemplates() const {
 	if (!fs::is_directory(config.getTemplateDir())) {
-		std::cout << "Warning: The template directory does not exists!" << std::endl;
+		std::cout << "Warning: The template directory does not exist! Can't copy templates!"
+				<< std::endl;
 		return;
 	}
 
-	// the variables for the index.html
-	std::map<std::string, std::string> vars;
-	vars["textureSize"] = str(settings.texture_size);
-	vars["tileSize"] = str(settings.tile_size);
-	vars["rotation"] = str(settings.rotation);
-	vars["maxZoom"] = str(settings.max_zoom);
-	vars["lastRender"] = str(time(NULL));
-
-	if (!copyTemplateFile("index.html", vars))
+	if (!writeTemplateIndexHtml())
 		std::cout << "Warning: Unable to copy template file index.html!" << std::endl;
-
-	// the variables for the markers.js - still in work
-	vars.clear();
-	vars["markers"] = "";
-	if (!copyTemplateFile("markers.js", vars))
+	if (!copyTemplateFile("markers.js"))
 		std::cout << "Warning: Unable to copy template file markers.js!" << std::endl;
 
 	// copy all other files and directories
@@ -251,36 +247,6 @@ void RenderManager::writeTemplates(const MapSettings& settings) {
 						<< std::endl;
 		}
 	}
-}
-
-void RenderManager::writeStats(int time_took) {
-	/*
-	 std::cout << "Writing stats..." << std::endl;
-
-	 std::ofstream file(opts.outputPath("statistics.html").c_str(), std::ios::trunc);
-	 if (!file) {
-	 std::cerr << "Error: Can't open file " << opts.outputPath("statistics.html")
-	 << " for the statistics!" << std::endl;
-	 return;
-	 }
-	 // TODO use strftime here
-	 //boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
-	 file << "<h1>Statistics</h1>";
-	 file << "<h2>Render statistics</h2><table>";
-	 //file << "<tr><th>Last render: </th><td>" << now << "</td></tr>";
-	 file << "<tr><th>Time took: </th><td>" << time_took << " seconds</td></tr>";
-	 file << "</table>";
-
-	 int chunks = 42;
-	 file << "<h2>World statistics</h2>";
-	 file << "<table>";
-	 file << "<tr><th>Regions: </th><td>" << world.getRegionCount() << "</td></tr>";
-	 file << "<tr><th>Chunks: </th><td>" << chunks << "</td></tr>";
-	 file << "<tr><th>Area: </th><td>" << (chunks * 16 * 16) / 1000000.
-	 << " km^2</td></tr>";
-	 file << "</table><br />";
-	 file.close();
-	 */
 }
 
 /**
@@ -506,13 +472,14 @@ bool RenderManager::renderWorld(size_t index, const RenderWorldConfig& world_con
 
 	std::cout << "Scanning world..." << std::endl;
 	TileSet tileset(world, 0);
+	config.setMapZoomlevel(index, rotation, tileset.getMaxZoom());
+	writeTemplateIndexHtml();
+
 	std::cout << "Start rendering..." << std::endl;
 
 	std::string rotations[] = {"tl", "tr", "br", "bl"};
 	std::string output_dir = config.getOutputPath(world_config.name_short + "/" + rotations[rotation]);
 	render(world, tileset, images, output_dir);
-
-	config.setMapZoomlevel(index, rotation, tileset.getMaxZoom());
 
 	return true;
 }
@@ -535,12 +502,15 @@ bool RenderManager::run() {
 
 	int start_all = time(NULL);
 
+	writeTemplates();
+
 	for (size_t i = 0; i < worlds.size(); i++) {
 		RenderWorldConfig world = worlds[i];
 		int i_from = i+1;
 		std::cout << "(" << i_from << "/" << i_to << ") Rendering world "
 				<< world.name_short << " (" << world.name_long << "):"
 				<< std::endl;
+
 		int j_from = 1;
 		int j_to = world.rotations.size();
 		for (std::set<int>::iterator it = world.rotations.begin();
@@ -562,6 +532,8 @@ bool RenderManager::run() {
 			j_from++;
 		}
 	}
+
+	writeTemplates();
 
 	int took_all = time(NULL) - start_all;
 	std::cout << "Rendering all worlds took " << took_all << " seconds." << std::endl;

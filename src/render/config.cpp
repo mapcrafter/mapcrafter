@@ -320,8 +320,16 @@ std::string RenderConfigParser::generateJavascript() const {
 
 	for (size_t i = 0; i < worlds.size(); i++) {
 		RenderWorldConfig world = worlds[i];
+
+#ifdef OLD_BOOST
+		std::string world_name = fs::path(world.input_dir).filename();
+#else
+		std::string world_name = fs::path(world.input_dir).filename().string();
+#endif
+
 		js += "\"" + world.name_short + "\" : {\n";
 		js += "\tname: \"" + world.name_long + "\",\n";
+		js += "\tworldName: \"" + world_name + "\",\n";
 		js += "\ttextureSize: " + str(world.texture_size) + ",\n";
 		js += "\ttileSize: " + str(32*world.texture_size) + ",\n";
 		js += "\tzoomLevels : {\n";

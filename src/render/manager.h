@@ -116,11 +116,12 @@ private:
 	RenderConfigParser config;
 
 	bool copyTemplateFile(const std::string& filename,
-	        std::map<std::string, std::string> vars =
-	                std::map<std::string, std::string>());
+	        const std::map<std::string, std::string>& vars =
+	                std::map<std::string, std::string>()) const;
 
-	void writeTemplates(const MapSettings& settings);
-	void writeStats(int time_took);
+	bool writeTemplateIndexHtml() const;
+	void writeTemplates() const;
+
 	void increaseMaxZoom();
 
 	void render(const mc::World& world, const TileSet& tiles,
