@@ -240,10 +240,10 @@ void RenderManager::writeTemplates() const {
 			continue;
 		if (fs::is_regular_file(*it)) {
 			if (!copyFile(*it, config.getOutputPath(filename)))
-				std::cout << "Warning: Unable to copy file " << filename << std::endl;
+				std::cout << "Warning: Unable to copy template file " << filename << std::endl;
 		} else if (fs::is_directory(*it)) {
 			if (!copyDirectory(*it, config.getOutputPath(filename)))
-				std::cout << "Warning: Unable to copy directory " << filename
+				std::cout << "Warning: Unable to copy template directory " << filename
 						<< std::endl;
 		}
 	}
@@ -495,6 +495,12 @@ bool RenderManager::run() {
 	if (!config.checkValid())
 		return false;
 
+	if (!fs::is_directory(config.getOutputDir())
+		&& !fs::create_directories(config.getOutputDir())) {
+		std::cerr << "Error: Unable to create output directory!" << std::endl;
+		return false;
+	}
+
 	std::vector<RenderWorldConfig> worlds = config.getWorlds();
 
 	std::string rotations[] = {"top left", "top right", "bottom right", "bottom left"};
@@ -532,8 +538,6 @@ bool RenderManager::run() {
 			j_from++;
 		}
 	}
-
-	writeTemplates();
 
 	int took_all = time(NULL) - start_all;
 	std::cout << "Rendering all worlds took " << took_all << " seconds." << std::endl;

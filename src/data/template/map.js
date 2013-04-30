@@ -165,6 +165,7 @@ function setMapType(type, rotation) {
 	}
 	
 	updateRotationSelect();
+	PosHash.updateHash()
 }
 
 function updateRotationSelect(text) {	
@@ -182,7 +183,6 @@ function updateRotationSelect(text) {
 			elem.setAttribute("data-rotation", i);
 			elem.onclick = function() {
 				setMapType(currentType, this.getAttribute("data-rotation"));
-				updatePosHash();
 				return false;
 			};
 		} else {
@@ -240,40 +240,45 @@ function initMarkers() {
 	}
 }
 
-function updatePosHash() {
-	var type = currentType;
-	var rotation = currentRotation;
-	var xzy = convertLatLngToMC(map.getCenter(), 64);
-	for(var i = 0; i < 3; i++)
-		xzy[i] = Math.round(xzy[i]);
-	var zoom = map.getZoom();
-	window.location.replace("#" + type + "/" + rotation + "/" + zoom + "/" + xzy[0] + "/" + xzy[1] + "/" + xzy[2]);
-}
-
-function parsePosHash() {
-	if(!location.hash)
-		return null;
-	
-	var url = location.hash.substr(1);
-	var split = url.split("/");
-	
-	if(split.length != 6)
-		return null;
-	for(var i = 1; i < 6; i++)
-		split[i] = parseInt(split[i]);
-	return split;
-}
-
-function gotoPosHash(hash) {
-	if(!hash)
-		return;
+var PosHash = {
+	"parseHash": function() {
+		if(!location.hash)
+			return null;
 		
-	setMapType(hash[0], hash[1]);
+		var url = location.hash.substr(1);
+		var split = url.split("/");
 		
-	var latlng = convertMCtoLatLng(hash[3], hash[4], hash[5]);
-	map.setCenter(latlng);
-	map.setZoom(hash[2]);
-}
+		if(split.length != 6)
+			return null;
+		for(var i = 1; i < 6; i++)
+			split[i] = parseInt(split[i]);
+		return split;
+	},
+	
+	"updateHash": function() {
+		var type = currentType;
+		var rotation = currentRotation;
+		var xzy = convertLatLngToMC(map.getCenter(), 64);
+		for(var i = 0; i < 3; i++)
+			xzy[i] = Math.round(xzy[i]);
+		var zoom = map.getZoom();
+		window.location.replace("#" + type + "/" + rotation + "/" + zoom + "/" + xzy[0] + "/" + xzy[1] + "/" + xzy[2]);
+	},
+	
+	"gotoHash": function(hash) {
+		if(!hash)
+			return;
+		
+		if(!(hash[0] in MapConfig) || !(hash[1] in MapConfig[hash[0]]))
+			return null;
+			
+		setMapType(hash[0], hash[1]);
+			
+		var latlng = convertMCtoLatLng(hash[3], hash[4], hash[5]);
+		map.setCenter(latlng);
+		map.setZoom(hash[2]);
+	},
+};
 
 function init() {
 	var mapOptions = {
@@ -302,10 +307,10 @@ function init() {
 	}
 	
 	// init position hash and register event handlers
-	gotoPosHash(parsePosHash())
-	updatePosHash();
-	google.maps.event.addListener(map, "dragend", updatePosHash);
-	google.maps.event.addListener(map, "zoom_changed", updatePosHash);
+	PosHash.gotoHash(PosHash.parseHash());
+	PosHash.updateHash();
+	google.maps.event.addListener(map, "dragend", PosHash.updateHash);
+	google.maps.event.addListener(map, "zoom_changed", PosHash.updateHash);
 
 	// widget to select the world
 	addControl(google.maps.ControlPosition.TOP_RIGHT, 1, function(wrapper) {
@@ -324,7 +329,6 @@ function init() {
 		select.onchange = function() {
 			for(rotation in getConfig(select.value).zoomLevels) {
 				setMapType(select.value, rotation);
-				updatePosHash();
 				break;
 			}
 		};
