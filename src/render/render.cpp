@@ -136,6 +136,10 @@ TileRenderer::~TileRenderer() {
 }
 
 Block TileRenderer::getBlock(const mc::BlockPos& pos, mc::Chunk* chunk) const {
+	// this can happen when we check for the bottom block shadow edges
+	if (pos.y < 0)
+		return Block(0, 0);
+
 	mc::ChunkPos chunk_pos(pos);
 	mc::Chunk* mychunk = chunk;
 	if (chunk == NULL || chunk_pos != chunk->getPos())

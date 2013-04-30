@@ -107,7 +107,7 @@ private:
 
 	RenderWorldConfig default_config;
 	std::vector<RenderWorldConfig> worlds;
-	std::vector<std::vector<int> > world_zoomlevels;
+	std::vector<int> world_zoomlevels;
 
 public:
 	RenderConfigParser();
@@ -123,7 +123,7 @@ public:
 	std::string getOutputPath(std::string file) const;
 	std::string getTemplatePath(std::string file) const;
 
-	void setMapZoomlevel(size_t world, int rotation, int zoomlevel);
+	void setMapZoomlevel(size_t world, int zoomlevel);
 	std::string generateJavascript() const;
 };
 

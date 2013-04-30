@@ -235,15 +235,45 @@ std::ostream& operator<<(std::ostream& stream, const Path& path) {
 	return stream;
 }
 
-TileSet::TileSet(mc::World& world, int last_check_time)
-		: world(world), last_check_time(last_check_time), depth(0) {
+TileSet::TileSet()
+		: min_depth(0), depth(0) {
+}
+
+TileSet::TileSet(const mc::World& world, int last_check)
+		: min_depth(0), depth(0) {
 	// find the available/required tiles
-	findRequiredRenderTiles();
-	findRequiredCompositeTiles(render_tiles, composite_tiles);
-	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
+	scan(world, last_check);
 }
 
 TileSet::~TileSet() {
+}
+
+void TileSet::scan(const mc::World& world, int last_check) {
+	findRequiredRenderTiles(world, last_check);
+	setDepth(min_depth);
+}
+
+int TileSet::getMinDepth() const {
+	return min_depth;
+}
+
+int TileSet::getDepth() const {
+	return depth;
+}
+
+void TileSet::setDepth(int depth) {
+	// only calculate the composite tiles new when the depth has changed
+	if (this->depth == depth || depth < min_depth)
+		return;
+
+	this->depth = depth;
+
+	// clear already calculated composite tiles and recalculate them
+	composite_tiles.clear();
+	required_composite_tiles.clear();
+
+	findRequiredCompositeTiles(render_tiles, composite_tiles);
+	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
 }
 
 /**
@@ -270,7 +300,11 @@ void getChunkTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles) {
  * This method finds out, which top level tiles a world has and which of them need to
  * get rendered.
  */
-void TileSet::findRequiredRenderTiles() {
+void TileSet::findRequiredRenderTiles(const mc::World& world, int last_check) {
+	// clear maybe already calculated tiles
+	render_tiles.clear();
+	required_render_tiles.clear();
+
 	// the min/max x/y coordinates of the tiles in the world
 	int tiles_x_min = 0, tiles_x_max = 0, tiles_y_min = 0, tiles_y_max = 0;
 
@@ -284,7 +318,7 @@ void TileSet::findRequiredRenderTiles() {
 		for (auto chunk_it = region_chunks.begin(); chunk_it != region_chunks.end();
 		        ++chunk_it) {
 			// check if the chunk was changed since the last check
-			bool changed = region.getChunkTimestamp(*chunk_it) > last_check_time;
+			bool changed = region.getChunkTimestamp(*chunk_it) > last_check;
 
 			// now get all tiles of the chunk
 			std::set<TilePos> tiles;
@@ -300,7 +334,7 @@ void TileSet::findRequiredRenderTiles() {
 
 				// insert the tile in the set of available render tiles
 				render_tiles.insert(*tile_it);
-				if (changed || last_check_time == 0)
+				if (changed || last_check == 0)
 					// if changed also in the list of required render tiles
 					required_render_tiles.insert(*tile_it);
 			}
@@ -308,9 +342,9 @@ void TileSet::findRequiredRenderTiles() {
 	}
 
 	// now get the necessary depth of the tile quadtree
-	for (depth = 0; depth < 32; depth++) {
+	for (min_depth = 0; min_depth < 32; min_depth++) {
 		// for each level calculate the radius and check if the tiles fit in this bounds
-		int radius = pow(2, depth) / 2;
+		int radius = pow(2, min_depth) / 2;
 		if (tiles_x_min > -radius && tiles_x_max < radius && tiles_y_min > -radius
 		        && tiles_y_max < radius)
 			break;
@@ -357,18 +391,6 @@ bool TileSet::isTileRequired(const Path& path) const {
 	return required_composite_tiles.count(path) != 0;
 }
 
-int TileSet::getRequiredRenderTilesCount() const {
-	return required_render_tiles.size();
-}
-
-int TileSet::getRequiredCompositeTilesCount() const {
-	return required_composite_tiles.size();
-}
-
-int TileSet::getMaxZoom() const {
-	return depth;
-}
-
 const std::set<TilePos>& TileSet::getAvailableRenderTiles() const {
 	return render_tiles;
 }
@@ -383,6 +405,14 @@ const std::set<TilePos>& TileSet::getRequiredRenderTiles() const {
 
 const std::set<Path>& TileSet::getRequiredCompositeTiles() const {
 	return required_composite_tiles;
+}
+
+int TileSet::getRequiredRenderTilesCount() const {
+	return required_render_tiles.size();
+}
+
+int TileSet::getRequiredCompositeTilesCount() const {
+	return required_composite_tiles.size();
 }
 
 /**

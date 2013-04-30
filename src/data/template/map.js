@@ -118,7 +118,7 @@ function createMapType(path, rotation) {
 			return(url);
 		},
 		tileSize: new google.maps.Size(config.tileSize, config.tileSize),
-		maxZoom: config.zoomLevels[rotation],
+		maxZoom: config.maxZoom,
 		minZoom: 0,
 		isPng: true
 	});
@@ -141,7 +141,7 @@ function getCurrentConfig() {
 }
 
 function getCurrentMaxZoom() {
-	return getCurrentConfig().zoomLevels[currentRotation];
+	return getCurrentConfig().maxZoom;
 }
 
 function setMapType(type, rotation) {
@@ -175,7 +175,7 @@ function updateRotationSelect(text) {
 		return;
 	text.innerHTML = "<span>Rotation: </span>";
 	
-	for(var i in getCurrentConfig().zoomLevels) {
+	for(var i in getCurrentConfig().rotations) {
 		var elem;
 		if(i != currentRotation) {
 			elem = document.createElement("a");
@@ -269,8 +269,9 @@ var PosHash = {
 		if(!hash)
 			return;
 		
-		if(!(hash[0] in MapConfig) || !(hash[1] in MapConfig[hash[0]]))
+		if(!(hash[0] in MapConfig) || getConfig(hash[0]).rotations.indexOf(hash[1]) == -1)
 			return null;
+			
 			
 		setMapType(hash[0], hash[1]);
 			
@@ -293,9 +294,12 @@ function init() {
 	
 	map = new google.maps.Map(document.getElementById("mcmap"), mapOptions);
 	
+	// parse the position hash from the url
+	var hash = PosHash.parseHash();
+	
 	var firstType = true;
 	for(var type in MapConfig) {
-		for(var rotation in MapConfig[type].zoomLevels) {
+		for(var rotation in getConfig(type).rotations) {
 			map.mapTypes.set(type + "-" + rotation, createMapType(type, rotation));
 			if(firstType) {
 				currentType = type;
@@ -306,9 +310,10 @@ function init() {
 		}
 	}
 	
-	// init position hash and register event handlers
-	PosHash.gotoHash(PosHash.parseHash());
+	// go to a (maybe specified) position
+	PosHash.gotoHash(hash);
 	PosHash.updateHash();
+	// and register event handlers to update the url position hash
 	google.maps.event.addListener(map, "dragend", PosHash.updateHash);
 	google.maps.event.addListener(map, "zoom_changed", PosHash.updateHash);
 
@@ -327,7 +332,7 @@ function init() {
 		}
 		
 		select.onchange = function() {
-			for(rotation in getConfig(select.value).zoomLevels) {
+			for(rotation in getConfig(select.value).rotations) {
 				setMapType(select.value, rotation);
 				break;
 			}

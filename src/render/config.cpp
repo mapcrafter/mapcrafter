@@ -254,7 +254,7 @@ bool RenderConfigParser::loadFile(const std::string& filename) {
 		worlds.push_back(world);
 	}
 
-	world_zoomlevels.resize(worlds.size(), std::vector<int>(4, 0));
+	world_zoomlevels.resize(worlds.size(), 0);
 
 	/*
 	std::cout << "Loaded " << worlds.size() << " worlds." << std::endl;
@@ -309,10 +309,10 @@ std::string RenderConfigParser::getTemplatePath(std::string file) const {
 	return (fs::path(template_dir) / file).string();
 }
 
-void RenderConfigParser::setMapZoomlevel(size_t world, int rotation, int zoomlevel) {
-	if (world >= worlds.size() || rotation >= 4)
+void RenderConfigParser::setMapZoomlevel(size_t world, int zoomlevel) {
+	if (world >= worlds.size())
 		return;
-	world_zoomlevels[world][rotation] = zoomlevel;
+	world_zoomlevels[world] = zoomlevel;
 }
 
 std::string RenderConfigParser::generateJavascript() const {
@@ -332,12 +332,12 @@ std::string RenderConfigParser::generateJavascript() const {
 		js += "\tworldName: \"" + world_name + "\",\n";
 		js += "\ttextureSize: " + str(world.texture_size) + ",\n";
 		js += "\ttileSize: " + str(32*world.texture_size) + ",\n";
-		js += "\tzoomLevels : {\n";
-		for (size_t j = 0; j <= 4; j++) {
-			if (world.rotations.count(j))
-				js += "\t\t" + str(j) + " : " + str(world_zoomlevels[i][j]) + ",\n";
-		}
-		js += "\t}\n";
+		js += "\tmaxZoom: " + str(world_zoomlevels[i]) + ",\n";
+		js += "\trotations: [";
+		for (std::set<int>::iterator it = world.rotations.begin();
+				it != world.rotations.end(); ++it)
+			js += str(*it) + ",";
+		js += "],\n";
 		js += "},";
 	}
 

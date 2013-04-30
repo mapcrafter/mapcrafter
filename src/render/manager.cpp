@@ -120,7 +120,7 @@ void renderRecursive(RecursiveRenderSettings& settings, const Path& path, Image&
 				<< " from " << file << std::endl;
 			std::cerr << settings.tiles.isTileRequired(path) << " " << settings.skip_tiles.count(path) << std::endl;
 		}
-	} else if (path.getDepth() == settings.tiles.getMaxZoom()) {
+	} else if (path.getDepth() == settings.tiles.getDepth()) {
 		// this tile is a render tile, render it (if we have a renderer)
 		if (settings.renderer == NULL)
 			return;
@@ -326,7 +326,7 @@ void RenderManager::render(const mc::World& world, const TileSet& tiles,
 	// check if only one thread
 	if (opts.jobs == 1) {
 		std::cout << "Rendering " << tiles.getRequiredRenderTilesCount()
-				<< " tiles on max zoom level " << tiles.getMaxZoom()
+				<< " tiles on max zoom level " << tiles.getDepth()
 				<< "." << std::endl;
 
 		// create needed things for recursiv render method
@@ -420,7 +420,7 @@ void RenderManager::renderMultithreaded(const mc::World& world, const TileSet& t
 		}
 
 		std::cout << "Thread " << i << " renders " << sum
-				<< " tiles on max zoom level " << tiles.getMaxZoom() << "." << std::endl;
+				<< " tiles on max zoom level " << tiles.getDepth() << "." << std::endl;
 
 		worker_settings[i] = settings;
 		// start thread
@@ -455,13 +455,7 @@ void RenderManager::renderMultithreaded(const mc::World& world, const TileSet& t
 }
 
 bool RenderManager::renderWorld(size_t index, const RenderWorldConfig& world_config,
-		int rotation) {
-	mc::World world;
-	if (!world.load(world_config.input_dir, rotation)) {
-		std::cerr << "Unable to load the world!" << std::endl;
-		return false;
-	}
-
+		int rotation, const mc::World& world, const TileSet& tileset) {
 	std::cout << "Creating block images..." << std::endl;
 	BlockImages images;
 	images.setSettings(world_config.texture_size, rotation, true, true);
@@ -469,11 +463,6 @@ bool RenderManager::renderWorld(size_t index, const RenderWorldConfig& world_con
 		std::cerr << "Unable to create block images!" << std::endl;
 		return false;
 	}
-
-	std::cout << "Scanning world..." << std::endl;
-	TileSet tileset(world, 0);
-	config.setMapZoomlevel(index, rotation, tileset.getMaxZoom());
-	writeTemplateIndexHtml();
 
 	std::cout << "Start rendering..." << std::endl;
 
@@ -496,43 +485,73 @@ bool RenderManager::run() {
 		return false;
 
 	if (!fs::is_directory(config.getOutputDir())
-		&& !fs::create_directories(config.getOutputDir())) {
+			&& !fs::create_directories(config.getOutputDir())) {
 		std::cerr << "Error: Unable to create output directory!" << std::endl;
 		return false;
 	}
 
-	std::vector<RenderWorldConfig> worlds = config.getWorlds();
+	std::vector<RenderWorldConfig> world_configs = config.getWorlds();
 
-	std::string rotations[] = {"top left", "top right", "bottom right", "bottom left"};
-	int i_to = worlds.size();
+	std::string rotation_names[] = {"top left", "top right", "bottom right", "bottom left"};
+	int i_to = world_configs.size();
 
 	int start_all = time(NULL);
 
 	writeTemplates();
 
-	for (size_t i = 0; i < worlds.size(); i++) {
-		RenderWorldConfig world = worlds[i];
+	for (size_t i = 0; i < world_configs.size(); i++) {
+		RenderWorldConfig world = world_configs[i];
 		int i_from = i+1;
 		std::cout << "(" << i_from << "/" << i_to << ") Rendering world "
 				<< world.name_short << " (" << world.name_long << "):"
 				<< std::endl;
+
+		std::cout << "Scanning world..." << std::endl;
+
+		mc::World worlds[4];
+		TileSet tilesets[4];
+		bool world_ok = true;
+
+		int depth = 0;
+		for (std::set<int>::iterator it = world.rotations.begin();
+				it != world.rotations.end(); ++it) {
+			if (!worlds[*it].load(world.input_dir, *it)) {
+				std::cerr << "Unable to load the world!" << std::endl;
+				std::cerr << "Skipping this world." << std::endl;
+				world_ok = false;
+				break;
+			}
+			tilesets[*it] = TileSet(worlds[*it], 0);
+			depth = std::max(depth, tilesets[*it].getMinDepth());
+		}
+
+		if (!world_ok)
+			continue;
+
+		config.setMapZoomlevel(i, depth);
+		writeTemplateIndexHtml();
+
+		for (std::set<int>::iterator it = world.rotations.begin();
+				it != world.rotations.end(); ++it) {
+			tilesets[*it].setDepth(depth);
+		}
 
 		int j_from = 1;
 		int j_to = world.rotations.size();
 		for (std::set<int>::iterator it = world.rotations.begin();
 				it != world.rotations.end(); ++it) {
 			std::cout << "(" << i_from << "." << j_from << "/" << i_from << "."
-					<< j_to << ") Rendering rotation " << rotations[*it]
+					<< j_to << ") Rendering rotation " << rotation_names[*it]
 					<< ":" << std::endl;
 
 			int start = time(NULL);
-			if (!renderWorld(i, worlds[i], *it)) {
+			if (!renderWorld(i, world, *it, worlds[*it], tilesets[*it])) {
 				std::cerr << "Skipping remaining rotations." << std::endl << std::endl;
 				break;
 			}
 
 			int took = time(NULL) - start;
-			std::cout << "Rendering rotation " << rotations[*it] << " took " << took
+			std::cout << "Rendering rotation " << rotation_names[*it] << " took " << took
 					<< " seconds." << std::endl << std::endl;
 
 			j_from++;

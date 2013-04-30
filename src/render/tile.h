@@ -121,10 +121,8 @@ std::ostream& operator<<(std::ostream& stream, const TilePos& tile);
  */
 class TileSet {
 private:
-	mc::World& world;
-	// time of the last check
-	int last_check_time;
-
+	// the depth needed to render all tiles
+	int min_depth;
 	// depth of the tile set = maximum zoom level
 	int depth;
 
@@ -137,16 +135,19 @@ private:
 	std::set<Path> required_composite_tiles;
 
 	void initMapSize();
-	void findRequiredRenderTiles();
+	void findRequiredRenderTiles(const mc::World& world, int last_check);
 	void findRequiredCompositeTiles(const std::set<TilePos>& render_tiles,
 			std::set<Path>& tiles);
 public:
-	TileSet(mc::World& World, int last_check_time);
+	TileSet();
+	TileSet(const mc::World& World, int last_check = 0);
 	virtual ~TileSet();
 
-	int getRequiredRenderTilesCount() const;
-	int getRequiredCompositeTilesCount() const;
-	int getMaxZoom() const;
+	void scan(const mc::World& world, int last_check);
+
+	int getMinDepth() const;
+	int getDepth() const;
+	void setDepth(int depth);
 
 	bool hasTile(const Path& path) const;
 	bool isTileRequired(const Path& path) const;
@@ -155,6 +156,9 @@ public:
 	const std::set<Path>& getAvailableCompositeTiles() const;
 	const std::set<TilePos>& getRequiredRenderTiles() const;
 	const std::set<Path>& getRequiredCompositeTiles() const;
+
+	int getRequiredRenderTilesCount() const;
+	int getRequiredCompositeTilesCount() const;
 
 	int findRenderTasks(int worker_count, std::vector<std::map<Path, int> >& workers) const;
 };
