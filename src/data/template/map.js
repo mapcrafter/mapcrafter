@@ -165,7 +165,7 @@ function setMapType(type, rotation) {
 	}
 	
 	updateRotationSelect();
-	PosHash.updateHash()
+	PosHash.updateHash();
 }
 
 function updateRotationSelect(text) {	
@@ -320,6 +320,7 @@ function init() {
 	// widget to select the world
 	addControl(google.maps.ControlPosition.TOP_RIGHT, 1, function(wrapper) {
 		var select = document.createElement('select');
+		select.setAttribute("id", "map-select");
 		select.style.padding = "5px";
 		select.style.border = "1px solid gray";
 		select.style.backgroundColor = "white";
@@ -328,6 +329,8 @@ function init() {
 			var option = document.createElement("option");
 			option.innerHTML = MapConfig[type].name;
 			option.setAttribute("value", type);
+			if(currentType == type)
+				option.setAttribute("selected", true);
 			select.appendChild(option);
 		}
 		

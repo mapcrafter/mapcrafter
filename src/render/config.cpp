@@ -205,7 +205,8 @@ void ConfigFile::set(const std::string& section, const std::string& key,
 }
 
 RenderWorldConfig::RenderWorldConfig()
-		: texture_size(12) {
+		: texture_size(12), render_unknown_blocks(false),
+		  render_leaves_transparent(true), render_biomes(true) {
 	rotations.insert(0);
 }
 
@@ -246,6 +247,12 @@ void RenderWorldConfig::readFromConfig(const fs::path& dir, const ConfigFile& co
 
 	if (config.has(section, "texture_size"))
 		texture_size = config.get<int>(section, "texture_size");
+	if (config.has(section, "render_unknwon_blocks"))
+		render_unknown_blocks = config.get<bool>(section, "render_unknown_blocks");
+	if (config.has(section, "render_leaves_transparent"))
+		render_leaves_transparent = config.get<bool>(section, "render_leaves_transparent");
+	if (config.has(section, "render_biomes"))
+		render_biomes = config.get<bool>(section, "render_biomes");
 
 	if (!input_dir.empty())
 		input_dir = fs::absolute(input_dir, dir).string();

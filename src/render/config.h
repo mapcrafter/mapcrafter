@@ -99,6 +99,9 @@ struct RenderWorldConfig {
 	std::vector<std::string> unknown_rotations;
 
 	int texture_size;
+	bool render_unknown_blocks;
+	bool render_leaves_transparent;
+	bool render_biomes;
 
 	RenderWorldConfig();
 
