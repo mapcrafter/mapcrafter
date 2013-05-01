@@ -51,7 +51,6 @@ struct RenderOpts {
  */
 struct MapSettings {
 	int texture_size;
-	int rotation;
 	int tile_size;
 	int max_zoom;
 
@@ -59,12 +58,15 @@ struct MapSettings {
 	bool render_leaves_transparent;
 	bool render_biomes;
 
-	int last_render;
+	std::vector<bool> rotations;
+	std::vector<int> last_render;
 
 	MapSettings();
 
 	bool read(const std::string& filename);
 	bool write(const std::string& filename) const;
+
+	static MapSettings byConfig(const RenderWorldConfig& config);
 };
 
 /**
@@ -122,7 +124,7 @@ private:
 	bool writeTemplateIndexHtml() const;
 	void writeTemplates() const;
 
-	void increaseMaxZoom();
+	void increaseMaxZoom(const fs::path& dir) const;
 
 	void render(const mc::World& world, const TileSet& tiles,
 			const BlockImages& images, const std::string& output_dir);

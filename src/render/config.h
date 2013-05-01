@@ -46,9 +46,13 @@ public:
 
 	bool has(const std::string& key) const;
 
-	void set(const std::string& key, const std::string& value);
 	std::string get(const std::string& key) const;
+	const std::vector<std::pair<std::string, std::string> >& getEntries() const;
+
+	void set(const std::string& key, const std::string& value);
 };
+
+std::ostream& operator<<(std::ostream& stream, const ConfigSection& section);
 
 /**
  * A simple INI-like config file parser.
@@ -62,11 +66,13 @@ private:
 	int getSectionIndex(const std::string& section) const;
 
 	bool load(std::istream& stream);
+	void write(std::ostream& stream) const;
 public:
 	ConfigFile();
 	~ConfigFile();
 
 	bool loadFile(const std::string& filename);
+	bool writeFile(const std::string& filename);
 
 	bool hasSection(const std::string& section) const;
 	const std::vector<std::string>& getSections() const;
@@ -78,6 +84,9 @@ public:
 	T get(const std::string& section, const std::string& key) const {
 		return as<T>(get(section, key));
 	}
+
+	void set(const std::string& section, const std::string& key,
+			const std::string& value);
 };
 
 struct RenderWorldConfig {
@@ -109,7 +118,7 @@ private:
 
 	RenderWorldConfig default_config;
 	std::vector<RenderWorldConfig> worlds;
-	std::vector<int> world_zoomlevels;
+	std::vector<int> worlds_max_zoom;
 
 public:
 	RenderConfigParser();
@@ -125,7 +134,7 @@ public:
 	std::string getOutputPath(std::string file) const;
 	std::string getTemplatePath(std::string file) const;
 
-	void setMapZoomlevel(size_t world, int zoomlevel);
+	void setWorldMaxZoom(size_t world, int max_zoom);
 	std::string generateJavascript() const;
 };
 

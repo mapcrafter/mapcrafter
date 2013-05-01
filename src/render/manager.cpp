@@ -27,46 +27,34 @@ namespace mapcrafter {
 namespace render {
 
 MapSettings::MapSettings()
-		: texture_size(12), rotation(0), tile_size(0), max_zoom(0),
+		: texture_size(12), tile_size(0), max_zoom(0),
 		  render_unknown_blocks(0), render_leaves_transparent(0),
-		  render_biomes(false), last_render(-1) {
+		  render_biomes(false) {
+	rotations.resize(4, false);
+	last_render.resize(4, 0);
 }
 
 /**
  * This method reads the map settings from a file.
  */
 bool MapSettings::read(const std::string& filename) {
-	std::ifstream file;
-	file.open(filename.c_str());
-	if (!file)
+	ConfigFile config;
+	if (!config.loadFile(filename))
 		return false;
 
-	std::string line;
-	// read line for line
-	while (std::getline(file, line)) {
-		std::string::size_type i = line.find(" ", 0);
-		if (i == std::string::npos)
-			continue;
-		// split line by a ' ' into key and value
-		// and save the value
-		std::string key = line.substr(0, i);
-		std::string value = line.substr(i + 1, line.size() - 1);
-		if (key == "texture_size")
-			texture_size = atoi(value.c_str());
-		else if (key == "rotation")
-			rotation = atoi(value.c_str());
-		else if (key == "tile_size")
-			tile_size = atoi(value.c_str());
-		else if (key == "max_zoom")
-			max_zoom = atoi(value.c_str());
-		else if (key == "render_unknown_blocks") {
-			render_unknown_blocks = value == "1";
-		} else if (key == "render_leaves_transparent") {
-			render_leaves_transparent = value == "1";
-		} else if (key == "render_biomes") {
-			render_biomes = value == "1";
-		} else if (key == "last_render")
-			last_render = atoi(value.c_str());
+	texture_size = config.get<int>("", "texture_size");
+	tile_size = config.get<int>("", "tile_size");
+	max_zoom = config.get<int>("", "max_zoom");
+
+	render_unknown_blocks = config.get<bool>("", "render_unknown_blocks");
+	render_leaves_transparent = config.get<bool>("", "render_leaves_transparent");
+	render_biomes = config.get<bool>("", "render_biomes");
+
+	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
+	for (int i = 0; i < 4; i++) {
+		rotations[i] = config.hasSection(rotation_names[i]);
+		if (rotations[i])
+			last_render[i] = config.get<int>(rotation_names[i], "last_render");
 	}
 
 	return true;
@@ -76,21 +64,41 @@ bool MapSettings::read(const std::string& filename) {
  * This method writes the map settings to a file.
  */
 bool MapSettings::write(const std::string& filename) const {
-	std::ofstream file(filename.c_str());
-	if (!file)
-		return false;
+	ConfigFile config;
 
-	file << "texture_size " << texture_size << std::endl;
-	file << "rotation " << rotation << std::endl;
-	file << "tile_size " << tile_size << std::endl;
-	file << "max_zoom " << max_zoom << std::endl;
-	file << "render_unknown_blocks " << render_unknown_blocks << std::endl;
-	file << "render_leaves_transparent " << render_leaves_transparent << std::endl;
-	file << "render_biomes " << render_biomes << std::endl;
-	file << "last_render " << last_render << std::endl;
-	file.close();
+	config.set("", "texture_size", str(texture_size));
+	config.set("", "tile_size", str(tile_size));
+	config.set("", "max_zoom", str(max_zoom));
 
-	return true;
+	config.set("", "render_unknown_blocks", str(render_unknown_blocks));
+	config.set("", "render_leaves_transparent", str(render_leaves_transparent));
+	config.set("", "render_biomes", str(render_biomes));
+
+	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
+	for (int i = 0; i < 4; i++) {
+		if (rotations[i])
+			config.set(rotation_names[i], "last_render", str(last_render[i]));
+	}
+
+	return config.writeFile(filename);
+}
+
+MapSettings MapSettings::byConfig(const RenderWorldConfig& config) {
+	MapSettings settings;
+
+	// TODO
+	settings.texture_size = config.texture_size;
+	settings.tile_size = config.texture_size * 32;
+
+	settings.render_unknown_blocks = true;
+	settings.render_leaves_transparent = true;
+	settings.render_biomes = true;
+
+	for (std::set<int>::const_iterator it = config.rotations.begin();
+			it != config.rotations.end(); ++it)
+		settings.rotations[*it] = true;
+
+	return settings;
 }
 
 /**
@@ -253,35 +261,32 @@ void RenderManager::writeTemplates() const {
  * This method increases the max zoom of a rendered map and makes the necessary changes
  * on the tile tree.
  */
-void RenderManager::increaseMaxZoom() {
-	fs::path out = config.getOutputDir();
-
+void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 	// at first rename the directories 1 2 3 4 (zoom level 0) and make new directories
 	for (int i = 1; i <= 4; i++) {
-		moveFile(out / str(i), out / (str(i) + "_"));
-		fs::create_directory(out / str(i));
+		moveFile(dir / str(i), dir / (str(i) + "_"));
+		fs::create_directory(dir / str(i));
 	}
 
 	// then move the old tile trees one zoom level deeper
-	moveFile(out / "1_", out / "1/4");
-	moveFile(out / "2_", out / "2/3");
-	moveFile(out / "3_", out / "3/2");
-	moveFile(out / "4_", out / "4/1");
+	moveFile(dir / "1_", dir / "1/4");
+	moveFile(dir / "2_", dir / "2/3");
+	moveFile(dir / "3_", dir / "3/2");
+	moveFile(dir / "4_", dir / "4/1");
 	// also move the images of the directories
-	moveFile(out / "1.png", out / "1/4.png");
-	moveFile(out / "2.png", out / "2/3.png");
-	moveFile(out / "3.png", out / "3/2.png");
-	moveFile(out / "4.png", out / "4/1.png");
+	moveFile(dir / "1.png", dir / "1/4.png");
+	moveFile(dir / "2.png", dir / "2/3.png");
+	moveFile(dir / "3.png", dir / "3/2.png");
+	moveFile(dir / "4.png", dir / "4/1.png");
 
 	// now read the images, which belong to the new directories
 	Image img1, img2, img3, img4;
-	img1.readPNG((out / "1/4.png").string());
-	img2.readPNG((out / "2/3.png").string());
-	img3.readPNG((out / "3/2.png").string());
-	img4.readPNG((out / "4/1.png").string());
+	img1.readPNG((dir / "1/4.png").string());
+	img2.readPNG((dir / "2/3.png").string());
+	img3.readPNG((dir / "3/2.png").string());
+	img4.readPNG((dir / "4/1.png").string());
 
-	//int s = settings.tile_size;
-	int s = 12;
+	int s = img1.getWidth();
 	// create images for the new directories
 	Image new1(s, s), new2(s, s), new3(s, s), new4(s, s);
 	Image old1, old2, old3, old4;
@@ -298,10 +303,10 @@ void RenderManager::increaseMaxZoom() {
 	new4.simpleblit(old4, 0, 0);
 
 	// now save the new images in the output directory
-	new1.writePNG((out / "1.png").string());
-	new2.writePNG((out / "2.png").string());
-	new3.writePNG((out / "3.png").string());
-	new4.writePNG((out / "4.png").string());
+	new1.writePNG((dir / "1.png").string());
+	new2.writePNG((dir / "2.png").string());
+	new3.writePNG((dir / "3.png").string());
+	new4.writePNG((dir / "4.png").string());
 
 	// don't forget the base.png
 	Image base_big(2*s, 2*s), base;
@@ -310,7 +315,7 @@ void RenderManager::increaseMaxZoom() {
 	base_big.simpleblit(new3, 0, s);
 	base_big.simpleblit(new4, s, s);
 	base_big.resizeHalf(base);
-	base.writePNG((out / "base.png").string());
+	base.writePNG((dir / "base.png").string());
 }
 
 /**
@@ -490,11 +495,12 @@ bool RenderManager::run() {
 		return false;
 	}
 
+	std::string rotation_names[] = {"top-left", "top-right", "bottom-right", "bottom-left"};
+	std::string rotation_short_names[] = {"tl", "tr", "br", "bl"};
+
 	std::vector<RenderWorldConfig> world_configs = config.getWorlds();
 
-	std::string rotation_names[] = {"top left", "top right", "bottom right", "bottom left"};
 	int i_to = world_configs.size();
-
 	int start_all = time(NULL);
 
 	writeTemplates();
@@ -506,12 +512,30 @@ bool RenderManager::run() {
 				<< world.name_short << " (" << world.name_long << "):"
 				<< std::endl;
 
-		std::cout << "Scanning world..." << std::endl;
+		std::string settings_filename = config.getOutputPath(world.name_short + "/map.settings");
+		MapSettings settings;
+		bool old_settings = fs::exists(settings_filename);
+		if (old_settings) {
+			if (!settings.read(settings_filename)) {
+				std::cerr << "Error: Unable to load old map.settings file!" << std::endl;
+				continue;
+			}
+
+			// TODO
+			// check here if the old settings file has the same settings
+			// like the provided configuration
+		} else
+			settings = MapSettings::byConfig(world);
+
+		// scan the different rotated versions of the world
+		// find the highest max zoom level of these tilesets to use this for all rotations
+		std::cout << "Scanning the world..." << std::endl;
 
 		mc::World worlds[4];
 		TileSet tilesets[4];
 		bool world_ok = true;
 
+		int start_scanning = time(NULL);
 		int depth = 0;
 		for (std::set<int>::iterator it = world.rotations.begin();
 				it != world.rotations.end(); ++it) {
@@ -521,21 +545,42 @@ bool RenderManager::run() {
 				world_ok = false;
 				break;
 			}
-			tilesets[*it] = TileSet(worlds[*it], 0);
+			tilesets[*it] = TileSet(worlds[*it], settings.last_render[*it]);
 			depth = std::max(depth, tilesets[*it].getMinDepth());
 		}
 
 		if (!world_ok)
 			continue;
 
-		config.setMapZoomlevel(i, depth);
-		writeTemplateIndexHtml();
+		// check if something was already rendered on a lower max zoom level
+		if (old_settings && settings.max_zoom < depth) {
+			std::cout << "The max zoom level was increased from " << settings.max_zoom
+					<< " to " << depth << std::endl;
+			std::cout << "I will move some files around..." << std::endl;
+		}
 
+		// now go through the rotations and set the max zoom level
 		for (std::set<int>::iterator it = world.rotations.begin();
 				it != world.rotations.end(); ++it) {
 			tilesets[*it].setDepth(depth);
+
+			// check if this rotation was already rendered
+			// on a lower max zoom level
+			// -> then: increase max zoom level
+			if (old_settings && settings.rotations[*it] && settings.max_zoom < depth) {
+				for (int i = settings.max_zoom; i < depth; i++)
+					increaseMaxZoom(config.getOutputDir() / rotation_short_names[*it]);
+			}
 		}
 
+		// now write the max zoom level to the settings file
+		settings.max_zoom = depth;
+		settings.write(settings_filename);
+		// and also to the template
+		config.setWorldMaxZoom(i, depth);
+		writeTemplateIndexHtml();
+
+		// go through the rotations and render them
 		int j_from = 1;
 		int j_to = world.rotations.size();
 		for (std::set<int>::iterator it = world.rotations.begin();
@@ -549,6 +594,10 @@ bool RenderManager::run() {
 				std::cerr << "Skipping remaining rotations." << std::endl << std::endl;
 				break;
 			}
+
+			settings.rotations[*it] = true;
+			settings.last_render[*it] = start_scanning;
+			settings.write(settings_filename);
 
 			int took = time(NULL) - start;
 			std::cout << "Rendering rotation " << rotation_names[*it] << " took " << took

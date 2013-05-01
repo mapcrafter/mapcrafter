@@ -49,6 +49,17 @@ bool ConfigSection::has(const std::string& key) const {
 	return getEntryIndex(key) != -1;
 }
 
+std::string ConfigSection::get(const std::string& key) const {
+	int index = getEntryIndex(key);
+	if (index == -1)
+		return "";
+	return entries[index].second;
+}
+
+const std::vector<std::pair<std::string, std::string> >& ConfigSection::getEntries() const {
+	return entries;
+}
+
 void ConfigSection::set(const std::string& key, const std::string& value) {
 	int index = getEntryIndex(key);
 	if (index == -1)
@@ -57,11 +68,15 @@ void ConfigSection::set(const std::string& key, const std::string& value) {
 		entries[index].second = value;
 }
 
-std::string ConfigSection::get(const std::string& key) const {
-	int index = getEntryIndex(key);
-	if (index == -1)
-		return "";
-	return entries[index].second;
+std::ostream& operator<<(std::ostream& stream, const ConfigSection& section) {
+	if (!section.getName().empty())
+		stream << "[" << section.getName() << "]" << std::endl;
+
+	auto entries = section.getEntries();
+	for (auto it = entries.begin(); it != entries.end(); ++it)
+		stream << it->first << " = " << it->second << std::endl;
+
+	return stream;
 }
 
 ConfigFile::ConfigFile() {
@@ -125,11 +140,28 @@ bool ConfigFile::load(std::istream& stream) {
 	return true;
 }
 
+void ConfigFile::write(std::ostream& stream) const {
+	stream << root << std::endl;
+
+	for (std::vector<ConfigSection>::const_iterator it = sections.begin();
+			it != sections.end(); ++it) {
+		stream << *it << std::endl;
+	}
+}
+
 bool ConfigFile::loadFile(const std::string& filename) {
 	std::ifstream in(filename);
 	if (!in)
 		return false;
 	return load(in);
+}
+
+bool ConfigFile::writeFile(const std::string& filename) {
+	std::ofstream out(filename);
+	if (!out)
+		return false;
+	write(out);
+	return true;
 }
 
 bool ConfigFile::hasSection(const std::string& section) const {
@@ -158,8 +190,22 @@ std::string ConfigFile::get(const std::string& section, const std::string& key) 
 	return sections.at(index).get(key);
 }
 
+void ConfigFile::set(const std::string& section, const std::string& key,
+		const std::string& value) {
+	if (section == "")
+		root.set(key, value);
+	else {
+		int index = getSectionIndex(section);
+		if (index == -1) {
+			sections.push_back(ConfigSection(section));
+			index = sections.size() - 1;
+		}
+		sections[index].set(key, value);
+	}
+}
+
 RenderWorldConfig::RenderWorldConfig()
-		: textures_dir("data/images"), texture_size(12) {
+		: texture_size(12) {
 	rotations.insert(0);
 }
 
@@ -275,7 +321,7 @@ bool RenderConfigParser::loadFile(const std::string& filename) {
 		worlds.push_back(world);
 	}
 
-	world_zoomlevels.resize(worlds.size(), 0);
+	worlds_max_zoom.resize(worlds.size(), 0);
 
 	/*
 	std::cout << "Loaded " << worlds.size() << " worlds." << std::endl;
@@ -330,10 +376,10 @@ std::string RenderConfigParser::getTemplatePath(std::string file) const {
 	return (fs::path(template_dir) / file).string();
 }
 
-void RenderConfigParser::setMapZoomlevel(size_t world, int zoomlevel) {
+void RenderConfigParser::setWorldMaxZoom(size_t world, int max_zoom) {
 	if (world >= worlds.size())
 		return;
-	world_zoomlevels[world] = zoomlevel;
+	worlds_max_zoom[world] = max_zoom;
 }
 
 std::string RenderConfigParser::generateJavascript() const {
@@ -353,7 +399,7 @@ std::string RenderConfigParser::generateJavascript() const {
 		js += "\tworldName: \"" + world_name + "\",\n";
 		js += "\ttextureSize: " + str(world.texture_size) + ",\n";
 		js += "\ttileSize: " + str(32*world.texture_size) + ",\n";
-		js += "\tmaxZoom: " + str(world_zoomlevels[i]) + ",\n";
+		js += "\tmaxZoom: " + str(worlds_max_zoom[i]) + ",\n";
 		js += "\trotations: [";
 		for (std::set<int>::iterator it = world.rotations.begin();
 				it != world.rotations.end(); ++it)
