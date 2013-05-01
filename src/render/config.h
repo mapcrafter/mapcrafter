@@ -68,6 +68,7 @@ public:
 
 	bool loadFile(const std::string& filename);
 
+	bool hasSection(const std::string& section) const;
 	const std::vector<std::string>& getSections() const;
 
 	bool has(const std::string& section, const std::string& key) const;
@@ -92,7 +93,8 @@ struct RenderWorldConfig {
 
 	RenderWorldConfig();
 
-	void readFromConfig(const ConfigFile& config, const std::string& section);
+	void readFromConfig(const fs::path& dir, const ConfigFile& config,
+			const std::string& section);
 	bool checkValid(std::vector<std::string>& errors) const;
 
 	void print(std::ostream& stream) const;

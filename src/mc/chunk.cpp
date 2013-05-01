@@ -76,11 +76,16 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::CompressionType compressi
 
 	// find sections list
 	nbt::TagList* tagSections = level->findTag<nbt::TagList>("Sections", nbt::TAG_LIST);
-	if (tagSections == NULL || tagSections->tag_type != nbt::TAG_COMPOUND) {
+
+	// I already saw (empty) chunks from the end with TagBytes instead of TagCompound
+	// in this list, ignore them, they are empty
+	if (tagSections == NULL
+			|| (tagSections->payload.size() != 0 && tagSections->tag_type != nbt::TAG_COMPOUND)) {
 		std::cerr << "Warning: Corrupt chunk at " << pos.x << ":" << pos.z
 		        << " (No valid sections list found)!" << std::endl;
 		return false;
-	}
+	} else if (tagSections->payload.size() == 0)
+		return true;
 
 	// go through all sections
 	for (std::vector<nbt::NBTTag*>::const_iterator it = tagSections->payload.begin();

@@ -84,8 +84,12 @@ bool ConfigFile::load(std::istream& stream) {
 		if (line.empty())
 			continue;
 
+		// a line starting with a # is a comment
+		if (line[0] == '#')
+			continue;
+
 		// a line with a new section
-		if (line[0] == '[') {
+		else if (line[0] == '[') {
 			if (line[line.size() - 1] != ']')
 				return false;
 
@@ -128,6 +132,10 @@ bool ConfigFile::loadFile(const std::string& filename) {
 	return load(in);
 }
 
+bool ConfigFile::hasSection(const std::string& section) const {
+	return getSectionIndex(section) != -1;
+}
+
 const std::vector<std::string>& ConfigFile::getSections() const {
 	return section_names;
 }
@@ -163,7 +171,8 @@ int stringToRotation(const std::string& str) {
 	return -1;
 }
 
-void RenderWorldConfig::readFromConfig(const ConfigFile& config, const std::string& section) {
+void RenderWorldConfig::readFromConfig(const fs::path& dir, const ConfigFile& config,
+		const std::string& section) {
 	if (config.has(section, "name"))
 		name_long = config.get(section, "name");
 	if (name_long.empty())
@@ -191,6 +200,11 @@ void RenderWorldConfig::readFromConfig(const ConfigFile& config, const std::stri
 
 	if (config.has(section, "texture_size"))
 		texture_size = config.get<int>(section, "texture_size");
+
+	if (!input_dir.empty())
+		input_dir = fs::absolute(input_dir, dir).string();
+	if (!textures_dir.empty())
+		textures_dir = fs::absolute(textures_dir, dir).string();
 }
 
 bool RenderWorldConfig::checkValid(std::vector<std::string>& errors) const {
@@ -241,16 +255,23 @@ bool RenderConfigParser::loadFile(const std::string& filename) {
 	if (!config.loadFile(filename))
 		return false;
 
+	fs::path dir = fs::path(filename).parent_path();
+
 	output_dir = config.get("", "output_dir");
 	template_dir = config.get("", "template_dir");
 
-	default_config.readFromConfig(config, "");
+	if (!output_dir.empty())
+		output_dir = fs::absolute(output_dir, dir).string();
+	if (!template_dir.empty())
+		template_dir = fs::absolute(template_dir, dir).string();
+
+	default_config.readFromConfig(dir, config, "");
 
 	std::vector<std::string> sections = config.getSections();
 	for (size_t i = 0; i < sections.size(); i++) {
 		RenderWorldConfig world = default_config;
 		world.name_short = sections[i];
-		world.readFromConfig(config, sections[i]);
+		world.readFromConfig(dir, config, sections[i]);
 		worlds.push_back(world);
 	}
 
