@@ -36,7 +36,8 @@ int main(int argc, char** argv) {
 		("config,c",po::value<std::string>(&config_file),
 			"the path of the world to render (required)")
 		("jobs,j", po::value<int>(&jobs),
-			"the count of jobs to render the map");
+			"the count of jobs to render the map")
+		("batch,b", "deactivates the animated progress bar");
 
 	po::variables_map vm;
 	try {
