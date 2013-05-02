@@ -125,7 +125,6 @@ function createMapType(path, rotation) {
 	type.name = config.name;
 	type.alt = path;
 	type.projection = new MapProjection(getConfig(path));
-	console.log(config);
 	return type;
 }
 
@@ -163,6 +162,8 @@ function setMapType(type, rotation) {
 		
 		//console.log("New position: " + convertLatLngToMC(map.getCenter(), 64));
 	}
+	
+	updateMarkers();
 	
 	updateRotationSelect();
 	PosHash.updateHash();
@@ -209,12 +210,21 @@ function addControl(pos, index, func) {
 	map.controls[pos].push(wrapper);
 }
 
-function initMarkers() {
+var mapMarkers = [];
+
+function updateMarkers() {
+	for(var i = 0; i < mapMarkers.length; i++)
+		mapMarkers[i].setMap(null);
+	mapMarkers = [];
+	
 	var infowindow = new google.maps.InfoWindow();
 	var current = {};
 
 	for(var i = 0; i < MARKERS.length; i++) {  
 		var location = MARKERS[i];
+		
+		if(location.world != getCurrentConfig().worldName)
+			continue;
 		
 		var markerOptions = {
 			position: convertMCtoLatLng(location.x, location.z, location.y),
@@ -224,6 +234,7 @@ function initMarkers() {
 		if(location.icon)
 			markerOptions["icon"] = location.icon;
 		var marker = new google.maps.Marker(markerOptions);
+		mapMarkers.push(marker);
 
 		google.maps.event.addListener(marker, "click", (function(marker, location) {
 			return function() {
@@ -271,7 +282,6 @@ var PosHash = {
 		
 		if(!(hash[0] in MapConfig) || getConfig(hash[0]).rotations.indexOf(hash[1]) == -1)
 			return null;
-			
 			
 		setMapType(hash[0], hash[1]);
 			
