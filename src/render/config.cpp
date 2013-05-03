@@ -26,6 +26,12 @@
 namespace mapcrafter {
 namespace render {
 
+int stringToRotation(const std::string& rotation, std::string names[4]) {
+	for (int i = 0; i < 4; i++)
+		if (rotation == names[i])
+			return i;
+	return -1;
+}
 
 ConfigSection::ConfigSection(const std::string& name)
 		: name(name) {
@@ -208,14 +214,7 @@ RenderWorldConfig::RenderWorldConfig()
 		: texture_size(12), render_unknown_blocks(false),
 		  render_leaves_transparent(true), render_biomes(true) {
 	rotations.insert(0);
-}
-
-int stringToRotation(const std::string& str) {
-	std::string directions[] = {"top-left", "top-right", "bottom-right", "bottom-left"};
-	for (int i = 0; i < 4; i++)
-		if (str == directions[i])
-			return i;
-	return -1;
+	render_behaviors.resize(4, 1);
 }
 
 void RenderWorldConfig::readFromConfig(const fs::path& dir, const ConfigFile& config,
@@ -285,6 +284,13 @@ bool RenderWorldConfig::checkValid(std::vector<std::string>& errors) const {
 		errors.push_back(prefix + "You have to specify a sane texture size (0 < texture_size <= 32)!");
 
 	return errors.size() == count;
+}
+
+bool RenderWorldConfig::canSkip() const {
+	for (int i = 0; i < 4; i++)
+		if (render_behaviors[i] != RENDER_SKIP)
+			return false;
+	return true;
 }
 
 void RenderWorldConfig::print(std::ostream& stream) const {
@@ -361,6 +367,84 @@ bool RenderConfigParser::checkValid() const {
 		return false;
 	}
 	return true;
+}
+
+bool nextSplit(std::string& string, std::string& world, std::string& rotation) {
+	if (string.empty()) {
+		world = "";
+		rotation = "";
+		return false;
+	}
+
+	size_t pos = string.find(",");
+	std::string sub = string;
+	if (pos != std::string::npos) {
+		sub = string.substr(0, pos);
+		string = string.substr(pos+1);
+	} else {
+		string = "";
+	}
+
+	world = sub;
+	pos = world.find(":");
+	if (pos != std::string::npos) {
+		rotation = world.substr(pos+1);
+		world = world.substr(0, pos);
+	} else {
+		rotation = "";
+	}
+
+	return true;
+}
+
+int getWorldIndex(const std::string& name, const std::vector<RenderWorldConfig>& worlds) {
+	for (size_t i = 0; i < worlds.size(); i++)
+		if (worlds[i].name_short == name)
+			return i;
+	return -1;
+}
+
+void RenderConfigParser::setRenderBehaviors(const std::string& render_skip,
+		const std::string& render, const std::string& render_force) {
+	std::string world, rotation;
+	int w, r;
+
+	std::string tmp = render_skip;
+	while (nextSplit(tmp, world, rotation)) {
+		// std::cout << "Skipping " << world << " " << rotation << std::endl;
+		w = getWorldIndex(world, worlds);
+		r = stringToRotation(rotation, ROTATION_NAMES_SHORT);
+		std::cout << w << " " << r << std::endl;
+		if (w != -1 && r != -1)
+			worlds[w].render_behaviors[r] = RenderWorldConfig::RENDER_SKIP;
+		else if (w != -1 && rotation.empty())
+			std::fill(&worlds[w].render_behaviors[0], &worlds[w].render_behaviors[4],
+					RenderWorldConfig::RENDER_SKIP);
+	}
+
+	tmp = render;
+	while (nextSplit(tmp, world, rotation)) {
+		// std::cout << "Rendering " << world << " " << rotation << std::endl;
+		w = getWorldIndex(world, worlds);
+		r = stringToRotation(rotation, ROTATION_NAMES_SHORT);
+		if (w != -1 && r != -1)
+			worlds[w].render_behaviors[r] = RenderWorldConfig::RENDER;
+		else if (w != -1 && rotation.empty())
+			std::fill(&worlds[w].render_behaviors[0], &worlds[w].render_behaviors[4],
+					RenderWorldConfig::RENDER);
+	}
+
+	tmp = render_force;
+	while (nextSplit(tmp, world, rotation)) {
+		// std::cout << "Rendering (force) " << world << " " << rotation << std::endl;
+		w = getWorldIndex(world, worlds);
+		r = stringToRotation(rotation, ROTATION_NAMES_SHORT);
+		if (w != -1 && r != -1)
+			worlds[w].render_behaviors[r] = RenderWorldConfig::RENDER_FORCE;
+		else if (w != -1 && rotation.empty())
+			std::fill(&worlds[w].render_behaviors[0], &worlds[w].render_behaviors[4],
+					RenderWorldConfig::RENDER_FORCE);
+	}
 }
 
 const std::vector<RenderWorldConfig>& RenderConfigParser::getWorlds() const {

@@ -28,6 +28,7 @@ namespace po = boost::program_options;
 int main(int argc, char** argv) {
 	std::string config_file;
 	std::string output_dir;
+	std::string render_skip, render, render_force;
 	int jobs;
 
 	po::options_description all("Allowed options");
@@ -35,6 +36,14 @@ int main(int argc, char** argv) {
 		("help,h", "shows a help message")
 		("config,c",po::value<std::string>(&config_file),
 			"the path of the world to render (required)")
+
+		("render-skip,s", po::value<std::string>(&render_skip),
+			"skips rendering the specified map(s)")
+		("render,r", po::value<std::string>(&render),
+			"renders the specified map(s)")
+		("render-force,f", po::value<std::string>(&render_force),
+			"renders the specified map(s) forced")
+
 		("jobs,j", po::value<int>(&jobs),
 			"the count of jobs to render the map")
 		("batch,b", "deactivates the animated progress bar");
@@ -69,6 +78,9 @@ int main(int argc, char** argv) {
 
 	mapcrafter::render::RenderOpts opts;
 	opts.config_file = config_file;
+	opts.render_skip = render_skip;
+	opts.render = render;
+	opts.render_force = render_force;
 	opts.jobs = jobs;
 	if (!vm.count("jobs"))
 		opts.jobs = 1;

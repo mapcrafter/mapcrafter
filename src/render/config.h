@@ -32,6 +32,11 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace render {
 
+static std::string ROTATION_NAMES[4] = {"top-left", "top-right", "bottom-right", "bottom-left"};
+static std::string ROTATION_NAMES_SHORT[4] = {"tl", "tr", "br", "bl"};
+
+int stringToRotation(const std::string& rotation, std::string names[4] = ROTATION_NAMES);
+
 class ConfigSection {
 private:
 	std::string name;
@@ -103,13 +108,21 @@ struct RenderWorldConfig {
 	bool render_leaves_transparent;
 	bool render_biomes;
 
+	std::vector<int> render_behaviors;
+
 	RenderWorldConfig();
 
 	void readFromConfig(const fs::path& dir, const ConfigFile& config,
 			const std::string& section);
 	bool checkValid(std::vector<std::string>& errors) const;
 
+	bool canSkip() const;
+
 	void print(std::ostream& stream) const;
+
+	static const int RENDER_SKIP = 0;
+	static const int RENDER = 1;
+	static const int RENDER_FORCE = 2;
 };
 
 class RenderConfigParser {
@@ -129,6 +142,9 @@ public:
 
 	bool loadFile(const std::string& filename);
 	bool checkValid() const;
+
+	void setRenderBehaviors(const std::string& render_skip, const std::string& render,
+			const std::string& render_force);
 
 	const std::vector<RenderWorldConfig>& getWorlds() const;
 	

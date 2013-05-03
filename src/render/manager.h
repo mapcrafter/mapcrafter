@@ -41,6 +41,7 @@ namespace render {
  */
 struct RenderOpts {
 	std::string config_file;
+	std::string render_skip, render, render_force;
 
 	int jobs;
 	bool batch;
@@ -130,9 +131,6 @@ private:
 			const BlockImages& images, const std::string& output_dir, bool biomes);
 	void renderMultithreaded(const mc::World& world, const TileSet& tiles,
 			const BlockImages& images, const std::string& output_dir, bool biomes);
-
-	bool renderWorld(size_t index, const RenderWorldConfig& world_config, int rotation,
-			const mc::World& world, const TileSet& tileset);
 public:
 	RenderManager(const RenderOpts& opts);
 

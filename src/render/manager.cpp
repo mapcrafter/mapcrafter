@@ -458,33 +458,20 @@ void RenderManager::renderMultithreaded(const mc::World& world, const TileSet& t
 	remaining_settings.progress_bar.finish();
 }
 
-bool RenderManager::renderWorld(size_t index, const RenderWorldConfig& world_config,
-		int rotation, const mc::World& world, const TileSet& tileset) {
-	BlockImages images;
-	images.setSettings(world_config.texture_size, rotation,
-			world_config.render_unknown_blocks, world_config.render_leaves_transparent);
-	if (!images.loadAll(world_config.textures_dir)) {
-		std::cerr << "Unable to create block images!" << std::endl;
-		return false;
-	}
-
-	std::string rotations[] = {"tl", "tr", "br", "bl"};
-	std::string output_dir = config.getOutputPath(world_config.name_short + "/" + rotations[rotation]);
-	render(world, tileset, images, output_dir, world_config.render_biomes);
-
-	return true;
-}
-
 /**
  * Starts the whole rendering thing.
  */
 bool RenderManager::run() {
+	// load the configuration file
 	if (!config.loadFile(opts.config_file)) {
 		std::cerr << "Error: Unable to read config file!" << std::endl;
 		return false;
 	}
+	// validate the configuration file
 	if (!config.checkValid())
 		return false;
+	// set the maps to render/skip/force-render from the command line options
+	config.setRenderBehaviors(opts.render_skip, opts.render, opts.render_force);
 
 	if (!fs::is_directory(config.getOutputDir())
 			&& !fs::create_directories(config.getOutputDir())) {
@@ -492,23 +479,35 @@ bool RenderManager::run() {
 		return false;
 	}
 
-	std::string rotation_names[] = {"top-left", "top-right", "bottom-right", "bottom-left"};
-	std::string rotation_short_names[] = {"tl", "tr", "br", "bl"};
-
 	std::vector<RenderWorldConfig> world_configs = config.getWorlds();
+
+	// check for already existing rendered maps
+	// and get the (old) zoom levels for the template
+	for (size_t i = 0; i < world_configs.size(); i++) {
+		MapSettings settings;
+		if (settings.read(config.getOutputPath(world_configs[i].name_short + "/map.settings")))
+			config.setWorldMaxZoom(i, settings.max_zoom);
+	}
+
+	// write all templates
+	writeTemplates();
 
 	int i_to = world_configs.size();
 	int start_all = time(NULL);
 
-	writeTemplates();
-
+	// go through all map configurations
 	for (size_t i = 0; i < world_configs.size(); i++) {
 		RenderWorldConfig world = world_configs[i];
+		// continue this map if all rotations are skipped
+		if (world.canSkip())
+			continue;
+
 		int i_from = i+1;
 		std::cout << "(" << i_from << "/" << i_to << ") Rendering world "
 				<< world.name_short << " (" << world.name_long << "):"
 				<< std::endl;
 
+		// check if we have already an old settings file
 		std::string settings_filename = config.getOutputPath(world.name_short + "/map.settings");
 		MapSettings settings;
 		bool old_settings = fs::exists(settings_filename);
@@ -519,10 +518,18 @@ bool RenderManager::run() {
 			}
 
 			// TODO
-			// check here if the old settings file has the same settings
-			// like the provided configuration
-		} else
+			// check if the settings file has the same settings like the configuration
+
+			// for force-render rotations, set the last render time to 0
+			// to render all tiles
+			for (int i = 0; i < 4; i++)
+				if (world.render_behaviors[i] == RenderWorldConfig::RENDER_FORCE)
+					settings.last_render[i] = 0;
+		} else {
+			// if we don't have a settings file
+			// create a new one
 			settings = MapSettings::byConfig(world);
+		}
 
 		// scan the different rotated versions of the world
 		// find the highest max zoom level of these tilesets to use this for all rotations
@@ -549,7 +556,7 @@ bool RenderManager::run() {
 		if (!world_ok)
 			continue;
 
-		// check if something was already rendered on a lower max zoom level
+		// check if the max zoom level has increased
 		if (old_settings && settings.max_zoom < depth) {
 			std::cout << "The max zoom level was increased from " << settings.max_zoom
 					<< " to " << depth << "." << std::endl;
@@ -566,7 +573,7 @@ bool RenderManager::run() {
 			// -> then: increase max zoom level
 			if (old_settings && settings.rotations[*it] && settings.max_zoom < depth) {
 				for (int i = settings.max_zoom; i < depth; i++)
-					increaseMaxZoom(config.getOutputDir() / world.name_short / rotation_short_names[*it]);
+					increaseMaxZoom(config.getOutputDir() / world.name_short / ROTATION_NAMES_SHORT[*it]);
 			}
 		}
 
@@ -578,12 +585,18 @@ bool RenderManager::run() {
 		writeTemplateIndexHtml();
 
 		// go through the rotations and render them
-		int j_from = 1;
+		int j_from = 0;
 		int j_to = world.rotations.size();
 		for (std::set<int>::iterator it = world.rotations.begin();
 				it != world.rotations.end(); ++it) {
+			j_from++;
+
+			// continue if we should skip this rotation
+			if (world.render_behaviors[*it] == RenderWorldConfig::RENDER_SKIP)
+				continue;
+
 			std::cout << "(" << i_from << "." << j_from << "/" << i_from << "."
-					<< j_to << ") Rendering rotation " << rotation_names[*it]
+					<< j_to << ") Rendering rotation " << ROTATION_NAMES[*it]
 					<< ":" << std::endl;
 
 			std::cout << "Start rendering..." << std::endl;
@@ -595,21 +608,31 @@ bool RenderManager::run() {
 			}
 
 			int start = time(NULL);
-			if (!renderWorld(i, world, *it, worlds[*it], tilesets[*it])) {
+
+			// create block images and render the world
+			BlockImages images;
+			images.setSettings(world.texture_size, *it, world.render_unknown_blocks,
+					world.render_leaves_transparent);
+			if (!images.loadAll(world.textures_dir)) {
+				std::cerr << "Unable to create block images!" << std::endl;
 				std::cerr << "Skipping remaining rotations." << std::endl << std::endl;
 				break;
 			}
 
+			std::string output_dir = config.getOutputPath(world.name_short + "/"
+					+ ROTATION_NAMES_SHORT[*it]);
+			render(worlds[*it], tilesets[*it], images, output_dir, world.render_biomes);
+
+			// update the settings file
 			settings.rotations[*it] = true;
 			settings.last_render[*it] = start_scanning;
 			settings.write(settings_filename);
 
 			int took = time(NULL) - start;
 			std::cout << "(" << i_from << "." << j_from << "/" << i_from << "."
-					<< j_to << ") Rendering rotation " << rotation_names[*it]
+					<< j_to << ") Rendering rotation " << ROTATION_NAMES[*it]
 					<< " took " << took << " seconds." << std::endl << std::endl;
 
-			j_from++;
 		}
 	}
 
