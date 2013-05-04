@@ -21,6 +21,7 @@
 
 #include <fstream>
 #include <cstdlib>
+#include <endian.h>
 
 namespace mapcrafter {
 namespace mc {

@@ -27,6 +27,7 @@
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <endian.h>
 
 namespace mapcrafter {
 namespace mc {
@@ -309,10 +310,9 @@ void TagList::dump(std::ostream& stream, const std::string& indendation) const {
 
 TagCompound::~TagCompound() {
 	for (std::map<std::string, NBTTag*>::iterator it = payload.begin();
-	        it != payload.end(); ++it) {
+			it != payload.end(); ++it) {
 		if (it->second != NULL)
 			delete it->second;
-		payload.erase(it->first);
 	}
 }
 
