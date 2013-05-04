@@ -41,7 +41,8 @@ namespace render {
  */
 struct RenderOpts {
 	std::string config_file;
-	std::string render_skip, render, render_force;
+	std::string render_skip, render_auto, render_force;
+	bool skip_all;
 
 	int jobs;
 	bool batch;

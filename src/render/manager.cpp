@@ -471,7 +471,8 @@ bool RenderManager::run() {
 	if (!config.checkValid())
 		return false;
 	// set the maps to render/skip/force-render from the command line options
-	config.setRenderBehaviors(opts.render_skip, opts.render, opts.render_force);
+	config.setRenderBehaviors(opts.skip_all, opts.render_skip, opts.render_auto,
+			opts.render_force);
 
 	if (!fs::is_directory(config.getOutputDir())
 			&& !fs::create_directories(config.getOutputDir())) {

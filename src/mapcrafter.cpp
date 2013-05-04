@@ -28,7 +28,7 @@ namespace po = boost::program_options;
 int main(int argc, char** argv) {
 	std::string config_file;
 	std::string output_dir;
-	std::string render_skip, render, render_force;
+	std::string render_skip, render_auto, render_force;
 	int jobs;
 
 	po::options_description all("Allowed options");
@@ -39,10 +39,11 @@ int main(int argc, char** argv) {
 
 		("render-skip,s", po::value<std::string>(&render_skip),
 			"skips rendering the specified map(s)")
-		("render,r", po::value<std::string>(&render),
+		("render-reset,r", "skips rendering all maps")
+		("render-auto,a", po::value<std::string>(&render_auto),
 			"renders the specified map(s)")
 		("render-force,f", po::value<std::string>(&render_force),
-			"renders the specified map(s) forced")
+			"renders the specified map(s) completely")
 
 		("jobs,j", po::value<int>(&jobs),
 			"the count of jobs to render the map")
@@ -79,7 +80,8 @@ int main(int argc, char** argv) {
 	mapcrafter::render::RenderOpts opts;
 	opts.config_file = config_file;
 	opts.render_skip = render_skip;
-	opts.render = render;
+	opts.skip_all = vm.count("render-reset");
+	opts.render_auto = render_auto;
 	opts.render_force = render_force;
 	opts.jobs = jobs;
 	if (!vm.count("jobs"))

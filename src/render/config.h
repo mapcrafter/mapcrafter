@@ -121,7 +121,7 @@ struct RenderWorldConfig {
 	void print(std::ostream& stream) const;
 
 	static const int RENDER_SKIP = 0;
-	static const int RENDER = 1;
+	static const int RENDER_AUTO = 1;
 	static const int RENDER_FORCE = 2;
 };
 
@@ -143,8 +143,8 @@ public:
 	bool loadFile(const std::string& filename);
 	bool checkValid() const;
 
-	void setRenderBehaviors(const std::string& render_skip, const std::string& render,
-			const std::string& render_force);
+	void setRenderBehaviors(bool skip_all, const std::string& render_skip,
+			const std::string& render_auto, const std::string& render_force);
 
 	const std::vector<RenderWorldConfig>& getWorlds() const;
 	

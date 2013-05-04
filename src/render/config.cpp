@@ -263,6 +263,9 @@ bool RenderWorldConfig::checkValid(std::vector<std::string>& errors) const {
 	bool count = errors.size();
 
 	std::string prefix = "[" + name_short + "] ";
+	if (name_long.empty())
+		errors.push_back(prefix + "You have to specify a world name (name)!");
+
 	if (input_dir.empty())
 		errors.push_back(prefix + "You have to specify a world directory (input_dir)!");
 	else if (!fs::is_directory(input_dir))
@@ -404,47 +407,32 @@ int getWorldIndex(const std::string& name, const std::vector<RenderWorldConfig>&
 	return -1;
 }
 
-void RenderConfigParser::setRenderBehaviors(const std::string& render_skip,
-		const std::string& render, const std::string& render_force) {
+void setBehaviors(std::vector<RenderWorldConfig>& worlds, std::string string,
+		int behavior) {
 	std::string world, rotation;
 	int w, r;
 
-	std::string tmp = render_skip;
-	while (nextSplit(tmp, world, rotation)) {
-		// std::cout << "Skipping " << world << " " << rotation << std::endl;
+	while (nextSplit(string, world, rotation)) {
 		w = getWorldIndex(world, worlds);
 		r = stringToRotation(rotation, ROTATION_NAMES_SHORT);
-		std::cout << w << " " << r << std::endl;
 		if (w != -1 && r != -1)
-			worlds[w].render_behaviors[r] = RenderWorldConfig::RENDER_SKIP;
+			worlds[w].render_behaviors[r] = behavior;
 		else if (w != -1 && rotation.empty())
 			std::fill(&worlds[w].render_behaviors[0], &worlds[w].render_behaviors[4],
-					RenderWorldConfig::RENDER_SKIP);
+					behavior);
 	}
+}
 
-	tmp = render;
-	while (nextSplit(tmp, world, rotation)) {
-		// std::cout << "Rendering " << world << " " << rotation << std::endl;
-		w = getWorldIndex(world, worlds);
-		r = stringToRotation(rotation, ROTATION_NAMES_SHORT);
-		if (w != -1 && r != -1)
-			worlds[w].render_behaviors[r] = RenderWorldConfig::RENDER;
-		else if (w != -1 && rotation.empty())
-			std::fill(&worlds[w].render_behaviors[0], &worlds[w].render_behaviors[4],
-					RenderWorldConfig::RENDER);
-	}
-
-	tmp = render_force;
-	while (nextSplit(tmp, world, rotation)) {
-		// std::cout << "Rendering (force) " << world << " " << rotation << std::endl;
-		w = getWorldIndex(world, worlds);
-		r = stringToRotation(rotation, ROTATION_NAMES_SHORT);
-		if (w != -1 && r != -1)
-			worlds[w].render_behaviors[r] = RenderWorldConfig::RENDER_FORCE;
-		else if (w != -1 && rotation.empty())
-			std::fill(&worlds[w].render_behaviors[0], &worlds[w].render_behaviors[4],
-					RenderWorldConfig::RENDER_FORCE);
-	}
+void RenderConfigParser::setRenderBehaviors(bool skip_all, const std::string& render_skip,
+		const std::string& render_auto, const std::string& render_force) {
+	if (!skip_all)
+		setBehaviors(worlds, render_skip, RenderWorldConfig::RENDER_SKIP);
+	else
+		for (size_t i = 0; i < worlds.size(); i++)
+			for (int j = 0; j < 4; j++)
+				worlds[i].render_behaviors[j] = RenderWorldConfig::RENDER_SKIP;
+	setBehaviors(worlds, render_auto, RenderWorldConfig::RENDER_AUTO);
+	setBehaviors(worlds, render_force, RenderWorldConfig::RENDER_FORCE);
 }
 
 const std::vector<RenderWorldConfig>& RenderConfigParser::getWorlds() const {

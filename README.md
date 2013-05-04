@@ -38,38 +38,52 @@ stuff of the template from Minecraft Overviewer.
 ### Configuration file format ###
 
 To tell the mapcrafter which maps to render, simple INI-like configuration
-files are used. Here is an example of a configuration file render.conf:
+files are used. With configuration files it is possible to render multiple
+maps/rotations (also rendermodes later) into one output directory. Here is an
+example of a configuration file render.conf:
 
 	output_dir = output
 	template_dir = mapcrafter/src/data/template
 	textures_dir = mapcrafter/src/data/textures
 
-	texture_size = 12
-
-	[main]
+	[world]
 	name = Main World
-	world = worlds/main
+	world = worlds/world
 	rotations = top-left top-right bottom-left bottom-right
 
-	[creative]
-	name = Creative World
-	world = worlds/creative
+	[world2]
+	name = World 2
+	world = worlds/world2
 	textures_dir = my/special/textures
+	texture_size = 16
 	rotations = top-left bottom-left
 
-You can render this worlds with (see command line options for more options):
+Here are two maps with different textures, texture sizes and rotations defined.
+
+You can render these worlds with (see command line options for more options):
 
 	./mapcrafter -c render.conf
 
-The configuration files consist of `key = value` pairs and sections (in square
-brackets) with options. The sections of the configuration files are the maps to
-render. 
+The configuration files consist of sections and `key = value` option pairs .
+The sections of the configuration files are the maps to render. The options in
+the sections are settings for the rendered worlds. You can specify these
+options also in the head of the configuration file to set default option
+values.  In the head are also options, which are relevant to all worlds and
+therefore must be defined in the head, for example `output_dir` and
+`template_dir`.
+
+The names of the sections (square brackets) are identifiers for the maps and
+used for internal representations, so they should be unique and you should only
+use alphanumeric chars. Additionally the sections have a normal name as an
+option `name`, which is also shown to the user in the output file.
 
 All these maps are rendered into one output directory, so you can view them in
-one HTML-File. For every map you can specify a list of rotations. When you
-decide to render all four directions of a map, you can interactively rotate the
-world on the webbrowser. Relative paths in the configuration file are relative
-to the path of the configuration file.
+one HTML-File. For every map you can specify a list of rotations. You can
+interactively rotate the world in the webbrowser, if you render different
+rotations of a world. 
+
+Relative paths in the configuration file are relative to the path of the
+configuration file.
 
 Here is a list of available options:
 
@@ -137,8 +151,8 @@ texture size 16, but texture size 12 looks still good and is faster to render.
 `rotations = [top-left] [top-right] [bottom-right] [bottom-left]`
 
 This is a list of rotations to render the world from. You can rotate the world
-by n*90 degrees. Later in the output file you can interactively rotate your
-world. Possible values for this space separated list are: top-left, top-right,
+by `n*90` degrees. Later in the output file you can interactively rotate your
+world. Possible values for this space-separated list are: top-left, top-right,
 bottom-right, bottom-left. Top left means that north is on the top left side on
 the map (same thing for other directions). This option defaults to top-left.
 
@@ -178,9 +192,30 @@ This is the path to the configuration file to use when rendering.
 
 `-s [--render-skip=] maps`
 
-`-r [--render=] maps`
+You can specify maps the renderer should skip when rendering. This is a
+comma-separated list of map names (the section names from the configuration
+file). You can also specify the rotation of the maps to skip by adding adding a
+':' and the short name of the rotation (`tl`, `tr`, `br`, `bl`). For exmaple:
+`world,world2` or `world:tl,world:bl,world2:bl,world3`.
 
-`-f [--render-force] maps`
+`-r [--render-reset]`
+
+This option skips all maps and renders only the maps you explicitly specify
+with `-a` or `-f`.
+
+`-a [--render-auto=] maps`
+
+You can specify maps the renderer should render automatically. This means that
+the renderer renders the map incrementally, if something was already rendered,
+or renders the map completely, if this is the first rendering. Per default the
+renderer renders all maps automatically. See `--render-skip` for the format to
+specify maps.
+
+`-f [--render-force=] maps`
+
+You can specify maps the renderer should render completely. This means that the
+renderer renders all tiles, not just the tiles, which might have changed. See
+`--render-skip` for the format to specify maps.
 
 `-j [--jobs=] number`
 
