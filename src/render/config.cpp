@@ -296,6 +296,13 @@ bool RenderWorldConfig::canSkip() const {
 	return true;
 }
 
+bool RenderWorldConfig::isCompleteRenderForce() const {
+	for (std::set<int>::const_iterator it = rotations.begin(); it != rotations.end(); ++it)
+		if (render_behaviors[*it] != RENDER_FORCE)
+			return false;
+	return true;
+}
+
 void RenderWorldConfig::print(std::ostream& stream) const {
 	std::cout << name_short << " '" << name_long << "'" << std::endl;
 	std::cout << "  input_dir " << input_dir << std::endl;

@@ -83,6 +83,13 @@ bool MapSettings::write(const std::string& filename) const {
 	return config.writeFile(filename);
 }
 
+bool MapSettings::equalsConfig(const RenderWorldConfig& config) const {
+	return texture_size == config.texture_size
+			&& render_unknown_blocks == config.render_unknown_blocks
+			&& render_leaves_transparent == config.render_leaves_transparent
+			&& render_biomes == config.render_biomes;
+}
+
 MapSettings MapSettings::byConfig(const RenderWorldConfig& config) {
 	MapSettings settings;
 
@@ -474,52 +481,63 @@ bool RenderManager::run() {
 	config.setRenderBehaviors(opts.skip_all, opts.render_skip, opts.render_auto,
 			opts.render_force);
 
+	// we need an output directory
 	if (!fs::is_directory(config.getOutputDir())
 			&& !fs::create_directories(config.getOutputDir())) {
 		std::cerr << "Error: Unable to create output directory!" << std::endl;
 		return false;
 	}
 
+	// get the maps to render
 	std::vector<RenderWorldConfig> world_configs = config.getWorlds();
 
 	// check for already existing rendered maps
-	// and get the (old) zoom levels for the template
+	// and get the (old) zoom levels for the template,
+	// so the user can still view the other maps while rendering
 	for (size_t i = 0; i < world_configs.size(); i++) {
 		MapSettings settings;
 		if (settings.read(config.getOutputPath(world_configs[i].name_short + "/map.settings")))
 			config.setWorldMaxZoom(i, settings.max_zoom);
 	}
 
-	// write all templates
+	// write all template files
 	writeTemplates();
 
 	int i_to = world_configs.size();
 	int start_all = time(NULL);
 
-	// go through all map configurations
+	// go through all maps
 	for (size_t i = 0; i < world_configs.size(); i++) {
 		RenderWorldConfig world = world_configs[i];
-		// continue this map if all rotations are skipped
+		// continue, if all rotations for this map are skipped
 		if (world.canSkip())
 			continue;
 
 		int i_from = i+1;
-		std::cout << "(" << i_from << "/" << i_to << ") Rendering world "
-				<< world.name_short << " (" << world.name_long << "):"
+		std::cout << "(" << i_from << "/" << i_to << ") Rendering map "
+				<< world.name_short << " (\"" << world.name_long << "\"):"
 				<< std::endl;
 
-		// check if we have already an old settings file
 		std::string settings_filename = config.getOutputPath(world.name_short + "/map.settings");
 		MapSettings settings;
-		bool old_settings = fs::exists(settings_filename);
+		// check if we have already an old settings file,
+		// but ignore the settings file if the whole world is force-rendered
+		bool old_settings = !world.isCompleteRenderForce() && fs::exists(settings_filename);
 		if (old_settings) {
 			if (!settings.read(settings_filename)) {
-				std::cerr << "Error: Unable to load old map.settings file!" << std::endl;
+				std::cerr << "Error: Unable to load old map.settings file!"
+						<< std::endl << std::endl;
 				continue;
 			}
 
-			// TODO
-			// check if the settings file has the same settings like the configuration
+			// check if the config file was not changed when rendering incrementally
+			if (!settings.equalsConfig(world)) {
+				std::cerr << "Error: The configuration does not equal the settings of the already rendered map." << std::endl;
+				std::cerr << "Force-render the whole map (" << world.name_short
+						<< ") or reset the configuration to the old settings."
+						<< std::endl << std::endl;
+				continue;
+			}
 
 			// for force-render rotations, set the last render time to 0
 			// to render all tiles
@@ -527,13 +545,15 @@ bool RenderManager::run() {
 				if (world.render_behaviors[i] == RenderWorldConfig::RENDER_FORCE)
 					settings.last_render[i] = 0;
 		} else {
-			// if we don't have a settings file
-			// create a new one
+			// if we don't have a settings file or force-render the whole map
+			// -> create a new one
 			settings = MapSettings::byConfig(world);
 		}
 
 		// scan the different rotated versions of the world
 		// find the highest max zoom level of these tilesets to use this for all rotations
+		// all rotations should have the same max zoom level
+		// to allow a nice interactively rotateable map
 		std::cout << "Scanning the world..." << std::endl;
 
 		mc::World worlds[4];
@@ -546,7 +566,7 @@ bool RenderManager::run() {
 				it != world.rotations.end(); ++it) {
 			if (!worlds[*it].load(world.input_dir, *it)) {
 				std::cerr << "Unable to load the world!" << std::endl;
-				std::cerr << "Skipping this world." << std::endl;
+				std::cerr << "Skipping this world." << std::endl << std::endl;
 				world_ok = false;
 				break;
 			}
@@ -569,8 +589,7 @@ bool RenderManager::run() {
 				it != world.rotations.end(); ++it) {
 			tilesets[*it].setDepth(depth);
 
-			// check if this rotation was already rendered
-			// on a lower max zoom level
+			// check if this rotation was already rendered on a lower max zoom level
 			// -> then: increase max zoom level
 			if (old_settings && settings.rotations[*it] && settings.max_zoom < depth) {
 				for (int i = settings.max_zoom; i < depth; i++)
@@ -600,7 +619,6 @@ bool RenderManager::run() {
 					<< j_to << ") Rendering rotation " << ROTATION_NAMES[*it]
 					<< ":" << std::endl;
 
-			std::cout << "Start rendering..." << std::endl;
 			if (settings.last_render[*it] != 0) {
 				time_t t = settings.last_render[*it];
 				char buffer[100];

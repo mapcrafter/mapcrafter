@@ -117,6 +117,7 @@ struct RenderWorldConfig {
 	bool checkValid(std::vector<std::string>& errors) const;
 
 	bool canSkip() const;
+	bool isCompleteRenderForce() const;
 
 	void print(std::ostream& stream) const;
 

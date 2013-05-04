@@ -68,6 +68,7 @@ struct MapSettings {
 	bool read(const std::string& filename);
 	bool write(const std::string& filename) const;
 
+	bool equalsConfig(const RenderWorldConfig& config) const;
 	static MapSettings byConfig(const RenderWorldConfig& config);
 };
 
