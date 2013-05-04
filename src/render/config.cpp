@@ -246,7 +246,7 @@ void RenderWorldConfig::readFromConfig(const fs::path& dir, const ConfigFile& co
 
 	if (config.has(section, "texture_size"))
 		texture_size = config.get<int>(section, "texture_size");
-	if (config.has(section, "render_unknwon_blocks"))
+	if (config.has(section, "render_unknown_blocks"))
 		render_unknown_blocks = config.get<bool>(section, "render_unknown_blocks");
 	if (config.has(section, "render_leaves_transparent"))
 		render_leaves_transparent = config.get<bool>(section, "render_leaves_transparent");
