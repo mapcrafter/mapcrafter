@@ -38,7 +38,7 @@ stuff of the template from Minecraft Overviewer.
 ### Configuration file format ###
 
 To tell the mapcrafter which maps to render, simple INI-like configuration
-files are used. Here is an exmaple of a configuration file:
+files are used. Here is an example of a configuration file render.conf:
 
 	output_dir = output
 	template_dir = mapcrafter/src/data/template
@@ -57,11 +57,19 @@ files are used. Here is an exmaple of a configuration file:
 	textures_dir = my/special/textures
 	rotations = top-left bottom-left
 
+You can render this worlds with (see command line options for more options):
+
+	./mapcrafter -c render.conf
+
 The configuration files consist of `key = value` pairs and sections (in square
-brackets).  The sections of the configuration files are the maps to render.
-You can specify for every map a list of rotations.  All these maps are rendered
-into one output file. Relative paths in the configuration file are relative to
-the path of the configuration file.
+brackets) with options. The sections of the configuration files are the maps to
+render. 
+
+All these maps are rendered into one output directory, so you can view them in
+one HTML-File. For every map you can specify a list of rotations. When you
+decide to render all four directions of a map, you can interactively rotate the
+world on the webbrowser. Relative paths in the configuration file are relative
+to the path of the configuration file.
 
 Here is a list of available options:
 
@@ -71,27 +79,29 @@ header before the first section starts:**
 `output_dir = <directory>`
 
 This is the directory, where mapcrafter saves the rendered map. Every time you
-render your map, the renderer copies the template files into this directory and
+render your map the renderer copies the template files into this directory and
 overwrites them, if they already exist. The renderer creates an index.html file
 you can open with your webbrowser. If you want to customize this HTML-File, you
 should do this directly in the template (see `template_dir`).
 
 `template_dir = <directory>`
 
-This is the directory with the web template files.  The renderer copies all
+This is the directory with the web template files. The renderer copies all
 files, which are in this directory, to the output directory and replaces the
 variables in the index.html file. The index.html file is also the file in the
 output directory you can open with your webbrowser after the rendering.
 
-**These options are for the maps. You specify them in the sections or you can
-specify them in the header. If you specify them in the header, these options
-are inherited in the sections if you do not overwrite them:**
+**These options are for the maps. You can specify them in the sections or you
+can specify them in the header. If you specify them in the header, these
+options are default values and inherited in the sections if you do not
+overwrite them:**
 
 `name = <name>`
 
-This is a name for the rendered map. You will see this name in the interface of
-the output file, so you can use here an human-readable name. Since the name of
-the section is used for internal representation, the name of section should be
+This is the name for the rendered map. You will see this name in the output file,
+so you should use here an human-readable name. The belonging configuration
+section to this map has also a name (in square brackets). Since the name of the
+section is used for internal representation, the name of the section should be
 unique and you should only use alphanumeric chars.
 
 `world = <directory>`
@@ -112,7 +122,7 @@ with the Minecraft 1.5 texture file format. You need here:
 * the blocks/ directory from your texture pack
 
 Probably you can get everything from your minecraft.jar. You can use the python
-script 'find_images.py' in the data directory to extract the images from your
+script `find_images.py` from the data directory to extract the images from your
 minecraft.jar.
 
 `texture_size = <number>`
@@ -120,35 +130,36 @@ minecraft.jar.
 This is the size (in pixels) of the block textures. The default texture size is
 12px (16px is the size of the default Minecraft textures).
 
-The size of a tile is 32*texturesize, so the higher the texture size, the more
-image data the renderer has to process. If you want a high detail, use texture
-size 16, but texture size 12 looks still good and is faster to render.
+The size of a tile is `32 * texture_size`, so the higher the texture size, the
+more image data the renderer has to process. If you want a high detail, use
+texture size 16, but texture size 12 looks still good and is faster to render.
 
 `rotations = [top-left] [top-right] [bottom-right] [bottom-left]`
 
 This is a list of rotations to render the world from. You can rotate the world
-by n*90 degrees.  Possible values for this space separated list are: top-left
-(default), top-right, bottom-right, bottom-left. Top left means that north is
-on the top left side on the map (same thing for other directions).
+by n*90 degrees. Later in the output file you can interactively rotate your
+world. Possible values for this space separated list are: top-left, top-right,
+bottom-right, bottom-left. Top left means that north is on the top left side on
+the map (same thing for other directions). This option defaults to top-left.
 
 `render_unknown_blocks = 1|0`
 
-With this setting, the renderer renders unknown blocks as red blocks (for
-debugging purposes). Per default, the renderer just ignores unknown blocks and
+With this option the renderer renders unknown blocks as red blocks (for
+debugging purposes). Per default the renderer just ignores unknown blocks and
 does not render them.
 
 `render_leaves_transparent = 1|0`
 
-You can specifiy this to use the transparent leave textures instead of the
-opaque textures. This option can make the renderer a bit slower, because the
-renderer also has to scan the blocks after the leaves to the ground. Per
-default the renderer renders leaves transparent.
+You can specifiy this to use the transparent leaf textures instead of the
+opaque textures. Using transparent leaf textures can make the renderer a bit
+slower, because the renderer also has to scan the blocks after the leaves to
+the ground. Per default the renderer renders leaves transparent.
 
 `render_biomes = 1|0`
 
 This setting makes the renderer to use the original biome colors for blocks
-like grass and leaves. At the moment, the renderer does not use the biome
-colors for water, because the renderer preblits the water blocks (great
+like grass and leaves. At the moment the renderer does not use the biome
+colors for water because the renderer preblits the water blocks (great
 performance improvement) and it is not very easy to preblit all biome color
 variants. And also, there is not a big difference with different water colors.
 Per default the renderer renders biomes.
@@ -157,21 +168,21 @@ Per default the renderer renders biomes.
 
 Here is a list of available command line options:
 
--h [--help]
+`-h [--help]`
 
 This shows a help about the command line options.
 
--c [--config=] file
+`-c [--config=] file`
 
 This is the path to the configuration file to use when rendering.
 
--s [--render-skip=] maps
+`-s [--render-skip=] maps`
 
--r [--render=] maps
+`-r [--render=] maps`
 
--f [--render-force] maps
+`-f [--render-force] maps`
 
--j [--jobs=] number
+`-j [--jobs=] number`
 
 This is the count of threads to use (defaults to one), when rendering the map.
 The rendering performance also depends heavily on your disk. You can render the
@@ -179,7 +190,7 @@ map to a solid state disk or a ramdisk to improve the performance.
 
 Every thread needs around 150MB ram.
 
--b [--batch]
+`-b [--batch]`
 
 This option deactivates the animated progress bar.
 
