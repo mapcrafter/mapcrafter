@@ -27,6 +27,8 @@
 #include "render/textures.h"
 #include "render/tile.h"
 
+//#include "render/rendermodes/base.h"
+
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
@@ -72,12 +74,18 @@ public:
 };
 
 /**
- * A combination of id/data.
+ * Data required to render a tile.
  */
-struct Block {
-	Block(uint16_t id = 0, uint16_t data = 0);
+struct RenderState {
+	mc::WorldCache& world;
+	const BlockImages& images;
 
-	uint16_t id, data;
+	mc::Chunk* chunk;
+
+	RenderState(mc::WorldCache& world, const BlockImages& images);
+	~RenderState();
+
+	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA) const;
 };
 
 /**
@@ -95,26 +103,27 @@ struct RenderBlock {
 	bool operator<(const RenderBlock& other) const;
 };
 
+class Rendermode;
+
 /**
  * Renders tiles from world data.
  */
 class TileRenderer {
 private:
-	mc::WorldCache& world;
-	const BlockImages& images;
+	RenderState state;
 
 	bool render_biomes;
 
-	Block getBlock(const mc::BlockPos& pos, mc::Chunk* chunk) const;
-	Biome getBiome(const mc::BlockPos& pos, const mc::Chunk* chunk) const;
+	std::vector<std::shared_ptr<Rendermode> > rendermodes;
 
-	uint16_t checkNeighbors(const mc::BlockPos& pos, mc::Chunk* chunk, uint16_t id,
-			uint16_t data) const;
+	Biome getBiome(const mc::BlockPos& pos, const mc::Chunk* chunk);
+
+	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 public:
 	TileRenderer(mc::WorldCache& world, const BlockImages& textures, bool render_biomes);
 	~TileRenderer();
 
-	void renderTile(const TilePos& pos, Image& tile) const;
+	void renderTile(const TilePos& pos, Image& tile);
 };
 
 }

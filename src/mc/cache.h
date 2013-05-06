@@ -29,6 +29,25 @@ namespace mapcrafter {
 namespace mc {
 
 /**
+ * A block with id/data/biome/lighting data.
+ */
+struct Block {
+	Block(uint16_t id = 0, uint16_t data = 0, uint8_t biome = 0,
+			uint8_t block_light = 15, uint8_t sky_light = 15);
+
+	uint16_t id, data;
+	uint8_t biome;
+	uint8_t block_light, sky_light;
+};
+
+const int GET_ID = 1;
+const int GET_DATA = 2;
+const int GET_BIOME = 4;
+const int GET_BLOCK_LIGHT = 8;
+const int GET_SKY_LIGHT = 16;
+const int GET_LIGHT = GET_BLOCK_LIGHT | GET_SKY_LIGHT;
+
+/**
  * Some cache statistics for debugging. Not used at the moment.
  *
  * Maybe add a set of corrupt chunks/regions to dump them at the end of the rendering.
@@ -103,14 +122,16 @@ private:
 	CacheStats regionstats;
 	CacheStats chunkstats;
 
-	int getRegionCacheIndex(const RegionPos& pos);
-	int getChunkCacheIndex(const ChunkPos& pos);
+	int getRegionCacheIndex(const RegionPos& pos) const;
+	int getChunkCacheIndex(const ChunkPos& pos) const;
 
 public:
 	WorldCache(const World& world);
 
 	RegionFile* getRegion(const RegionPos& pos);
 	Chunk* getChunk(const ChunkPos& pos);
+
+	Block getBlock(const mc::BlockPos& pos, const mc::Chunk* chunk, int get = GET_ID | GET_DATA);
 
 	const CacheStats& getRegionCacheStats() const;
 	const CacheStats& getChunkCacheStats() const;

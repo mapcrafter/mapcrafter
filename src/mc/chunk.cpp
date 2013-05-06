@@ -95,10 +95,15 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::CompressionType compressi
 		nbt::TagByteArray* blocks = tagSection->findTag<nbt::TagByteArray>("Blocks", nbt::TAG_BYTE_ARRAY);
 		nbt::TagByteArray* add = tagSection->findTag<nbt::TagByteArray>("Add", nbt::TAG_BYTE_ARRAY);
 		nbt::TagByteArray* data = tagSection->findTag<nbt::TagByteArray>("Data", nbt::TAG_BYTE_ARRAY);
+
+		nbt::TagByteArray* block_light = tagSection->findTag<nbt::TagByteArray>("BlockLight", nbt::TAG_BYTE_ARRAY);
+		nbt::TagByteArray* sky_light = tagSection->findTag<nbt::TagByteArray>("SkyLight", nbt::TAG_BYTE_ARRAY);
 		// make sure section is valid
-		if (y == NULL || blocks == NULL || data == NULL
+		if (y == NULL || blocks == NULL || data == NULL || block_light == NULL || sky_light == NULL
 				|| blocks->payload.size() != 4096
-				|| data->payload.size() != 2048)
+				|| data->payload.size() != 2048
+				|| block_light->payload.size() != 2048
+				|| sky_light->payload.size() != 2048)
 			continue;
 
 		// add it
@@ -110,6 +115,9 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::CompressionType compressi
 		else
 			std::copy(add->payload.begin(), add->payload.end(), section.add);
 		std::copy(data->payload.begin(), data->payload.end(), section.data);
+
+		std::copy(block_light->payload.begin(), block_light->payload.end(), section.block_light);
+		std::copy(sky_light->payload.begin(), sky_light->payload.end(), section.sky_light);
 		// set the position of this section
 		section_offsets[section.y] = sections.size();
 		sections.push_back(section);
@@ -167,10 +175,32 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 	return sections[section_offsets[section]].blocks[offset] + (add << 8);
 }
 
+uint8_t Chunk::getData(const LocalBlockPos& pos, int array) const {
+	int section = pos.y / 16;
+	if (section_offsets[section] == -1) {
+		if (array == 1 || array == 2)
+			return 15;
+		return 0;
+	}
+
+	int x = pos.x;
+	int z = pos.z;
+	if (rotation)
+		rotateBlockPos(x, z, rotation);
+
+	int offset = ((pos.y % 16) * 16 + z) * 16 + x;
+	if ((offset % 2) == 0)
+		return sections[section_offsets[section]].getArray(array)[offset / 2] & 0xf;
+	return (sections[section_offsets[section]].getArray(array)[offset / 2] >> 4) & 0x0f;
+}
+
 /**
  * Returns the block data at a position.
  */
 uint8_t Chunk::getBlockData(const LocalBlockPos& pos) const {
+	return getData(pos, 0);
+
+	/*
 	int section = pos.y / 16;
 	if (section_offsets[section] == -1)
 		return 0;
@@ -184,6 +214,15 @@ uint8_t Chunk::getBlockData(const LocalBlockPos& pos) const {
 	if ((offset % 2) == 0)
 		return sections[section_offsets[section]].data[offset / 2] & 0xf;
 	return (sections[section_offsets[section]].data[offset / 2] >> 4) & 0x0f;
+	*/
+}
+
+uint8_t Chunk::getBlockLight(const LocalBlockPos& pos) const {
+	return getData(pos, 1);
+}
+
+uint8_t Chunk::getSkyLight(const LocalBlockPos& pos) const {
+	return getData(pos, 2);
 }
 
 uint8_t Chunk::getBiomeAt(const LocalBlockPos& pos) const {

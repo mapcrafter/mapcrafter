@@ -36,6 +36,17 @@ struct ChunkSection {
 	uint8_t blocks[16 * 16 * 16];
 	uint8_t add[16 * 16 * 8];
 	uint8_t data[16 * 16 * 8];
+	uint8_t block_light[16 * 16 * 8];
+	uint8_t sky_light[16 * 16 * 8];
+
+	const uint8_t* getArray(int i) const {
+		if (i == 0)
+			return data;
+		else if (i == 1)
+			return block_light;
+		else
+			return sky_light;
+	}
 };
 
 /**
@@ -55,6 +66,8 @@ private:
 	std::vector<ChunkSection> sections;
 
 	uint8_t biomes[256];
+
+	uint8_t getData(const LocalBlockPos& pos, int array) const;
 public:
 	Chunk();
 	virtual ~Chunk();
@@ -68,6 +81,9 @@ public:
 	bool hasSection(int section) const;
 	uint16_t getBlockID(const LocalBlockPos& pos) const;
 	uint8_t getBlockData(const LocalBlockPos& pos) const;
+
+	uint8_t getBlockLight(const LocalBlockPos& pos) const;
+	uint8_t getSkyLight(const LocalBlockPos& pos) const;
 
 	uint8_t getBiomeAt(const LocalBlockPos& pos) const;
 

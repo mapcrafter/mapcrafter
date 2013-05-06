@@ -78,7 +78,7 @@ struct MapSettings {
  */
 struct RecursiveRenderSettings {
 	const TileSet& tiles;
-	const TileRenderer* renderer;
+	TileRenderer* renderer;
 
 	int tile_size;
 	fs::path output_dir;
@@ -88,7 +88,7 @@ struct RecursiveRenderSettings {
 	bool show_progress;
 	ProgressBar progress_bar;
 
-	RecursiveRenderSettings(const TileSet& tiles, const TileRenderer* renderer)
+	RecursiveRenderSettings(const TileSet& tiles, TileRenderer* renderer)
 		: tiles(tiles), renderer(renderer), tile_size(0), progress(0), show_progress(true) {}
 };
 

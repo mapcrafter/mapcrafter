@@ -22,6 +22,12 @@
 namespace mapcrafter {
 namespace mc {
 
+Block::Block(uint16_t id, uint16_t data, uint8_t biome,
+		uint8_t block_light, uint8_t sky_light)
+		: id(id), data(data), biome(biome),
+		  block_light(block_light), sky_light(sky_light) {
+}
+
 WorldCache::WorldCache(const World& world)
 		: world(world) {
 	for (int i = 0; i < RSIZE; i++) {
@@ -35,14 +41,14 @@ WorldCache::WorldCache(const World& world)
 /**
  * Calculates the position of a region position in the cache.
  */
-int WorldCache::getRegionCacheIndex(const RegionPos& pos) {
+int WorldCache::getRegionCacheIndex(const RegionPos& pos) const {
 	return (((pos.x + 4096) & RMASK) * RWIDTH + (pos.z + 4096)) & RMASK;
 }
 
 /**
  * Calculates the position of a chunk position in the cache.
  */
-int WorldCache::getChunkCacheIndex(const ChunkPos& pos) {
+int WorldCache::getChunkCacheIndex(const ChunkPos& pos) const {
 	//                4096*32
 	return (((pos.x + 131072) & CMASK) * CWIDTH + (pos.z + 131072)) & CMASK;
 }
@@ -105,6 +111,36 @@ Chunk* WorldCache::getChunk(const ChunkPos& pos) {
 	entry.key = pos;
 	//chunkstats.misses++;
 	return &entry.value;
+}
+
+Block WorldCache::getBlock(const mc::BlockPos& pos, const mc::Chunk* chunk, int get) {
+	// this can happen when we check for the bottom block shadow edges
+	if (pos.y < 0)
+		return Block();
+
+	mc::ChunkPos chunk_pos(pos);
+	const mc::Chunk* mychunk = chunk;
+	if (chunk == NULL || chunk_pos != chunk->getPos())
+		mychunk = getChunk(chunk_pos);
+	// chunk may be NULL
+	if (mychunk == NULL) {
+		return Block();
+	// otherwise get all required block data
+	} else {
+		mc::LocalBlockPos local(pos);
+		Block block;
+		if (get & GET_ID)
+			block.id = mychunk->getBlockID(local);
+		if (get & GET_DATA)
+			block.data = mychunk->getBlockData(local);
+		if (get & GET_BIOME)
+			block.biome = mychunk->getBiomeAt(local);
+		if (get & GET_BLOCK_LIGHT)
+			block.block_light = mychunk->getBlockLight(local);
+		if (get & GET_SKY_LIGHT)
+			block.sky_light = mychunk->getSkyLight(local);
+		return block;
+	}
 }
 
 const CacheStats& WorldCache::getRegionCacheStats() const {

@@ -11,7 +11,10 @@ endif
 
 LDFLAGS=-lpng -lpthread -lboost_iostreams -lboost_system -lboost_filesystem -lboost_program_options
 
-OBJECTS=util.o $(addprefix mc/, cache.o chunk.o nbt.o pos.o region.o world.o) $(addprefix render/, config.o image.o manager.o render.o textures.o tile.o)
+OBJECTS=util.o
+OBJECTS+= $(addprefix mc/, cache.o chunk.o nbt.o pos.o region.o world.o) 
+OBJECTS+= $(addprefix render/, config.o image.o manager.o render.o textures.o tile.o)
+OBJECTS+= $(addprefix render/rendermodes/, base.o lighting.o)
 TEST_OBJECTS=$(addprefix test/, test_image.o test_nbt.o test_pos.o test_tile.o)
 
 all: $(OBJECTS) mapcrafter testtextures #test
@@ -45,6 +48,9 @@ render/manager.o: render/manager.cpp mc/cache.h mc/pos.h mc/chunk.h mc/region.h 
 render/render.o: render/render.cpp  mc/pos.h mc/cache.h render/config.h render/textures.h render/tile.h
 render/textures.o: render/textures.cpp render/image.o
 render/tile.o: render/tile.cpp mc/pos.h mc/chunk.h mc/cache.h
+
+render/rendermodes/base.o: render/rendermodes/base.cpp
+render/rendermodes/lighting.o: render/rendermodes/lighting.cpp
 
 test/test_image.o: test/test_image.cpp render/image.h
 test/test_nbt.o: test/test_nbt.cpp mc/nbt.h
