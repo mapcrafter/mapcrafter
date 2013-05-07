@@ -450,7 +450,7 @@ private:
 	void createGrassBlock(); // id 2
 	void createWater(); // id 8, 9
 	void createLava(); // id 10, 11
-	void createWood(uint16_t data, const Image& side_texture); // id 17
+	void createWood(uint16_t id, uint16_t data, const Image& side_texture, const Image& top_texture); // id 17
 	void createLeaves(); // id 18
 	void createDispenserDropper(uint16_t id, const Image& front); // id 23, 158
 	void createBed(); // id 26

@@ -1410,12 +1410,11 @@ void BlockImages::createLava() { // id 10, 11
 	}
 }
 
-void BlockImages::createWood(uint16_t data, const Image& side) { // id 17
-	Image top = textures.TREE_TOP;
-	createBlock(17, data | 4, top, side, side);
-	createBlock(17, data | 8, side, top, side);
-	createBlock(17, data, side, side, top); // old format
-	createBlock(17, data | 4 | 8, side, side, top);
+void BlockImages::createWood(uint16_t id, uint16_t data, const Image& side, const Image& top) { // id 17
+	createBlock(id, data | 4, top, side, side);
+	createBlock(id, data | 8, side, top, side);
+	createBlock(id, data, side, side, top); // old format
+	createBlock(id, data | 4 | 8, side, side, top);
 }
 
 void BlockImages::createLeaves() { // id 18
@@ -2095,10 +2094,10 @@ void BlockImages::loadBlocks() {
 	createBlock(15, 0, t.ORE_IRON); // iron ore
 	createBlock(16, 0, t.ORE_COAL); // coal ore
 	// -- wood
-	createWood(0, t.TREE_SIDE); // oak
-	createWood(1, t.TREE_SPRUCE); // pine/spruce
-	createWood(2, t.TREE_BIRCH); // birch
-	createWood(3, t.TREE_JUNGLE); // jungle
+	createWood(17, 0, t.TREE_SIDE, t.TREE_TOP); // oak
+	createWood(17, 1, t.TREE_SPRUCE, t.TREE_TOP); // pine/spruce
+	createWood(17, 2, t.TREE_BIRCH, t.TREE_TOP); // birch
+	createWood(17, 3, t.TREE_JUNGLE, t.TREE_TOP); // jungle
 	createLeaves(); // id 18
 	createBlock(19, 0, t.SPONGE); // sponge
 	createBlock(20, 0, t.GLASS); // glass
