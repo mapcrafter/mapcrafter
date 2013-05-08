@@ -327,8 +327,8 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 /**
  * Renders render tiles and composite tiles.
  */
-void RenderManager::render(const mc::World& world, const TileSet& tiles,
-		const BlockImages& images, const std::string& output_dir, bool biomes) {
+void RenderManager::render(const RenderWorldConfig& config, const std::string& output_dir,
+		const mc::World& world, const TileSet& tiles, const BlockImages& images) {
 	if(tiles.getRequiredCompositeTilesCount() == 0) {
 		std::cout << "No tiles need to get rendered." << std::endl;
 		return;
@@ -342,7 +342,7 @@ void RenderManager::render(const mc::World& world, const TileSet& tiles,
 
 		// create needed things for recursiv render method
 		mc::WorldCache cache(world);
-		TileRenderer renderer(cache, images, biomes);
+		TileRenderer renderer(cache, images, config);
 		RecursiveRenderSettings settings(tiles, &renderer);
 
 		settings.tile_size = images.getTileSize();
@@ -356,7 +356,7 @@ void RenderManager::render(const mc::World& world, const TileSet& tiles,
 		renderRecursive(settings, Path(), tile);
 		settings.progress_bar.finish();
 	} else {
-		renderMultithreaded(world, tiles, images, output_dir, biomes);
+		renderMultithreaded(config, output_dir, world, tiles, images);
 	}
 }
 
@@ -388,8 +388,9 @@ void* runWorker(void* settings_ptr) {
 /**
  * This method starts the render threads when multithreading is enabled.
  */
-void RenderManager::renderMultithreaded(const mc::World& world, const TileSet& tiles,
-		const BlockImages& images, const std::string& output_dir, bool biomes) {
+void RenderManager::renderMultithreaded(const RenderWorldConfig& config,
+		const std::string& output_dir, const mc::World& world, const TileSet& tiles,
+		const BlockImages& images) {
 	// a list of workers
 	std::vector<std::map<Path, int> > workers;
 	// find task/worker assignemt
@@ -410,7 +411,7 @@ void RenderManager::renderMultithreaded(const mc::World& world, const TileSet& t
 		// create all informations needed for the worker
 		// every thread has his own cache
 		mc::WorldCache* cache = new mc::WorldCache(world);
-		TileRenderer* renderer = new TileRenderer(*cache, images, biomes);
+		TileRenderer* renderer = new TileRenderer(*cache, images, config);
 		RecursiveRenderSettings* render_settings =
 				new RecursiveRenderSettings(tiles, renderer);
 		render_settings->tile_size = images.getTileSize();
@@ -640,7 +641,7 @@ bool RenderManager::run() {
 
 			std::string output_dir = config.getOutputPath(world.name_short + "/"
 					+ ROTATION_NAMES_SHORT[*it]);
-			render(worlds[*it], tilesets[*it], images, output_dir, world.render_biomes);
+			render(world, output_dir, worlds[*it], tilesets[*it], images);
 
 			// update the settings file
 			settings.rotations[*it] = true;

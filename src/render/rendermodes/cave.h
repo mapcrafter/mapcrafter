@@ -17,25 +17,26 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lighting.h"
+#ifndef CAVE_H_
+#define CAVE_H_
+
+#include "render/rendermodes/base.h"
 
 namespace mapcrafter {
 namespace render {
 
-LightingRendermode::LightingRendermode(RenderState& state, bool day)
-		: Rendermode(state), day(day) {
-}
+class CaveRendermode: public Rendermode {
+protected:
+	bool isLight(const mc::BlockPos& pos);
+	bool isTransparentBlock(const mc::Block& block) const;
+public:
+	CaveRendermode(RenderState& state);
+	virtual ~CaveRendermode();
 
-LightingRendermode::~LightingRendermode() {
-
-}
-
-bool LightingRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint8_t data) {
-	return false;
-}
-
-void LightingRendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint8_t data) {
-}
+	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint8_t data);
+	virtual void draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint8_t data);
+};
 
 } /* namespace render */
 } /* namespace mapcrafter */
+#endif /* CAVE_H_ */

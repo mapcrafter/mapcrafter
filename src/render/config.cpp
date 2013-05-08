@@ -244,6 +244,9 @@ void RenderWorldConfig::readFromConfig(const fs::path& dir, const ConfigFile& co
 		}
 	}
 
+	if (config.has(section, "rendermode"))
+		rendermode = config.get(section, "rendermode");
+
 	if (config.has(section, "texture_size"))
 		texture_size = config.get<int>(section, "texture_size");
 	if (config.has(section, "render_unknown_blocks"))

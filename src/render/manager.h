@@ -129,10 +129,11 @@ private:
 
 	void increaseMaxZoom(const fs::path& dir) const;
 
-	void render(const mc::World& world, const TileSet& tiles,
-			const BlockImages& images, const std::string& output_dir, bool biomes);
-	void renderMultithreaded(const mc::World& world, const TileSet& tiles,
-			const BlockImages& images, const std::string& output_dir, bool biomes);
+	void render(const RenderWorldConfig& config, const std::string& output_dir,
+			const mc::World& world, const TileSet& tiles,
+			const BlockImages& images);
+	void renderMultithreaded(const RenderWorldConfig& config, const std::string& output_dir,
+			const mc::World& world, const TileSet& tiles, const BlockImages& images);
 public:
 	RenderManager(const RenderOpts& opts);
 

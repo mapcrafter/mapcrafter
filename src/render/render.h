@@ -23,11 +23,10 @@
 #include "mc/pos.h"
 #include "mc/cache.h"
 
+#include "render/config.h"
 #include "render/image.h"
 #include "render/textures.h"
 #include "render/tile.h"
-
-//#include "render/rendermodes/base.h"
 
 #include <boost/filesystem.hpp>
 
@@ -120,7 +119,8 @@ private:
 
 	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 public:
-	TileRenderer(mc::WorldCache& world, const BlockImages& textures, bool render_biomes);
+	TileRenderer(mc::WorldCache& world, const BlockImages& textures,
+			const RenderWorldConfig& config);
 	~TileRenderer();
 
 	void renderTile(const TilePos& pos, Image& tile);

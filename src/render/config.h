@@ -103,6 +103,8 @@ struct RenderWorldConfig {
 	std::set<int> rotations;
 	std::vector<std::string> unknown_rotations;
 
+	std::string rendermode;
+
 	int texture_size;
 	bool render_unknown_blocks;
 	bool render_leaves_transparent;

@@ -138,9 +138,9 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 }
 
 TileRenderer::TileRenderer(mc::WorldCache& world, const BlockImages& images,
-        bool render_biomes)
-		: state(world, images), render_biomes(render_biomes) {
-	//rendermodes.push_back(std::shared_ptr<Rendermode>(new LightingRendermode(state)));
+        const RenderWorldConfig& config)
+		: state(world, images), render_biomes(config.render_biomes) {
+	createRendermode(config.rendermode, config, state, rendermodes);
 }
 
 TileRenderer::~TileRenderer() {
@@ -442,6 +442,11 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 							// get image and replace the old render block with this
 							top.image = state.images.getOpaqueWater(neighbor_south,
 							        neighbor_west);
+
+							// don't forget the rendermodes
+							for (size_t i = 0; i < rendermodes.size(); i++)
+								rendermodes[i]->draw(top.image, top.pos, id, data);
+
 							row_nodes.insert(top);
 							break;
 
