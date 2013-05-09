@@ -178,7 +178,7 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 uint8_t Chunk::getData(const LocalBlockPos& pos, int array) const {
 	int section = pos.y / 16;
 	if (section_offsets[section] == -1) {
-		if (array == 1 || array == 2)
+		if (array == 2)
 			return 15;
 		return 0;
 	}
