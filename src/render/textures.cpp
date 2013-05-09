@@ -397,13 +397,13 @@ bool BlockTextures::load(const std::string& block_dir, int size) {
  * Blits a face on a block image.
  */
 void blitFace(Image& image, int face, const Image& texture, int xoff, int yoff,
-		bool darken) {
+		bool darken, double darken_left, double darken_right) {
 	double d = 1;
 	if (darken) {
 		if (face == FACE_SOUTH || face == FACE_NORTH)
-			d = 0.6;
+			d = darken_left;
 		else if (face == FACE_WEST || face == FACE_EAST)
-			d = 0.75;
+			d = darken_right;
 	}
 
 	int size = texture.getWidth();
@@ -550,7 +550,7 @@ BlockImage BlockImage::rotate(int count) const {
 /**
  * Creates the block image from the textures.
  */
-Image BlockImage::buildImage() const {
+Image BlockImage::buildImage(double dleft, double dright) const {
 	Image image;
 
 	int size = 0;
@@ -565,9 +565,11 @@ Image BlockImage::buildImage() const {
 			int face = order[i];
 			int xoff = getXOffset(face), yoff = getYOffset(face);
 			if (face == FACE_NORTH || face == FACE_EAST)
-				blitFace(image, face, getFace(face).flip(true, false), xoff, yoff);
+				blitFace(image, face, getFace(face).flip(true, false),
+						xoff, yoff, true, dleft, dright);
 			else
-				blitFace(image, face, getFace(face), xoff, yoff);
+				blitFace(image, face, getFace(face),
+						xoff, yoff, true, dleft, dright);
 		}
 	} else if (type == ITEM_STYLE) {
 		blitItemStyleBlock(image, getFace(FACE_NORTH), getFace(FACE_EAST));
@@ -578,18 +580,24 @@ Image BlockImage::buildImage() const {
 
 BlockImages::BlockImages()
 		: texture_size(16), rotation(0), render_unknown_blocks(false),
-		  render_leaves_transparent(false), max_water(99) {
+		  render_leaves_transparent(false), max_water(99),
+		  dleft(0.75), dright(0.6) {
 }
 
 BlockImages::~BlockImages() {
 }
 
 void BlockImages::setSettings(int texture_size, int rotation, bool render_unknown_blocks,
-        bool render_leaves_transparent) {
+        bool render_leaves_transparent, const std::string& rendermode) {
 	this->texture_size = texture_size;
 	this->rotation = rotation;
 	this->render_unknown_blocks = render_unknown_blocks;
 	this->render_leaves_transparent = render_leaves_transparent;
+
+	if (rendermode == "daylight" || rendermode == "nightlight") {
+		dleft = 0.8;
+		dright = 0.95;
+	}
 }
 
 /**
@@ -924,7 +932,7 @@ void BlockImages::addBlockShadowEdges(uint16_t id, uint16_t data, const Image& b
  * Sets a block image in the block image list (and rotates it if necessary (later)).
  */
 void BlockImages::setBlockImage(uint16_t id, uint16_t data, const BlockImage& block) {
-	setBlockImage(id, data, block.rotate(rotation).buildImage());
+	setBlockImage(id, data, buildImage(block.rotate(rotation)));
 }
 
 /**
@@ -1046,10 +1054,10 @@ void BlockImages::testWaterTransparency() {
 			blitFace(opaque_water[2], FACE_TOP, water, 0, 0, false);
 			blitFace(opaque_water[3], FACE_TOP, water, 0, 0, false);
 
-			blitFace(opaque_water[1], FACE_SOUTH, water);
-			blitFace(opaque_water[2], FACE_WEST, water);
-			blitFace(opaque_water[3], FACE_SOUTH, water);
-			blitFace(opaque_water[3], FACE_WEST, water);
+			blitFace(opaque_water[1], FACE_SOUTH, water, 0, 0, true, dleft, dright);
+			blitFace(opaque_water[2], FACE_WEST, water, true, dleft, dright);
+			blitFace(opaque_water[3], FACE_SOUTH, water, true, dleft, dright);
+			blitFace(opaque_water[3], FACE_WEST, water, true, dleft, dright);
 			break;
 		// when images are too transparent
 		} else {
@@ -1061,11 +1069,15 @@ void BlockImages::testWaterTransparency() {
 }
 
 uint32_t BlockImages::darkenLeft(uint32_t pixel) const {
-	return rgba_multiply(pixel, 0.75, 0.75, 0.75);
+	return rgba_multiply(pixel, dleft, dleft, dleft);
 }
 
 uint32_t BlockImages::darkenRight(uint32_t pixel) const {
-	return rgba_multiply(pixel, 0.6, 0.6, 0.6);
+	return rgba_multiply(pixel, dright, dright, dright);
+}
+
+Image BlockImages::buildImage(const BlockImage& image) {
+	return image.buildImage(dleft, dright);
 }
 
 BlockImage BlockImages::buildSmallerBlock(const Image& left_texture,
@@ -1184,7 +1196,7 @@ Image BlockImages::buildStairsEast(const Image& texture) {
 Image BlockImages::buildUpsideDownStairsNorth(const Image& texture) {
 	Image block(getBlockImageSize(), getBlockImageSize());
 
-	blitFace(block, FACE_TOP, texture);
+	blitFace(block, FACE_TOP, texture, true, dleft, dright);
 
 	for (SideFaceIterator it(texture_size, SideFaceIterator::RIGHT); !it.end();
 	        it.next()) {
@@ -1207,8 +1219,8 @@ Image BlockImages::buildUpsideDownStairsNorth(const Image& texture) {
 Image BlockImages::buildUpsideDownStairsSouth(const Image& texture) {
 	Image block(getBlockImageSize(), getBlockImageSize());
 
-	blitFace(block, FACE_SOUTH, texture);
-	blitFace(block, FACE_TOP, texture);
+	blitFace(block, FACE_SOUTH, texture, true, dleft, dright);
+	blitFace(block, FACE_TOP, texture, true, dleft, dright);
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
 		if (it.src_y <= texture_size / 2 || it.src_x >= texture_size / 2) {
@@ -1223,7 +1235,7 @@ Image BlockImages::buildUpsideDownStairsSouth(const Image& texture) {
 Image BlockImages::buildUpsideDownStairsEast(const Image& texture) {
 	Image block(getBlockImageSize(), getBlockImageSize());
 
-	blitFace(block, FACE_TOP, texture);
+	blitFace(block, FACE_TOP, texture, true, dleft, dright);
 
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
@@ -1247,8 +1259,8 @@ Image BlockImages::buildUpsideDownStairsEast(const Image& texture) {
 Image BlockImages::buildUpsideDownStairsWest(const Image& texture) {
 	Image block(getBlockImageSize(), getBlockImageSize());
 
-	blitFace(block, FACE_WEST, texture);
-	blitFace(block, FACE_TOP, texture);
+	blitFace(block, FACE_WEST, texture, true, dleft, dright);
+	blitFace(block, FACE_TOP, texture, true, dleft, dright);
 	for (SideFaceIterator it(texture_size, SideFaceIterator::RIGHT); !it.end();
 	        it.next()) {
 		if (it.src_y <= texture_size / 2 || it.src_x <= texture_size / 2) {
@@ -1370,9 +1382,9 @@ void BlockImages::createWater() { // id 8, 9
 		Image side_texture = water.move(0, smaller);
 
 		Image block(getBlockImageSize(), getBlockImageSize());
-		blitFace(block, FACE_WEST, side_texture, 0, 0, true);
-		blitFace(block, FACE_SOUTH, side_texture, 0, 0, true);
-		blitFace(block, FACE_TOP, water, 0, smaller, true);
+		blitFace(block, FACE_WEST, side_texture, true, dleft, dright);
+		blitFace(block, FACE_SOUTH, side_texture, true, dleft, dright);
+		blitFace(block, FACE_TOP, water, 0, smaller, true, dleft, dright);
 		setBlockImage(8, data, block);
 		setBlockImage(9, data, block);
 	}
@@ -1382,15 +1394,15 @@ void BlockImages::createWater() { // id 8, 9
 			Image block(getBlockImageSize(), getBlockImageSize());
 			uint16_t extra_data = 0;
 			if (w == 1)
-				blitFace(block, FACE_WEST, water);
+				blitFace(block, FACE_WEST, water, true, dleft, dright);
 			else
 				extra_data |= DATA_WEST;
 
 			if (s == 1)
-				blitFace(block, FACE_SOUTH, water);
+				blitFace(block, FACE_SOUTH, water, true, dleft, dright);
 			else
 				extra_data |= DATA_SOUTH;
-			blitFace(block, FACE_TOP, water);
+			blitFace(block, FACE_TOP, water, true, dleft, dright);
 			setBlockImage(8, extra_data, block);
 			setBlockImage(9, extra_data, block);
 		}
@@ -1621,10 +1633,10 @@ void BlockImages::createChest(uint16_t id, Image* textures) { // id 54, 95, 130
 	chest.setFace(FACE_NORTH | FACE_EAST | FACE_WEST, textures[CHEST_SIDE]);
 	chest.setFace(FACE_TOP, textures[CHEST_TOP]);
 
-	setBlockImage(id, DATA_NORTH, chest.rotate(2).buildImage());
-	setBlockImage(id, DATA_SOUTH, chest.buildImage());
-	setBlockImage(id, DATA_EAST, chest.rotate(3).buildImage());
-	setBlockImage(id, DATA_WEST, chest.rotate(1).buildImage());
+	setBlockImage(id, DATA_NORTH, buildImage(chest.rotate(2)));
+	setBlockImage(id, DATA_SOUTH, buildImage(chest));
+	setBlockImage(id, DATA_EAST, buildImage(chest.rotate(3)));
+	setBlockImage(id, DATA_WEST, buildImage(chest.rotate(1)));
 }
 
 void BlockImages::createDoubleChest(uint16_t id, Image* textures) { // id 54
@@ -1643,15 +1655,15 @@ void BlockImages::createDoubleChest(uint16_t id, Image* textures) { // id 54
 	right.setFace(FACE_TOP, textures[LARGECHEST_TOP_RIGHT].rotate(3));
 
 	int l = LARGECHEST_DATA_LARGE;
-	setBlockImage(id, DATA_NORTH | l | LARGECHEST_DATA_LEFT, left.rotate(2).buildImage());
-	setBlockImage(id, DATA_SOUTH | l | LARGECHEST_DATA_LEFT, left.buildImage());
-	setBlockImage(id, DATA_EAST | l | LARGECHEST_DATA_LEFT, left.rotate(3).buildImage());
-	setBlockImage(id, DATA_WEST | l | LARGECHEST_DATA_LEFT, left.rotate(1).buildImage());
+	setBlockImage(id, DATA_NORTH | l | LARGECHEST_DATA_LEFT, buildImage(left.rotate(2)));
+	setBlockImage(id, DATA_SOUTH | l | LARGECHEST_DATA_LEFT, buildImage(left));
+	setBlockImage(id, DATA_EAST | l | LARGECHEST_DATA_LEFT, buildImage(left.rotate(3)));
+	setBlockImage(id, DATA_WEST | l | LARGECHEST_DATA_LEFT, buildImage(left.rotate(1)));
 
-	setBlockImage(id, DATA_NORTH | l, right.rotate(2).buildImage());
-	setBlockImage(id, DATA_SOUTH | l, right.buildImage());
-	setBlockImage(id, DATA_EAST | l, right.rotate(3).buildImage());
-	setBlockImage(id, DATA_WEST | l, right.rotate(1).buildImage());
+	setBlockImage(id, DATA_NORTH | l, buildImage(right.rotate(2)));
+	setBlockImage(id, DATA_SOUTH | l, buildImage(right));
+	setBlockImage(id, DATA_EAST | l, buildImage(right.rotate(3)));
+	setBlockImage(id, DATA_WEST | l, buildImage(right.rotate(1)));
 }
 
 void BlockImages::createDoor(uint16_t id, const Image& texture_bottom,
@@ -1733,7 +1745,7 @@ void BlockImages::createCactus() { // id 81
 	block.setFace(FACE_WEST, textures.CACTUS_SIDE, 2, 0);
 	block.setFace(FACE_SOUTH, textures.CACTUS_SIDE, -2, 0);
 	block.setFace(FACE_TOP, textures.CACTUS_TOP);
-	setBlockImage(81, 0, block.buildImage());
+	setBlockImage(81, 0, buildImage(block));
 }
 
 /**
@@ -1804,7 +1816,7 @@ void BlockImages::createFence(uint16_t id, const Image& texture) { // id 85, 113
 		BlockImage block(BlockImage::ITEM_STYLE);
 		block.setFace(FACE_NORTH | FACE_SOUTH, left);
 		block.setFace(FACE_EAST | FACE_WEST, right);
-		setBlockImage(id, data, block.buildImage());
+		setBlockImage(id, data, buildImage(block));
 	}
 }
 
@@ -1823,7 +1835,7 @@ void BlockImages::createCake() { // id 92
 	block.setFace(FACE_WEST, textures.CAKE_SIDE, 1, 0);
 	block.setFace(FACE_SOUTH, textures.CAKE_SIDE, -1, 0);
 	block.setFace(FACE_TOP, textures.CAKE_TOP, 0, 9);
-	setBlockImage(92, 0, block.buildImage());
+	setBlockImage(92, 0, buildImage(block));
 }
 
 void BlockImages::createRedstoneRepeater(uint16_t id, const Image& texture) { // id 93, 94
@@ -1921,7 +1933,7 @@ void BlockImages::createBarsPane(uint16_t id, const Image& texture_left_right) {
 		BlockImage block(BlockImage::ITEM_STYLE);
 		block.setFace(FACE_NORTH | FACE_SOUTH, left);
 		block.setFace(FACE_EAST | FACE_WEST, right);
-		setBlockImage(id, data, block.buildImage());
+		setBlockImage(id, data, buildImage(block));
 	}
 }
 
@@ -2020,16 +2032,16 @@ void BlockImages::createCauldron() { // id 118
 
 	for (int i = 0; i < 4; i++) {
 		Image block(getBlockImageSize(), getBlockImageSize());
-		blitFace(block, FACE_NORTH, side);
-		blitFace(block, FACE_EAST, side);
+		blitFace(block, FACE_NORTH, side, true, dleft, dright);
+		blitFace(block, FACE_EAST, side, true, dleft, dright);
 		if (i == 3)
-			blitFace(block, FACE_TOP, water, 0, 2);
+			blitFace(block, FACE_TOP, water, 0, 2, true, dleft, dright);
 		else if (i == 2)
-			blitFace(block, FACE_TOP, water, 0, 5);
+			blitFace(block, FACE_TOP, water, 0, 5, true, dleft, dright);
 		else if (i == 1)
-			blitFace(block, FACE_TOP, water, 0, 9);
-		blitFace(block, FACE_SOUTH, side);
-		blitFace(block, FACE_WEST, side);
+			blitFace(block, FACE_TOP, water, 0, 9, true, dleft, dright);
+		blitFace(block, FACE_SOUTH, side, true, dleft, dright);
+		blitFace(block, FACE_WEST, side, true, dleft, dright);
 		setBlockImage(118, i, block);
 	}
 }
@@ -2042,14 +2054,14 @@ void BlockImages::createBeacon() { // id 138
 	textures.BEACON.resizeInterpolated(texture_size * 0.75, texture_size * 0.75,
 			beacon_texture);
 	Image smallblock(texture_size * 2, texture_size * 2);
-	blitFace(smallblock, FACE_WEST, beacon_texture);
-	blitFace(smallblock, FACE_SOUTH, beacon_texture);
-	blitFace(smallblock, FACE_TOP, beacon_texture);
+	blitFace(smallblock, FACE_WEST, beacon_texture, true, dleft, dright);
+	blitFace(smallblock, FACE_SOUTH, beacon_texture, true, dleft, dright);
+	blitFace(smallblock, FACE_TOP, beacon_texture, true, dleft, dright);
 
 	// then create the obsidian ground
 	Image obsidian_texture = textures.OBSIDIAN;
-	Image obsidian = buildSmallerBlock(obsidian_texture, obsidian_texture,
-			obsidian_texture, 0, texture_size / 4).buildImage();
+	Image obsidian = buildImage(buildSmallerBlock(obsidian_texture, obsidian_texture,
+			obsidian_texture, 0, texture_size / 4));
 
 	// blit block and obsidian ground
 	beacon.simpleblit(obsidian, 0, 0);
@@ -2057,16 +2069,16 @@ void BlockImages::createBeacon() { // id 138
 
 	// then blit outside glass
 	Image glass_texture = textures.GLASS;
-	blitFace(beacon, FACE_WEST, glass_texture);
-	blitFace(beacon, FACE_SOUTH, glass_texture);
-	blitFace(beacon, FACE_TOP, glass_texture);
+	blitFace(beacon, FACE_WEST, glass_texture, true, dleft, dright);
+	blitFace(beacon, FACE_SOUTH, glass_texture, true, dleft, dright);
+	blitFace(beacon, FACE_TOP, glass_texture, true, dleft, dright);
 
 	setBlockImage(138, 0, beacon);
 }
 
 void BlockImages::loadBlocks() {
 	buildCustomTextures();
-	unknown_block = BlockImage().setFace(0b11111, unknown_block).buildImage();
+	unknown_block = buildImage(BlockImage().setFace(0b11111, unknown_block));
 
 	BlockTextures& t = textures;
 

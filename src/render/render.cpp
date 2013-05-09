@@ -437,7 +437,11 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 							west = state.getBlock(top.pos + mc::DIR_WEST);
 
 							bool neighbor_south = (south.id == 8 || south.id == 9);
+							if (neighbor_south)
+								data |= DATA_SOUTH;
 							bool neighbor_west = (west.id == 8 || west.id == 9);
+							if (neighbor_west)
+								data |= DATA_WEST;
 
 							// get image and replace the old render block with this
 							top.image = state.images.getOpaqueWater(neighbor_south,

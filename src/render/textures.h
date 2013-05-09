@@ -329,8 +329,9 @@ public:
 	std::vector<TextureImage*> textures;
 };
 
-void blitFace(Image& image, int face, const Image& texture, int xoff = 0, int yoff = 0,
-		bool darken = true);
+void blitFace(Image& image, int face, const Image& texture,
+		int xoff = 0, int yoff = 0,
+		bool darken = true, double dleft = 0.6, double dright = 0.75);
 void blitItemStyleBlock(Image& image, const Image& north_south, const Image& east_west);
 
 void rotateImages(Image& north, Image& south, Image& east, Image& west, int rotation);
@@ -354,7 +355,7 @@ public:
 	int getYOffset(int face) const;
 
 	BlockImage rotate(int count) const;
-	Image buildImage() const;
+	Image buildImage(double dleft, double dright) const;
 
 	static const int NORMAL = 1;
 	static const int ITEM_STYLE = 2;
@@ -386,6 +387,10 @@ private:
 	Image opaque_water[4];
 	Image shadow_edge_masks[4];
 
+	// factor to darken the side faces
+	// defaults to 0.75 and 0.6
+	double dleft, dright;
+
 	// map of block images
 	// key is a 32 bit integer, first two bytes id, second two bytes data
 	std::unordered_map<uint32_t, Image> block_images;
@@ -411,6 +416,8 @@ private:
 
 	uint32_t darkenLeft(uint32_t pixel) const;
 	uint32_t darkenRight(uint32_t pixel) const;
+
+	Image buildImage(const BlockImage& image);
 
 	BlockImage buildSmallerBlock(const Image& left_texture, const Image& right_texture,
 	        const Image& top_texture, int y1, int y2);
@@ -485,7 +492,7 @@ public:
 	~BlockImages();
 
 	void setSettings(int texture_size, int rotation, bool render_unknown_blocks,
-	        bool render_leaves_transparent);
+	        bool render_leaves_transparent, const std::string& rendermode);
 
 	bool loadChests(const std::string& normal, const std::string& large,
 	        const std::string& ender);

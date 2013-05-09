@@ -40,6 +40,14 @@ uint32_t rgba_multiply(uint32_t value, double r, double g, double b, double a) {
 	return rgba(red * r, green * g, blue * b, alpha * a);
 }
 
+uint32_t rgba_multiply(uint32_t value, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+	int red = (RED(value) * r) / 255;
+	int green = (GREEN(value) * g) / 255;
+	int blue = (BLUE(value) * b) / 255;
+	int alpha = (ALPHA(value) * a) / 255;
+	return rgba(red, green, blue, alpha);
+}
+
 /**
  * This code is from pigmap.
  * Thanks to Michael J. Nelson (equalpants) for this fast alpha blending.
@@ -148,10 +156,20 @@ void Image::setPixel(int x, int y, uint32_t pixel) {
 	data[y * width + x] = pixel;
 }
 
+// fast pixel access - but no validation
+const uint32_t& Image::pixel(int x, int y) const {
+	return data[y * width + x];
+}
+
+uint32_t& Image::pixel(int x, int y) {
+	return data[y * width + x];
+}
+
 void Image::simpleblit(const Image& image, int x, int y) {
 	if (x >= width || y >= height)
 		return;
 
+	/*
 	int dx = MAX(x, 0);
 	int sx = MAX(0, -x);
 	for (; sx < image.width && dx < width; sx++, dx++) {
@@ -165,12 +183,25 @@ void Image::simpleblit(const Image& image, int x, int y) {
 			}
 		}
 	}
+	*/
+
+	int sx = MAX(0, -x);
+	int sy;
+	for (; sx < image.width && sx+x < width; sx++) {
+		sy = MAX(0, -y);
+		for (; sy < image.height && sy+y < height; sy++) {
+			if (ALPHA(image.data[sy*image.width+sx]) != 0) {
+				data[(sy+y) * width + (sx+x)] = image.data[sy * image.width + sx];
+			}
+		}
+	}
 }
 
 void Image::alphablit(const Image& image, int x, int y) {
 	if (x >= width || y >= height)
 		return;
 
+	/*
 	int dx = MAX(x, 0);
 	int sx = MAX(0, -x);
 	for (; sx < image.width && dx < width; sx++, dx++) {
@@ -178,6 +209,16 @@ void Image::alphablit(const Image& image, int x, int y) {
 		int sy = MAX(0, -y);
 		for (; sy < image.height && dy < height; sy++, dy++) {
 			blend(data[dy * width + dx], image.data[sy * image.width + sx]);
+		}
+	}
+	*/
+
+	int sx = MAX(0, -x);
+	int sy;
+	for (; sx < image.width && sx+x < width; sx++) {
+		sy = MAX(0, -y);
+		for (; sy < image.height && sy+y < height; sy++) {
+			blend(data[(sy+y) * width + (sx+x)], image.data[sy * image.width + sx]);
 		}
 	}
 }

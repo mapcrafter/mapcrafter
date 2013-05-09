@@ -33,7 +33,7 @@ namespace mc {
  */
 struct Block {
 	Block(uint16_t id = 0, uint16_t data = 0, uint8_t biome = 0,
-			uint8_t block_light = 15, uint8_t sky_light = 15);
+			uint8_t block_light = 0, uint8_t sky_light = 15);
 
 	uint16_t id, data;
 	uint8_t biome;
@@ -54,21 +54,24 @@ const int GET_LIGHT = GET_BLOCK_LIGHT | GET_SKY_LIGHT;
  */
 struct CacheStats {
 	CacheStats()
-			: hits(0), misses(0), unavailable(0) {
+			: hits(0), misses(0), region_not_found(0), not_found(0), invalid(0) {
 	}
 
 	void print(const std::string& name) const {
-		double efficiency = ((double) hits / (hits + misses)) * 10000;
-		efficiency = (double) efficiency / 100;
-		std::cout << name << ": hits:" << hits << " misses:" << misses << " unavailable:"
-		        << unavailable << std::endl;
-		std::cout << "   efficiency: " << efficiency << "% hits (hits+misses)"
-		        << std::endl;
+		std::cout << name << ":" << std::endl;
+		std::cout << "  hits: " << hits << std::endl
+				  << "  misses: " << misses << std::endl
+				  << "  region_not_found: " << region_not_found << std::endl
+				  << "  not_found: " << not_found << std::endl
+				  << "  invalid: " << invalid << std::endl;
 	}
 
 	int hits;
 	int misses;
-	int unavailable;
+
+	int region_not_found;
+	int not_found;
+	int invalid;
 };
 
 /**

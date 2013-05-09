@@ -28,6 +28,11 @@ namespace render {
 class LightingRendermode : public Rendermode {
 private:
 	bool day;
+
+	double getLightingValue(const mc::BlockPos& pos) const;
+	double getLighting(const mc::BlockPos& pos, mc::BlockPos p1, mc::BlockPos p2,
+			mc::BlockPos extra = mc::DIR_TOP) const;
+	void createShade(Image& image, double c1, double c2, double c3, double c4) const;
 public:
 	LightingRendermode(RenderState& state, bool day);
 	virtual ~LightingRendermode();

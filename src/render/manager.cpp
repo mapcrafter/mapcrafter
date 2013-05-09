@@ -355,6 +355,9 @@ void RenderManager::render(const RenderWorldConfig& config, const std::string& o
 		// then render just everything recursive
 		renderRecursive(settings, Path(), tile);
 		settings.progress_bar.finish();
+
+		//cache.getRegionCacheStats().print("region cache");
+		//cache.getChunkCacheStats().print("chunk cache");
 	} else {
 		renderMultithreaded(config, output_dir, world, tiles, images);
 	}
@@ -632,7 +635,7 @@ bool RenderManager::run() {
 			// create block images and render the world
 			BlockImages images;
 			images.setSettings(world.texture_size, *it, world.render_unknown_blocks,
-					world.render_leaves_transparent);
+					world.render_leaves_transparent, world.rendermode);
 			if (!images.loadAll(world.textures_dir)) {
 				std::cerr << "Unable to create block images!" << std::endl;
 				std::cerr << "Skipping remaining rotations." << std::endl << std::endl;

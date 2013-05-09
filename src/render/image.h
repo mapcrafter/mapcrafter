@@ -29,10 +29,10 @@
 #define ROTATE_180 2
 #define ROTATE_270 3
 
-#define ALPHA(value) ((value & 0xff000000) >> 24)
-#define BLUE(value) ((value & 0xff0000) >> 16)
-#define GREEN(value) ((value & 0xff00) >> 8)
-#define RED(value) (value & 0xff)
+#define ALPHA(value) (((value) & 0xff000000) >> 24)
+#define BLUE(value) (((value) & 0xff0000) >> 16)
+#define GREEN(value) (((value) & 0xff00) >> 8)
+#define RED(value) ((value) & 0xff)
 
 # ifndef UINT64_C
 #  if __WORDSIZE == 64
@@ -47,6 +47,7 @@ namespace render {
 
 uint32_t rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 uint32_t rgba_multiply(uint32_t value, double r, double g, double b, double a = 1);
+uint32_t rgba_multiply(uint32_t value, uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
 
 void blend(uint32_t& dest, const uint32_t& source);
 
@@ -72,6 +73,9 @@ public:
 
 	uint32_t getPixel(int x, int y) const;
 	void setPixel(int x, int y, uint32_t pixel);
+
+	const uint32_t& pixel(int x, int y) const;
+	uint32_t& pixel(int x, int y);
 
 	void simpleblit(const Image& image, int x, int y);
 	void alphablit(const Image& image, int x, int y);
