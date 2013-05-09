@@ -189,32 +189,21 @@ function updateRotationSelect(text) {
 		} else {
 			elem = document.createElement("b");
 		}
-		switch(currentRotation){
-		case 0:
-			elem.innerHTML = ["<img src=tl_.gif alt=top-left>", "<img src=tr.gif alt=top-right>", "<img src=br.gif alt=bottom-right>", "<img src=bl.gif alt=bottom-left>"][i];
-			break;
-		case 1:
-			elem.innerHTML = ["<img src=tl.gif alt=top-left>", "<img src=tr_.gif alt=top-right>", "<img src=br.gif alt=bottom-right>", "<img src=bl.gif alt=bottom-left>"][i];
-			break;
-		case 2:
-			elem.innerHTML = ["<img src=tl.gif alt=top-left>", "<img src=tr.gif alt=top-right>", "<img src=br_.gif alt=bottom-right>", "<img src=bl.gif alt=bottom-left>"][i];
-			break;
-		case 3:
-			elem.innerHTML = ["<img src=tl.gif alt=top-left>", "<img src=tr.gif alt=top-right>", "<img src=br.gif alt=bottom-right>", "<img src=bl_.gif alt=bottom-left>"][i];
-			break;
-		}
-		elem.style.marginRight = "5px";
-		elem.style.marginLeft = "5px";
+		
+		var short = ["tl", "tr", "br", "bl"][i];
+		if (i == currentRotation)
+			short += "_active";
+		var long = ["top-left", "top-right", "bottom-right", "bottom-left"][i];
+		elem.innerHTML = "<img class='rotation' src='icons/" + short + ".gif' alt='" + long + "' />";
+		
 		text.appendChild(elem);
 	}
 }
 
-function addControl(pos, index, func) {
+function addControl(pos, index, name, func) {
 	var wrapper = document.createElement("div");
-	wrapper.style.margin = "5px";
-	wrapper.style.padding = "3px";
-	wrapper.style.border = "1px solid gray";
-	wrapper.style.backgroundColor = "white";
+	wrapper.setAttribute("class", "control-wrapper");
+	wrapper.setAttribute("id", "control-wrapper-" + name);
 	
 	func(wrapper);
 	wrapper.index = pos;
@@ -340,11 +329,9 @@ function init() {
 	google.maps.event.addListener(map, "zoom_changed", PosHash.updateHash);
 
 	// widget to select the world
-	addControl(google.maps.ControlPosition.TOP_RIGHT, 1, function(wrapper) {
-		var select = document.createElement('select');
+	addControl(google.maps.ControlPosition.TOP_RIGHT, 1, "map-select", function(wrapper) {
+		var select = document.createElement("select");
 		select.setAttribute("id", "map-select");
-		select.style.border = "1px solid gray";
-		select.style.backgroundColor = "white";
 		
 		for(var type in MapConfig) {
 			var option = document.createElement("option");
@@ -370,17 +357,25 @@ function init() {
 	});
 	
 	// widget to select the rotation of the current world
-	addControl(google.maps.ControlPosition.BOTTOM_CENTER, 1, function(wrapper) {
+	addControl(google.maps.ControlPosition.BOTTOM_CENTER, 1, "rotation-select", function(wrapper) {
 		var text = document.createElement("span");
 		text.setAttribute("id", "map-rotation-select");
-		text.innerHTML = "no update";
+		
+		// preload the rotation select images
+		for(name in ["tl", "tr", "br", "bl"]) {
+			var img = new Image();
+			img.src = "icons/" + name + ".gif";
+			var img2 = new Image();
+			img2.src = "icons/" + name + "_active.gif";
+		}
+		
 		updateRotationSelect(text);
 		
 		wrapper.appendChild(text);
 	});
 	
 	// widget to show the current cursor position in Minecraft coordinates
-	addControl(google.maps.ControlPosition.BOTTOM_LEFT, 1, function(wrapper) {
+	addControl(google.maps.ControlPosition.BOTTOM_LEFT, 1, "pos", function(wrapper) {
 		var text = document.createElement("span");
 		text.setAttribute("id", "mouse-move-div");
 		
