@@ -14,7 +14,7 @@ LDFLAGS=-lpng -lpthread -lboost_iostreams -lboost_system -lboost_filesystem -lbo
 OBJECTS=util.o
 OBJECTS+= $(addprefix mc/, cache.o chunk.o nbt.o pos.o region.o world.o) 
 OBJECTS+= $(addprefix render/, config.o image.o manager.o render.o textures.o tile.o)
-OBJECTS+= $(addprefix render/rendermodes/, base.o lighting.o)
+OBJECTS+= $(addprefix render/rendermodes/, base.o cave.o lighting.o)
 TEST_OBJECTS=$(addprefix test/, test_image.o test_nbt.o test_pos.o test_tile.o)
 
 all: $(OBJECTS) mapcrafter testtextures #test
