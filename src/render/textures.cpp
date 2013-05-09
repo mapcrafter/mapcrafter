@@ -595,8 +595,8 @@ void BlockImages::setSettings(int texture_size, int rotation, bool render_unknow
 	this->render_leaves_transparent = render_leaves_transparent;
 
 	if (rendermode == "daylight" || rendermode == "nightlight") {
-		dleft = 0.8;
-		dright = 0.95;
+		dleft = 0.95;
+		dright = 0.8;
 	}
 }
 
@@ -1055,9 +1055,9 @@ void BlockImages::testWaterTransparency() {
 			blitFace(opaque_water[3], FACE_TOP, water, 0, 0, false);
 
 			blitFace(opaque_water[1], FACE_SOUTH, water, 0, 0, true, dleft, dright);
-			blitFace(opaque_water[2], FACE_WEST, water, true, dleft, dright);
-			blitFace(opaque_water[3], FACE_SOUTH, water, true, dleft, dright);
-			blitFace(opaque_water[3], FACE_WEST, water, true, dleft, dright);
+			blitFace(opaque_water[2], FACE_WEST, water, 0, 0, true, dleft, dright);
+			blitFace(opaque_water[3], FACE_SOUTH, water, 0, 0, true, dleft, dright);
+			blitFace(opaque_water[3], FACE_WEST, water, 0, 0, true, dleft, dright);
 			break;
 		// when images are too transparent
 		} else {
@@ -1196,7 +1196,7 @@ Image BlockImages::buildStairsEast(const Image& texture) {
 Image BlockImages::buildUpsideDownStairsNorth(const Image& texture) {
 	Image block(getBlockImageSize(), getBlockImageSize());
 
-	blitFace(block, FACE_TOP, texture, true, dleft, dright);
+	blitFace(block, FACE_TOP, texture, 0, 0, true, dleft, dright);
 
 	for (SideFaceIterator it(texture_size, SideFaceIterator::RIGHT); !it.end();
 	        it.next()) {
@@ -1219,8 +1219,8 @@ Image BlockImages::buildUpsideDownStairsNorth(const Image& texture) {
 Image BlockImages::buildUpsideDownStairsSouth(const Image& texture) {
 	Image block(getBlockImageSize(), getBlockImageSize());
 
-	blitFace(block, FACE_SOUTH, texture, true, dleft, dright);
-	blitFace(block, FACE_TOP, texture, true, dleft, dright);
+	blitFace(block, FACE_SOUTH, texture, 0, 0, true, dleft, dright);
+	blitFace(block, FACE_TOP, texture, 0, 0, true, dleft, dright);
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
 		if (it.src_y <= texture_size / 2 || it.src_x >= texture_size / 2) {
@@ -1235,7 +1235,7 @@ Image BlockImages::buildUpsideDownStairsSouth(const Image& texture) {
 Image BlockImages::buildUpsideDownStairsEast(const Image& texture) {
 	Image block(getBlockImageSize(), getBlockImageSize());
 
-	blitFace(block, FACE_TOP, texture, true, dleft, dright);
+	blitFace(block, FACE_TOP, texture, 0, 0, true, dleft, dright);
 
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
@@ -1259,8 +1259,8 @@ Image BlockImages::buildUpsideDownStairsEast(const Image& texture) {
 Image BlockImages::buildUpsideDownStairsWest(const Image& texture) {
 	Image block(getBlockImageSize(), getBlockImageSize());
 
-	blitFace(block, FACE_WEST, texture, true, dleft, dright);
-	blitFace(block, FACE_TOP, texture, true, dleft, dright);
+	blitFace(block, FACE_WEST, texture, 0, 0, true, dleft, dright);
+	blitFace(block, FACE_TOP, texture, 0, 0, true, dleft, dright);
 	for (SideFaceIterator it(texture_size, SideFaceIterator::RIGHT); !it.end();
 	        it.next()) {
 		if (it.src_y <= texture_size / 2 || it.src_x <= texture_size / 2) {
@@ -1382,8 +1382,8 @@ void BlockImages::createWater() { // id 8, 9
 		Image side_texture = water.move(0, smaller);
 
 		Image block(getBlockImageSize(), getBlockImageSize());
-		blitFace(block, FACE_WEST, side_texture, true, dleft, dright);
-		blitFace(block, FACE_SOUTH, side_texture, true, dleft, dright);
+		blitFace(block, FACE_WEST, side_texture, 0, 0, true, dleft, dright);
+		blitFace(block, FACE_SOUTH, side_texture, 0, 0, true, dleft, dright);
 		blitFace(block, FACE_TOP, water, 0, smaller, true, dleft, dright);
 		setBlockImage(8, data, block);
 		setBlockImage(9, data, block);
@@ -1394,15 +1394,15 @@ void BlockImages::createWater() { // id 8, 9
 			Image block(getBlockImageSize(), getBlockImageSize());
 			uint16_t extra_data = 0;
 			if (w == 1)
-				blitFace(block, FACE_WEST, water, true, dleft, dright);
+				blitFace(block, FACE_WEST, water, 0, 0, true, dleft, dright);
 			else
 				extra_data |= DATA_WEST;
 
 			if (s == 1)
-				blitFace(block, FACE_SOUTH, water, true, dleft, dright);
+				blitFace(block, FACE_SOUTH, water, 0, 0, true, dleft, dright);
 			else
 				extra_data |= DATA_SOUTH;
-			blitFace(block, FACE_TOP, water, true, dleft, dright);
+			blitFace(block, FACE_TOP, water, 0, 0, true, dleft, dright);
 			setBlockImage(8, extra_data, block);
 			setBlockImage(9, extra_data, block);
 		}
@@ -2032,16 +2032,16 @@ void BlockImages::createCauldron() { // id 118
 
 	for (int i = 0; i < 4; i++) {
 		Image block(getBlockImageSize(), getBlockImageSize());
-		blitFace(block, FACE_NORTH, side, true, dleft, dright);
-		blitFace(block, FACE_EAST, side, true, dleft, dright);
+		blitFace(block, FACE_NORTH, side, 0, 0, true, dleft, dright);
+		blitFace(block, FACE_EAST, side, 0, 0, true, dleft, dright);
 		if (i == 3)
 			blitFace(block, FACE_TOP, water, 0, 2, true, dleft, dright);
 		else if (i == 2)
 			blitFace(block, FACE_TOP, water, 0, 5, true, dleft, dright);
 		else if (i == 1)
 			blitFace(block, FACE_TOP, water, 0, 9, true, dleft, dright);
-		blitFace(block, FACE_SOUTH, side, true, dleft, dright);
-		blitFace(block, FACE_WEST, side, true, dleft, dright);
+		blitFace(block, FACE_SOUTH, side, 0, 0, true, dleft, dright);
+		blitFace(block, FACE_WEST, side, 0, 0, true, dleft, dright);
 		setBlockImage(118, i, block);
 	}
 }
@@ -2054,9 +2054,9 @@ void BlockImages::createBeacon() { // id 138
 	textures.BEACON.resizeInterpolated(texture_size * 0.75, texture_size * 0.75,
 			beacon_texture);
 	Image smallblock(texture_size * 2, texture_size * 2);
-	blitFace(smallblock, FACE_WEST, beacon_texture, true, dleft, dright);
-	blitFace(smallblock, FACE_SOUTH, beacon_texture, true, dleft, dright);
-	blitFace(smallblock, FACE_TOP, beacon_texture, true, dleft, dright);
+	blitFace(smallblock, FACE_WEST, beacon_texture, 0, 0, true, dleft, dright);
+	blitFace(smallblock, FACE_SOUTH, beacon_texture, 0, 0, true, dleft, dright);
+	blitFace(smallblock, FACE_TOP, beacon_texture, 0, 0, true, dleft, dright);
 
 	// then create the obsidian ground
 	Image obsidian_texture = textures.OBSIDIAN;
@@ -2069,9 +2069,9 @@ void BlockImages::createBeacon() { // id 138
 
 	// then blit outside glass
 	Image glass_texture = textures.GLASS;
-	blitFace(beacon, FACE_WEST, glass_texture, true, dleft, dright);
-	blitFace(beacon, FACE_SOUTH, glass_texture, true, dleft, dright);
-	blitFace(beacon, FACE_TOP, glass_texture, true, dleft, dright);
+	blitFace(beacon, FACE_WEST, glass_texture, 0, 0, true, dleft, dright);
+	blitFace(beacon, FACE_SOUTH, glass_texture, 0, 0, true, dleft, dright);
+	blitFace(beacon, FACE_TOP, glass_texture, 0, 0, true, dleft, dright);
 
 	setBlockImage(138, 0, beacon);
 }

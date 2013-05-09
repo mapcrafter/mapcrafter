@@ -499,6 +499,18 @@ double assignTasks(std::vector<Task> tasks, std::vector<Worker>& workers) {
 	return (double) max_diff / sumTasks(tasks);
 }
 
+struct Assigment {
+
+	int level;
+	int remaining;
+	double difference;
+	std::vector<std::map<Path, int> > workers;
+
+	bool operator<(const Assigment& other) const {
+		return difference < other.difference;
+	};
+};
+
 /**
  * This method tries to find an assignment of render tasks to a specific count of workers.
  * The workers should do the same amount of work.
@@ -538,10 +550,14 @@ int TileSet::findRenderTasks(int worker_count,
 		tiles_by_zoom[it->getDepth()].insert(*it);
 	}
 
+	// list of possible assignments
+	std::vector<Assigment> assignments;
+
 	// the count of composite tiles, the renderer needs to render at the end
 	int composite_tiles = 1;
-	// go through all zoom levels
-	for (int zoom = 1; zoom < depth; zoom++) {
+	// go through the composite tiles of all zoom levels
+	// maximum zoom level 6, because on zoom level 5 are already 4**5=1025 tiles
+	for (int zoom = 1; zoom <= 6 && zoom < depth; zoom++) {
 		// a list of "tasks" - composite tiles to start rendering
 		std::vector<Task> tasks;
 		for (std::set<Path>::iterator it = tiles_by_zoom[zoom].begin();
@@ -560,29 +576,34 @@ int TileSet::findRenderTasks(int worker_count,
 		// assign tasks, get maximum difference from the average
 		double difference = assignTasks(tasks, workers_zoomlevel);
 
-		// difference should smaller than 5% or 50 tiles
-		if (difference < 0.05 || difference * sumTasks(tasks) < 50) {
-			// assign now tasks to real workers list
-			workers.resize(worker_count);
-			for (int i = 0; i < worker_count; i++) {
-				Worker w = workers_zoomlevel[i];
-				for (size_t j = 0; j < w.tasks.size(); j++)
-					workers[i][w.tasks[j].tile] = countTiles(w.tasks[j].tile,
-							tile_childs, depth);
-			}
-
-			break;
+		// create assignment and put it in the list
+		Assigment assignment;
+		assignment.level = zoom;
+		assignment.remaining = composite_tiles;
+		assignment.difference = difference;
+		assignment.workers.resize(worker_count);
+		for (int i = 0; i < worker_count; i++) {
+			Worker w = workers_zoomlevel[i];
+			for (size_t j = 0; j < w.tasks.size(); j++)
+				assignment.workers[i][w.tasks[j].tile] = countTiles(w.tasks[j].tile,
+						tile_childs, depth);
 		}
+		assignments.push_back(assignment);
 
 		// then go to the next zoom level
 		// but before, add all composite tiles on this level to the composite tiles,
 		// which are rendered at the end
-		for (std::set<Path>::iterator it = tiles_by_zoom[zoom].begin();
-						it != tiles_by_zoom[zoom].end(); ++it)
-			composite_tiles++;
+		composite_tiles += tiles_by_zoom[zoom].size();
 	}
 
-	return composite_tiles;
+	// sort the assignments by the differences ascending
+	std::sort(assignments.begin(), assignments.end());
+
+	// get the assignment with the lowest differences
+	Assigment assignment = assignments.front();
+	workers = assignment.workers;
+
+	return assignment.remaining;
 }
 
 }
