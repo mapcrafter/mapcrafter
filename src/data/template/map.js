@@ -174,7 +174,7 @@ function updateRotationSelect(text) {
 		text = document.getElementById("map-rotation-select");
 	if(!text)
 		return;
-	text.innerHTML = "<span>Rotation: </span>";
+	text.innerHTML = "";
 	
 	for(var i in getCurrentConfig().rotations) {
 		var elem;
@@ -189,8 +189,20 @@ function updateRotationSelect(text) {
 		} else {
 			elem = document.createElement("b");
 		}
-		
-		elem.innerHTML = ["top-left", "top-right", "bottom-right", "bottom-left"][i];
+		switch(currentRotation){
+		case 0:
+			elem.innerHTML = ["<img src=tl_.gif alt=top-left>", "<img src=tr.gif alt=top-right>", "<img src=br.gif alt=bottom-right>", "<img src=bl.gif alt=bottom-left>"][i];
+			break;
+		case 1:
+			elem.innerHTML = ["<img src=tl.gif alt=top-left>", "<img src=tr_.gif alt=top-right>", "<img src=br.gif alt=bottom-right>", "<img src=bl.gif alt=bottom-left>"][i];
+			break;
+		case 2:
+			elem.innerHTML = ["<img src=tl.gif alt=top-left>", "<img src=tr.gif alt=top-right>", "<img src=br_.gif alt=bottom-right>", "<img src=bl.gif alt=bottom-left>"][i];
+			break;
+		case 3:
+			elem.innerHTML = ["<img src=tl.gif alt=top-left>", "<img src=tr.gif alt=top-right>", "<img src=br.gif alt=bottom-right>", "<img src=bl_.gif alt=bottom-left>"][i];
+			break;
+		}
 		elem.style.marginRight = "5px";
 		elem.style.marginLeft = "5px";
 		text.appendChild(elem);
@@ -331,7 +343,6 @@ function init() {
 	addControl(google.maps.ControlPosition.TOP_RIGHT, 1, function(wrapper) {
 		var select = document.createElement('select');
 		select.setAttribute("id", "map-select");
-		select.style.padding = "5px";
 		select.style.border = "1px solid gray";
 		select.style.backgroundColor = "white";
 		
@@ -375,8 +386,8 @@ function init() {
 		
 		google.maps.event.addListener(map, "mousemove", function(event) {
 			var xzy = convertLatLngToMC(event.latLng, 64);
-			document.getElementById("mouse-move-div").innerHTML = "x: " + Math.round(xzy[0]) 
-				+ " z: " + Math.round(xzy[1]) + " y: " + Math.round(xzy[2]);
+			document.getElementById("mouse-move-div").innerHTML = "X: " + Math.round(xzy[0]) 
+				+ " Z: " + Math.round(xzy[1]) + " Y: " + Math.round(xzy[2]);
 		});
 		
 		wrapper.appendChild(text);
