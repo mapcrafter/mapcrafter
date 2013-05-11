@@ -194,7 +194,7 @@ function updateRotationSelect(text) {
 		if (i == currentRotation)
 			short += "_active";
 		var long = ["top-left", "top-right", "bottom-right", "bottom-left"][i];
-		elem.innerHTML = "<img class='rotation' src='icons/" + short + ".gif' alt='" + long + "' />";
+		elem.innerHTML = "<img class='rotation' src='icons/" + short + ".png' alt='" + long + "' />";
 		
 		text.appendChild(elem);
 	}
@@ -364,9 +364,9 @@ function init() {
 		// preload the rotation select images
 		for(name in ["tl", "tr", "br", "bl"]) {
 			var img = new Image();
-			img.src = "icons/" + name + ".gif";
+			img.src = "icons/" + name + ".png";
 			var img2 = new Image();
-			img2.src = "icons/" + name + "_active.gif";
+			img2.src = "icons/" + name + "_active.png";
 		}
 		
 		updateRotationSelect(text);
