@@ -1,9 +1,9 @@
 var lastRender = new Date();
-lastRender.setTime(MapConfig.lastRender * 1000);
+lastRender.setTime(LAST_RENDER * 1000);
 
 var MARKERS = [
 	// You can add here your own markers, for example:
-	// {"world": "worldname", "x": 42, "z": 73, "y": 64, "title": "Spawnpoint"},
+	// {"world": "worldname", "x": 0, "z": 0, "y": 64, "title": "Spawnpoint"},
 	
 	// You have to specify a world name, this is the last part of the path to the world.
 	// For exmaple: The name for "/this/is/my_world" is just "my_world".
@@ -17,5 +17,6 @@ var MARKERS = [
 	
 	
 	// You want to show when the map was rendered last time?
+	// (at the moment not working)
 	// {"world": "worldname", "x": 0, "z": 0, "y": 64, "title": "Last render", "text": "Last render: " + lastRender.toLocaleString()},
 ];

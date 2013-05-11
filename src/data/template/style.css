@@ -10,8 +10,7 @@ body {
 	padding: 0;
 	
 	font-family: Arial, Helvetica, sans-serif;
-	font-size: 12px;
-	font-weight: bold;
+	font-size: 14px;
 }
 
 #mcmap {
@@ -24,6 +23,9 @@ body {
 	padding: 4px;
 	border: 1px solid gray;
 	background-color: white;
+	
+	font-size: 12px;
+	font-weight: bold;
 }
 
 #control-wrapper-map-select select {
