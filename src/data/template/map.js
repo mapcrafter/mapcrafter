@@ -112,7 +112,7 @@ MapPosHashHandler.prototype.gotoHash = function(hash) {
 			|| !(hash[1] in this.ui.getConfig(hash[0]).rotations))
 		return null;
 		
-	this.ui.setMapType(hash[0], hash[1]);
+	this.ui.setMapTypeAndRotation(hash[0], hash[1]);
 		
 	var latlng = this.ui.mcToLatLng(hash[3], hash[4], hash[5]);
 	this.ui.gmap.setCenter(latlng);
