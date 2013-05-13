@@ -570,6 +570,7 @@ MapcrafterUI.prototype.latLngToMC = function(latlng, y) {
 	
 	var config = this.getCurrentConfig();
 	
+<<<<<<< HEAD
 	var lat = latlng.lat();
 	var lng = latlng.lng();
 	
