@@ -1373,6 +1373,15 @@ void BlockImages::createGrassBlock() { // id 2
 	block.setFace(FACE_NORTH | FACE_SOUTH | FACE_EAST | FACE_WEST, grass);
 	block.setFace(FACE_TOP, top);
 	setBlockImage(2, 0, block);
+	
+	// create the snowy version
+	grass = textures.SNOW_SIDE;
+	top = textures.SNOW;
+
+	BlockImage block_snow;
+	block_snow.setFace(FACE_NORTH | FACE_SOUTH | FACE_EAST | FACE_WEST, grass);
+	block_snow.setFace(FACE_TOP, top);
+	setBlockImage(2, GRASS_SNOW, block_snow);
 }
 
 void BlockImages::createWater() { // id 8, 9
@@ -1738,6 +1747,27 @@ void BlockImages::createSnow() { // id 78
 		int height = data / 8.0 * texture_size;
 		setBlockImage(78, data, buildSmallerBlock(snow, snow, snow, 0, height));
 	}
+}
+
+void BlockImages::createIce() { // id 79
+	Image texture = textures.ICE;
+
+	for (int w = 0; w <= 1; w++)
+		for (int s = 0; s <= 1; s++) {
+			Image block(getBlockImageSize(), getBlockImageSize());
+			uint16_t extra_data = 0;
+			if (w == 1)
+				blitFace(block, FACE_WEST, texture, 0, 0, true, dleft, dright);
+			else
+				extra_data |= DATA_WEST;
+
+			if (s == 1)
+				blitFace(block, FACE_SOUTH, texture, 0, 0, true, dleft, dright);
+			else
+				extra_data |= DATA_SOUTH;
+			blitFace(block, FACE_TOP, texture, 0, 0, true, dleft, dright);
+			setBlockImage(79, extra_data, block);
+		}
 }
 
 void BlockImages::createCactus() { // id 81
@@ -2212,7 +2242,7 @@ void BlockImages::loadBlocks() {
 	createTorch(76, t.REDTORCH_LIT); // redstone torch on
 	createButton(77, t.STONE); // stone button
 	createSnow(); // id 78
-	createBlock(79, 0, t.ICE); // ice
+	createIce(); // id 79
 	createBlock(80, 0, t.SNOW); // snow block
 	createCactus(); // id 81
 	createBlock(82, 0, t.CLAY); // clay block
@@ -2357,7 +2387,9 @@ const Image& BlockImages::getBlock(uint16_t id, uint16_t data) const {
 Image BlockImages::getBiomeDependBlock(uint16_t id, uint16_t data,
         const Biome& biome) const {
 	data = filterBlockData(id, data);
-	if (biome.id >= BIOMES_SIZE)
+	// just return the block if biome is invalid
+	// special case for the snowy grass block
+	if (biome.id >= BIOMES_SIZE || (id == 2 && (data & GRASS_SNOW)))
 		return getBlock(id, data);
 
 	if (!hasBlock(id, data))

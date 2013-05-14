@@ -25,7 +25,7 @@ using namespace mapcrafter::render;
 
 int main(int argc, char **argv) {
 	BlockImages images;
-	images.setSettings(24, 0, true, true, "");
+	images.setSettings(16, 0, true, true, "");
 	if(!images.loadChests("data/textures/chest.png", "data/textures/largechest.png",
 			"data/textures/enderchest.png"))
 		std::cerr << "Unable to load chest.png, largechest.png or enderchest.png" << std::endl;

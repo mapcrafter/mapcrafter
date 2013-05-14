@@ -222,7 +222,13 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 
 	mc::Block north, south, east, west, top, bottom;
 
-	if ((id == 8 || id == 9) && data == 0) { // full water blocks
+	if (id == 2) { // grass blocks
+		// check if snow is on top to use the snowy sides instead of grass
+		top = state.getBlock(pos + mc::DIR_TOP);
+		if (top.id == 78 || top.id == 80)
+			data |= GRASS_SNOW;
+
+	} else if ((id == 8 || id == 9) && data == 0) { // full water blocks
 		west = state.getBlock(pos + mc::DIR_WEST);
 		south = state.getBlock(pos + mc::DIR_SOUTH);
 
@@ -301,6 +307,17 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		} else {
 			data |= direction;
 		}
+
+	} else if (id == 79) {
+		// ice blocks
+		west = state.getBlock(pos + mc::DIR_WEST);
+		south = state.getBlock(pos + mc::DIR_SOUTH);
+
+		// check if west and south neighbors are also ice blocks
+		if (west.id == 79)
+			data |= DATA_WEST;
+		if (south.id == 79)
+			data |= DATA_SOUTH;
 
 	} else if (id == 85 || id == 101 || id == 102 || id == 113) {
 		// fence, iron bars, glas panes, nether fence

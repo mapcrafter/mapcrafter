@@ -113,6 +113,8 @@ const int EDGE_EAST = 16384;
 const int EDGE_BOTTOM = 32768;
 
 // some data values and stuff for special blocks
+const int GRASS_SNOW = 16;
+
 const int DOOR_NORTH = 16;
 const int DOOR_SOUTH = 32;
 const int DOOR_EAST = 64;
@@ -472,6 +474,7 @@ private:
 	void createRails(); // id 66
 	void createButton(uint16_t id, const Image& tex); // id 77, 143
 	void createSnow(); // id 78
+	void createIce(); // id 79
 	void createCactus(); // id 81
 	void createFence(uint16_t id, const Image& texture); // id 85, 113
 	void createPumkin(uint16_t id, const Image& front); // id 86, 91
