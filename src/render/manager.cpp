@@ -268,22 +268,37 @@ void RenderManager::writeTemplates() const {
  * on the tile tree.
  */
 void RenderManager::increaseMaxZoom(const fs::path& dir) const {
-	// at first rename the directories 1 2 3 4 (zoom level 0) and make new directories
-	for (int i = 1; i <= 4; i++) {
-		moveFile(dir / str(i), dir / (str(i) + "_"));
-		fs::create_directory(dir / str(i));
+	if (fs::exists(dir / "1")) {
+		// at first rename the directories 1 2 3 4 (zoom level 0) and make new directories
+		moveFile(dir / "1", dir / "1_");
+		fs::create_directories(dir / "1");
+		// then move the old tile trees one zoom level deeper
+		moveFile(dir / "1_", dir / "1/4");
+		// also move the images of the directories
+		moveFile(dir / "1.png", dir / "1/4.png");
 	}
 
-	// then move the old tile trees one zoom level deeper
-	moveFile(dir / "1_", dir / "1/4");
-	moveFile(dir / "2_", dir / "2/3");
-	moveFile(dir / "3_", dir / "3/2");
-	moveFile(dir / "4_", dir / "4/1");
-	// also move the images of the directories
-	moveFile(dir / "1.png", dir / "1/4.png");
-	moveFile(dir / "2.png", dir / "2/3.png");
-	moveFile(dir / "3.png", dir / "3/2.png");
-	moveFile(dir / "4.png", dir / "4/1.png");
+	// do the same for the other directories
+	if (fs::exists(dir / "2")) {
+		moveFile(dir / "2", dir / "2_");
+		fs::create_directories(dir / "2");
+		moveFile(dir / "2_", dir / "2/3");
+		moveFile(dir / "2.png", dir / "2/3.png");
+	}
+	
+	if (fs::exists(dir / "3")) {
+		moveFile(dir / "3", dir / "3_");
+		fs::create_directories(dir / "3");
+		moveFile(dir / "3_", dir / "3/2");
+		moveFile(dir / "3.png", dir / "3/2.png");
+	}
+	
+	if (fs::exists(dir / "4")) {
+		moveFile(dir / "4", dir / "4_");
+		fs::create_directories(dir / "4");
+		moveFile(dir / "4_", dir / "4/1");
+		moveFile(dir / "4.png", dir / "4/1.png");
+	}
 
 	// now read the images, which belong to the new directories
 	Image img1, img2, img3, img4;

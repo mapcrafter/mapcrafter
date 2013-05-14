@@ -86,7 +86,7 @@ bool copyDirectory(const fs::path& from, const fs::path& to) {
 }
 
 bool moveFile(const fs::path& from, const fs::path& to) {
-	if (fs::exists(to) && !!fs::remove(to))
+	if (!fs::exists(from) || (fs::exists(to) && !fs::remove(to)))
 		return false;
 	fs::rename(from, to);
 	return true;
