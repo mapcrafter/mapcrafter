@@ -112,6 +112,7 @@ private:
 	RenderState state;
 
 	bool render_biomes;
+	bool water_preblit;
 
 	std::vector<std::shared_ptr<Rendermode> > rendermodes;
 

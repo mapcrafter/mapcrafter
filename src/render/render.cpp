@@ -139,7 +139,9 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 
 TileRenderer::TileRenderer(mc::WorldCache& world, const BlockImages& images,
         const RenderWorldConfig& config)
-		: state(world, images), render_biomes(config.render_biomes) {
+		: state(world, images), render_biomes(config.render_biomes),
+		  water_preblit(config.rendermode != "daylight"
+				  && config.rendermode != "nightlight") {
 	createRendermode(config.rendermode, config, state, rendermodes);
 }
 
@@ -231,13 +233,18 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 	} else if ((id == 8 || id == 9) && data == 0) { // full water blocks
 		west = state.getBlock(pos + mc::DIR_WEST);
 		south = state.getBlock(pos + mc::DIR_SOUTH);
+		top = state.getBlock(pos + mc::DIR_TOP);
 
-		// check if west and south neighbors are also full water blocks
-		if ((west.id == 8 || west.id == 9) && west.data == 0) {
+		// check if the neighbors on visible faces (top, west, south)
+		// are also full water blocks
+		if (!water_preblit && top.isFullWater())
+			data |= DATA_TOP;
+
+		if (west.isFullWater())
 			data |= DATA_WEST;
-		} if ((south.id == 8 || south.id == 9) && south.data == 0) {
+
+		if (south.isFullWater())
 			data |= DATA_SOUTH;
-		}
 	} else if (id == 54 || id == 95 || id == 130 || id == 146) { // chests
 		// at first get all neighbor blocks
 		north = state.getBlock(pos + mc::DIR_NORTH);
@@ -389,7 +396,12 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 
 	// iterate over the highest blocks in the tile
 	for (TileTopBlockIterator it(pos, block_size, tile_size); !it.end(); it.next()) {
-		// water counter
+		// water render behavior n1:
+		// are we already in a row of water?
+		bool in_water = false;
+
+		// water render behavior n2:
+		// water counter, how many water blocks are at the moment in this row?
 		int water = 0;
 
 		// the render block objects in our current block row
@@ -405,8 +417,12 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 			if (state.chunk == NULL || state.chunk->getPos() != current_chunk)
 				// get chunk if not
 				state.chunk = state.world.getChunk(current_chunk);
-			if (state.chunk == NULL)
+			if (state.chunk == NULL) {
+				// here is nothing (= air),
+				// so reset state if we are in water
+				in_water = false;
 				continue;
+			}
 
 			// get local block position
 			mc::LocalBlockPos local(block.current);
@@ -414,8 +430,10 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 			// now get block id
 			uint16_t id = state.chunk->getBlockID(local);
 			// air is completely transparent so continue
-			if (id == 0)
+			if (id == 0) {
+				in_water = false;
 				continue;
+			}
 
 			// now get the block data
 			uint16_t data = state.chunk->getBlockData(local);
@@ -431,61 +449,87 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 			if (!visible)
 				continue;
 
-			// check for water
-			if ((id == 8 || id == 9) && data == 0) {
-				water++;
+			bool is_water = (id == 8 || id == 9) && data == 0;
+			if (is_water && !water_preblit) {
+				// water render behavior n1:
+				// render only the top sides of the water blocks
+				// and darken the ground with the lighting data
+				// used for lighting rendermode
 
-				// when we have enough water in a row
-				// we can stop searching more blocks
-				// and replace the already added render blocks with a preblit water block
-				if (water > max_water) {
-					std::set<RenderBlock>::const_iterator it = row_nodes.begin();
-					// iterate through the render blocks in this row
-					while (it != row_nodes.end()) {
-						std::set<RenderBlock>::const_iterator current = it++;
-						// check if we have reached the top most water block
-						if (it == row_nodes.end() || (it->id != 8 && it->id != 9)) {
-							RenderBlock top = *current;
-							row_nodes.erase(current);
+				// if we are already in water, skip checking this water block
+				if (is_water && in_water)
+					continue;
+				in_water = is_water;
 
-							// check for neighbors
-							mc::Block south, west;
-							south = state.getBlock(top.pos + mc::DIR_SOUTH);
-							west = state.getBlock(top.pos + mc::DIR_WEST);
+			} else if (water_preblit) {
+				// water render behavior n2:
+				// render the top side of every water block
+				// have also preblit water blocks to skip redundant alphablitting
 
-							bool neighbor_south = (south.id == 8 || south.id == 9);
-							if (neighbor_south)
-								data |= DATA_SOUTH;
-							bool neighbor_west = (west.id == 8 || west.id == 9);
-							if (neighbor_west)
-								data |= DATA_WEST;
+				// no lighting is needed because the 'opaque-water-effect'
+				// is created by blitting the top sides of the water blocks
+				// one above the other
 
-							// get image and replace the old render block with this
-							top.image = state.images.getOpaqueWater(neighbor_south,
-							        neighbor_west);
+				if (!is_water) {
+					// if not water, reset the counter
+					water = 0;
+				} else {
+					water++;
 
-							// don't forget the rendermodes
-							for (size_t i = 0; i < rendermodes.size(); i++)
-								rendermodes[i]->draw(top.image, top.pos, id, data);
+					// when we have enough water in a row
+					// we can stop searching more blocks
+					// and replace the already added render blocks with a preblit water block
+					if (water > max_water) {
+						std::set<RenderBlock>::const_iterator it = row_nodes.begin();
+						// iterate through the render blocks in this row
+						while (it != row_nodes.end()) {
+							std::set<RenderBlock>::const_iterator current = it++;
+							// check if we have reached the top most water block
+							if (it == row_nodes.end() || (it->id != 8 && it->id != 9)) {
+								RenderBlock top = *current;
+								row_nodes.erase(current);
 
-							row_nodes.insert(top);
-							break;
+								// check for neighbors
+								mc::Block south, west;
+								south = state.getBlock(top.pos + mc::DIR_SOUTH);
+								west = state.getBlock(top.pos + mc::DIR_WEST);
 
-						} else {
-							// water render block
-							row_nodes.erase(current);
+								bool neighbor_south = (south.id == 8 || south.id == 9);
+								if (neighbor_south)
+									data |= DATA_SOUTH;
+								bool neighbor_west = (west.id == 8 || west.id == 9);
+								if (neighbor_west)
+									data |= DATA_WEST;
+
+								// get image and replace the old render block with this
+								top.image = state.images.getOpaqueWater(neighbor_south,
+										neighbor_west);
+
+								// don't forget the rendermodes
+								for (size_t i = 0; i < rendermodes.size(); i++)
+									rendermodes[i]->draw(top.image, top.pos, id, data);
+
+								row_nodes.insert(top);
+								break;
+
+							} else {
+								// water render block
+								row_nodes.erase(current);
+							}
 						}
-					}
 
-					break;
+						break;
+					}
 				}
-			} else
-				// if not water, reset the counter
-				water = 0;
+			}
+
+
 
 			// check for special data (neighbor related)
 			// get block image, check for transparency, create render block...
 			data = checkNeighbors(block.current, id, data);
+			//if (is_water && (data & DATA_WEST) && (data & DATA_SOUTH))
+			//	continue;
 			Image image;
 			bool transparent = state.images.isBlockTransparent(id, data);
 

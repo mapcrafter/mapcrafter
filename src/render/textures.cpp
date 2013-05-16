@@ -1398,23 +1398,31 @@ void BlockImages::createWater() { // id 8, 9
 		setBlockImage(9, data, block);
 	}
 
-	for (int w = 0; w <= 1; w++)
-		for (int s = 0; s <= 1; s++) {
-			Image block(getBlockImageSize(), getBlockImageSize());
-			uint16_t extra_data = 0;
-			if (w == 1)
-				blitFace(block, FACE_WEST, water, 0, 0, true, dleft, dright);
-			else
-				extra_data |= DATA_WEST;
+	for (int i = 0; i <= 0b111; i++) {
+		bool west = i & 0b100;
+		bool south = i & 0b010;
+		bool top = i & 0b001;
 
-			if (s == 1)
-				blitFace(block, FACE_SOUTH, water, 0, 0, true, dleft, dright);
-			else
-				extra_data |= DATA_SOUTH;
+		Image block(getBlockImageSize(), getBlockImageSize());
+		uint16_t extra_data = 0;
+
+		if (top)
 			blitFace(block, FACE_TOP, water, 0, 0, true, dleft, dright);
-			setBlockImage(8, extra_data, block);
-			setBlockImage(9, extra_data, block);
-		}
+		else
+			extra_data |= DATA_TOP;
+		if (west)
+			blitFace(block, FACE_WEST, water, 0, 0, true, dleft, dright);
+		else
+			extra_data |= DATA_WEST;
+
+		if (south)
+			blitFace(block, FACE_SOUTH, water, 0, 0, true, dleft, dright);
+		else
+			extra_data |= DATA_SOUTH;
+
+		setBlockImage(8, extra_data, block);
+		setBlockImage(9, extra_data, block);
+	}
 }
 
 void BlockImages::createLava() { // id 10, 11

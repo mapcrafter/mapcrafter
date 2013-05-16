@@ -106,6 +106,7 @@ const int DATA_NORTH = 16;
 const int DATA_EAST = 32;
 const int DATA_SOUTH = 64;
 const int DATA_WEST = 128;
+const int DATA_TOP = 256;
 
 // the last three bits of 2 bytes
 const int EDGE_NORTH = 8192;
