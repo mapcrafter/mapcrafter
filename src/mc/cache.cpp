@@ -28,6 +28,10 @@ Block::Block(uint16_t id, uint16_t data, uint8_t biome,
 		  block_light(block_light), sky_light(sky_light) {
 }
 
+bool Block::isFullWater() const {
+	return (id == 8 || id == 9) && data == 0;
+}
+
 WorldCache::WorldCache(const World& world)
 		: world(world) {
 	for (int i = 0; i < RSIZE; i++) {

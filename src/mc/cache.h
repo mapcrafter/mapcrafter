@@ -38,6 +38,8 @@ struct Block {
 	uint16_t id, data;
 	uint8_t biome;
 	uint8_t block_light, sky_light;
+
+	bool isFullWater() const;
 };
 
 const int GET_ID = 1;
