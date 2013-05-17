@@ -29,10 +29,16 @@ class LightingRendermode : public Rendermode {
 private:
 	bool day;
 
+	double calculateLightingFactor(uint8_t block_light, uint8_t sky_light) const;
 	double getLightingValue(const mc::BlockPos& pos) const;
-	double getLighting(const mc::BlockPos& pos, mc::BlockPos p1, mc::BlockPos p2,
+	double getCornerLighting(const mc::BlockPos& pos, mc::BlockPos p1, mc::BlockPos p2,
 			mc::BlockPos extra = mc::DIR_TOP) const;
 	void createShade(Image& image, double c1, double c2, double c3, double c4) const;
+
+	void doSimpleLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint8_t data);
+	void doSmoothLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint8_t data);
+
+	void doSmoothLightSnow(Image& image, const mc::BlockPos& pos);
 public:
 	LightingRendermode(RenderState& state, bool day);
 	virtual ~LightingRendermode();
