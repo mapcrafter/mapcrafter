@@ -179,17 +179,25 @@ void TagLong::dump(std::ostream& stream, const std::string& indendation) const {
 }
 
 NBTTag& TagFloat::read(std::istream& stream) {
-	int32_t tmp;
-	stream.read((char*) &tmp, sizeof(tmp));
+	union {
+		int32_t tmp;
+		float myfloat;
+	};
+	stream.read(reinterpret_cast<char*>(&tmp), sizeof(int32_t));
 	tmp = be32toh(tmp);
-	payload = (float) (*(float*) &tmp);
+	payload = myfloat;
 	return *this;
 }
 
 void TagFloat::write(std::ostream& stream) const {
 	NBTTag::write(stream);
-	int32_t tmp = htobe32(*(int32_t*) &payload);
-	stream.write((char*) &tmp, sizeof(payload));
+	union {
+		int32_t tmp;
+		float myfloat;
+	};
+	myfloat = payload;
+	tmp = htobe32(tmp);
+	stream.write(reinterpret_cast<char*>(&tmp), sizeof(int32_t));
 }
 
 void TagFloat::dump(std::ostream& stream, const std::string& indendation) const {
@@ -197,17 +205,25 @@ void TagFloat::dump(std::ostream& stream, const std::string& indendation) const 
 }
 
 NBTTag& TagDouble::read(std::istream& stream) {
-	int64_t tmp;
-	stream.read((char*) &tmp, sizeof(tmp));
+	union {
+		int64_t tmp;
+		double mydouble;
+	};
+	stream.read(reinterpret_cast<char*>(&tmp), sizeof(int64_t));
 	tmp = be64toh(tmp);
-	payload = (double) (*(double*) &tmp);
+	payload = mydouble;
 	return *this;
 }
 
 void TagDouble::write(std::ostream& stream) const {
 	NBTTag::write(stream);
-	int64_t tmp = htobe64(*(int64_t*) &payload);
-	stream.write((char*) ((double*) &tmp), sizeof(payload));
+	union {
+		int64_t tmp;
+		double myfloat;
+	};
+	myfloat = payload;
+	tmp = htobe64(tmp);
+	stream.write(reinterpret_cast<char*>(&tmp), sizeof(int64_t));
 }
 
 void TagDouble::dump(std::ostream& stream, const std::string& indendation) const {

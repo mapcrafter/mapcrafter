@@ -222,7 +222,7 @@ public:
 	T* findTag(const std::string& name, TagType type) const {
 		NBTTag* tag = findTag(name);
 		if (tag != NULL && tag->getType() == type)
-			return (T*) tag;
+			return dynamic_cast<T*>(tag);
 		return NULL;
 	}
 	void addTag(const std::string& name, NBTTag* tag);

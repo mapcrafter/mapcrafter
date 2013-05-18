@@ -57,7 +57,7 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 		for (int z = 0; z < 32; z++) {
 			file.seekg(4 * (x + z * 32), std::ios::beg);
 			int tmp;
-			file.read((char*) &tmp, 4);
+			file.read(reinterpret_cast<char*>(&tmp), 4);
 			if (tmp == 0)
 				continue;
 			int offset = be32toh(tmp << 8) * 4096;
@@ -65,7 +65,7 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 
 			file.seekg(4096, std::ios::cur);
 			int timestamp;
-			file.read((char*) &timestamp, 4);
+			file.read(reinterpret_cast<char*>(&timestamp), 4);
 			timestamp = be32toh(timestamp);
 
 			ChunkPos pos(x + regionpos.x * 32, z + regionpos.z * 32);
@@ -93,7 +93,7 @@ bool RegionFile::loadAll() {
 	file.seekg(0, std::ios::beg);
 
 	regiondata.resize(filesize);
-	file.read((char*) &regiondata[0], filesize);
+	file.read(reinterpret_cast<char*>(&regiondata[0]), filesize);
 
 	return true;
 }
@@ -146,7 +146,7 @@ int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 	int offset = chunk_offsets[unrotated.getLocalZ() * 32 + unrotated.getLocalX()];
 
 	// get data size and compression type
-	int size = *((int*) &regiondata[offset]);
+	int size = *(reinterpret_cast<int*>(&regiondata[offset]));
 	uint8_t compression = regiondata[offset + 4];
 	nbt::CompressionType comp = nbt::NO_COMPRESSION;
 	if (compression == 1)
@@ -160,7 +160,7 @@ int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 	chunk.setRotation(rotation);
 	// try to load the chunk
 	try {
-		if (!chunk.readNBT((char*) &regiondata[offset + 5], size, comp))
+		if (!chunk.readNBT(reinterpret_cast<char*>(&regiondata[offset + 5]), size, comp))
 			return CHUNK_DATA_INVALID;
 	} catch (const nbt::NBTError& err) {
 		std::cout << "Error: Unable to read chunk at " << pos.x << ":" << pos.z
