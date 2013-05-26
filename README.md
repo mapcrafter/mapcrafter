@@ -123,6 +123,21 @@ unique and you should only use alphanumeric chars.
 This is the directory of the Minecraft world to render. The directory should
 contain a directory 'region' with the .mca region files.
 
+`rendermode = normal|cave|daylight|nightlight`
+
+This is the rendermode to use when rendering the world. Possible rendermodes are:
+
+* `normal`
+	* The default rendermode.
+* `cave`
+	* Renders only caves and colors blocks depending on their height to make 
+	  them better recognizable.
+* `daylight`
+	* Renders the world with lighting. This lighting rendermode is still a bit 
+	  experimental, but already useable and looks good in most cases.
+* `nightlight`
+	* Like `daylight`, but renders at night.
+
 `textures_dir = <directory>`
 
 This is the directory with the Minecraft texture files.  The renderer works
