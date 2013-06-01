@@ -110,6 +110,8 @@ struct RenderWorldConfig {
 	bool render_leaves_transparent;
 	bool render_biomes;
 
+	std::string incremental_detection;
+
 	std::vector<int> render_behaviors;
 
 	RenderWorldConfig();

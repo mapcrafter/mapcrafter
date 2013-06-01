@@ -30,9 +30,6 @@
 #include <algorithm>
 #include <stdint.h>
 #include <set>
-#include <boost/filesystem.hpp>
-
-namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace render {
@@ -239,18 +236,53 @@ TileSet::TileSet()
 		: min_depth(0), depth(0) {
 }
 
-TileSet::TileSet(const mc::World& world, int last_check)
+TileSet::TileSet(const mc::World& world)
 		: min_depth(0), depth(0) {
-	// find the available/required tiles
-	scan(world, last_check);
+	scan(world);
 }
 
 TileSet::~TileSet() {
 }
 
-void TileSet::scan(const mc::World& world, int last_check) {
-	findRequiredRenderTiles(world, last_check);
+void TileSet::scan(const mc::World& world) {
+	findRenderTiles(world);
 	setDepth(min_depth);
+}
+
+/**
+ * This method finds all render tiles, which where changed since a specific timestamp.
+ */
+void TileSet::scanRequiredByTimestamp(int last_change) {
+	required_render_tiles.clear();
+
+	for (std::map<TilePos, int>::iterator it = tile_timestamps.begin();
+			it != tile_timestamps.end(); ++it) {
+		if (it->second >= last_change)
+			required_render_tiles.insert(it->first);
+	}
+
+	required_composite_tiles.clear();
+	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
+}
+
+/**
+ * This method finds all render tiles, which are required based on the modification
+ * times of the tile image files.
+ */
+void TileSet::scanRequiredByFiletimes(const fs::path& output_dir) {
+	required_render_tiles.clear();
+
+	for (std::map<TilePos, int>::iterator it = tile_timestamps.begin();
+			it != tile_timestamps.end(); ++it) {
+		Path path = Path::byTilePos(it->first, depth);
+		fs::path file = output_dir / (path.toString() + ".png");
+		//std::cout << file.string() << " " << fs::exists(file) << std::endl ;
+		if (!fs::exists(file) || fs::last_write_time(file) <= it->second)
+			required_render_tiles.insert(it->first);
+	}
+
+	required_composite_tiles.clear();
+	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
 }
 
 int TileSet::getMinDepth() const {
@@ -300,7 +332,7 @@ void getChunkTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles) {
  * This method finds out, which top level tiles a world has and which of them need to
  * get rendered.
  */
-void TileSet::findRequiredRenderTiles(const mc::World& world, int last_check) {
+void TileSet::findRenderTiles(const mc::World& world) {
 	// clear maybe already calculated tiles
 	render_tiles.clear();
 	required_render_tiles.clear();
@@ -317,8 +349,7 @@ void TileSet::findRequiredRenderTiles(const mc::World& world, int last_check) {
 		const std::set<mc::ChunkPos>& region_chunks = region.getContainingChunks();
 		for (auto chunk_it = region_chunks.begin(); chunk_it != region_chunks.end();
 		        ++chunk_it) {
-			// check if the chunk was changed since the last check
-			bool changed = region.getChunkTimestamp(*chunk_it) > last_check;
+			int timestamp = region.getChunkTimestamp(*chunk_it);
 
 			// now get all tiles of the chunk
 			std::set<TilePos> tiles;
@@ -332,11 +363,16 @@ void TileSet::findRequiredRenderTiles(const mc::World& world, int last_check) {
 				tiles_y_min = MIN(tiles_y_min, tile_it->getY());
 				tiles_y_max = MAX(tiles_y_max, tile_it->getY());
 
+				// update tile timestamp
+				if (!render_tiles.count(*tile_it))
+					tile_timestamps[*tile_it] = timestamp;
+				else
+					tile_timestamps[*tile_it] = MAX(tile_timestamps[*tile_it], timestamp);
+
 				// insert the tile in the set of available render tiles
+				// and also make it required by default
 				render_tiles.insert(*tile_it);
-				if (changed || last_check == 0)
-					// if changed also in the list of required render tiles
-					required_render_tiles.insert(*tile_it);
+				required_render_tiles.insert(*tile_it);
 			}
 		}
 	}

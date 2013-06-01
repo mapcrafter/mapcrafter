@@ -139,6 +139,18 @@ void renderRecursive(RecursiveRenderSettings& settings, const Path& path, Image&
 		if (settings.renderer == NULL)
 			return;
 		settings.renderer->renderTile(path.getTilePos(), tile);
+
+		/*
+		int size = settings.tile_size;
+		for (int x = 0; x < size; x++)
+			for (int y = 0; y < size; y++) {
+				if (x < 5 || x > size-5)
+					tile.setPixel(x, y, rgba(0, 0, 255, 255));
+				if (y < 5 || y > size-5)
+					tile.setPixel(x, y, rgba(0, 0, 255, 255));
+			}
+		*/
+
 		// save it
 		saveTile(settings.output_dir, path, tile);
 
@@ -183,6 +195,17 @@ void renderRecursive(RecursiveRenderSettings& settings, const Path& path, Image&
 			other.resizeHalf(resized);
 			tile.simpleblit(resized, size / 2, size / 2);
 		}
+
+		/*
+		for (int x = 0; x < size; x++)
+			for (int y = 0; y < size; y++) {
+				if (x < 5 || x > size-5)
+					tile.setPixel(x, y, rgba(255, 0, 0, 255));
+				if (y < 5 || y > size-5)
+					tile.setPixel(x, y, rgba(255, 0, 0, 255));
+			}
+		*/
+
 		// then save tile
 		saveTile(settings.output_dir, path, tile);
 	}
@@ -250,7 +273,8 @@ void RenderManager::writeTemplates() const {
 #else
 		std::string filename = it->path().filename().string();
 #endif
-		if (filename.compare("index.html") == 0 || filename.compare("markers.js") == 0)
+		if (filename == "index.html"
+				|| filename == "markers.js")
 			continue;
 		if (fs::is_regular_file(*it)) {
 			if (!copyFile(*it, config.getOutputPath(filename)))
@@ -589,7 +613,7 @@ bool RenderManager::run() {
 				world_ok = false;
 				break;
 			}
-			tilesets[*it] = TileSet(worlds[*it], settings.last_render[*it]);
+			tilesets[*it] = TileSet(worlds[*it]/*, settings.last_render[*it]*/);
 			depth = std::max(depth, tilesets[*it].getMinDepth());
 		}
 
@@ -608,11 +632,21 @@ bool RenderManager::run() {
 				it != world.rotations.end(); ++it) {
 			tilesets[*it].setDepth(depth);
 
+			fs::path output_dir = config.getOutputDir() / world.name_short / ROTATION_NAMES_SHORT[*it];
 			// check if this rotation was already rendered on a lower max zoom level
 			// -> then: increase max zoom level
 			if (old_settings && settings.rotations[*it] && settings.max_zoom < depth) {
 				for (int i = settings.max_zoom; i < depth; i++)
-					increaseMaxZoom(config.getOutputDir() / world.name_short / ROTATION_NAMES_SHORT[*it]);
+					increaseMaxZoom(output_dir);
+			}
+
+			// if this is an incremental rendering...
+			if (world.render_behaviors[*it] == RenderWorldConfig::RENDER_AUTO) {
+				// ...scan the required tiles
+				if (world.incremental_detection == "filetimes")
+					tilesets[*it].scanRequiredByFiletimes(output_dir);
+				else
+					tilesets[*it].scanRequiredByTimestamp(settings.last_render[*it]);
 			}
 		}
 

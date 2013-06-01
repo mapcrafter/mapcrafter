@@ -26,6 +26,9 @@
 
 #include <set>
 #include <vector>
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 /**
  * The renderer renders the world to tiles, which are arranged in a quadtree. Every node
@@ -130,20 +133,26 @@ private:
 	std::set<TilePos> render_tiles;
 	// the top level tiles which actually need to get rendered
 	std::set<TilePos> required_render_tiles;
+	// timestamps of render tiles required to rerender a tile
+	// (= highest timestamp of all chunks in a tile)
+	std::map<TilePos, int> tile_timestamps;
+
 	// same here for composite tiles
 	std::set<Path> composite_tiles;
 	std::set<Path> required_composite_tiles;
 
 	void initMapSize();
-	void findRequiredRenderTiles(const mc::World& world, int last_check);
+	void findRenderTiles(const mc::World& world);
 	void findRequiredCompositeTiles(const std::set<TilePos>& render_tiles,
 			std::set<Path>& tiles);
 public:
 	TileSet();
-	TileSet(const mc::World& World, int last_check = 0);
+	TileSet(const mc::World& World);
 	virtual ~TileSet();
 
-	void scan(const mc::World& world, int last_check);
+	void scan(const mc::World& world);
+	void scanRequiredByTimestamp(int last_change);
+	void scanRequiredByFiletimes(const fs::path& output_dir);
 
 	int getMinDepth() const;
 	int getDepth() const;

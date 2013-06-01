@@ -178,6 +178,19 @@ performance improvement) and it is not very easy to preblit all biome color
 variants. And also, there is not a big difference with different water colors.
 Per default the renderer renders biomes.
 
+`incremental_detection = timestamp|filetimes`
+
+This setting specifies the way the renderer should check if tiles are required
+when rendering incremental.  Possible options are:
+
+* `timestamp` (default)
+	* The renderer saves the time of the last rendering.  All tiles whoose
+	  chunk timestamps are newer than this last-render-time are required.
+* `filetimes`
+	* The renderer checks the modification times of the already rendered tile
+	  images.  All tiles whoose chunk timestamps are newer than this
+	  modification time are required.
+
 ### Command line options ###
 
 Here is a list of available command line options:

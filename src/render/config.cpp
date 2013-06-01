@@ -256,6 +256,9 @@ void RenderWorldConfig::readFromConfig(const fs::path& dir, const ConfigFile& co
 	if (config.has(section, "render_biomes"))
 		render_biomes = config.get<bool>(section, "render_biomes");
 
+	if (config.has(section, "incremental_detection"))
+		incremental_detection = config.get(section, "incremental_detection");
+
 	if (!input_dir.empty())
 		input_dir = fs::absolute(input_dir, dir).string();
 	if (!textures_dir.empty())
@@ -288,6 +291,11 @@ bool RenderWorldConfig::checkValid(std::vector<std::string>& errors) const {
 
 	if (texture_size <= 0 || texture_size > 32)
 		errors.push_back(prefix + "You have to specify a sane texture size (0 < texture_size <= 32)!");
+
+	if (incremental_detection != ""
+			&& incremental_detection != "timestamp"
+			&& incremental_detection != "filetimes")
+		errors.push_back(prefix + "The value of incremental_detection must be 'timestamp' or 'filetimes'!");
 
 	return errors.size() == count;
 }
