@@ -246,7 +246,7 @@ bool RenderManager::writeTemplateIndexHtml() const {
 	std::map<std::string, std::string> vars;
 	vars["worlds"] = config.generateJavascript();
 
-	return copyTemplateFile("index.html", vars);
+	return copyTemplateFile("index.html", vars) && copyTemplateFile("index.leaflet.html", vars);
 }
 
 /**
@@ -260,7 +260,8 @@ void RenderManager::writeTemplates() const {
 	}
 
 	if (!writeTemplateIndexHtml())
-		std::cout << "Warning: Unable to copy template file index.html!" << std::endl;
+		std::cout << "Warning: Unable to copy template files index.html and index.leaflet.html!" 
+			<< std::endl;
 	if (!copyTemplateFile("markers.js"))
 		std::cout << "Warning: Unable to copy template file markers.js!" << std::endl;
 
@@ -274,6 +275,7 @@ void RenderManager::writeTemplates() const {
 		std::string filename = it->path().filename().string();
 #endif
 		if (filename == "index.html"
+				|| filename == "index.leaflet.html"
 				|| filename == "markers.js")
 			continue;
 		if (fs::is_regular_file(*it)) {
