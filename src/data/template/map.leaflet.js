@@ -72,8 +72,8 @@ MapPosHashHandler.prototype.create = function() {
 		};
 	})(this);
 	
-	google.maps.event.addListener(this.ui.gmap, "dragend", handler);
-	google.maps.event.addListener(this.ui.gmap, "zoom_changed", handler);
+	this.ui.lmap.on("dragend", handler);
+	this.ui.lmap.on("zoomend", handler);
 };
 
 MapPosHashHandler.prototype.onMapChange = function(name, rotation) {
@@ -97,10 +97,10 @@ MapPosHashHandler.prototype.parseHash = function() {
 MapPosHashHandler.prototype.updateHash = function() {
 	var type = this.ui.getCurrentType();
 	var rotation = this.ui.getCurrentRotation();
-	var xzy = this.ui.latLngToMC(this.ui.gmap.getCenter(), 64);
+	var xzy = this.ui.latLngToMC(this.ui.lmap.getCenter(), 64);
 	for(var i = 0; i < 3; i++)
 		xzy[i] = Math.round(xzy[i]);
-	var zoom = this.ui.gmap.getZoom();
+	var zoom = this.ui.lmap.getZoom();
 	window.location.replace("#" + type + "/" + rotation + "/" + zoom + "/" + xzy[0] + "/" + xzy[1] + "/" + xzy[2]);
 };
 
@@ -115,8 +115,7 @@ MapPosHashHandler.prototype.gotoHash = function(hash) {
 	this.ui.setMapTypeAndRotation(hash[0], hash[1]);
 		
 	var latlng = this.ui.mcToLatLng(hash[3], hash[4], hash[5]);
-	this.ui.gmap.setCenter(latlng);
-	this.ui.gmap.setZoom(hash[2]);
+	this.ui.lmap.setView(latlng, hash[2]);
 };
 
 MapMarkerHandler.prototype = new MapHandler();
@@ -345,17 +344,15 @@ function MapcrafterUI(config) {
 	this.handlersNotCreated = [];
 	this.created = false
 	
-	//this.addHandler(new MapPosHashHandler());
+	this.addHandler(new MapPosHashHandler());
 }
 
 MapcrafterUI.prototype.init = function() {
-	this.lmap = L.map("mcmap").setView([0, 0], 0);
+	this.lmap = L.map("mcmap", {
+		crs: L.CRS.Simple
+	}).setView([0, 0], 0);
 	
 	var lmap = this.lmap;
-	this.lmap.on("click", function(e) {
-		console.log(e.latlng);
-		console.log(lmap.project(e.latlng));
-	});
 	
 	var firstType = true;
 	for(var type in this.config) {
@@ -383,6 +380,10 @@ MapcrafterUI.prototype.init = function() {
 		
 	this.controlsNotCreated = [];
 	this.handlersNotCreated = [];
+	
+	//L.marker(this.mcToLatLng(-241, 58, 64)).addTo(this.lmap);
+	//L.marker(this.lmap.unproject([192, 192])).addTo(this.lmap);
+	//console.log(this.latLngToMC(this.mcToLatLng(12, 34, 56), 56));
 };
 
 MapcrafterUI.prototype.getAllConfig = function() {
@@ -542,9 +543,14 @@ MapcrafterUI.prototype.mcToLatLng = function(x, z, y) {
 	var lng = 0.5 - (1.0 / Math.pow(2, config.maxZoom + 1)) + col * 2*block;
 	// lat is now one block size for every row 
 	var lat = 0.5 + row * block;
-	
-	return new L.LatLng(0, 0);
-	//return new L.LatLng(lat, lng);
+
+	// now we have coordinates in the range [0; 1]
+	// we use the unproject method of leaflet to convert pixel coordinates
+	// to real lat/lng coordinates
+	// every zoom level has tileSize * 2^zoom pixels, so just multiplicate
+	// the [0; 1] coordinates with this pixel count and use the unproject method
+	var size = config.tileSize * Math.pow(2, this.lmap.getZoom());
+	return this.lmap.unproject([lng * size, lat * size]);
 };
 
 MapcrafterUI.prototype.latLngToMC = function(latlng, y) {
@@ -570,8 +576,14 @@ MapcrafterUI.prototype.latLngToMC = function(latlng, y) {
 	
 	var config = this.getCurrentConfig();
 	
-	var lat = latlng.lat;
-	var lng = latlng.lng;
+	// same way like in the other method
+	// we convert the lat/lng coordinates to pixel coordinates
+	// then we need to convert the pixel coordinates to lat/lng coordinates in the range [0; 1]
+	// to use them for the lat/lng -> MC algorithm
+	var point = this.lmap.project(latlng);
+	var size = config.tileSize * Math.pow(2, this.lmap.getZoom());
+	var lat = point.y / size;
+	var lng = point.x / size;
 	
 	var tile = (1.0 / Math.pow(2, config.maxZoom + 1));
 	var block = (config.textureSize/2.0) / (config.tileSize * Math.pow(2, config.maxZoom));
@@ -587,6 +599,5 @@ MapcrafterUI.prototype.latLngToMC = function(latlng, y) {
 		z = nz;
 	}
 	
-	return [0, 0, y];
-	//return [x, z, y];
+	return [x, z, y];
 };
