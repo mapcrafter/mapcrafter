@@ -130,40 +130,27 @@ function MapMarkerHandler(markers) {
 
 MapMarkerHandler.prototype.onMapChange = function(name, rotation) {
 	for(var i = 0; i < this.mapMarkers.length; i++)
-		this.mapMarkers[i].setMap(null);
+		this.ui.lmap.removeLayer(this.mapMarkers[i]);
 	this.mapMarkers = [];
 	
-	var infowindow = new google.maps.InfoWindow();
-	var current = {};
-
 	for(var i = 0; i < this.markers.length; i++) {  
 		var location = this.markers[i];
 		
 		if(location.world != this.ui.getCurrentConfig().worldName)
 			continue;
 		
-		var markerOptions = {
-			position: this.ui.mcToLatLng(location.x, location.z, location.y),
-			map: this.ui.gmap,
+		var marker = new L.Marker(this.ui.mcToLatLng(location.x, location.z, location.y), {
 			title: location.title,
-		};
-		if(location.icon)
-			markerOptions["icon"] = location.icon;
-		var marker = new google.maps.Marker(markerOptions);
+		});
+		if(location.icon) {
+			marker.setIcon(new L.Icon({
+				iconUrl: location.icon,
+			}));
+		}
+		marker.bindPopup(location.text ? location.text : location.title);
+		marker.addTo(this.ui.lmap);
+		
 		this.mapMarkers.push(marker);
-
-		google.maps.event.addListener(marker, "click", (function(ui, marker, location) {
-			return function() {
-				if(current == location) {
-					infowindow.close();
-					current = {};
-					return;
-				}
-				infowindow.setContent(location.text ? location.text : location.title);
-				infowindow.open(ui.gmap, marker);
-				current = location;
-			}
-		})(this.ui, marker, location));
 	}
 };
 
@@ -290,9 +277,9 @@ MousePosControl.prototype.create = function(wrapper) {
 	var text = document.createElement("span");
 	text.setAttribute("id", "mouse-move-div");
 	
-	google.maps.event.addListener(this.ui.gmap, "mousemove", (function(ui) {
+	this.ui.lmap.on("mousemove", (function(ui) {
 		return function(event) {
-			var xzy = ui.latLngToMC(event.latLng, 64);
+			var xzy = ui.latLngToMC(event.latlng, 64);
 			document.getElementById("mouse-move-div").innerHTML = "X: " + Math.round(xzy[0]) 
 				+ " Z: " + Math.round(xzy[1]) + " Y: " + Math.round(xzy[2]);
 		};
@@ -498,7 +485,10 @@ MapcrafterUI.prototype.addControl = function(control, pos, index) {
 			return wrapper;
 		},
 	});
-	var lcontrol = new controlType(pos);
+	var lcontrol = new controlType({
+		position: pos,
+	});
+	console.log(lcontrol.position);
 	this.lmap.addControl(lcontrol);
 };
 
