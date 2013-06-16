@@ -262,7 +262,9 @@ void RenderManager::writeTemplates() const {
 	if (!writeTemplateIndexHtml())
 		std::cout << "Warning: Unable to copy template files index.html and index.leaflet.html!" 
 			<< std::endl;
-	if (!copyTemplateFile("markers.js"))
+
+	if (!fs::exists(config.getOutputPath("markers.js"))
+			&& !copyFile(config.getTemplatePath("markers.js"), config.getOutputPath("markers.js")))
 		std::cout << "Warning: Unable to copy template file markers.js!" << std::endl;
 
 	// copy all other files and directories

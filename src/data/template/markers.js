@@ -1,22 +1,33 @@
-var lastRender = new Date();
-lastRender.setTime(LAST_RENDER * 1000);
+// Here you can add your own markers.
 
-var MARKERS = [
-	// You can add here your own markers, for example:
-	// {"world": "worldname", "x": 0, "z": 0, "y": 64, "title": "Spawnpoint"},
+var MARKERS = {
+	// You have to specify a world name for the markers.
+	// This is the last part of the path to the world.
+	// For example: The name for "/this/is/my_world" is just "my_world".
+	"worldname": [
+		// A simple example for a marker:
+		{"pos": [0, 0, 64], "title": "Spawnpoint"},
+		// The position of a marker is always in the form [x, z, y].
+		
+		// You can add your own icon:
+		{"pos": [12, 34, 64], "title": "Marker", "icon": "icons/myicon.png"},
+		// Just copy your icon file into your template directory to use it here.
+		// A size of 24x24 pixel for your icons would be good.
+		// Otherwise you should also specify the size of your icon (for the Leaflet template):
+		{"pos": [12, 34, 64], "title": "Marker", "icon": "icons/myicon.png", "iconsize": [32, 32]},
+		
+		// And/or you can set the text of the marker window:
+		{"pos": [34, 12, 64], "title": "Another Marker", "text": "This is <b>another</b> marker"},
+	],
 	
-	// You have to specify a world name, this is the last part of the path to the world.
-	// For exmaple: The name for "/this/is/my_world" is just "my_world".
+	// And you can specify the markers of your other worlds:
+	"world2": [
+		{"pos": [0, 0, 64], "title": "Marker"},
+	],
 	
-	// You can add your own icon:
-	// {"world": "worldname", "x": 42, "z": 73, "y": 64, "title": "Spawnpoint", "icon": "icons/myicon.png"},
+	"world2": [
+		{"pos": [0, 0, 64], "title": "Marker"},
+	],
 	
-	// and/or you can set the text of the marker window:
-	// (text defaults to the title of the marker)
-	// {"world": "worldname", "x": 42, "z": 73, "y": 64, "title": "Spawnpoint", "text": "This is the <b>spawnpoint</b>."},
-	
-	
-	// You want to show when the map was rendered last time?
-	// (at the moment not working)
-	// {"world": "worldname", "x": 0, "z": 0, "y": 64, "title": "Last render", "text": "Last render: " + lastRender.toLocaleString()},
-];
+	// etc.
+};

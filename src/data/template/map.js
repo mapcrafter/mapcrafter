@@ -137,14 +137,15 @@ MapMarkerHandler.prototype.onMapChange = function(name, rotation) {
 	var infowindow = new google.maps.InfoWindow();
 	var current = {};
 
-	for(var i = 0; i < this.markers.length; i++) {  
-		var location = this.markers[i];
+	var world = this.ui.getCurrentConfig().worldName;
+	if(!(world in this.markers))
+		return;
+	for(var i = 0; i < this.markers[world].length; i++) {
+		var location = this.markers[world][i];
 		
-		if(location.world != this.ui.getCurrentConfig().worldName)
-			continue;
-		
+		var pos = location.pos;
 		var markerOptions = {
-			position: this.ui.mcToLatLng(location.x, location.z, location.y),
+			position: this.ui.mcToLatLng(pos[0], pos[1], pos[2]),
 			map: this.ui.gmap,
 			title: location.title,
 		};

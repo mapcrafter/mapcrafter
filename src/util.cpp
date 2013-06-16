@@ -54,9 +54,10 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
 
 bool copyFile(const fs::path& from, const fs::path& to) {
 	std::ifstream in(from.string().c_str());
+	if (!in)
+		return false;
 	std::ofstream out(to.string().c_str());
-
-	if (!in || !out)
+	if (!out)
 		return false;
 
 	out << in.rdbuf();

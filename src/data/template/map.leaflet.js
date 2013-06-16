@@ -133,18 +133,20 @@ MapMarkerHandler.prototype.onMapChange = function(name, rotation) {
 		this.ui.lmap.removeLayer(this.mapMarkers[i]);
 	this.mapMarkers = [];
 	
-	for(var i = 0; i < this.markers.length; i++) {  
-		var location = this.markers[i];
+	var world = this.ui.getCurrentConfig().worldName;
+	if(!(world in this.markers))
+		return;
+	for(var i = 0; i < this.markers[world].length; i++) {  
+		var location = this.markers[world][i];
 		
-		if(location.world != this.ui.getCurrentConfig().worldName)
-			continue;
-		
-		var marker = new L.Marker(this.ui.mcToLatLng(location.x, location.z, location.y), {
+		var pos = location.pos;
+		var marker = new L.Marker(this.ui.mcToLatLng(pos[0], pos[1], pos[2]), {
 			title: location.title,
 		});
 		if(location.icon) {
 			marker.setIcon(new L.Icon({
 				iconUrl: location.icon,
+				iconSize: (location.iconsize ? location.iconsize : [24, 24]),
 			}));
 		}
 		marker.bindPopup(location.text ? location.text : location.title);
@@ -339,16 +341,12 @@ MapcrafterUI.prototype.init = function() {
 		crs: L.CRS.Simple
 	}).setView([0, 0], 0);
 	
-	var lmap = this.lmap;
-	
 	var firstType = true;
 	for(var type in this.config) {
 		this.layers[type] = {};
 		for(var rotation in this.config[type].rotations) {
 			this.layers[type][rotation] = this.createTileLayer(type, this.config[type], rotation);
 			if(firstType) {
-				this.currentType = type;
-				this.currentRotation = rotation;
 				this.setMapTypeAndRotation(type, rotation);
 				firstType = false;
 			}
@@ -367,10 +365,6 @@ MapcrafterUI.prototype.init = function() {
 		
 	this.controlsNotCreated = [];
 	this.handlersNotCreated = [];
-	
-	//L.marker(this.mcToLatLng(-241, 58, 64)).addTo(this.lmap);
-	//L.marker(this.lmap.unproject([192, 192])).addTo(this.lmap);
-	//console.log(this.latLngToMC(this.mcToLatLng(12, 34, 56), 56));
 };
 
 MapcrafterUI.prototype.getAllConfig = function() {
@@ -394,32 +388,35 @@ MapcrafterUI.prototype.getCurrentConfig = function() {
 };
 
 MapcrafterUI.prototype.setMapTypeAndRotation = function(type, rotation) {
-	var oldType = this.getCurrentConfig();
-	var oldLayer = this.layers[this.currentType][this.currentRotation];
+	var oldConfig = this.getCurrentConfig();
 	var oldRotation = this.currentRotation;
-	var newType = this.getConfig(type);
+	var oldLayer = null;
+	var xzy = null;
+	if(this.currentType != null && this.currentRotation != null) {
+		oldLayer = this.layers[this.currentType][this.currentRotation];
+		xzy = this.latLngToMC(this.lmap.getCenter(), 64);
+	}
 	
-	xzy = this.latLngToMC(this.lmap.getCenter(), 64);
 	this.currentType = type;
 	this.currentRotation = parseInt(rotation);
+	var config = this.getCurrentConfig();
 	
 	var oldZoom = this.lmap.getZoom();
-	//this.gmap.setMapTypeId(type + "-" + rotation);
-	this.lmap.removeLayer(oldLayer);
+	if(oldLayer != null) {
+		this.lmap.removeLayer(oldLayer);
+	}
 	this.lmap.addLayer(this.layers[this.currentType][this.currentRotation]);
 	
-	if(oldType.worldName != newType.worldName) {
-		//this.gmap.setCenter(new google.maps.LatLng(0.5, 0.5));
-		//this.gmap.setZoom(0);
-		this.lmap.setView([0, 0], 0);
-	} else if(this.currentRotation != oldRotation) {
-		//this.gmap.setCenter(this.mcToLatLng(xzy[0], xzy[1], xzy[2]));
+	if(oldLayer == null || oldConfig.worldName != config.worldName) {
+		// set view to the center
+		this.lmap.setView(this.lmap.unproject([config.tileSize/2, config.tileSize/2]), 0);
+	} else /*if(this.currentRotation != oldRotation)*/ {
 		this.lmap.setView(this.mcToLatLng(xzy[0], xzy[1], xzy[2]), oldZoom);
 		
 		// adjust the zoom level
 		// if one switches between maps with different max zoom levels
-		if(oldType.maxZoom != newType.maxZoom) {
-			this.lmap.setZoom(oldZoom + newType.maxZoom - oldType.maxZoom);
+		if(oldConfig.maxZoom != config.maxZoom) {
+			this.lmap.setZoom(oldZoom + config.maxZoom - oldConfig.maxZoom);
 		}
 	}
 	
@@ -460,7 +457,7 @@ MapcrafterUI.prototype.addControl = function(control, pos, index) {
 	}
 	
 	var self = this;
-	var controlType = L.Control.extend({
+	var ControlType = L.Control.extend({
 		onAdd: function(map) {
 			var wrapper = document.createElement("div");
 			wrapper.setAttribute("class", "control-wrapper");
@@ -485,10 +482,9 @@ MapcrafterUI.prototype.addControl = function(control, pos, index) {
 			return wrapper;
 		},
 	});
-	var lcontrol = new controlType({
+	var lcontrol = new ControlType({
 		position: pos,
 	});
-	console.log(lcontrol.position);
 	this.lmap.addControl(lcontrol);
 };
 
