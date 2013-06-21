@@ -4,12 +4,12 @@ Configuration File Format
 
 To tell the mapcrafter which maps to render, simple INI-like configuration
 files are used. With configuration files it is possible to render multiple
-maps/rotations/rendermodes into one output directory. 
+maps/rotations/rendermodes into one output file. 
 
 An Example
 ==========
 
-Here is an example of a configuration file (render.conf):::
+Here is an example of a configuration file (render.conf)::
 
 	output_dir = output
 	template_dir = mapcrafter/src/data/template
@@ -29,7 +29,7 @@ Here is an example of a configuration file (render.conf):::
 
 Here are two maps with different textures, texture sizes and rotations defined.
 
-You can render these worlds with (see command line options for more options):::
+You can render these worlds with (see :doc:`commandline` for more options)::
 
 	./mapcrafter -c render.conf
 
@@ -57,8 +57,10 @@ configuration file.
 Available options
 =================
 
-**These options are relevant for all maps, so you have to put them in the
-header before the first section starts:**
+.. note::
+
+	These options are relevant for all maps, so you have to put them in the
+	header before the first section starts
 
 ``output_dir = <directory>``
 
@@ -75,10 +77,12 @@ header before the first section starts:**
 	variables in the index.html file. The index.html file is also the file in the
 	output directory you can open with your webbrowser after the rendering.
 
-**These options are for the maps. You can specify them in the sections or you
-can specify them in the header. If you specify them in the header, these
-options are default values and inherited in the sections if you do not
-overwrite them:**
+.. note::
+
+	These options are for the maps. You can specify them in the sections or you
+	can specify them in the header. If you specify them in the header, these
+	options are default values and inherited in the sections if you do not
+	overwrite them
 
 ``name = <name>``
 
@@ -113,12 +117,12 @@ overwrite them:**
 	This is the directory with the Minecraft texture files.  The renderer works
 	with the Minecraft 1.5 texture file format. You need here: 
 
-		* chest.png
-		* enderchest.png
-		* largechest.png
-		* foliagecolor.png
-		* grasscolor.png
-		* the blocks/ directory from your texture pack
+	* chest.png
+	* enderchest.png
+	* largechest.png
+	* foliagecolor.png
+	* grasscolor.png
+	* the blocks/ directory from your texture pack
 
 	Probably you can get everything from your minecraft.jar. You can use the python
 	script ``find_images.py`` from the data directory to extract the images from your
@@ -158,7 +162,7 @@ overwrite them:**
 
 	This setting makes the renderer to use the original biome colors for blocks
 	like grass and leaves. At the moment the renderer does not use the biome
-	colors for water because the renderer preblits the water blocks (great
+	colors for water because the renderer preblits the water blocks (which is a great
 	performance improvement) and it is not very easy to preblit all biome color
 	variants. And also, there is not a big difference with different water colors.
 	Per default the renderer renders biomes.

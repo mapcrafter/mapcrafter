@@ -1,6 +1,6 @@
-==========================
-Adding Markers to your Map
-==========================
+=======
+Markers
+=======
 
 You can add your own map markers by editing the file ``markers.js`` in the output
 directory.  This is a Javascript file where you can add markers to your maps.

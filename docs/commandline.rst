@@ -10,7 +10,8 @@ Here is a list of available command line options:
 
 .. cmdoption:: -c <file>, --config <file>
 
-	This is the path to the configuration file to use when rendering.
+	This is the path to the configuration file to use when rendering
+	and is **required**.
 
 .. cmdoption:: -s <maps>, --render-skip <maps>
 
@@ -50,4 +51,5 @@ Here is a list of available command line options:
 
 .. cmdoption:: -b, --batch
 
-	This option deactivates the animated progress bar.
+	This option deactivates the animated progress bar. This is useful if you
+	let the renderer run with a cronjob and pipe the output into a log file.
