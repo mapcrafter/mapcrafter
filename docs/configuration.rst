@@ -9,7 +9,9 @@ maps/rotations/rendermodes into one output file.
 An Example
 ==========
 
-Here is an example of a configuration file (render.conf)::
+Here is an example of a configuration file (render.conf):
+
+.. code-block:: ini
 
 	output_dir = output
 	template_dir = mapcrafter/src/data/template
@@ -26,18 +28,23 @@ Here is an example of a configuration file (render.conf)::
 	textures_dir = my/special/textures
 	texture_size = 16
 	rotations = top-left bottom-left
+	rendermode = daylight
 
 Here are two maps with different textures, texture sizes and rotations defined.
+The first world is rendered with the default textures and from all available
+directions. The second world is rendered with other textures, with texture
+size 16 and only from two directions. Furthermore the lighting rendermode
+is used.
 
 You can render these worlds with (see :doc:`commandline` for more options)::
 
 	./mapcrafter -c render.conf
 
-The configuration files consist of ``sections`` and ``key = value`` option pairs .
+The configuration files consist of ``[sections]`` and ``key = value`` option pairs .
 The sections of the configuration files are the maps to render. The options in
-the sections are settings for the rendered worlds. You can specify these
-options also in the head of the configuration file to set default option
-values.  In the head are also options, which are relevant to all worlds and
+the sections are settings for the rendered maps. You can also specify these
+options in the head of the configuration file to set default option
+values. In the head are also options, which are relevant to all worlds and
 therefore must be defined in the head, for example ``output_dir`` and
 ``template_dir``.
 
@@ -54,7 +61,7 @@ rotations of a world.
 Relative paths in the configuration file are relative to the path of the
 configuration file.
 
-Available options
+Available Options
 =================
 
 .. note::
@@ -64,17 +71,22 @@ Available options
 
 ``output_dir = <directory>``
 
+	**Required**
+
 	This is the directory, where mapcrafter saves the rendered map. Every time you
 	render your map the renderer copies the template files into this directory and
-	overwrites them, if they already exist. The renderer creates an index.html file
+	overwrites them, if they already exist. The renderer creates an ``index.html`` file
 	you can open with your webbrowser. If you want to customize this HTML-File, you
-	should do this directly in the template (see ``template_dir``).
+	should do this directly in the template (see ``template_dir``) because this
+	file is overwritten every time you render the map.
 
 ``template_dir = <directory>``
 
+	**Required**
+
 	This is the directory with the web template files. The renderer copies all
 	files, which are in this directory, to the output directory and replaces the
-	variables in the index.html file. The index.html file is also the file in the
+	variables in the ``index.html`` file. The ``index.html`` file is also the file in the
 	output directory you can open with your webbrowser after the rendering.
 
 .. note::
@@ -86,6 +98,8 @@ Available options
 
 ``name = <name>``
 
+	**Default:** ``<name of the section>``
+
 	This is the name for the rendered map. You will see this name in the output file,
 	so you should use here an human-readable name. The belonging configuration
 	section to this map has also a name (in square brackets). Since the name of the
@@ -94,10 +108,14 @@ Available options
 
 ``world = <directory>``
 
-	This is the directory of the Minecraft world to render. The directory should
-	contain a directory 'region' with the .mca region files.
+	**Required**
+
+	This is the directory of the Minecraft World to render. The directory should
+	contain a directory ``region`` with the .mca region files.
 
 ``rendermode = normal|cave|daylight|nightlight``
+	
+	**Default:** ``normal``
 
 	This is the rendermode to use when rendering the world. Possible rendermodes are:
 
@@ -114,8 +132,10 @@ Available options
 
 ``textures_dir = <directory>``
 
-	This is the directory with the Minecraft texture files.  The renderer works
-	with the Minecraft 1.5 texture file format. You need here: 
+	**Required**
+
+	This is the directory with the Minecraft Texture files.  The renderer works
+	with the Minecraft 1.5 Texture file format. You need here: 
 
 	* chest.png
 	* enderchest.png
@@ -127,11 +147,15 @@ Available options
 	Probably you can get everything from your minecraft.jar. You can use the python
 	script ``find_images.py`` from the data directory to extract the images from your
 	minecraft.jar.
+	
+	See also :ref:`installing-textures`.
 
 ``texture_size = <number>``
 
+	**Default:** ``12``
+
 	This is the size (in pixels) of the block textures. The default texture size is
-	12px (16px is the size of the default Minecraft textures).
+	12px (16px is the size of the default Minecraft Textures).
 
 	The size of a tile is ``32 * texture_size``, so the higher the texture size, the
 	more image data the renderer has to process. If you want a high detail, use
@@ -139,40 +163,50 @@ Available options
 
 ``rotations = [top-left] [top-right] [bottom-right] [bottom-left]``
 
-	This is a list of rotations to render the world from. You can rotate the world
-	by ``n*90`` degrees. Later in the output file you can interactively rotate your
-	world. Possible values for this space-separated list are: top-left, top-right,
-	bottom-right, bottom-left. Top left means that north is on the top left side on
-	the map (same thing for other directions). This option defaults to top-left.
+	**Default:** ``top-left``
+
+	This is a list of directions to render the world from. You can rotate the world
+	by n*90 degrees. Later in the output file you can interactively rotate your
+	world. Possible values for this space-separated list are: 
+	``top-left``, ``top-right``, ``bottom-right``, ``bottom-left``. 
+	
+	Top left means that north is on the top left side on the map (same thing for 
+	other directions).
 
 ``render_unknown_blocks = 1|0``
 
+	**Default:** ``0``
+
 	With this option the renderer renders unknown blocks as red blocks (for
-	debugging purposes). Per default the renderer just ignores unknown blocks and
-	does not render them.
+	debugging purposes).
 
 ``render_leaves_transparent = 1|0``
+
+	**Default:** ``1``
 
 	You can specifiy this to use the transparent leaf textures instead of the
 	opaque textures. Using transparent leaf textures can make the renderer a bit
 	slower, because the renderer also has to scan the blocks after the leaves to
-	the ground. Per default the renderer renders leaves transparent.
+	the ground.
 
 ``render_biomes = 1|0``
+
+	**Default:** ``1``
 
 	This setting makes the renderer to use the original biome colors for blocks
 	like grass and leaves. At the moment the renderer does not use the biome
 	colors for water because the renderer preblits the water blocks (which is a great
 	performance improvement) and it is not very easy to preblit all biome color
 	variants. And also, there is not a big difference with different water colors.
-	Per default the renderer renders biomes.
 
 ``incremental_detection = timestamp|filetimes``
+
+	**Default:** ``timestamp``
 
 	This setting specifies the way the renderer should check if tiles are required
 	when rendering incremental.  Possible options are:
 
-	``timestamp`` (default)
+	``timestamp``
 		The renderer saves the time of the last rendering.  All tiles whoose
 		chunk timestamps are newer than this last-render-time are required.
 	``filetimes``

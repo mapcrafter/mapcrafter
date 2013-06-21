@@ -17,8 +17,8 @@ Here is a list of available command line options:
 
 	You can specify maps the renderer should skip when rendering. This is a
 	comma-separated list of map names (the section names from the configuration
-	file). You can also specify the rotation of the maps to skip by adding adding a
-	':' and the short name of the rotation (``tl``, ``tr``, ``br``, ``bl``). 
+	file). You can also specify the rotation of the maps to skip by adding a
+	``:`` and the short name of the rotation (``tl``, ``tr``, ``br``, ``bl``). 
 	
 	For example: ``world,world2`` or ``world:tl,world:bl,world2:bl,world3``.
 
@@ -26,6 +26,13 @@ Here is a list of available command line options:
 
 	This option skips all maps and renders only the maps you explicitly specify
 	with ``-a`` or ``-f``.
+
+	.. note::
+
+		This option is useful if you want to update only the template
+		of your rendered map::
+		
+			./mapcrafter -c render.conf -r
 
 .. cmdoption:: -a <maps>, --render-auto <maps>
 
@@ -44,8 +51,9 @@ Here is a list of available command line options:
 .. cmdoption:: -j <number>, --jobs <number>
 
 	This is the count of threads to use (defaults to one), when rendering the map.
-	The rendering performance also depends heavily on your disk. You can render the
-	map to a solid state disk or a ramdisk to improve the performance.
+	Using as much threads as CPU cores you have is good, but the rendering 
+	performance also depends heavily on your disk. You can render the map 
+	to a solid state disk or a ramdisk to improve the performance.
 
 	Every thread needs around 150MB ram.
 
