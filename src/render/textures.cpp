@@ -2084,6 +2084,29 @@ void BlockImages::createCauldron() { // id 118
 	}
 }
 
+void BlockImages::createDragonEgg() { // id 122
+	// create an half circle of the dragon egg texture
+	// to create an item style block with this texture
+
+	Image texture = textures.DRAGON_EGG;
+
+	// the formula for an half circle is sqrt(r*r - x*x)
+	// the circle would go from -r to +r
+	// here we use 1.5 * sqrt(r*r - x*x) in the interval [0;texture_size/2],
+	// reflect the quarter circle and remove all pixels which are not in the circle
+
+	int r = (texture_size/2) * (texture_size/2);
+	for (int x = 0; x <= texture_size/2; x++) {
+		int height = 1.5*sqrt(r - x*x);
+		for (int y = 0; y < texture_size-height; y++) {
+			texture.setPixel(texture_size/2 + x, y, rgba(0, 0, 0, 0));
+			texture.setPixel(texture_size/2 - x - 1, y, rgba(0, 0, 0, 0));
+		}
+	}
+
+	createItemStyleBlock(122, 0, texture);
+}
+
 void BlockImages::createBeacon() { // id 138
 	Image beacon(texture_size * 2, texture_size * 2);
 
@@ -2309,7 +2332,7 @@ void BlockImages::loadBlocks() {
 	createSmallerBlock(120, 0, t.ENDFRAME_SIDE, t.ENDFRAME_TOP, 0,
 			texture_size * 0.8125); // end portal frame
 	createBlock(121, 0, t.WHITE_STONE); // end stone
-	// id 122 // dragon egg
+	createDragonEgg(); // id 122
 	createBlock(123, 0, t.REDSTONE_LIGHT); // redstone lamp inactive
 	createBlock(124, 0, t.REDSTONE_LIGHT_LIT); // redstone lamp active
 	createSlabs(125, false, true); // wooden double slabs

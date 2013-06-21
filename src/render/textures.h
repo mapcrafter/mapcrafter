@@ -488,6 +488,7 @@ private:
 	void createVines(); // id 106
 	void createFenceGate(); // id 107
 	void createCauldron(); // id 118
+	void createDragonEgg(); // id 122
 	void createBeacon(); // id 138
 
 	void loadBlocks();
