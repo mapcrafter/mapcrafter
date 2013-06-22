@@ -138,6 +138,16 @@ const int LARGECHEST_BACK_RIGHT = 6;
 const int LARGECHEST_DATA_LARGE = 256;
 const int LARGECHEST_DATA_LEFT = 512;
 
+const int REDSTONE_NORTH = 16;
+const int REDSTONE_EAST = 32;
+const int REDSTONE_SOUTH = 64;
+const int REDSTONE_WEST = 128;
+const int REDSTONE_TOPNORTH = 256;
+const int REDSTONE_TOPEAST = 512;
+const int REDSTONE_TOPSOUTH = 1024;
+const int REDSTONE_TOPWEST = 2048;
+const int REDSTONE_POWERED = 4096;
+
 /**
  * The base for an iterator to transform the pixels of a source image to the pixels of a
  * destination image.
@@ -471,6 +481,7 @@ private:
 	void createStairs(uint16_t id, const Image& texture); // id 53, 67, 108, 109, 114, 128, 134, 135, 136
 	void createChest(uint16_t id, Image* textures); // id 54, 95, 130
 	void createDoubleChest(uint16_t id, Image* textures); // id 54
+	void createRedstoneWire(bool powered); // id 55
 	void createDoor(uint16_t id, const Image& bottom, const Image& top); // id 64, 71
 	void createRails(); // id 66
 	void createButton(uint16_t id, const Image& tex); // id 77, 143

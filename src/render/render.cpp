@@ -274,6 +274,31 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			if (west.id == 54)
 				data |= DATA_WEST << 4;
 		}
+	} else if (id == 55) { // redstone wire
+		// check if the redstone wire is connected to other redstone wires
+		if (state.getBlock(pos + mc::DIR_NORTH).id == id
+				|| state.getBlock(pos + mc::DIR_NORTH + mc::DIR_BOTTOM).id == id)
+			data |= REDSTONE_NORTH;
+		else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_NORTH).id == id)
+			data |= REDSTONE_NORTH | REDSTONE_TOPNORTH;
+
+		if (state.getBlock(pos + mc::DIR_SOUTH).id == id
+				|| state.getBlock(pos + mc::DIR_SOUTH + mc::DIR_BOTTOM).id == id)
+			data |= REDSTONE_SOUTH;
+		else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_SOUTH).id == id)
+			data |= REDSTONE_SOUTH | REDSTONE_TOPSOUTH;
+
+		if (state.getBlock(pos + mc::DIR_EAST).id == id
+				|| state.getBlock(pos + mc::DIR_EAST + mc::DIR_BOTTOM).id == id)
+			data |= REDSTONE_EAST;
+		else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_EAST).id == id)
+			data |= REDSTONE_EAST | REDSTONE_TOPEAST;
+
+		if (state.getBlock(pos + mc::DIR_WEST).id == id
+				|| state.getBlock(pos + mc::DIR_WEST + mc::DIR_BOTTOM).id == id)
+			data |= REDSTONE_WEST;
+		else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_WEST).id == id)
+			data |= REDSTONE_WEST | REDSTONE_TOPWEST;
 	} else if (id == 64 || id == 71) {
 		// doors
 		uint16_t top = data & 8 ? DOOR_TOP : 0;

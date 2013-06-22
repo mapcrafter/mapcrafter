@@ -146,7 +146,12 @@ bool TextureImage::load(const std::string& path, int size) {
 
 	// we resize the transparent version of the leaves without interpolation,
 	// because this can cause half-transparent pixels, which aren't good for performance
-	if (name == "leaves" || name == "leaves_jungle" || name == "leaves_spruce")
+	// redstone also without interpolation
+	if (name == "leaves"
+			|| name == "leaves_jungle"
+			|| name == "leaves_spruce"
+			|| name == "redstoneDust_cross"
+			|| name == "redstoneDust_line")
 		tmp.resizeSimple(size, size, *this);
 	else
 		tmp.resizeInterpolated(size, size, *this);
@@ -862,6 +867,11 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 				|| (dir == DATA_WEST && neighbors == DATA_SOUTH))
 			new_data |= LARGECHEST_DATA_LEFT;
 		return new_data;
+	} else if (id == 55) { // redstone wire
+		// check if powered
+		if ((data & 0b1111) != 0)
+			return (data & ~(0b1111)) | REDSTONE_POWERED;
+		return data & ~(0b1111);
 	} else if (id == 60) // farmland
 		return data & 0xff00;
 	else if (id == 64 || id == 71) // doors
@@ -1683,6 +1693,76 @@ void BlockImages::createDoubleChest(uint16_t id, Image* textures) { // id 54
 	setBlockImage(id, DATA_WEST | l, buildImage(right.rotate(1)));
 }
 
+void BlockImages::createRedstoneWire(bool powered) { // id 55
+	Image redstone_cross = textures.REDSTONE_DUST_CROSS;
+	Image redstone_line = textures.REDSTONE_DUST_LINE;
+
+	uint8_t color = powered ? 50 : 255;
+	redstone_cross = redstone_cross.colorize(color, 0, 0);
+	redstone_line = redstone_line.colorize(color, 0, 0);
+
+	// 1/16 of the texture size
+	double s = (double) texture_size / 16;
+
+	// go through all redstone combinations
+	for (uint16_t i = 0; i <= 0xff; i++) {
+		// the redstone extra data starts at the fifth byte
+		// so shift the data to the right
+		uint16_t data = i << 4;
+
+		// skip unpossible redstone combinations
+		// things like neighbor topnorth but not north
+		// what would look like redstone on a wall without a connection
+		if (((data & REDSTONE_TOPNORTH) && !(data & REDSTONE_NORTH))
+				|| ((data & REDSTONE_TOPSOUTH) && !(data & REDSTONE_SOUTH))
+				|| ((data & REDSTONE_TOPEAST) && !(data & REDSTONE_EAST))
+				|| ((data & REDSTONE_TOPWEST) && !(data & REDSTONE_WEST)))
+			continue;
+
+		BlockImage block;
+		Image texture = redstone_cross;
+		// remove the connections from the cross image
+		// if there is no connection
+		if(!(data & REDSTONE_NORTH))
+			texture.fill(rgba(0, 0, 0, 0), 0, 0, s*16, s*4);
+		if(!(data & REDSTONE_SOUTH))
+			texture.fill(rgba(0, 0, 0, 0), 0, s*12, s*16, s*4);
+
+		if(!(data & REDSTONE_EAST))
+			texture.fill(rgba(0, 0, 0, 0), s*12, 0, s*4, s*16);
+		if(!(data & REDSTONE_WEST))
+			texture.fill(rgba(0, 0, 0, 0), 0, 0, s*4, s*16);
+
+		// check if we have a line of restone
+		if (data == (REDSTONE_NORTH | REDSTONE_SOUTH))
+			texture = redstone_line.rotate(ROTATE_90);
+		else if (data == (REDSTONE_EAST | REDSTONE_WEST))
+			texture = redstone_line;
+
+		// check if
+		if (data & REDSTONE_TOPNORTH)
+			block.setFace(FACE_NORTH, redstone_line.rotate(ROTATE_90));
+		if (data & REDSTONE_TOPSOUTH)
+			block.setFace(FACE_SOUTH, redstone_line.rotate(ROTATE_90));
+		if (data & REDSTONE_TOPEAST)
+			block.setFace(FACE_EAST, redstone_line.rotate(ROTATE_90));
+		if (data & REDSTONE_TOPWEST)
+			block.setFace(FACE_WEST, redstone_line.rotate(ROTATE_90));
+
+		// rotate the texture to fit the sky directions
+		texture = texture.rotate(ROTATE_270);
+		block.setFace(FACE_BOTTOM, texture);
+
+		// set extra data
+		if (powered)
+			data |= REDSTONE_POWERED;
+		// we can add the block like this without rotation
+		// because we calculate the neighbors on our own,
+		// it does not depend on the rotation of the map
+		setBlockImage(55, data, buildImage(block));
+	}
+}
+
 void BlockImages::createDoor(uint16_t id, const Image& texture_bottom,
         const Image& texture_top) { // id 64, 71
 	// TODO sometimes the texture needs to get x flipped when door is opened
@@ -2235,7 +2315,8 @@ void BlockImages::loadBlocks() {
 	createStairs(53, t.WOOD); // oak wood stairs
 	createChest(54, chest); // chest
 	createDoubleChest(54, largechest); // chest
-	// id 55 // redstone wire
+	createRedstoneWire(true); // id 55
+	createRedstoneWire(false);
 	createBlock(56, 0, t.ORE_DIAMOND); // diamond ore
 	createBlock(57, 0, t.BLOCK_DIAMOND); // block of diamond
 	createBlock(58, 0, t.WORKBENCH_SIDE, t.WORKBENCH_FRONT, t.WORKBENCH_TOP); // crafting table
