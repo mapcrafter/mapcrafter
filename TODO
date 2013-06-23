@@ -1,20 +1,20 @@
 TODO:
-	- for the next big version:
-	- config files to allow to render multiple worlds/different rotations/rendermodes 
-	  to the same output file
+	- improve lighting special cases (stairs, half steps, etc.)
 	
-	- add all blocks
-	
-Blocks:
-	- piston extension
-	- redstone
-	- sign post / wall sign
-	- lever
-	- dragon egg
-	- tripwire / -hook
-	- cobblestone wall
-	- flower pot
-	- heads
-	- anvil
-	
-	- corner stairs?
+	- add all blocks:
+		- piston extension
+		- sign post / wall sign
+		- lever
+		- tripwire / -hook
+		- cobblestone wall
+		- flower pot
+		- heads
+		- anvil
+		
+		- corner stairs?
+
+ideas:
+	- add a config option to specify which map should be the default map
+	  in the interface and an option to specify the default view of
+	  every map
+	- crop the world and render only a specified part

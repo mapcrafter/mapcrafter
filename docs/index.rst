@@ -31,9 +31,9 @@ Features
 * Rendering Minecraft Worlds to maps viewable in any webbrowser
 * Configuration files to control the renderer
 * Four different directions to render your worlds from with an isometric 3D view
+* Different rendermodes
 * Biome colors
-* Incremental rendering
-* Multithreading
+* Incremental rendering, multithreading
 * User-defined markers on your maps
 
 Requirements
