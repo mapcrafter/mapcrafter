@@ -2480,6 +2480,13 @@ bool BlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
 	data = filterBlockData(id, data);
 	// remove edge data
 	data &= ~(EDGE_NORTH | EDGE_EAST | EDGE_BOTTOM);
+
+	// special case for doors because they are only used with special data
+	// and not with the original minecraft data
+	// without this the lighting code for example would need to filter the door data
+	// FIXME
+	if (id == 64 || id == 71)
+		return true;
 	if (block_images.count(id | (data << 16)) == 0)
 		return !render_unknown_blocks;
 	return block_transparency.count(id | (data << 16)) != 0;
