@@ -91,18 +91,22 @@ private:
 	LightingColor getCornerColor(const mc::BlockPos& pos, const CornerNeighbors& corner) const;
 	CornerColors getCornerColors(const mc::BlockPos& pos, const FaceCorners& corners) const;
 	
-	void lightLeft(Image& image, const CornerColors& colors) const;
-	void lightRight(Image& image, const CornerColors& colors) const;
+	void lightLeft(Image& image, const CornerColors& colors,
+			bool top = true, bool bottom = true) const;
+	void lightRight(Image& image, const CornerColors& colors,
+			bool top = true, bool bottom = true) const;
 	void lightTop(Image& image, const CornerColors& colors, int yoff = 0) const;
 	
-	void doSimpleLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint8_t data);
-	void doSmoothLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint8_t data);
+	void doSlabLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+	void doSimpleLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	void doSmoothLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 public:
 	LightingRendermode(RenderState& state, bool day);
 	virtual ~LightingRendermode();
 
-	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint8_t data);
-	virtual void draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint8_t data);
+	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	virtual void draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 };
 
 } /* namespace render */

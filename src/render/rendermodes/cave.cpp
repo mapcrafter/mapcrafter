@@ -38,7 +38,7 @@ bool CaveRendermode::isTransparentBlock(const mc::Block& block) const {
 	return block.id == 0 || state.images.isBlockTransparent(block.id, block.data);
 }
 
-bool CaveRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint8_t data) {
+bool CaveRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	mc::BlockPos directions[6] = {
 			mc::DIR_NORTH, mc::DIR_SOUTH, mc::DIR_EAST, mc::DIR_WEST,
 			mc::DIR_TOP, mc::DIR_BOTTOM
@@ -82,7 +82,7 @@ bool CaveRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint8_t data
 	return true;
 }
 
-void CaveRendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint8_t data) {
+void CaveRendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	// a nice color gradient to see something
 	// (because the whole map is just full of cave stuff,
 	// one can't differentiate the single caves)

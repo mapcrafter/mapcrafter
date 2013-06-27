@@ -33,8 +33,8 @@ public:
 	CaveRendermode(RenderState& state);
 	virtual ~CaveRendermode();
 
-	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint8_t data);
-	virtual void draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint8_t data);
+	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	virtual void draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 };
 
 } /* namespace render */

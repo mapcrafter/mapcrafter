@@ -260,12 +260,15 @@ CornerColors LightingRendermode::getCornerColors(const mc::BlockPos& pos, const 
 /**
  * Adds smooth lighting to the left face of a block image.
  */
-void LightingRendermode::lightLeft(Image& image, const CornerColors& colors) const {
+void LightingRendermode::lightLeft(Image& image, const CornerColors& colors,
+		bool top, bool bottom) const {
 	int size = image.getWidth() / 2;
 	Image tex(size, size);
 	createShade(tex, colors);
 
 	for (SideFaceIterator it(size, SideFaceIterator::LEFT); !it.end(); it.next()) {
+		if ((it.src_y < size/2 && !top) || (it.src_y >= size/2 && !bottom))
+			continue;
 		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + size/2);
 		if (pixel != 0) {
 			uint8_t d = ALPHA(tex.pixel(it.src_x, it.src_y));
@@ -277,12 +280,15 @@ void LightingRendermode::lightLeft(Image& image, const CornerColors& colors) con
 /**
  * Adds smooth lighting to the right face of a block image.
  */
-void LightingRendermode::lightRight(Image& image, const CornerColors& colors) const {
+void LightingRendermode::lightRight(Image& image, const CornerColors& colors,
+		bool top, bool bottom) const {
 	int size = image.getWidth() / 2;
 	Image tex(size, size);
 	createShade(tex, colors);
 
 	for (SideFaceIterator it(size, SideFaceIterator::RIGHT); !it.end(); it.next()) {
+		if ((it.src_y < size/2 && !top) || (it.src_y >= size/2 && !bottom))
+			continue;
 		uint32_t& pixel = image.pixel(it.dest_x + size, it.dest_y + size/2);
 		if (pixel != 0) {
 			uint8_t d = ALPHA(tex.pixel(it.src_x, it.src_y));
@@ -310,10 +316,39 @@ void LightingRendermode::lightTop(Image& image, const CornerColors& colors, int 
 }
 
 /**
+ * Applies the smooth lighting to a slab (not double slabs).
+ */
+void LightingRendermode::doSlabLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+	// to apply smooth lighting to a slab,
+	// we move the top shadow down if this is the bottom slab
+	// and we use only the top/bottom part of the side shadows
+
+	// check if the slab is the top or the bottom half of the block
+	bool top = data & 0x8;
+	bool bottom = !top;
+	// set y-offset for the top face shadow
+	int yoff = top ? 0 : image.getHeight()/4;
+
+	// light the faces
+	mc::Block block;
+	block = state.getBlock(pos + mc::DIR_WEST);
+	if (block.id == 0 || state.images.isBlockTransparent(block.id, block.data))
+		lightLeft(image, getCornerColors(pos, CORNERS_LEFT), top, bottom);
+
+	block = state.getBlock(pos + mc::DIR_SOUTH);
+	if (block.id == 0 || state.images.isBlockTransparent(block.id, block.data))
+		lightRight(image, getCornerColors(pos, CORNERS_RIGHT), top, bottom);
+
+	block = state.getBlock(pos + mc::DIR_TOP);
+	if (block.id == 0 || state.images.isBlockTransparent(block.id, block.data))
+		lightTop(image, getCornerColors(pos, CORNERS_TOP), yoff);
+}
+
+/**
  * Applies a simple lighting to a block. This colors the whole block with the lighting
  * color of the block.
  */
-void LightingRendermode::doSimpleLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint8_t data) {
+void LightingRendermode::doSimpleLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	uint8_t factor = getLightingColor(pos) * 255;
 
 	int size = image.getWidth();
@@ -329,7 +364,7 @@ void LightingRendermode::doSimpleLight(Image& image, const mc::BlockPos& pos, ui
 /**
  * Applies the smooth lighting to a block.
  */
-void LightingRendermode::doSmoothLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint8_t data) {
+void LightingRendermode::doSmoothLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	// check if lighting faces are visible
 	bool light_left = true, light_right = true, light_top = true;
 
@@ -368,17 +403,20 @@ void LightingRendermode::doSmoothLight(Image& image, const mc::BlockPos& pos, ui
 		lightTop(image, getCornerColors(pos, CORNERS_TOP));
 }
 
-bool LightingRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint8_t data) {
+bool LightingRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	return false;
 }
 
-void LightingRendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint8_t data) {
+void LightingRendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	bool transparent = state.images.isBlockTransparent(id, data);
 	bool water = (id == 8 || id == 9) && (data & 0b1111) == 0;
 
 	if(id == 78 && (data & 0b1111) == 0) {
 		// flat snow gets also smooth lighting
 		lightTop(image, getCornerColors(pos, CORNERS_BOTTOM), image.getHeight() / 2);
+	} else if (id == 44 || id == 126) {
+		// slabs and wooden slabs
+		doSlabLight(image, pos, id, data);
 	} else if (transparent && !water && id != 79) {
 		// transparent blocks (except full water blocks and ice)
 		// get simple lighting, they are completely lighted, not per face

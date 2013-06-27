@@ -35,11 +35,11 @@ void Rendermode::start() {
 void Rendermode::end() {
 }
 
-bool Rendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint8_t data) {
+bool Rendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	return false;
 }
 
-void Rendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint8_t data) {
+void Rendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 }
 
 bool createRendermode(const std::string& name, const RenderWorldConfig& config,
