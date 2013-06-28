@@ -249,12 +249,13 @@ LightingColor LightingRendermode::getCornerColor(const mc::BlockPos& pos, const 
  * Returns the corner lighting colors of a block face.
  */
 CornerColors LightingRendermode::getCornerColors(const mc::BlockPos& pos, const FaceCorners& corners) const {
-	return CornerColors({{
+	CornerColors colors = {{
 		getCornerColor(pos, corners.corner1),
 		getCornerColor(pos, corners.corner2),
 		getCornerColor(pos, corners.corner3),
 		getCornerColor(pos, corners.corner4),
-	}});
+	}};
+	return colors;
 }
 
 /**
@@ -304,7 +305,8 @@ void LightingRendermode::lightTop(Image& image, const CornerColors& colors, int 
 	int size = image.getWidth() / 2;
 	Image tex(size, size);
 	// we need to rotate the corners a bit to make them suitable for the TopFaceIterator
-	createShade(tex, {{colors[1], colors[3], colors[0], colors[2]}});
+	CornerColors rotated = {{colors[1], colors[3], colors[0], colors[2]}};
+	createShade(tex, rotated);
 
 	for (TopFaceIterator it(size); !it.end(); it.next()) {
 		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + yoff);
