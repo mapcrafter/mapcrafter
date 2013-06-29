@@ -60,6 +60,15 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.0.5**
+
+* Added a new configuration file format to specify worlds to render
+* Added different rendermodes: default, lighting (day/night), cave
+* Added ability to render different worlds/rotations/rendermodes into one output file
+* Added new blocks: dragon egg, redstone wires, some redstone/quartz stuff from Minecraft 1.5
+* Added alternative way to check if tiles are required when rendering incremental (image file timestamps)
+* Added alternative Leaflet template
+
 **v.0.4.1**
 
 * Fixed a bug preventing rotated worlds
