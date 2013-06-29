@@ -433,9 +433,26 @@ void setBehaviors(std::vector<RenderWorldConfig>& worlds, std::string string,
 	while (nextSplit(string, world, rotation)) {
 		w = getWorldIndex(world, worlds);
 		r = stringToRotation(rotation, ROTATION_NAMES_SHORT);
-		if (w != -1 && r != -1)
+		if (w == -1) {
+			std::cout << "Warning: Unknown map '" << world << "'." << std::endl;
+			continue;
+		}
+
+		if (!rotation.empty()) {
+			if (r == -1) {
+				std::cout << "Warning: Unknown rotation '" << rotation << "'." << std::endl;
+				continue;
+			}
+			if (!worlds[w].rotations.count(r)) {
+				std::cout << "Warning: Map '" << world << "' does not have rotation '"
+					<< rotation << "'." << std::endl;
+				continue;
+			}
+		}
+
+		if (r != -1)
 			worlds[w].render_behaviors[r] = behavior;
-		else if (w != -1 && rotation.empty())
+		else
 			std::fill(&worlds[w].render_behaviors[0], &worlds[w].render_behaviors[4],
 					behavior);
 	}
