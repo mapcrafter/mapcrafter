@@ -26,69 +26,72 @@
 
 namespace nbt = mapcrafter::mc::nbt;
 
-#define REQUIRE_TAG(tag, name) if(tag == NULL) { BOOST_ERROR("Tag '" + std::string(name) + "' not found!"); return; }
+#define REQUIRE_TAG(found, name) if(!found) { BOOST_ERROR("Tag '" + std::string(name) + "' not found!"); return; }
 
 BOOST_AUTO_TEST_CASE(nbt_testIO) {
-	std::stringstream stream;
+	std::vector<std::string> list_data = {"This", "is", "a", "test", "list", "."};
+	std::vector<int32_t> intarray_data = {1, 1, 2, 3, 5, 8, 13, 21};
+	std::vector<int8_t> bytearray_data = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
+	
+	for (nbt::Compression compression : {
+			nbt::Compression::NO_COMPRESSION,
+			nbt::Compression::GZIP,
+			nbt::Compression::ZLIB}) {
+		BOOST_MESSAGE(std::string("Testing NBT with") + (compression == nbt::Compression::NO_COMPRESSION ? "out compression." : (compression == nbt::Compression::GZIP ? " Gzip compression." : " Zlib compression.")));
+		
+		std::stringstream stream;
+		
+		nbt::NBTFile out("TestNBTFile");
+		out.addTag("byte", nbt::tag<nbt::TagByte>(42));
+		out.addTag("short", nbt::tag<nbt::TagShort>(1337));
+		out.addTag("int", nbt::tag<nbt::TagInt>(-23));
+		out.addTag("long", nbt::tag<nbt::TagLong>(123456));
+		out.addTag("float", nbt::tag<nbt::TagFloat>(3.1415926));
+		out.addTag("double", nbt::tag<nbt::TagDouble>(2.7182818));
+		out.addTag("string", nbt::tag<nbt::TagString>("foobar"));
 
-	std::vector<std::string> listdata;
-	listdata.push_back("This");
-	listdata.push_back("is");
-	listdata.push_back("a");
-	listdata.push_back("test");
-	listdata.push_back("list");
-	listdata.push_back(".");
+		std::unique_ptr<nbt::TagList> list = nbt::tag<nbt::TagList>(nbt::TagString::TAG_TYPE);
+		for (size_t i = 0; i < list_data.size(); i++)
+			list->payload.push_back(nbt::tag<nbt::TagString>(list_data[i]));
+		out.addTag("list", std::move(list));
+		out.addTag("bytearray", nbt::tag<nbt::TagByteArray>(bytearray_data));
+		out.addTag("intarray", nbt::tag<nbt::TagIntArray>(intarray_data));
+		
+		//out.dump(std::cout);
+		out.writeNBT(stream, compression);
 
-	nbt::NBTFile out("TestNBTFile");
-	out.addTag("byte", new nbt::TagByte(42));
-	out.addTag("short", new nbt::TagShort(1337));
-	out.addTag("int", new nbt::TagInt(-23));
-	out.addTag("long", new nbt::TagLong(123456));
-	out.addTag("float", new nbt::TagFloat(3.1415926));
-	out.addTag("double", new nbt::TagDouble(2.7182818));
-	out.addTag("string", new nbt::TagString("foobar"));
+		stream.seekg(0, std::ios_base::beg);
 
-	nbt::TagList* list = new nbt::TagList(nbt::TAG_STRING);
-	for (int i = 0; i < listdata.size(); i++)
-		list->payload.push_back(new nbt::TagString(listdata[i]));
-	out.addTag("list", list);
-	out.writeNBT(stream, nbt::GZIP);
+		nbt::NBTFile in;
+		in.readNBT(stream, compression);
+		in.dump(std::cout);
+		
+		REQUIRE_TAG(in.hasTag<nbt::TagByte>("byte"), "byte");
+		REQUIRE_TAG(in.hasTag<nbt::TagShort>("short"), "short");
+		REQUIRE_TAG(in.hasTag<nbt::TagInt>("int"), "int");
+		REQUIRE_TAG(in.hasTag<nbt::TagLong>("long"), "long");
+		REQUIRE_TAG(in.hasTag<nbt::TagFloat>("float"), "float");
+		REQUIRE_TAG(in.hasTag<nbt::TagDouble>("double"), "double");
+		REQUIRE_TAG(in.hasTag<nbt::TagString>("string"), "string");
+		REQUIRE_TAG(in.hasList<nbt::TagString>("list", list_data.size()), "list");
+		REQUIRE_TAG(in.hasArray<nbt::TagByteArray>("bytearray", bytearray_data.size()), "bytearray");
+		REQUIRE_TAG(in.hasArray<nbt::TagIntArray>("intarray", intarray_data.size()), "intarray");
 
-	stream.seekg(0, std::ios_base::beg);
-
-	nbt::NBTFile in;
-	in.readNBT(stream, nbt::GZIP);
-	nbt::TagByte* tag_byte = in.findTag<nbt::TagByte>("byte", nbt::TAG_BYTE);
-	nbt::TagShort* tag_short = in.findTag<nbt::TagShort>("short", nbt::TAG_SHORT);
-	nbt::TagInt* tag_int = in.findTag<nbt::TagInt>("int", nbt::TAG_INT);
-	nbt::TagLong* tag_long = in.findTag<nbt::TagLong>("long", nbt::TAG_LONG);
-	nbt::TagFloat* tag_float = in.findTag<nbt::TagFloat>("float", nbt::TAG_FLOAT);
-	nbt::TagDouble* tag_double = in.findTag<nbt::TagDouble>("double", nbt::TAG_DOUBLE);
-	nbt::TagString* tag_string = in.findTag<nbt::TagString>("string", nbt::TAG_STRING);
-	nbt::TagList* tag_list = in.findTag<nbt::TagList>("list", nbt::TAG_LIST);
-
-	REQUIRE_TAG(tag_byte, "byte");
-	REQUIRE_TAG(tag_short, "short");
-	REQUIRE_TAG(tag_int, "int");
-	REQUIRE_TAG(tag_long, "long");
-	REQUIRE_TAG(tag_float, "float");
-	REQUIRE_TAG(tag_double, "double");
-	REQUIRE_TAG(tag_string, "string");
-	REQUIRE_TAG(tag_list, "list");
-
-	BOOST_CHECK_EQUAL(tag_byte->payload, 42);
-	BOOST_CHECK_EQUAL(tag_short->payload, 1337);
-	BOOST_CHECK_EQUAL(tag_int->payload, -23);
-	BOOST_CHECK_EQUAL(tag_long->payload, 123456);
-	BOOST_CHECK_CLOSE(tag_float->payload, 3.1415926, 0.0001);
-	BOOST_CHECK_CLOSE(tag_double->payload, 2.7182818, 0.0001);
-	BOOST_CHECK_EQUAL(tag_string->payload, "foobar");
-
-	BOOST_CHECK_EQUAL(tag_list->tag_type, nbt::TAG_STRING);
-	BOOST_CHECK_EQUAL(listdata.size(), tag_list->payload.size());
-	for(int i = 0; i < listdata.size(); i++) {
-		BOOST_CHECK_EQUAL(tag_list->payload[i]->getType(), nbt::TAG_STRING);
-		BOOST_CHECK(listdata[i] == ((nbt::TagString*) tag_list->payload[i])->payload);
+		BOOST_CHECK_EQUAL(in.findTag<nbt::TagByte>("byte").payload, 42);
+		BOOST_CHECK_EQUAL(in.findTag<nbt::TagShort>("short").payload, 1337);
+		BOOST_CHECK_EQUAL(in.findTag<nbt::TagInt>("int").payload, -23);
+		BOOST_CHECK_EQUAL(in.findTag<nbt::TagLong>("long").payload, 123456);
+		BOOST_CHECK_CLOSE(in.findTag<nbt::TagFloat>("float").payload, 3.1415926, 0.0001);
+		BOOST_CHECK_CLOSE(in.findTag<nbt::TagDouble>("double").payload, 2.7182818, 0.0001);
+		BOOST_CHECK_EQUAL(in.findTag<nbt::TagString>("string").payload, "foobar");
+		
+		nbt::TagList& tag_list = in.findTag<nbt::TagList>("list");
+		for (size_t i = 0; i < list_data.size(); i++) {
+			BOOST_CHECK(tag_list.payload[i]->getType() == nbt::TagString::TAG_TYPE);
+			BOOST_CHECK(list_data[i] == tag_list.payload[i]->cast<nbt::TagString>().payload);
+		}
+		
+		BOOST_CHECK(bytearray_data == in.findTag<nbt::TagByteArray>("bytearray").payload);
+		BOOST_CHECK(intarray_data == in.findTag<nbt::TagIntArray>("intarray").payload);
 	}
-
 }
