@@ -148,11 +148,11 @@ int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 	// get data size and compression type
 	int size = *(reinterpret_cast<int*>(&regiondata[offset]));
 	uint8_t compression = regiondata[offset + 4];
-	nbt::CompressionType comp = nbt::NO_COMPRESSION;
+	nbt::Compression comp = nbt::Compression::NO_COMPRESSION;
 	if (compression == 1)
-		comp = nbt::GZIP;
+		comp = nbt::Compression::GZIP;
 	else if (compression == 2)
-		comp = nbt::ZLIB;
+		comp = nbt::Compression::ZLIB;
 
 	size = be32toh(size) - 1;
 

@@ -74,8 +74,8 @@ public:
 
 	void setRotation(int rotation);
 
-	bool readNBT(const char* data, size_t len, nbt::CompressionType compression =
-	        nbt::ZLIB);
+	bool readNBT(const char* data, size_t len, nbt::Compression compression =
+	        nbt::Compression::ZLIB);
 	void clear();
 
 	bool hasSection(int section) const;

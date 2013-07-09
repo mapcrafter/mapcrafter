@@ -42,82 +42,83 @@ void Chunk::setRotation(int rotation) {
 /**
  * Reads the chunk from (compressed) nbt data.
  */
-bool Chunk::readNBT(const char* data, size_t len, nbt::CompressionType compression) {
+bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) {
 	clear();
 
 	nbt::NBTFile nbt;
 	nbt.readNBT(data, len, compression);
 
 	// find "level" tag
-	nbt::TagCompound* level = nbt.findTag<nbt::TagCompound>("Level", nbt::TAG_COMPOUND);
-	if (level == NULL) {
+	if (!nbt.hasTag<nbt::TagCompound>("Level")) {
 		std::cerr << "Warning: Corrupt chunk (No level tag)!" << std::endl;
 		return false;
 	}
+	nbt::TagCompound& level = nbt.findTag<nbt::TagCompound>("Level");
 
 	// then find x/z pos of the chunk
-	nbt::TagInt* xpos = level->findTag<nbt::TagInt>("xPos", nbt::TAG_INT);
-	nbt::TagInt* zpos = level->findTag<nbt::TagInt>("zPos", nbt::TAG_INT);
-	if (xpos == NULL || zpos == NULL) {
+	if (!level.hasTag<nbt::TagInt>("xPos") || !level.hasTag<nbt::TagInt>("zPos")) {
 		std::cerr << "Warning: Corrupt chunk (No x/z position found)!" << std::endl;
 		return false;
 	}
-	pos = ChunkPos(xpos->payload, zpos->payload);
+	pos = ChunkPos(level.findTag<nbt::TagInt>("xPos").payload,
+				   level.findTag<nbt::TagInt>("zPos").payload);
 	if (rotation)
 		pos.rotate(rotation);
 
-	nbt::TagByteArray* tagBiomes = level->findTag<nbt::TagByteArray>("Biomes",
-			nbt::TAG_BYTE_ARRAY);
-	if (tagBiomes != NULL && tagBiomes->payload.size() == 256)
-		std::copy(tagBiomes->payload.begin(), tagBiomes->payload.end(), biomes);
-	else
+	if (level.hasArray<nbt::TagByteArray>("Biomes", 256)) {
+		nbt::TagByteArray& biomes_tag = level.findTag<nbt::TagByteArray>("Biomes");
+		std::copy(biomes_tag.payload.begin(), biomes_tag.payload.end(), biomes);
+	} else
 		std::cerr << "Warning: Corrupt chunk at " << pos.x << ":" << pos.z
 				<< " (No biome data found)!" << std::endl;
 
 	// find sections list
-	nbt::TagList* tagSections = level->findTag<nbt::TagList>("Sections", nbt::TAG_LIST);
-
-	// I already saw (empty) chunks from the end with TagBytes instead of TagCompound
+	// I already saw (empty) chunks from the end with TagByte instead of TagCompound
 	// in this list, ignore them, they are empty
-	if (tagSections == NULL
-			|| (tagSections->payload.size() != 0 && tagSections->tag_type != nbt::TAG_COMPOUND)) {
+	if (!level.hasList<nbt::TagCompound>("Sections")
+			&& !level.hasList<nbt::TagByte>("Sections", 0)) {
 		std::cerr << "Warning: Corrupt chunk at " << pos.x << ":" << pos.z
-		        << " (No valid sections list found)!" << std::endl;
+			<< " (No valid sections list found)!" << std::endl;
 		return false;
-	} else if (tagSections->payload.size() == 0)
+	}
+	
+	nbt::TagList& sections_tag = level.findTag<nbt::TagList>("Sections");
+	if (sections_tag.tag_type != nbt::TagCompound::TAG_TYPE)
 		return true;
 
 	// go through all sections
-	for (std::vector<nbt::NBTTag*>::const_iterator it = tagSections->payload.begin();
-	        it != tagSections->payload.end(); ++it) {
-		nbt::TagCompound* tagSection = (nbt::TagCompound*) *it;
-		nbt::TagByte* y = tagSection->findTag<nbt::TagByte>("Y", nbt::TAG_BYTE);
-		nbt::TagByteArray* blocks = tagSection->findTag<nbt::TagByteArray>("Blocks", nbt::TAG_BYTE_ARRAY);
-		nbt::TagByteArray* add = tagSection->findTag<nbt::TagByteArray>("Add", nbt::TAG_BYTE_ARRAY);
-		nbt::TagByteArray* data = tagSection->findTag<nbt::TagByteArray>("Data", nbt::TAG_BYTE_ARRAY);
-
-		nbt::TagByteArray* block_light = tagSection->findTag<nbt::TagByteArray>("BlockLight", nbt::TAG_BYTE_ARRAY);
-		nbt::TagByteArray* sky_light = tagSection->findTag<nbt::TagByteArray>("SkyLight", nbt::TAG_BYTE_ARRAY);
+	for (auto it = sections_tag.payload.begin(); it != sections_tag.payload.end(); ++it) {
+		nbt::TagCompound& section_tag = (*it)->cast<nbt::TagCompound>();
+		
 		// make sure section is valid
-		if (y == NULL || blocks == NULL || data == NULL || block_light == NULL || sky_light == NULL
-				|| blocks->payload.size() != 4096
-				|| data->payload.size() != 2048
-				|| block_light->payload.size() != 2048
-				|| sky_light->payload.size() != 2048)
+		if (!section_tag.hasTag<nbt::TagByte>("Y")
+				|| !section_tag.hasArray<nbt::TagByteArray>("Blocks", 4096)
+				|| !section_tag.hasArray<nbt::TagByteArray>("Data", 2048)
+				|| !section_tag.hasArray<nbt::TagByteArray>("BlockLight", 2048)
+				|| !section_tag.hasArray<nbt::TagByteArray>("SkyLight", 2048))
 			continue;
+		
+		nbt::TagByte& y = section_tag.findTag<nbt::TagByte>("Y");
+		nbt::TagByteArray& blocks = section_tag.findTag<nbt::TagByteArray>("Blocks");
+		nbt::TagByteArray& data = section_tag.findTag<nbt::TagByteArray>("Data");
+
+		nbt::TagByteArray& block_light = section_tag.findTag<nbt::TagByteArray>("BlockLight");
+		nbt::TagByteArray& sky_light = section_tag.findTag<nbt::TagByteArray>("SkyLight");
 
 		// add it
 		ChunkSection section;
-		section.y = y->payload;
-		std::copy(blocks->payload.begin(), blocks->payload.end(), section.blocks);
-		if (add == NULL || add->payload.size() != 2048)
+		section.y = y.payload;
+		std::copy(blocks.payload.begin(), blocks.payload.end(), section.blocks);
+		if (!section_tag.hasArray<nbt::TagByteArray>("Add", 2048))
 			std::fill(&section.add[0], &section.add[2048], 0);
-		else
-			std::copy(add->payload.begin(), add->payload.end(), section.add);
-		std::copy(data->payload.begin(), data->payload.end(), section.data);
+		else {
+			nbt::TagByteArray& add = section_tag.findTag<nbt::TagByteArray>("Add");
+			std::copy(add.payload.begin(), add.payload.end(), section.add);
+		}
+		std::copy(data.payload.begin(), data.payload.end(), section.data);
 
-		std::copy(block_light->payload.begin(), block_light->payload.end(), section.block_light);
-		std::copy(sky_light->payload.begin(), sky_light->payload.end(), section.sky_light);
+		std::copy(block_light.payload.begin(), block_light.payload.end(), section.block_light);
+		std::copy(sky_light.payload.begin(), sky_light.payload.end(), section.sky_light);
 		// set the position of this section
 		section_offsets[section.y] = sections.size();
 		sections.push_back(section);
@@ -157,7 +158,7 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 	if (section_offsets[section] == -1)
 		return 0;
 	// FIXME sometimes this happens, fix this
-	if (sections.size() > 16 || sections.size() <= section_offsets[section]) {
+	if (sections.size() > 16 || sections.size() <= (unsigned) section_offsets[section]) {
 		return 0;
 	}
 
@@ -199,22 +200,6 @@ uint8_t Chunk::getData(const LocalBlockPos& pos, int array) const {
  */
 uint8_t Chunk::getBlockData(const LocalBlockPos& pos) const {
 	return getData(pos, 0);
-
-	/*
-	int section = pos.y / 16;
-	if (section_offsets[section] == -1)
-		return 0;
-
-	int x = pos.x;
-	int z = pos.z;
-	if (rotation)
-		rotateBlockPos(x, z, rotation);
-
-	int offset = ((pos.y % 16) * 16 + z) * 16 + x;
-	if ((offset % 2) == 0)
-		return sections[section_offsets[section]].data[offset / 2] & 0xf;
-	return (sections[section_offsets[section]].data[offset / 2] >> 4) & 0x0f;
-	*/
 }
 
 uint8_t Chunk::getBlockLight(const LocalBlockPos& pos) const {
