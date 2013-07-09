@@ -211,6 +211,9 @@ class TextureImage : public Image {
 private:
 	std::string name;
 public:
+	// the original (not resized) texture image
+	Image original;
+
 	TextureImage();
 	TextureImage(const std::string& name);
 	~TextureImage();
@@ -498,9 +501,11 @@ private:
 	void createStem(uint16_t id); // id 104, 105
 	void createVines(); // id 106
 	void createFenceGate(); // id 107
+	void createBrewingStand(); // id 117
 	void createCauldron(); // id 118
 	void createDragonEgg(); // id 122
 	void createBeacon(); // id 138
+	void createFlowerPot(); // id 140
 
 	void loadBlocks();
 public:

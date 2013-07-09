@@ -139,6 +139,8 @@ bool TextureImage::load(const std::string& path, int size) {
 	if (!tmp.readPNG(path + "/" + name + ".png"))
 		return false;
 
+	original = tmp;
+
 	// check if this is an animated texture
 	// -> use only the first frame
 	if (tmp.getWidth() < tmp.getHeight())
@@ -2144,6 +2146,13 @@ void BlockImages::createFenceGate() { // id 107
 	}
 }
 
+void BlockImages::createBrewingStand() { // id 117
+	Image block(getBlockImageSize(), getBlockImageSize());
+	blitFace(block, FACE_BOTTOM, textures.BREWING_STAND_BASE);
+	blitItemStyleBlock(block, textures.BREWING_STAND, textures.BREWING_STAND);
+	setBlockImage(117, 0, block);
+}
+
 void BlockImages::createCauldron() { // id 118
 	Image side = textures.CAULDRON_SIDE;
 	Image water = textures.WATER;
@@ -2215,6 +2224,58 @@ void BlockImages::createBeacon() { // id 138
 	blitFace(beacon, FACE_TOP, glass_texture, 0, 0, true, dleft, dright);
 
 	setBlockImage(138, 0, beacon);
+}
+
+void BlockImages::createFlowerPot() { // id 140
+	double s = (double) textures.FLOWER_POT.original.getWidth() / 16;
+	Image tmptex = textures.FLOWER_POT.original.clip(s*5, s*10, s*6, s*6);
+	Image pot_texture;
+	
+	s = (double) texture_size / 16;
+	tmptex.resizeInterpolated(s*6, s*6, pot_texture);
+	
+	int xoff = std::ceil(s*10);
+	int yoff = std::ceil(s*16);
+	
+	Image pot(getBlockImageSize(), getBlockImageSize());
+	blitFace(pot, FACE_NORTH, pot_texture, xoff, yoff, true, dleft, dright);
+	blitFace(pot, FACE_EAST, pot_texture, xoff, yoff, true, dleft, dright);
+	blitFace(pot, FACE_TOP, textures.DIRT.clip(0, 0, s*6, s*6), xoff, yoff+s*3);
+	
+	Image contents[] = {
+		Image(),
+		textures.ROSE,
+		textures.FLOWER,
+		textures.SAPLING,
+		textures.SAPLING_SPRUCE,
+		textures.SAPLING_BIRCH,
+		textures.SAPLING_JUNGLE,
+		textures.MUSHROOM_RED,
+		textures.MUSHROOM_BROWN,
+		Image(),
+		textures.DEADBUSH,
+		textures.FERN,
+	};
+	
+	for (int16_t i = 0; i < 11; i++) {
+		Image block = pot;
+		
+		if (i == 9) {
+			Image cactus = getBlock(81, 0);
+			Image content;
+			cactus.resizeSimple(s*16, s*16, content);
+			block.alphablit(content, s*8, s*8);
+		} else if (i != 0) {
+			Image content(texture_size*2, texture_size*2);
+			blitItemStyleBlock(content, contents[i], contents[i]);
+			block.alphablit(content, 0, s*-3);
+		}
+		
+		blitFace(block, FACE_WEST, pot_texture, xoff, yoff, true, dleft, dright);
+		blitFace(block, FACE_SOUTH, pot_texture, xoff, yoff, true, dleft, dright);
+		
+		setBlockImage(140, i, block);
+	}
 }
 
 void BlockImages::loadBlocks() {
@@ -2406,7 +2467,8 @@ void BlockImages::loadBlocks() {
 	createItemStyleBlock(115, 3, t.NETHER_STALK_2); //
 	// --
 	createSmallerBlock(116, 0, t.ENCHANTMENT_SIDE, t.ENCHANTMENT_TOP, 0, texture_size * 0.75); // enchantment table
-	createItemStyleBlock(117, 0, t.BREWING_STAND); // brewing stand
+	//createItemStyleBlock(117, 0, t.BREWING_STAND); // brewing stand
+	createBrewingStand(); // id 117
 	createCauldron(); // id 118 // cauldron
 	createSmallerBlock(119, 0, endportal_texture, endportal_texture,
 			texture_size * 0.25, texture_size * 0.75); // end portal
@@ -2431,7 +2493,7 @@ void BlockImages::loadBlocks() {
 	createBlock(137, 0, t.COMMAND_BLOCK); // command block
 	createBeacon(); // beacon
 	// id 139 // cobblestone wall
-	// id 140 // flower pot
+	createFlowerPot(); // id 140
 	// carrots --
 	createItemStyleBlock(141, 0, t.CARROTS_0);
 	createItemStyleBlock(141, 1, t.CARROTS_0);
