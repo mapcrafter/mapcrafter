@@ -114,7 +114,7 @@ private:
 	bool render_biomes;
 	bool water_preblit;
 
-	std::vector<std::shared_ptr<Rendermode> > rendermodes;
+	std::vector<std::unique_ptr<Rendermode>> rendermodes;
 
 	Biome getBiome(const mc::BlockPos& pos, const mc::Chunk* chunk);
 
