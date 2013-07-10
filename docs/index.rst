@@ -11,10 +11,12 @@ Welcome
 
 mapcrafter is a fast Minecraft World Renderer written in C++. It renders
 Minecraft Worlds to a bunch of images, which are viewable in any webbrowser
-using the Google Maps API.
+using the Google Maps API (or Leaflet as an alternative).
 
 mapcrafter is not yet finished. At the moment a few blocks are not supported, 
-but the basic rendering routines are implemented. The renderer works with 
+but the basic rendering routines are implemented. mapcrafter uses configuration
+files to specify which worlds should get rendered and allows multiple rendered
+worlds/rotation of worlds/rendermodes in one output file. The renderer works with 
 the Anvil World format and the Minecraft 1.5 Texture Packs.
 
 mapcrafter is free software and available under the GPL license. You can
@@ -41,7 +43,7 @@ Requirements
 
 * A Linux-based or Mac operating system would be good, 
   building the renderer on Windows is possible but not easy.
-* A C++ compiler (preferable gcc) and make to build mapcrafter.
+* A C++ compiler (preferable gcc), cmake and make to build mapcrafter.
 * Some libraries:
 	* libpng
 	* libpthread

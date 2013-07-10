@@ -9,7 +9,7 @@ using the Google Maps API.
 mapcrafter runs on linux (maybe also Mac OS or W****** with cygwin) and needs
 libpng, libpthread, libboost-iostreams,libboost-system, libboost-filesystem,
 and libboost-program-options (and libboost-test if you want to use the tests).
-You can build it with g++ and the supplied makefile.
+You can build it with g++ and cmake/make.
 
 mapcrafter is not yet finished. At the moment a few blocks are not supported,
 but the basic rendering routines are implemented. The renderer works with the
