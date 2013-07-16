@@ -256,13 +256,13 @@ RotationSelectControl.prototype.create = function(wrapper) {
 		img = document.createElement("img");
 		img.setAttribute("id", "rotation-" + names[i]);
 		img.setAttribute("class", "rotation");
-		img.setAttribute("src", "icons/" + names[i] + ".png");
+		img.setAttribute("src", "images/" + names[i] + ".png");
 		a.appendChild(img);
 		
 		var img2 = document.createElement("img");
 		img2.setAttribute("id", "rotation-" + names[i] + "-active");
 		img2.setAttribute("class", "rotation");
-		img2.setAttribute("src", "icons/" + names[i] + "_active.png");
+		img2.setAttribute("src", "images/" + names[i] + "_active.png");
 		
 		wrapper.appendChild(a);
 		wrapper.appendChild(img2);
