@@ -43,7 +43,7 @@ Requirements
 
 * A Linux-based or Mac operating system would be good, 
   building the renderer on Windows is possible but not easy.
-* A C++ compiler (preferable gcc), cmake and make to build mapcrafter.
+* A C++ compiler (preferable gcc), CMake and make to build mapcrafter.
 * Some libraries:
 	* libpng
 	* libpthread

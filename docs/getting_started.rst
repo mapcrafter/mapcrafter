@@ -21,13 +21,15 @@ Debian-like Linux system, you can install these packages with apt::
     sudo apt-get install libpng12-dev libboost-iostreams-dev \
     libboost-system-dev libboost-filesystem-dev libboost-program-options-dev
 
-Then you can go into the ``src`` directory and build mapcrafter with the
-following commands::
+Then you can go into the directory where the mapcrafter source is 
+(probably ``mapcrafter/``, not ``mapcrafter/src/``) and build mapcrafter 
+with the following commands::
 
     cmake .
     make
 
-If everything goes well, you should have an executable file ``mapcrafter``.
+If everything goes well, you should have an executable file ``mapcrafter``
+in the ``src/`` directory.
 
 .. _installing-textures:
 
@@ -41,16 +43,16 @@ Now you need to get your Minecraft Textures. You need the following files:
 * largechest.png 
 * foliagecolor.png 
 * grasscolor.png 
-* the blocks/ directory from your texture pack
+* the ``blocks/`` directory from your texture pack
 
 You can get those files from your ``minecraft.jar`` file (default textures) or
 from another texture pack. You should put those files in the
-``src/data/textures`` directory. There are already ``endportal.png`` and
+``src/data/textures/`` directory. There are already ``endportal.png`` and
 ``fire.png``.
 
 To extract the textures from the ``minecraft.jar`` there is a python script
-``find_images.py`` in the ``src/data`` directory. Just go into the
-``src/data/textures`` directory or into your own textures directory and
+``find_images.py`` in the ``src/data/`` directory. Just go into the
+``src/data/textures/`` directory or into your own textures directory and
 run::
 
     python find_images.py /path/to/my/minecraft.jar
@@ -73,7 +75,7 @@ At first you have to create a configuration file like this::
 
 In the configuration file you define which worlds the renderer should render.
 In this example is defined that the renderer should render the world in the
-directory ``world`` into the output directory ``output``. Directories with
+directory ``world/`` into the output directory ``output/``. Directories with
 template and textures are also defined.  All relative paths in this
 configuration file are relative to the path of the configuration file.
 
