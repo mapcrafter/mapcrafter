@@ -303,6 +303,19 @@ MousePosControl.prototype.create = function(wrapper) {
 	wrapper.appendChild(text);
 }
 
+HTMLControl.prototype = new MapControl();
+
+/**
+ * A simple control with user-defined content.
+ */
+function HTMLControl(html) {
+	this.html = html;
+}
+
+HTMLControl.prototype.create = function(wrapper) {
+	wrapper.innerHTML = this.html;
+};
+
 /**
  * The main map class.
  */

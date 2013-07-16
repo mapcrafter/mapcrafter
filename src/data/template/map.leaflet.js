@@ -290,6 +290,19 @@ MousePosControl.prototype.create = function(wrapper) {
 	wrapper.appendChild(text);
 }
 
+HTMLControl.prototype = new MapControl();
+
+/**
+ * A simple control with user-defined content.
+ */
+function HTMLControl(html) {
+	this.html = html;
+}
+
+HTMLControl.prototype.create = function(wrapper) {
+	wrapper.innerHTML = this.html;
+};
+
 var MCTileLayer = L.TileLayer.extend({
 	initialize: function(url, options) {
 		this._url = url;
