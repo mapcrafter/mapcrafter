@@ -17,9 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "render/config.h"
-
-#include "util.h"
+#include "config.h"
 
 #include <fstream>
 

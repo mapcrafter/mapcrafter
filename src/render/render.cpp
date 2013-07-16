@@ -17,11 +17,11 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "render/render.h"
+#include "render.h"
 
-#include "render/rendermodes/base.h"
+#include "rendermodes/base.h"
 
-#include "util.h"
+#include "../util.h"
 
 #include <iostream>
 #include <fstream>

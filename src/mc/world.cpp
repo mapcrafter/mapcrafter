@@ -17,11 +17,9 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mc/world.h"
+#include "world.h"
 
-#include "mc/chunk.h"
-
-#include "util.h"
+#include "../util.h"
 
 #include <iostream>
 #include <fstream>

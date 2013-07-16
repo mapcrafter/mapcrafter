@@ -17,9 +17,9 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "render/textures.h"
+#include "textures.h"
 
-#include "util.h"
+#include "../util.h"
 
 #include <iostream>
 #include <map>

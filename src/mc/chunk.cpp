@@ -17,9 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mc/chunk.h"
-
-#include "mc/nbt.h"
+#include "chunk.h"
 
 #include <iostream>
 #include <cmath>

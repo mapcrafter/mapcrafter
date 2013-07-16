@@ -17,7 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mc/nbt.h"
+#include "nbt.h"
 
 #include <iostream>
 #include <fstream>

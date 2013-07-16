@@ -20,13 +20,13 @@
 #ifndef RENDER_H_
 #define RENDER_H_
 
-#include "mc/pos.h"
-#include "mc/cache.h"
+#include "../mc/pos.h"
+#include "../mc/cache.h"
 
-#include "render/config.h"
-#include "render/image.h"
-#include "render/textures.h"
-#include "render/tile.h"
+#include "config.h"
+#include "image.h"
+#include "textures.h"
+#include "tile.h"
 
 #include <boost/filesystem.hpp>
 

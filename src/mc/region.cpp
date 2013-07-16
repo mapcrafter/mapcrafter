@@ -17,7 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mc/region.h"
+#include "region.h"
 
 #include <fstream>
 #include <cstdlib>

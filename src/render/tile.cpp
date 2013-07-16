@@ -17,11 +17,13 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "render/tile.h"
+#include "tile.h"
 
-#include "mc/pos.h"
-#include "render/render.h"
-#include "util.h"
+#include "../mc/pos.h"
+
+#include "render.h"
+
+#include "../util.h"
 
 #include <iostream>
 #include <sstream>

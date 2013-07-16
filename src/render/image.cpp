@@ -17,9 +17,9 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "render/image.h"
+#include "image.h"
 
-#include "util.h"
+#include "../util.h"
 
 #include <iostream>
 #include <fstream>

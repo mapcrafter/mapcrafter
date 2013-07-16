@@ -20,9 +20,9 @@
 #ifndef WORLD_H_
 #define WORLD_H_
 
-#include "mc/pos.h"
-#include "mc/chunk.h"
-#include "mc/region.h"
+#include "pos.h"
+#include "chunk.h"
+#include "region.h"
 
 #include <string>
 #include <unordered_set>

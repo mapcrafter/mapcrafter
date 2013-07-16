@@ -20,7 +20,7 @@
 #ifndef TEXTURES_H_
 #define TEXTURES_H_
 
-#include "render/image.h"
+#include "image.h"
 
 #include <string>
 #include <unordered_map>

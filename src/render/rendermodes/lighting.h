@@ -20,7 +20,7 @@
 #ifndef LIGHT_H_
 #define LIGHT_H_
 
-#include "render/rendermodes/base.h"
+#include "base.h"
 
 #include <array>
 

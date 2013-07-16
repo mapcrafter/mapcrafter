@@ -20,8 +20,8 @@
 #ifndef REGION_H_
 #define REGION_H_
 
-#include "mc/pos.h"
-#include "mc/chunk.h"
+#include "pos.h"
+#include "chunk.h"
 
 #include <string>
 #include <set>

@@ -20,7 +20,7 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
-#include "util.h"
+#include "../util.h"
 
 #include <string>
 #include <vector>

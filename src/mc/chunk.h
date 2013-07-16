@@ -20,8 +20,8 @@
 #ifndef CHUNK_H_
 #define CHUNK_H_
 
-#include "mc/nbt.h"
-#include "mc/pos.h"
+#include "nbt.h"
+#include "pos.h"
 
 #include <stdint.h>
 

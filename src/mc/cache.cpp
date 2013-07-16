@@ -17,7 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mc/cache.h"
+#include "cache.h"
 
 namespace mapcrafter {
 namespace mc {

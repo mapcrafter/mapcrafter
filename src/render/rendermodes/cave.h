@@ -20,7 +20,7 @@
 #ifndef CAVE_H_
 #define CAVE_H_
 
-#include "render/rendermodes/base.h"
+#include "base.h"
 
 namespace mapcrafter {
 namespace render {

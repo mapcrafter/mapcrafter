@@ -17,7 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "render/tile.h"
+#include "../render/tile.h"
 
 #include <map>
 #include <boost/test/unit_test.hpp>

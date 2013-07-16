@@ -20,14 +20,14 @@
 #ifndef MANAGER_H_
 #define MANAGER_H_
 
-#include "mc/cache.h"
-#include "mc/world.h"
+#include "../mc/cache.h"
+#include "../mc/world.h"
 
-#include "render/config.h"
-#include "render/tile.h"
-#include "render/render.h"
+#include "config.h"
+#include "tile.h"
+#include "render.h"
 
-#include "util.h"
+#include "../util.h"
 
 #include <boost/filesystem.hpp>
 

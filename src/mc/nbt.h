@@ -20,7 +20,7 @@
 #ifndef NBT_H_
 #define NBT_H_
 
-#include "util.h"
+#include "../util.h"
 
 #include <cstdint>
 #include <exception>

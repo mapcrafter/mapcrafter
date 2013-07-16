@@ -17,7 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mc/pos.h"
+#include "../mc/pos.h"
 
 #include <iostream>
 #include <set>

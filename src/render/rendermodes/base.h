@@ -20,12 +20,12 @@
 #ifndef BASE_H_
 #define BASE_H_
 
-#include "mc/pos.h"
-#include "mc/cache.h"
+#include "../../mc/pos.h"
+#include "../../mc/cache.h"
 
-#include "render/config.h"
-#include "render/image.h"
-#include "render/render.h"
+#include "../config.h"
+#include "../image.h"
+#include "../render.h"
 
 #include <string>
 #include <vector>
@@ -60,7 +60,7 @@ bool createRendermode(const std::string& name, const RenderWorldConfig& config,
 } /* namespace render */
 } /* namespace mapcrafter */
 
-#include "render/rendermodes/cave.h"
-#include "render/rendermodes/lighting.h"
+#include "cave.h"
+#include "lighting.h"
 
 #endif /* BASE_H_ */

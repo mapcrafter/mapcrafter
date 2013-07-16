@@ -20,9 +20,9 @@
 #ifndef TILE_H_
 #define TILE_H_
 
-#include "mc/world.h"
+#include "../mc/world.h"
 
-#include "render/textures.h"
+#include "textures.h"
 
 #include <set>
 #include <vector>
