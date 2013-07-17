@@ -42,7 +42,7 @@ bool Rendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 void Rendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 }
 
-bool createRendermode(const std::string& name, const RenderWorldConfig& config,
+bool createRendermode(const std::string& name, const config::RenderWorldConfig& config,
 		RenderState& state, std::vector<std::unique_ptr<Rendermode>>& modes) {
 	if (name.empty() || name == "normal")
 		return true;

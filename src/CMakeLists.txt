@@ -5,6 +5,7 @@ set(HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/util.h
 )
 
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/config")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/mc")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/render")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/render/rendermodes")

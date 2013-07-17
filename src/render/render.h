@@ -20,10 +20,11 @@
 #ifndef RENDER_H_
 #define RENDER_H_
 
+#include "../config/config.h"
+
 #include "../mc/pos.h"
 #include "../mc/cache.h"
 
-#include "config.h"
 #include "image.h"
 #include "textures.h"
 #include "tile.h"
@@ -121,7 +122,7 @@ private:
 	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 public:
 	TileRenderer(mc::WorldCache& world, const BlockImages& textures,
-			const RenderWorldConfig& config);
+			const config::RenderWorldConfig& config);
 	~TileRenderer();
 
 	void renderTile(const TilePos& pos, Image& tile);

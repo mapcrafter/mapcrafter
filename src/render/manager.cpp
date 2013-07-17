@@ -38,7 +38,7 @@ MapSettings::MapSettings()
  * This method reads the map settings from a file.
  */
 bool MapSettings::read(const std::string& filename) {
-	ConfigFile config;
+	config::ConfigFile config;
 	if (!config.loadFile(filename))
 		return false;
 
@@ -64,7 +64,7 @@ bool MapSettings::read(const std::string& filename) {
  * This method writes the map settings to a file.
  */
 bool MapSettings::write(const std::string& filename) const {
-	ConfigFile config;
+	config::ConfigFile config;
 
 	config.set("", "texture_size", str(texture_size));
 	config.set("", "tile_size", str(tile_size));
@@ -83,14 +83,14 @@ bool MapSettings::write(const std::string& filename) const {
 	return config.writeFile(filename);
 }
 
-bool MapSettings::equalsConfig(const RenderWorldConfig& config) const {
+bool MapSettings::equalsConfig(const config::RenderWorldConfig& config) const {
 	return texture_size == config.texture_size
 			&& render_unknown_blocks == config.render_unknown_blocks
 			&& render_leaves_transparent == config.render_leaves_transparent
 			&& render_biomes == config.render_biomes;
 }
 
-MapSettings MapSettings::byConfig(const RenderWorldConfig& config) {
+MapSettings MapSettings::byConfig(const config::RenderWorldConfig& config) {
 	MapSettings settings;
 
 	settings.texture_size = config.texture_size;
@@ -370,7 +370,7 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 /**
  * Renders render tiles and composite tiles.
  */
-void RenderManager::render(const RenderWorldConfig& config, const std::string& output_dir,
+void RenderManager::render(const config::RenderWorldConfig& config, const std::string& output_dir,
 		const mc::World& world, const TileSet& tiles, const BlockImages& images) {
 	if(tiles.getRequiredCompositeTilesCount() == 0) {
 		std::cout << "No tiles need to get rendered." << std::endl;
@@ -434,7 +434,7 @@ void* runWorker(void* settings_ptr) {
 /**
  * This method starts the render threads when multithreading is enabled.
  */
-void RenderManager::renderMultithreaded(const RenderWorldConfig& config,
+void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 		const std::string& output_dir, const mc::World& world, const TileSet& tiles,
 		const BlockImages& images) {
 	// a list of workers
@@ -536,7 +536,7 @@ bool RenderManager::run() {
 	}
 
 	// get the maps to render
-	std::vector<RenderWorldConfig> world_configs = config.getWorlds();
+	std::vector<config::RenderWorldConfig> world_configs = config.getWorlds();
 
 	// check for already existing rendered maps
 	// and get the (old) zoom levels for the template,
@@ -555,7 +555,7 @@ bool RenderManager::run() {
 
 	// go through all maps
 	for (size_t i = 0; i < world_configs.size(); i++) {
-		RenderWorldConfig world = world_configs[i];
+		config::RenderWorldConfig world = world_configs[i];
 		// continue, if all rotations for this map are skipped
 		if (world.canSkip())
 			continue;
@@ -589,7 +589,7 @@ bool RenderManager::run() {
 			// for force-render rotations, set the last render time to 0
 			// to render all tiles
 			for (int i = 0; i < 4; i++)
-				if (world.render_behaviors[i] == RenderWorldConfig::RENDER_FORCE)
+				if (world.render_behaviors[i] == config::RenderWorldConfig::RENDER_FORCE)
 					settings.last_render[i] = 0;
 		} else {
 			// if we don't have a settings file or force-render the whole map
@@ -636,7 +636,7 @@ bool RenderManager::run() {
 				it != world.rotations.end(); ++it) {
 			tilesets[*it].setDepth(depth);
 
-			fs::path output_dir = config.getOutputDir() / world.name_short / ROTATION_NAMES_SHORT[*it];
+			fs::path output_dir = config.getOutputDir() / world.name_short / config::ROTATION_NAMES_SHORT[*it];
 			// check if this rotation was already rendered on a lower max zoom level
 			// -> then: increase max zoom level
 			if (old_settings && settings.rotations[*it] && settings.max_zoom < depth) {
@@ -645,7 +645,7 @@ bool RenderManager::run() {
 			}
 
 			// if this is an incremental rendering...
-			if (world.render_behaviors[*it] == RenderWorldConfig::RENDER_AUTO) {
+			if (world.render_behaviors[*it] == config::RenderWorldConfig::RENDER_AUTO) {
 				// ...scan the required tiles
 				if (world.incremental_detection == "filetimes")
 					tilesets[*it].scanRequiredByFiletimes(output_dir);
@@ -669,11 +669,11 @@ bool RenderManager::run() {
 			j_from++;
 
 			// continue if we should skip this rotation
-			if (world.render_behaviors[*it] == RenderWorldConfig::RENDER_SKIP)
+			if (world.render_behaviors[*it] == config::RenderWorldConfig::RENDER_SKIP)
 				continue;
 
 			std::cout << "(" << i_from << "." << j_from << "/" << i_from << "."
-					<< j_to << ") Rendering rotation " << ROTATION_NAMES[*it]
+					<< j_to << ") Rendering rotation " << config::ROTATION_NAMES[*it]
 					<< ":" << std::endl;
 
 			if (settings.last_render[*it] != 0) {
@@ -696,7 +696,7 @@ bool RenderManager::run() {
 			}
 
 			std::string output_dir = config.getOutputPath(world.name_short + "/"
-					+ ROTATION_NAMES_SHORT[*it]);
+					+ config::ROTATION_NAMES_SHORT[*it]);
 			render(world, output_dir, worlds[*it], tilesets[*it], images);
 
 			// update the settings file
@@ -706,7 +706,7 @@ bool RenderManager::run() {
 
 			int took = time(NULL) - start;
 			std::cout << "(" << i_from << "." << j_from << "/" << i_from << "."
-					<< j_to << ") Rendering rotation " << ROTATION_NAMES[*it]
+					<< j_to << ") Rendering rotation " << config::ROTATION_NAMES[*it]
 					<< " took " << took << " seconds." << std::endl << std::endl;
 
 		}

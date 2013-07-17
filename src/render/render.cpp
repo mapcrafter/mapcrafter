@@ -138,7 +138,7 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 }
 
 TileRenderer::TileRenderer(mc::WorldCache& world, const BlockImages& images,
-        const RenderWorldConfig& config)
+        const config::RenderWorldConfig& config)
 		: state(world, images), render_biomes(config.render_biomes),
 		  water_preblit(config.rendermode != "daylight"
 				  && config.rendermode != "nightlight") {

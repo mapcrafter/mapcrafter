@@ -20,10 +20,11 @@
 #ifndef MANAGER_H_
 #define MANAGER_H_
 
+#include "../config/config.h"
+
 #include "../mc/cache.h"
 #include "../mc/world.h"
 
-#include "config.h"
 #include "tile.h"
 #include "render.h"
 
@@ -68,8 +69,8 @@ struct MapSettings {
 	bool read(const std::string& filename);
 	bool write(const std::string& filename) const;
 
-	bool equalsConfig(const RenderWorldConfig& config) const;
-	static MapSettings byConfig(const RenderWorldConfig& config);
+	bool equalsConfig(const config::RenderWorldConfig& config) const;
+	static MapSettings byConfig(const config::RenderWorldConfig& config);
 };
 
 /**
@@ -118,7 +119,7 @@ void renderRecursive(RecursiveRenderSettings& settings, const Path& path, Image&
 class RenderManager {
 private:
 	RenderOpts opts;
-	RenderConfigParser config;
+	config::RenderConfigParser config;
 
 	bool copyTemplateFile(const std::string& filename,
 	        const std::map<std::string, std::string>& vars =
@@ -129,10 +130,10 @@ private:
 
 	void increaseMaxZoom(const fs::path& dir) const;
 
-	void render(const RenderWorldConfig& config, const std::string& output_dir,
+	void render(const config::RenderWorldConfig& config, const std::string& output_dir,
 			const mc::World& world, const TileSet& tiles,
 			const BlockImages& images);
-	void renderMultithreaded(const RenderWorldConfig& config, const std::string& output_dir,
+	void renderMultithreaded(const config::RenderWorldConfig& config, const std::string& output_dir,
 			const mc::World& world, const TileSet& tiles, const BlockImages& images);
 public:
 	RenderManager(const RenderOpts& opts);

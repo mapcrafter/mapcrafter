@@ -20,10 +20,11 @@
 #ifndef BASE_H_
 #define BASE_H_
 
+#include "../../config/config.h"
+
 #include "../../mc/pos.h"
 #include "../../mc/cache.h"
 
-#include "../config.h"
 #include "../image.h"
 #include "../render.h"
 
@@ -54,7 +55,7 @@ public:
 	virtual void draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 };
 
-bool createRendermode(const std::string& name, const RenderWorldConfig& config,
+bool createRendermode(const std::string& name, const config::RenderWorldConfig& config,
 		RenderState& state, std::vector<std::unique_ptr<Rendermode>>& modes);
 
 } /* namespace render */
