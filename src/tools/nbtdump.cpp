@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "mc/nbt.h"
+#include "../mc/nbt.h"
 
 namespace nbt = mapcrafter::mc::nbt;
 
