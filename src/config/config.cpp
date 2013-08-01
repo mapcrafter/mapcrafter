@@ -1,8 +1,20 @@
 /*
- * config.cpp
+ * Copyright 2012, 2013 Moritz Hilscher
  *
- *  Created on: 17.07.2013
- *      Author: moritz
+ * This file is part of mapcrafter.
+ *
+ * mapcrafter is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * mapcrafter is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -69,9 +81,9 @@ void RenderWorldConfig::readFromConfig(const fs::path& dir, const ConfigFile& co
 		incremental_detection = config.get(section, "incremental_detection");
 
 	if (!input_dir.empty())
-		input_dir = fs::absolute(input_dir, dir).string();
+		input_dir = BOOST_FS_ABSOLUTE(input_dir, dir).string();
 	if (!textures_dir.empty())
-		textures_dir = fs::absolute(textures_dir, dir).string();
+		textures_dir = BOOST_FS_ABSOLUTE(textures_dir, dir).string();
 }
 
 bool RenderWorldConfig::checkValid(std::vector<std::string>& errors) const {
@@ -310,12 +322,7 @@ std::string RenderConfigParser::generateJavascript() const {
 
 	for (size_t i = 0; i < worlds.size(); i++) {
 		RenderWorldConfig world = worlds[i];
-
-#ifdef OLD_BOOST
-		std::string world_name = fs::path(world.input_dir).filename();
-#else
-		std::string world_name = fs::path(world.input_dir).filename().string();
-#endif
+		std::string world_name = BOOST_FS_FILENAME(fs::path(world.input_dir));
 
 		js += "\"" + world.name_short + "\" : {\n";
 		js += "\tname: \"" + world.name_long + "\",\n";

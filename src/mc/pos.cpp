@@ -23,6 +23,9 @@
 
 #include <cmath>
 #include <cstdio>
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace mc {
@@ -50,11 +53,7 @@ bool RegionPos::operator<(const RegionPos& other) const {
 }
 
 RegionPos RegionPos::byFilename(const std::string& filename) {
-#ifdef OLD_BOOST
-	std::string name = boost::filesystem::path(filename).filename();
-#else
-	std::string name = boost::filesystem::path(filename).filename().string();
-#endif
+	std::string name = BOOST_FS_FILENAME(fs::path(filename));
 
 	int x, z;
 	if (sscanf(name.c_str(), "r.%d.%d.mca", &x, &z) != 2)

@@ -25,18 +25,26 @@
 #include <string>
 #include <boost/filesystem.hpp>
 
-namespace fs = boost::filesystem;
+#if BOOST_FILESYSTEM_VERSION == 2
+	#define OLD_BOOST_FILESYSTEM 42
+#endif
+
+#ifndef BOOST_FILESYSTEM_VERSION
+	#define OLD_BOOST_FILESYSTEM 42
+#endif
+
+#ifdef OLD_BOOST_FILESYSTEM
+	#define BOOST_FS_FILENAME(p) (p).filename()
+	#define BOOST_FS_ABSOLUTE(p, b) fs::complete((p), (b))
+#else
+	#define BOOST_FS_FILENAME(p) (p).filename().string()
+	#define BOOST_FS_ABSOLUTE(p, b) fs::absolute((p), (b))
+#endif
 
 #define MIN(a, b) (a < b ? a : b)
 #define MAX(a, b) (a > b ? a : b)
 
-#if BOOST_FILESYSTEM_VERSION == 2
-	#define OLD_BOOST 42
-#endif
-
-#ifndef BOOST_FILESYSTEM_VERSION
-	#define OLD_BOOST 42
-#endif
+namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 

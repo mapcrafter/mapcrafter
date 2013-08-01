@@ -271,11 +271,7 @@ void RenderManager::writeTemplates() const {
 	fs::directory_iterator end;
 	for (fs::directory_iterator it(config.getTemplateDir()); it != end;
 			++it) {
-#ifdef OLD_BOOST
-		std::string filename = it->path().filename();
-#else
-		std::string filename = it->path().filename().string();
-#endif
+		std::string filename = BOOST_FS_FILENAME(it->path());
 		if (filename == "index.html"
 				|| filename == "index.leaflet.html"
 				|| filename == "markers.js")
