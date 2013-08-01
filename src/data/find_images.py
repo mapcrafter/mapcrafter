@@ -5,11 +5,11 @@ import os
 import zipfile
 
 files = {
-	"chest.png" : "item/chest.png",
-	"enderchest.png" : "item/enderchest.png",
-	"largechest.png" : "item/largechest.png",
-	"foliagecolor.png" : "misc/foliagecolor.png",
-	"grasscolor.png" : "misc/grasscolor.png",
+	"chest.png" : "assets/minecraft/textures/entity/chest/normal.png",
+	"enderchest.png" : "assets/minecraft/textures/entity/chest/ender.png",
+	"largechest.png" : "assets/minecraft/textures/entity/chest/normal_double.png",
+	"foliagecolor.png" : "assets/minecraft/textures/colormap/foliage.png",
+	"grasscolor.png" : "assets/minecraft/textures/colormap/grass.png",
 }
 
 if __name__ == "__main__":
@@ -31,8 +31,8 @@ if __name__ == "__main__":
 	print "Extracting block images:"
 	found, extracted, skipped = 0, 0, 0
 	for info in jar.infolist():
-		if info.filename.startswith("textures/blocks/"):
-			filename = info.filename.replace("textures/", "")
+		if info.filename.startswith("assets/minecraft/textures/blocks/"):
+			filename = info.filename.replace("assets/minecraft/textures/", "")
 			found += 1
 			
 			if os.path.exists(filename) and not force:
