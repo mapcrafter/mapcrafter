@@ -25,7 +25,6 @@
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
-#include <endian.h>
 
 namespace mapcrafter {
 namespace mc {
@@ -62,21 +61,21 @@ template<>
 int16_t read<int16_t>(std::istream& stream) {
 	int16_t value;
 	stream.read(reinterpret_cast<char*>(&value), sizeof(value));
-	return be16toh(value);
+	return bigEndian16(value);
 }
 
 template<>
 int32_t read<int32_t>(std::istream& stream) {
 	int32_t value;
 	stream.read(reinterpret_cast<char*>(&value), sizeof(value));
-	return be32toh(value);
+	return bigEndian32(value);
 }
 
 template<>
 int64_t read<int64_t>(std::istream& stream) {
 	int64_t value;
 	stream.read(reinterpret_cast<char*>(&value), sizeof(value));
-	return be64toh(value);
+	return bigEndian64(value);
 }
 
 template<>
@@ -97,7 +96,7 @@ double read<double>(std::istream& stream) {
 		double mydouble;
 	};
 	stream.read(reinterpret_cast<char*>(&tmp), sizeof(int64_t));
-	tmp = be64toh(tmp);
+	tmp = bigEndian64(tmp);
 	return mydouble;
 }
 
@@ -121,19 +120,19 @@ void write<int8_t>(std::ostream& stream, int8_t value) {
 
 template<>
 void write<int16_t>(std::ostream& stream, int16_t value) {
-	int16_t tmp = htobe16(value);
+	int16_t tmp = bigEndian16(value);
 	stream.write(reinterpret_cast<char*>(&tmp), sizeof(value));
 }
 
 template<>
 void write<int32_t>(std::ostream& stream, int32_t value) {
-	int32_t tmp = htobe32(value);
+	int32_t tmp = bigEndian32(value);
 	stream.write(reinterpret_cast<char*>(&tmp), sizeof(value));
 }
 
 template<>
 void write<int64_t>(std::ostream& stream, int64_t value) {
-	int64_t tmp = htobe64(value);
+	int64_t tmp = bigEndian64(value);
 	stream.write(reinterpret_cast<char*>(&tmp), sizeof(value));
 }
 
@@ -144,7 +143,7 @@ void write<float>(std::ostream& stream, float value) {
 		float myfloat;
 	};
 	myfloat = value;
-	tmp = htobe32(tmp);
+	tmp = bigEndian32(tmp);
 	stream.write(reinterpret_cast<char*>(&tmp), sizeof(int32_t));
 }
 
@@ -155,7 +154,7 @@ void write<double>(std::ostream& stream, double value) {
 		double myfloat;
 	};
 	myfloat = value;
-	tmp = htobe64(tmp);
+	tmp = bigEndian64(tmp);
 	stream.write(reinterpret_cast<char*>(&tmp), sizeof(int64_t));
 }
 

@@ -21,7 +21,6 @@
 
 #include <fstream>
 #include <cstdlib>
-#include <endian.h>
 
 namespace mapcrafter {
 namespace mc {
@@ -60,13 +59,13 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 			file.read(reinterpret_cast<char*>(&tmp), 4);
 			if (tmp == 0)
 				continue;
-			int offset = be32toh(tmp << 8) * 4096;
+			int offset = bigEndian32(tmp << 8) * 4096;
 			//uint8_t sectors = ((uint8_t*) &tmp)[3];
 
 			file.seekg(4096, std::ios::cur);
 			int timestamp;
 			file.read(reinterpret_cast<char*>(&timestamp), 4);
-			timestamp = be32toh(timestamp);
+			timestamp = bigEndian32(timestamp);
 
 			ChunkPos pos(x + regionpos.x * 32, z + regionpos.z * 32);
 			if (rotation)

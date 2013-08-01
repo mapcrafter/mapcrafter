@@ -49,6 +49,9 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 
 bool isBigEndian();
+int16_t bigEndian16(int16_t x);
+int32_t bigEndian32(int32_t x);
+int64_t bigEndian64(int64_t x);
 
 template<typename T>
 std::string str(T value) {

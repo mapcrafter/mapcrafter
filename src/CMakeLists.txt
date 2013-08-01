@@ -1,8 +1,22 @@
+INCLUDE (CheckIncludeFiles)
+CHECK_INCLUDE_FILES ("endian.h" HAVE_ENDIAN_H)
+CHECK_INCLUDE_FILES ("sys/endian.h" HAVE_SYS_ENDIAN_H)
+
+if(HAVE_SYS_ENDIAN_H)
+    set(HAVE_ENDIAN_H ON)
+    set(ENDIAN_H_FREEBSD ON)
+else()
+    set(ENDIAN_H_FREEBSD OFF)
+endif()
+
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
+
 set(SOURCE
 	${CMAKE_CURRENT_SOURCE_DIR}/util.cpp
 )
 set(HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/util.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/config.h
 )
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/config")
