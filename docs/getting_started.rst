@@ -56,7 +56,7 @@ run::
     python find_images.py /path/to/my/minecraft.jar
 
 You will probably find your Minecraft Jar file in 
-``~/.minecraft/version/%version$/%version%.jar``.
+``~/.minecraft/version/%version%/%version%.jar``.
 
 You can now specify this directory with the texture images as your textures
 directory.
