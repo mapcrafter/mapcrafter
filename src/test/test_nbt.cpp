@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(nbt_testIO) {
 		out.addTag("double", nbt::tag<nbt::TagDouble>(2.7182818));
 		out.addTag("string", nbt::tag<nbt::TagString>("foobar"));
 
-		std::unique_ptr<nbt::TagList> list = nbt::tag<nbt::TagList>(nbt::TagString::TAG_TYPE);
+		TagPtrType<nbt::TagList> list = nbt::tag<nbt::TagList>(nbt::TagString::TAG_TYPE);
 		for (size_t i = 0; i < list_data.size(); i++)
 			list->payload.push_back(nbt::tag<nbt::TagString>(list_data[i]));
 		out.addTag("list", std::move(list));

@@ -146,7 +146,7 @@ public:
 	}
 
 	void dump(std::ostream& stream, const std::string& indendation = "") const {
-		if (std::is_same<T, int8_t>())
+		if (std::is_same<T, int8_t>::value)
 			dumpTag(stream, indendation, *this, static_cast<int>(payload));
 		else
 			dumpTag(stream, indendation, *this);
@@ -173,7 +173,7 @@ public:
 	Tag& read(std::istream& stream) {
 		int32_t length = nbtstream::read<int32_t>(stream);
 		payload.resize(length);
-		if (std::is_same<T, int8_t>())
+		if (std::is_same<T, int8_t>::value)
 			stream.read(reinterpret_cast<char*>(&payload[0]), length * sizeof(T));
 		else {
 			for (int32_t i = 0; i < length; i++)
@@ -185,7 +185,7 @@ public:
 	void write(std::ostream& stream) const {
 		Tag::write(stream);
 		nbtstream::write<int32_t>(stream, payload.size());
-		if (std::is_same<T, int8_t>())
+		if (std::is_same<T, int8_t>::value)
 			stream.write(reinterpret_cast<const char*>(&payload[0]), payload.size() * sizeof(T));
 		else {
 			for (size_t i = 0; i < payload.size(); i++)
@@ -219,6 +219,16 @@ public:
 	static const int8_t TAG_TYPE = (int8_t) TagType::TAG_STRING;
 };
 
+// use shared_ptr in gcc <= 4.4.* instead of unique_ptr,
+// because there are some bugs
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
+# define TagPtrType std::shared_ptr
+#else
+# define TagPtrType std::unique_ptr
+#endif
+
+typedef TagPtrType<Tag> TagPtr;
+
 class TagList: public Tag {
 public:
 	TagList(int8_t tag_type = -1) : Tag(TAG_TYPE), tag_type(tag_type) {}
@@ -229,7 +239,7 @@ public:
 	void dump(std::ostream& stream, const std::string& indendation = "") const;
 
 	int8_t tag_type;
-	std::vector<std::unique_ptr<Tag>> payload;
+	std::vector<TagPtr> payload;
 	
 	static const int8_t TAG_TYPE = (int8_t) TagType::TAG_LIST;
 };
@@ -254,7 +264,8 @@ public:
 	
 	template<typename T>
 	bool hasArray(const std::string& name, int32_t len = -1) const {
-		static_assert(std::is_same<T, TagByteArray>() || std::is_same<T, TagIntArray>(),
+		static_assert(std::is_same<T, TagByteArray>::value
+				|| std::is_same<T, TagIntArray>::value,
 			"Only TagByteArray and TagIntArray are allowed as template argument!");
 		if (!hasTag<T>(name))
 			return false;
@@ -277,9 +288,9 @@ public:
 		return findTag(name).cast<T>();
 	}
 
-	void addTag(const std::string& name, std::unique_ptr<Tag> tag);
+	void addTag(const std::string& name, TagPtr tag);
 
-	std::map<std::string, std::unique_ptr<Tag>> payload;
+	std::map<std::string, TagPtr> payload;
 	
 	static const int8_t TAG_TYPE = (int8_t) TagType::TAG_COMPOUND;
 };
@@ -305,9 +316,9 @@ public:
 Tag* createTag(int8_t type);
 
 template<typename T, typename ... Args>
-std::unique_ptr<T> tag(Args ... args) {
-	static_assert(std::is_base_of<Tag, T>(), "The template type is not a subclass of Tag!");
-	return std::unique_ptr<T>(new T(args...));
+TagPtrType<T> tag(Args ... args) {
+	static_assert(std::is_base_of<Tag, T>::value, "The template type is not a subclass of Tag!");
+	return TagPtrType<T>(new T(args...));
 }
 
 }

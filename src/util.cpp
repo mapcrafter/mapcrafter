@@ -19,8 +19,6 @@
 
 #include "util.h"
 
-#include "config.h"
-
 #include <fstream>
 #include <sstream>
 #include <stdio.h>

@@ -17,5 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#cmakedefine HAVE_NULLPTR
+
 #cmakedefine HAVE_ENDIAN_H
 #cmakedefine ENDIAN_H_FREEBSD

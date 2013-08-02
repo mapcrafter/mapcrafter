@@ -1,3 +1,7 @@
+INCLUDE(CheckCXXSourceCompiles)
+set(CMAKE_REQUIRED_FLAGS -std=c++0x)
+CHECK_CXX_SOURCE_COMPILES("int main() { void* p = nullptr; }" HAVE_NULLPTR)
+
 INCLUDE (CheckIncludeFiles)
 CHECK_INCLUDE_FILES ("endian.h" HAVE_ENDIAN_H)
 CHECK_INCLUDE_FILES ("sys/endian.h" HAVE_SYS_ENDIAN_H)
@@ -16,7 +20,7 @@ set(SOURCE
 )
 set(HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/util.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/config.h
+	${CMAKE_CURRENT_SOURCE_DIR}/config.h
 )
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/config")

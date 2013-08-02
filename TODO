@@ -14,7 +14,12 @@ TODO:
 		- corner stairs?
 
 ideas:
+	- different config file section types:
+	   - [w:world_name] for the different Minecraft Worlds
+	   - [m:map_map] for the different rendered maps
+	 - crop the world and render only a specified part
+	
 	- add a config option to specify which map should be the default map
 	  in the interface and an option to specify the default view of
 	  every map
-	- crop the world and render only a specified part
+	- add option to specify a "minimum" zoom level

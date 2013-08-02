@@ -261,7 +261,7 @@ Tag& TagList::read(std::istream& stream) {
 						   + ". NBT data stream may be corrupted.");
 		tag->read(stream);
 		tag->setWriteType(false);
-		payload.push_back(std::unique_ptr<Tag>(tag));
+		payload.push_back(TagPtrType<Tag>(tag));
 	}
 	return *this;
 }
@@ -302,7 +302,7 @@ Tag& TagCompound::read(std::istream& stream) {
 						   + ". NBT data stream may be corrupted.");
 		tag->read(stream);
 		tag->setName(name);
-		payload[name] = std::unique_ptr<Tag>(tag);
+		payload[name] = TagPtrType<Tag>(tag);
 	}
 	return *this;
 }
@@ -336,7 +336,7 @@ Tag& TagCompound::findTag(const std::string& name) const {
 	return *payload.at(name);
 }
 
-void TagCompound::addTag(const std::string& name, std::unique_ptr<Tag> tag) {
+void TagCompound::addTag(const std::string& name, TagPtr tag) {
 	tag->setName(name);
 	payload[name] = std::move(tag);
 }
