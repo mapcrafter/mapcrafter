@@ -4,12 +4,13 @@ import sys
 import os
 import zipfile
 
+dirs = ("chest", "colormap")
 files = {
-	"chest.png" : "assets/minecraft/textures/entity/chest/normal.png",
-	"enderchest.png" : "assets/minecraft/textures/entity/chest/ender.png",
-	"largechest.png" : "assets/minecraft/textures/entity/chest/normal_double.png",
-	"foliagecolor.png" : "assets/minecraft/textures/colormap/foliage.png",
-	"grasscolor.png" : "assets/minecraft/textures/colormap/grass.png",
+	"chest/normal.png" : "assets/minecraft/textures/entity/chest/normal.png",
+	"chest/ender.png" : "assets/minecraft/textures/entity/chest/ender.png",
+	"chest/normal_double.png" : "assets/minecraft/textures/entity/chest/normal_double.png",
+	"colormap/foliage.png" : "assets/minecraft/textures/colormap/foliage.png",
+	"colormap/grass.png" : "assets/minecraft/textures/colormap/grass.png",
 }
 
 if __name__ == "__main__":
@@ -52,6 +53,11 @@ if __name__ == "__main__":
 	
 	print ""
 	print "Extracting other textures:"
+	
+	for dir in dirs:
+		if not os.path.exists(dir):
+			os.mkdir(dir)
+	
 	for filename, zipname in files.items():
 		try:
 			print " - Extracting" , filename , "...",

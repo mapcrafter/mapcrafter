@@ -38,24 +38,25 @@ Installing the Textures
 
 Now you need to get your Minecraft Textures. You need the following files:
 
-* chest.png 
-* enderchest.png 
-* largechest.png 
-* foliagecolor.png 
-* grasscolor.png 
-* the ``blocks/`` directory from your texture pack
+* directory ``chest/`` with normal.png, normal_double.png and ender.png 
+* directory ``colormap/`` with foliage.png and grass.png
+* directory ``blocks/`` from your texture pack
+* endportal.png and fire.png
 
-You can get those files from your ``minecraft.jar`` file (default textures) or
-from another texture pack. You should put those files in the
+You can get those files from your Minecraft Jar file (default textures) or
+from another resource pack. You should put those files in the
 ``src/data/textures/`` directory. There are already ``endportal.png`` and
 ``fire.png``.
 
-To extract the textures from the ``minecraft.jar`` there is a python script
+To extract the textures from your Minecraft Jar file there is a python script
 ``find_images.py`` in the ``src/data/`` directory. Just go into the
 ``src/data/textures/`` directory or into your own textures directory and
 run::
 
     python find_images.py /path/to/my/minecraft.jar
+
+You will probably find your Minecraft Jar file in 
+``~/.minecraft/version/%version$/%version%.jar``.
 
 You can now specify this directory with the texture images as your textures
 directory.

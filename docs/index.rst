@@ -17,7 +17,7 @@ mapcrafter is not yet finished. At the moment a few blocks are not supported,
 but the basic rendering routines are implemented. mapcrafter uses configuration
 files to specify which worlds should get rendered and allows multiple rendered
 worlds/rotation of worlds/rendermodes in one output file. The renderer works with 
-the Anvil World format and the Minecraft 1.5 Texture Packs.
+the Anvil World format and the Minecraft 1.6 Resource Packs.
 
 mapcrafter is free software and available under the GPL license. You can
 access the latest source code of mapcrafter on GitHub:
@@ -54,7 +54,7 @@ Requirements
 	* (libboost-test if you want to use the tests)
 * For the Minecraft Worlds:
 	* Anvil World Format
-	* Minecraft 1.5 Texture Packs
+	* Minecraft 1.6 Resource Packs
 
 Help
 ====

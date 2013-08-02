@@ -135,18 +135,16 @@ Available Options
 	**Required**
 
 	This is the directory with the Minecraft Texture files.  The renderer works
-	with the Minecraft 1.5 Texture file format. You need here: 
+	with the Minecraft 1.6 Resource Pack file format. You need here: 
 
-	* chest.png
-	* enderchest.png
-	* largechest.png
-	* foliagecolor.png
-	* grasscolor.png
-	* the blocks/ directory from your texture pack
+	* directory ``chest/`` with normal.png, normal_double.png and ender.png 
+	* directory ``colormap/`` with foliage.png and grass.png
+	* directory ``blocks/`` from your texture pack
+	* endportal.png and fire.png
 
-	Probably you can get everything from your minecraft.jar. You can use the python
+	Probably you can get everything from your Minecraft Jar file. You can use the python
 	script ``find_images.py`` from the data directory to extract the images from your
-	minecraft.jar.
+	Minecraft Jar file.
 	
 	See also :ref:`installing-textures`.
 
