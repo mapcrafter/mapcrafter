@@ -52,14 +52,9 @@ int main(int argc, char** argv) {
 	po::variables_map vm;
 	try {
 		po::store(po::parse_command_line(argc, argv, all), vm);
-	} catch (po::unknown_option& ex) {
-		std::cout << "I have no idea what you mean with '" << ex.get_option_name()
-		        << "'..." << std::endl;
-		std::cout << all << std::endl;
-		return 1;
-	} catch (po::invalid_option_value& ex) {
-		std::cout << "I can't convert the value of '" << ex.get_option_name() << "'..."
-		        << std::endl;
+	} catch (po::error& ex) {
+		std::cout << "There is a problem parsing the command line arguments: "
+				<< ex.what() << std::endl << std::endl;
 		std::cout << all << std::endl;
 		return 1;
 	}
