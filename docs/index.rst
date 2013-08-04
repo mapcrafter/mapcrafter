@@ -43,7 +43,7 @@ Requirements
 
 * A Linux-based or Mac operating system would be good, 
   building the renderer on Windows is possible but not easy.
-* A C++ compiler (preferable gcc), CMake and make to build mapcrafter.
+* A C++ compiler (preferable gcc, minimum gcc 4.4), CMake and make to build mapcrafter.
 * Some libraries:
 	* libpng
 	* libpthread
@@ -66,6 +66,12 @@ You can find a detailed documentation about the renderer in
 If you find bugs or problems when using mapcrafter or if you have ideas
 for new features, then please feel free to add an issue to the 
 `GitHub issue tracker <https://github.com/m0r13/mapcrafter/issues>`_.
+
+You can contact me in IRC (#mapcrafter on Freenode). Use the 
+`webclient <http://webchat.freenode.net/?channels=mapcrafter>`_ if you
+are new to IRC. I will be there most of the time, but please bear in mind
+that I can't be available all the time. If I'm not there, wait some time or 
+try another time of the day.
 
 Contents
 ========
