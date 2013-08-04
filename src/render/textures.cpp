@@ -1395,8 +1395,12 @@ void BlockImages::createSmallerBlock(uint16_t id, uint16_t data,
 
 void BlockImages::createSmallerBlock(uint16_t id, uint16_t data, const Image& side_face,
         const Image& top_texture, int y1, int y2) {
-	setBlockImage(id, data,
-	        buildSmallerBlock(side_face, side_face, top_texture, y1, y2));
+	createSmallerBlock(id, data, side_face, side_face, top_texture, y1, y2);
+}
+
+void BlockImages::createSmallerBlock(uint16_t id, uint16_t data, const Image& texture,
+		int y1, int y2) {
+	createSmallerBlock(id, data, texture, texture, texture, y1, y2);
 }
 
 void BlockImages::createRotatedBlock(uint16_t id, uint16_t extra_data,
@@ -2625,7 +2629,24 @@ void BlockImages::loadBlocks() {
 	// --
 
 	createBlock(170, 0, t.HAY_BLOCK_SIDE, t.HAY_BLOCK_TOP); // hay block
-	// id 171 carpet
+	// carpet --
+	createSmallerBlock(171, 0, t.WOOL_COLORED_WHITE, 0, 1);
+	createSmallerBlock(171, 1, t.WOOL_COLORED_ORANGE, 0, 1);
+	createSmallerBlock(171, 2, t.WOOL_COLORED_MAGENTA, 0, 1);
+	createSmallerBlock(171, 3, t.WOOL_COLORED_LIGHT_BLUE, 0, 1);
+	createSmallerBlock(171, 4, t.WOOL_COLORED_YELLOW, 0, 1);
+	createSmallerBlock(171, 5, t.WOOL_COLORED_LIME, 0, 1);
+	createSmallerBlock(171, 6, t.WOOL_COLORED_PINK, 0, 1);
+	createSmallerBlock(171, 7, t.WOOL_COLORED_GRAY, 0, 1);
+	createSmallerBlock(171, 8, t.WOOL_COLORED_SILVER, 0, 1);
+	createSmallerBlock(171, 9, t.WOOL_COLORED_CYAN, 0, 1);
+	createSmallerBlock(171, 10, t.WOOL_COLORED_PURPLE, 0, 1);
+	createSmallerBlock(171, 11, t.WOOL_COLORED_BLUE, 0, 1);
+	createSmallerBlock(171, 12, t.WOOL_COLORED_BROWN, 0, 1);
+	createSmallerBlock(171, 13, t.WOOL_COLORED_GREEN, 0, 1);
+	createSmallerBlock(171, 14, t.WOOL_COLORED_RED, 0, 1);
+	createSmallerBlock(171, 15, t.WOOL_COLORED_BLACK, 0, 1);
+	// --
 	createBlock(172, 0, t.HARDENED_CLAY); // hardened clay
 	createBlock(173, 0, t.COAL_BLOCK); // block of coal
 }

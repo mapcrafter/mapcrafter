@@ -479,6 +479,7 @@ private:
 	        const Image& right_texture, const Image& top_texture, int y1, int y2);
 	void createSmallerBlock(uint16_t id, uint16_t data, const Image& side_face,
 	        const Image& top_texture, int y1, int y2);
+	void createSmallerBlock(uint16_t id, uint16_t data, const Image& texture, int y1, int y2);
 	void createRotatedBlock(uint16_t id, uint16_t extra_data, const Image& front_texture,
 	        const Image& side_texture, const Image& top_texture);
 	void createRotatedBlock(uint16_t id, uint16_t extra_data, const Image& front_texture,
