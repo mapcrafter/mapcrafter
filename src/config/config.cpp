@@ -162,9 +162,9 @@ bool RenderConfigParser::loadFile(const std::string& filename) {
 	template_dir = config.get("", "template_dir");
 
 	if (!output_dir.empty())
-		output_dir = fs::absolute(output_dir, dir).string();
+		output_dir = BOOST_FS_ABSOLUTE(output_dir, dir).string();
 	if (!template_dir.empty())
-		template_dir = fs::absolute(template_dir, dir).string();
+		template_dir = BOOST_FS_ABSOLUTE(template_dir, dir).string();
 
 	default_config.readFromConfig(dir, config, "");
 
