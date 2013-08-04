@@ -153,7 +153,7 @@ int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 	else if (compression == 2)
 		comp = nbt::Compression::ZLIB;
 
-	size = be32toh(size) - 1;
+	size = bigEndian32(size) - 1;
 
 	// set the chunk rotation
 	chunk.setRotation(rotation);

@@ -85,7 +85,7 @@ float read<float>(std::istream& stream) {
 		float myfloat;
 	};
 	stream.read(reinterpret_cast<char*>(&tmp), sizeof(int32_t));
-	tmp = be32toh(tmp);
+	tmp = bigEndian32(tmp);
 	return myfloat;
 }
 
