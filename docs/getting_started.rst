@@ -49,11 +49,11 @@ from another resource pack. You should put those files in the
 ``fire.png``.
 
 To extract the textures from your Minecraft Jar file there is a python script
-``find_images.py`` in the ``src/data/`` directory. Just go into the
-``src/data/textures/`` directory or into your own textures directory and
-run::
+``find_images.py`` in the ``src/data/`` directory. Run the python script with 
+the jar file and the texture directory (where it should unpack the texture files to)
+as arguments.
 
-    python find_images.py /path/to/my/minecraft.jar
+    python find_images.py /path/to/my/minecraft.jar /my/textures/directory
 
 You will probably find your Minecraft Jar file in 
 ``~/.minecraft/version/%version%/%version%.jar``.

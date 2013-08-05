@@ -3,8 +3,9 @@
 import sys
 import os
 import zipfile
+import argparse
 
-dirs = ("chest", "colormap")
+dirs = ("", "chest", "colormap", "blocks")
 files = {
 	"chest/normal.png" : "assets/minecraft/textures/entity/chest/normal.png",
 	"chest/ender.png" : "assets/minecraft/textures/entity/chest/ender.png",
@@ -14,29 +15,33 @@ files = {
 }
 
 if __name__ == "__main__":
-	if len(sys.argv) < 2:
-		print "Usage: ./find_images.py [-f] <minecraft.jar>"
-		sys.exit(1)
-		
-	force = False
-	path = sys.argv[1]
-	if len(sys.argv) >= 3:
-		force = sys.argv[1] == "-f"
-		path = sys.argv[2]
+	parser = argparse.ArgumentParser(description="Extracts from a Minecraft Jar file the textures required for mapcrafter.")
+	parser.add_argument("-f", "--force", 
+					help="forces overwriting eventually already existing textures",
+					action="store_true")
+	parser.add_argument("jarfile",
+					help="the Minecraft Jar file to use",
+					metavar="<jarfile>")
+	parser.add_argument("outdir",
+					help="the output texture directory",
+					metavar="<outdir>")
+	args = vars(parser.parse_args())
 	
-	if not os.path.exists("blocks"):
-		os.mkdir("blocks")
-		
-	jar = zipfile.ZipFile(path)
-		
+	jar = zipfile.ZipFile(args["jarfile"])
+	
+	for dir in dirs:
+		if not os.path.exists(os.path.join(args["outdir"], dir)):
+			os.mkdir(os.path.join(args["outdir"], dir))
+	
 	print "Extracting block images:"
 	found, extracted, skipped = 0, 0, 0
 	for info in jar.infolist():
 		if info.filename.startswith("assets/minecraft/textures/blocks/"):
 			filename = info.filename.replace("assets/minecraft/textures/", "")
+			filename = os.path.join(args["outdir"], filename)
 			found += 1
 			
-			if os.path.exists(filename) and not force:
+			if os.path.exists(filename) and not args["force"]:
 				skipped += 1
 				continue
 			
@@ -54,15 +59,12 @@ if __name__ == "__main__":
 	print ""
 	print "Extracting other textures:"
 	
-	for dir in dirs:
-		if not os.path.exists(dir):
-			os.mkdir(dir)
-	
 	for filename, zipname in files.items():
 		try:
 			print " - Extracting" , filename , "...",
 			info = jar.getinfo(zipname)
-			if os.path.exists(filename) and not force:
+			filename = os.path.join(args["outdir"], filename)
+			if os.path.exists(filename) and not args["force"]:
 				print "skipped."
 			else:
 				fin = jar.open(info)
@@ -73,4 +75,3 @@ if __name__ == "__main__":
 				print "extracted."
 		except KeyError:
 			print "not found!"
-		
