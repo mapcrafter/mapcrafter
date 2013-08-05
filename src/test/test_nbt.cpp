@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(nbt_testIO) {
 
 		nbt::NBTFile in;
 		in.readNBT(stream, compression);
-		in.dump(std::cout);
+		//in.dump(std::cout);
 		
 		REQUIRE_TAG(in.hasTag<nbt::TagByte>("byte"), "byte");
 		REQUIRE_TAG(in.hasTag<nbt::TagShort>("short"), "short");
