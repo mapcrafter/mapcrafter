@@ -26,12 +26,25 @@ endif()
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
 
+add_custom_target(version.cpp
+    ./version.sh
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} VERBATIM
+)
+if(NOT "${CMAKE_CURRENT_SOURCE_DIR}/version.cpp")
+    execute_process(
+        COMMAND "./version.sh"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+endif()
+
 set(SOURCE
-	${CMAKE_CURRENT_SOURCE_DIR}/util.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/version.cpp
 )
 set(HEADERS
-	${CMAKE_CURRENT_SOURCE_DIR}/util.h
-	${CMAKE_CURRENT_SOURCE_DIR}/config.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/config.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/version.h
 )
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/config")
@@ -42,6 +55,8 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tools")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/test")
 
 add_library(mapcraftercore SHARED ${SOURCE})
+add_dependencies(mapcraftercore version.cpp)
+
 target_link_libraries(mapcraftercore ${Boost_IOSTREAMS_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 if(Boost_UNIT_TEST_FRAMEWORK_FOUND)

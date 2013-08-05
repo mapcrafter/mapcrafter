@@ -19,8 +19,11 @@
 
 #include "render/manager.h"
 
+#include "version.h"
+
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <boost/program_options.hpp>
 
 namespace po = boost::program_options;
@@ -34,6 +37,8 @@ int main(int argc, char** argv) {
 	po::options_description all("Allowed options");
 	all.add_options()
 		("help,h", "shows a help message")
+		("version,v", "shows the version of mapcrafter")
+
 		("config,c",po::value<std::string>(&config_file),
 			"the path of the world to render (required)")
 
@@ -64,6 +69,14 @@ int main(int argc, char** argv) {
 	if (vm.count("help")) {
 		std::cout << all << std::endl;
 		return 1;
+	}
+
+	if (vm.count("version")) {
+		std::cout << "mapcrafter version: " << mapcrafter::MAPCRAFTER_VERSION;
+		if (strlen(mapcrafter::MAPCRAFTER_GITVERSION))
+			std::cout << " (" << mapcrafter::MAPCRAFTER_GITVERSION << ")";
+		std::cout << std::endl;
+		return 0;
 	}
 
 	if (!vm.count("config")) {
