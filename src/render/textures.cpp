@@ -798,12 +798,12 @@ bool BlockImages::loadBlocks(const std::string& block_dir) {
 bool BlockImages::loadAll(const std::string& textures_dir) {
 	if (!loadChests(textures_dir + "/chest/normal.png", textures_dir + "/chest/normal_double.png",
 			textures_dir + "/chest/ender.png")) {
-		std::cerr << "Error: Unable to load chest.png, largechest.png or enderchest.png!"
+		std::cerr << "Error: Unable to load chest/normal.png, chest/normal_double.png or chest/ender.png!"
 				<< std::endl;
 		return false;
 	} else if (!loadColors(textures_dir + "/colormap/foliage.png",
 			textures_dir + "/colormap/grass.png")) {
-		std::cerr << "Error: Unable to load foliagecolor.png or grasscolor.png!"
+		std::cerr << "Error: Unable to load colormap/foliage.png or colormap/grass.png!"
 				<< std::endl;
 		return false;
 	} else if (!loadOther(textures_dir + "/fire.png",
