@@ -156,7 +156,7 @@ bool RenderConfigParser::loadFile(const std::string& filename) {
 	if (!config.loadFile(filename))
 		return false;
 
-	fs::path dir = fs::path(filename).parent_path();
+	fs::path dir = BOOST_FS_ABSOLUTE1(fs::path(filename)).parent_path();
 
 	output_dir = config.get("", "output_dir");
 	template_dir = config.get("", "template_dir");

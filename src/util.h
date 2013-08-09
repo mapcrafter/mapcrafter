@@ -55,9 +55,11 @@ private:
 #ifdef OLD_BOOST_FILESYSTEM
 # define BOOST_FS_FILENAME(p) (p).filename()
 # define BOOST_FS_ABSOLUTE(p, b) fs::complete((p), (b))
+# define BOOST_FS_ABSOLUTE1(p) fs::complete((p))
 #else
 # define BOOST_FS_FILENAME(p) (p).filename().string()
 # define BOOST_FS_ABSOLUTE(p, b) fs::absolute((p), (b))
+# define BOOST_FS_ABSOLUTE1(p) fs::absolute((p))
 #endif
 
 #define MIN(a, b) (a < b ? a : b)
