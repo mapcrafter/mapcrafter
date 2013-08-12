@@ -2359,7 +2359,7 @@ void BlockImages::loadBlocks() {
 	createBlock(1, 0, t.STONE); // stone
 	createGrassBlock(); // id 2
 	createBlock(3, 0, t.DIRT); // dirt
-	createBlock(4, 0, t.STONEBRICK); // cobblestone
+	createBlock(4, 0, t.COBBLESTONE); // cobblestone
 	// -- wooden planks
 	createBlock(5, 0, t.PLANKS_OAK); // oak
 	createBlock(5, 1, t.PLANKS_SPRUCE); // pine/spruce
