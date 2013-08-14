@@ -2475,7 +2475,7 @@ void BlockImages::loadBlocks() {
 	createSingleFaceBlock(65, 5, FACE_WEST, t.LADDER);
 	// --
 	createRails(); // id 66
-	createStairs(67, t.STONEBRICK); // cobblestone stairs
+	createStairs(67, t.COBBLESTONE); // cobblestone stairs
 	// id 68 // wall sign
 	// id 69 // lever
 	createSmallerBlock(70, 0, t.STONE, t.STONE, 0, 1); // stone pressure plate
