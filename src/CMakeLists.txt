@@ -27,12 +27,12 @@ endif()
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
 
 add_custom_target(version.cpp
-    bash ./version.sh
+    sh ./version.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} VERBATIM
 )
 if(NOT "${CMAKE_CURRENT_SOURCE_DIR}/version.cpp")
     execute_process(
-        COMMAND bash ./version.sh
+        COMMAND sh ./version.sh
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
 endif()

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 version=$(cat ../VERSION | sed 's/\n//')
 gitversion=""
