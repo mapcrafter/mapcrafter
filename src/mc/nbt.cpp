@@ -19,7 +19,6 @@
 
 #include "nbt.h"
 
-#include <iostream>
 #include <fstream>
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
@@ -29,21 +28,6 @@
 namespace mapcrafter {
 namespace mc {
 namespace nbt {
-
-static const char* TAG_NAMES[] = {
-	"TAG_End",
-	"TAG_Byte",
-	"TAG_Short",
-	"TAG_Int",
-	"TAG_Long",
-	"TAG_Float",
-	"TAG_Double",
-	"TAG_Byte_Array",
-	"TAG_String",
-	"TAG_List",
-	"TAG_Compound",
-	"TAG_Int_Array",
-};
 
 namespace nbtstream {
 template<typename T>
@@ -163,24 +147,6 @@ void write<std::string>(std::ostream& stream, std::string value) {
 	write<int16_t>(stream, value.size());
 	stream.write(value.c_str(), value.size());
 }
-}
-
-template<typename T>
-void dumpTag(std::ostream& stream, const std::string& indendation,
-		T tag) {
-	dumpTag(stream, indendation, tag, tag.payload);
-}
-
-template<typename T, typename P>
-void dumpTag(std::ostream& stream, const std::string& indendation,
-		T tag, P payloadrepr) {
-	const char* type = "TAG_Unknown";
-	if (tag.getType() >= 0 && tag.getType() <= 11)
-		type = TAG_NAMES[tag.getType()];
-	stream << indendation << type;
-	if (tag.isNamed())
-		stream << "(\"" << tag.getName() << "\")";
-	stream << ": " << payloadrepr << std::endl;
 }
 
 Tag::Tag(int8_t type)

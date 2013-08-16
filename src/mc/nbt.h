@@ -22,6 +22,7 @@
 
 #include "../util.h"
 
+#include <iostream>
 #include <cstdint>
 #include <exception>
 #include <map>
@@ -74,21 +75,44 @@ enum class Compression {
 	NO_COMPRESSION = 0, GZIP = 1, ZLIB = 2
 };
 
+static const char* TAG_NAMES[] = {
+	"TAG_End",
+	"TAG_Byte",
+	"TAG_Short",
+	"TAG_Int",
+	"TAG_Long",
+	"TAG_Float",
+	"TAG_Double",
+	"TAG_Byte_Array",
+	"TAG_String",
+	"TAG_List",
+	"TAG_Compound",
+	"TAG_Int_Array",
+};
+
+template<typename T>
+void dumpTag(std::ostream& stream, const std::string& indendation, T tag) {
+	dumpTag(stream, indendation, tag, tag.payload);
+}
+
+template<typename T, typename P>
+void dumpTag(std::ostream& stream, const std::string& indendation, T tag, P payloadrepr) {
+	const char* type = "TAG_Unknown";
+	if (tag.getType() >= 0 && tag.getType() <= 11)
+		type = TAG_NAMES[tag.getType()];
+	stream << indendation << type;
+	if (tag.isNamed())
+		stream << "(\"" << tag.getName() << "\")";
+	stream << ": " << payloadrepr << std::endl;
+}
+
 namespace nbtstream {
-template<typename T> 
+template<typename T>
 T read(std::istream& stream);
 
 template<typename T>
 void write(std::ostream& stream, T t);
 }
-
-template<typename T>
-void dumpTag(std::ostream& stream, const std::string& indendation,
-		T tag);
-
-template<typename T, typename P>
-void dumpTag(std::ostream& stream, const std::string& indendation,
-		T tag, P payloadrepr);
 
 class Tag {
 protected:
