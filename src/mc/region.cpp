@@ -52,6 +52,14 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 		chunk_timestamps[i] = 0;
 	}
 
+	file.seekg(0, std::ios::end);
+	int filesize = file.tellg();
+	file.seekg(0, std::ios::beg);
+	// make sure the region file has a header
+	if (filesize < 8192) {
+		return false;
+	}
+
 	for (int x = 0; x < 32; x++) {
 		for (int z = 0; z < 32; z++) {
 			file.seekg(4 * (x + z * 32), std::ios::beg);
