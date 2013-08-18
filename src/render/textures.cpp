@@ -2628,11 +2628,11 @@ void BlockImages::loadBlocks() {
 	createBlock(159, 15, t.HARDENED_CLAY_STAINED_BLACK);
 	// --
 
-    // hay block --
+	// hay block --
 	createBlock(170, 0, t.HAY_BLOCK_SIDE, t.HAY_BLOCK_TOP); // normal orientation
-    createBlock(170, 4, t.HAY_BLOCK_TOP, t.HAY_BLOCK_SIDE.rotate(1), t.HAY_BLOCK_SIDE); // east-west
-    createBlock(170, 8, t.HAY_BLOCK_SIDE.rotate(1), t.HAY_BLOCK_TOP, t.HAY_BLOCK_SIDE.rotate(1)); // north-south
-    // --
+	createBlock(170, 4, t.HAY_BLOCK_TOP, t.HAY_BLOCK_SIDE.rotate(1), t.HAY_BLOCK_SIDE); // east-west
+	createBlock(170, 8, t.HAY_BLOCK_SIDE.rotate(1), t.HAY_BLOCK_TOP, t.HAY_BLOCK_SIDE.rotate(1)); // north-south
+	// --
 	// carpet --
 	createSmallerBlock(171, 0, t.WOOL_COLORED_WHITE, 0, 1);
 	createSmallerBlock(171, 1, t.WOOL_COLORED_ORANGE, 0, 1);
