@@ -84,8 +84,9 @@ int main(int argc, char** argv) {
 	}
 
 	if (vm.count("find-resources")) {
-		std::string mapcrafter_bin = mapcrafter::findExecutablePath();
-		std::cout << "mapcrafter binary: " << mapcrafter_bin << std::endl;
+		fs::path mapcrafter_bin = mapcrafter::findExecutablePath();
+		std::cout << "Your home directory: " << mapcrafter::findHomeDir().string() << std::endl;
+		std::cout << "mapcrafter binary: " << mapcrafter_bin.string() << std::endl;
 		
 		mapcrafter::PathList resources = mapcrafter::findResourceDirs(mapcrafter_bin);
 		std::cout << "Resource directories:" << std::endl;

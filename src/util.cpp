@@ -158,14 +158,22 @@ bool moveFile(const fs::path& from, const fs::path& to) {
 	return true;
 }
 
+// TODO make sure this works on different OSes
+fs::path findHomeDir() {
+	char* path = getenv("HOME");
+	if (path != nullptr)
+		return fs::path(path);
+	return fs::path("");
+}
+
 // TODO check different OSes
 // see also http://stackoverflow.com/questions/12468104/multi-os-get-executable-path
-std::string findExecutablePath() {
+fs::path findExecutablePath() {
 	char buf[1024];
 #if defined(unix) || defined(__unix) || defined(__unix__) || defined(__linux__)
 	int len;
 	if ((len = readlink("/proc/self/exe", buf, sizeof(buf))) != -1)
-		return std::string(buf, len);
+		return fs::path(std::string(buf, len));
 #elif defined(__FreeBSD__)
 	int mib[4]
 	mib[0] = CTL_KERN;
@@ -173,20 +181,22 @@ std::string findExecutablePath() {
 	mib[2] = KERN_PROC_PATHNAME;
 	mib[3] = -1;
 	sysctl(mib, 4, buf, sizeof(buf), NULL, 0);
-	return std::string(buf);
+	return fs::path(std::string(buf));
 #else
 	static_assert(0, "Unable to find the executable's path!");
 #endif
-	return "";
+	return fs::path("");
 }
 
 PathList findResourceDirs(const fs::path& mapcrafter_bin) {
-	// TODO platform independent way to find home directories
 	PathList resources = {
-	//	"/home/moritz/.mapcrafter",
 		mapcrafter_bin.parent_path().parent_path() / "share" / "mapcrafter",
 		mapcrafter_bin.parent_path() / "data",
 	};
+	fs::path home = findHomeDir();
+	if (!home.empty())
+		resources.insert(resources.begin(), home / ".mapcrafter");
+
 	for (PathList::iterator it = resources.begin(); it != resources.end(); ) {
 		if (!fs::is_directory(*it))
 			resources.erase(it);

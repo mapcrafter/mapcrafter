@@ -116,7 +116,8 @@ bool copyFile(const fs::path& from, const fs::path& to);
 bool copyDirectory(const fs::path& from, const fs::path& to);
 bool moveFile(const fs::path& from, const fs::path& to);
 
-std::string findExecutablePath();
+fs::path findHomeDir();
+fs::path findExecutablePath();
 
 typedef std::vector<fs::path> PathList;
 PathList findResourceDirs(const fs::path& mapcrafter_bin);
