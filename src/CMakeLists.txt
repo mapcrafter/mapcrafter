@@ -71,3 +71,4 @@ target_link_libraries(mapcrafter mapcraftercore)
 
 install(TARGETS mapcraftercore DESTINATION lib)
 install(TARGETS mapcrafter DESTINATION bin)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/template DESTINATION share/mapcrafter)
