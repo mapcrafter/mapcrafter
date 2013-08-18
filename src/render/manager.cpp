@@ -242,6 +242,11 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
 	return true;
 }
 
+bool RenderManager::copyTemplateFile(const std::string& filename) const {
+	std::map<std::string, std::string> vars;
+	return copyTemplateFile(filename, vars);
+}
+
 bool RenderManager::writeTemplateIndexHtml() const {
 	std::map<std::string, std::string> vars;
 	vars["worlds"] = config.generateJavascript();

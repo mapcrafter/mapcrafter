@@ -122,8 +122,8 @@ private:
 	config::RenderConfigParser config;
 
 	bool copyTemplateFile(const std::string& filename,
-	        const std::map<std::string, std::string>& vars =
-	                std::map<std::string, std::string>()) const;
+	        const std::map<std::string, std::string>& vars) const;
+	bool copyTemplateFile(const std::string& filename) const;
 
 	bool writeTemplateIndexHtml() const;
 	void writeTemplates() const;
