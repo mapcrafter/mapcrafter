@@ -68,3 +68,6 @@ target_link_libraries(mapcraftercore pthread)
 
 add_executable(mapcrafter mapcrafter.cpp)
 target_link_libraries(mapcrafter mapcraftercore)
+
+install(TARGETS mapcraftercore DESTINATION lib)
+install(TARGETS mapcrafter DESTINATION bin)
