@@ -957,6 +957,9 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	// the light sensor shouldn't have any data, but I had problems with it...
 	else if (id == 151)
 		return 0;
+
+    if (id == 170)
+        std::cout << (int) (data & 0xff) << std::endl;
 	return data;
 }
 
@@ -1670,7 +1673,7 @@ void BlockImages::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) 
 		slab_textures[0x0] = textures.STONE_SLAB_SIDE;
 		slab_textures[0x1] = textures.SANDSTONE_NORMAL;
 		slab_textures[0x2] = textures.PLANKS_OAK;
-		slab_textures[0x3] = textures.STONEBRICK;
+		slab_textures[0x3] = textures.COBBLESTONE;
 		slab_textures[0x4] = textures.BRICK;
 		slab_textures[0x5] = textures.STONEBRICK;
 		slab_textures[0x6] = textures.NETHER_BRICK;
