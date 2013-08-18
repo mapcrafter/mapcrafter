@@ -25,6 +25,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 #include <boost/filesystem.hpp>
 
 #ifndef HAVE_NULLPTR
@@ -114,6 +115,12 @@ T rotate_shift_l(T x, int m, int n) {
 bool copyFile(const fs::path& from, const fs::path& to);
 bool copyDirectory(const fs::path& from, const fs::path& to);
 bool moveFile(const fs::path& from, const fs::path& to);
+
+typedef std::vector<fs::path> PathList;
+
+PathList findResourceDirs(const fs::path& mapcrafter_bin);
+PathList findTemplateDirs(const fs::path& mapcrafter_bin);
+PathList findTextureDirs(const fs::path& mapcrafter_bin);
 
 /**
  * Shows a nice command line progress bar.

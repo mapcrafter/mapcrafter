@@ -158,6 +158,38 @@ bool moveFile(const fs::path& from, const fs::path& to) {
 	return true;
 }
 
+PathList findResourceDirs(const fs::path& mapcrafter_bin) {
+	// TODO platform independent way to find home directories
+	PathList resources = {
+	//	"/home/moritz/.mapcrafter",
+		mapcrafter_bin.parent_path().parent_path() / "share" / "mapcrafter",
+		mapcrafter_bin.parent_path() / "data",
+	};
+	for (PathList::iterator it = resources.begin(); it != resources.end(); ) {
+		if (!fs::is_directory(*it))
+			resources.erase(it);
+		else
+			++it;
+	}
+	return resources;
+}
+
+PathList findTemplateDirs(const fs::path& mapcrafter_bin) {
+	PathList templates, resources = findResourceDirs(mapcrafter_bin);
+	for (PathList::iterator it = resources.begin(); it != resources.end(); ++it)
+		if (fs::is_directory(*it / "template"))
+			templates.push_back(*it / "template");
+	return templates;
+}
+
+PathList findTextureDirs(const fs::path& mapcrafter_bin) {
+	PathList textures, resources = findResourceDirs(mapcrafter_bin);
+	for (PathList::iterator it = resources.begin(); it != resources.end(); ++it)
+		if (fs::is_directory(*it / "textures"))
+			textures.push_back(*it / "textures");
+	return textures;
+}
+
 ProgressBar::ProgressBar()
 		: max(0), animated(true), start(time(NULL)), last_update(0), last_value(0),
 		  last_percent(0) {

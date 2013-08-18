@@ -19,14 +19,17 @@
 
 #include "render/manager.h"
 
+#include "util.h"
 #include "version.h"
 
 #include <iostream>
 #include <string>
 #include <cstring>
 #include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
 
 namespace po = boost::program_options;
+namespace fs = boost::filesystem;
 
 int main(int argc, char** argv) {
 	std::string config_file;
@@ -38,6 +41,7 @@ int main(int argc, char** argv) {
 	all.add_options()
 		("help,h", "shows a help message")
 		("version,v", "shows the version of mapcrafter")
+		("find-resources", "shows available resource directories")
 
 		("config,c",po::value<std::string>(&config_file),
 			"the path of the world to render (required)")
@@ -76,6 +80,26 @@ int main(int argc, char** argv) {
 		if (strlen(mapcrafter::MAPCRAFTER_GITVERSION))
 			std::cout << " (" << mapcrafter::MAPCRAFTER_GITVERSION << ")";
 		std::cout << std::endl;
+		return 0;
+	}
+
+	if (vm.count("find-resources")) {
+		// TODO find a platform independent way to get the path to the programs executable
+		std::cout << "mapcrafter binary: " << argv[0] << std::endl;
+
+		mapcrafter::PathList templates = mapcrafter::findTemplateDirs(argv[0]);
+		std::cout << "Template directories:" << std::endl;
+		for (size_t i = 0; i < templates.size(); i++)
+			std::cout << "  " << i+1 << ". " << BOOST_FS_ABSOLUTE1(templates[i]).string() << std::endl;
+		if (templates.size() == 0)
+			std::cout << "  Nothing found." << std::endl;
+
+		mapcrafter::PathList textures = mapcrafter::findTextureDirs(argv[0]);
+		std::cout << "Texture directories:" << std::endl;
+		for (size_t i = 0; i < textures.size(); i++)
+			std::cout << "  " << i+1 << ". " << BOOST_FS_ABSOLUTE1(textures[i]).string() << std::endl;
+		if (textures.size() == 0)
+			std::cout << "  Nothing found." << std::endl;
 		return 0;
 	}
 
