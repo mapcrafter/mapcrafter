@@ -84,17 +84,17 @@ int main(int argc, char** argv) {
 	}
 
 	if (vm.count("find-resources")) {
-		// TODO find a platform independent way to get the path to the programs executable
-		std::cout << "mapcrafter binary: " << argv[0] << std::endl;
+		std::string mapcrafter_bin = mapcrafter::findExecutablePath();
+		std::cout << "mapcrafter binary: " << mapcrafter_bin << std::endl;
 
-		mapcrafter::PathList templates = mapcrafter::findTemplateDirs(argv[0]);
+		mapcrafter::PathList templates = mapcrafter::findTemplateDirs(mapcrafter_bin);
 		std::cout << "Template directories:" << std::endl;
 		for (size_t i = 0; i < templates.size(); i++)
 			std::cout << "  " << i+1 << ". " << BOOST_FS_ABSOLUTE1(templates[i]).string() << std::endl;
 		if (templates.size() == 0)
 			std::cout << "  Nothing found." << std::endl;
 
-		mapcrafter::PathList textures = mapcrafter::findTextureDirs(argv[0]);
+		mapcrafter::PathList textures = mapcrafter::findTextureDirs(mapcrafter_bin);
 		std::cout << "Texture directories:" << std::endl;
 		for (size_t i = 0; i < textures.size(); i++)
 			std::cout << "  " << i+1 << ". " << BOOST_FS_ABSOLUTE1(textures[i]).string() << std::endl;
