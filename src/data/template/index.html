@@ -4,7 +4,11 @@
 		<title>Minecraft Map</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 		<link rel="stylesheet" type="text/css" href="style.css" />
-		<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+		<link rel="stylesheet" href="leaflet.css" />
+		<!--[if lte IE 8]>
+		<link rel="stylesheet" href="leaflet.ie.css" />
+		<![endif]-->
+		<script src="leaflet.js"></script>
 		<script type="text/javascript" src="map.js"></script>
 		<script type="text/javascript">
 		var CONFIG = {
@@ -18,9 +22,9 @@
 		function init() {
 			Mapcrafter.init();
 			
-			Mapcrafter.addControl(new MapSelectControl(), google.maps.ControlPosition.TOP_RIGHT, 1);
-			Mapcrafter.addControl(new RotationSelectControl(), google.maps.ControlPosition.BOTTOM_CENTER, 1);
-			Mapcrafter.addControl(new MousePosControl(), google.maps.ControlPosition.BOTTOM_LEFT, 1);
+			Mapcrafter.addControl(new MapSelectControl(), "topright", 1);
+			Mapcrafter.addControl(new RotationSelectControl(), "topright", 2);
+			Mapcrafter.addControl(new MousePosControl(), "bottomleft", 1);
 			
 			Mapcrafter.addHandler(new MapMarkerHandler(MARKERS));
 		}

@@ -251,7 +251,7 @@ bool RenderManager::writeTemplateIndexHtml() const {
 	std::map<std::string, std::string> vars;
 	vars["worlds"] = config.generateJavascript();
 
-	return copyTemplateFile("index.html", vars) && copyTemplateFile("index.leaflet.html", vars);
+	return copyTemplateFile("index.html", vars);
 }
 
 /**
@@ -265,8 +265,7 @@ void RenderManager::writeTemplates() const {
 	}
 
 	if (!writeTemplateIndexHtml())
-		std::cout << "Warning: Unable to copy template files index.html and index.leaflet.html!" 
-			<< std::endl;
+		std::cout << "Warning: Unable to copy template file index.html!" << std::endl;
 
 	if (!fs::exists(config.getOutputPath("markers.js"))
 			&& !copyFile(config.getTemplatePath("markers.js"), config.getOutputPath("markers.js")))
@@ -278,7 +277,6 @@ void RenderManager::writeTemplates() const {
 			++it) {
 		std::string filename = BOOST_FS_FILENAME(it->path());
 		if (filename == "index.html"
-				|| filename == "index.leaflet.html"
 				|| filename == "markers.js")
 			continue;
 		if (fs::is_regular_file(*it)) {

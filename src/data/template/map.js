@@ -72,8 +72,8 @@ MapPosHashHandler.prototype.create = function() {
 		};
 	})(this);
 	
-	google.maps.event.addListener(this.ui.gmap, "dragend", handler);
-	google.maps.event.addListener(this.ui.gmap, "zoom_changed", handler);
+	this.ui.lmap.on("dragend", handler);
+	this.ui.lmap.on("zoomend", handler);
 };
 
 MapPosHashHandler.prototype.onMapChange = function(name, rotation) {
@@ -97,10 +97,10 @@ MapPosHashHandler.prototype.parseHash = function() {
 MapPosHashHandler.prototype.updateHash = function() {
 	var type = this.ui.getCurrentType();
 	var rotation = this.ui.getCurrentRotation();
-	var xzy = this.ui.latLngToMC(this.ui.gmap.getCenter(), 64);
+	var xzy = this.ui.latLngToMC(this.ui.lmap.getCenter(), 64);
 	for(var i = 0; i < 3; i++)
 		xzy[i] = Math.round(xzy[i]);
-	var zoom = this.ui.gmap.getZoom();
+	var zoom = this.ui.lmap.getZoom();
 	window.location.replace("#" + type + "/" + rotation + "/" + zoom + "/" + xzy[0] + "/" + xzy[1] + "/" + xzy[2]);
 };
 
@@ -115,8 +115,7 @@ MapPosHashHandler.prototype.gotoHash = function(hash) {
 	this.ui.setMapTypeAndRotation(hash[0], hash[1]);
 		
 	var latlng = this.ui.mcToLatLng(hash[3], hash[4], hash[5]);
-	this.ui.gmap.setCenter(latlng);
-	this.ui.gmap.setZoom(hash[2]);
+	this.ui.lmap.setView(latlng, hash[2]);
 };
 
 MapMarkerHandler.prototype = new MapHandler();
@@ -131,41 +130,29 @@ function MapMarkerHandler(markers) {
 
 MapMarkerHandler.prototype.onMapChange = function(name, rotation) {
 	for(var i = 0; i < this.mapMarkers.length; i++)
-		this.mapMarkers[i].setMap(null);
+		this.ui.lmap.removeLayer(this.mapMarkers[i]);
 	this.mapMarkers = [];
 	
-	var infowindow = new google.maps.InfoWindow();
-	var current = {};
-
 	var world = this.ui.getCurrentConfig().worldName;
 	if(!(world in this.markers))
 		return;
-	for(var i = 0; i < this.markers[world].length; i++) {
+	for(var i = 0; i < this.markers[world].length; i++) {  
 		var location = this.markers[world][i];
 		
 		var pos = location.pos;
-		var markerOptions = {
-			position: this.ui.mcToLatLng(pos[0], pos[1], pos[2]),
-			map: this.ui.gmap,
+		var marker = new L.Marker(this.ui.mcToLatLng(pos[0], pos[1], pos[2]), {
 			title: location.title,
-		};
-		if(location.icon)
-			markerOptions["icon"] = location.icon;
-		var marker = new google.maps.Marker(markerOptions);
+		});
+		if(location.icon) {
+			marker.setIcon(new L.Icon({
+				iconUrl: location.icon,
+				iconSize: (location.iconsize ? location.iconsize : [24, 24]),
+			}));
+		}
+		marker.bindPopup(location.text ? location.text : location.title);
+		marker.addTo(this.ui.lmap);
+		
 		this.mapMarkers.push(marker);
-
-		google.maps.event.addListener(marker, "click", (function(ui, marker, location) {
-			return function() {
-				if(current == location) {
-					infowindow.close();
-					current = {};
-					return;
-				}
-				infowindow.setContent(location.text ? location.text : location.title);
-				infowindow.open(ui.gmap, marker);
-				current = location;
-			}
-		})(this.ui, marker, location));
 	}
 };
 
@@ -292,9 +279,9 @@ MousePosControl.prototype.create = function(wrapper) {
 	var text = document.createElement("span");
 	text.setAttribute("id", "mouse-move-div");
 	
-	google.maps.event.addListener(this.ui.gmap, "mousemove", (function(ui) {
+	this.ui.lmap.on("mousemove", (function(ui) {
 		return function(event) {
-			var xzy = ui.latLngToMC(event.latLng, 64);
+			var xzy = ui.latLngToMC(event.latlng, 64);
 			document.getElementById("mouse-move-div").innerHTML = "X: " + Math.round(xzy[0]) 
 				+ " Z: " + Math.round(xzy[1]) + " Y: " + Math.round(xzy[2]);
 		};
@@ -316,6 +303,32 @@ HTMLControl.prototype.create = function(wrapper) {
 	wrapper.innerHTML = this.html;
 };
 
+var MCTileLayer = L.TileLayer.extend({
+	initialize: function(url, options) {
+		this._url = url;
+		
+		L.setOptions(this, options);
+	},
+	
+	getTileUrl: function(tile) {
+		var zoom = this._map.getZoom();
+		var url = this._url;
+		if(tile.x < 0 || tile.x >= Math.pow(2, zoom) || tile.y < 0 || tile.y >= Math.pow(2, zoom)) {
+			url += "/blank";
+		} else if(zoom == 0) {
+			url += "/base";
+		} else {
+			for(var z = zoom - 1; z >= 0; --z) {
+				var x = Math.floor(tile.x / Math.pow(2, z)) % 2;
+				var y = Math.floor(tile.y / Math.pow(2, z)) % 2;
+				url += "/" + (x + 2 * y + 1);
+			}
+		}
+		url = url + ".png";
+		return url;
+	},
+});
+
 /**
  * The main map class.
  */
@@ -325,7 +338,8 @@ function MapcrafterUI(config) {
 	this.currentType = null;
 	this.currentRotation = null;
 	
-	this.gmap = null;
+	this.lmap = null;
+	this.layers = {};
 	
 	this.handlers = [];
 	this.controlsNotCreated = [];
@@ -336,28 +350,16 @@ function MapcrafterUI(config) {
 }
 
 MapcrafterUI.prototype.init = function() {
-	var mapOptions = {
-		zoom: 0,
-		center: new google.maps.LatLng(0.5, 0.5),
-		
-		navigationControl: true,
-		scaleControl: false,
-		mapTypeControl: false,
-		streetViewControl: false,
-	};
-	
-	this.gmap = new google.maps.Map(document.getElementById("mcmap"), mapOptions);
-	
-	this.handlers = [];
+	this.lmap = L.map("mcmap", {
+		crs: L.CRS.Simple
+	}).setView([0, 0], 0);
 	
 	var firstType = true;
 	for(var type in this.config) {
+		this.layers[type] = {};
 		for(var rotation in this.config[type].rotations) {
-			this.gmap.mapTypes.set(type + "-" + rotation, 
-					this.createMapType(type, this.config[type], rotation));
+			this.layers[type][rotation] = this.createTileLayer(type, this.config[type], rotation);
 			if(firstType) {
-				this.currentType = type;
-				this.currentRotation = rotation;
 				this.setMapTypeAndRotation(type, rotation);
 				firstType = false;
 			}
@@ -399,25 +401,35 @@ MapcrafterUI.prototype.getCurrentConfig = function() {
 };
 
 MapcrafterUI.prototype.setMapTypeAndRotation = function(type, rotation) {
-	var oldType = this.getCurrentConfig();
-	var newType = this.getConfig(type);
+	var oldConfig = this.getCurrentConfig();
+	var oldRotation = this.currentRotation;
+	var oldLayer = null;
+	var xzy = null;
+	if(this.currentType != null && this.currentRotation != null) {
+		oldLayer = this.layers[this.currentType][this.currentRotation];
+		xzy = this.latLngToMC(this.lmap.getCenter(), 64);
+	}
 	
-	xzy = this.latLngToMC(this.gmap.getCenter(), 64);
 	this.currentType = type;
 	this.currentRotation = parseInt(rotation);
+	var config = this.getCurrentConfig();
 	
-	var oldZoom = this.gmap.getZoom();
-	this.gmap.setMapTypeId(type + "-" + rotation);
-	if(oldType.worldName != newType.worldName) {
-		this.gmap.setCenter(new google.maps.LatLng(0.5, 0.5));
-		this.gmap.setZoom(0);
-	} else {
-		this.gmap.setCenter(this.mcToLatLng(xzy[0], xzy[1], xzy[2]));
+	var oldZoom = this.lmap.getZoom();
+	if(oldLayer != null) {
+		this.lmap.removeLayer(oldLayer);
+	}
+	this.lmap.addLayer(this.layers[this.currentType][this.currentRotation]);
+	
+	if(oldLayer == null || oldConfig.worldName != config.worldName) {
+		// set view to the center
+		this.lmap.setView(this.lmap.unproject([config.tileSize/2, config.tileSize/2]), 0);
+	} else /*if(this.currentRotation != oldRotation)*/ {
+		this.lmap.setView(this.mcToLatLng(xzy[0], xzy[1], xzy[2]), oldZoom);
 		
 		// adjust the zoom level
 		// if one switches between maps with different max zoom levels
-		if(oldType.maxZoom != newType.maxZoom) {
-			this.gmap.setZoom(oldZoom + newType.maxZoom - oldType.maxZoom);
+		if(oldConfig.maxZoom != config.maxZoom) {
+			this.lmap.setZoom(oldZoom + config.maxZoom - oldConfig.maxZoom);
 		}
 	}
 	
@@ -441,57 +453,14 @@ MapcrafterUI.prototype.setMapRotation = function(rotation) {
 	this.setMapTypeAndRotation(this.currentType, rotation);
 };
 
-/**
- * From Minecraft Overviewer.
- */
-// our custom projection maps Latitude to Y, and Longitude to X as normal,
-// but it maps the range [0.0, 1.0] to [0, tileSize] in both directions
-// so it is easier to position markers, etc. based on their position
-// (find their position in the lowest-zoom image, and divide by tileSize)
-function MapProjection(config) {
-	this.config = config
-	this.inverseTileSize = 1.0 / this.config.tileSize;
-}
-
-MapProjection.prototype.fromLatLngToPoint = function(latLng) {
-	var x = latLng.lng() * this.config.tileSize;
-	var y = latLng.lat() * this.config.tileSize;
-	return new google.maps.Point(x, y);
-};
-
-MapProjection.prototype.fromPointToLatLng = function(point) {
-	var lng = point.x * this.inverseTileSize;
-	var lat = point.y * this.inverseTileSize;
-	return new google.maps.LatLng(lat, lng);
-};
-
-MapcrafterUI.prototype.createMapType = function(name, config, rotation) {
-	var type = new google.maps.ImageMapType({
-		getTileUrl: function(tile, zoom) {
-			var url = name + "/" + ["tl", "tr", "br", "bl"][rotation];
-			if(tile.x < 0 || tile.x >= Math.pow(2, zoom) || tile.y < 0 || tile.y >= Math.pow(2, zoom)) {
-				url += "/blank";
-			} else if(zoom == 0) {
-				url += "/base";
-			} else {
-				for(var z = zoom - 1; z >= 0; --z) {
-					var x = Math.floor(tile.x / Math.pow(2, z)) % 2;
-					var y = Math.floor(tile.y / Math.pow(2, z)) % 2;
-					url += "/" + (x + 2 * y + 1);
-				}
-			}
-			url = url + ".png";
-			return url;
-		},
-		tileSize: new google.maps.Size(config.tileSize, config.tileSize),
+MapcrafterUI.prototype.createTileLayer = function(name, config, rotation) {
+	var layer = new MCTileLayer(name + "/" + ["tl", "tr", "br", "bl"][rotation], {
 		maxZoom: config.maxZoom,
-		minZoom: 0,
-		isPng: true
+		tileSize: config.tileSize,
+		noWrap: true,
 	});
-	type.name = config.name;
-	type.alt = name;
-	type.projection = new MapProjection(config);
-	return type;
+	
+	return layer;
 };
 
 MapcrafterUI.prototype.addControl = function(control, pos, index) {
@@ -500,20 +469,36 @@ MapcrafterUI.prototype.addControl = function(control, pos, index) {
 		return;
 	}
 	
-	var wrapper = document.createElement("div");
-	wrapper.setAttribute("class", "control-wrapper");
-	wrapper.setAttribute("id", "control-wrapper-" + name);
-	
-	control.ui = this;
-	control.create(wrapper);
-	wrapper.index = index;
-	
-	var handler = control.getHandler();
-	if(handler != null) {
-		this.addHandler(handler);
-	}
-	
-	this.gmap.controls[pos].push(wrapper);
+	var self = this;
+	var ControlType = L.Control.extend({
+		onAdd: function(map) {
+			var wrapper = document.createElement("div");
+			wrapper.setAttribute("class", "control-wrapper");
+			wrapper.setAttribute("id", "control-wrapper-" + name);
+			// just a dirty hack to prevent the map getting all mouse click events
+			wrapper.onmouseover = function() {
+				map.dragging.disable();
+			};
+			wrapper.onmouseout = function() {
+				map.dragging.enable();
+			}
+			
+			control.ui = self;
+			control.create(wrapper);
+			wrapper.index = index;
+			
+			var handler = control.getHandler();
+			if(handler != null) {
+				self.addHandler(handler);
+			}
+			
+			return wrapper;
+		},
+	});
+	var lcontrol = new ControlType({
+		position: pos,
+	});
+	this.lmap.addControl(lcontrol);
 };
 
 MapcrafterUI.prototype.addHandler = function(handler) {
@@ -557,8 +542,14 @@ MapcrafterUI.prototype.mcToLatLng = function(x, z, y) {
 	var lng = 0.5 - (1.0 / Math.pow(2, config.maxZoom + 1)) + col * 2*block;
 	// lat is now one block size for every row 
 	var lat = 0.5 + row * block;
-	
-	return new google.maps.LatLng(lat, lng);
+
+	// now we have coordinates in the range [0; 1]
+	// we use the unproject method of leaflet to convert pixel coordinates
+	// to real lat/lng coordinates
+	// every zoom level has tileSize * 2^zoom pixels, so just multiplicate
+	// the [0; 1] coordinates with this pixel count and use the unproject method
+	var size = config.tileSize * Math.pow(2, this.lmap.getZoom());
+	return this.lmap.unproject([lng * size, lat * size]);
 };
 
 MapcrafterUI.prototype.latLngToMC = function(latlng, y) {
@@ -584,8 +575,14 @@ MapcrafterUI.prototype.latLngToMC = function(latlng, y) {
 	
 	var config = this.getCurrentConfig();
 	
-	var lat = latlng.lat();
-	var lng = latlng.lng();
+	// same way like in the other method
+	// we convert the lat/lng coordinates to pixel coordinates
+	// then we need to convert the pixel coordinates to lat/lng coordinates in the range [0; 1]
+	// to use them for the lat/lng -> MC algorithm
+	var point = this.lmap.project(latlng);
+	var size = config.tileSize * Math.pow(2, this.lmap.getZoom());
+	var lat = point.y / size;
+	var lng = point.x / size;
 	
 	var tile = (1.0 / Math.pow(2, config.maxZoom + 1));
 	var block = (config.textureSize/2.0) / (config.tileSize * Math.pow(2, config.maxZoom));
