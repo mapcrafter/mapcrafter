@@ -66,18 +66,18 @@ bool MapSettings::read(const std::string& filename) {
 bool MapSettings::write(const std::string& filename) const {
 	config::ConfigFile config;
 
-	config.set("", "texture_size", str(texture_size));
-	config.set("", "tile_size", str(tile_size));
-	config.set("", "max_zoom", str(max_zoom));
+	config.set("", "texture_size", util::str(texture_size));
+	config.set("", "tile_size", util::str(tile_size));
+	config.set("", "max_zoom", util::str(max_zoom));
 
-	config.set("", "render_unknown_blocks", str(render_unknown_blocks));
-	config.set("", "render_leaves_transparent", str(render_leaves_transparent));
-	config.set("", "render_biomes", str(render_biomes));
+	config.set("", "render_unknown_blocks", util::str(render_unknown_blocks));
+	config.set("", "render_leaves_transparent", util::str(render_leaves_transparent));
+	config.set("", "render_biomes", util::str(render_biomes));
 
 	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
 	for (int i = 0; i < 4; i++) {
 		if (rotations[i])
-			config.set(rotation_names[i], "last_render", str(last_render[i]));
+			config.set(rotation_names[i], "last_render", util::str(last_render[i]));
 	}
 
 	return config.writeFile(filename);
@@ -231,7 +231,7 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
 
 	for (std::map<std::string, std::string>::const_iterator it = vars.begin();
 			it != vars.end(); ++it) {
-		replaceAll(data, "{" + it->first + "}", it->second);
+		util::replaceAll(data, "{" + it->first + "}", it->second);
 	}
 
 	std::ofstream out(config.getOutputPath(filename).c_str());
@@ -268,7 +268,7 @@ void RenderManager::writeTemplates() const {
 		std::cout << "Warning: Unable to copy template file index.html!" << std::endl;
 
 	if (!fs::exists(config.getOutputPath("markers.js"))
-			&& !copyFile(config.getTemplatePath("markers.js"), config.getOutputPath("markers.js")))
+			&& !util::copyFile(config.getTemplatePath("markers.js"), config.getOutputPath("markers.js")))
 		std::cout << "Warning: Unable to copy template file markers.js!" << std::endl;
 
 	// copy all other files and directories
@@ -280,10 +280,10 @@ void RenderManager::writeTemplates() const {
 				|| filename == "markers.js")
 			continue;
 		if (fs::is_regular_file(*it)) {
-			if (!copyFile(*it, config.getOutputPath(filename)))
+			if (!util::copyFile(*it, config.getOutputPath(filename)))
 				std::cout << "Warning: Unable to copy template file " << filename << std::endl;
 		} else if (fs::is_directory(*it)) {
-			if (!copyDirectory(*it, config.getOutputPath(filename)))
+			if (!util::copyDirectory(*it, config.getOutputPath(filename)))
 				std::cout << "Warning: Unable to copy template directory " << filename
 						<< std::endl;
 		}
@@ -297,34 +297,34 @@ void RenderManager::writeTemplates() const {
 void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 	if (fs::exists(dir / "1")) {
 		// at first rename the directories 1 2 3 4 (zoom level 0) and make new directories
-		moveFile(dir / "1", dir / "1_");
+		util::moveFile(dir / "1", dir / "1_");
 		fs::create_directories(dir / "1");
 		// then move the old tile trees one zoom level deeper
-		moveFile(dir / "1_", dir / "1/4");
+		util::moveFile(dir / "1_", dir / "1/4");
 		// also move the images of the directories
-		moveFile(dir / "1.png", dir / "1/4.png");
+		util::moveFile(dir / "1.png", dir / "1/4.png");
 	}
 
 	// do the same for the other directories
 	if (fs::exists(dir / "2")) {
-		moveFile(dir / "2", dir / "2_");
+		util::moveFile(dir / "2", dir / "2_");
 		fs::create_directories(dir / "2");
-		moveFile(dir / "2_", dir / "2/3");
-		moveFile(dir / "2.png", dir / "2/3.png");
+		util::moveFile(dir / "2_", dir / "2/3");
+		util::moveFile(dir / "2.png", dir / "2/3.png");
 	}
 	
 	if (fs::exists(dir / "3")) {
-		moveFile(dir / "3", dir / "3_");
+		util::moveFile(dir / "3", dir / "3_");
 		fs::create_directories(dir / "3");
-		moveFile(dir / "3_", dir / "3/2");
-		moveFile(dir / "3.png", dir / "3/2.png");
+		util::moveFile(dir / "3_", dir / "3/2");
+		util::moveFile(dir / "3.png", dir / "3/2.png");
 	}
 	
 	if (fs::exists(dir / "4")) {
-		moveFile(dir / "4", dir / "4_");
+		util::moveFile(dir / "4", dir / "4_");
 		fs::create_directories(dir / "4");
-		moveFile(dir / "4_", dir / "4/1");
-		moveFile(dir / "4.png", dir / "4/1.png");
+		util::moveFile(dir / "4_", dir / "4/1");
+		util::moveFile(dir / "4.png", dir / "4/1.png");
 	}
 
 	// now read the images, which belong to the new directories
@@ -391,7 +391,7 @@ void RenderManager::render(const config::RenderWorldConfig& config, const std::s
 		settings.output_dir = output_dir;
 
 		settings.show_progress = true;
-		settings.progress_bar = ProgressBar(tiles.getRequiredRenderTilesCount(), !opts.batch);
+		settings.progress_bar = util::ProgressBar(tiles.getRequiredRenderTilesCount(), !opts.batch);
 
 		Image tile;
 		// then render just everything recursive
@@ -484,7 +484,7 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 		pthread_create(&threads[i], NULL, runWorker, (void*) settings);
 	}
 
-	ProgressBar progress(tiles.getRequiredRenderTilesCount(), !opts.batch);
+	util::ProgressBar progress(tiles.getRequiredRenderTilesCount(), !opts.batch);
 	// loop while the render threads are running
 	while (1) {
 		sleep(1);
@@ -506,7 +506,7 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 	// render remaining composite tiles
 	std::cout << "Rendering remaining " << remaining << " composite tiles" << std::endl;
 	Image tile;
-	remaining_settings.progress_bar = ProgressBar(remaining, !opts.batch);
+	remaining_settings.progress_bar = util::ProgressBar(remaining, !opts.batch);
 	renderRecursive(remaining_settings, Path(), tile);
 	remaining_settings.progress_bar.finish();
 }

@@ -38,15 +38,14 @@ if(NOT "${CMAKE_CURRENT_SOURCE_DIR}/version.cpp")
 endif()
 
 set(SOURCE
-    ${CMAKE_CURRENT_SOURCE_DIR}/util.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/version.cpp
 )
 set(HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/config.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util.h
     ${CMAKE_CURRENT_SOURCE_DIR}/version.h
 )
 
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/util")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/config")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/mc")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/render")

@@ -327,13 +327,13 @@ std::string RenderConfigParser::generateJavascript() const {
 		js += "\"" + world.name_short + "\" : {\n";
 		js += "\tname: \"" + world.name_long + "\",\n";
 		js += "\tworldName: \"" + world_name + "\",\n";
-		js += "\ttextureSize: " + str(world.texture_size) + ",\n";
-		js += "\ttileSize: " + str(32*world.texture_size) + ",\n";
-		js += "\tmaxZoom: " + str(worlds_max_zoom[i]) + ",\n";
+		js += "\ttextureSize: " + util::str(world.texture_size) + ",\n";
+		js += "\ttileSize: " + util::str(32*world.texture_size) + ",\n";
+		js += "\tmaxZoom: " + util::str(worlds_max_zoom[i]) + ",\n";
 		js += "\trotations: [";
 		for (std::set<int>::iterator it = world.rotations.begin();
 				it != world.rotations.end(); ++it)
-			js += str(*it) + ",";
+			js += util::str(*it) + ",";
 		js += "],\n";
 		js += "},";
 	}

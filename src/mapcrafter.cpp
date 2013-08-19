@@ -84,25 +84,25 @@ int main(int argc, char** argv) {
 	}
 
 	if (vm.count("find-resources")) {
-		fs::path mapcrafter_bin = mapcrafter::findExecutablePath();
-		std::cout << "Your home directory: " << mapcrafter::findHomeDir().string() << std::endl;
+		fs::path mapcrafter_bin = mapcrafter::util::findExecutablePath();
+		std::cout << "Your home directory: " << mapcrafter::util::findHomeDir().string() << std::endl;
 		std::cout << "mapcrafter binary: " << mapcrafter_bin.string() << std::endl;
 		
-		mapcrafter::PathList resources = mapcrafter::findResourceDirs(mapcrafter_bin);
+		mapcrafter::util::PathList resources = mapcrafter::util::findResourceDirs(mapcrafter_bin);
 		std::cout << "Resource directories:" << std::endl;
 		for (size_t i = 0; i < resources.size(); i++)
 			std::cout << "  " << i+1 << ". " << BOOST_FS_ABSOLUTE1(resources[i]).string() << std::endl;
 		if (resources.size() == 0)
 			std::cout << "  Nothing found." << std::endl;
 
-		mapcrafter::PathList templates = mapcrafter::findTemplateDirs(mapcrafter_bin);
+		mapcrafter::util::PathList templates = mapcrafter::util::findTemplateDirs(mapcrafter_bin);
 		std::cout << "Template directories:" << std::endl;
 		for (size_t i = 0; i < templates.size(); i++)
 			std::cout << "  " << i+1 << ". " << BOOST_FS_ABSOLUTE1(templates[i]).string() << std::endl;
 		if (templates.size() == 0)
 			std::cout << "  Nothing found." << std::endl;
 
-		mapcrafter::PathList textures = mapcrafter::findTextureDirs(mapcrafter_bin);
+		mapcrafter::util::PathList textures = mapcrafter::util::findTextureDirs(mapcrafter_bin);
 		std::cout << "Texture directories:" << std::endl;
 		for (size_t i = 0; i < textures.size(); i++)
 			std::cout << "  " << i+1 << ". " << BOOST_FS_ABSOLUTE1(textures[i]).string() << std::endl;

@@ -175,8 +175,8 @@ Path Path::byTilePos(const TilePos& tile, int depth) {
 	if (tile.getX() > radius || tile.getY() > radius || tile.getX() < -radius
 	        || tile.getY() < -radius)
 		throw std::runtime_error(
-		        "Invalid tile position " + str(tile.getX()) + ":" + str(tile.getY())
-		                + " on depth " + str(depth));
+		        "Invalid tile position " + util::str(tile.getX()) + ":" + util::str(tile.getY())
+		                + " on depth " + util::str(depth));
 	// the tactic is here to calculate the bounds where the tile is inside
 	int bounds_left = -radius;
 	int bounds_right = radius;

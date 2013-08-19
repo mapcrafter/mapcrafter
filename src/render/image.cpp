@@ -437,7 +437,7 @@ bool Image::readPNG(const std::string& filename) {
 	for (int32_t i = 0; i < height; i++, p += width)
 		rows[i] = (png_bytep) p;
 
-	if (mapcrafter::isBigEndian()) {
+	if (mapcrafter::util::isBigEndian()) {
 		png_set_bgr(png);
 		png_set_swap_alpha(png);
 	}
@@ -481,7 +481,7 @@ bool Image::writePNG(const std::string& filename) const {
 
 	png_set_rows(png, info, rows);
 
-	if (mapcrafter::isBigEndian())
+	if (mapcrafter::util::isBigEndian())
 		png_write_png(png, info, PNG_TRANSFORM_BGR | PNG_TRANSFORM_SWAP_ALPHA, NULL);
 	else
 		png_write_png(png, info, PNG_TRANSFORM_IDENTITY, NULL);

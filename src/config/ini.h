@@ -80,7 +80,7 @@ public:
 
 	template<typename T>
 	T get(const std::string& section, const std::string& key) const {
-		return as<T>(get(section, key));
+		return util::as<T>(get(section, key));
 	}
 
 	void set(const std::string& section, const std::string& key,

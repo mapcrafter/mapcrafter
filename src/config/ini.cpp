@@ -124,8 +124,8 @@ bool ConfigFile::load(std::istream& stream) {
 					return false;
 			}
 
-			trim(key);
-			trim(value);
+			util::trim(key);
+			util::trim(value);
 			//std::cout << "   " << key << "=\"" << value << "\"" << std::endl;
 
 			if (section == -1)

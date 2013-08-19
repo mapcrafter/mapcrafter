@@ -45,21 +45,21 @@ template<>
 int16_t read<int16_t>(std::istream& stream) {
 	int16_t value;
 	stream.read(reinterpret_cast<char*>(&value), sizeof(value));
-	return bigEndian16(value);
+	return util::bigEndian16(value);
 }
 
 template<>
 int32_t read<int32_t>(std::istream& stream) {
 	int32_t value;
 	stream.read(reinterpret_cast<char*>(&value), sizeof(value));
-	return bigEndian32(value);
+	return util::bigEndian32(value);
 }
 
 template<>
 int64_t read<int64_t>(std::istream& stream) {
 	int64_t value;
 	stream.read(reinterpret_cast<char*>(&value), sizeof(value));
-	return bigEndian64(value);
+	return util::bigEndian64(value);
 }
 
 template<>
@@ -69,7 +69,7 @@ float read<float>(std::istream& stream) {
 		float myfloat;
 	};
 	stream.read(reinterpret_cast<char*>(&tmp), sizeof(int32_t));
-	tmp = bigEndian32(tmp);
+	tmp = util::bigEndian32(tmp);
 	return myfloat;
 }
 
@@ -80,7 +80,7 @@ double read<double>(std::istream& stream) {
 		double mydouble;
 	};
 	stream.read(reinterpret_cast<char*>(&tmp), sizeof(int64_t));
-	tmp = bigEndian64(tmp);
+	tmp = util::bigEndian64(tmp);
 	return mydouble;
 }
 
@@ -104,19 +104,19 @@ void write<int8_t>(std::ostream& stream, int8_t value) {
 
 template<>
 void write<int16_t>(std::ostream& stream, int16_t value) {
-	int16_t tmp = bigEndian16(value);
+	int16_t tmp = util::bigEndian16(value);
 	stream.write(reinterpret_cast<char*>(&tmp), sizeof(value));
 }
 
 template<>
 void write<int32_t>(std::ostream& stream, int32_t value) {
-	int32_t tmp = bigEndian32(value);
+	int32_t tmp = util::bigEndian32(value);
 	stream.write(reinterpret_cast<char*>(&tmp), sizeof(value));
 }
 
 template<>
 void write<int64_t>(std::ostream& stream, int64_t value) {
-	int64_t tmp = bigEndian64(value);
+	int64_t tmp = util::bigEndian64(value);
 	stream.write(reinterpret_cast<char*>(&tmp), sizeof(value));
 }
 
@@ -127,7 +127,7 @@ void write<float>(std::ostream& stream, float value) {
 		float myfloat;
 	};
 	myfloat = value;
-	tmp = bigEndian32(tmp);
+	tmp = util::bigEndian32(tmp);
 	stream.write(reinterpret_cast<char*>(&tmp), sizeof(int32_t));
 }
 
@@ -138,7 +138,7 @@ void write<double>(std::ostream& stream, double value) {
 		double myfloat;
 	};
 	myfloat = value;
-	tmp = bigEndian64(tmp);
+	tmp = util::bigEndian64(tmp);
 	stream.write(reinterpret_cast<char*>(&tmp), sizeof(int64_t));
 }
 
@@ -223,7 +223,7 @@ Tag& TagList::read(std::istream& stream) {
 	for (int32_t i = 0; i < length; i++) {
 		Tag* tag = createTag(tag_type);
 		if (tag == nullptr)
-			throw NBTError(std::string("Unknown tag type with id ") + str(static_cast<int>(tag_type))
+			throw NBTError(std::string("Unknown tag type with id ") + util::str(static_cast<int>(tag_type))
 						   + ". NBT data stream may be corrupted.");
 		tag->read(stream);
 		tag->setWriteType(false);
@@ -264,7 +264,7 @@ Tag& TagCompound::read(std::istream& stream) {
 		std::string name = nbtstream::read<std::string>(stream);
 		Tag* tag = createTag(tag_type);
 		if (tag == nullptr)
-			throw NBTError(std::string("Unknown tag type with id ") + str(static_cast<int>(tag_type))
+			throw NBTError(std::string("Unknown tag type with id ") + util::str(static_cast<int>(tag_type))
 						   + ". NBT data stream may be corrupted.");
 		tag->read(stream);
 		tag->setName(name);
@@ -331,11 +331,11 @@ void NBTFile::decompressStream(std::istream& stream, std::stringstream& decompre
 	} catch (boost::iostreams::gzip_error &e) {
 		throw NBTError(
 		        "Error while decompressing gzip data: " + std::string(e.what()) + " ("
-		                + str(e.error()) + ")");
+		                + util::str(e.error()) + ")");
 	} catch (boost::iostreams::zlib_error &e) {
 		throw NBTError(
 		        "Error while decompressing zlib data: " + std::string(e.what()) + " ("
-		                + str(e.error()) + ")");
+		                + util::str(e.error()) + ")");
 	}
 }
 

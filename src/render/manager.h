@@ -87,7 +87,7 @@ struct RecursiveRenderSettings {
 
 	int progress;
 	bool show_progress;
-	ProgressBar progress_bar;
+	util::ProgressBar progress_bar;
 
 	RecursiveRenderSettings(const TileSet& tiles, TileRenderer* renderer)
 		: tiles(tiles), renderer(renderer), tile_size(0), progress(0), show_progress(true) {}

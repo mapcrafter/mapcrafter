@@ -67,13 +67,13 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 			file.read(reinterpret_cast<char*>(&tmp), 4);
 			if (tmp == 0)
 				continue;
-			int offset = bigEndian32(tmp << 8) * 4096;
+			int offset = util::bigEndian32(tmp << 8) * 4096;
 			//uint8_t sectors = ((uint8_t*) &tmp)[3];
 
 			file.seekg(4096, std::ios::cur);
 			int timestamp;
 			file.read(reinterpret_cast<char*>(&timestamp), 4);
-			timestamp = bigEndian32(timestamp);
+			timestamp = util::bigEndian32(timestamp);
 
 			ChunkPos pos(x + regionpos.x * 32, z + regionpos.z * 32);
 			if (rotation)
@@ -161,7 +161,7 @@ int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 	else if (compression == 2)
 		comp = nbt::Compression::ZLIB;
 
-	size = bigEndian32(size) - 1;
+	size = util::bigEndian32(size) - 1;
 
 	// set the chunk rotation
 	chunk.setRotation(rotation);

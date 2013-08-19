@@ -218,7 +218,7 @@ public:
 	}
 	
 	void dump(std::ostream& stream, const std::string& indendation = "") const {
-		dumpTag(stream, indendation, *this, str(payload.size()) + " entries");
+		dumpTag(stream, indendation, *this, util::str(payload.size()) + " entries");
 	}
 
 	std::vector<T> payload;
