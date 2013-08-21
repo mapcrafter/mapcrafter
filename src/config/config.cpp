@@ -19,7 +19,12 @@
 
 #include "config.h"
 
+#include "../util.h"
+
 #include <fstream>
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace config {
@@ -49,6 +54,8 @@ void RenderWorldConfig::readFromConfig(const fs::path& dir, const ConfigFile& co
 		input_dir = config.get(section, "world");
 	if (config.has(section, "textures_dir"))
 		textures_dir = config.get(section, "textures_dir");
+	else
+		textures_dir = util::findTextureDir().string();
 
 	if (config.has(section, "rotations")) {
 		rotations.clear();
@@ -165,6 +172,8 @@ bool RenderConfigParser::loadFile(const std::string& filename) {
 		output_dir = BOOST_FS_ABSOLUTE(output_dir, dir).string();
 	if (!template_dir.empty())
 		template_dir = BOOST_FS_ABSOLUTE(template_dir, dir).string();
+	else
+		template_dir = util::findTemplateDir().string();
 
 	default_config.readFromConfig(dir, config, "");
 
