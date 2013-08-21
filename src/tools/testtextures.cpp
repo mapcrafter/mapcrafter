@@ -20,14 +20,61 @@
 #include "../render/textures.h"
 
 #include <iostream>
+#include <string>
+#include <boost/program_options.hpp>
+
+namespace po = boost::program_options;
 
 using namespace mapcrafter::render;
 
 int main(int argc, char **argv) {
+	std::string texture_dir;
+	std::string output_file;
+	int texture_size;
+
+	po::options_description all("Allowed options");
+	all.add_options()
+		("help,h", "shows a help message")
+
+		("texture-dir,i",po::value<std::string>(&texture_dir),
+			"the path to the textures (required)")
+		("output-image,o", po::value<std::string>(&output_file),
+			"the path to the output image (default: blocks.png)")
+		("texture-size,t", po::value<int>(&texture_size),
+			"the texture size used to generate the blocks (default: 16)");
+
+	po::variables_map vm;
+	try {
+		po::store(po::parse_command_line(argc, argv, all), vm);
+	} catch (po::error& ex) {
+		std::cout << "There is a problem parsing the command line arguments: "
+				<< ex.what() << std::endl << std::endl;
+		std::cout << all << std::endl;
+		return 1;
+	}
+
+	po::notify(vm);
+
+	if (vm.count("help")) {
+		std::cout << all << std::endl;
+		return 1;
+	}
+
+	if (!vm.count("texture-dir")) {
+		std::cout << "You have to specify a texture directory!" << std::endl;
+		std::cout << all << std::endl;
+		return 1;
+	}
+
+	if (!vm.count("output"))
+		output_file = "blocks.png";
+	if (!vm.count("texture-size"))
+		texture_size = 16;
+
 	BlockImages images;
-	images.setSettings(16, 0, true, true, "");
-	if(images.loadAll("data/textures")) {
-		images.saveBlocks("blocks.png");
+	images.setSettings(texture_size, 0, true, true, "");
+	if(images.loadAll(texture_dir)) {
+		images.saveBlocks(output_file);
 		return 0;
 	}
 
