@@ -798,20 +798,22 @@ bool BlockImages::loadBlocks(const std::string& block_dir) {
 bool BlockImages::loadAll(const std::string& textures_dir) {
 	if (!loadChests(textures_dir + "/chest/normal.png", textures_dir + "/chest/normal_double.png",
 			textures_dir + "/chest/ender.png")) {
-		std::cerr << "Error: Unable to load chest/normal.png, chest/normal_double.png or chest/ender.png!"
-				<< std::endl;
+		std::cerr << "Error: Unable to load chest/normal.png, chest/normal_double.png or chest/ender.png" << std::endl;
+		std::cerr << "from texture directory '" << textures_dir << "'." << std::endl;
 		return false;
 	} else if (!loadColors(textures_dir + "/colormap/foliage.png",
 			textures_dir + "/colormap/grass.png")) {
-		std::cerr << "Error: Unable to load colormap/foliage.png or colormap/grass.png!"
-				<< std::endl;
+		std::cerr << "Error: Unable to load colormap/foliage.png or colormap/grass.png";
+		std::cerr << "from texture directory '" << textures_dir << "'." << std::endl;
 		return false;
 	} else if (!loadOther(textures_dir + "/fire.png",
 			textures_dir + "/endportal.png")) {
-		std::cerr << "Error: Unable to load fire.png or endportal.png!" << std::endl;
+		std::cerr << "Error: Unable to load fire.png or endportal.png" << std::endl;
+		std::cerr << "from texture directory '" << textures_dir << "'." << std::endl;
 		return false;
 	} else if (!loadBlocks(textures_dir + "/blocks")) {
-		std::cerr << "Error: Unable to load block textures!" << std::endl;
+		std::cerr << "Error: Unable to load block textures" << std::endl;
+		std::cerr << "from texture directory '" << textures_dir << "'." << std::endl;
 		return false;
 	}
 	return true;

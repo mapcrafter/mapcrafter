@@ -689,7 +689,6 @@ bool RenderManager::run() {
 			images.setSettings(world.texture_size, *it, world.render_unknown_blocks,
 					world.render_leaves_transparent, world.rendermode);
 			if (!images.loadAll(world.textures_dir)) {
-				std::cerr << "Unable to create block images!" << std::endl;
 				std::cerr << "Skipping remaining rotations." << std::endl << std::endl;
 				break;
 			}
