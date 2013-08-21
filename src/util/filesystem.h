@@ -40,6 +40,8 @@ PathList findResourceDirs(const fs::path& mapcrafter_bin);
 PathList findTemplateDirs(const fs::path& mapcrafter_bin);
 PathList findTextureDirs(const fs::path& mapcrafter_bin);
 
+fs::path findTemplateDir();
+fs::path findTextureDir();
 
 } /* namespace util */
 } /* namespace mapcrafter */

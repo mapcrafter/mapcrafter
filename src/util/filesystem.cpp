@@ -130,5 +130,19 @@ PathList findTextureDirs(const fs::path& mapcrafter_bin) {
 	return textures;
 }
 
+fs::path findTemplateDir() {
+	PathList templates = findTemplateDirs(findExecutablePath());
+	if (templates.size())
+		return *templates.begin();
+	return fs::path();
+}
+
+fs::path findTextureDir() {
+	PathList textures = findTextureDirs(findExecutablePath());
+	if (textures.size())
+		return *textures.begin();
+	return fs::path();
+}
+
 } /* namespace util */
 } /* namespace mapcrafter */
