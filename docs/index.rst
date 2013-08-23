@@ -5,15 +5,11 @@ mapcrafter
 Welcome
 =======
 
-.. image:: mapcrafter.png
-	:align: center
-	:width: 700px
-
-mapcrafter is a fast Minecraft World Renderer written in C++. It renders
+mapcrafter is a fast Minecraft Map Renderer written in C++. It renders
 Minecraft Worlds to a bunch of images, which are viewable using Leaflet like a big Google Map 
-in any webbrowser. mapcrafter is not yet finished. A few blocks are not supported
-yet, but all rendering routines are implemented. 
+in any webbrowser. mapcrafter is not yet finished.
 
+It runs on Linux and other Unix-like operation systems like Mac OS. 
 The renderer works with the Anvil World format and the Minecraft 1.6 Resource Packs.
 
 mapcrafter is free software and available under the GPL license. You can
@@ -23,6 +19,10 @@ http://github.com/m0r13/mapcrafter
 There are a few example maps of the renderer on the 
 `GitHub Wiki <https://github.com/m0r13/mapcrafter/wiki/Example-maps>`_. 
 Please feel free to add your own map to this list.
+
+.. image:: mapcrafter.png
+	:align: center
+	:width: 700px
 
 Features
 ========
@@ -57,28 +57,11 @@ Documentation Contents
 .. toctree::
    :maxdepth: 2
    
+   installation
    getting_started
    configuration
    commandline
    markers
-
-Requirements
-============
-
-* A Linux-based or Mac operating system would be good, 
-  building the renderer on Windows is possible but not easy.
-* A C++ compiler (preferable gcc, minimum gcc 4.4), CMake and make to build mapcrafter.
-* Some libraries:
-	* libpng
-	* libpthread
-	* libboost-iostreams
-	* libboost-system
-	* libboost-filesystem
-	* libboost-program-options
-	* (libboost-test if you want to use the tests)
-* For the Minecraft Worlds:
-	* Anvil World Format
-	* Minecraft 1.6 Resource Packs
 
 Indices and tables
 ==================
