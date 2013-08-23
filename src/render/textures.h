@@ -410,7 +410,6 @@ private:
 
 	BlockTextures textures;
 	Image empty_texture;
-	Image fire_texture;
 	Image endportal_texture;
 
 	Image chest[3];
@@ -539,7 +538,7 @@ public:
 	bool loadChests(const std::string& normal, const std::string& large,
 	        const std::string& ender);
 	bool loadColors(const std::string& foliagecolor, const std::string& grasscolor);
-	bool loadOther(const std::string& fire, const std::string& endportal);
+	bool loadOther(const std::string& endportal);
 	bool loadBlocks(const std::string& block_dir);
 	bool loadAll(const std::string& textures_dir);
 	bool saveBlocks(const std::string& filename);

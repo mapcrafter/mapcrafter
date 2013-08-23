@@ -771,11 +771,10 @@ bool BlockImages::loadColors(const std::string& foliagecolor,
 	return foliagecolors.readPNG(foliagecolor) && grasscolors.readPNG(grasscolor);
 }
 
-bool BlockImages::loadOther(const std::string& fire, const std::string& endportal) {
-	Image fire_img, endportal_img;
-	if(!fire_img.readPNG(fire) || !endportal_img.readPNG(endportal))
+bool BlockImages::loadOther(const std::string& endportal) {
+	Image endportal_img;
+	if(!endportal_img.readPNG(endportal))
 		return false;
-	fire_img.resizeInterpolated(texture_size, texture_size, fire_texture);
 	endportal_img.resizeInterpolated(texture_size, texture_size, endportal_texture);
 	return true;
 }
@@ -806,9 +805,8 @@ bool BlockImages::loadAll(const std::string& textures_dir) {
 		std::cerr << "Error: Unable to load colormap/foliage.png or colormap/grass.png";
 		std::cerr << "from texture directory '" << textures_dir << "'." << std::endl;
 		return false;
-	} else if (!loadOther(textures_dir + "/fire.png",
-			textures_dir + "/endportal.png")) {
-		std::cerr << "Error: Unable to load fire.png or endportal.png" << std::endl;
+	} else if (!loadOther(textures_dir + "/endportal.png")) {
+		std::cerr << "Error: Unable to load endportal.png" << std::endl;
 		std::cerr << "from texture directory '" << textures_dir << "'." << std::endl;
 		return false;
 	} else if (!loadBlocks(textures_dir + "/blocks")) {
@@ -2445,7 +2443,7 @@ void BlockImages::loadBlocks() {
 	createBlock(48, 0, t.COBBLESTONE_MOSSY); // moss stone
 	createBlock(49, 0, t.OBSIDIAN); // obsidian
 	createTorch(50, t.TORCH_ON); // torch
-	createItemStyleBlock(51, 0, fire_texture); // fire
+	createItemStyleBlock(51, 0, t.FIRE_LAYER_0); // fire
 	createBlock(52, 0, t.MOB_SPAWNER); // monster spawner
 	createStairs(53, t.PLANKS_OAK); // oak wood stairs
 	createChest(54, chest); // chest
