@@ -42,9 +42,9 @@ Features
 Help
 ====
 
-Read :doc:`getting_started` to get a first insight how to use the renderer.
-You can find a detailed documentation about the renderer in
-:doc:`configuration` and :doc:`commandline`.
+Read :doc:`using_mapcrafter` to get a first insight how to use the renderer.
+You can find a detailed documentation about the render configuration file
+format in :doc:`configuration`.
 
 If you find bugs or problems when using mapcrafter or if you have ideas for new
 features, then please feel free to add an issue to the `GitHub issue tracker
@@ -63,9 +63,8 @@ Documentation Contents
    :maxdepth: 2
    
    installation
-   getting_started
+   using_mapcrafter
    configuration
-   commandline
    markers
 
 Indices and tables
