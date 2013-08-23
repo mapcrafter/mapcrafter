@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	if (!vm.count("output"))
+	if (!vm.count("output-image"))
 		output_file = "blocks.png";
 	if (!vm.count("texture-size"))
 		texture_size = 16;
