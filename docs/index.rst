@@ -2,22 +2,19 @@
 mapcrafter
 ==========
 
-.. image:: mapcrafter.png
-	:align: center
-	:height: 500px
-
 Welcome
 =======
 
-mapcrafter is a fast Minecraft World Renderer written in C++. It renders
-Minecraft Worlds to a bunch of images, which are viewable in any webbrowser
-using Leaflet.
+.. image:: mapcrafter.png
+	:align: center
+	:width: 700px
 
-mapcrafter is not yet finished. At the moment a few blocks are not supported
-yet, but all rendering routines are implemented. mapcrafter uses configuration
-files to specify which worlds should get rendered and allows multiple rendered
-worlds/rotation of worlds/rendermodes in one output file. The renderer works
-with the Anvil World format and the Minecraft 1.6 Resource Packs.
+mapcrafter is a fast Minecraft World Renderer written in C++. It renders
+Minecraft Worlds to a bunch of images, which are viewable using Leaflet like a big Google Map 
+in any webbrowser. mapcrafter is not yet finished. A few blocks are not supported
+yet, but all rendering routines are implemented. 
+
+The renderer works with the Anvil World format and the Minecraft 1.6 Resource Packs.
 
 mapcrafter is free software and available under the GPL license. You can
 access the latest source code of mapcrafter on GitHub:
@@ -30,31 +27,12 @@ Please feel free to add your own map to this list.
 Features
 ========
 
-* Rendering Minecraft Worlds to maps viewable in any webbrowser
-* Configuration files to control the renderer
-* Four different directions to render your worlds from with an isometric 3D view
-* Different rendermodes
-* Biome colors
-* Incremental rendering, multithreading
-* User-defined markers on your maps
-
-Requirements
-============
-
-* A Linux-based or Mac operating system would be good, 
-  building the renderer on Windows is possible but not easy.
-* A C++ compiler (preferable gcc, minimum gcc 4.4), CMake and make to build mapcrafter.
-* Some libraries:
-	* libpng
-	* libpthread
-	* libboost-iostreams
-	* libboost-system
-	* libboost-filesystem
-	* libboost-program-options
-	* (libboost-test if you want to use the tests)
-* For the Minecraft Worlds:
-	* Anvil World Format
-	* Minecraft 1.6 Resource Packs
+* **Web output**: Render your Minecraft Worlds to maps with an isometric 3D perspective viewable in any webbrowser!
+* **Different directions**: Choose from four different directions to render your worlds!
+* **Different rendermodes**: Choose between different rendermodes like day, night and cave for your maps!
+* **Configuration files**: Control which worlds are rendered from which direction and with which rendermodes!
+* **Markers**: Define your own markers for your maps!
+* **Other stuff**: Biome colors, incremental rendering, multithreading
 
 Help
 ====
@@ -73,8 +51,8 @@ are new to IRC. I will be there most of the time, but please bear in mind
 that I can't be available all the time. If I'm not there, wait some time or 
 try another time of the day.
 
-Contents
-========
+Documentation Contents
+======================
 
 .. toctree::
    :maxdepth: 2
@@ -83,6 +61,24 @@ Contents
    configuration
    commandline
    markers
+
+Requirements
+============
+
+* A Linux-based or Mac operating system would be good, 
+  building the renderer on Windows is possible but not easy.
+* A C++ compiler (preferable gcc, minimum gcc 4.4), CMake and make to build mapcrafter.
+* Some libraries:
+	* libpng
+	* libpthread
+	* libboost-iostreams
+	* libboost-system
+	* libboost-filesystem
+	* libboost-program-options
+	* (libboost-test if you want to use the tests)
+* For the Minecraft Worlds:
+	* Anvil World Format
+	* Minecraft 1.6 Resource Packs
 
 Indices and tables
 ==================
