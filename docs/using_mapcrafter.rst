@@ -36,6 +36,8 @@ with your webbrowser.
 For more information about rendering maps, see :doc:`configuration` and the
 next section about command line options.
 
+.. _command_line_options:
+
 Command Line Options
 ====================
 

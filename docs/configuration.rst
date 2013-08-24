@@ -36,9 +36,10 @@ directions. The second world is rendered with other textures, with texture
 size 16 and only from two directions. Furthermore the lighting rendermode
 is used.
 
-You can render these worlds with (see :doc:`commandline` for more options)::
+You can render these worlds with (see :ref:`command_line_options` for more 
+options)::
 
-	./mapcrafter -c render.conf
+	mapcrafter -c render.conf
 
 The configuration files consist of ``[sections]`` and ``key = value`` option pairs .
 The sections of the configuration files are the maps to render. The options in
@@ -201,10 +202,10 @@ Available Options
 	when rendering incremental.  Possible options are:
 
 	``timestamp``
-		The renderer saves the time of the last rendering.  All tiles whoose
-		chunk timestamps are newer than this last-render-time are required.
+	  The renderer saves the time of the last rendering.  All tiles whoose
+	  chunk timestamps are newer than this last-render-time are required.
 	``filetimes``
-		The renderer checks the modification times of the already rendered tile
-		images.  All tiles whoose chunk timestamps are newer than this
-		modification time are required.
+	  The renderer checks the modification times of the already rendered tile
+	  images.  All tiles whoose chunk timestamps are newer than this
+	  modification time are required.
 
