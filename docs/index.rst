@@ -7,7 +7,7 @@ Welcome
 
 mapcrafter is a fast Minecraft Map Renderer written in C++. It renders
 Minecraft Worlds to a bunch of images, which are viewable using Leaflet like a
-big Google Map in any webbrowser.
+big map in any webbrowser.
 
 It runs on Linux and other Unix-like operating systems like Mac OS.  The
 renderer works with the Anvil World format and the Minecraft 1.6 Resource
@@ -15,7 +15,7 @@ Packs.
 
 mapcrafter is free software and available under the GPL license. You can access
 the latest source code of mapcrafter on GitHub:
-http://github.com/m0r13/mapcrafter
+https://github.com/m0r13/mapcrafter
 
 There are a few example maps of the renderer on the `GitHub Wiki
 <https://github.com/m0r13/mapcrafter/wiki/Example-maps>`_.  Please feel free to
