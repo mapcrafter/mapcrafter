@@ -59,14 +59,20 @@ can use the already built mapcrafter Debian packages.  This is the recommended
 practice though you can easily upgrade mapcrafter everytime to the newest
 stable version.
 
-Add the following line to your apt sources (``/etc/apt/sources.list``)::
+Create the file ``/etc/apt/sources.list.d/mapcrafter.list`` with the 
+following content::
 
     deb http://mapcrafter.org/debian ./
 
-Run ``sudo apt-get update`` to update your sources and ``sudo apt-get install
-mapcrafter`` to install mapcrafter.  During this process mapcrafter will
-automatically download a temporary Minecraft Jar file and unpack required
-texture files.
+Run ``sudo apt-get update`` to update your sources. If you get an error
+concerning GPG keys, you have to import the GPG key of the mapcrafter project
+manually::
+
+    gpg --keyserver pgp.mit.edu --recv 0xb6f77e28fe4f4eac && gpg --export --armor 0xb6f77e28fe4f4eac | sudo apt-key add -
+
+Now you can run ``sudo apt-get install mapcrafter`` to install mapcrafter.
+During this process it will automatically download a temporary Minecraft Jar
+file and unpack required texture files.
 
 Resources and Textures
 ======================
