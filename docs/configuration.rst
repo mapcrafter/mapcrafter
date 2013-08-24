@@ -9,13 +9,11 @@ maps/rotations/rendermodes into one output file.
 An Example
 ==========
 
-Here is an example of a configuration file (render.conf):
+Here is an example of a configuration file (let's call it ``render.conf``):
 
 .. code-block:: ini
 
 	output_dir = output
-	template_dir = mapcrafter/src/data/template
-	textures_dir = mapcrafter/src/data/textures
 
 	[world]
 	name = Main World
