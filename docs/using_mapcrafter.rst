@@ -78,7 +78,7 @@ Here is a list of available command line options:
 		This option is useful if you want to update only the template
 		of your rendered map::
 		
-			./mapcrafter -c render.conf -r
+			mapcrafter -c render.conf -r
 
 .. cmdoption:: -a <maps>, --render-auto <maps>
 
