@@ -82,7 +82,7 @@ Available Options
 
 ``template_dir = <directory>``
 
-	**Required**
+	**Default:** default template directory (see :ref:`resources_textures`)
 
 	This is the directory with the web template files. The renderer copies all
 	files, which are in this directory, to the output directory and replaces the
@@ -132,7 +132,7 @@ Available Options
 
 ``textures_dir = <directory>``
 
-	**Required**
+	**Default:** default texture directory (see :ref:`resources_textures`)
 
 	This is the directory with the Minecraft Texture files.  The renderer works
 	with the Minecraft 1.6 Resource Pack file format. You need here: 
@@ -140,13 +140,9 @@ Available Options
 	* directory ``chest/`` with normal.png, normal_double.png and ender.png 
 	* directory ``colormap/`` with foliage.png and grass.png
 	* directory ``blocks/`` from your texture pack
-	* endportal.png and fire.png
+	* endportal.png
 
-	Probably you can get everything from your Minecraft Jar file. You can use the python
-	script ``find_images.py`` from the data directory to extract the images from your
-	Minecraft Jar file.
-	
-	See also :ref:`installing-textures`.
+	See also :ref:`resources_textures` to see how to get these files.
 
 ``texture_size = <number>``
 

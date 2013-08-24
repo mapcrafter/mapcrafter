@@ -74,6 +74,8 @@ Now you can run ``sudo apt-get install mapcrafter`` to install mapcrafter.
 During this process it will automatically download a temporary Minecraft Jar
 file and unpack required texture files.
 
+.. _resources_textures:
+
 Resources and Textures
 ======================
 

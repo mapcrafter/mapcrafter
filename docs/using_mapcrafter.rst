@@ -45,6 +45,15 @@ Here is a list of available command line options:
 
 	This shows a help about the command line options.
 
+.. cmdoption:: -v, --version
+
+	Shows the version of mapcrafter.
+
+.. cmdoption:: --find-resources
+
+	Shows the resource directories of mapcrafter. See also
+	:ref:`resources_textures`.
+
 .. cmdoption:: -c <file>, --config <file>
 
 	This is the path to the configuration file to use when rendering
