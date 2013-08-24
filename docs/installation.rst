@@ -92,8 +92,8 @@ is the directory where mapcrafter is installed (mostly ``/usr`` or
 is used if you built mapcrafter from source and run it directly without
 installing.
 
-The template files in these resource directories are expected by the renderer
-in ``template/``, the texture files in ``textures/``.
+The template and texture files in these resource directories are expected by
+the renderer in ``template/``, the texture files in ``textures/``.
 
 You can get the paths to the resource directories of mapcrafter by running
 ``mapcrafter --find-resources``. For example, when I installed the Debian
