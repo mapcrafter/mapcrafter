@@ -19,6 +19,8 @@
 
 #include "filesystem.h"
 
+#include "../util.h"
+
 #include <iostream>
 #include <fstream>
 
