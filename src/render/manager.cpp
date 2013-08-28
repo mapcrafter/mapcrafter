@@ -452,11 +452,14 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 	std::vector<RenderWorkerSettings*> worker_settings;
 	threads.resize(opts.jobs);
 	worker_settings.resize(opts.jobs);
+
+	// list of caches
+	std::vector<mc::WorldCache> caches(opts.jobs, mc::WorldCache(world));
+
 	for (int i = 0; i < opts.jobs; i++) {
 		// create all informations needed for the worker
 		// every thread has his own cache
-		mc::WorldCache* cache = new mc::WorldCache(world);
-		TileRenderer* renderer = new TileRenderer(*cache, images, config);
+		TileRenderer* renderer = new TileRenderer(caches[i], images, config);
 		RecursiveRenderSettings* render_settings =
 				new RecursiveRenderSettings(tiles, renderer);
 		render_settings->tile_size = images.getTileSize();
