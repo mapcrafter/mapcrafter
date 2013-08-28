@@ -119,7 +119,7 @@ struct CacheEntry {
  */
 class WorldCache {
 private:
-	const World& world;
+	World world;
 
 	CacheEntry<RegionPos, RegionFile> regioncache[RSIZE];
 	CacheEntry<ChunkPos, Chunk> chunkcache[CSIZE];
@@ -131,7 +131,7 @@ private:
 	int getChunkCacheIndex(const ChunkPos& pos) const;
 
 public:
-	WorldCache(const World& world);
+	WorldCache(const World& world = World());
 
 	RegionFile* getRegion(const RegionPos& pos);
 	Chunk* getChunk(const ChunkPos& pos);
