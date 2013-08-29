@@ -20,6 +20,8 @@
 #ifndef RENDER_H_
 #define RENDER_H_
 
+#include "../util.h"
+
 #include "../config/config.h"
 
 #include "../mc/pos.h"
@@ -77,13 +79,15 @@ public:
  * Data required to render a tile.
  */
 struct RenderState {
-	mc::WorldCache& world;
-	const BlockImages& images;
+	mc::WorldCache* world;
+	const BlockImages* images;
 
 	mc::Chunk* chunk;
 
-	RenderState(mc::WorldCache& world, const BlockImages& images);
+	RenderState(mc::WorldCache* world = nullptr, const BlockImages* images = nullptr);
 	~RenderState();
+
+	bool isValid() const;
 
 	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA) const;
 };
@@ -121,6 +125,7 @@ private:
 
 	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 public:
+	TileRenderer();
 	TileRenderer(mc::WorldCache& world, const BlockImages& textures,
 			const config::RenderWorldConfig& config);
 	~TileRenderer();

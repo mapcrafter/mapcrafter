@@ -21,8 +21,6 @@
 
 #include "rendermodes/base.h"
 
-#include "../util.h"
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -121,25 +119,35 @@ bool BlockRowIterator::end() const {
 	return current.y < 0;
 }
 
-RenderState::RenderState(mc::WorldCache& world, const BlockImages& images)
-		: world(world), images(images), chunk(NULL) {
+RenderState::RenderState(mc::WorldCache* world, const BlockImages* images)
+		: world(world), images(images), chunk(nullptr) {
 }
 
 RenderState::~RenderState() {
 
 }
 
+bool RenderState::isValid() const {
+	return world != nullptr && images != nullptr;
+}
+
 mc::Block RenderState::getBlock(const mc::BlockPos& pos, int get) const {
-	return world.getBlock(pos, chunk, get);
+	assert(isValid());
+
+	return world->getBlock(pos, chunk, get);
 }
 
 bool RenderBlock::operator<(const RenderBlock& other) const {
 	return pos < other.pos;
 }
 
+TileRenderer::TileRenderer()
+		: state(), render_biomes(false), water_preblit(true) {
+}
+
 TileRenderer::TileRenderer(mc::WorldCache& world, const BlockImages& images,
         const config::RenderWorldConfig& config)
-		: state(world, images), render_biomes(config.render_biomes),
+		: state(&world, &images), render_biomes(config.render_biomes),
 		  water_preblit(config.rendermode != "daylight"
 				  && config.rendermode != "nightlight") {
 	createRendermode(config.rendermode, config, state, rendermodes);
@@ -149,6 +157,8 @@ TileRenderer::~TileRenderer() {
 }
 
 Biome TileRenderer::getBiome(const mc::BlockPos& pos, const mc::Chunk* chunk) {
+	assert(state.isValid());
+
 	uint8_t biome_id = chunk->getBiomeAt(mc::LocalBlockPos(pos));
 	Biome biome = BIOMES[DEFAULT_BIOME];
 	if (render_biomes && biome_id < BIOMES_SIZE)
@@ -168,8 +178,8 @@ Biome TileRenderer::getBiome(const mc::BlockPos& pos, const mc::Chunk* chunk) {
 			mc::ChunkPos chunk_pos(other);
 			uint8_t other_id = chunk->getBiomeAt(mc::LocalBlockPos(other));
 			if (chunk_pos != chunk->getPos()) {
-				mc::Chunk* other_chunk = state.world.getChunk(chunk_pos);
-				if (other_chunk == NULL)
+				mc::Chunk* other_chunk = state.world->getChunk(chunk_pos);
+				if (other_chunk == nullptr)
 					continue;
 				other_id = other_chunk->getBiomeAt(mc::LocalBlockPos(other));
 			}
@@ -221,6 +231,7 @@ uint16_t getDoorDirectionClosed(uint16_t direction, bool flip) {
  * Checks for a specific block the neighbors and sets extra block data if necessary.
  */
 uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+	assert(state.isValid());
 
 	mc::Block north, south, east, west, top, bottom;
 
@@ -360,16 +371,16 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 
 		// check for same neighbors
 		if (north.id != 0 && (north.id == id
-				|| !state.images.isBlockTransparent(north.id, north.data)))
+				|| !state.images->isBlockTransparent(north.id, north.data)))
 			data |= DATA_NORTH;
 		if (south.id != 0 && (south.id == id
-				|| !state.images.isBlockTransparent(south.id, south.data)))
+				|| !state.images->isBlockTransparent(south.id, south.data)))
 			data |= DATA_SOUTH;
 		if (east.id != 0 && (east.id == id
-				|| !state.images.isBlockTransparent(east.id, east.data)))
+				|| !state.images->isBlockTransparent(east.id, east.data)))
 			data |= DATA_EAST;
 		if (west.id != 0 && (west.id == id
-				|| !state.images.isBlockTransparent(west.id, west.data)))
+				|| !state.images->isBlockTransparent(west.id, west.data)))
 			data |= DATA_WEST;
 
 		// check fences, they can also connect with fence gates
@@ -384,18 +395,18 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 	}
 
 
-	if (!state.images.isBlockTransparent(id, data)) {
+	if (!state.images->isBlockTransparent(id, data)) {
 		// add shadow edges on opaque blockes
 		north = state.getBlock(pos + mc::DIR_NORTH);
 		east = state.getBlock(pos + mc::DIR_EAST);
 		bottom = state.getBlock(pos + mc::DIR_BOTTOM);
 
 		// check if neighbors are opaque
-		if (north.id == 0 || state.images.isBlockTransparent(north.id, north.data))
+		if (north.id == 0 || state.images->isBlockTransparent(north.id, north.data))
 			data |= EDGE_NORTH;
-		if (east.id == 0 || state.images.isBlockTransparent(east.id, east.data))
+		if (east.id == 0 || state.images->isBlockTransparent(east.id, east.data))
 			data |= EDGE_EAST;
-		if (bottom.id == 0 || state.images.isBlockTransparent(bottom.id, bottom.data))
+		if (bottom.id == 0 || state.images->isBlockTransparent(bottom.id, bottom.data))
 			data |= EDGE_BOTTOM;
 	}
 
@@ -403,14 +414,16 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 }
 
 void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
+	assert(state.isValid());
+
 	// some vars, set correct image size
-	int block_size = state.images.getBlockImageSize();
-	int tile_size = state.images.getTileSize();
+	int block_size = state.images->getBlockImageSize();
+	int tile_size = state.images->getTileSize();
 	tile.setSize(tile_size, tile_size);
 
 	// get the maximum count of water blocks,
 	// blitted about each over, until they are nearly opaque
-	int max_water = state.images.getMaxWaterNeededOpaque();
+	int max_water = state.images->getMaxWaterNeededOpaque();
 
 	// all visible blocks, which are rendered in this tile
 	std::set<RenderBlock> blocks;
@@ -439,10 +452,10 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 
 			// check if current chunk is not null
 			// and if the chunk wasn't replaced in the cache (i.e. position changed)
-			if (state.chunk == NULL || state.chunk->getPos() != current_chunk)
+			if (state.chunk == nullptr || state.chunk->getPos() != current_chunk)
 				// get chunk if not
-				state.chunk = state.world.getChunk(current_chunk);
-			if (state.chunk == NULL) {
+				state.chunk = state.world->getChunk(current_chunk);
+			if (state.chunk == nullptr) {
 				// here is nothing (= air),
 				// so reset state if we are in water
 				in_water = false;
@@ -527,7 +540,7 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 									data |= DATA_WEST;
 
 								// get image and replace the old render block with this
-								top.image = state.images.getOpaqueWater(neighbor_south,
+								top.image = state.images->getOpaqueWater(neighbor_south,
 										neighbor_west);
 
 								// don't forget the rendermodes
@@ -556,13 +569,13 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 			//if (is_water && (data & DATA_WEST) && (data & DATA_SOUTH))
 			//	continue;
 			Image image;
-			bool transparent = state.images.isBlockTransparent(id, data);
+			bool transparent = state.images->isBlockTransparent(id, data);
 
 			// check for biome data
 			if (id == 2 || id == 18 || id == 31 || id == 106 || id == 111)
-				image = state.images.getBiomeDependBlock(id, data, getBiome(block.current, state.chunk));
+				image = state.images->getBiomeDependBlock(id, data, getBiome(block.current, state.chunk));
 			else
-				image = state.images.getBlock(id, data);
+				image = state.images->getBlock(id, data);
 
 			RenderBlock node;
 			node.x = it.draw_x;
