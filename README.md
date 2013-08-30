@@ -36,8 +36,8 @@ stuff of the template from Minecraft Overviewer.
 ## Documentation ##
 
 The documentation is in the `docs/` directory and you can build it yourself
-with Sphinx. You can read a built version of the documentation on
-[Read the Docs](http://mapcrafter.readthedocs.org) and you can also [download
+with Sphinx. You can read a built version of the documentation from
+[Read the Docs](http://docs.mapcrafter.org) and you can also [download
 other builds](https://readthedocs.org/projects/mapcrafter/downloads/).
 
 ## Examples ##
