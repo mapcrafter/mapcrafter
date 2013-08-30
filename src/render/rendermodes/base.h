@@ -56,7 +56,7 @@ public:
 };
 
 bool createRendermode(const std::string& name, const config::RenderWorldConfig& config,
-		RenderState& state, std::vector<std::unique_ptr<Rendermode>>& modes);
+		RenderState& state, std::vector<std::shared_ptr<Rendermode>>& modes);
 
 } /* namespace render */
 } /* namespace mapcrafter */

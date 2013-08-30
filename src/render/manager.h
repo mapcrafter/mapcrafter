@@ -78,8 +78,8 @@ struct MapSettings {
  * are a lot of parameters and most of them don't change, so let's put them into a struct.
  */
 struct RecursiveRenderSettings {
-	const TileSet& tiles;
-	TileRenderer* renderer;
+	TileSet tiles;
+	TileRenderer renderer;
 
 	int tile_size;
 	fs::path output_dir;
@@ -89,7 +89,9 @@ struct RecursiveRenderSettings {
 	bool show_progress;
 	util::ProgressBar progress_bar;
 
-	RecursiveRenderSettings(const TileSet& tiles, TileRenderer* renderer)
+	RecursiveRenderSettings()
+		: tile_size(0), progress(0), show_progress(true) {}
+	RecursiveRenderSettings(const TileSet& tiles, const TileRenderer& renderer)
 		: tiles(tiles), renderer(renderer), tile_size(0), progress(0), show_progress(true) {}
 };
 
@@ -99,10 +101,10 @@ struct RecursiveRenderSettings {
 struct RenderWorkerSettings {
 
 	RenderWorkerSettings()
-			: thread(-1), render_settings(NULL), base_progress(0), finished(false) {}
+		: thread(-1), base_progress(0), finished(false) {}
 
 	int thread;
-	RecursiveRenderSettings* render_settings;
+	RecursiveRenderSettings render_settings;
 
 	std::set<Path> tiles;
 

@@ -43,16 +43,16 @@ void Rendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16
 }
 
 bool createRendermode(const std::string& name, const config::RenderWorldConfig& config,
-		RenderState& state, std::vector<std::unique_ptr<Rendermode>>& modes) {
+		RenderState& state, std::vector<std::shared_ptr<Rendermode>>& modes) {
 	if (name.empty() || name == "normal")
 		return true;
 
 	if (name == "cave")
-		modes.push_back(std::unique_ptr<Rendermode>(new CaveRendermode(state)));
+		modes.push_back(std::shared_ptr<Rendermode>(new CaveRendermode(state)));
 	else if (name == "daylight")
-		modes.push_back(std::unique_ptr<Rendermode>(new LightingRendermode(state, true)));
+		modes.push_back(std::shared_ptr<Rendermode>(new LightingRendermode(state, true)));
 	else if (name == "nightlight")
-		modes.push_back(std::unique_ptr<Rendermode>(new LightingRendermode(state, false)));
+		modes.push_back(std::shared_ptr<Rendermode>(new LightingRendermode(state, false)));
 	else
 		return false;
 	return true;

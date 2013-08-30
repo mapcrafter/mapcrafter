@@ -625,5 +625,9 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 		rendermodes[i]->end();
 }
 
+bool TileRenderer::isValid() const {
+	return state.isValid();
+}
+
 }
 }

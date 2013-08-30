@@ -136,9 +136,9 @@ void renderRecursive(RecursiveRenderSettings& settings, const Path& path, Image&
 		}
 	} else if (path.getDepth() == settings.tiles.getDepth()) {
 		// this tile is a render tile, render it (if we have a renderer)
-		if (settings.renderer == NULL)
+		if (!settings.renderer.isValid())
 			return;
-		settings.renderer->renderTile(path.getTilePos(), tile);
+		settings.renderer.renderTile(path.getTilePos(), tile);
 
 		/*
 		int size = settings.tile_size;
@@ -385,7 +385,7 @@ void RenderManager::render(const config::RenderWorldConfig& config, const std::s
 		// create needed things for recursiv render method
 		mc::WorldCache cache(world);
 		TileRenderer renderer(cache, images, config);
-		RecursiveRenderSettings settings(tiles, &renderer);
+		RecursiveRenderSettings settings(tiles, renderer);
 
 		settings.tile_size = images.getTileSize();
 		settings.output_dir = output_dir;
@@ -418,12 +418,12 @@ void* runWorker(void* settings_ptr) {
 			it != settings->tiles.end(); ++it) {
 
 		// render this composite tile
-		renderRecursive(*settings->render_settings, *it, tile);
+		renderRecursive(settings->render_settings, *it, tile);
 
 		// clear image, increase progress
 		tile.clear();
-		settings->base_progress += settings->render_settings->progress;
-		settings->render_settings->progress = 0;
+		settings->base_progress += settings->render_settings.progress;
+		settings->render_settings.progress = 0;
 	}
 
 	settings->finished = true;
@@ -442,7 +442,7 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 	int remaining = tiles.findRenderTasks(opts.jobs, workers);
 
 	// create render settings for the remaining composite tiles at the end
-	RecursiveRenderSettings remaining_settings(tiles, NULL);
+	RecursiveRenderSettings remaining_settings(tiles, TileRenderer());
 	remaining_settings.tile_size = images.getTileSize();
 	remaining_settings.output_dir = output_dir;
 	remaining_settings.show_progress = true;
@@ -459,12 +459,11 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 	for (int i = 0; i < opts.jobs; i++) {
 		// create all informations needed for the worker
 		// every thread has his own cache
-		TileRenderer* renderer = new TileRenderer(caches[i], images, config);
-		RecursiveRenderSettings* render_settings =
-				new RecursiveRenderSettings(tiles, renderer);
-		render_settings->tile_size = images.getTileSize();
-		render_settings->output_dir = output_dir;
-		render_settings->show_progress = false;
+		TileRenderer renderer(caches[i], images, config);
+		RecursiveRenderSettings render_settings(tiles, renderer);
+		render_settings.tile_size = images.getTileSize();
+		render_settings.output_dir = output_dir;
+		render_settings.show_progress = false;
 
 		RenderWorkerSettings* settings = new RenderWorkerSettings;
 		settings->thread = i;
@@ -497,7 +496,7 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 		bool running = false;
 		for (int i = 0; i < opts.jobs; i++) {
 			sum += worker_settings[i]->base_progress
-					+ worker_settings[i]->render_settings->progress;
+					+ worker_settings[i]->render_settings.progress;
 			running = running || !worker_settings[i]->finished;
 		}
 		progress.update(sum);
