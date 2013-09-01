@@ -23,6 +23,10 @@
 #include <ctime>
 #include <pthread.h>
 
+#if defined(__WIN32__) || defined(__WIN64__)
+  #include <windows.h>
+#endif
+
 namespace mapcrafter {
 namespace render {
 
@@ -489,7 +493,12 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 	util::ProgressBar progress(tiles.getRequiredRenderTilesCount(), !opts.batch);
 	// loop while the render threads are running
 	while (1) {
+	
+#if defined(__WIN32__) || defined(__WIN64__)
+		Sleep(1);
+#else
 		sleep(1);
+#endif
 
 		// check if threads are running and update progress_bar
 		int sum = 0;
