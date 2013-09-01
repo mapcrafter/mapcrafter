@@ -1,7 +1,20 @@
 cmake_minimum_required(VERSION 2.6)
 project(mapcrafter)
 
-add_definitions(-O3)
+option(OPT_DEBUG "Debug" OFF)
+option(OPT_OPTIMIZE "Optimize" ON)
+option(OPT_PROFILE "Profile" OFF)
+
+if(OPT_DEBUG)
+    add_definitions(-g)
+endif()
+if(OPT_OPTIMIZE)
+    add_definitions(-O3)
+endif()
+if(OPT_PROFILE)
+    add_definitions(-pg)
+endif()
+
 add_definitions(-Wall)
 add_definitions(-std=c++0x)
 
