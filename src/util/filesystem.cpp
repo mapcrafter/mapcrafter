@@ -24,6 +24,10 @@
 #include <iostream>
 #include <fstream>
 
+#if defined(__WIN32__) || defined(__WIN64__)
+  #include <windows.h>
+#endif
+
 namespace mapcrafter {
 namespace util {
 
@@ -70,7 +74,12 @@ bool moveFile(const fs::path& from, const fs::path& to) {
 
 // TODO make sure this works on different OSes
 fs::path findHomeDir() {
-	char* path = getenv("HOME");
+	char* path;
+#if defined(__WIN32__) || defined(__WIN64__)
+	path = getenv("APPDATA");
+#else
+	path = getenv("HOME");
+#endif
 	if (path != nullptr)
 		return fs::path(path);
 	return fs::path("");
@@ -91,6 +100,9 @@ fs::path findExecutablePath() {
 	mib[2] = KERN_PROC_PATHNAME;
 	mib[3] = -1;
 	sysctl(mib, 4, buf, sizeof(buf), NULL, 0);
+	return fs::path(std::string(buf));
+#elif defined(__WIN32__) || defined(__WIN64__)
+	GetModuleFileName(NULL, buf, 1024);
 	return fs::path(std::string(buf));
 #else
 	static_assert(0, "Unable to find the executable's path!");
