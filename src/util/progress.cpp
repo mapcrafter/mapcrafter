@@ -20,6 +20,7 @@
 #include "progress.h"
 
 #include <iostream>
+#include <cstdio>
 #include <ctime>
 
 namespace mapcrafter {
