@@ -35,9 +35,7 @@ bool CaveRendermode::isLight(const mc::BlockPos& pos) {
 }
 
 bool CaveRendermode::isTransparentBlock(const mc::Block& block) const {
-	assert(state.isValid());
-
-	return block.id == 0 || state.images->isBlockTransparent(block.id, block.data);
+	return block.id == 0 || state.images.isBlockTransparent(block.id, block.data);
 }
 
 bool CaveRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {

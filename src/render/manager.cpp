@@ -19,6 +19,7 @@
 
 #include "manager.h"
 
+#include <tuple>
 #include <fstream>
 #include <ctime>
 #include <pthread.h>
@@ -139,9 +140,7 @@ void renderRecursive(RecursiveRenderSettings& settings, const Path& path, Image&
 			std::cerr << settings.tiles.isTileRequired(path) << " " << settings.skip_tiles.count(path) << std::endl;
 		}
 	} else if (path.getDepth() == settings.tiles.getDepth()) {
-		// this tile is a render tile, render it (if we have a renderer)
-		if (!settings.renderer.isValid())
-			return;
+		// this tile is a render tile, render it
 		settings.renderer.renderTile(path.getTilePos(), tile);
 
 		/*
@@ -451,20 +450,15 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 	remaining_settings.output_dir = output_dir;
 	remaining_settings.show_progress = true;
 
-	// list of threads
-	std::vector<pthread_t> threads;
+	// list of threads/workers
+	std::vector<pthread_t> threads(opts.jobs);
 	std::vector<RenderWorkerSettings*> worker_settings;
-	threads.resize(opts.jobs);
-	worker_settings.resize(opts.jobs);
-
-	// list of caches
-	std::vector<mc::WorldCache> caches(opts.jobs, mc::WorldCache(world));
+	std::vector<TileRenderer*> worker_renderers;
 
 	for (int i = 0; i < opts.jobs; i++) {
 		// create all informations needed for the worker
-		// every thread has his own cache
-		TileRenderer renderer(caches[i], images, config);
-		RecursiveRenderSettings render_settings(tiles, renderer);
+		TileRenderer* renderer = new TileRenderer(mc::WorldCache(world), images, config);
+		RecursiveRenderSettings render_settings(tiles, *renderer);
 		render_settings.tile_size = images.getTileSize();
 		render_settings.output_dir = output_dir;
 		render_settings.show_progress = false;
@@ -485,7 +479,9 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 		std::cout << "Thread " << i << " renders " << sum
 				<< " tiles on max zoom level " << tiles.getDepth() << "." << std::endl;
 
-		worker_settings[i] = settings;
+		worker_settings.push_back(settings);
+		worker_renderers.push_back(renderer);
+
 		// start thread
 		pthread_create(&threads[i], NULL, runWorker, (void*) settings);
 	}
@@ -513,6 +509,12 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 			break;
 	}
 	progress.finish();
+
+	// free some memory used by the workers
+	for (int i = 0; i < opts.jobs; i++) {
+		delete worker_settings[i];
+		delete worker_renderers[i];
+	}
 
 	// render remaining composite tiles
 	std::cout << "Rendering remaining " << remaining << " composite tiles" << std::endl;
