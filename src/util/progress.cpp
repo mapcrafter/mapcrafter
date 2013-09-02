@@ -61,9 +61,9 @@ void ProgressBar::update(int value) {
 		// at the end an average speed
 		speed = (double) value / (now - start);
 
+	// go to the begin of the line
 	if (animated)
-		// go to the begin of the line
-		std::cout << "\033[K";
+		std::cout << "\r";
 	// show the progress bar
 	std::cout << "[";
 	for (int i = 0; i <= 100; i += 2) {
