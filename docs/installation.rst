@@ -36,8 +36,9 @@ Linux system, you can install these packages with apt::
     sudo apt-get install libpng12-dev libboost-iostreams-dev \
     libboost-system-dev libboost-filesystem-dev libboost-program-options-dev
 
-Then you can go into the directory of the mapcrafter source code and build
-mapcrafter with the following commands::
+Then you can go into the directory with the mapcrafter source (for example
+``mapcrafter/``, not ``mapcrafter/src/``) and build it with the following
+commands::
 
     cmake .
     make
