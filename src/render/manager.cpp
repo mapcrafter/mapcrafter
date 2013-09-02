@@ -19,7 +19,6 @@
 
 #include "manager.h"
 
-#include <tuple>
 #include <fstream>
 #include <ctime>
 #include <pthread.h>
