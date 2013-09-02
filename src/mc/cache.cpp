@@ -19,6 +19,8 @@
 
 #include "cache.h"
 
+#include "../util.h"
+
 namespace mapcrafter {
 namespace mc {
 
@@ -69,12 +71,12 @@ RegionFile* WorldCache::getRegion(const RegionPos& pos) {
 
 	// region does not exist, region in cache was not modified
 	if (!world.getRegion(pos, entry.value))
-		return NULL;
+		return nullptr;
 
 	if (!entry.value.loadAll()) {
 		// the region is not valid, region in cache was probably modified
 		entry.used = false;
-		return NULL;
+		return nullptr;
 	}
 
 	entry.used = true;
@@ -93,22 +95,22 @@ Chunk* WorldCache::getChunk(const ChunkPos& pos) {
 
 	// if not try to get the region of the chunk from the cache
 	RegionFile* region = getRegion(pos.getRegion());
-	if (region == NULL) {
+	if (region == nullptr) {
 		//chunkstats.unavailable++;
-		return NULL;
+		return nullptr;
 	}
 
 	// then try to load the chunk
 	int status = region->loadChunk(pos, entry.value);
 	// the chunk does not exist, chunk in cache was not modified
 	if (status == RegionFile::CHUNK_DOES_NOT_EXIST)
-		return NULL;
+		return nullptr;
 
 	if (status != RegionFile::CHUNK_OK) {
 		//chunkstats.unavailable++;
 		// the chunk is not valid, chunk in cache was probably modified
 		entry.used = false;
-		return NULL;
+		return nullptr;
 	}
 
 	entry.used = true;
@@ -124,10 +126,10 @@ Block WorldCache::getBlock(const mc::BlockPos& pos, const mc::Chunk* chunk, int 
 
 	mc::ChunkPos chunk_pos(pos);
 	const mc::Chunk* mychunk = chunk;
-	if (chunk == NULL || chunk_pos != chunk->getPos())
+	if (chunk == nullptr || chunk_pos != chunk->getPos())
 		mychunk = getChunk(chunk_pos);
-	// chunk may be NULL
-	if (mychunk == NULL) {
+	// chunk may be nullptr
+	if (mychunk == nullptr) {
 		return Block();
 	// otherwise get all required block data
 	} else {
