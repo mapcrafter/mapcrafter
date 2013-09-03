@@ -64,6 +64,9 @@ endif()
 
 target_link_libraries(mapcraftercore png)
 target_link_libraries(mapcraftercore pthread)
+if(OPT_BOOST_STATIC)
+	target_link_libraries(mapcraftercore z)
+endif()
 
 add_executable(mapcrafter mapcrafter.cpp)
 target_link_libraries(mapcrafter mapcraftercore)
