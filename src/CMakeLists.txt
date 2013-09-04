@@ -58,7 +58,7 @@ add_dependencies(mapcraftercore version.cpp)
 
 target_link_libraries(mapcraftercore ${Boost_IOSTREAMS_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-if(Boost_UNIT_TEST_FRAMEWORK_FOUND)
+if(NOT OPT_SKIP_TESTS)
 	target_link_libraries(mapcraftercore ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 endif()
 
