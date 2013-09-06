@@ -2681,6 +2681,7 @@ void BlockImages::loadBlocks() {
 	// --
 	createBlock(172, 0, t.HARDENED_CLAY); // hardened clay
 	createBlock(173, 0, t.COAL_BLOCK); // block of coal
+	createBlock(174, 0, t.DIRT_PODZOL_SIDE, t.DIRT_PODZOL_SIDE, t.DIRT_PODZOL_TOP); // podzol
 }
 
 bool BlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
