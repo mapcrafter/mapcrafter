@@ -254,11 +254,24 @@ BlockTextures::BlockTextures()
 				"destroy_stage_5"), DESTROY_STAGE_6("destroy_stage_6"), DESTROY_STAGE_7(
 				"destroy_stage_7"), DESTROY_STAGE_8("destroy_stage_8"), DESTROY_STAGE_9(
 				"destroy_stage_9"), DIAMOND_BLOCK("diamond_block"), DIAMOND_ORE(
-				"diamond_ore"), DIRT("dirt"), DISPENSER_FRONT_HORIZONTAL(
+				"diamond_ore"), DIRT("dirt"), DIRT_PODZOL_SIDE("dirt_podzol_side"), DIRT_PODZOL_TOP(
+				"dirt_podzol_top"), DISPENSER_FRONT_HORIZONTAL(
 				"dispenser_front_horizontal"), DISPENSER_FRONT_VERTICAL(
 				"dispenser_front_vertical"), DOOR_IRON_LOWER("door_iron_lower"), DOOR_IRON_UPPER(
 				"door_iron_upper"), DOOR_WOOD_LOWER("door_wood_lower"), DOOR_WOOD_UPPER(
-				"door_wood_upper"), DRAGON_EGG("dragon_egg"), DROPPER_FRONT_HORIZONTAL(
+				"door_wood_upper"), DOUBLE_PLANT_FERN_BOTTOM("doublePlant_fern_bottom"), DOUBLE_PLANT_FERN_TOP(
+				"doublePlant_fern_top"), DOUBLE_PLANT_GRASS_BOTTOM(
+				"doublePlant_grass_bottom"), DOUBLE_PLANT_GRASS_TOP(
+				"doublePlant_grass_top"), DOUBLE_PLANT_PAEONIA_BOTTOM(
+				"doublePlant_paeonia_bottom"), DOUBLE_PLANT_PAEONIA_TOP(
+				"doublePlant_paeonia_top"), DOUBLE_PLANT_ROSE_BOTTOM(
+				"doublePlant_rose_bottom"), DOUBLE_PLANT_ROSE_TOP("doublePlant_rose_top"), DOUBLE_PLANT_SUNFLOWER_BACK(
+				"doublePlant_sunflower_back"), DOUBLE_PLANT_SUNFLOWER_BOTTOM(
+				"doublePlant_sunflower_bottom"), DOUBLE_PLANT_SUNFLOWER_FRONT(
+				"doublePlant_sunflower_front"), DOUBLE_PLANT_SUNFLOWER_TOP(
+				"doublePlant_sunflower_top"), DOUBLE_PLANT_SYRINGA_BOTTOM(
+				"doublePlant_syringa_bottom"), DOUBLE_PLANT_SYRINGA_TOP(
+				"doublePlant_syringa_top"), DRAGON_EGG("dragon_egg"), DROPPER_FRONT_HORIZONTAL(
 				"dropper_front_horizontal"), DROPPER_FRONT_VERTICAL(
 				"dropper_front_vertical"), EMERALD_BLOCK("emerald_block"), EMERALD_ORE(
 				"emerald_ore"), ENCHANTING_TABLE_BOTTOM("enchanting_table_bottom"), ENCHANTING_TABLE_SIDE(
@@ -266,8 +279,13 @@ BlockTextures::BlockTextures()
 				"end_stone"), ENDFRAME_EYE("endframe_eye"), ENDFRAME_SIDE(
 				"endframe_side"), ENDFRAME_TOP("endframe_top"), FARMLAND_DRY(
 				"farmland_dry"), FARMLAND_WET("farmland_wet"), FERN("fern"), FIRE_LAYER_0(
-				"fire_layer_0"), FIRE_LAYER_1("fire_layer_1"), FLOWER_DANDELION(
-				"flower_dandelion"), FLOWER_POT("flower_pot"), FLOWER_ROSE("flower_rose"), FURNACE_FRONT_OFF(
+				"fire_layer_0"), FIRE_LAYER_1("fire_layer_1"), FLOWER_ALLIUM(
+				"flower_allium"), FLOWER_BLUE_ORCHID("flower_blue_orchid"), FLOWER_DANDELION(
+				"flower_dandelion"), FLOWER_HOUSTONIA("flower_houstonia"), FLOWER_OXEYE_DAISY(
+				"flower_oxeye_daisy"), FLOWER_PAEONIA("flower_paeonia"), FLOWER_POT(
+				"flower_pot"), FLOWER_ROSE("flower_rose"), FLOWER_TULIP_ORANGE(
+				"flower_tulip_orange"), FLOWER_TULIP_PINK("flower_tulip_pink"), FLOWER_TULIP_RED(
+				"flower_tulip_red"), FLOWER_TULIP_WHITE("flower_tulip_white"), FURNACE_FRONT_OFF(
 				"furnace_front_off"), FURNACE_FRONT_ON("furnace_front_on"), FURNACE_SIDE(
 				"furnace_side"), FURNACE_TOP("furnace_top"), GLASS("glass"), GLASS_PANE_TOP(
 				"glass_pane_top"), GLOWSTONE("glowstone"), GOLD_BLOCK("gold_block"), GOLD_ORE(
@@ -291,19 +309,19 @@ BlockTextures::BlockTextures()
 				"hardened_clay_stained_white"), HARDENED_CLAY_STAINED_YELLOW(
 				"hardened_clay_stained_yellow"), HAY_BLOCK_SIDE("hay_block_side"), HAY_BLOCK_TOP(
 				"hay_block_top"), HOPPER_INSIDE("hopper_inside"), HOPPER_OUTSIDE(
-				"hopper_outside"), HOPPER_TOP("hopper_top"), ICE("ice"), IRON_BARS(
-				"iron_bars"), IRON_BLOCK("iron_block"), IRON_ORE("iron_ore"), ITEMFRAME_BACKGROUND(
-				"itemframe_background"), JUKEBOX_SIDE("jukebox_side"), JUKEBOX_TOP(
-				"jukebox_top"), LADDER("ladder"), LAPIS_BLOCK("lapis_block"), LAPIS_ORE(
-				"lapis_ore"), LAVA_FLOW("lava_flow"), LAVA_STILL("lava_still"), LEAVES_BIRCH(
-				"leaves_birch"), LEAVES_BIRCH_OPAQUE("leaves_birch_opaque"), LEAVES_JUNGLE(
-				"leaves_jungle"), LEAVES_JUNGLE_OPAQUE("leaves_jungle_opaque"), LEAVES_OAK(
-				"leaves_oak"), LEAVES_OAK_OPAQUE("leaves_oak_opaque"), LEAVES_SPRUCE(
-				"leaves_spruce"), LEAVES_SPRUCE_OPAQUE("leaves_spruce_opaque"), LEVER(
-				"lever"), LOG_BIRCH("log_birch"), LOG_BIRCH_TOP("log_birch_top"), LOG_JUNGLE(
-				"log_jungle"), LOG_JUNGLE_TOP("log_jungle_top"), LOG_OAK("log_oak"), LOG_OAK_TOP(
-				"log_oak_top"), LOG_SPRUCE("log_spruce"), LOG_SPRUCE_TOP(
-				"log_spruce_top"), MELON_SIDE("melon_side"), MELON_STEM_CONNECTED(
+				"hopper_outside"), HOPPER_TOP("hopper_top"), ICE("ice"), ICE_PACKED(
+				"ice_packed"), IRON_BARS("iron_bars"), IRON_BLOCK("iron_block"), IRON_ORE(
+				"iron_ore"), ITEMFRAME_BACKGROUND("itemframe_background"), JUKEBOX_SIDE(
+				"jukebox_side"), JUKEBOX_TOP("jukebox_top"), LADDER("ladder"), LAPIS_BLOCK(
+				"lapis_block"), LAPIS_ORE("lapis_ore"), LAVA_FLOW("lava_flow"), LAVA_STILL(
+				"lava_still"), LEAVES_BIRCH("leaves_birch"), LEAVES_BIRCH_OPAQUE(
+				"leaves_birch_opaque"), LEAVES_JUNGLE("leaves_jungle"), LEAVES_JUNGLE_OPAQUE(
+				"leaves_jungle_opaque"), LEAVES_OAK("leaves_oak"), LEAVES_OAK_OPAQUE(
+				"leaves_oak_opaque"), LEAVES_SPRUCE("leaves_spruce"), LEAVES_SPRUCE_OPAQUE(
+				"leaves_spruce_opaque"), LEVER("lever"), LOG_BIRCH("log_birch"), LOG_BIRCH_TOP(
+				"log_birch_top"), LOG_JUNGLE("log_jungle"), LOG_JUNGLE_TOP(
+				"log_jungle_top"), LOG_OAK("log_oak"), LOG_OAK_TOP("log_oak_top"), LOG_SPRUCE(
+				"log_spruce"), LOG_SPRUCE_TOP("log_spruce_top"), MELON_SIDE("melon_side"), MELON_STEM_CONNECTED(
 				"melon_stem_connected"), MELON_STEM_DISCONNECTED(
 				"melon_stem_disconnected"), MELON_TOP("melon_top"), MOB_SPAWNER(
 				"mob_spawner"), MUSHROOM_BLOCK_INSIDE("mushroom_block_inside"), MUSHROOM_BLOCK_SKIN_BROWN(
@@ -380,14 +398,24 @@ BlockTextures::BlockTextures()
 						&DESTROY_STAGE_3, &DESTROY_STAGE_4, &DESTROY_STAGE_5,
 						&DESTROY_STAGE_6, &DESTROY_STAGE_7, &DESTROY_STAGE_8,
 						&DESTROY_STAGE_9, &DIAMOND_BLOCK, &DIAMOND_ORE, &DIRT,
-						&DISPENSER_FRONT_HORIZONTAL, &DISPENSER_FRONT_VERTICAL,
-						&DOOR_IRON_LOWER, &DOOR_IRON_UPPER, &DOOR_WOOD_LOWER,
-						&DOOR_WOOD_UPPER, &DRAGON_EGG, &DROPPER_FRONT_HORIZONTAL,
+						&DIRT_PODZOL_SIDE, &DIRT_PODZOL_TOP, &DISPENSER_FRONT_HORIZONTAL,
+						&DISPENSER_FRONT_VERTICAL, &DOOR_IRON_LOWER, &DOOR_IRON_UPPER,
+						&DOOR_WOOD_LOWER, &DOOR_WOOD_UPPER, &DOUBLE_PLANT_FERN_BOTTOM,
+						&DOUBLE_PLANT_FERN_TOP, &DOUBLE_PLANT_GRASS_BOTTOM,
+						&DOUBLE_PLANT_GRASS_TOP, &DOUBLE_PLANT_PAEONIA_BOTTOM,
+						&DOUBLE_PLANT_PAEONIA_TOP, &DOUBLE_PLANT_ROSE_BOTTOM,
+						&DOUBLE_PLANT_ROSE_TOP, &DOUBLE_PLANT_SUNFLOWER_BACK,
+						&DOUBLE_PLANT_SUNFLOWER_BOTTOM, &DOUBLE_PLANT_SUNFLOWER_FRONT,
+						&DOUBLE_PLANT_SUNFLOWER_TOP, &DOUBLE_PLANT_SYRINGA_BOTTOM,
+						&DOUBLE_PLANT_SYRINGA_TOP, &DRAGON_EGG, &DROPPER_FRONT_HORIZONTAL,
 						&DROPPER_FRONT_VERTICAL, &EMERALD_BLOCK, &EMERALD_ORE,
 						&ENCHANTING_TABLE_BOTTOM, &ENCHANTING_TABLE_SIDE,
 						&ENCHANTING_TABLE_TOP, &END_STONE, &ENDFRAME_EYE, &ENDFRAME_SIDE,
 						&ENDFRAME_TOP, &FARMLAND_DRY, &FARMLAND_WET, &FERN, &FIRE_LAYER_0,
-						&FIRE_LAYER_1, &FLOWER_DANDELION, &FLOWER_POT, &FLOWER_ROSE,
+						&FIRE_LAYER_1, &FLOWER_ALLIUM, &FLOWER_BLUE_ORCHID,
+						&FLOWER_DANDELION, &FLOWER_HOUSTONIA, &FLOWER_OXEYE_DAISY,
+						&FLOWER_PAEONIA, &FLOWER_POT, &FLOWER_ROSE, &FLOWER_TULIP_ORANGE,
+						&FLOWER_TULIP_PINK, &FLOWER_TULIP_RED, &FLOWER_TULIP_WHITE,
 						&FURNACE_FRONT_OFF, &FURNACE_FRONT_ON, &FURNACE_SIDE,
 						&FURNACE_TOP, &GLASS, &GLASS_PANE_TOP, &GLOWSTONE, &GOLD_BLOCK,
 						&GOLD_ORE, &GRASS_SIDE, &GRASS_SIDE_OVERLAY, &GRASS_SIDE_SNOWED,
@@ -400,14 +428,14 @@ BlockTextures::BlockTextures()
 						&HARDENED_CLAY_STAINED_PURPLE, &HARDENED_CLAY_STAINED_RED,
 						&HARDENED_CLAY_STAINED_SILVER, &HARDENED_CLAY_STAINED_WHITE,
 						&HARDENED_CLAY_STAINED_YELLOW, &HAY_BLOCK_SIDE, &HAY_BLOCK_TOP,
-						&HOPPER_INSIDE, &HOPPER_OUTSIDE, &HOPPER_TOP, &ICE, &IRON_BARS,
-						&IRON_BLOCK, &IRON_ORE, &ITEMFRAME_BACKGROUND, &JUKEBOX_SIDE,
-						&JUKEBOX_TOP, &LADDER, &LAPIS_BLOCK, &LAPIS_ORE, &LAVA_FLOW,
-						&LAVA_STILL, &LEAVES_BIRCH, &LEAVES_BIRCH_OPAQUE, &LEAVES_JUNGLE,
-						&LEAVES_JUNGLE_OPAQUE, &LEAVES_OAK, &LEAVES_OAK_OPAQUE,
-						&LEAVES_SPRUCE, &LEAVES_SPRUCE_OPAQUE, &LEVER, &LOG_BIRCH,
-						&LOG_BIRCH_TOP, &LOG_JUNGLE, &LOG_JUNGLE_TOP, &LOG_OAK,
-						&LOG_OAK_TOP, &LOG_SPRUCE, &LOG_SPRUCE_TOP, &MELON_SIDE,
+						&HOPPER_INSIDE, &HOPPER_OUTSIDE, &HOPPER_TOP, &ICE, &ICE_PACKED,
+						&IRON_BARS, &IRON_BLOCK, &IRON_ORE, &ITEMFRAME_BACKGROUND,
+						&JUKEBOX_SIDE, &JUKEBOX_TOP, &LADDER, &LAPIS_BLOCK, &LAPIS_ORE,
+						&LAVA_FLOW, &LAVA_STILL, &LEAVES_BIRCH, &LEAVES_BIRCH_OPAQUE,
+						&LEAVES_JUNGLE, &LEAVES_JUNGLE_OPAQUE, &LEAVES_OAK,
+						&LEAVES_OAK_OPAQUE, &LEAVES_SPRUCE, &LEAVES_SPRUCE_OPAQUE, &LEVER,
+						&LOG_BIRCH, &LOG_BIRCH_TOP, &LOG_JUNGLE, &LOG_JUNGLE_TOP,
+						&LOG_OAK, &LOG_OAK_TOP, &LOG_SPRUCE, &LOG_SPRUCE_TOP, &MELON_SIDE,
 						&MELON_STEM_CONNECTED, &MELON_STEM_DISCONNECTED, &MELON_TOP,
 						&MOB_SPAWNER, &MUSHROOM_BLOCK_INSIDE, &MUSHROOM_BLOCK_SKIN_BROWN,
 						&MUSHROOM_BLOCK_SKIN_RED, &MUSHROOM_BLOCK_SKIN_STEM,
