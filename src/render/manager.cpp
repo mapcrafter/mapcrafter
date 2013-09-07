@@ -452,11 +452,13 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 	// list of threads/workers
 	std::vector<pthread_t> threads(opts.jobs);
 	std::vector<RenderWorkerSettings*> worker_settings;
+	std::vector<mc::WorldCache*> worker_caches;
 	std::vector<TileRenderer*> worker_renderers;
 
 	for (int i = 0; i < opts.jobs; i++) {
 		// create all informations needed for the worker
-		TileRenderer* renderer = new TileRenderer(mc::WorldCache(world), images, config);
+		mc::WorldCache* cache = new mc::WorldCache(world);
+		TileRenderer* renderer = new TileRenderer(*cache, images, config);
 		RecursiveRenderSettings render_settings(tiles, *renderer);
 		render_settings.tile_size = images.getTileSize();
 		render_settings.output_dir = output_dir;
@@ -479,6 +481,7 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 				<< " tiles on max zoom level " << tiles.getDepth() << "." << std::endl;
 
 		worker_settings.push_back(settings);
+		worker_caches.push_back(cache);
 		worker_renderers.push_back(renderer);
 
 		// start thread
@@ -512,6 +515,7 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 	// free some memory used by the workers
 	for (int i = 0; i < opts.jobs; i++) {
 		delete worker_settings[i];
+		delete worker_caches[i];
 		delete worker_renderers[i];
 	}
 
