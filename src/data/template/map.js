@@ -34,7 +34,7 @@ MapRotationHandler.prototype.update = function(text) {
 	
 	var images = this.control.images;
 	for(var i = 0; i < 4; i++) {
-		if(!(i in config.rotations)) {
+		if(config.rotations.indexOf(i) == -1) {
 			images[2*i].style.display = "none";
 			images[2*i+1].style.display = "none";
 		} else {
@@ -357,7 +357,8 @@ MapcrafterUI.prototype.init = function() {
 	var firstType = true;
 	for(var type in this.config) {
 		this.layers[type] = {};
-		for(var rotation in this.config[type].rotations) {
+		for(var i in this.config[type].rotations) {
+			var rotation = this.config[type].rotations[i];
 			this.layers[type][rotation] = this.createTileLayer(type, this.config[type], rotation);
 			if(firstType) {
 				this.setMapTypeAndRotation(type, rotation);
