@@ -517,7 +517,7 @@ private:
 	void createRails(); // id 66
 	void createButton(uint16_t id, const Image& tex); // id 77, 143
 	void createSnow(); // id 78
-	void createIce(); // id 79
+	void createIce(uint8_t id); // id 79
 	void createCactus(); // id 81
 	void createFence(uint16_t id, const Image& texture); // id 85, 113
 	void createPumkin(uint16_t id, const Image& front); // id 86, 91

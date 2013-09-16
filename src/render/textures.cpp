@@ -1939,7 +1939,7 @@ void BlockImages::createSnow() { // id 78
 	}
 }
 
-void BlockImages::createIce() { // id 79
+void BlockImages::createIce(uint8_t id) { // id 79
 	Image texture = textures.ICE;
 
 	for (int w = 0; w <= 1; w++)
@@ -1956,7 +1956,7 @@ void BlockImages::createIce() { // id 79
 			else
 				extra_data |= DATA_SOUTH;
 			blitFace(block, FACE_TOP, texture, 0, 0, true, dleft, dright);
-			setBlockImage(79, extra_data, block);
+			setBlockImage(id, extra_data, block);
 		}
 }
 
@@ -2515,7 +2515,7 @@ void BlockImages::loadBlocks() {
 	createTorch(76, t.REDSTONE_TORCH_ON); // redstone torch on
 	createButton(77, t.STONE); // stone button
 	createSnow(); // id 78
-	createIce(); // id 79
+	createIce(79); // ice block
 	createBlock(80, 0, t.SNOW); // snow block
 	createCactus(); // id 81
 	createBlock(82, 0, t.CLAY); // clay block
@@ -2681,7 +2681,8 @@ void BlockImages::loadBlocks() {
 	// --
 	createBlock(172, 0, t.HARDENED_CLAY); // hardened clay
 	createBlock(173, 0, t.COAL_BLOCK); // block of coal
-	createBlock(174, 0, t.DIRT_PODZOL_SIDE, t.DIRT_PODZOL_SIDE, t.DIRT_PODZOL_TOP); // podzol
+	createIce(174); // packed ice
+	//createBlock(174, 0, t.DIRT_PODZOL_SIDE, t.DIRT_PODZOL_SIDE, t.DIRT_PODZOL_TOP); // podzol
 }
 
 bool BlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
