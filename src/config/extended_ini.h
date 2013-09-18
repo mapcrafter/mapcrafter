@@ -86,6 +86,8 @@ public:
 	void remove(const std::string& key);
 };
 
+std::ostream& operator<<(std::ostream& out, const ConfigSection& section);
+
 class ConfigFile {
 private:
 	std::vector<ConfigSection> sections;

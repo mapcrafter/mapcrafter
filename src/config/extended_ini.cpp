@@ -54,6 +54,20 @@ void ConfigSection::remove(const std::string& key) {
 		entries.erase(entries.begin() + index);
 }
 
+std::ostream& operator<<(std::ostream& out, const ConfigSection& section) {
+	if (section.getName() != "") {
+		if (section.getType() == "")
+			out << "[" << section.getName() << "]" << std::endl;
+		else
+			out << "[" << section.getType() << ":" << section.getName() << "]" << std::endl;
+	}
+
+	const std::vector<ConfigEntry>& entries = section.getEntries();
+	for (std::vector<ConfigEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
+		out << it->first << " = " << it->second << std::endl;
+	return out;
+}
+
 bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 	return true;
 }
