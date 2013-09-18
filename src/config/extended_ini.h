@@ -38,7 +38,7 @@ public:
 	~ConfigMessage() {}
 
 	int getType() const { return type; }
-	const std::string& getMessage() const { return message };
+	const std::string& getMessage() const { return message; };
 
 	std::ostream& operator<<(std::ostream& out) const {
 		out << type << ": " << message;
@@ -54,25 +54,29 @@ typedef std::vector<ValidationMessage> ValidationMessages;
 
 class ConfigSection {
 private:
+	std::string type;
+	std::string name;
 public:
 	ConfigSection(const std::string& type = "", const std::string& name = "")
 		: type(type), name(name) {}
 	~ConfigSection() {}
 	
-	bool has(const std::string& key);
+	const std::string getType() const { return type; }
+	const std::string getName() const { return name; }
+
+	bool has(const std::string& key) const;
 	
-	std::string get(const std::string& key, const std::string& default = "") const;
+	std::string get(const std::string& key, const std::string& default_value = "") const;
 	template<typename T>
-	std::string get(const std::string& key, const T& default = T()) const {
+	std::string get(const std::string& key, const T& default_value = T()) const {
 		if (has(key))
-			return as<T>(get(key));
-		return default;
+			return util::as<T>(get(key));
+		return default_value;
 	}
 	
 	void set(const std::string& key, const std::string& value);
-	
 	void remove(const std::string& key);
-}
+};
 
 class ConfigFile {
 private:
@@ -88,6 +92,9 @@ public:
 	
 	const ConfigSection& getSection(const std::string& type, const std::string& name) const;
 	ConfigSection& getSection(const std::string& type, const std::string& name);
+
+	void addSection(const std::string& type, const std::string& name);
+	void removeSection(const std::string& type, const std::string& name);
 };
 
 } /* namespace config */
