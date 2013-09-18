@@ -56,6 +56,10 @@ class ConfigSection {
 private:
 	std::string type;
 	std::string name;
+
+	std::vector<std::pair<std::string, std::string> > entries;
+
+	int getEntryIndex(const std::string& key) const;
 public:
 	ConfigSection(const std::string& type = "", const std::string& name = "")
 		: type(type), name(name) {}
@@ -80,7 +84,11 @@ public:
 
 class ConfigFile {
 private:
+	std::vector<ConfigSection> sections;
+
 	ConfigSection empty_section;
+
+	int getSectionIndex(const std::string& type, const std::string& name) const;
 public:
 	ConfigFile() {}
 	~ConfigFile() {}
@@ -102,7 +110,7 @@ public:
 	const ConfigSection& getSection(const std::string& type, const std::string& name) const;
 	ConfigSection& getSection(const std::string& type, const std::string& name);
 
-	void addSection(const std::string& type, const std::string& name);
+	ConfigSection& addSection(const std::string& type, const std::string& name);
 	void removeSection(const std::string& type, const std::string& name);
 };
 
