@@ -19,6 +19,8 @@
 
 #include "extended_ini.h"
 
+#include <fstream>
+
 namespace mapcrafter {
 namespace config2 {
 
@@ -69,11 +71,64 @@ std::ostream& operator<<(std::ostream& out, const ConfigSection& section) {
 }
 
 bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
+	int section = -1;
+	std::string line;
+	while (std::getline(in, line)) {
+		if (line.empty())
+			continue;
+
+		// a line starting with a # is a comment
+		if (line[0] == '#')
+			continue;
+
+		// a line with a new section
+		else if (line[0] == '[') {
+			if (line[line.size() - 1] != ']')
+				return false;
+
+			std::string type, name;
+			std::string section_name = line.substr(1, line.size() - 2);
+			std::string::size_type colon = section_name.find(':');
+			if (colon == std::string::npos)
+				name = section_name;
+			else {
+				type = section_name.substr(0, colon);
+				name = section_name.substr(colon+1, std::string::npos);
+			}
+
+			section++;
+			sections.push_back(ConfigSection(type, name));
+		} else {
+			// just a line with key = value
+			std::string key, value;
+			for (size_t i = 0; i < line.size(); i++) {
+				if (line[i] == '=') {
+					key = line.substr(0, i);
+					value = line.substr(i + 1, line.size() - i - 1);
+					break;
+				}
+				if (i == line.size() - 1)
+					return false;
+			}
+
+			util::trim(key);
+			util::trim(value);
+
+			if (section == -1)
+				root.set(key, value);
+			else
+				sections[section].set(key, value);
+		}
+	}
+
 	return true;
 }
 
 bool ConfigFile::loadFile(const std::string& filename, ValidationMessage& msg) {
-	return true;
+	std::ifstream in(filename);
+	if (!in)
+		return false;
+	return load(in, msg);
 }
 
 bool ConfigFile::write(std::ostream& out) const {

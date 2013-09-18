@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <string>
+#include <map>
 
 namespace mapcrafter {
 namespace config2 {
@@ -69,6 +70,8 @@ public:
 	
 	const std::string& getType() const { return type; }
 	const std::string& getName() const { return name; }
+
+	bool isEmpty() const { return entries.size() == 0; }
 
 	bool has(const std::string& key) const;
 	
