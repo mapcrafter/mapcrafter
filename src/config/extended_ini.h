@@ -74,7 +74,7 @@ public:
 	
 	std::string get(const std::string& key, const std::string& default_value = "") const;
 	template<typename T>
-	std::string get(const std::string& key, const T& default_value = T()) const {
+	T get(const std::string& key, T default_value = T()) const {
 		if (has(key))
 			return util::as<T>(get(key));
 		return default_value;
@@ -126,6 +126,8 @@ public:
 	ConfigSection& addSection(const std::string& type, const std::string& name) {
 		return getSection(type, name);
 	}
+	ConfigSection& addSection(const ConfigSection& section);
+
 	void removeSection(const std::string& type, const std::string& name);
 };
 

@@ -111,6 +111,16 @@ ConfigSection& ConfigFile::getSection(const std::string& type, const std::string
 	return sections.back();
 }
 
+ConfigSection& ConfigFile::addSection(const ConfigSection& section) {
+	int index = getSectionIndex(section.getType(), section.getName());
+	if (index == -1) {
+		sections.push_back(section);
+		return sections.back();
+	}
+	sections[index] = section;
+	return sections[index];
+}
+
 void ConfigFile::removeSection(const std::string& type, const std::string& name) {
 	int index = getSectionIndex(type, name);
 	if (index == -1)
