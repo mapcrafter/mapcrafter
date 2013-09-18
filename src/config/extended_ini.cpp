@@ -77,6 +77,10 @@ int ConfigFile::getSectionIndex(const std::string& type, const std::string& name
 	return -1;
 }
 
+bool ConfigFile::hasSection(const std::string& type, const std::string& name) const {
+	return getSectionIndex(type, name) != -1;
+}
+
 const ConfigSection& ConfigFile::getSection(const std::string& type, const std::string& name) const {
 	int index = getSectionIndex(type, name);
 	if (index == -1)
@@ -91,10 +95,6 @@ ConfigSection& ConfigFile::getSection(const std::string& type, const std::string
 	ConfigSection section(type, name);
 	sections.push_back(section);
 	return sections.back();
-}
-
-ConfigSection& ConfigFile::addSection(const std::string& type, const std::string& name) {
-	return getSection(type, name);
 }
 
 void ConfigFile::removeSection(const std::string& type, const std::string& name) {

@@ -52,12 +52,14 @@ public:
 
 typedef std::vector<ValidationMessage> ValidationMessages;
 
+typedef std::pair<std::string, std::string> ConfigEntry;
+
 class ConfigSection {
 private:
 	std::string type;
 	std::string name;
 
-	std::vector<std::pair<std::string, std::string> > entries;
+	std::vector<ConfigEntry> entries;
 
 	int getEntryIndex(const std::string& key) const;
 public:
@@ -78,6 +80,8 @@ public:
 		return default_value;
 	}
 	
+	const std::vector<ConfigEntry> getEntries() const { return entries; }
+
 	void set(const std::string& key, const std::string& value);
 	void remove(const std::string& key);
 };
@@ -85,6 +89,7 @@ public:
 class ConfigFile {
 private:
 	std::vector<ConfigSection> sections;
+	ConfigSection root;
 
 	ConfigSection empty_section;
 
@@ -106,11 +111,19 @@ public:
 
 	bool write(std::ostream& out) const;
 	bool writeFile(const std::string& filename) const;
-	
+
+	bool hasSection(const std::string& type, const std::string& name) const;
+
+	const ConfigSection& getRootSection() const { return root; }
+	ConfigSection& getRootSection() { return root; }
 	const ConfigSection& getSection(const std::string& type, const std::string& name) const;
 	ConfigSection& getSection(const std::string& type, const std::string& name);
 
-	ConfigSection& addSection(const std::string& type, const std::string& name);
+	const std::vector<ConfigSection> getSections() const { return sections; }
+
+	ConfigSection& addSection(const std::string& type, const std::string& name) {
+		return getSection(type, name);
+	}
 	void removeSection(const std::string& type, const std::string& name);
 };
 
