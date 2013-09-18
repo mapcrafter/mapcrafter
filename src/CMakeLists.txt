@@ -37,6 +37,11 @@ if(NOT "${CMAKE_CURRENT_SOURCE_DIR}/version.cpp")
     )
 endif()
 
+add_custom_target(runtests
+    ./test_all --log_level=test_suite
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test VERBATIM
+)
+
 set(SOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/version.cpp
 )
