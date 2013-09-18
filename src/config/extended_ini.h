@@ -26,16 +26,16 @@
 #include <string>
 
 namespace mapcrafter {
-namespace config {
+namespace config2 {
 
 class ValidationMessage {
 private:
 	int type;
 	std::string message;
 public:
-	ConfigMessage(int type = -1, const std::string& message = "")
+	ValidationMessage(int type = -1, const std::string& message = "")
 		: type(type), message(message) {}
-	~ConfigMessage() {}
+	~ValidationMessage() {}
 
 	int getType() const { return type; }
 	const std::string& getMessage() const { return message; };
@@ -45,9 +45,9 @@ public:
 		return out;
 	}
 
-	static int INFO = 0;
-	static int WARNING = 1;
-	static int ERROR = 2;
+	static const int INFO = 0;
+	static const int WARNING = 1;
+	static const int ERROR = 2;
 };
 
 typedef std::vector<ValidationMessage> ValidationMessages;
@@ -61,8 +61,8 @@ public:
 		: type(type), name(name) {}
 	~ConfigSection() {}
 	
-	const std::string getType() const { return type; }
-	const std::string getName() const { return name; }
+	const std::string& getType() const { return type; }
+	const std::string& getName() const { return name; }
 
 	bool has(const std::string& key) const;
 	
@@ -80,12 +80,21 @@ public:
 
 class ConfigFile {
 private:
+	ConfigSection empty_section;
 public:
 	ConfigFile() {}
 	~ConfigFile() {}
 
-	bool load(std::istream& in, ValidationMessage& msg = ValidationMessage());
-	bool loadFile(const std::string& filename, ValidationMessage& msg = ValidationMessage());
+	bool load(std::istream& in, ValidationMessage& msg);
+	bool load(std::istream& in) {
+		ValidationMessage msg;
+		return load(in, msg);
+	}
+	bool loadFile(const std::string& filename, ValidationMessage& msg);
+	bool loadFile(const std::string& filename) {
+		ValidationMessage msg;
+		return loadFile(filename, msg);
+	}
 
 	bool write(std::ostream& out) const;
 	bool writeFile(const std::string& filename) const;
