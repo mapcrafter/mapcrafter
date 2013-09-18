@@ -24,6 +24,17 @@
 namespace mapcrafter {
 namespace config2 {
 
+std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg) {
+	switch (msg.getType()) {
+		case (ValidationMessage::INFO): out << "Info: "; break;
+		case (ValidationMessage::WARNING): out << "Warning: "; break;
+		case (ValidationMessage::ERROR): out << "Error: "; break;
+		default: out << msg.getType(); break;
+	}
+	out << msg.getMessage();
+	return out;
+}
+
 int ConfigSection::getEntryIndex(const std::string& key) const {
 	for (size_t i = 0; i < entries.size(); i++)
 		if (entries[i].first == key)
@@ -71,9 +82,10 @@ std::ostream& operator<<(std::ostream& out, const ConfigSection& section) {
 }
 
 bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
-	int section = -1;
+	int section = -1, i = 0;
 	std::string line;
 	while (std::getline(in, line)) {
+		i++;
 		if (line.empty())
 			continue;
 
@@ -83,8 +95,10 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 
 		// a line with a new section
 		else if (line[0] == '[') {
-			if (line[line.size() - 1] != ']')
+			if (line[line.size() - 1] != ']') {
+				msg = ValidationMessage(ValidationMessage::ERROR, "Expecting ']' at end of line " + util::str(i) + ".");
 				return false;
+			}
 
 			std::string type, name;
 			std::string section_name = line.substr(1, line.size() - 2);
@@ -94,6 +108,11 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 			else {
 				type = section_name.substr(0, colon);
 				name = section_name.substr(colon+1, std::string::npos);
+			}
+
+			if (name.empty()) {
+				msg = ValidationMessage(ValidationMessage::ERROR, "Invalid section name on line " + util::str(i) + ".");
+				return false;
 			}
 
 			section++;
@@ -107,8 +126,10 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 					value = line.substr(i + 1, line.size() - i - 1);
 					break;
 				}
-				if (i == line.size() - 1)
+				if (i == line.size() - 1) {
+					msg = ValidationMessage(ValidationMessage::ERROR, "No '=' found on line " + util::str(i) + ".");
 					return false;
+				}
 			}
 
 			util::trim(key);
@@ -132,11 +153,19 @@ bool ConfigFile::loadFile(const std::string& filename, ValidationMessage& msg) {
 }
 
 bool ConfigFile::write(std::ostream& out) const {
+	if (!root.isEmpty())
+		out << root << std::endl;
+	for (size_t i = 0; i < sections.size(); i++)
+		if (sections[i].isNamed())
+			out << sections[i] << std::endl;
 	return true;
 }
 
 bool ConfigFile::writeFile(const std::string& filename) const {
-	return true;
+	std::ofstream out(filename);
+	if (!out)
+		return false;
+	return write(out);
 }
 
 int ConfigFile::getSectionIndex(const std::string& type, const std::string& name) const {

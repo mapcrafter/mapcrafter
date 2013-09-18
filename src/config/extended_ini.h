@@ -41,15 +41,12 @@ public:
 	int getType() const { return type; }
 	const std::string& getMessage() const { return message; };
 
-	std::ostream& operator<<(std::ostream& out) const {
-		out << type << ": " << message;
-		return out;
-	}
-
 	static const int INFO = 0;
 	static const int WARNING = 1;
 	static const int ERROR = 2;
 };
+
+std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg);
 
 typedef std::vector<ValidationMessage> ValidationMessages;
 
@@ -71,6 +68,7 @@ public:
 	const std::string& getType() const { return type; }
 	const std::string& getName() const { return name; }
 
+	bool isNamed() const { return !name.empty(); }
 	bool isEmpty() const { return entries.size() == 0; }
 
 	bool has(const std::string& key) const;
