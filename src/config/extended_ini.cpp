@@ -147,8 +147,10 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 
 bool ConfigFile::loadFile(const std::string& filename, ValidationMessage& msg) {
 	std::ifstream in(filename);
-	if (!in)
+	if (!in) {
+		msg = ValidationMessage(ValidationMessage::ERROR, "I/O Error");
 		return false;
+	}
 	return load(in, msg);
 }
 

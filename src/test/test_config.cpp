@@ -20,17 +20,49 @@
 #include "../config/extended_ini.h"
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <boost/test/unit_test.hpp>
 
 namespace config = mapcrafter::config2;
 
 BOOST_AUTO_TEST_CASE(config_test) {
+	/*
 	config::ConfigSection section("world", "myworld");
 	section.set("foo", "bar");
 	section.set("foo2", "test");
 	section.remove("foo2");
 	section.set("test", "73");
 	section.set("test", "42");
+	*/
 
-	//std::cout << section << std::endl;
+	/*
+	config::ConfigSection section("test", "");
+	section.set("foo", "42");
+
+	config::ConfigFile c;
+
+	config::ValidationMessage msg;
+	if (!c.loadFile("test.conf", msg))
+		std::cout << msg << std::endl;
+	else {
+		c.getRootSection().set("hello", "world");
+		c.addSection(section);
+		c.write(std::cout);
+	}
+	*/
+}
+
+BOOST_AUTO_TEST_CASE(config_testReadWrite) {
+	config::ConfigFile c;
+	if (!c.loadFile("data/config/test.conf"))
+		BOOST_ERROR("Unable to load test config file test.conf!");
+	std::ifstream in("data/config/test.conf");
+	std::string in_data((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+
+	std::ostringstream out;
+	c.write(out);
+	std::string out_data = out.rdbuf()->str();
+
+	BOOST_CHECK_EQUAL(in_data, out_data);
 }
