@@ -41,6 +41,16 @@ public:
 	int getType() const { return type; }
 	const std::string& getMessage() const { return message; };
 
+	static ValidationMessage info(const std::string& message) {
+		return ValidationMessage(INFO, message);
+	}
+	static ValidationMessage warning(const std::string& message) {
+		return ValidationMessage(WARNING, message);
+	}
+	static ValidationMessage error(const std::string& message) {
+		return ValidationMessage(ERROR, message);
+	}
+
 	static const int INFO = 0;
 	static const int WARNING = 1;
 	static const int ERROR = 2;

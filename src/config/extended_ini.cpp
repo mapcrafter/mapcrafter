@@ -96,7 +96,7 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 		// a line with a new section
 		else if (line[0] == '[') {
 			if (line[line.size() - 1] != ']') {
-				msg = ValidationMessage(ValidationMessage::ERROR, "Expecting ']' at end of line " + util::str(i) + ".");
+				msg = ValidationMessage::error("Expecting ']' at end of line " + util::str(i) + ".");
 				return false;
 			}
 
@@ -111,7 +111,7 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 			}
 
 			if (name.empty()) {
-				msg = ValidationMessage(ValidationMessage::ERROR, "Invalid section name on line " + util::str(i) + ".");
+				msg = ValidationMessage::error("Invalid section name on line " + util::str(i) + ".");
 				return false;
 			}
 
@@ -127,7 +127,7 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 					break;
 				}
 				if (i == line.size() - 1) {
-					msg = ValidationMessage(ValidationMessage::ERROR, "No '=' found on line " + util::str(i) + ".");
+					msg = ValidationMessage::error("No '=' found on line " + util::str(i) + ".");
 					return false;
 				}
 			}
@@ -148,7 +148,7 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 bool ConfigFile::loadFile(const std::string& filename, ValidationMessage& msg) {
 	std::ifstream in(filename);
 	if (!in) {
-		msg = ValidationMessage(ValidationMessage::ERROR, "I/O Error");
+		msg = ValidationMessage::error("Unable to read file '" + filename + "'!");
 		return false;
 	}
 	return load(in, msg);
