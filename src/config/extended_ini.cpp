@@ -35,11 +35,11 @@ std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg) {
 	return out;
 }
 
-bool validation_invalid(const ValidationMessages& validation) {
+bool validation_valid(const ValidationMessages& validation) {
 	for (auto it = validation.begin(); it != validation.end(); ++it)
 		if (it->getType() == ValidationMessage::ERROR)
-			return true;
-	return false;
+			return false;
+	return true;
 }
 
 int ConfigSection::getEntryIndex(const std::string& key) const {
