@@ -78,7 +78,7 @@ bool ConfigParser::parse(const std::string& filename, ValidationMap& validation)
 
 	if (config.hasSection("global", "world")) {
 		ValidationList msgs;
-		ok = ok && world_global.parse(config.getSection("global", "world"), msgs);
+		ok = world_global.parse(config.getSection("global", "world"), msgs) && ok;
 		if (!msgs.empty())
 			validation.push_back(std::make_pair("Global world configuration", msgs));
 		if (!ok)
@@ -87,7 +87,7 @@ bool ConfigParser::parse(const std::string& filename, ValidationMap& validation)
 
 	if (config.hasSection("global", "map")) {
 		ValidationList msgs;
-		ok = ok && map_global.parse(config.getSection("global", "map"), msgs);
+		ok = map_global.parse(config.getSection("global", "map"), msgs) && ok;
 		if (!msgs.empty())
 			validation.push_back(std::make_pair("Global map configuration", msgs));
 		if (!ok)
@@ -110,11 +110,15 @@ bool ConfigParser::parse(const std::string& filename, ValidationMap& validation)
 		ValidationList msgs;
 		WorldSection world = world_global;
 		world.setGlobal(false);
+		ok = world.parse(*it, msgs) && ok;
 
-		ok = ok && world.parse(*it, msgs);
+		if (hasWorld(it->getName())) {
+			msgs.push_back(ValidationMessage::error("World name '" + it->getName() + "' already used!"));
+			ok = false;
+		} else
+			worlds[it->getName()] = world;
+
 		validation.push_back(std::make_pair("World section '" + it->getName() + "'", msgs));
-
-		worlds[it->getName()] = world;
 	}
 
 	for (auto it = sections.begin(); it != sections.end(); ++it) {
@@ -123,14 +127,32 @@ bool ConfigParser::parse(const std::string& filename, ValidationMap& validation)
 		ValidationList msgs;
 		MapSection map = map_global;
 		map.setGlobal(false);
+		ok = map.parse(*it, msgs) && ok;
 
-		ok = ok && map.parse(*it, msgs);
+		if (hasMap(it->getName())) {
+			msgs.push_back(ValidationMessage::error("Map name '" + it->getName() + "' already used!"));
+			ok = false;
+		} else
+			maps.push_back(map);
+
 		validation.push_back(std::make_pair("Map section '" + it->getName() + "'", msgs));
-
-		maps.push_back(map);
 	}
 
 	return ok;
+}
+
+bool ConfigParser::hasMap(const std::string& map) const {
+	for (auto it = maps.begin(); it != maps.end(); ++it)
+		if (it->getShortName() == map)
+			return true;
+	return false;
+}
+
+const MapSection& ConfigParser::getMap(const std::string& map) const {
+	for (auto it = maps.begin(); it != maps.begin(); ++it)
+		if (it->getShortName() == map)
+			return *it;
+	throw std::out_of_range("Map not found!");
 }
 
 } /* namespace config */

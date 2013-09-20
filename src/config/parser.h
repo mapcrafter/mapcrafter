@@ -160,7 +160,9 @@ public:
 	const std::map<std::string, WorldSection>& getWorlds() const { return worlds; }
 	const WorldSection& getWorld(const std::string& world) const { return worlds.at(world); }
 
+	bool hasMap(const std::string& map) const;
 	const std::vector<MapSection>& getMaps() const { return maps; }
+	const MapSection& getMap(const std::string& map) const;
 };
 
 } /* namespace config */
