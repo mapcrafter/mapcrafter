@@ -58,9 +58,14 @@ public:
 
 std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg);
 
-typedef std::vector<ValidationMessage> ValidationMessages;
+typedef std::vector<ValidationMessage> ValidationList;
 
-bool validation_valid(const ValidationMessages& validation);
+inline ValidationList make_validation_list(const ValidationMessage& msg) {
+	ValidationList validation;
+	validation.push_back(msg);
+	return validation;
+}
+bool validation_valid(const ValidationList& validation);
 
 typedef std::pair<std::string, std::string> ConfigEntry;
 

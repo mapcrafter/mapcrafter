@@ -35,7 +35,7 @@ std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg) {
 	return out;
 }
 
-bool validation_valid(const ValidationMessages& validation) {
+bool validation_valid(const ValidationList& validation) {
 	for (auto it = validation.begin(); it != validation.end(); ++it)
 		if (it->getType() == ValidationMessage::ERROR)
 			return false;

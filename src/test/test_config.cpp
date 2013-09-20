@@ -18,6 +18,7 @@
  */
 
 #include "../config/extended_ini.h"
+#include "../config/parser.h"
 
 #include <iostream>
 #include <fstream>
@@ -51,6 +52,23 @@ BOOST_AUTO_TEST_CASE(config_test) {
 		c.write(std::cout);
 	}
 	*/
+
+	if (!42)
+		return;
+
+	config::ConfigParser parser;
+	config::ValidationMap validation;
+	bool ok = parser.parse("test.conf", validation);
+
+	if (validation.size() > 0) {
+		std::cout << (ok ? "Some notes on your configuration file:" : "Your configuration file is invalid!") << std::endl;
+		for (auto it = validation.begin(); it != validation.end(); ++it) {
+			std::cout << it->first << ":" << std::endl;
+			for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+				std::cout << " - " << *it2 << std::endl;
+			}
+		}
+	}
 }
 
 BOOST_AUTO_TEST_CASE(config_testReadWrite) {
