@@ -59,6 +59,7 @@ public:
 std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg);
 
 typedef std::vector<ValidationMessage> ValidationMessages;
+bool validation_invalid(const ValidationMessages& validation);
 
 typedef std::pair<std::string, std::string> ConfigEntry;
 
