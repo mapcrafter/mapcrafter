@@ -47,6 +47,7 @@ public:
 			value = section.get<T>(key);
 			loaded = true;
 			valid = true;
+			return true;
 		}
 		return false;
 	}
