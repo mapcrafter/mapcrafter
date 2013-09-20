@@ -94,6 +94,7 @@ public:
 	WorldSection(bool global = false) : global(global) {}
 	~WorldSection() {}
 
+	void setGlobal(bool global) { this->global = global; }
 	bool parse(const ConfigSection& section, ValidationList& validation);
 
 	fs::path getInputDir() const { return input_dir.getValue(); }
@@ -119,6 +120,7 @@ public:
 		  render_unknown_blocks(false), render_leaves_transparent(false), render_biomes(false) {}
 	~MapSection() {}
 
+	void setGlobal(bool global) { this->global = global; }
 	bool parse(const ConfigSection& section, ValidationList& validation);
 
 	std::string getShortName() const { return name_short; }
@@ -159,7 +161,6 @@ public:
 	const WorldSection& getWorld(const std::string& world) const { return worlds.at(world); }
 
 	const std::vector<MapSection>& getMaps() const { return maps; }
-	const MapSection& getMap(const std::string& map) const;
 };
 
 } /* namespace config */

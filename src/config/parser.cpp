@@ -70,17 +70,67 @@ bool ConfigParser::parse(const std::string& filename, ValidationMap& validation)
 	ConfigFile config;
 	ValidationMessage msg;
 	if (!config.loadFile(filename, msg)) {
-		validation.push_back(std::make_pair("Config file", make_validation_list(msg)));
+		validation.push_back(std::make_pair("Configuration file", make_validation_list(msg)));
 		return false;
 	}
 
-	if (config.hasSection("global", "map")) {
-	}
+	bool ok = true;
 
 	if (config.hasSection("global", "world")) {
+		ValidationList msgs;
+		ok = ok && world_global.parse(config.getSection("global", "world"), msgs);
+		if (!msgs.empty())
+			validation.push_back(std::make_pair("Global world configuration", msgs));
+		if (!ok)
+			return false;
 	}
 
-	return true;
+	if (config.hasSection("global", "map")) {
+		ValidationList msgs;
+		ok = ok && map_global.parse(config.getSection("global", "map"), msgs);
+		if (!msgs.empty())
+			validation.push_back(std::make_pair("Global map configuration", msgs));
+		if (!ok)
+			return false;
+	}
+
+	auto sections = config.getSections();
+
+	for (auto it = sections.begin(); it != sections.end(); ++it)
+		if (it->getType() != "world" && it->getType() != "map"
+				&& it->getNameType() != "global:world"
+				&& it->getNameType() != "global:map") {
+			validation.push_back(std::make_pair("Section '" + it->getName() + "' with type '" + it->getType() + "'",
+					make_validation_list(ValidationMessage::warning("Unknown section type!"))));
+		}
+
+	for (auto it = sections.begin(); it != sections.end(); ++it) {
+		if (it->getType() != "world")
+			continue;
+		ValidationList msgs;
+		WorldSection world = world_global;
+		world.setGlobal(false);
+
+		ok = ok && world.parse(*it, msgs);
+		validation.push_back(std::make_pair("World section '" + it->getName() + "'", msgs));
+
+		worlds[it->getName()] = world;
+	}
+
+	for (auto it = sections.begin(); it != sections.end(); ++it) {
+		if (it->getType() != "map")
+			continue;
+		ValidationList msgs;
+		MapSection map = map_global;
+		map.setGlobal(false);
+
+		ok = ok && map.parse(*it, msgs);
+		validation.push_back(std::make_pair("Map section '" + it->getName() + "'", msgs));
+
+		maps.push_back(map);
+	}
+
+	return ok;
 }
 
 } /* namespace config */

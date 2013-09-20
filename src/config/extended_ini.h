@@ -84,6 +84,7 @@ public:
 	
 	const std::string& getType() const { return type; }
 	const std::string& getName() const { return name; }
+	std::string getNameType() const { return type + ":" + name; }
 
 	bool isNamed() const { return !name.empty(); }
 	bool isEmpty() const { return entries.size() == 0; }
