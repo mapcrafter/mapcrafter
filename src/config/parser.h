@@ -43,20 +43,17 @@ public:
 	~Field() {}
 
 	bool load(const ConfigSection& section, const std::string& key) {
-		if (loaded)
-			return true;
 		if (section.has(key)) {
 			value = section.get<T>(key);
 			loaded = true;
 			valid = true;
-		} else
-			loaded = false;
-		return loaded;
+		}
+		return false;
 	}
 
 	bool load(const ConfigSection& section, const std::string& key, T default_value) {
-		if (loaded)
-			return true;
+		if (loaded && !section.has(key))
+			return false;
 		value = section.get<T>(key, default_value);
 		loaded = true;
 		valid = true;
