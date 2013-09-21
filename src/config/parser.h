@@ -21,6 +21,7 @@
 #define PARSER_H_
 
 #include "extended_ini.h"
+#include "validation.h"
 
 #include <string>
 #include <vector>
@@ -31,57 +32,6 @@ namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace config2 {
-
-template <typename T>
-class Field {
-private:
-	T value;
-	bool loaded;
-	bool valid;
-public:
-	Field(T value = T()) : value(value), loaded(false), valid(false) {}
-	~Field() {}
-
-	bool load(const ConfigSection& section, const std::string& key) {
-		if (section.has(key)) {
-			value = section.get<T>(key);
-			loaded = true;
-			valid = true;
-			return true;
-		}
-		return false;
-	}
-
-	bool load(const ConfigSection& section, const std::string& key, T default_value) {
-		if (loaded && !section.has(key))
-			return false;
-		value = section.get<T>(key, default_value);
-		loaded = true;
-		valid = true;
-		return loaded;
-	}
-
-	bool require(ValidationList& validation, std::string message) {
-		if (!loaded) {
-			validation.push_back(ValidationMessage::error(message));
-			return false;
-		}
-		return true;
-	}
-
-	bool validateOneOf(ValidationList& validation, std::string message, std::vector<T> values) {
-		if (!loaded)
-			return false;
-		for (auto it = values.begin(); it != values.end(); ++it)
-			if (value == *it)
-				return true;
-		return false;
-	}
-
-	T getValue() const { return value; }
-	bool isLoaded() const { return loaded; }
-	bool isValid() const { return valid; }
-};
 
 class WorldSection {
 private:
@@ -134,8 +84,6 @@ public:
 	bool renderLeavesTransparent() const { return render_leaves_transparent.getValue(); }
 	bool renderBiomes() const { return render_biomes.getValue(); }
 };
-
-typedef std::vector<std::pair<std::string, ValidationList > > ValidationMap;
 
 class ConfigParser {
 private:

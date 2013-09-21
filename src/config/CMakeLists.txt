@@ -3,7 +3,8 @@ set(SOURCE
 	${CMAKE_CURRENT_SOURCE_DIR}/config.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extended_ini.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/ini.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/parser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/parser.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/validation.cpp
 	PARENT_SCOPE
 )
 set(HEADERS
@@ -12,5 +13,6 @@ set(HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/extended_ini.h
 	${CMAKE_CURRENT_SOURCE_DIR}/ini.h
 	${CMAKE_CURRENT_SOURCE_DIR}/parser.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/validation.h
 	PARENT_SCOPE
 )

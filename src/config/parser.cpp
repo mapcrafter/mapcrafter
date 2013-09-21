@@ -19,6 +19,8 @@
 
 #include "parser.h"
 
+#include "validation.h"
+
 namespace mapcrafter {
 namespace config2 {
 
@@ -45,7 +47,17 @@ bool MapSection::parse(const ConfigSection& section, ValidationList& validation)
 				+ texture_dir.getValue().string() + "' does not exist!"));
 
 	if (rotations.load(section, "rotations", "top-left")) {
-
+		std::string str = rotations.getValue();
+		std::stringstream ss;
+		ss << str;
+		std::string elem;
+		while (ss >> elem) {
+			int r = stringToRotation(elem);
+			if (r != -1)
+				rotations_set.insert(r);
+			else
+				validation.push_back(ValidationMessage::error("Invalid rotation '" + elem + "'!"));
+		}
 	}
 
 	if (rendermode.load(section, "rendermode", "normal"))

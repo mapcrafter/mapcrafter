@@ -22,6 +22,8 @@
 
 #include "../util.h"
 
+//#include "validation.h"
+
 #include <iostream>
 #include <string>
 #include <map>
@@ -29,43 +31,7 @@
 namespace mapcrafter {
 namespace config2 {
 
-class ValidationMessage {
-private:
-	int type;
-	std::string message;
-public:
-	ValidationMessage(int type = -1, const std::string& message = "")
-		: type(type), message(message) {}
-	~ValidationMessage() {}
-
-	int getType() const { return type; }
-	const std::string& getMessage() const { return message; };
-
-	static ValidationMessage info(const std::string& message) {
-		return ValidationMessage(INFO, message);
-	}
-	static ValidationMessage warning(const std::string& message) {
-		return ValidationMessage(WARNING, message);
-	}
-	static ValidationMessage error(const std::string& message) {
-		return ValidationMessage(ERROR, message);
-	}
-
-	static const int INFO = 0;
-	static const int WARNING = 1;
-	static const int ERROR = 2;
-};
-
-std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg);
-
-typedef std::vector<ValidationMessage> ValidationList;
-
-inline ValidationList make_validation_list(const ValidationMessage& msg) {
-	ValidationList validation;
-	validation.push_back(msg);
-	return validation;
-}
-bool validation_valid(const ValidationList& validation);
+class ValidationMessage;
 
 typedef std::pair<std::string, std::string> ConfigEntry;
 
@@ -120,15 +86,9 @@ public:
 	~ConfigFile() {}
 
 	bool load(std::istream& in, ValidationMessage& msg);
-	bool load(std::istream& in) {
-		ValidationMessage msg;
-		return load(in, msg);
-	}
+	bool load(std::istream& in);
 	bool loadFile(const std::string& filename, ValidationMessage& msg);
-	bool loadFile(const std::string& filename) {
-		ValidationMessage msg;
-		return loadFile(filename, msg);
-	}
+	bool loadFile(const std::string& filename);
 
 	bool write(std::ostream& out) const;
 	bool writeFile(const std::string& filename) const;

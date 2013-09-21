@@ -19,28 +19,12 @@
 
 #include "extended_ini.h"
 
+#include "validation.h"
+
 #include <fstream>
 
 namespace mapcrafter {
 namespace config2 {
-
-std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg) {
-	switch (msg.getType()) {
-		case (ValidationMessage::INFO): out << "Info: "; break;
-		case (ValidationMessage::WARNING): out << "Warning: "; break;
-		case (ValidationMessage::ERROR): out << "Error: "; break;
-		default: out << msg.getType(); break;
-	}
-	out << msg.getMessage();
-	return out;
-}
-
-bool validation_valid(const ValidationList& validation) {
-	for (auto it = validation.begin(); it != validation.end(); ++it)
-		if (it->getType() == ValidationMessage::ERROR)
-			return false;
-	return true;
-}
 
 int ConfigSection::getEntryIndex(const std::string& key) const {
 	for (size_t i = 0; i < entries.size(); i++)
@@ -152,6 +136,11 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 	return true;
 }
 
+bool ConfigFile::load(std::istream& in) {
+	ValidationMessage msg;
+	return load(in, msg);
+}
+
 bool ConfigFile::loadFile(const std::string& filename, ValidationMessage& msg) {
 	std::ifstream in(filename);
 	if (!in) {
@@ -159,6 +148,11 @@ bool ConfigFile::loadFile(const std::string& filename, ValidationMessage& msg) {
 		return false;
 	}
 	return load(in, msg);
+}
+
+bool ConfigFile::loadFile(const std::string& filename) {
+	ValidationMessage msg;
+	return loadFile(filename, msg);
 }
 
 bool ConfigFile::write(std::ostream& out) const {
