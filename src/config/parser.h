@@ -83,7 +83,7 @@ public:
 	bool renderUnknownBlocks() const { return render_unknown_blocks.getValue(); }
 	bool renderLeavesTransparent() const { return render_leaves_transparent.getValue(); }
 	bool renderBiomes() const { return render_biomes.getValue(); }
-	bool useImageTimestamps() const { return use_image_timestamps; }
+	bool useImageTimestamps() const { return use_image_timestamps.getValue(); }
 };
 
 class ConfigParser {
