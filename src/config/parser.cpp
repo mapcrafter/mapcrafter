@@ -166,6 +166,59 @@ bool ConfigParser::parse(const std::string& filename, ValidationMap& validation)
 	return ok;
 }
 
+std::string rotationsToString(std::set<int> rotations) {
+	std::string str;
+	for (auto it = rotations.begin(); it != rotations.end(); ++it)
+		if (*it >= 0 && *it < 4)
+			str += " " + ROTATION_NAMES[*it];
+	util::trim(str);
+	return str;
+}
+
+void dumpWorldSection(std::ostream& out, const WorldSection& section) {
+	out << "  input_dir = " << section.getInputDir().string() << std::endl;
+}
+
+void dumpMapSection(std::ostream& out, const MapSection& section) {
+	out << "  name = " << section.getLongName() << std::endl;
+	out << "  world = " << section.getWorld() << std::endl;
+	out << "  texture_dir = " << section.getTextureDir() << std::endl;
+	out << "  rotations = " << rotationsToString(section.getRotations()) << std::endl;
+	out << "  rendermode = " << section.getRendermode() << std::endl;
+	out << "  texture_size = " << section.getTextureSize() << std::endl;
+	out << "  render_unknown_blocks = " << section.renderUnknownBlocks() << std::endl;
+	out << "  render_leaves_transparent = " << section.renderLeavesTransparent() << std::endl;
+	out << "  render_biomes = " << section.renderBiomes() << std::endl;
+	out << "  use_image_timestamps = " << section.useImageTimestamps() << std::endl;
+}
+
+void ConfigParser::dump(std::ostream& out) const {
+	out << "General:" << std::endl;
+	out << "  output_dir = " << output_dir.getValue().string() << std::endl;
+	out << "  template_dir = " << template_dir.getValue().string() << std::endl;
+	out << std::endl;
+
+	out << "Global world configuration:" << std::endl;
+	dumpWorldSection(out, world_global);
+	out << std::endl;
+
+	out << "Global map configuration:" << std::endl;
+	dumpMapSection(out, map_global);
+	out << std::endl;
+
+	for (auto it = worlds.begin(); it != worlds.end(); ++it) {
+		out << "World '" << it->first << "':" << std::endl;
+		dumpWorldSection(out, it->second);
+		out << std::endl;
+	}
+
+	for (auto it = maps.begin(); it != maps.end(); ++it) {
+		out << "Map '" << it->getShortName() << "':" << std::endl;
+		dumpMapSection(out, *it);
+		out << std::endl;
+	}
+}
+
 bool ConfigParser::hasMap(const std::string& map) const {
 	for (auto it = maps.begin(); it != maps.end(); ++it)
 		if (it->getShortName() == map)

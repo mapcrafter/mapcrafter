@@ -48,5 +48,8 @@ int main(int argc, char **argv) {
 		std::cout << "Everything ok." << std::endl;
 	}
 
+	std::cout << std::endl << "The parsed configuration file:" << std::endl;
+	parser.dump(std::cout);
+
 	return 0;
 }

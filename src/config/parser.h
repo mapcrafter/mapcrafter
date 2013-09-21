@@ -100,6 +100,7 @@ public:
 	~ConfigParser() {}
 
 	bool parse(const std::string& filename, ValidationMap& validation);
+	void dump(std::ostream& out) const;
 
 	fs::path getOutputDir() const { return output_dir.getValue(); }
 	fs::path getTemplateDir() const { return template_dir.getValue(); }
