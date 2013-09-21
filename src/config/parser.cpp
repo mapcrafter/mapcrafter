@@ -60,16 +60,20 @@ bool MapSection::parse(const ConfigSection& section, ValidationList& validation)
 		}
 	}
 
-	if (rendermode.load(section, "rendermode", "normal"))
-		rendermode.validateOneOf(validation, "Your specified rendermode is invalid!", {
-			"normal", "daylight", "nightlight", "cave",
-		});
+	if (rendermode.load(section, "rendermode", "normal")) {
+		std::string r = rendermode.getValue();
+		if (r != "normal" && r != "daylight" && r != "nightlight" && r != "cave")
+			validation.push_back(ValidationMessage::error("'rendermode' must be one of: normal, daylight, nightlight, cave"));
+	}
 
-	texture_size.load(section, "texture_size", 12);
+	if (texture_size.load(section, "texture_size", 12))
+		if (texture_size.getValue() <= 0 || texture_size.getValue() > 32)
+			validation.push_back(ValidationMessage::error("'texture_size' must a number between 1 and 32!"));
 
 	render_unknown_blocks.load(section, "render_unkown_blocks", false);
 	render_leaves_transparent.load(section, "render_leaves_transparent", true);
 	render_biomes.load(section, "render_biomes", true);
+	use_image_timestamps.load(section, "use_image_timestamps", true);
 
 	if (!global) {
 		world.require(validation, "You have to specify a world ('world')!");
