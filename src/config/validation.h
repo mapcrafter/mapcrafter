@@ -75,10 +75,7 @@ public:
 
 	bool load(const ConfigSection& section, const std::string& key) {
 		if (section.has(key)) {
-			if (std::is_same<T, std::string>::value)
-				value = section.get(key);
-			else
-				value = section.get<T>(key);
+			value = section.get<T>(key);
 			loaded = true;
 			valid = true;
 			return true;
@@ -89,10 +86,7 @@ public:
 	bool load(const ConfigSection& section, const std::string& key, T default_value) {
 		if (loaded && !section.has(key))
 			return false;
-		if (std::is_same<T, std::string>::value)
-			value = section.get(key, default_value);
-		else
-			value = section.get<T>(key, default_value);
+		value = section.get<T>(key, default_value);
 		loaded = true;
 		valid = true;
 		return loaded;

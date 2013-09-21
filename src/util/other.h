@@ -22,6 +22,9 @@
 
 #include <string>
 #include <sstream>
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace util {
@@ -38,6 +41,10 @@ std::string str(T value) {
 	return ss.str();
 }
 
+/**
+ * A lazy function to convert different datatypes.
+ * Works by printing the value into a string stream and reading the new datatype from it.
+ */
 template<typename T>
 T as(const std::string& from) {
 	T to;

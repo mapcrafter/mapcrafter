@@ -94,6 +94,23 @@ int64_t bigEndian64(int64_t x) {
 #endif
 }
 
+/**
+ * Overwrites the string stream solution for string -> string conversion.
+ * Why? Converting the string 'This is a test.' would just result in 'This'
+ */
+template<>
+std::string as(const std::string& from) {
+	return from;
+}
+
+/**
+ * Same thing with string -> string conversion.
+ */
+template<>
+fs::path as(const std::string& from) {
+	return fs::path(from);
+}
+
 void trim(std::string& str) {
 	// removes trailing and leading whitespaces
 	size_t end = str.find_last_not_of(" \t");
