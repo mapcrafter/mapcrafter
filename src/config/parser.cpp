@@ -91,6 +91,10 @@ bool ConfigParser::parse(const std::string& filename, ValidationMap& validation)
 	ValidationList general_msgs;
 	output_dir.load(config.getRootSection(), "output_dir");
 	output_dir.require(general_msgs, "You have to specify an output directory ('output_dir')!");
+	if (template_dir.load(config.getRootSection(), "template_dir") &&
+			!fs::is_directory(template_dir.getValue()))
+		general_msgs.push_back(ValidationMessage::error("'template_dir' must be an existing directory! '"
+				+ template_dir.getValue().string() + "' does not exist!"));
 	validation.push_back(std::make_pair("Configuration file", general_msgs));
 
 	if (config.hasSection("global", "world")) {

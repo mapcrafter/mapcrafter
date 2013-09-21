@@ -90,7 +90,7 @@ private:
 	WorldSection world_global;
 	MapSection map_global;
 
-	Field<fs::path> output_dir;
+	Field<fs::path> output_dir, template_dir;
 
 	std::map<std::string, WorldSection> worlds;
 	std::vector<MapSection> maps;
@@ -101,6 +101,7 @@ public:
 	bool parse(const std::string& filename, ValidationMap& validation);
 
 	fs::path getOutputDir() const { return output_dir.getValue(); }
+	fs::path getTemplateDir() const { return template_dir.getValue(); }
 
 	bool hasWorld(const std::string& world) const { return worlds.count(world); }
 	const std::map<std::string, WorldSection>& getWorlds() const { return worlds; }
