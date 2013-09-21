@@ -52,29 +52,12 @@ BOOST_AUTO_TEST_CASE(config_test) {
 		c.write(std::cout);
 	}
 	*/
-
-	if (!42)
-		return;
-
-	config::ConfigParser parser;
-	config::ValidationMap validation;
-	bool ok = parser.parse("test.conf", validation);
-
-	if (validation.size() > 0) {
-		std::cout << (ok ? "Some notes on your configuration file:" : "Your configuration file is invalid!") << std::endl;
-		for (auto it = validation.begin(); it != validation.end(); ++it) {
-			std::cout << it->first << ":" << std::endl;
-			for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
-				std::cout << " - " << *it2 << std::endl;
-			}
-		}
-	}
 }
 
 BOOST_AUTO_TEST_CASE(config_testReadWrite) {
 	config::ConfigFile c;
 	if (!c.loadFile("data/config/test.conf"))
-		BOOST_ERROR("Unable to load test config file test.conf!");
+		BOOST_ERROR("Unable to load test config file data/config/test.conf!");
 	std::ifstream in("data/config/test.conf");
 	std::string in_data((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
 
@@ -83,4 +66,47 @@ BOOST_AUTO_TEST_CASE(config_testReadWrite) {
 	std::string out_data = out.rdbuf()->str();
 
 	BOOST_CHECK_EQUAL(in_data, out_data);
+}
+
+BOOST_AUTO_TEST_CASE(config_testFieldValidation) {
+	config::ValidationList validation;
+
+	// test the behavior of loading config entries from different sections
+	// into the field objects
+	config::ConfigSection section1, section2, section3, section4;
+	section2.set("test", "foobar");
+	section4.set("test", "42");
+
+	config::Field<std::string> field, field2;
+	field.load(section1, "test");
+	BOOST_CHECK(!field.isLoaded());
+	BOOST_CHECK(!field.require(validation, "error"));
+
+	field.load(section2, "test");
+	BOOST_CHECK(field.isLoaded());
+	BOOST_CHECK_EQUAL(field.getValue(), "foobar");
+
+	field.load(section3, "test");
+	BOOST_CHECK(field.isLoaded());
+	BOOST_CHECK_EQUAL(field.getValue(), "foobar");
+
+	field.load(section4, "test");
+	BOOST_CHECK(field.isLoaded());
+	BOOST_CHECK_EQUAL(field.getValue(), "42");
+
+	field2.load(section1, "test", "default");
+	BOOST_CHECK(field2.isLoaded());
+	BOOST_CHECK_EQUAL(field2.getValue(), "default");
+
+	field2.load(section2, "test", "default");
+	BOOST_CHECK(field2.isLoaded());
+	BOOST_CHECK_EQUAL(field2.getValue(), "foobar");
+
+	field2.load(section3, "test", "default");
+	BOOST_CHECK(field2.isLoaded());
+	BOOST_CHECK_EQUAL(field2.getValue(), "foobar");
+
+	field2.load(section4, "test", "default");
+	BOOST_CHECK(field2.isLoaded());
+	BOOST_CHECK_EQUAL(field2.getValue(), "42");
 }
