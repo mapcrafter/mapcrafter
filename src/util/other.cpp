@@ -111,6 +111,13 @@ fs::path as(const std::string& from) {
 	return fs::path(from);
 }
 
+template<>
+bool as(const std::string& from) {
+	if (from == "yes" || from == "on" || from == "1")
+		return true;
+	return false;
+}
+
 void trim(std::string& str) {
 	// removes trailing and leading whitespaces
 	size_t end = str.find_last_not_of(" \t");
