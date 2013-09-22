@@ -115,7 +115,9 @@ template<>
 bool as(const std::string& from) {
 	if (from == "yes" || from == "on" || from == "1")
 		return true;
-	return false;
+	if (from == "no" || from == "off" || from == "0")
+		return false;
+	throw std::invalid_argument("Must be one of yes/no, on/off or 0/1.");
 }
 
 void trim(std::string& str) {

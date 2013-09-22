@@ -25,7 +25,7 @@ namespace mapcrafter {
 namespace config2 {
 
 bool WorldSection::parse(const ConfigSection& section, ValidationList& validation) {
-	if (input_dir.load(section, "input_dir") && !fs::is_directory(input_dir.getValue()))
+	if (input_dir.load(validation, section, "input_dir") && !fs::is_directory(input_dir.getValue()))
 		validation.push_back(ValidationMessage::error("'input_dir' must be an existing directory! '"
 				+ input_dir.getValue().string() + "' does not exist!"));
 
@@ -40,13 +40,13 @@ bool MapSection::parse(const ConfigSection& section, ValidationList& validation)
 	name_short = section.getName();
 	name_long = section.has("name") ? section.get("name") : name_short;
 
-	world.load(section, "world");
+	world.load(validation, section, "world");
 
-	if (texture_dir.load(section, "texture_dir") && !fs::is_directory(texture_dir.getValue()))
+	if (texture_dir.load(validation, section, "texture_dir") && !fs::is_directory(texture_dir.getValue()))
 		validation.push_back(ValidationMessage::error("'texture_dir' must be an existing directory! '"
 				+ texture_dir.getValue().string() + "' does not exist!"));
 
-	if (rotations.load(section, "rotations", "top-left")) {
+	if (rotations.load(validation, section, "rotations", "top-left")) {
 		std::string str = rotations.getValue();
 		std::stringstream ss;
 		ss << str;
@@ -60,20 +60,20 @@ bool MapSection::parse(const ConfigSection& section, ValidationList& validation)
 		}
 	}
 
-	if (rendermode.load(section, "rendermode", "normal")) {
+	if (rendermode.load(validation, section, "rendermode", "normal")) {
 		std::string r = rendermode.getValue();
 		if (r != "normal" && r != "daylight" && r != "nightlight" && r != "cave")
 			validation.push_back(ValidationMessage::error("'rendermode' must be one of: normal, daylight, nightlight, cave"));
 	}
 
-	if (texture_size.load(section, "texture_size", 12))
+	if (texture_size.load(validation, section, "texture_size", 12))
 		if (texture_size.getValue() <= 0 || texture_size.getValue() > 32)
 			validation.push_back(ValidationMessage::error("'texture_size' must a number between 1 and 32!"));
 
-	render_unknown_blocks.load(section, "render_unkown_blocks", false);
-	render_leaves_transparent.load(section, "render_leaves_transparent", true);
-	render_biomes.load(section, "render_biomes", true);
-	use_image_timestamps.load(section, "use_image_timestamps", true);
+	render_unknown_blocks.load(validation, section, "render_unkown_blocks", false);
+	render_leaves_transparent.load(validation, section, "render_leaves_transparent", true);
+	render_biomes.load(validation, section, "render_biomes", true);
+	use_image_timestamps.load(validation, section, "use_image_timestamps", true);
 
 	if (!global) {
 		world.require(validation, "You have to specify a world ('world')!");
@@ -93,9 +93,9 @@ bool ConfigParser::parse(const std::string& filename, ValidationMap& validation)
 	bool ok = true;
 
 	ValidationList general_msgs;
-	output_dir.load(config.getRootSection(), "output_dir");
+	output_dir.load(general_msgs, config.getRootSection(), "output_dir");
 	output_dir.require(general_msgs, "You have to specify an output directory ('output_dir')!");
-	if (template_dir.load(config.getRootSection(), "template_dir") &&
+	if (template_dir.load(general_msgs, config.getRootSection(), "template_dir") &&
 			!fs::is_directory(template_dir.getValue()))
 		general_msgs.push_back(ValidationMessage::error("'template_dir' must be an existing directory! '"
 				+ template_dir.getValue().string() + "' does not exist!"));

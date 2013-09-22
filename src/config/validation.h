@@ -73,22 +73,30 @@ public:
 	Field(T value = T()) : value(value), loaded(false), valid(false) {}
 	~Field() {}
 
-	bool load(const ConfigSection& section, const std::string& key) {
+	bool load(ValidationList& validation, const ConfigSection& section, const std::string& key) {
 		if (section.has(key)) {
-			value = section.get<T>(key);
-			loaded = true;
-			valid = true;
-			return true;
+			try {
+				value = section.get<T>(key);
+				loaded = true;
+				valid = true;
+				return true;
+			} catch (std::invalid_argument& e) {
+				validation.push_back(ValidationMessage::error("Invalid value for '" + key + "': " + e.what()));
+			}
 		}
 		return false;
 	}
 
-	bool load(const ConfigSection& section, const std::string& key, T default_value) {
+	bool load(ValidationList& validation, const ConfigSection& section, const std::string& key, T default_value) {
 		if (loaded && !section.has(key))
 			return false;
-		value = section.get<T>(key, default_value);
-		loaded = true;
-		valid = true;
+		try {
+			value = section.get<T>(key, default_value);
+			loaded = true;
+			valid = true;
+		} catch (std::invalid_argument& e) {
+			validation.push_back(ValidationMessage::error("Invalid value for '" + key + "': " + e.what()));
+		}
 		return loaded;
 	}
 
