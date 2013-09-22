@@ -233,5 +233,87 @@ const MapSection& MapcrafterConfigFile::getMap(const std::string& map) const {
 	throw std::out_of_range("Map not found!");
 }
 
+MapcrafterConfigHelper::MapcrafterConfigHelper() {
+}
+
+MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfigFile& config)
+	: config(config) {
+	auto worlds = config.getWorlds();
+	for (auto it = worlds.begin(); it != worlds.end(); ++it)
+		world_zoomlevels[it->first] = 0;
+}
+
+MapcrafterConfigHelper::~MapcrafterConfigHelper() {
+}
+
+std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
+	std::string js = "";
+
+	auto maps = config.getMaps();
+	for (auto it = maps.begin(); it != maps.end(); ++it) {
+		std::string world_name = BOOST_FS_FILENAME(config.getWorld(it->getWorld()).getInputDir());
+
+		js += "\"" + it->getShortName() + "\" : {\n";
+		js += "\tname: \"" + it->getLongName() + "\",\n";
+		js += "\tworldName: \"" + world_name + "\",\n";
+		js += "\ttextureSize: " + util::str(it->getTextureSize()) + ",\n";
+		js += "\ttileSize: " + util::str(32 * it->getTextureSize()) + ",\n";
+		//js += "\tmaxZoom: " + util::str(worlds_max_zoom[i]) + ",\n";
+		js += "\trotations: [";
+		for (auto it2 = it->getRotations().begin(); it2 != it->getRotations().end(); ++it2)
+			js += util::str(*it2) + ",";
+		js += "],\n";
+		js += "},";
+	}
+
+	return js;
+}
+
+
+const std::set<int>& MapcrafterConfigHelper::getUsedRotations(const std::string& world) const {
+	return world_rotations.at(world);
+}
+
+void MapcrafterConfigHelper::setUsedRotations(const std::string& world, const std::set<int>& rotations) {
+	for (auto it = rotations.begin(); it != rotations.end(); ++it)
+		world_rotations[world].insert(*it);
+}
+
+int MapcrafterConfigHelper::getWorldZoomlevel(const std::string& world) const {
+	return world_zoomlevels.at(world);
+}
+
+void MapcrafterConfigHelper::setWorldZoomlevel(const std::string& world, int zoomlevel) {
+	world_zoomlevels[world] = zoomlevel;
+}
+
+int MapcrafterConfigHelper::getRenderBehavior(const std::string& map, int rotation) const {
+	return render_behaviors.at(map).at(rotation);
+}
+
+void MapcrafterConfigHelper::setRenderBehavior(const std::string& map, int rotation, int behavior) {
+	if (rotation == -1)
+		for (size_t i = 0; i < 4; i++)
+			render_behaviors[map][i] = behavior;
+	else
+		render_behaviors[map][rotation] = behavior;
+}
+
+bool MapcrafterConfigHelper::isCompleteRenderSkip(const std::string& map) const {
+	const std::set<int>& rotations = config.getMap(map).getRotations();
+	for (auto it = rotations.begin(); it != rotations.end(); ++it)
+		if (getRenderBehavior(map, *it) != RENDER_SKIP)
+			return false;
+	return true;
+}
+
+bool MapcrafterConfigHelper::isCompleteRenderForce(const std::string& map) const {
+	const std::set<int>& rotations = config.getMap(map).getRotations();
+	for (auto it = rotations.begin(); it != rotations.end(); ++it)
+		if (getRenderBehavior(map, *it) != RENDER_FORCE)
+			return false;
+	return true;
+}
+
 } /* namespace config */
 } /* namespace mapcrafter */

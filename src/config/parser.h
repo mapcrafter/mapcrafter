@@ -26,6 +26,8 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
+#include <array>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
@@ -105,8 +107,8 @@ public:
 	fs::path getOutputDir() const { return output_dir.getValue(); }
 	fs::path getTemplateDir() const { return template_dir.getValue(); }
 
-	std::string getOutputPath(std::string path) const { return (output_dir.getValue() / path).string(); }
-	std::string getTemplatePath(std::string path) const { return (template_dir.getValue() / path).string(); }
+	std::string getOutputPath(const std::string& path) const { return (output_dir.getValue() / path).string(); }
+	std::string getTemplatePath(const std::string& path) const { return (template_dir.getValue() / path).string(); }
 
 	bool hasWorld(const std::string& world) const { return worlds.count(world); }
 	const std::map<std::string, WorldSection>& getWorlds() const { return worlds; }
@@ -115,6 +117,37 @@ public:
 	bool hasMap(const std::string& map) const;
 	const std::vector<MapSection>& getMaps() const { return maps; }
 	const MapSection& getMap(const std::string& map) const;
+};
+
+class MapcrafterConfigHelper {
+private:
+	MapcrafterConfigFile config;
+
+	std::map<std::string, std::set<int> > world_rotations;
+	std::map<std::string, int> world_zoomlevels;
+	std::map<std::string, std::array<int, 4> > render_behaviors;
+public:
+	MapcrafterConfigHelper();
+	MapcrafterConfigHelper(const MapcrafterConfigFile& config);
+	~MapcrafterConfigHelper();
+
+	std::string generateTemplateJavascript() const;
+
+	const std::set<int>& getUsedRotations(const std::string& world) const;
+	void setUsedRotations(const std::string& world, const std::set<int>& rotations);
+
+	int getWorldZoomlevel(const std::string& world) const;
+	void setWorldZoomlevel(const std::string& world, int zoomlevel);
+
+	int getRenderBehavior(const std::string& map, int rotation = -1) const;
+	void setRenderBehavior(const std::string& map, int rotation, int behavior);
+
+	bool isCompleteRenderSkip(const std::string& map) const;
+	bool isCompleteRenderForce(const std::string& map) const;
+
+	static const int RENDER_SKIP = 0;
+	static const int RENDER_AUTO = 1;
+	static const int RENDER_FORCE = 2;
 };
 
 } /* namespace config */
