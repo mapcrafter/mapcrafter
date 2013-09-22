@@ -23,7 +23,7 @@ add_definitions(-std=c++0x)
 if(OPT_BOOST_STATIC)
 	set(Boost_USE_STATIC_LIBS ON)
 	# we need zlib to link boost iostreams statically
-	find_library(Z z)
+	find_package(ZLIB REQUIRED)
 endif()
 
 find_package(Boost COMPONENTS iostreams system filesystem program_options REQUIRED)
@@ -36,17 +36,7 @@ if(NOT OPT_SKIP_TESTS)
 endif()
 include_directories(${Boost_INCLUDE_DIRS})
 
-find_library(PTHREAD pthread)
-find_library(PNG png)
-
-if("${PTHREAD}" EQUAL "PTHREAD-NOTFOUND")
-    message(FATAL_ERROR "libpthread not found!")
-endif()
-if("${PNG}" EQUAL "PNG-NOTFOUND")
-    message(FATAL_ERROR "libpng not found!")
-endif()
-if(OPT_BOOST_STATIC AND "${Z}" EQUAL "Z-NOTFOUND")
-	message(FATAL_ERROR "zlib not found!")
-endif()
+find_package(Threads REQUIRED)
+find_package(PNG REQUIRED)
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")
