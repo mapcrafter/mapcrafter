@@ -86,7 +86,7 @@ public:
 	bool useImageTimestamps() const { return use_image_timestamps.getValue(); }
 };
 
-class ConfigParser {
+class MapcrafterConfigFile {
 private:
 	WorldSection world_global;
 	MapSection map_global;
@@ -96,8 +96,8 @@ private:
 	std::map<std::string, WorldSection> worlds;
 	std::vector<MapSection> maps;
 public:
-	ConfigParser() : world_global(true), map_global(true) {}
-	~ConfigParser() {}
+	MapcrafterConfigFile() : world_global(true), map_global(true) {}
+	~MapcrafterConfigFile() {}
 
 	bool parse(const std::string& filename, ValidationMap& validation);
 	void dump(std::ostream& out) const;

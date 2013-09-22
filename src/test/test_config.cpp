@@ -78,35 +78,35 @@ BOOST_AUTO_TEST_CASE(config_testFieldValidation) {
 	section4.set("test", "42");
 
 	config::Field<std::string> field, field2;
-	field.load(section1, "test");
+	field.load(validation, section1, "test");
 	BOOST_CHECK(!field.isLoaded());
 	BOOST_CHECK(!field.require(validation, "error"));
 
-	field.load(section2, "test");
+	field.load(validation, section2, "test");
 	BOOST_CHECK(field.isLoaded());
 	BOOST_CHECK_EQUAL(field.getValue(), "foobar");
 
-	field.load(section3, "test");
+	field.load(validation, section3, "test");
 	BOOST_CHECK(field.isLoaded());
 	BOOST_CHECK_EQUAL(field.getValue(), "foobar");
 
-	field.load(section4, "test");
+	field.load(validation, section4, "test");
 	BOOST_CHECK(field.isLoaded());
 	BOOST_CHECK_EQUAL(field.getValue(), "42");
 
-	field2.load(section1, "test", "default");
+	field2.load(validation, section1, "test", "default");
 	BOOST_CHECK(field2.isLoaded());
 	BOOST_CHECK_EQUAL(field2.getValue(), "default");
 
-	field2.load(section2, "test", "default");
+	field2.load(validation, section2, "test", "default");
 	BOOST_CHECK(field2.isLoaded());
 	BOOST_CHECK_EQUAL(field2.getValue(), "foobar");
 
-	field2.load(section3, "test", "default");
+	field2.load(validation, section3, "test", "default");
 	BOOST_CHECK(field2.isLoaded());
 	BOOST_CHECK_EQUAL(field2.getValue(), "foobar");
 
-	field2.load(section4, "test", "default");
+	field2.load(validation, section4, "test", "default");
 	BOOST_CHECK(field2.isLoaded());
 	BOOST_CHECK_EQUAL(field2.getValue(), "42");
 }

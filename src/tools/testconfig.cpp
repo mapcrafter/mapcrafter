@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 
 	std::string configfile = argv[1];
 
-	config::ConfigParser parser;
+	config::MapcrafterConfigFile parser;
 	config::ValidationMap validation;
 	bool ok = parser.parse(configfile, validation);
 

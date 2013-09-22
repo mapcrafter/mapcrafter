@@ -82,7 +82,7 @@ bool MapSection::parse(const ConfigSection& section, ValidationList& validation)
 	return isValidationValid(validation);
 }
 
-bool ConfigParser::parse(const std::string& filename, ValidationMap& validation) {
+bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& validation) {
 	ConfigFile config;
 	ValidationMessage msg;
 	if (!config.loadFile(filename, msg)) {
@@ -192,7 +192,7 @@ void dumpMapSection(std::ostream& out, const MapSection& section) {
 	out << "  use_image_timestamps = " << section.useImageTimestamps() << std::endl;
 }
 
-void ConfigParser::dump(std::ostream& out) const {
+void MapcrafterConfigFile::dump(std::ostream& out) const {
 	out << "General:" << std::endl;
 	out << "  output_dir = " << output_dir.getValue().string() << std::endl;
 	out << "  template_dir = " << template_dir.getValue().string() << std::endl;
@@ -219,14 +219,14 @@ void ConfigParser::dump(std::ostream& out) const {
 	}
 }
 
-bool ConfigParser::hasMap(const std::string& map) const {
+bool MapcrafterConfigFile::hasMap(const std::string& map) const {
 	for (auto it = maps.begin(); it != maps.end(); ++it)
 		if (it->getShortName() == map)
 			return true;
 	return false;
 }
 
-const MapSection& ConfigParser::getMap(const std::string& map) const {
+const MapSection& MapcrafterConfigFile::getMap(const std::string& map) const {
 	for (auto it = maps.begin(); it != maps.begin(); ++it)
 		if (it->getShortName() == map)
 			return *it;
