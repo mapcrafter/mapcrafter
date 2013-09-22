@@ -105,6 +105,9 @@ public:
 	fs::path getOutputDir() const { return output_dir.getValue(); }
 	fs::path getTemplateDir() const { return template_dir.getValue(); }
 
+	std::string getOutputPath(std::string path) const { return (output_dir.getValue() / path).string(); }
+	std::string getTemplatePath(std::string path) const { return (template_dir.getValue() / path).string(); }
+
 	bool hasWorld(const std::string& world) const { return worlds.count(world); }
 	const std::map<std::string, WorldSection>& getWorlds() const { return worlds; }
 	const WorldSection& getWorld(const std::string& world) const { return worlds.at(world); }
