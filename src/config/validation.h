@@ -60,8 +60,8 @@ std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg);
 typedef std::vector<ValidationMessage> ValidationList;
 typedef std::vector<std::pair<std::string, ValidationList > > ValidationMap;
 
-ValidationList make_validation_list(const ValidationMessage& msg);
-bool validation_valid(const ValidationList& validation);
+ValidationList makeValidationList(const ValidationMessage& msg);
+bool isValidationValid(const ValidationList& validation);
 
 template <typename T>
 class Field {
@@ -92,21 +92,12 @@ public:
 		return loaded;
 	}
 
-	bool require(ValidationList& validation, std::string message) {
+	bool require(ValidationList& validation, std::string message) const {
 		if (!loaded) {
 			validation.push_back(ValidationMessage::error(message));
 			return false;
 		}
 		return true;
-	}
-
-	bool validateOneOf(ValidationList& validation, std::string message, std::vector<T> values) {
-		if (!loaded)
-			return false;
-		for (auto it = values.begin(); it != values.end(); ++it)
-			if (value == *it)
-				return true;
-		return false;
 	}
 
 	T getValue() const { return value; }

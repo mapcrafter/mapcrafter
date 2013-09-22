@@ -33,7 +33,7 @@ bool WorldSection::parse(const ConfigSection& section, ValidationList& validatio
 		input_dir.require(validation, "You have to specify an input directory ('input_dir')!");
 	}
 
-	return validation_valid(validation);
+	return isValidationValid(validation);
 }
 
 bool MapSection::parse(const ConfigSection& section, ValidationList& validation) {
@@ -79,14 +79,14 @@ bool MapSection::parse(const ConfigSection& section, ValidationList& validation)
 		world.require(validation, "You have to specify a world ('world')!");
 	}
 
-	return validation_valid(validation);
+	return isValidationValid(validation);
 }
 
 bool ConfigParser::parse(const std::string& filename, ValidationMap& validation) {
 	ConfigFile config;
 	ValidationMessage msg;
 	if (!config.loadFile(filename, msg)) {
-		validation.push_back(std::make_pair("Configuration file", make_validation_list(msg)));
+		validation.push_back(std::make_pair("Configuration file", makeValidationList(msg)));
 		return false;
 	}
 
@@ -126,7 +126,7 @@ bool ConfigParser::parse(const std::string& filename, ValidationMap& validation)
 				&& it->getNameType() != "global:world"
 				&& it->getNameType() != "global:map") {
 			validation.push_back(std::make_pair("Section '" + it->getName() + "' with type '" + it->getType() + "'",
-					make_validation_list(ValidationMessage::warning("Unknown section type!"))));
+					makeValidationList(ValidationMessage::warning("Unknown section type!"))));
 		}
 
 	for (auto it = sections.begin(); it != sections.end(); ++it) {

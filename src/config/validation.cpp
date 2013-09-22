@@ -33,13 +33,13 @@ std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg) {
 	return out;
 }
 
-ValidationList make_validation_list(const ValidationMessage& msg) {
+ValidationList makeValidationList(const ValidationMessage& msg) {
 	ValidationList validation;
 	validation.push_back(msg);
 	return validation;
 }
 
-bool validation_valid(const ValidationList& validation) {
+bool isValidationValid(const ValidationList& validation) {
 	for (auto it = validation.begin(); it != validation.end(); ++it)
 		if (it->getType() == ValidationMessage::ERROR)
 			return false;
