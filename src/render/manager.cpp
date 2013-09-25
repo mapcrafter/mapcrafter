@@ -19,6 +19,7 @@
 
 #include "manager.h"
 
+#include <array>
 #include <fstream>
 #include <ctime>
 #include <pthread.h>
@@ -42,23 +43,25 @@ MapSettings::MapSettings()
  * This method reads the map settings from a file.
  */
 bool MapSettings::read(const std::string& filename) {
-	config::ConfigFile config;
+	config2::ConfigFile config;
 	if (!config.loadFile(filename))
 		return false;
 
-	texture_size = config.get<int>("", "texture_size");
-	tile_size = config.get<int>("", "tile_size");
-	max_zoom = config.get<int>("", "max_zoom");
+	config2::ConfigSection& root = config.getRootSection();
 
-	render_unknown_blocks = config.get<bool>("", "render_unknown_blocks");
-	render_leaves_transparent = config.get<bool>("", "render_leaves_transparent");
-	render_biomes = config.get<bool>("", "render_biomes");
+	texture_size = root.get<int>("texture_size");
+	tile_size = root.get<int>("tile_size");
+	max_zoom = root.get<int>("max_zoom");
+
+	render_unknown_blocks = root.get<bool>("render_unknown_blocks");
+	render_leaves_transparent = root.get<bool>("render_leaves_transparent");
+	render_biomes = root.get<bool>("render_biomes");
 
 	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
 	for (int i = 0; i < 4; i++) {
-		rotations[i] = config.hasSection(rotation_names[i]);
+		rotations[i] = config.hasSection("rotation", rotation_names[i]);
 		if (rotations[i])
-			last_render[i] = config.get<int>(rotation_names[i], "last_render");
+			last_render[i] = config.getSection("rotation", rotation_names[i]).get<int>("last_render");
 	}
 
 	return true;
@@ -68,44 +71,45 @@ bool MapSettings::read(const std::string& filename) {
  * This method writes the map settings to a file.
  */
 bool MapSettings::write(const std::string& filename) const {
-	config::ConfigFile config;
+	config2::ConfigFile config;
+	config2::ConfigSection& root = config.getRootSection();
 
-	config.set("", "texture_size", util::str(texture_size));
-	config.set("", "tile_size", util::str(tile_size));
-	config.set("", "max_zoom", util::str(max_zoom));
+	root.set("texture_size", util::str(texture_size));
+	root.set("tile_size", util::str(tile_size));
+	root.set("max_zoom", util::str(max_zoom));
 
-	config.set("", "render_unknown_blocks", util::str(render_unknown_blocks));
-	config.set("", "render_leaves_transparent", util::str(render_leaves_transparent));
-	config.set("", "render_biomes", util::str(render_biomes));
+	root.set("render_unknown_blocks", util::str(render_unknown_blocks));
+	root.set("render_leaves_transparent", util::str(render_leaves_transparent));
+	root.set("render_biomes", util::str(render_biomes));
 
 	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
 	for (int i = 0; i < 4; i++) {
 		if (rotations[i])
-			config.set(rotation_names[i], "last_render", util::str(last_render[i]));
+			config.getSection("rotation", rotation_names[i]).set("last_render", util::str(last_render[i]));
 	}
 
 	return config.writeFile(filename);
 }
 
-bool MapSettings::equalsConfig(const config::RenderWorldConfig& config) const {
-	return texture_size == config.texture_size
-			&& render_unknown_blocks == config.render_unknown_blocks
-			&& render_leaves_transparent == config.render_leaves_transparent
-			&& render_biomes == config.render_biomes;
+bool MapSettings::equalsMapConfig(const config2::MapSection& map) const {
+	return texture_size == map.getTextureSize()
+			&& render_unknown_blocks == map.renderUnknownBlocks()
+			&& render_leaves_transparent == map.renderLeavesTransparent()
+			&& render_biomes == map.renderBiomes();
 }
 
-MapSettings MapSettings::byConfig(const config::RenderWorldConfig& config) {
+MapSettings MapSettings::byMapConfig(const config2::MapSection& map) {
 	MapSettings settings;
 
-	settings.texture_size = config.texture_size;
-	settings.tile_size = config.texture_size * 32;
+	settings.texture_size = map.getTextureSize();
+	settings.tile_size = map.getTextureSize() * 32;
 
-	settings.render_unknown_blocks = config.render_unknown_blocks;
-	settings.render_leaves_transparent = config.render_leaves_transparent;
-	settings.render_biomes = config.render_biomes;
+	settings.render_unknown_blocks = map.renderUnknownBlocks();
+	settings.render_leaves_transparent = map.renderLeavesTransparent();
+	settings.render_biomes = map.renderBiomes();
 
-	for (std::set<int>::const_iterator it = config.rotations.begin();
-			it != config.rotations.end(); ++it)
+	auto rotations = map.getRotations();
+	for (auto it = rotations.begin(); it != rotations.end(); ++it)
 		settings.rotations[*it] = true;
 
 	return settings;
@@ -251,7 +255,7 @@ bool RenderManager::copyTemplateFile(const std::string& filename) const {
 
 bool RenderManager::writeTemplateIndexHtml() const {
 	std::map<std::string, std::string> vars;
-	vars["worlds"] = config.generateJavascript();
+	vars["worlds"] = confighelper.generateTemplateJavascript();
 
 	return copyTemplateFile("index.html", vars);
 }
@@ -371,7 +375,7 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 /**
  * Renders render tiles and composite tiles.
  */
-void RenderManager::render(const config::RenderWorldConfig& config, const std::string& output_dir,
+void RenderManager::render(const config2::MapSection& map, const std::string& output_dir,
 		const mc::World& world, const TileSet& tiles, const BlockImages& images) {
 	if(tiles.getRequiredCompositeTilesCount() == 0) {
 		std::cout << "No tiles need to get rendered." << std::endl;
@@ -386,7 +390,7 @@ void RenderManager::render(const config::RenderWorldConfig& config, const std::s
 
 		// create needed things for recursiv render method
 		mc::WorldCache cache(world);
-		TileRenderer renderer(cache, images, config);
+		TileRenderer renderer(cache, images, map);
 		RecursiveRenderSettings settings(tiles, renderer);
 
 		settings.tile_size = images.getTileSize();
@@ -403,7 +407,7 @@ void RenderManager::render(const config::RenderWorldConfig& config, const std::s
 		//cache.getRegionCacheStats().print("region cache");
 		//cache.getChunkCacheStats().print("chunk cache");
 	} else {
-		renderMultithreaded(config, output_dir, world, tiles, images);
+		renderMultithreaded(map, output_dir, world, tiles, images);
 	}
 }
 
@@ -435,7 +439,7 @@ void* runWorker(void* settings_ptr) {
 /**
  * This method starts the render threads when multithreading is enabled.
  */
-void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
+void RenderManager::renderMultithreaded(const config2::MapSection& map,
 		const std::string& output_dir, const mc::World& world, const TileSet& tiles,
 		const BlockImages& images) {
 	// a list of workers
@@ -456,7 +460,7 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
 
 	for (int i = 0; i < opts.jobs; i++) {
 		// create all informations needed for the worker
-		TileRenderer* renderer = new TileRenderer(mc::WorldCache(world), images, config);
+		TileRenderer* renderer = new TileRenderer(mc::WorldCache(world), images, map);
 		RecursiveRenderSettings render_settings(tiles, *renderer);
 		render_settings.tile_size = images.getTileSize();
 		render_settings.output_dir = output_dir;
@@ -527,17 +531,28 @@ void RenderManager::renderMultithreaded(const config::RenderWorldConfig& config,
  * Starts the whole rendering thing.
  */
 bool RenderManager::run() {
-	// load the configuration file
-	if (!config.loadFile(opts.config_file)) {
-		std::cerr << "Error: Unable to read config file!" << std::endl;
-		return false;
+
+	config2::ValidationMap validation;
+	bool ok = config.parse(opts.config_file, validation);
+
+	if (validation.size() > 0) {
+		std::cout << (ok ? "Some notes on your configuration file:" : "Your configuration file is invalid!") << std::endl;
+		for (auto it = validation.begin(); it != validation.end(); ++it) {
+			if (it->second.empty())
+				continue;
+			std::cout << it->first << ":" << std::endl;
+			for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+				std::cout << " - " << *it2 << std::endl;
+		}
 	}
-	// validate the configuration file
-	if (!config.checkValid())
+	if (!ok)
 		return false;
+
+	/*
 	// set the maps to render/skip/force-render from the command line options
 	config.setRenderBehaviors(opts.skip_all, opts.render_skip, opts.render_auto,
 			opts.render_force);
+	*/
 
 	// we need an output directory
 	if (!fs::is_directory(config.getOutputDir())
@@ -546,41 +561,73 @@ bool RenderManager::run() {
 		return false;
 	}
 
-	// get the maps to render
-	std::vector<config::RenderWorldConfig> world_configs = config.getWorlds();
+	confighelper = config2::MapcrafterConfigHelper(config);
+	auto config_worlds = config.getWorlds();
+	auto config_maps = config.getMaps();
 
+	std::map<std::string, std::array<mc::World, 4> > worlds;
+	std::map<std::string, std::array<TileSet, 4> > tilesets;
+
+	// find out which rotations are needed for which world
+	// ...and...
 	// check for already existing rendered maps
 	// and get the (old) zoom levels for the template,
 	// so the user can still view the other maps while rendering
-	for (size_t i = 0; i < world_configs.size(); i++) {
+	for (auto it = config_maps.begin(); it != config_maps.end(); ++it) {
+		confighelper.setUsedRotations(it->getWorld(), it->getRotations());
+
 		MapSettings settings;
-		if (settings.read(config.getOutputPath(world_configs[i].name_short + "/map.settings")))
-			config.setWorldMaxZoom(i, settings.max_zoom);
+		if (settings.read(config.getOutputPath(it->getShortName() + "/map.settings")))
+			confighelper.setWorldZoomlevel(it->getWorld(), settings.max_zoom);
+	}
+
+	std::cout << "Scanning worlds..." << std::endl;
+
+	for (auto it = config_worlds.begin(); it != config_worlds.end(); ++it) {
+		int zoomlevels_max = 0;
+		auto rotations = confighelper.getUsedRotations(it->first);
+		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2) {
+			mc::World world;
+			if (!world.load(it->second.getInputDir().string())) {
+				std::cerr << "Unable to load world " << it->first << "!" << std::endl;
+				return false;
+			}
+			TileSet tileset(world);
+			zoomlevels_max = std::max(zoomlevels_max, tileset.getDepth());
+
+			worlds[it->first][*it2] = world;
+			tilesets[it->first][*it2] = tileset;
+		}
+
+		confighelper.setWorldZoomlevel(it->first, zoomlevels_max);
+		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2) {
+			tilesets[it->first][*it2].setDepth(zoomlevels_max);
+		}
 	}
 
 	// write all template files
 	writeTemplates();
 
-	int i_to = world_configs.size();
+	int i_to = config_maps.size();
 	int start_all = time(NULL);
 
 	// go through all maps
-	for (size_t i = 0; i < world_configs.size(); i++) {
-		config::RenderWorldConfig world = world_configs[i];
+	for (size_t i = 0; i < config_maps.size(); i++) {
+		config2::MapSection map = config_maps[i];
 		// continue, if all rotations for this map are skipped
-		if (world.canSkip())
+		if (confighelper.getRenderBehavior(map.getShortName()) == config2::MapcrafterConfigHelper::RENDER_SKIP)
 			continue;
 
 		int i_from = i+1;
 		std::cout << "(" << i_from << "/" << i_to << ") Rendering map "
-				<< world.name_short << " (\"" << world.name_long << "\"):"
+				<< map.getShortName() << " (\"" << map.getLongName() << "\"):"
 				<< std::endl;
 
-		std::string settings_filename = config.getOutputPath(world.name_short + "/map.settings");
+		std::string settings_filename = config.getOutputPath(map.getShortName() + "/map.settings");
 		MapSettings settings;
 		// check if we have already an old settings file,
 		// but ignore the settings file if the whole world is force-rendered
-		bool old_settings = !world.isCompleteRenderForce() && fs::exists(settings_filename);
+		bool old_settings = !confighelper.isCompleteRenderForce(map.getShortName()) && fs::exists(settings_filename);
 		if (old_settings) {
 			if (!settings.read(settings_filename)) {
 				std::cerr << "Error: Unable to load old map.settings file!"
@@ -589,9 +636,9 @@ bool RenderManager::run() {
 			}
 
 			// check if the config file was not changed when rendering incrementally
-			if (!settings.equalsConfig(world)) {
+			if (!settings.equalsMapConfig(map)) {
 				std::cerr << "Error: The configuration does not equal the settings of the already rendered map." << std::endl;
-				std::cerr << "Force-render the whole map (" << world.name_short
+				std::cerr << "Force-render the whole map (" << map.getShortName()
 						<< ") or reset the configuration to the old settings."
 						<< std::endl << std::endl;
 				continue;
@@ -600,14 +647,16 @@ bool RenderManager::run() {
 			// for force-render rotations, set the last render time to 0
 			// to render all tiles
 			for (int i = 0; i < 4; i++)
-				if (world.render_behaviors[i] == config::RenderWorldConfig::RENDER_FORCE)
+				if (confighelper.getRenderBehavior(map.getShortName(), i) == config2::MapcrafterConfigHelper::RENDER_FORCE)
 					settings.last_render[i] = 0;
 		} else {
 			// if we don't have a settings file or force-render the whole map
 			// -> create a new one
-			settings = MapSettings::byConfig(world);
+			settings = MapSettings::byMapConfig(map);
 		}
 
+		int start_scanning = time(NULL);
+		/*
 		// scan the different rotated versions of the world
 		// find the highest max zoom level of these tilesets to use this for all rotations
 		// all rotations should have the same max zoom level
@@ -628,20 +677,23 @@ bool RenderManager::run() {
 				world_ok = false;
 				break;
 			}
-			tilesets[*it] = TileSet(worlds[*it]/*, settings.last_render[*it]*/);
+			tilesets[*it] = TileSet(worlds[*it]/*, settings.last_render[*it]*//*);
 			depth = std::max(depth, tilesets[*it].getMinDepth());
 		}
 
 		if (!world_ok)
 			continue;
+		*/
 
+		int zoomlevels = confighelper.getWorldZoomlevel(map.getWorld());
 		// check if the max zoom level has increased
-		if (old_settings && settings.max_zoom < depth) {
+		if (old_settings && settings.max_zoom < zoomlevels) {
 			std::cout << "The max zoom level was increased from " << settings.max_zoom
-					<< " to " << depth << "." << std::endl;
+					<< " to " << zoomlevels << "." << std::endl;
 			std::cout << "I will move some files around..." << std::endl;
 		}
 
+		/*
 		// now go through the rotations and set the max zoom level
 		for (std::set<int>::iterator it = world.rotations.begin();
 				it != world.rotations.end(); ++it) {
@@ -664,23 +716,24 @@ bool RenderManager::run() {
 					tilesets[*it].scanRequiredByTimestamp(settings.last_render[*it]);
 			}
 		}
+		*/
 
 		// now write the max zoom level to the settings file
-		settings.max_zoom = depth;
+		settings.max_zoom = zoomlevels;
 		settings.write(settings_filename);
 		// and also to the template
-		config.setWorldMaxZoom(i, depth);
+		//confighelper.setWorldZoomlevel(, depth);
 		writeTemplateIndexHtml();
 
 		// go through the rotations and render them
 		int j_from = 0;
-		int j_to = world.rotations.size();
-		for (std::set<int>::iterator it = world.rotations.begin();
-				it != world.rotations.end(); ++it) {
+		int j_to = map.getRotations().size();
+		auto rotations = map.getRotations();
+		for (auto it = rotations.begin(); it != rotations.end(); ++it) {
 			j_from++;
 
 			// continue if we should skip this rotation
-			if (world.render_behaviors[*it] == config::RenderWorldConfig::RENDER_SKIP)
+			if (confighelper.getRenderBehavior(map.getShortName(), *it) == config2::MapcrafterConfigHelper::RENDER_SKIP)
 				continue;
 
 			std::cout << "(" << i_from << "." << j_from << "/" << i_from << "."
@@ -698,16 +751,15 @@ bool RenderManager::run() {
 
 			// create block images and render the world
 			BlockImages images;
-			images.setSettings(world.texture_size, *it, world.render_unknown_blocks,
-					world.render_leaves_transparent, world.rendermode);
-			if (!images.loadAll(world.textures_dir)) {
+			images.setSettings(map.getTextureSize(), *it, map.renderUnknownBlocks(),
+					map.renderLeavesTransparent(), map.getRendermode());
+			if (!images.loadAll(map.getTextureDir().string())) {
 				std::cerr << "Skipping remaining rotations." << std::endl << std::endl;
 				break;
 			}
 
-			std::string output_dir = config.getOutputPath(world.name_short + "/"
-					+ config::ROTATION_NAMES_SHORT[*it]);
-			render(world, output_dir, worlds[*it], tilesets[*it], images);
+			std::string output_dir = config.getOutputPath(map.getShortName() + "/" + config2::ROTATION_NAMES_SHORT[*it]);
+			render(map, output_dir, worlds[map.getWorld()][*it], tilesets[map.getWorld()][*it], images);
 
 			// update the settings file
 			settings.rotations[*it] = true;

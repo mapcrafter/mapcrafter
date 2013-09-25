@@ -20,7 +20,7 @@
 #ifndef MANAGER_H_
 #define MANAGER_H_
 
-#include "../config/config.h"
+#include "../config/parser.h"
 
 #include "../mc/cache.h"
 #include "../mc/world.h"
@@ -33,6 +33,8 @@
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
+
+namespace config = mapcrafter::config2;
 
 namespace mapcrafter {
 namespace render {
@@ -69,8 +71,8 @@ struct MapSettings {
 	bool read(const std::string& filename);
 	bool write(const std::string& filename) const;
 
-	bool equalsConfig(const config::RenderWorldConfig& config) const;
-	static MapSettings byConfig(const config::RenderWorldConfig& config);
+	bool equalsMapConfig(const config2::MapSection& map) const;
+	static MapSettings byMapConfig(const config2::MapSection& map);
 };
 
 /**
@@ -121,7 +123,8 @@ void renderRecursive(RecursiveRenderSettings& settings, const Path& path, Image&
 class RenderManager {
 private:
 	RenderOpts opts;
-	config::RenderConfigParser config;
+	config2::MapcrafterConfigFile config;
+	config2::MapcrafterConfigHelper confighelper;
 
 	bool copyTemplateFile(const std::string& filename,
 	        const std::map<std::string, std::string>& vars) const;
@@ -132,10 +135,10 @@ private:
 
 	void increaseMaxZoom(const fs::path& dir) const;
 
-	void render(const config::RenderWorldConfig& config, const std::string& output_dir,
+	void render(const config2::MapSection& config, const std::string& output_dir,
 			const mc::World& world, const TileSet& tiles,
 			const BlockImages& images);
-	void renderMultithreaded(const config::RenderWorldConfig& config, const std::string& output_dir,
+	void renderMultithreaded(const config2::MapSection& config, const std::string& output_dir,
 			const mc::World& world, const TileSet& tiles, const BlockImages& images);
 public:
 	RenderManager(const RenderOpts& opts);

@@ -22,7 +22,7 @@
 
 #include "../util.h"
 
-#include "../config/config.h"
+#include "../config/parser.h"
 
 #include "../mc/pos.h"
 #include "../mc/cache.h"
@@ -126,7 +126,7 @@ private:
 public:
 	TileRenderer();
 	TileRenderer(const mc::WorldCache& world, const BlockImages& textures,
-			const config::RenderWorldConfig& config);
+			const config2::MapSection& map);
 	~TileRenderer();
 
 	void renderTile(const TilePos& pos, Image& tile);

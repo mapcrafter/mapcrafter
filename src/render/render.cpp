@@ -132,11 +132,11 @@ TileRenderer::TileRenderer()
 }
 
 TileRenderer::TileRenderer(const mc::WorldCache& world, const BlockImages& images,
-        const config::RenderWorldConfig& config)
-		: state(world, images), render_biomes(config.render_biomes),
-		  water_preblit(config.rendermode != "daylight"
-				  && config.rendermode != "nightlight") {
-	createRendermode(config.rendermode, config, state, rendermodes);
+        const config2::MapSection& map)
+		: state(world, images), render_biomes(map.renderBiomes()),
+		  water_preblit(map.getRendermode() != "daylight"
+				  && map.getRendermode() != "nightlight") {
+	createRendermode(map.getRendermode(), map, state, rendermodes);
 }
 
 TileRenderer::~TileRenderer() {
