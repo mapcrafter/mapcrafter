@@ -588,12 +588,12 @@ bool RenderManager::run() {
 		auto rotations = confighelper.getUsedRotations(it->first);
 		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2) {
 			mc::World world;
-			if (!world.load(it->second.getInputDir().string())) {
+			if (!world.load(it->second.getInputDir().string(), *it2)) {
 				std::cerr << "Unable to load world " << it->first << "!" << std::endl;
 				return false;
 			}
 			TileSet tileset(world);
-			zoomlevels_max = std::max(zoomlevels_max, tileset.getDepth());
+			zoomlevels_max = std::max(zoomlevels_max, tileset.getMinDepth());
 
 			worlds[it->first][*it2] = world;
 			tilesets[it->first][*it2] = tileset;
@@ -624,6 +624,9 @@ bool RenderManager::run() {
 		std::cout << "(" << i_from << "/" << i_to << ") Rendering map "
 				<< map.getShortName() << " (\"" << map.getLongName() << "\"):"
 				<< std::endl;
+
+		if (!fs::is_directory(config.getOutputDir() / mapname))
+			fs::create_directories(config.getOutputDir() / mapname);
 
 		std::string settings_filename = config.getOutputPath(mapname + "/map.settings");
 		MapSettings settings;
@@ -734,8 +737,11 @@ bool RenderManager::run() {
 		for (auto it = rotations.begin(); it != rotations.end(); ++it) {
 			j_from++;
 
+			int rotation = *it;
+
 			// continue if we should skip this rotation
-			if (confighelper.getRenderBehavior(map.getShortName(), *it) == config2::MapcrafterConfigHelper::RENDER_SKIP)
+			if (confighelper.getRenderBehavior(map.getShortName(), rotation)
+					== config2::MapcrafterConfigHelper::RENDER_SKIP)
 				continue;
 
 			std::cout << "(" << i_from << "." << j_from << "/" << i_from << "."
@@ -760,8 +766,8 @@ bool RenderManager::run() {
 				break;
 			}
 
-			std::string output_dir = config.getOutputPath(map.getShortName() + "/" + config2::ROTATION_NAMES_SHORT[*it]);
-			render(map, output_dir, worlds[worldname][*it], tilesets[mapname][*it], images);
+			std::string output_dir = config.getOutputPath(mapname + "/" + config2::ROTATION_NAMES_SHORT[*it]);
+			render(map, output_dir, worlds[worldname][*it], tilesets[worldname][*it], images);
 
 			// update the settings file
 			settings.rotations[*it] = true;

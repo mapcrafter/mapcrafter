@@ -280,7 +280,8 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 		js += "\ttileSize: " + util::str(32 * it->getTextureSize()) + ",\n";
 		//js += "\tmaxZoom: " + util::str(worlds_max_zoom[i]) + ",\n";
 		js += "\trotations: [";
-		for (auto it2 = it->getRotations().begin(); it2 != it->getRotations().end(); ++it2)
+		auto rotations = it->getRotations();
+		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2)
 			js += util::str(*it2) + ",";
 		js += "],\n";
 		js += "},";
