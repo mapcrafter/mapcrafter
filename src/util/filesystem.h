@@ -34,11 +34,12 @@ bool moveFile(const fs::path& from, const fs::path& to);
 
 fs::path findHomeDir();
 fs::path findExecutablePath();
+fs::path findExecutableMapcrafterDir(fs::path executable = findExecutablePath());
 
 typedef std::vector<fs::path> PathList;
-PathList findResourceDirs(const fs::path& mapcrafter_bin);
-PathList findTemplateDirs(const fs::path& mapcrafter_bin);
-PathList findTextureDirs(const fs::path& mapcrafter_bin);
+PathList findResourceDirs(const fs::path& executable);
+PathList findTemplateDirs(const fs::path& executable);
+PathList findTextureDirs(const fs::path& executable);
 
 fs::path findTemplateDir();
 fs::path findTextureDir();
