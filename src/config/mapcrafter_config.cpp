@@ -17,7 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "parser.h"
+#include "mapcrafter_config.h"
 
 #include "../util.h"
 #include "validation.h"

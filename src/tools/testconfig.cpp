@@ -17,7 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../config/parser.h"
+#include "../config/mapcrafter_config.h"
 
 #include <iostream>
 #include <string>

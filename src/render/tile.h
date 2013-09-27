@@ -50,7 +50,7 @@ namespace fs = boost::filesystem;
  * The TileSet class manages the tiles for the rendering process. The render tiles are
  * stored as tile positions, all other composite tiles as tile paths. The tile set scans
  * the world and all chunks, calculates the maximum needed zoom level and finds out, which
- * tiles exists and which tiles need to get rendered (useful for incremental rendering,
+ * tiles exist and which tiles need to get rendered (useful for incremental rendering,
  * when only a few chunks where changed).
  *
  * The tile renderer can then render the render tiles and compose the composite tiles

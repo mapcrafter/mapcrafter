@@ -20,7 +20,7 @@
 #ifndef MANAGER_H_
 #define MANAGER_H_
 
-#include "../config/parser.h"
+#include "../config/mapcrafter_config.h"
 
 #include "../mc/cache.h"
 #include "../mc/world.h"
