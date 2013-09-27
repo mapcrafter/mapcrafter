@@ -19,6 +19,7 @@
 
 #include "parser.h"
 
+#include "../util.h"
 #include "validation.h"
 
 namespace mapcrafter {
@@ -45,6 +46,10 @@ bool MapSection::parse(const ConfigSection& section, ValidationList& validation)
 	if (texture_dir.load(validation, section, "texture_dir") && !fs::is_directory(texture_dir.getValue()))
 		validation.push_back(ValidationMessage::error("'texture_dir' must be an existing directory! '"
 				+ texture_dir.getValue().string() + "' does not exist!"));
+	else if (!util::findTextureDir().empty())
+		texture_dir.setValue(util::findTextureDir());
+	else if (!global)
+		texture_dir.require(validation, "You have to specifiy a texture directory ('texture_dir')!");
 
 	if (rotations.load(validation, section, "rotations", "top-left")) {
 		std::string str = rotations.getValue();
@@ -95,10 +100,15 @@ bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& val
 	ValidationList general_msgs;
 	output_dir.load(general_msgs, config.getRootSection(), "output_dir");
 	output_dir.require(general_msgs, "You have to specify an output directory ('output_dir')!");
-	if (template_dir.load(general_msgs, config.getRootSection(), "template_dir") &&
+	if (template_dir.load(general_msgs, config.getRootSection(), "template_dir", util::findTemplateDir()) &&
 			!fs::is_directory(template_dir.getValue()))
 		general_msgs.push_back(ValidationMessage::error("'template_dir' must be an existing directory! '"
 				+ template_dir.getValue().string() + "' does not exist!"));
+	else if (!util::findTemplateDir().empty())
+		template_dir.setValue(util::findTemplateDir());
+	else
+		template_dir.require(general_msgs, "You have to specifiy a template directory ('template_dir')!");
+
 	validation.push_back(std::make_pair("Configuration file", general_msgs));
 
 	if (config.hasSection("global", "world")) {

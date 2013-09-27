@@ -109,6 +109,8 @@ public:
 	}
 
 	T getValue() const { return value; }
+	void setValue(T value) { this->value = value; }
+
 	bool isLoaded() const { return loaded; }
 	bool isValid() const { return valid; }
 };
