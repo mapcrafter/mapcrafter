@@ -227,7 +227,7 @@ bool MapcrafterConfigFile::hasMap(const std::string& map) const {
 }
 
 const MapSection& MapcrafterConfigFile::getMap(const std::string& map) const {
-	for (auto it = maps.begin(); it != maps.begin(); ++it)
+	for (auto it = maps.begin(); it != maps.end(); ++it)
 		if (it->getShortName() == map)
 			return *it;
 	throw std::out_of_range("Map not found!");
@@ -288,6 +288,7 @@ void MapcrafterConfigHelper::setWorldZoomlevel(const std::string& world, int zoo
 }
 
 int MapcrafterConfigHelper::getRenderBehavior(const std::string& map, int rotation) const {
+	return RENDER_AUTO;
 	return render_behaviors.at(map).at(rotation);
 }
 

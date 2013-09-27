@@ -614,8 +614,10 @@ bool RenderManager::run() {
 	// go through all maps
 	for (size_t i = 0; i < config_maps.size(); i++) {
 		config2::MapSection map = config_maps[i];
+		std::string mapname = map.getShortName();
+		std::string worldname = map.getWorld();
 		// continue, if all rotations for this map are skipped
-		if (confighelper.getRenderBehavior(map.getShortName()) == config2::MapcrafterConfigHelper::RENDER_SKIP)
+		if (confighelper.getRenderBehavior(mapname) == config2::MapcrafterConfigHelper::RENDER_SKIP)
 			continue;
 
 		int i_from = i+1;
@@ -623,11 +625,11 @@ bool RenderManager::run() {
 				<< map.getShortName() << " (\"" << map.getLongName() << "\"):"
 				<< std::endl;
 
-		std::string settings_filename = config.getOutputPath(map.getShortName() + "/map.settings");
+		std::string settings_filename = config.getOutputPath(mapname + "/map.settings");
 		MapSettings settings;
 		// check if we have already an old settings file,
 		// but ignore the settings file if the whole world is force-rendered
-		bool old_settings = !confighelper.isCompleteRenderForce(map.getShortName()) && fs::exists(settings_filename);
+		bool old_settings = !confighelper.isCompleteRenderForce(mapname) && fs::exists(settings_filename);
 		if (old_settings) {
 			if (!settings.read(settings_filename)) {
 				std::cerr << "Error: Unable to load old map.settings file!"
@@ -638,7 +640,7 @@ bool RenderManager::run() {
 			// check if the config file was not changed when rendering incrementally
 			if (!settings.equalsMapConfig(map)) {
 				std::cerr << "Error: The configuration does not equal the settings of the already rendered map." << std::endl;
-				std::cerr << "Force-render the whole map (" << map.getShortName()
+				std::cerr << "Force-render the whole map (" << mapname
 						<< ") or reset the configuration to the old settings."
 						<< std::endl << std::endl;
 				continue;
@@ -647,7 +649,7 @@ bool RenderManager::run() {
 			// for force-render rotations, set the last render time to 0
 			// to render all tiles
 			for (int i = 0; i < 4; i++)
-				if (confighelper.getRenderBehavior(map.getShortName(), i) == config2::MapcrafterConfigHelper::RENDER_FORCE)
+				if (confighelper.getRenderBehavior(mapname, i) == config2::MapcrafterConfigHelper::RENDER_FORCE)
 					settings.last_render[i] = 0;
 		} else {
 			// if we don't have a settings file or force-render the whole map
@@ -685,7 +687,7 @@ bool RenderManager::run() {
 			continue;
 		*/
 
-		int zoomlevels = confighelper.getWorldZoomlevel(map.getWorld());
+		int zoomlevels = confighelper.getWorldZoomlevel(worldname);
 		// check if the max zoom level has increased
 		if (old_settings && settings.max_zoom < zoomlevels) {
 			std::cout << "The max zoom level was increased from " << settings.max_zoom
@@ -759,7 +761,7 @@ bool RenderManager::run() {
 			}
 
 			std::string output_dir = config.getOutputPath(map.getShortName() + "/" + config2::ROTATION_NAMES_SHORT[*it]);
-			render(map, output_dir, worlds[map.getWorld()][*it], tilesets[map.getWorld()][*it], images);
+			render(map, output_dir, worlds[worldname][*it], tilesets[mapname][*it], images);
 
 			// update the settings file
 			settings.rotations[*it] = true;
