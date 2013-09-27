@@ -25,10 +25,13 @@
 namespace mapcrafter {
 namespace config2 {
 
-bool WorldSection::parse(const ConfigSection& section, ValidationList& validation) {
-	if (input_dir.load(validation, section, "input_dir") && !fs::is_directory(input_dir.getValue()))
-		validation.push_back(ValidationMessage::error("'input_dir' must be an existing directory! '"
-				+ input_dir.getValue().string() + "' does not exist!"));
+bool WorldSection::parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation) {
+	if (input_dir.load(validation, section, "input_dir")) {
+		input_dir.setValue(BOOST_FS_ABSOLUTE(input_dir.getValue(), config_dir));
+		if(!fs::is_directory(input_dir.getValue()))
+			validation.push_back(ValidationMessage::error("'input_dir' must be an existing directory! '"
+					+ input_dir.getValue().string() + "' does not exist!"));
+	}
 
 	if (!global) {
 		input_dir.require(validation, "You have to specify an input directory ('input_dir')!");
@@ -37,19 +40,21 @@ bool WorldSection::parse(const ConfigSection& section, ValidationList& validatio
 	return isValidationValid(validation);
 }
 
-bool MapSection::parse(const ConfigSection& section, ValidationList& validation) {
+bool MapSection::parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation) {
 	name_short = section.getName();
 	name_long = section.has("name") ? section.get("name") : name_short;
 
 	world.load(validation, section, "world");
 
-	if (texture_dir.load(validation, section, "texture_dir") && !fs::is_directory(texture_dir.getValue()))
-		validation.push_back(ValidationMessage::error("'texture_dir' must be an existing directory! '"
-				+ texture_dir.getValue().string() + "' does not exist!"));
-	else if (!util::findTextureDir().empty())
+	if (texture_dir.load(validation, section, "texture_dir")) {
+		texture_dir.setValue(BOOST_FS_ABSOLUTE(texture_dir.getValue(), config_dir));
+		if (!fs::is_directory(texture_dir.getValue()))
+			validation.push_back(ValidationMessage::error("'texture_dir' must be an existing directory! '"
+					+ texture_dir.getValue().string() + "' does not exist!"));
+	} else if (!util::findTextureDir().empty())
 		texture_dir.setValue(util::findTextureDir());
 	else if (!global)
-		texture_dir.require(validation, "You have to specifiy a texture directory ('texture_dir')!");
+		texture_dir.require(validation, "You have to specify a texture directory ('texture_dir')!");
 
 	if (rotations.load(validation, section, "rotations", "top-left")) {
 		std::string str = rotations.getValue();
@@ -95,25 +100,30 @@ bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& val
 		return false;
 	}
 
+	fs::path config_dir = fs::path(filename).parent_path();
+
 	bool ok = true;
 
 	ValidationList general_msgs;
 	output_dir.load(general_msgs, config.getRootSection(), "output_dir");
+	if (output_dir.isLoaded())
+		output_dir.setValue(BOOST_FS_ABSOLUTE(output_dir.getValue(), config_dir));
 	output_dir.require(general_msgs, "You have to specify an output directory ('output_dir')!");
-	if (template_dir.load(general_msgs, config.getRootSection(), "template_dir", util::findTemplateDir()) &&
-			!fs::is_directory(template_dir.getValue()))
-		general_msgs.push_back(ValidationMessage::error("'template_dir' must be an existing directory! '"
-				+ template_dir.getValue().string() + "' does not exist!"));
-	else if (!util::findTemplateDir().empty())
+	if (template_dir.load(general_msgs, config.getRootSection(), "template_dir")) {
+		template_dir.setValue(BOOST_FS_ABSOLUTE(template_dir.getValue(), config_dir));
+		if (!fs::is_directory(template_dir.getValue()))
+			general_msgs.push_back(ValidationMessage::error("'template_dir' must be an existing directory! '"
+					+ template_dir.getValue().string() + "' does not exist!"));
+	} else if (!util::findTemplateDir().empty())
 		template_dir.setValue(util::findTemplateDir());
 	else
-		template_dir.require(general_msgs, "You have to specifiy a template directory ('template_dir')!");
+		template_dir.require(general_msgs, "You have to specify a template directory ('template_dir')!");
 
 	validation.push_back(std::make_pair("Configuration file", general_msgs));
 
 	if (config.hasSection("global", "world")) {
 		ValidationList msgs;
-		ok = world_global.parse(config.getSection("global", "world"), msgs) && ok;
+		ok = world_global.parse(config.getSection("global", "world"), config_dir, msgs) && ok;
 		if (!msgs.empty())
 			validation.push_back(std::make_pair("Global world configuration", msgs));
 		if (!ok)
@@ -122,7 +132,7 @@ bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& val
 
 	if (config.hasSection("global", "map")) {
 		ValidationList msgs;
-		ok = map_global.parse(config.getSection("global", "map"), msgs) && ok;
+		ok = map_global.parse(config.getSection("global", "map"), config_dir, msgs) && ok;
 		if (!msgs.empty())
 			validation.push_back(std::make_pair("Global map configuration", msgs));
 		if (!ok)
@@ -145,7 +155,7 @@ bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& val
 		ValidationList msgs;
 		WorldSection world = world_global;
 		world.setGlobal(false);
-		ok = world.parse(*it, msgs) && ok;
+		ok = world.parse(*it, config_dir, msgs) && ok;
 
 		if (hasWorld(it->getName())) {
 			msgs.push_back(ValidationMessage::error("World name '" + it->getName() + "' already used!"));
@@ -162,7 +172,7 @@ bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& val
 		ValidationList msgs;
 		MapSection map = map_global;
 		map.setGlobal(false);
-		ok = map.parse(*it, msgs) && ok;
+		ok = map.parse(*it, config_dir, msgs) && ok;
 
 		if (hasMap(it->getName())) {
 			msgs.push_back(ValidationMessage::error("Map name '" + it->getName() + "' already used!"));

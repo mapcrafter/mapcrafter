@@ -45,7 +45,7 @@ public:
 	~WorldSection() {}
 
 	void setGlobal(bool global) { this->global = global; }
-	bool parse(const ConfigSection& section, ValidationList& validation);
+	bool parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation);
 
 	fs::path getInputDir() const { return input_dir.getValue(); }
 };
@@ -71,7 +71,7 @@ public:
 	~MapSection() {}
 
 	void setGlobal(bool global) { this->global = global; }
-	bool parse(const ConfigSection& section, ValidationList& validation);
+	bool parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation);
 
 	std::string getShortName() const { return name_short; }
 	std::string getLongName() const { return name_long; }
