@@ -578,7 +578,7 @@ bool RenderManager::run() {
 
 		MapSettings settings;
 		if (settings.read(config.getOutputPath(it->getShortName() + "/map.settings")))
-			confighelper.setWorldZoomlevel(it->getWorld(), settings.max_zoom);
+			confighelper.setMapZoomlevel(it->getShortName(), settings.max_zoom);
 	}
 
 	std::cout << "Scanning worlds..." << std::endl;
@@ -599,10 +599,11 @@ bool RenderManager::run() {
 			tilesets[it->first][*it2] = tileset;
 		}
 
-		confighelper.setWorldZoomlevel(it->first, zoomlevels_max);
+		//confighelper.setWorldZoomlevel(it->first, zoomlevels_max);
 		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2) {
 			tilesets[it->first][*it2].setDepth(zoomlevels_max);
 		}
+		confighelper.setWorldZoomlevel(it->first, zoomlevels_max);
 	}
 
 	// write all template files
@@ -690,11 +691,11 @@ bool RenderManager::run() {
 			continue;
 		*/
 
-		int zoomlevels = confighelper.getWorldZoomlevel(worldname);
+		int world_zoomlevels = confighelper.getWorldZoomlevel(worldname);
 		// check if the max zoom level has increased
-		if (old_settings && settings.max_zoom < zoomlevels) {
+		if (old_settings && settings.max_zoom < world_zoomlevels) {
 			std::cout << "The max zoom level was increased from " << settings.max_zoom
-					<< " to " << zoomlevels << "." << std::endl;
+					<< " to " << world_zoomlevels << "." << std::endl;
 			std::cout << "I will move some files around..." << std::endl;
 		}
 
@@ -723,11 +724,11 @@ bool RenderManager::run() {
 		}
 		*/
 
-		// now write the max zoom level to the settings file
-		settings.max_zoom = zoomlevels;
+		// now write the zoomlevel to the settings file
+		settings.max_zoom = world_zoomlevels;
 		settings.write(settings_filename);
 		// and also to the template
-		//confighelper.setWorldZoomlevel(, depth);
+		confighelper.setMapZoomlevel(mapname, settings.max_zoom);
 		writeTemplateIndexHtml();
 
 		// go through the rotations and render them
@@ -745,10 +746,10 @@ bool RenderManager::run() {
 				continue;
 
 			std::cout << "(" << i_from << "." << j_from << "/" << i_from << "."
-					<< j_to << ") Rendering rotation " << config::ROTATION_NAMES[*it]
+					<< j_to << ") Rendering rotation " << config2::ROTATION_NAMES[rotation]
 					<< ":" << std::endl;
 
-			if (settings.last_render[*it] != 0) {
+			if (settings.last_render[rotation] != 0) {
 				time_t t = settings.last_render[*it];
 				char buffer[100];
 				strftime(buffer, 100, "%d %b %Y, %H:%M:%S", localtime(&t));
@@ -759,19 +760,19 @@ bool RenderManager::run() {
 
 			// create block images and render the world
 			BlockImages images;
-			images.setSettings(map.getTextureSize(), *it, map.renderUnknownBlocks(),
+			images.setSettings(map.getTextureSize(), rotation, map.renderUnknownBlocks(),
 					map.renderLeavesTransparent(), map.getRendermode());
 			if (!images.loadAll(map.getTextureDir().string())) {
 				std::cerr << "Skipping remaining rotations." << std::endl << std::endl;
 				break;
 			}
 
-			std::string output_dir = config.getOutputPath(mapname + "/" + config2::ROTATION_NAMES_SHORT[*it]);
-			render(map, output_dir, worlds[worldname][*it], tilesets[worldname][*it], images);
+			std::string output_dir = config.getOutputPath(mapname + "/" + config2::ROTATION_NAMES_SHORT[rotation]);
+			render(map, output_dir, worlds[worldname][rotation], tilesets[worldname][rotation], images);
 
 			// update the settings file
-			settings.rotations[*it] = true;
-			settings.last_render[*it] = start_scanning;
+			settings.rotations[rotation] = true;
+			settings.last_render[rotation] = start_scanning;
 			settings.write(settings_filename);
 
 			int took = time(NULL) - start;

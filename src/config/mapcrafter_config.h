@@ -125,6 +125,8 @@ private:
 
 	std::map<std::string, std::set<int> > world_rotations;
 	std::map<std::string, int> world_zoomlevels;
+	std::map<std::string, int> map_zoomlevels;
+
 	std::map<std::string, std::array<int, 4> > render_behaviors;
 public:
 	MapcrafterConfigHelper();
@@ -137,7 +139,9 @@ public:
 	void setUsedRotations(const std::string& world, const std::set<int>& rotations);
 
 	int getWorldZoomlevel(const std::string& world) const;
+	int getMapZoomlevel(const std::string& map) const;
 	void setWorldZoomlevel(const std::string& world, int zoomlevel);
+	void setMapZoomlevel(const std::string& map, int zoomlevel);
 
 	int getRenderBehavior(const std::string& map, int rotation = -1) const;
 	void setRenderBehavior(const std::string& map, int rotation, int behavior);

@@ -121,18 +121,18 @@ bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& val
 
 	validation.push_back(std::make_pair("Configuration file", general_msgs));
 
-	if (config.hasSection("global", "world")) {
+	if (config.hasSection("global", "worlds")) {
 		ValidationList msgs;
-		ok = world_global.parse(config.getSection("global", "world"), config_dir, msgs) && ok;
+		ok = world_global.parse(config.getSection("global", "worlds"), config_dir, msgs) && ok;
 		if (!msgs.empty())
 			validation.push_back(std::make_pair("Global world configuration", msgs));
 		if (!ok)
 			return false;
 	}
 
-	if (config.hasSection("global", "map")) {
+	if (config.hasSection("global", "maps")) {
 		ValidationList msgs;
-		ok = map_global.parse(config.getSection("global", "map"), config_dir, msgs) && ok;
+		ok = map_global.parse(config.getSection("global", "maps"), config_dir, msgs) && ok;
 		if (!msgs.empty())
 			validation.push_back(std::make_pair("Global map configuration", msgs));
 		if (!ok)
@@ -143,8 +143,8 @@ bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& val
 
 	for (auto it = sections.begin(); it != sections.end(); ++it)
 		if (it->getType() != "world" && it->getType() != "map"
-				&& it->getNameType() != "global:world"
-				&& it->getNameType() != "global:map") {
+				&& it->getNameType() != "global:worlds"
+				&& it->getNameType() != "global:maps") {
 			validation.push_back(std::make_pair("Section '" + it->getName() + "' with type '" + it->getType() + "'",
 					makeValidationList(ValidationMessage::warning("Unknown section type!"))));
 		}
@@ -278,7 +278,7 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 		js += "\tworldName: \"" + world_name + "\",\n";
 		js += "\ttextureSize: " + util::str(it->getTextureSize()) + ",\n";
 		js += "\ttileSize: " + util::str(32 * it->getTextureSize()) + ",\n";
-		//js += "\tmaxZoom: " + util::str(worlds_max_zoom[i]) + ",\n";
+		js += "\tmaxZoom: " + util::str(getMapZoomlevel(it->getShortName())) + ",\n";
 		js += "\trotations: [";
 		auto rotations = it->getRotations();
 		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2)
@@ -304,8 +304,16 @@ int MapcrafterConfigHelper::getWorldZoomlevel(const std::string& world) const {
 	return world_zoomlevels.at(world);
 }
 
+int MapcrafterConfigHelper::getMapZoomlevel(const std::string& map) const {
+	return map_zoomlevels.at(map);
+}
+
 void MapcrafterConfigHelper::setWorldZoomlevel(const std::string& world, int zoomlevel) {
 	world_zoomlevels[world] = zoomlevel;
+}
+
+void MapcrafterConfigHelper::setMapZoomlevel(const std::string& map, int zoomlevel) {
+	map_zoomlevels[map] = zoomlevel;
 }
 
 int MapcrafterConfigHelper::getRenderBehavior(const std::string& map, int rotation) const {
