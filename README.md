@@ -69,7 +69,7 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 **v.0.5.1**
 
 * Added support for Minecraft 1.6 Resource Packs
-    **(You have delete your old textures and get them new from a new Minecraft Jar file)**
+    **(You have to delete your old textures and get them new from a new Minecraft Jar file)**
 * Added some new blocks from Minecraft 1.6
 * Better compatibility for older gcc (4.4 +) and boost versions
 * Some code reworkings, replaced plain Makefile with CMake
