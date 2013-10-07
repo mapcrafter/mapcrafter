@@ -9,22 +9,35 @@ At first you have to create a configuration file like this::
 
 	output_dir = output
 	
-	[world]
-	name = My World
-	world = world
+	[world:myworld]
+	input_dir = world
+	
+	[map:mymap]
+	name = My Map
+	world = myworld
 
-In the configuration file you define which worlds the renderer should render.
-In this example is defined that the renderer should render the world in the
-directory ``world/`` into the output directory ``output/``. All relative paths
-in configuration files are relative to the path of the configuration file.
+In the configuration file you define which worlds and maps the renderer should
+render.  Worlds are the different Minecraft Worlds, maps are the rendered
+Minecraft Worlds.  They can be rendered with different rendermodes and
+different rotations.
+
+You have to declare every world you want to use in a section which name is
+prefixed with ``world:``.  Then you can use these worlds for your different
+maps. Every map section name is also prefixed with ``map:``.  In this example
+is the world ``myworld`` with the input directory ``world/`` declared.  The
+world ``myworld`` is rendered as map ``mymap`` into the output directory
+``output/``.
+
+All relative paths in configuration files are relative to the path of the
+configuration file.
 
 Now it's time to render your first world::
 
-	mapcrafter -c myworld.conf
+    mapcrafter -c render.conf
 
 To improve the performance you can also render the map with multiple threads::
 
-	mapcrafter -c myworld.conf -j 2
+    mapcrafter -c render.conf -j 2
 
 2 is the number of threads the renderer should use. You should use the count of
 your CPU cores, but often the input/output is the bottleneck so using more
