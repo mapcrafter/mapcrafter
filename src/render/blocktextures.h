@@ -8,32 +8,13 @@
 #ifndef BLOCKTEXTURES_H_
 #define BLOCKTEXTURES_H_
 
-#include "image.h"
+#include "textureimage.h"
 
 #include <string>
 #include <vector>
 
 namespace mapcrafter {
 namespace render {
-
-/**
- * A single Minecraft block texture image.
- */
-class TextureImage : public Image {
-private:
-	std::string name;
-public:
-	// the original (not resized) texture image
-	Image original;
-
-	TextureImage();
-	TextureImage(const std::string& name);
-	~TextureImage();
-
-	bool load(const std::string& path, int size);
-
-	const std::string& getName() const;
-};
 
 /**
  * Collection of Minecraft block textures.
