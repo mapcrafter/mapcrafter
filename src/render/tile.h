@@ -22,8 +22,6 @@
 
 #include "../mc/world.h"
 
-#include "blockimages.h"
-
 #include <set>
 #include <vector>
 #include <boost/filesystem.hpp>
