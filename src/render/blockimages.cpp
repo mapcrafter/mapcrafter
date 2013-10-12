@@ -17,7 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "textures.h"
+#include "blockimages.h"
 
 #include "../util.h"
 

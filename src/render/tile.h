@@ -22,7 +22,7 @@
 
 #include "../mc/world.h"
 
-#include "textures.h"
+#include "blockimages.h"
 
 #include <set>
 #include <vector>
