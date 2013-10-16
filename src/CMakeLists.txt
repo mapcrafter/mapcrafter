@@ -37,6 +37,11 @@ if(NOT "${CMAKE_CURRENT_SOURCE_DIR}/version.cpp")
     )
 endif()
 
+add_custom_target(gen_texture_code
+    sh tools/gen_texture_code.sh
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 set(SOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/version.cpp
 )
