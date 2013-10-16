@@ -149,6 +149,8 @@ const int REDSTONE_TOPSOUTH = 1024;
 const int REDSTONE_TOPWEST = 2048;
 const int REDSTONE_POWERED = 4096;
 
+const int LARGEPLANT_TOP = 16;
+
 /**
  * The base for an iterator to transform the pixels of a source image to the pixels of a
  * destination image.
@@ -426,6 +428,7 @@ private:
 	void createDragonEgg(); // id 122
 	void createBeacon(); // id 138
 	void createFlowerPot(); // id 140
+	void createLargePlant(uint16_t data, const Image& texture, const Image& top_texture); // id 175
 
 	void loadBlocks();
 public:

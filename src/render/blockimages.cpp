@@ -2067,6 +2067,11 @@ void BlockImages::createFlowerPot() { // id 140
 	}
 }
 
+void BlockImages::createLargePlant(uint16_t data, const Image& texture, const Image& top_texture) { // id 175
+	createItemStyleBlock(175, data, texture);
+	createItemStyleBlock(175, data | LARGEPLANT_TOP, top_texture);
+}
+
 void BlockImages::loadBlocks() {
 	buildCustomTextures();
 	unknown_block = buildImage(BlockImage().setFace(0b11111, unknown_block));
@@ -2372,6 +2377,18 @@ void BlockImages::loadBlocks() {
 	createBlock(173, 0, t.COAL_BLOCK); // block of coal
 	createIce(174); // packed ice
 	//createBlock(174, 0, t.DIRT_PODZOL_SIDE, t.DIRT_PODZOL_SIDE, t.DIRT_PODZOL_TOP); // podzol
+	
+	// large plants --
+	// the top texture of the sunflower has get modified a bit
+	Image sunflower_top = t.DOUBLE_PLANT_SUNFLOWER_TOP;
+	sunflower_top.alphablit(t.DOUBLE_PLANT_SUNFLOWER_FRONT, 0, -texture_size * 0.25);
+	createLargePlant(0, t.DOUBLE_PLANT_SUNFLOWER_BOTTOM, sunflower_top);
+	createLargePlant(1, t.DOUBLE_PLANT_SYRINGA_BOTTOM, t.DOUBLE_PLANT_SYRINGA_TOP);
+	createLargePlant(2, t.DOUBLE_PLANT_GRASS_BOTTOM, t.DOUBLE_PLANT_GRASS_TOP);
+	createLargePlant(3, t.DOUBLE_PLANT_FERN_BOTTOM, t.DOUBLE_PLANT_FERN_TOP);
+	createLargePlant(4, t.DOUBLE_PLANT_ROSE_BOTTOM, t.DOUBLE_PLANT_ROSE_TOP);
+	createLargePlant(5, t.DOUBLE_PLANT_PAEONIA_BOTTOM, t.DOUBLE_PLANT_PAEONIA_TOP);
+	// --
 }
 
 bool BlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {

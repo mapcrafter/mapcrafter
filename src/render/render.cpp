@@ -374,6 +374,14 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			data |= DATA_EAST;
 		if (id == 85 && west.id == 107)
 			data |= DATA_WEST;
+	} else if (id == 175) {
+		// large plants
+		if (data == 0xf) {
+			// if this is the top part of a plant,
+			// get the flower type from the block below
+			// and add the special 'flower-top-part' bit
+			return state.getBlock(pos + mc::DIR_BOTTOM).data | LARGEPLANT_TOP;
+		}
 	}
 
 
