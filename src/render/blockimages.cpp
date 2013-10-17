@@ -2152,7 +2152,17 @@ void BlockImages::loadBlocks() {
 	// --
 	createBlock(36, 0, empty_texture); // block moved by piston aka 'block 36'
 	createItemStyleBlock(37, 0, t.FLOWER_DANDELION); // dandelion
-	createItemStyleBlock(38, 0, t.FLOWER_ROSE); // rose
+	// -- poppy -- different flowers
+	createItemStyleBlock(38, 0, t.FLOWER_ROSE); // poppy
+	createItemStyleBlock(38, 1, t.FLOWER_BLUE_ORCHID); // blue orchid
+	createItemStyleBlock(38, 2, t.FLOWER_ALLIUM); // azure bluet
+	createItemStyleBlock(38, 3, t.FLOWER_HOUSTONIA); // 
+	createItemStyleBlock(38, 4, t.FLOWER_TULIP_RED); // red tulip
+	createItemStyleBlock(38, 5, t.FLOWER_TULIP_ORANGE); // orange tulip
+	createItemStyleBlock(38, 6, t.FLOWER_TULIP_WHITE); // white tulip
+	createItemStyleBlock(38, 7, t.FLOWER_TULIP_PINK); // pink tulip
+	createItemStyleBlock(38, 8, t.FLOWER_OXEYE_DAISY); // oxeye daisy
+	// --
 	createItemStyleBlock(39, 0, t.MUSHROOM_BROWN); // brown mushroom
 	createItemStyleBlock(40, 0, t.MUSHROOM_RED); // red mushroom
 	createBlock(41, 0, t.GOLD_BLOCK); // block of gold
