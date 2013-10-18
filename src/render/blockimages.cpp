@@ -2081,6 +2081,8 @@ void BlockImages::loadBlocks() {
 	createBlock(1, 0, t.STONE); // stone
 	createGrassBlock(); // id 2
 	createBlock(3, 0, t.DIRT); // dirt
+	createBlock(3, 1, t.DIRT); // grassless dirt
+	createBlock(3, 2, t.DIRT_PODZOL_SIDE, t.DIRT_PODZOL_SIDE, t.DIRT_PODZOL_TOP); // podzol
 	createBlock(4, 0, t.COBBLESTONE); // cobblestone
 	// -- wooden planks
 	createBlock(5, 0, t.PLANKS_OAK); // oak
