@@ -62,10 +62,10 @@ if(NOT OPT_SKIP_TESTS)
 	target_link_libraries(mapcraftercore ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 endif()
 
-target_link_libraries(mapcraftercore png)
-target_link_libraries(mapcraftercore pthread)
+target_link_libraries(mapcraftercore ${PNG_LIBRARIES})
+target_link_libraries(mapcraftercore ${CMAKE_THREAD_LIBS_INIT})
 if(OPT_BOOST_STATIC)
-	target_link_libraries(mapcraftercore z)
+	target_link_libraries(mapcraftercore ${ZLIB_LIBRARIES})
 endif()
 
 add_executable(mapcrafter mapcrafter.cpp)
