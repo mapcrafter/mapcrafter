@@ -628,7 +628,7 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & (0xff00 | 0b00000011);
 	else if (id >= 8 && id <= 11) // water, lava
 		return data & (0xff00 | 0b11110111);
-	else if (id == 18) // leaves
+	else if (id == 18 || id == 161) // leaves
 		return data & (0xff00 | 0b00000011);
 	else if (id == 26) // bed
 		return data & (0xff00 | 0b00001011);
@@ -796,8 +796,8 @@ void BlockImages::createBiomeBlocks() {
 		uint16_t id = it->first & 0xffff;
 		uint16_t data = (it->first & 0xffff0000) >> 16;
 
-		// grass block, leaves, grass, vines, lily pad
-		if (id != 2 && id != 18 && id != 31 && id != 106 && id != 111)
+		// grass block, leaves (18, 161), grass, vines, lily pad
+		if (id != 2 && id != 18 && id != 161 && id != 31 && id != 106 && id != 111)
 			continue;
 
 		for (uint64_t b = 0; b < BIOMES_SIZE; b++) {
@@ -1253,11 +1253,17 @@ void BlockImages::createLeaves() { // id 18
 		createBlock(18, 1, textures.LEAVES_SPRUCE); // pine/spruce
 		createBlock(18, 2, textures.LEAVES_OAK); // birch
 		createBlock(18, 3, textures.LEAVES_JUNGLE); // jungle
+
+		createBlock(161, 0, textures.LEAVES_ACACIA); // acacia
+		createBlock(161, 1, textures.LEAVES_BIG_OAK); // dark oak
 	} else {
 		createBlock(18, 0, textures.LEAVES_OAK_OPAQUE); // oak
 		createBlock(18, 1, textures.LEAVES_SPRUCE_OPAQUE); // pine/spruce
 		createBlock(18, 2, textures.LEAVES_OAK_OPAQUE); // birch
 		createBlock(18, 3, textures.LEAVES_JUNGLE_OPAQUE); // jungle
+
+		createBlock(161, 0, textures.LEAVES_ACACIA_OPAQUE); // acacia
+		createBlock(161, 1, textures.LEAVES_BIG_OAK_OPAQUE); // dark oak
 	}
 }
 
@@ -2362,6 +2368,7 @@ void BlockImages::loadBlocks() {
 	createBlock(159, 14, t.HARDENED_CLAY_STAINED_RED);
 	createBlock(159, 15, t.HARDENED_CLAY_STAINED_BLACK);
 	// --
+	// id 161 acacia/dark oak leaves, see createLeaves()
 	// some more wood --
 	createWood(162, 0, t.LOG_ACACIA, t.LOG_ACACIA_TOP); // acacia
 	createWood(162, 1, t.LOG_BIG_OAK, t.LOG_BIG_OAK_TOP); // acacia (placeholder)

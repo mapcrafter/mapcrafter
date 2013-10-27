@@ -560,7 +560,7 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 			bool transparent = state.images.isBlockTransparent(id, data);
 
 			// check for biome data
-			if (id == 2 || id == 18 || id == 31 || id == 106 || id == 111)
+			if (id == 2 || id == 18 || id == 161 || id == 31 || id == 106 || id == 111)
 				image = state.images.getBiomeDependBlock(id, data, getBiome(block.current, state.chunk));
 			else
 				image = state.images.getBlock(id, data);
