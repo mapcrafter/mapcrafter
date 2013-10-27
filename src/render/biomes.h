@@ -50,6 +50,8 @@ public:
 
 	uint8_t getID() const;
 	uint32_t getColor(const Image& colors, bool flip_xy = false) const;
+
+	static bool isBiomeBlock(uint16_t id, uint16_t data);
 };
 
 // different Minecraft Biomes

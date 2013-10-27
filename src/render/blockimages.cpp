@@ -725,9 +725,8 @@ void BlockImages::createBiomeBlocks() {
 		uint16_t id = it->first & 0xffff;
 		uint16_t data = (it->first & 0xffff0000) >> 16;
 
-		// grass block, leaves (18, 161), grass, vines, lily pad, large flowers (tallgrass, fern)
-		if (id != 2 && id != 18 && id != 161 && id != 31 && id != 106 && id != 111
-				&& !(id == 175 && ((data & 0b11) == 2 || (data & 0b11) == 3)))
+		// check if this is a biome block
+		if (!Biome::isBiomeBlock(id, data))
 			continue;
 
 		for (uint64_t b = 0; b < BIOMES_SIZE; b++) {

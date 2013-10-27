@@ -19,6 +19,7 @@
 
 #include "render.h"
 
+#include "biomes.h"
 #include "rendermodes/base.h"
 
 #include <iostream>
@@ -558,8 +559,7 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 			bool transparent = state.images.isBlockTransparent(id, data);
 
 			// check for biome data
-			if (id == 2 || id == 18 || id == 161 || id == 31 || id == 106 || id == 111
-					|| (id == 175 && ((data & 0b11) == 2 || (data & 0b11) == 3)))
+			if (Biome::isBiomeBlock(id, data))
 				image = state.images.getBiomeDependBlock(id, data, getBiome(block.current, state.chunk));
 			else
 				image = state.images.getBlock(id, data);
