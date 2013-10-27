@@ -2106,6 +2106,7 @@ void BlockImages::loadBlocks() {
 	createWater(); // id 8, 9
 	createLava(); // id 10, 11
 	createBlock(12, 0, t.SAND); // sand
+	createBlock(12, 1, t.RED_SAND); // red sand
 	createBlock(13, 0, t.GRAVEL); // gravel
 	createBlock(14, 0, t.GOLD_ORE); // gold ore
 	createBlock(15, 0, t.IRON_ORE); // iron ore
