@@ -2387,10 +2387,9 @@ void BlockImages::loadBlocks() {
 	// --
 	createBlock(172, 0, t.HARDENED_CLAY); // hardened clay
 	createBlock(173, 0, t.COAL_BLOCK); // block of coal
-	createIce(174); // packed ice
-	//createBlock(174, 0, t.DIRT_PODZOL_SIDE, t.DIRT_PODZOL_SIDE, t.DIRT_PODZOL_TOP); // podzol
+	createBlock(174, 0, t.ICE_PACKED); // packed ice
 	
-	// large plants --
+	// large plants, id 175 --
 	// the top texture of the sunflower has get modified a bit
 	Image sunflower_top = t.DOUBLE_PLANT_SUNFLOWER_TOP;
 	sunflower_top.alphablit(t.DOUBLE_PLANT_SUNFLOWER_FRONT, 0, -texture_size * 0.25);
