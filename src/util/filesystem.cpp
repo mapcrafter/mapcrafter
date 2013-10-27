@@ -89,7 +89,7 @@ fs::path findHomeDir() {
 // see also http://stackoverflow.com/questions/12468104/multi-os-get-executable-path
 fs::path findExecutablePath() {
 	char buf[1024];
-#if defined(unix) || defined(__unix) || defined(__unix__) || defined(__linux__)
+#if defined(unix) || defined(__unix) || defined(__unix__) || defined(__linux__) || defined(__APPLE__)
 	int len;
 	if ((len = readlink("/proc/self/exe", buf, sizeof(buf))) != -1)
 		return fs::path(std::string(buf, len));
