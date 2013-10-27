@@ -697,12 +697,6 @@ Image BlockImages::createBiomeBlock(uint16_t id, uint16_t data,
 	double r = (double) RED(color) / 255;
 	double g = (double) GREEN(color) / 255;
 	double b = (double) BLUE(color) / 255;
-	
-	// multiply with fixed biome color values
-	// necessary for the Swampland biome
-	r *= (double) biome_data.r / 255;
-	g *= (double) biome_data.g / 255;
-	b *= (double) biome_data.b / 255;
 
 	// grass block needs something special
 	if (id == 2) {
@@ -2387,15 +2381,15 @@ Image BlockImages::getBiomeDependBlock(uint16_t id, uint16_t data,
 	data = filterBlockData(id, data);
 	// just return the block if biome is invalid
 	// special case for the snowy grass block
-	if (biome.id >= BIOMES_SIZE || (id == 2 && (data & GRASS_SNOW)))
+	if (biome.getID() >= BIOMES_SIZE || (id == 2 && (data & GRASS_SNOW)))
 		return getBlock(id, data);
 
 	if (!hasBlock(id, data))
 		return unknown_block;
 
 	// check if this biome block is precalculated
-	if (biome == BIOMES[biome.id]) {
-		int64_t key = id | (((int64_t) data) << 16) | (((int64_t) biome.id) << 32);
+	if (biome == BIOMES[biome.getID()]) {
+		int64_t key = id | (((int64_t) data) << 16) | (((int64_t) biome.getID()) << 32);
 		if (!biome_images.count(key))
 			return unknown_block;
 		return biome_images.at(key);

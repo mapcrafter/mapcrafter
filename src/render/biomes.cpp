@@ -24,13 +24,19 @@
 namespace mapcrafter {
 namespace render {
 
+
+Biome::Biome(uint8_t id, double temperature, double rainfall, uint8_t r, uint8_t g, uint8_t b)
+	: id(id), temperature(temperature), rainfall(rainfall),
+	  extra_r(r), extra_g(g), extra_b(b) {
+}
+
 Biome& Biome::operator+=(const Biome& other) {
 	rainfall += other.rainfall;
 	temperature += other.temperature;
 
-	r += other.r;
-	g += other.g;
-	b += other.b;
+	extra_r += other.extra_r;
+	extra_g += other.extra_g;
+	extra_b += other.extra_b;
 
 	return *this;
 }
@@ -42,23 +48,33 @@ Biome& Biome::operator/=(int n) {
 	rainfall /= n;
 	temperature /= n;
 
-	r /= n;
-	g /= n;
-	b /= n;
+	extra_r /= n;
+	extra_g /= n;
+	extra_b /= n;
 
 	return *this;
 }
 
 /**
- * Checks, if two biomes are the same.
+ * Checks if two biomes are equal.
  */
 bool Biome::operator==(const Biome& other) const {
 	double epsilon = 0.1;
 	return std::abs(other.rainfall - rainfall) <= epsilon
 			&& std::abs(other.temperature - temperature) <= epsilon
-			&& r == other.r && g == other.g && b == other.b;
+			&& extra_r == other.extra_r && extra_g == other.extra_g && extra_b == other.extra_b;
 }
 
+/**
+ * Returns the biome ID.
+ */
+uint8_t Biome::getID() const {
+	return id;
+}
+
+/**
+ * Calculates the color of the biome with a biome color image.
+ */
 uint32_t Biome::getColor(const Image& colors, bool flip_xy) const {
 	// x is temperature
 	double tmp_temperature = temperature;
@@ -82,8 +98,14 @@ uint32_t Biome::getColor(const Image& colors, bool flip_xy) const {
 		y = 255 - tmp;
 	}
 
-	// return color at this position
-	return colors.getPixel(x, y);
+	// get color at this position
+	uint32_t color = colors.getPixel(x, y);
+	if (extra_r != 255 || extra_g != 255 || extra_b != 255) {
+		// multiply with fixed biome color values if specified
+		// necessary for the swampland biome
+		return rgba_multiply(color, (uint8_t) extra_r, (uint8_t) extra_g, (uint8_t) extra_b, 255);
+	}
+	return color;
 }
 
 } /* namespace render */

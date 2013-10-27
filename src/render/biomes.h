@@ -28,18 +28,9 @@ namespace render {
 /**
  * A Minecraft Biome with data to tint the biome-depend blocks.
  */
-struct Biome {
-	Biome(uint8_t id, double temperature, double rainfall, uint8_t r, uint8_t g, uint8_t b)
-		: id(id), temperature(temperature), rainfall(rainfall), r(r), g(g), b(b) {};
-	Biome(uint8_t id, double temperature, double rainfall)
-		: id(id), temperature(temperature), rainfall(rainfall), r(255), g(255), b(255) {};
-
-	Biome& operator+=(const Biome& other);
-	Biome& operator/=(int n);
-	bool operator==(const Biome& other) const;
-
-	uint32_t getColor(const Image& colors, bool flip_xy = false) const;
-
+class Biome {
+private:
+	// id of the biome
 	uint8_t id;
 
 	// temperature and rainfall
@@ -47,7 +38,18 @@ struct Biome {
 	double temperature;
 	double rainfall;
 
-	int r, g, b;
+	// extra color values, for example for the swampland biome
+	int extra_r, extra_g, extra_b;
+public:
+	Biome(uint8_t id, double temperature, double rainfall,
+			uint8_t r = 255, uint8_t g = 255, uint8_t b = 255);
+
+	Biome& operator+=(const Biome& other);
+	Biome& operator/=(int n);
+	bool operator==(const Biome& other) const;
+
+	uint8_t getID() const;
+	uint32_t getColor(const Image& colors, bool flip_xy = false) const;
 };
 
 // different Minecraft Biomes
