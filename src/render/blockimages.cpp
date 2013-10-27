@@ -2108,6 +2108,7 @@ void BlockImages::loadBlocks() {
 	createWood(17, 1, t.LOG_SPRUCE, t.LOG_SPRUCE_TOP); // pine/spruce
 	createWood(17, 2, t.LOG_BIRCH, t.LOG_BIRCH_TOP); // birch
 	createWood(17, 3, t.LOG_JUNGLE, t.LOG_JUNGLE_TOP); // jungle
+	// --
 	createLeaves(); // id 18
 	createBlock(19, 0, t.SPONGE); // sponge
 	createBlock(20, 0, t.GLASS); // glass
@@ -2361,6 +2362,14 @@ void BlockImages::loadBlocks() {
 	createBlock(159, 14, t.HARDENED_CLAY_STAINED_RED);
 	createBlock(159, 15, t.HARDENED_CLAY_STAINED_BLACK);
 	// --
+	// some more wood --
+	createWood(162, 0, t.LOG_ACACIA, t.LOG_ACACIA_TOP); // acacia
+	createWood(162, 1, t.LOG_BIG_OAK, t.LOG_BIG_OAK_TOP); // acacia (placeholder)
+	createWood(162, 2, t.LOG_ACACIA, t.LOG_ACACIA_TOP); // dark wood
+	createWood(162, 3, t.LOG_BIG_OAK, t.LOG_BIG_OAK_TOP); // dark wood (placeholder)
+	// --
+	createStairs(163, t.PLANKS_ACACIA); // acacia wood stairs
+	createStairs(164, t.PLANKS_BIG_OAK); // dark oak wood stairs
 
 	// hay block --
 	createBlock(170, 0, t.HAY_BLOCK_SIDE, t.HAY_BLOCK_TOP); // normal orientation
