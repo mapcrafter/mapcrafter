@@ -1,22 +1,24 @@
 set(SOURCE
 	${SOURCE}
+	${CMAKE_CURRENT_SOURCE_DIR}/biomes.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/blockimages.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/blocktextures.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/image.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/manager.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/render.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/blockimages.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/blocktextures.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/textureimage.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/textureimage.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/tile.cpp
 	PARENT_SCOPE
 )
 set(HEADERS
 	${HEADERS}
+	${CMAKE_CURRENT_SOURCE_DIR}/biomes.h
+	${CMAKE_CURRENT_SOURCE_DIR}/blockimages.h
+	${CMAKE_CURRENT_SOURCE_DIR}/blocktextures.h
 	${CMAKE_CURRENT_SOURCE_DIR}/image.h
 	${CMAKE_CURRENT_SOURCE_DIR}/manager.h
 	${CMAKE_CURRENT_SOURCE_DIR}/render.h
-	${CMAKE_CURRENT_SOURCE_DIR}/blockimages.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/blocktextures.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/textureimage.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/textureimage.h
 	${CMAKE_CURRENT_SOURCE_DIR}/tile.h
 	PARENT_SCOPE
 )
