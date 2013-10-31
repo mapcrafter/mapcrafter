@@ -1196,6 +1196,12 @@ void BlockImages::createLeaves() { // id 18
 	}
 }
 
+void BlockImages::createGlass(uint16_t id, uint16_t data, const Image& texture) { // id 20, 95
+	BlockImage block(BlockImage::NORMAL);
+	block.setFace(FACE_SOUTH | FACE_WEST | FACE_TOP, texture);
+	setBlockImage(id, data, block.buildImage(dleft, dright));
+}
+
 void BlockImages::createDispenserDropper(uint16_t id, const Image& front) { // id 23, 158
 	Image side = textures.FURNACE_SIDE;
 	Image top = textures.FURNACE_TOP;
@@ -2052,7 +2058,7 @@ void BlockImages::loadBlocks() {
 	// --
 	createLeaves(); // id 18
 	createBlock(19, 0, t.SPONGE); // sponge
-	createBlock(20, 0, t.GLASS); // glass
+	createGlass(20, 1, t.GLASS);
 	createBlock(21, 0, t.LAPIS_ORE); // lapis lazuli ore
 	createBlock(22, 0, t.LAPIS_BLOCK); // lapis lazuli block
 	createDispenserDropper(23, t.DISPENSER_FRONT_HORIZONTAL); // dispenser
@@ -2179,7 +2185,24 @@ void BlockImages::loadBlocks() {
 	createCake(); // id 92
 	createRedstoneRepeater(93, t.REPEATER_OFF); // redstone repeater off
 	createRedstoneRepeater(94, t.REPEATER_ON); // redstone repeater on
-	createChest(95, chest); // locked chest
+	// stained glass --
+	createGlass(95, 0, t.GLASS_WHITE);
+	createGlass(95, 1, t.GLASS_ORANGE);
+	createGlass(95, 2, t.GLASS_MAGENTA);
+	createGlass(95, 3, t.GLASS_LIGHT_BLUE);
+	createGlass(95, 4, t.GLASS_YELLOW);
+	createGlass(95, 5, t.GLASS_LIME);
+	createGlass(95, 6, t.GLASS_PINK);
+	createGlass(95, 7, t.GLASS_GRAY);
+	createGlass(95, 8, t.GLASS_SILVER);
+	createGlass(95, 9, t.GLASS_CYAN);
+	createGlass(95, 10, t.GLASS_PURPLE);
+	createGlass(95, 11, t.GLASS_BLUE);
+	createGlass(95, 12, t.GLASS_BROWN);
+	createGlass(95, 13, t.GLASS_GREEN);
+	createGlass(95, 14, t.GLASS_RED);
+	createGlass(95, 15, t.GLASS_BLACK);
+	// --
 	createTrapdoor(); // id 96 // trapdoor
 	// -- monster egg
 	createBlock(97, 0, t.STONE); // stone

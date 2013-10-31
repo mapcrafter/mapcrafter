@@ -338,6 +338,7 @@ private:
 	void createLava(); // id 10, 11
 	void createWood(uint16_t id, uint16_t data, const Image& side_texture, const Image& top_texture); // id 17
 	void createLeaves(); // id 18
+	void createGlass(uint16_t id, uint16_t data, const Image& texture); // id 20, 95
 	void createDispenserDropper(uint16_t id, const Image& front); // id 23, 158
 	void createBed(); // id 26
 	void createStraightRails(uint16_t id, uint16_t extra_data, const Image& texture); // id 27, 28, 66
