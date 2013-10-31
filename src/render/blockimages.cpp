@@ -1332,6 +1332,8 @@ void BlockImages::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) 
 		slab_textures[0x1] = textures.PLANKS_SPRUCE;
 		slab_textures[0x2] = textures.PLANKS_BIRCH;
 		slab_textures[0x3] = textures.PLANKS_JUNGLE;
+		slab_textures[0x4] = textures.PLANKS_ACACIA;
+		slab_textures[0x5] = textures.PLANKS_BIG_OAK;
 	}
 	for (std::map<int, Image>::const_iterator it = slab_textures.begin();
 	        it != slab_textures.end(); ++it) {
