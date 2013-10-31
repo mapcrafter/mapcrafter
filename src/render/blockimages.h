@@ -360,7 +360,7 @@ private:
 	void createRedstoneRepeater(uint16_t id, const Image& texture); // id 93, 94
 	void createTrapdoor(); // id 96
 	void createHugeMushroom(uint16_t id, const Image& cap); // id 99, 100
-	void createBarsPane(uint16_t id, const Image& texture); // id 101, 102
+	void createBarsPane(uint16_t id, uint16_t extra_data, const Image& texture); // id 101, 102
 	void createStem(uint16_t id); // id 104, 105
 	void createVines(); // id 106
 	void createFenceGate(); // id 107

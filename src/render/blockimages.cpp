@@ -1746,7 +1746,8 @@ void BlockImages::createHugeMushroom(uint16_t id, const Image& cap) { // id 99, 
 	setBlockImage(id, 15, buildHugeMushroom(pores, cap, 0, stem, 0b111111));
 }
 
-void BlockImages::createBarsPane(uint16_t id, const Image& texture_left_right) { // id 101, 102
+void BlockImages::createBarsPane(uint16_t id, uint16_t extra_data,
+		const Image& texture_left_right) { // id 101, 102
 	Image texture_left = texture_left_right;
 	Image texture_right = texture_left_right;
 	texture_left.fill(0, texture_size / 2, 0, texture_size / 2, texture_size);
@@ -1779,7 +1780,7 @@ void BlockImages::createBarsPane(uint16_t id, const Image& texture_left_right) {
 		BlockImage block(BlockImage::ITEM_STYLE);
 		block.setFace(FACE_NORTH | FACE_SOUTH, left);
 		block.setFace(FACE_EAST | FACE_WEST, right);
-		setBlockImage(id, data, buildImage(block));
+		setBlockImage(id, data | extra_data, buildImage(block));
 	}
 }
 
@@ -2193,8 +2194,8 @@ void BlockImages::loadBlocks() {
 	// --
 	createHugeMushroom(99, t.MUSHROOM_BLOCK_SKIN_BROWN); // huge brown mushroom
 	createHugeMushroom(100, t.MUSHROOM_BLOCK_SKIN_RED); // huge red mushroom
-	createBarsPane(101, t.IRON_BARS); // iron bars
-	createBarsPane(102, t.GLASS); // glass pane
+	createBarsPane(101, 0, t.IRON_BARS); // iron bars
+	createBarsPane(102, 0, t.GLASS); // glass pane
 	createBlock(103, 0, t.MELON_SIDE, t.MELON_TOP); // melon
 	createStem(104); // pumpkin stem
 	createStem(105); // melon stem
@@ -2301,6 +2302,24 @@ void BlockImages::loadBlocks() {
 	createBlock(159, 13, t.HARDENED_CLAY_STAINED_GREEN);
 	createBlock(159, 14, t.HARDENED_CLAY_STAINED_RED);
 	createBlock(159, 15, t.HARDENED_CLAY_STAINED_BLACK);
+	// --
+	// stained glass pane --
+	createBarsPane(160, 0, t.GLASS_WHITE);
+	createBarsPane(160, 1, t.GLASS_ORANGE);
+	createBarsPane(160, 2, t.GLASS_MAGENTA);
+	createBarsPane(160, 3, t.GLASS_LIGHT_BLUE);
+	createBarsPane(160, 4, t.GLASS_YELLOW);
+	createBarsPane(160, 5, t.GLASS_LIME);
+	createBarsPane(160, 6, t.GLASS_PINK);
+	createBarsPane(160, 7, t.GLASS_GRAY);
+	createBarsPane(160, 8, t.GLASS_SILVER);
+	createBarsPane(160, 9, t.GLASS_CYAN);
+	createBarsPane(160, 10, t.GLASS_PURPLE);
+	createBarsPane(160, 11, t.GLASS_BLUE);
+	createBarsPane(160, 12, t.GLASS_BROWN);
+	createBarsPane(160, 13, t.GLASS_GREEN);
+	createBarsPane(160, 14, t.GLASS_RED);
+	createBarsPane(160, 15, t.GLASS_BLACK);
 	// --
 	// id 161 acacia/dark oak leaves, see createLeaves()
 	// some more wood --
