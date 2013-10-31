@@ -2029,6 +2029,8 @@ void BlockImages::loadBlocks() {
 	createItemStyleBlock(6, 1, t.SAPLING_SPRUCE); // spruce
 	createItemStyleBlock(6, 2, t.SAPLING_BIRCH); // birch
 	createItemStyleBlock(6, 3, t.SAPLING_JUNGLE); // jungle
+	createItemStyleBlock(6, 4, t.SAPLING_ACACIA); // acacia
+	createItemStyleBlock(6, 5, t.SAPLING_ROOFED_OAK); // dark oak
 	// --
 	createBlock(7, 0, t.BEDROCK); // bedrock
 	createWater(); // id 8, 9
