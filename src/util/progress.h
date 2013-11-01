@@ -23,13 +23,27 @@
 namespace mapcrafter {
 namespace util {
 
+class IProgressHandler {
+public:
+	virtual ~IProgressHandler() {};
+
+	virtual int getMax() const = 0;
+	virtual void setMax(int max) = 0;
+
+	virtual int getValue() const = 0;
+	virtual void setValue(int value) = 0;
+};
+
 /**
  * Shows a nice command line progress bar.
  */
-class ProgressBar {
+class ProgressBar : public IProgressHandler {
 private:
 	// the maximum value of the progress
 	int max;
+	// the current value of the progress
+	int value;
+
 	// animated? if yes, it updates the progress bar and makes it "animated"
 	// but not good if you pipe the output in a file, so you can disable it
 	bool animated;
@@ -38,22 +52,23 @@ private:
 	int start;
 	// time of last update
 	int last_update;
-	// value of last update
-	int last_value;
 	// current percentage of last update
 	int last_percent;
 public:
-	ProgressBar();
-	ProgressBar(int max, bool animated);
+	ProgressBar(int max = 0, bool animated = true);
+	virtual ~ProgressBar();
 
-	void setMax(int max);
-	int getMax() const;
+	void update(int value, bool force = false);
+	void finish();
+
+	virtual int getMax() const;
+	virtual void setMax(int max);
+
+	virtual int getValue() const;
+	virtual void setValue(int value);
 
 	void setAnimated(bool animated);
 	bool isAnimated() const;
-
-	void update(int value);
-	void finish();
 };
 
 } /* namespace util */

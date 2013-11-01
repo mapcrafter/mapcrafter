@@ -26,37 +26,45 @@
 namespace mapcrafter {
 namespace util {
 
-ProgressBar::ProgressBar()
-		: max(0), animated(true), start(time(NULL)), last_update(0), last_value(0),
-		  last_percent(0) {
-}
-
 ProgressBar::ProgressBar(int max, bool animated)
-		: max(max), animated(animated), start(time(NULL)), last_update(0), last_value(0),
-		  last_percent(0) {
+		: max(max), value(0), animated(animated),
+		  start(time(NULL)), last_update(0), last_percent(0) {
 }
 
-void ProgressBar::setMax(int max) {
-	this->max = max;
+ProgressBar::~ProgressBar() {
 }
 
 int ProgressBar::getMax() const {
 	return max;
 }
 
-void ProgressBar::update(int value) {
+void ProgressBar::setMax(int max) {
+	this->max = max;
+	update(value, true);
+}
+
+int ProgressBar::getValue() const {
+	return value;
+}
+
+void ProgressBar::setValue(int value) {
+	update(value, this->value > value);
+	this->value = value;
+}
+
+void ProgressBar::update(int value, bool force) {
 	// check when animated if we are at 100% and this is this the first time we are at 100%
 	// so we show the progress bar only one time at the end
-	if (!animated && (value != max || (value == max && last_value == max)))
+	if (!force && !animated && (value != max || (value == max && this->value == max)))
 		return;
 	int now = time(NULL);
 	// check if the time since the last show and the change was big enough to show a progress
 	double percent = value / (double) max * 100.;
-	if (last_update + 1 > now && !(last_percent != max && value == max))
+	if (!force && last_update + 1 > now && !(last_percent != max && value == max))
 		return;
 
 	// now calculate the speed
-	double speed = (double) (value - last_value) / (now - last_update);
+	double speed = (double) (value - this->value) / (now - last_update);
 	if (value == max)
 		// at the end an average speed
 		speed = (double) value / (now - start);
@@ -85,9 +93,9 @@ void ProgressBar::update(int value) {
 		std::cout.flush();
 	} else
 		std::cout << std::endl;
-	// set this as last show
+	// set this as last shown
 	last_update = now;
-	last_value = value;
+	this->value = value;
 	last_percent = percent;
 }
 
