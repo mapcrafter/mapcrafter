@@ -21,8 +21,6 @@
 
 #include "../mc/pos.h"
 
-#include "render.h"
-
 #include "../util.h"
 
 #include <iostream>

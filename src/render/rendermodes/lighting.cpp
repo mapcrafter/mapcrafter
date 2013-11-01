@@ -19,7 +19,7 @@
 
 #include "lighting.h"
 
-#include "../textures.h"
+#include "../blockimages.h"
 
 #include <cmath>
 

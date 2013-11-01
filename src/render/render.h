@@ -28,7 +28,7 @@
 #include "../mc/cache.h"
 
 #include "image.h"
-#include "textures.h"
+#include "blockimages.h"
 #include "tile.h"
 
 #include <boost/filesystem.hpp>
