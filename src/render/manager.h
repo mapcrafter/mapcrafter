@@ -25,7 +25,7 @@
 #include "../mc/cache.h"
 #include "../mc/world.h"
 
-#include "tile.h"
+#include "tileset.h"
 #include "render.h"
 
 #include "../util.h"

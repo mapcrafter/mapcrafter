@@ -17,17 +17,17 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../render/tile.h"
+#include "../render/tileset.h"
 
 #include <map>
 #include <boost/test/unit_test.hpp>
 
 namespace render = mapcrafter::render;
 
-#define PATH(a, b, c, d) ((((render::Path() + a) + b) + c) + d)
+#define PATH(a, b, c, d) ((((render::TilePath() + a) + b) + c) + d)
 
 BOOST_AUTO_TEST_CASE(test_tilepos) {
-	std::map<render::TilePos, render::Path> tiles;
+	std::map<render::TilePos, render::TilePath> tiles;
 	tiles[render::TilePos(0, 0)] = PATH(4, 1, 1, 1);
 	tiles[render::TilePos(-3, -5)] = PATH(1, 2, 3, 4);
 	tiles[render::TilePos(2, 4)] = PATH(4, 3, 2, 1);
@@ -36,17 +36,17 @@ BOOST_AUTO_TEST_CASE(test_tilepos) {
 	tiles[render::TilePos(-8, 2)] = PATH(3, 1, 3, 1);
 	tiles[render::TilePos(-5, 6)] = PATH(3, 3, 4, 2);
 
-	for (std::map<render::TilePos, render::Path>::const_iterator it = tiles.begin();
+	for (std::map<render::TilePos, render::TilePath>::const_iterator it = tiles.begin();
 	        it != tiles.end(); ++it) {
 		BOOST_CHECK_EQUAL(it->first, it->second.getTilePos());
-		BOOST_CHECK_EQUAL(it->second, render::Path::byTilePos(it->first, 4));
+		BOOST_CHECK_EQUAL(it->second, render::TilePath::byTilePos(it->first, 4));
 	}
 
 	// check consistence of < operator of Path
-	std::set<render::Path> paths;
+	std::set<render::TilePath> paths;
 	for(int x = -8; x <= 8; x++) {
 		for(int y = -8; y <= 8; y++) {
-			paths.insert(render::Path::byTilePos(render::TilePos(x, y), 4));
+			paths.insert(render::TilePath::byTilePos(render::TilePos(x, y), 4));
 		}
 	}
 	BOOST_CHECK_EQUAL(paths.size(), 256);

@@ -29,7 +29,7 @@
 
 #include "image.h"
 #include "blockimages.h"
-#include "tile.h"
+#include "tileset.h"
 
 #include <boost/filesystem.hpp>
 

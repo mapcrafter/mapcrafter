@@ -17,7 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "tile.h"
+#include "tileset.h"
 
 #include "../mc/pos.h"
 
