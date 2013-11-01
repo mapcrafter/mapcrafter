@@ -89,32 +89,32 @@ public:
  * is a 1, 2, 3 or 4.
  * The length of the path is the zoom level of the tile.
  */
-class Path {
+class TilePath {
 private:
 	std::vector<int> path;
 public:
-	Path();
-	Path(const std::vector<int>& path);
-	~Path();
+	TilePath();
+	TilePath(const std::vector<int>& path);
+	~TilePath();
 
 	const std::vector<int>& getPath() const;
 	int getDepth() const;
 	TilePos getTilePos() const;
 
-	Path& operator+=(int node);
-	Path operator+(int node) const;
+	TilePath& operator+=(int node);
+	TilePath operator+(int node) const;
 
-	Path parent() const;
+	TilePath parent() const;
 
-	bool operator==(const Path& other) const;
-	bool operator<(const Path& other) const;
+	bool operator==(const TilePath& other) const;
+	bool operator<(const TilePath& other) const;
 
 	std::string toString() const;
 
-	static Path byTilePos(const TilePos& tile, int depth);
+	static TilePath byTilePos(const TilePos& tile, int depth);
 };
 
-std::ostream& operator<<(std::ostream& stream, const Path& path);
+std::ostream& operator<<(std::ostream& stream, const TilePath& path);
 std::ostream& operator<<(std::ostream& stream, const TilePos& tile);
 
 /**
@@ -136,13 +136,13 @@ private:
 	std::map<TilePos, int> tile_timestamps;
 
 	// same here for composite tiles
-	std::set<Path> composite_tiles;
-	std::set<Path> required_composite_tiles;
+	std::set<TilePath> composite_tiles;
+	std::set<TilePath> required_composite_tiles;
 
 	void initMapSize();
 	void findRenderTiles(const mc::World& world);
 	void findRequiredCompositeTiles(const std::set<TilePos>& render_tiles,
-			std::set<Path>& tiles);
+			std::set<TilePath>& tiles);
 public:
 	TileSet();
 	TileSet(const mc::World& World);
@@ -156,18 +156,18 @@ public:
 	int getDepth() const;
 	void setDepth(int depth);
 
-	bool hasTile(const Path& path) const;
-	bool isTileRequired(const Path& path) const;
+	bool hasTile(const TilePath& path) const;
+	bool isTileRequired(const TilePath& path) const;
 
 	const std::set<TilePos>& getAvailableRenderTiles() const;
-	const std::set<Path>& getAvailableCompositeTiles() const;
+	const std::set<TilePath>& getAvailableCompositeTiles() const;
 	const std::set<TilePos>& getRequiredRenderTiles() const;
-	const std::set<Path>& getRequiredCompositeTiles() const;
+	const std::set<TilePath>& getRequiredCompositeTiles() const;
 
 	int getRequiredRenderTilesCount() const;
 	int getRequiredCompositeTilesCount() const;
 
-	int findRenderTasks(int worker_count, std::vector<std::map<Path, int> >& workers) const;
+	int findRenderTasks(int worker_count, std::vector<std::map<TilePath, int> >& workers) const;
 };
 
 }

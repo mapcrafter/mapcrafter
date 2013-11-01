@@ -85,7 +85,7 @@ struct RecursiveRenderSettings {
 
 	int tile_size;
 	fs::path output_dir;
-	std::set<Path> skip_tiles;
+	std::set<TilePath> skip_tiles;
 
 	int progress;
 	bool show_progress;
@@ -108,14 +108,14 @@ struct RenderWorkerSettings {
 	int thread;
 	RecursiveRenderSettings render_settings;
 
-	std::set<Path> tiles;
+	std::set<TilePath> tiles;
 
 	int base_progress;
 	bool finished;
 };
 
-void saveTile(const fs::path& output_dir, const Path& path, const Image& tile);
-void renderRecursive(RecursiveRenderSettings& settings, const Path& path, Image& tile);
+void saveTile(const fs::path& output_dir, const TilePath& path, const Image& tile);
+void renderRecursive(RecursiveRenderSettings& settings, const TilePath& path, Image& tile);
 
 /**
  * This does the whole rendering process.

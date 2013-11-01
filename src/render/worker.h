@@ -26,7 +26,7 @@ private:
 
 	config2::MapcrafterConfigFile config;
 	config2::MapSection map_config;
-	std::set<Path> tiles, tiles_skip;
+	std::set<TilePath> tiles, tiles_skip;
 public:
 	Worker();
 	~Worker();
@@ -36,7 +36,7 @@ public:
 			std::shared_ptr<BlockImages> blockimages);
 	void setWork(const config2::MapcrafterConfigFile& config,
 			const config2::MapSection& map_config,
-			const std::set<Path>& tiles, const std::set<Path>& tiles_skip);
+			const std::set<TilePath>& tiles, const std::set<TilePath>& tiles_skip);
 
 	void operator()();
 };

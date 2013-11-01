@@ -118,7 +118,7 @@ MapSettings MapSettings::byMapConfig(const config2::MapSection& map) {
 /**
  * Saves a tile image.
  */
-void saveTile(const fs::path& output_dir, const Path& path, const Image& tile) {
+void saveTile(const fs::path& output_dir, const TilePath& path, const Image& tile) {
 	std::string filename = path.toString() + ".png";
 	if (path.getDepth() == 0)
 		filename = "base.png";
@@ -132,7 +132,7 @@ void saveTile(const fs::path& output_dir, const Path& path, const Image& tile) {
 /**
  * This function renders tiles recursive.
  */
-void renderRecursive(RecursiveRenderSettings& settings, const Path& path, Image& tile) {
+void renderRecursive(RecursiveRenderSettings& settings, const TilePath& path, Image& tile) {
 	// if this is tile is not required or we should skip it, load it from file
 	if (!settings.tiles.isTileRequired(path)
 			|| settings.skip_tiles.count(path) == 1) {
@@ -401,7 +401,7 @@ void RenderManager::render(const config2::MapSection& map, const std::string& ou
 
 		Image tile;
 		// then render just everything recursive
-		renderRecursive(settings, Path(), tile);
+		renderRecursive(settings, TilePath(), tile);
 		settings.progress_bar.finish();
 
 		//cache.getRegionCacheStats().print("region cache");
@@ -420,7 +420,7 @@ void* runWorker(void* settings_ptr) {
 
 	Image tile;
 	// iterate through the start composite tiles
-	for (std::set<Path>::const_iterator it = settings->tiles.begin();
+	for (std::set<TilePath>::const_iterator it = settings->tiles.begin();
 			it != settings->tiles.end(); ++it) {
 
 		// render this composite tile
@@ -443,7 +443,7 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map,
 		const std::string& output_dir, const mc::World& world, const TileSet& tiles,
 		const BlockImages& images) {
 	// a list of workers
-	std::vector<std::map<Path, int> > workers;
+	std::vector<std::map<TilePath, int> > workers;
 	// find task/worker assignemt
 	int remaining = tiles.findRenderTasks(opts.jobs, workers);
 
@@ -472,7 +472,7 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map,
 
 		// add tasks to thread
 		int sum = 0;
-		for (std::map<Path, int>::iterator it = workers[i].begin(); it != workers[i].end();
+		for (std::map<TilePath, int>::iterator it = workers[i].begin(); it != workers[i].end();
 				++it) {
 			sum += it->second;
 			settings->tiles.insert(it->first);
@@ -523,7 +523,7 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map,
 	std::cout << "Rendering remaining " << remaining << " composite tiles" << std::endl;
 	Image tile;
 	remaining_settings.progress_bar = util::ProgressBar(remaining, !opts.batch);
-	renderRecursive(remaining_settings, Path(), tile);
+	renderRecursive(remaining_settings, TilePath(), tile);
 	remaining_settings.progress_bar.finish();
 }
 

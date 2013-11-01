@@ -82,28 +82,28 @@ bool TilePos::operator<(const TilePos& other) const {
 	return x < other.x;
 }
 
-Path::Path() {
+TilePath::TilePath() {
 }
 
-Path::Path(const std::vector<int>& path)
+TilePath::TilePath(const std::vector<int>& path)
 		: path(path) {
 }
 
-Path::~Path() {
+TilePath::~TilePath() {
 }
 
-const std::vector<int>& Path::getPath() const {
+const std::vector<int>& TilePath::getPath() const {
 	return path;
 }
 
-int Path::getDepth() const {
+int TilePath::getDepth() const {
 	return path.size();
 }
 
 /**
  * This method calculates the
  */
-TilePos Path::getTilePos() const {
+TilePos TilePath::getTilePos() const {
 	// calculate the radius of all tiles on the top zoom level (2^zoomlevel / 2)
 	int radius = pow(2, path.size()) / 2;
 	// the startpoint is top left
@@ -125,7 +125,7 @@ TilePos Path::getTilePos() const {
 	return TilePos(x, y);
 }
 
-std::string Path::toString() const {
+std::string TilePath::toString() const {
 	std::stringstream ss;
 	for (size_t i = 0; i < path.size(); i++) {
 		ss << path[i];
@@ -135,28 +135,28 @@ std::string Path::toString() const {
 	return ss.str();
 }
 
-Path& Path::operator+=(int node) {
+TilePath& TilePath::operator+=(int node) {
 	path.push_back(node);
 	return *this;
 }
 
-Path Path::operator+(int node) const {
-	Path copy(path);
+TilePath TilePath::operator+(int node) const {
+	TilePath copy(path);
 	copy.path.push_back(node);
 	return copy;
 }
 
-Path Path::parent() const {
-	Path copy(path);
+TilePath TilePath::parent() const {
+	TilePath copy(path);
 	copy.path.pop_back();
 	return copy;
 }
 
-bool Path::operator==(const Path& other) const {
+bool TilePath::operator==(const TilePath& other) const {
 	return path == other.path;
 }
 
-bool Path::operator<(const Path& other) const {
+bool TilePath::operator<(const TilePath& other) const {
 	return path < other.path;
 }
 
@@ -164,8 +164,8 @@ bool Path::operator<(const Path& other) const {
  * This method calculates the path by a specific tile position on a specific level.
  * This is the opposite of Path::getTilePos().
  */
-Path Path::byTilePos(const TilePos& tile, int depth) {
-	Path path;
+TilePath TilePath::byTilePos(const TilePos& tile, int depth) {
+	TilePath path;
 
 	// at first calculate the radius in tiles of this zoom level
 	int radius = pow(2, depth) / 2;
@@ -227,7 +227,7 @@ std::ostream& operator<<(std::ostream& stream, const TilePos& tile) {
 	return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const Path& path) {
+std::ostream& operator<<(std::ostream& stream, const TilePath& path) {
 	stream << path.toString();
 	return stream;
 }
@@ -274,7 +274,7 @@ void TileSet::scanRequiredByFiletimes(const fs::path& output_dir) {
 
 	for (std::map<TilePos, int>::iterator it = tile_timestamps.begin();
 			it != tile_timestamps.end(); ++it) {
-		Path path = Path::byTilePos(it->first, depth);
+		TilePath path = TilePath::byTilePos(it->first, depth);
 		fs::path file = output_dir / (path.toString() + ".png");
 		//std::cout << file.string() << " " << fs::exists(file) << std::endl ;
 		if (!fs::exists(file) || fs::last_write_time(file) <= it->second)
@@ -393,35 +393,35 @@ void TileSet::findRenderTiles(const mc::World& world) {
  * which composite tiles are available and which composite tiles need to get rendered.
  */
 void TileSet::findRequiredCompositeTiles(const std::set<TilePos>& render_tiles,
-		std::set<Path>& tiles) {
+		std::set<TilePath>& tiles) {
 
 	// iterate through the render tiles on the max zoom level
 	// add their parent composite tiles
 	for (std::set<TilePos>::iterator it = render_tiles.begin(); it != render_tiles.end(); ++it) {
-		Path path = Path::byTilePos(*it, depth);
+		TilePath path = TilePath::byTilePos(*it, depth);
 		tiles.insert(path.parent());
 	}
 
 	// now iterate through the composite tiles from bottom to top
 	// and also add their parent composite tiles
 	for (int d = depth - 1; d > 0; d--) {
-		std::set<Path> tmp;
-		for (std::set<Path>::iterator it = tiles.begin(); it != tiles.end(); ++it) {
+		std::set<TilePath> tmp;
+		for (std::set<TilePath>::iterator it = tiles.begin(); it != tiles.end(); ++it) {
 			if (it->getDepth() == d)
 				tmp.insert(it->parent());
 		}
-		for (std::set<Path>::iterator it = tmp.begin(); it != tmp.end(); ++it)
+		for (std::set<TilePath>::iterator it = tmp.begin(); it != tmp.end(); ++it)
 			tiles.insert(*it);
 	}
 }
 
-bool TileSet::hasTile(const Path& path) const {
+bool TileSet::hasTile(const TilePath& path) const {
 	if (path.getDepth() == depth)
 		return render_tiles.count(path.getTilePos()) != 0;
 	return composite_tiles.count(path) != 0;
 }
 
-bool TileSet::isTileRequired(const Path& path) const {
+bool TileSet::isTileRequired(const TilePath& path) const {
 	if(path.getDepth() == depth)
 		return required_render_tiles.count(path.getTilePos()) != 0;
 	return required_composite_tiles.count(path) != 0;
@@ -431,7 +431,7 @@ const std::set<TilePos>& TileSet::getAvailableRenderTiles() const {
 	return render_tiles;
 }
 
-const std::set<Path>& TileSet::getAvailableCompositeTiles() const {
+const std::set<TilePath>& TileSet::getAvailableCompositeTiles() const {
 	return composite_tiles;
 }
 
@@ -439,7 +439,7 @@ const std::set<TilePos>& TileSet::getRequiredRenderTiles() const {
 	return required_render_tiles;
 }
 
-const std::set<Path>& TileSet::getRequiredCompositeTiles() const {
+const std::set<TilePath>& TileSet::getRequiredCompositeTiles() const {
 	return required_composite_tiles;
 }
 
@@ -455,11 +455,11 @@ int TileSet::getRequiredCompositeTilesCount() const {
  * This function counts the render tiles, which are in composite tile. The childs map is a map
  * with tiles and a list of their childs.
  */
-int countTiles(const Path& tile, std::map<Path, std::set<Path> >& childs, int level) {
+int countTiles(const TilePath& tile, std::map<TilePath, std::set<TilePath> >& childs, int level) {
 	int count = 0;
 	if (tile.getDepth() == level)
 		return 1;
-	for (std::set<Path>::const_iterator it = childs[tile].begin(); it != childs[tile].end();
+	for (std::set<TilePath>::const_iterator it = childs[tile].begin(); it != childs[tile].end();
 			++it) {
 		count += countTiles(*it, childs, level);
 	}
@@ -471,7 +471,7 @@ int countTiles(const Path& tile, std::map<Path, std::set<Path> >& childs, int le
  * then recursive rendering.
  */
 struct Task {
-	Path tile;
+	TilePath tile;
 	int costs;
 };
 
@@ -540,7 +540,7 @@ struct Assigment {
 	int level;
 	int remaining;
 	double difference;
-	std::vector<std::map<Path, int> > workers;
+	std::vector<std::map<TilePath, int> > workers;
 
 	bool operator<(const Assigment& other) const {
 		return difference < other.difference;
@@ -552,20 +552,20 @@ struct Assigment {
  * The workers should do the same amount of work.
  */
 int TileSet::findRenderTasks(int worker_count,
-		std::vector<std::map<Path, int> >& workers) const {
+		std::vector<std::map<TilePath, int> >& workers) const {
 	//std::cout << "Render tiles: " << required_render_tiles.size() << std::endl;
 	//std::cout << "Composite tiles: " << required_composite_tiles.size() << std::endl;
 
 	// at first create two lists:
 	// a list with tiles and their childs
-	std::map<Path, std::set<Path> > tile_childs;
+	std::map<TilePath, std::set<TilePath> > tile_childs;
 	// for every zoom level a list with tiles on it
-	std::vector<std::set<Path> > tiles_by_zoom;
+	std::vector<std::set<TilePath> > tiles_by_zoom;
 	tiles_by_zoom.resize(depth + 1);
 	// go through all required composite tiles
-	for (std::set<Path>::iterator it = required_composite_tiles.begin();
+	for (std::set<TilePath>::iterator it = required_composite_tiles.begin();
 			it != required_composite_tiles.end(); ++it) {
-		std::set<Path> childs;
+		std::set<TilePath> childs;
 		// check if we're at the level before the render tiles
 		if (it->getDepth() == depth - 1) {
 			// then check render tile childs
@@ -596,7 +596,7 @@ int TileSet::findRenderTasks(int worker_count,
 	for (int zoom = 1; zoom <= 6 && zoom < depth; zoom++) {
 		// a list of "tasks" - composite tiles to start rendering
 		std::vector<Task> tasks;
-		for (std::set<Path>::iterator it = tiles_by_zoom[zoom].begin();
+		for (std::set<TilePath>::iterator it = tiles_by_zoom[zoom].begin();
 				it != tiles_by_zoom[zoom].end(); ++it) {
 			// create tasks
 			Task task;
