@@ -305,6 +305,8 @@ int MapcrafterConfigHelper::getWorldZoomlevel(const std::string& world) const {
 }
 
 int MapcrafterConfigHelper::getMapZoomlevel(const std::string& map) const {
+	if (!map_zoomlevels.count(map))
+		return 0;
 	return map_zoomlevels.at(map);
 }
 

@@ -31,6 +31,7 @@
 #include "blockimages.h"
 #include "tileset.h"
 
+#include <memory>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
@@ -79,12 +80,15 @@ public:
  * Data required to render a tile.
  */
 struct RenderState {
-	mc::WorldCache world;
-	BlockImages images;
+	std::shared_ptr<mc::WorldCache> world;
+	std::shared_ptr<BlockImages> images;
 
 	mc::Chunk* chunk;
 
-	RenderState(const mc::WorldCache& world = mc::WorldCache(), const BlockImages& images = BlockImages())
+	RenderState()
+		: chunk(nullptr) {}
+	RenderState(std::shared_ptr<mc::WorldCache> world,
+			std::shared_ptr<BlockImages> images)
 		: world(world), images(images), chunk(nullptr) {}
 	~RenderState() {}
 
@@ -125,7 +129,8 @@ private:
 	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 public:
 	TileRenderer();
-	TileRenderer(const mc::WorldCache& world, const BlockImages& textures,
+	TileRenderer(std::shared_ptr<mc::WorldCache> world,
+			std::shared_ptr<BlockImages> images,
 			const config2::MapSection& map);
 	~TileRenderer();
 

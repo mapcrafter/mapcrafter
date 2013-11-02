@@ -388,9 +388,10 @@ void RenderManager::render(const config2::MapSection& map, const std::string& ou
 				<< " tiles on max zoom level " << tiles.getDepth()
 				<< "." << std::endl;
 
-		// create needed things for recursiv render method
-		mc::WorldCache cache(world);
-		TileRenderer renderer(cache, images, map);
+		// create needed things for recursive render method
+		std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(world));
+		std::shared_ptr<BlockImages> blockimages(new BlockImages(images));
+		TileRenderer renderer(cache, blockimages, map);
 		RecursiveRenderSettings settings(tiles, renderer);
 
 		settings.tile_size = images.getTileSize();
@@ -458,9 +459,13 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map,
 	std::vector<RenderWorkerSettings*> worker_settings;
 	std::vector<TileRenderer*> worker_renderers;
 
+	std::shared_ptr<BlockImages> blockimages(new BlockImages(images));
+
 	for (int i = 0; i < opts.jobs; i++) {
 		// create all informations needed for the worker
-		TileRenderer* renderer = new TileRenderer(mc::WorldCache(world), images, map);
+
+		std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(world));
+		TileRenderer* renderer = new TileRenderer(cache, blockimages, map);
 		RecursiveRenderSettings render_settings(tiles, *renderer);
 		render_settings.tile_size = images.getTileSize();
 		render_settings.output_dir = output_dir;

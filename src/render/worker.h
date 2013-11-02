@@ -53,9 +53,12 @@ public:
 	void setWorld(std::shared_ptr<mc::WorldCache> world,
 			std::shared_ptr<TileSet> tileset,
 			std::shared_ptr<BlockImages> blockimages);
+
 	void setWork(const config2::MapcrafterConfigFile& config,
 			const config2::MapSection& map_config,
 			const std::set<TilePath>& tiles, const std::set<TilePath>& tiles_skip);
+
+	void renderRecursive(const TilePath& path, Image& image);
 
 	void operator()();
 };

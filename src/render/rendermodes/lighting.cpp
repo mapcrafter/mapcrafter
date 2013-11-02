@@ -188,7 +188,7 @@ void LightingRendermode::estimateBlockLight(mc::Block& block, const mc::BlockPos
 		above = state.getBlock(pos + off, mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
 		if (isSpecialTransparent(above.id))
 			continue;
-		if (above.id == 0 || state.images.isBlockTransparent(above.id, above.data))
+		if (above.id == 0 || state.images->isBlockTransparent(above.id, above.data))
 			block.sky_light = above.sky_light;
 		else
 			block.sky_light = 15;
@@ -202,7 +202,7 @@ void LightingRendermode::estimateBlockLight(mc::Block& block, const mc::BlockPos
 		for (int dz = -1; dz <= 1; dz++)
 			for (int dy = -1; dy <= 1; dy++) {
 				mc::Block other = state.getBlock(pos + mc::BlockPos(dx, dz, dy), mc::GET_ID | mc::GET_DATA | mc::GET_BLOCK_LIGHT);
-				if ((other.id == 0 || state.images.isBlockTransparent(other.id, other.data))
+				if ((other.id == 0 || state.images->isBlockTransparent(other.id, other.data))
 						&& !isSpecialTransparent(other.id)) {
 					block_lights += other.block_light;
 					block_lights_count++;
@@ -334,15 +334,15 @@ void LightingRendermode::doSlabLight(Image& image, const mc::BlockPos& pos, uint
 	// light the faces
 	mc::Block block;
 	block = state.getBlock(pos + mc::DIR_WEST);
-	if (block.id == 0 || state.images.isBlockTransparent(block.id, block.data))
+	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
 		lightLeft(image, getCornerColors(pos, CORNERS_LEFT), top, bottom);
 
 	block = state.getBlock(pos + mc::DIR_SOUTH);
-	if (block.id == 0 || state.images.isBlockTransparent(block.id, block.data))
+	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
 		lightRight(image, getCornerColors(pos, CORNERS_RIGHT), top, bottom);
 
 	block = state.getBlock(pos + mc::DIR_TOP);
-	if (block.id == 0 || state.images.isBlockTransparent(block.id, block.data))
+	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
 		lightTop(image, getCornerColors(pos, CORNERS_TOP), yoff);
 }
 
@@ -383,15 +383,15 @@ void LightingRendermode::doSmoothLight(Image& image, const mc::BlockPos& pos, ui
 	mc::Block block;
 	if (light_left) {
 		block = state.getBlock(pos + mc::DIR_WEST);
-		light_left = block.id == 0 || state.images.isBlockTransparent(block.id, block.data);
+		light_left = block.id == 0 || state.images->isBlockTransparent(block.id, block.data);
 	}
 	if (light_right) {
 		block = state.getBlock(pos + mc::DIR_SOUTH);
-		light_right = block.id == 0 || state.images.isBlockTransparent(block.id, block.data);
+		light_right = block.id == 0 || state.images->isBlockTransparent(block.id, block.data);
 	}
 	if (light_top) {
 		block = state.getBlock(pos + mc::DIR_TOP);
-		light_top = block.id == 0 || state.images.isBlockTransparent(block.id, block.data);
+		light_top = block.id == 0 || state.images->isBlockTransparent(block.id, block.data);
 	}
 
 	// do the lighting
@@ -410,7 +410,7 @@ bool LightingRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t
 }
 
 void LightingRendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
-	bool transparent = state.images.isBlockTransparent(id, data);
+	bool transparent = state.images->isBlockTransparent(id, data);
 	bool water = (id == 8 || id == 9) && (data & 0b1111) == 0;
 
 	if(id == 78 && (data & 0b1111) == 0) {
