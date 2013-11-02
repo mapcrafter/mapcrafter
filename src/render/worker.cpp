@@ -22,15 +22,15 @@
 namespace mapcrafter {
 namespace render {
 
-Worker::Worker() {
+RenderWorker::RenderWorker() {
 
 }
 
-Worker::~Worker() {
+RenderWorker::~RenderWorker() {
 
 }
 
-void Worker::setWorld(std::shared_ptr<mc::WorldCache> world,
+void RenderWorker::setWorld(std::shared_ptr<mc::WorldCache> world,
 		std::shared_ptr<TileSet> tileset,
 		std::shared_ptr<BlockImages> blockimages) {
 	this->world = world;
@@ -38,7 +38,7 @@ void Worker::setWorld(std::shared_ptr<mc::WorldCache> world,
 	this->blockimages = blockimages;
 }
 
-void Worker::setWork(const config2::MapcrafterConfigFile& config,
+void RenderWorker::setWork(const config2::MapcrafterConfigFile& config,
 		const config2::MapSection& map_config,
 		const std::set<TilePath>& tiles, const std::set<TilePath>& tiles_skip) {
 	this->config = config;
@@ -47,7 +47,7 @@ void Worker::setWork(const config2::MapcrafterConfigFile& config,
 	this->tiles_skip = tiles_skip;
 }
 
-void Worker::renderRecursive(const TilePath& tile, Image& image) {
+void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 	// if this is tile is not required or we should skip it, load it from file
 	if (!tileset->isTileRequired(tile) || tiles_skip.count(tile)) {
 		fs::path file = config.getOutputPath(tile.toString() + ".png");
@@ -128,7 +128,7 @@ void Worker::renderRecursive(const TilePath& tile, Image& image) {
 	}
 }
 
-void Worker::operator()() {
+void RenderWorker::operator()() {
 	renderer = TileRenderer(world, blockimages, map_config);
 }
 

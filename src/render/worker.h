@@ -36,7 +36,7 @@
 namespace mapcrafter {
 namespace render {
 
-class Worker {
+class RenderWorker {
 private:
 	std::shared_ptr<mc::WorldCache> world;
 	std::shared_ptr<TileSet> tileset;
@@ -47,8 +47,8 @@ private:
 	config2::MapSection map_config;
 	std::set<TilePath> tiles, tiles_skip;
 public:
-	Worker();
-	~Worker();
+	RenderWorker();
+	~RenderWorker();
 
 	void setWorld(std::shared_ptr<mc::WorldCache> world,
 			std::shared_ptr<TileSet> tileset,

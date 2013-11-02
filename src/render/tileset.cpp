@@ -478,7 +478,7 @@ struct Task {
 /**
  * A worker with assigned render tasks.
  */
-struct Worker {
+struct TaskWorker {
 	int work;
 	std::vector<Task> tasks;
 };
@@ -487,7 +487,7 @@ bool compareTasks(const Task& t1, const Task& t2) {
 	return t1.costs < t2.costs;
 }
 
-bool compareWorkers(const Worker& w1, const Worker& w2) {
+bool compareWorkers(const TaskWorker& w1, const TaskWorker& w2) {
 	return w1.work < w2.work;
 }
 
@@ -505,7 +505,7 @@ int sumTasks(std::vector<Task>& vec) {
  *
  * The function returns the maximum difference from the average work as percentage.
  */
-double assignTasks(std::vector<Task> tasks, std::vector<Worker>& workers) {
+double assignTasks(std::vector<Task> tasks, std::vector<TaskWorker>& workers) {
 	// sort the tasks ascending
 	std::sort(tasks.begin(), tasks.end(), compareTasks);
 
@@ -607,7 +607,7 @@ int TileSet::findRenderTasks(int worker_count,
 		}
 
 		// create a list of workers
-		std::vector<Worker> workers_zoomlevel;
+		std::vector<TaskWorker> workers_zoomlevel;
 		workers_zoomlevel.resize(worker_count);
 		// assign tasks, get maximum difference from the average
 		double difference = assignTasks(tasks, workers_zoomlevel);
@@ -619,7 +619,7 @@ int TileSet::findRenderTasks(int worker_count,
 		assignment.difference = difference;
 		assignment.workers.resize(worker_count);
 		for (int i = 0; i < worker_count; i++) {
-			Worker w = workers_zoomlevel[i];
+			TaskWorker w = workers_zoomlevel[i];
 			for (size_t j = 0; j < w.tasks.size(); j++)
 				assignment.workers[i][w.tasks[j].tile] = countTiles(w.tasks[j].tile,
 						tile_childs, depth);
