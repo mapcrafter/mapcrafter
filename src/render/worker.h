@@ -43,7 +43,7 @@ private:
 	std::shared_ptr<BlockImages> blockimages;
 	TileRenderer renderer;
 
-	config2::MapcrafterConfigFile config;
+	fs::path output_dir;
 	config2::MapSection map_config;
 	std::set<TilePath> tiles, tiles_skip;
 public:
@@ -54,10 +54,11 @@ public:
 			std::shared_ptr<TileSet> tileset,
 			std::shared_ptr<BlockImages> blockimages);
 
-	void setWork(const config2::MapcrafterConfigFile& config,
+	void setWork(const fs::path& output_dir,
 			const config2::MapSection& map_config,
 			const std::set<TilePath>& tiles, const std::set<TilePath>& tiles_skip);
 
+	void saveTile(const TilePath& tile, const Image& image);
 	void renderRecursive(const TilePath& path, Image& image);
 
 	void operator()();

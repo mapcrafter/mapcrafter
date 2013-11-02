@@ -38,19 +38,30 @@ void RenderWorker::setWorld(std::shared_ptr<mc::WorldCache> world,
 	this->blockimages = blockimages;
 }
 
-void RenderWorker::setWork(const config2::MapcrafterConfigFile& config,
+void RenderWorker::setWork(const fs::path& output_dir,
 		const config2::MapSection& map_config,
 		const std::set<TilePath>& tiles, const std::set<TilePath>& tiles_skip) {
-	this->config = config;
+	this->output_dir = output_dir;
 	this->map_config = map_config;
 	this->tiles = tiles;
 	this->tiles_skip = tiles_skip;
 }
 
+void RenderWorker::saveTile(const TilePath& tile, const Image& image) {
+	std::string filename = tile.toString() + ".png";
+	if (tile.getDepth() == 0)
+		filename = "base.png";
+	fs::path file = output_dir / filename;
+	if (!fs::exists(file.branch_path()))
+		fs::create_directories(file.branch_path());
+	if (!image.writePNG(file.string()))
+		std::cout << "Unable to write " << file.string() << std::endl;
+}
+
 void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 	// if this is tile is not required or we should skip it, load it from file
 	if (!tileset->isTileRequired(tile) || tiles_skip.count(tile)) {
-		fs::path file = config.getOutputPath(tile.toString() + ".png");
+		fs::path file = output_dir / (tile.toString() + ".png");
 		if (!image.readPNG(file.string())) {
 			std::cerr << "Unable to read tile " << tile.toString() << " from " << file << std::endl;
 			std::cerr << tileset->isTileRequired(tile) << " " << tiles_skip.count(tile) << std::endl;
@@ -71,7 +82,7 @@ void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 		*/
 
 		// save it
-		//saveTile(settings.output_dir, path, tile);
+		saveTile(tile, image);
 
 		// update progress
 		/*
@@ -124,7 +135,7 @@ void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 		*/
 
 		// then save tile
-		//saveTile(settings.output_dir, path, tile);
+		saveTile(tile, image);
 	}
 }
 
