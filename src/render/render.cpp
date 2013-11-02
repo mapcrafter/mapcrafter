@@ -36,8 +36,8 @@ TileTopBlockIterator::TileTopBlockIterator(const TilePos& tile, int block_size,
         int tile_size)
 		: block_size(block_size), tile_size(tile_size), is_end(false) {
 	// at first get the chunk, whose row and column is at the top right of the tile
-	mc::ChunkPos topright_chunk = mc::ChunkPos::byRowCol(4 * tile.getY(),
-	        2 * tile.getX() + 2);
+	mc::ChunkPos topright_chunk = mc::ChunkPos::byRowCol(4 * TILE_WIDTH * tile.getY(),
+			2 * TILE_WIDTH * tile.getX() + 2);
 
 	// now get the first visible block from this chunk in this tile
 	top = mc::LocalBlockPos(8, 6, 255).toGlobalPos(topright_chunk);
@@ -46,9 +46,9 @@ TileTopBlockIterator::TileTopBlockIterator(const TilePos& tile, int block_size,
 
 	// calculate bounds of the tile
 	min_row = top.getRow() + 1;
-	max_row = top.getRow() + 64 + 4;
+	max_row = top.getRow() + (64 * TILE_WIDTH) + 4;
 	max_col = top.getCol() + 2;
-	min_col = max_col - 32;
+	min_col = max_col - (32 * TILE_WIDTH);
 
 	// calculate position of the first block, relative row/col in this tile are needed
 	int row = current.getRow() - min_row;

@@ -309,7 +309,7 @@ void TileSet::setDepth(int depth) {
 }
 
 /**
- * This function calculates the tiles, a chunk covers.
+ * This function calculates the tiles a chunk covers.
  */
 void getChunkTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles) {
 	// at first get row and column of the top of the chunk

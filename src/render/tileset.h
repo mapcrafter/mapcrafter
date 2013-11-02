@@ -62,6 +62,8 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace render {
 
+const int TILE_WIDTH = 1;
+
 /**
  * This class represents the position of a render tile.
  */

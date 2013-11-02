@@ -21,6 +21,8 @@
 
 #include "../util.h"
 
+#include "tileset.h"
+
 #include <iostream>
 #include <map>
 #include <cstdlib>
@@ -2462,7 +2464,7 @@ int BlockImages::getTextureSize() const {
 }
 
 int BlockImages::getTileSize() const {
-	return texture_size * 2 * 16;
+	return texture_size * 2 * 16 * TILE_WIDTH;
 }
 
 }
