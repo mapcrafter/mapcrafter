@@ -46,6 +46,8 @@ private:
 	fs::path output_dir;
 	config2::MapSection map_config;
 	std::set<TilePath> tiles, tiles_skip;
+
+	std::shared_ptr<util::IProgressHandler> progress;
 public:
 	RenderWorker();
 	~RenderWorker();
@@ -57,6 +59,8 @@ public:
 	void setWork(const fs::path& output_dir,
 			const config2::MapSection& map_config,
 			const std::set<TilePath>& tiles, const std::set<TilePath>& tiles_skip);
+
+	void setProgressHandler(std::shared_ptr<util::IProgressHandler> progress);
 
 	void saveTile(const TilePath& tile, const Image& image);
 	void renderRecursive(const TilePath& path, Image& image);

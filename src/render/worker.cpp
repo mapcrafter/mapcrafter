@@ -47,6 +47,10 @@ void RenderWorker::setWork(const fs::path& output_dir,
 	this->tiles_skip = tiles_skip;
 }
 
+void RenderWorker::setProgressHandler(std::shared_ptr<util::IProgressHandler> progress) {
+	this->progress = progress;
+}
+
 void RenderWorker::saveTile(const TilePath& tile, const Image& image) {
 	std::string filename = tile.toString() + ".png";
 	if (tile.getDepth() == 0)
@@ -71,6 +75,7 @@ void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 		renderer.renderTile(tile.getTilePos(), image);
 
 		/*
+		// draws a border on the tile
 		int size = settings.tile_size;
 		for (int x = 0; x < size; x++)
 			for (int y = 0; y < size; y++) {
@@ -85,12 +90,7 @@ void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 		saveTile(tile, image);
 
 		// update progress
-		/*
-		settings.progress++;
-		if (settings.show_progress) {
-			settings.progress_bar.update(settings.progress);
-		}
-		*/
+		progress->setValue(progress->getValue() + 1);
 	} else {
 		// this tile is a composite tile, we need to compose it from its children
 		// just check, if children 1, 2, 3, 4 exists, render it, resize it to the half size
@@ -125,6 +125,7 @@ void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 		}
 
 		/*
+		// draws a border on the tile
 		for (int x = 0; x < size; x++)
 			for (int y = 0; y < size; y++) {
 				if (x < 5 || x > size-5)
@@ -134,7 +135,7 @@ void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 			}
 		*/
 
-		// then save tile
+		// then save the tile
 		saveTile(tile, image);
 	}
 }
