@@ -567,6 +567,7 @@ bool RenderManager::run() {
 	}
 
 	confighelper = config2::MapcrafterConfigHelper(config);
+	confighelper.parseRenderBehaviors(opts.skip_all, opts.render_skip, opts.render_auto, opts.render_force);
 	auto config_worlds = config.getWorlds();
 	auto config_maps = config.getMaps();
 
@@ -604,7 +605,6 @@ bool RenderManager::run() {
 			tilesets[it->first][*it2] = tileset;
 		}
 
-		//confighelper.setWorldZoomlevel(it->first, zoomlevels_max);
 		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2) {
 			tilesets[it->first][*it2].setDepth(zoomlevels_max);
 		}
@@ -623,7 +623,7 @@ bool RenderManager::run() {
 		std::string mapname = map.getShortName();
 		std::string worldname = map.getWorld();
 		// continue, if all rotations for this map are skipped
-		if (confighelper.getRenderBehavior(mapname) == config2::MapcrafterConfigHelper::RENDER_SKIP)
+		if (confighelper.isCompleteRenderSkip(mapname))
 			continue;
 
 		int i_from = i+1;
@@ -641,8 +641,7 @@ bool RenderManager::run() {
 		bool old_settings = !confighelper.isCompleteRenderForce(mapname) && fs::exists(settings_filename);
 		if (old_settings) {
 			if (!settings.read(settings_filename)) {
-				std::cerr << "Error: Unable to load old map.settings file!"
-						<< std::endl << std::endl;
+				std::cerr << "Error: Unable to load old map.settings file!" << std::endl << std::endl;
 				continue;
 			}
 

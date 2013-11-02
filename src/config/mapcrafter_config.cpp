@@ -258,6 +258,11 @@ MapcrafterConfigHelper::MapcrafterConfigHelper() {
 
 MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfigFile& config)
 	: config(config) {
+	auto maps = config.getMaps();
+	for (auto it = maps.begin(); it != maps.end(); ++it)
+		for (int i = 0; i < 4; i++)
+			render_behaviors[it->getShortName()][i] = RENDER_AUTO;
+
 	auto worlds = config.getWorlds();
 	for (auto it = worlds.begin(); it != worlds.end(); ++it)
 		world_zoomlevels[it->first] = 0;
@@ -319,7 +324,6 @@ void MapcrafterConfigHelper::setMapZoomlevel(const std::string& map, int zoomlev
 }
 
 int MapcrafterConfigHelper::getRenderBehavior(const std::string& map, int rotation) const {
-	return RENDER_AUTO;
 	return render_behaviors.at(map).at(rotation);
 }
 
@@ -345,6 +349,74 @@ bool MapcrafterConfigHelper::isCompleteRenderForce(const std::string& map) const
 		if (getRenderBehavior(map, *it) != RENDER_FORCE)
 			return false;
 	return true;
+}
+
+bool nextRenderBehaviorSplit(std::string& string, std::string& world, std::string& rotation) {
+	if (string.empty()) {
+		world = "";
+		rotation = "";
+		return false;
+	}
+
+	size_t pos = string.find(",");
+	std::string sub = string;
+	if (pos != std::string::npos) {
+		sub = string.substr(0, pos);
+		string = string.substr(pos+1);
+	} else {
+		string = "";
+	}
+
+	world = sub;
+	pos = world.find(":");
+	if (pos != std::string::npos) {
+		rotation = world.substr(pos+1);
+		world = world.substr(0, pos);
+	} else {
+		rotation = "";
+	}
+
+	return true;
+}
+
+void MapcrafterConfigHelper::setRenderBehaviors(std::string maps, int behavior) {
+	std::string map, rotation;
+
+	while (nextRenderBehaviorSplit(maps, map, rotation)) {
+		int r = stringToRotation(rotation, ROTATION_NAMES_SHORT);
+		if (!config.hasMap(map)) {
+			std::cout << "Warning: Unknown map '" << map << "'." << std::endl;
+			continue;
+		}
+
+		if (!rotation.empty()) {
+			if (r == -1) {
+				std::cout << "Warning: Unknown rotation '" << rotation << "'." << std::endl;
+				continue;
+			}
+			if (!config.getMap(map).getRotations().count(r)) {
+				std::cout << "Warning: Map '" << map << "' does not have rotation '" << rotation << "'." << std::endl;
+				continue;
+			}
+		}
+
+		if (r != -1)
+			render_behaviors[map][r] = behavior;
+		else
+			std::fill(&render_behaviors[map][0], &render_behaviors[map][4], behavior);
+	}
+}
+
+void MapcrafterConfigHelper::parseRenderBehaviors(bool skip_all, const std::string& render_skip,
+		const std::string& render_auto, const std::string& render_force) {
+	if (!skip_all)
+		setRenderBehaviors(render_skip, RENDER_SKIP);
+	else
+		for (size_t i = 0; i < config.getMaps().size(); i++)
+			for (int j = 0; j < 4; j++)
+				render_behaviors[config.getMaps()[i].getShortName()][j] = RENDER_SKIP;
+	setRenderBehaviors(render_auto, RENDER_AUTO);
+	setRenderBehaviors(render_force, RENDER_FORCE);
 }
 
 } /* namespace config */
