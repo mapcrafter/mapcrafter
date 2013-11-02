@@ -316,11 +316,12 @@ void getChunkTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles) {
 	int row = chunk.getRow();
 	int col = chunk.getCol();
 	// then get from this the tile position (every tile is 2 columns wide and 4 rows tall)
-	int base_x = col / 2;
-	int base_y = row / 4;
+	int base_x = col / (2 * TILE_WIDTH);
+	int base_y = row / (4 * TILE_WIDTH);
 	// now add all tiles,
 	// a chunk is 9 tiles tall
 	// and one or two tiles wide (two tiles if column is even)
+	// TODO fix this for TILE_WIDTH > 1
 	for (int tile_y = base_y - 1; tile_y <= base_y + 8; tile_y++) {
 		tiles.insert(TilePos(base_x, tile_y));
 		if (col % 2 == 0)
