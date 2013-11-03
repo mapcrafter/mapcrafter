@@ -147,6 +147,16 @@ void RenderWorker::operator()() {
 	
 	progress->setMax(42); // TODO
 	progress->setValue(0);
+	
+	Image image;
+	// iterate through the start composite tiles
+	for (auto it = tiles.begin(); it != tiles.end(); ++it) {
+		// render this composite tile
+		renderRecursive(*it, image);
+
+		// clear image
+		tile.clear();
+	}
 }
 
 } /* namespace render */
