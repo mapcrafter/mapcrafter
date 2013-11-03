@@ -26,25 +26,44 @@
 namespace mapcrafter {
 namespace util {
 
+DummyProgressHandler::DummyProgressHandler()
+	: max(0), value(0) {
+}
+
+DummyProgressHandler::~DummyProgressHandler() {
+}
+
+int DummyProgressHandler::getMax() const {
+	return max;
+}
+
+void DummyProgressHandler::setMax(int max) {
+	this->max = max;
+}
+
+int DummyProgressHandler::getValue() const {
+	return value;
+}
+
+void DummyProgressHandler::setValue(int value) {
+	this->value = value;
+}
+
 ProgressBar::ProgressBar(int max, bool animated)
-		: max(max), value(0), animated(animated),
+		: animated(animated),
 		  start(time(NULL)), last_update(0), last_percent(0) {
+	setMax(max);
 }
 
 ProgressBar::~ProgressBar() {
 }
 
-int ProgressBar::getMax() const {
-	return max;
+void ProgressBar::setAnimated(bool animated) {
+	this->animated = animated;
 }
 
-void ProgressBar::setMax(int max) {
-	this->max = max;
-	update(value, true);
-}
-
-int ProgressBar::getValue() const {
-	return value;
+bool ProgressBar::isAnimated() const {
+	return animated;
 }
 
 void ProgressBar::setValue(int value) {
@@ -97,14 +116,6 @@ void ProgressBar::update(int value, bool force) {
 	last_update = now;
 	this->value = value;
 	last_percent = percent;
-}
-
-void ProgressBar::setAnimated(bool animated) {
-	this->animated = animated;
-}
-
-bool ProgressBar::isAnimated() const {
-	return animated;
 }
 
 void ProgressBar::finish() {

@@ -34,16 +34,26 @@ public:
 	virtual void setValue(int value) = 0;
 };
 
+class DummyProgressHandler : public IProgressHandler {
+protected:
+	// the maximum and current value of the progress
+	int max, value;
+public:
+	DummyProgressHandler();
+	virtual ~DummyProgressHandler();
+
+	virtual int getMax() const;
+	virtual void setMax(int max);
+
+	virtual int getValue() const;
+	virtual void setValue(int value);
+};
+
 /**
  * Shows a nice command line progress bar.
  */
-class ProgressBar : public IProgressHandler {
+class ProgressBar : public DummyProgressHandler {
 private:
-	// the maximum value of the progress
-	int max;
-	// the current value of the progress
-	int value;
-
 	// animated? if yes, it updates the progress bar and makes it "animated"
 	// but not good if you pipe the output in a file, so you can disable it
 	bool animated;
@@ -58,17 +68,14 @@ public:
 	ProgressBar(int max = 0, bool animated = true);
 	virtual ~ProgressBar();
 
+	void setAnimated(bool animated);
+	bool isAnimated() const;
+
 	void update(int value, bool force = false);
 	void finish();
 
-	virtual int getMax() const;
-	virtual void setMax(int max);
-
-	virtual int getValue() const;
 	virtual void setValue(int value);
 
-	void setAnimated(bool animated);
-	bool isAnimated() const;
 };
 
 } /* namespace util */
