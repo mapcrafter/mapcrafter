@@ -38,27 +38,36 @@ namespace render {
 
 class RenderWorker {
 private:
+	// cache and tileset of the map to render
 	std::shared_ptr<mc::WorldCache> world;
 	std::shared_ptr<TileSet> tileset;
+	
+	// configuration of the map to render
 	std::shared_ptr<BlockImages> blockimages;
+	config2::MapSection map_config;
+	fs::path map_output_dir;
+	// and a TileRenderer instance
 	TileRenderer renderer;
 
-	fs::path output_dir;
-	config2::MapSection map_config;
+	// information about the work to do:
+	// tiles to render recursively
+	// and tiles we can skip and just read from disk
 	std::set<TilePath> tiles, tiles_skip;
-
+	
+	// progress handler
 	std::shared_ptr<util::IProgressHandler> progress;
 public:
 	RenderWorker();
 	~RenderWorker();
 
 	void setWorld(std::shared_ptr<mc::WorldCache> world,
-			std::shared_ptr<TileSet> tileset,
-			std::shared_ptr<BlockImages> blockimages);
+			std::shared_ptr<TileSet> tileset);
+	
+	void setMapConfig(std::shared_ptr<BlockImages> blockimages,
+			const config2::MapSection map_config,
+			const fs::path& map_output_dir);
 
-	void setWork(const fs::path& output_dir,
-			const config2::MapSection& map_config,
-			const std::set<TilePath>& tiles, const std::set<TilePath>& tiles_skip);
+	void setWork(const std::set<TilePath>& tiles, const std::set<TilePath>& tiles_skip);
 
 	void setProgressHandler(std::shared_ptr<util::IProgressHandler> progress);
 

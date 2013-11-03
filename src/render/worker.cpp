@@ -31,18 +31,20 @@ RenderWorker::~RenderWorker() {
 }
 
 void RenderWorker::setWorld(std::shared_ptr<mc::WorldCache> world,
-		std::shared_ptr<TileSet> tileset,
-		std::shared_ptr<BlockImages> blockimages) {
+		std::shared_ptr<TileSet> tileset) {
 	this->world = world;
 	this->tileset = tileset;
-	this->blockimages = blockimages;
 }
 
-void RenderWorker::setWork(const fs::path& output_dir,
-		const config2::MapSection& map_config,
-		const std::set<TilePath>& tiles, const std::set<TilePath>& tiles_skip) {
-	this->output_dir = output_dir;
+void RenderWorker::setMapConfig(std::shared_ptr<BlockImages> blockimages,
+		const config2::MapSection map_config,
+		const fs::path& map_output_dir) {
+	this->blockimages = blockimages;
 	this->map_config = map_config;
+	this->map_output_dir = map_output_dir;
+}
+
+void RenderWorker::setWork(const std::set<TilePath>& tiles, const std::set<TilePath>& tiles_skip) {
 	this->tiles = tiles;
 	this->tiles_skip = tiles_skip;
 }
@@ -55,7 +57,7 @@ void RenderWorker::saveTile(const TilePath& tile, const Image& image) {
 	std::string filename = tile.toString() + ".png";
 	if (tile.getDepth() == 0)
 		filename = "base.png";
-	fs::path file = output_dir / filename;
+	fs::path file = map_output_dir / filename;
 	if (!fs::exists(file.branch_path()))
 		fs::create_directories(file.branch_path());
 	if (!image.writePNG(file.string()))
@@ -65,7 +67,7 @@ void RenderWorker::saveTile(const TilePath& tile, const Image& image) {
 void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 	// if this is tile is not required or we should skip it, load it from file
 	if (!tileset->isTileRequired(tile) || tiles_skip.count(tile)) {
-		fs::path file = output_dir / (tile.toString() + ".png");
+		fs::path file = map_output_dir / (tile.toString() + ".png");
 		if (!image.readPNG(file.string())) {
 			std::cerr << "Unable to read tile " << tile.toString() << " from " << file << std::endl;
 			std::cerr << tileset->isTileRequired(tile) << " " << tiles_skip.count(tile) << std::endl;
@@ -142,6 +144,9 @@ void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 
 void RenderWorker::operator()() {
 	renderer = TileRenderer(world, blockimages, map_config);
+	
+	progress->setMax(42); // TODO
+	progress->setValue(0);
 }
 
 } /* namespace render */
