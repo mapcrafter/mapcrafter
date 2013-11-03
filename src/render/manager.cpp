@@ -19,6 +19,8 @@
 
 #include "manager.h"
 
+#include "worker.h"
+
 #include <array>
 #include <fstream>
 #include <ctime>
@@ -376,39 +378,38 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
  * Renders render tiles and composite tiles.
  */
 void RenderManager::render(const config2::MapSection& map, const std::string& output_dir,
-		const mc::World& world, const TileSet& tiles, const BlockImages& images) {
-	if(tiles.getRequiredCompositeTilesCount() == 0) {
+		const mc::World& world, std::shared_ptr<TileSet> tileset,
+		std::shared_ptr<BlockImages> blockimages) {
+	if(tileset->getRequiredCompositeTilesCount() == 0) {
 		std::cout << "No tiles need to get rendered." << std::endl;
 		return;
 	}
 
 	// check if only one thread
 	if (opts.jobs == 1) {
-		std::cout << "Rendering " << tiles.getRequiredRenderTilesCount()
-				<< " tiles on max zoom level " << tiles.getDepth()
-				<< "." << std::endl;
+		std::cout << "Rendering " << tileset->getRequiredRenderTilesCount();
+		std::cout << " tiles on max zoom level " << tileset->getDepth() << "." << std::endl;
 
-		// create needed things for recursive render method
+		// create cache for the worker
 		std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(world));
-		std::shared_ptr<BlockImages> blockimages(new BlockImages(images));
-		TileRenderer renderer(cache, blockimages, map);
-		RecursiveRenderSettings settings(tiles, renderer);
 
-		settings.tile_size = images.getTileSize();
-		settings.output_dir = output_dir;
+		// create the worker and set required data
+		RenderWorker worker;
+		worker.setWorld(cache, tileset);
+		worker.setMapConfig(blockimages, map, output_dir);
 
-		settings.show_progress = true;
-		settings.progress_bar = util::ProgressBar(tiles.getRequiredRenderTilesCount(), !opts.batch);
+		std::set<TilePath> tiles, tiles_skip;
+		tiles.insert(TilePath());
+		worker.setWork(tiles, tiles_skip);
 
-		Image tile;
-		// then render just everything recursive
-		renderRecursive(settings, TilePath(), tile);
-		settings.progress_bar.finish();
+		std::shared_ptr<util::ProgressBar> progress(new util::ProgressBar(0, !opts.batch));
+		worker.setProgressHandler(progress);
 
-		//cache.getRegionCacheStats().print("region cache");
-		//cache.getChunkCacheStats().print("chunk cache");
+		// start rendering
+		worker();
+		progress->finish();
 	} else {
-		renderMultithreaded(map, output_dir, world, tiles, images);
+		renderMultithreaded(map, output_dir, world, tileset, blockimages);
 	}
 }
 
@@ -441,16 +442,16 @@ void* runWorker(void* settings_ptr) {
  * This method starts the render threads when multithreading is enabled.
  */
 void RenderManager::renderMultithreaded(const config2::MapSection& map,
-		const std::string& output_dir, const mc::World& world, const TileSet& tiles,
-		const BlockImages& images) {
+		const std::string& output_dir, const mc::World& world, std::shared_ptr<TileSet> tileset,
+		std::shared_ptr<BlockImages> blockimages) {
 	// a list of workers
 	std::vector<std::map<TilePath, int> > workers;
 	// find task/worker assignemt
-	int remaining = tiles.findRenderTasks(opts.jobs, workers);
+	int remaining = tileset->findRenderTasks(opts.jobs, workers);
 
 	// create render settings for the remaining composite tiles at the end
-	RecursiveRenderSettings remaining_settings(tiles, TileRenderer());
-	remaining_settings.tile_size = images.getTileSize();
+	RecursiveRenderSettings remaining_settings(*tileset, TileRenderer());
+	remaining_settings.tile_size = blockimages->getTileSize();
 	remaining_settings.output_dir = output_dir;
 	remaining_settings.show_progress = true;
 
@@ -459,15 +460,13 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map,
 	std::vector<RenderWorkerSettings*> worker_settings;
 	std::vector<TileRenderer*> worker_renderers;
 
-	std::shared_ptr<BlockImages> blockimages(new BlockImages(images));
-
 	for (int i = 0; i < opts.jobs; i++) {
 		// create all informations needed for the worker
 
 		std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(world));
 		TileRenderer* renderer = new TileRenderer(cache, blockimages, map);
-		RecursiveRenderSettings render_settings(tiles, *renderer);
-		render_settings.tile_size = images.getTileSize();
+		RecursiveRenderSettings render_settings(*tileset, *renderer);
+		render_settings.tile_size = blockimages->getTileSize();
 		render_settings.output_dir = output_dir;
 		render_settings.show_progress = false;
 
@@ -485,7 +484,7 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map,
 		}
 
 		std::cout << "Thread " << i << " renders " << sum
-				<< " tiles on max zoom level " << tiles.getDepth() << "." << std::endl;
+				<< " tiles on max zoom level " << tileset->getDepth() << "." << std::endl;
 
 		worker_settings.push_back(settings);
 		worker_renderers.push_back(renderer);
@@ -494,7 +493,7 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map,
 		pthread_create(&threads[i], NULL, runWorker, (void*) settings);
 	}
 
-	util::ProgressBar progress(tiles.getRequiredRenderTilesCount(), !opts.batch);
+	util::ProgressBar progress(tileset->getRequiredRenderTilesCount(), !opts.batch);
 	// loop while the render threads are running
 	while (1) {
 	
@@ -572,7 +571,7 @@ bool RenderManager::run() {
 	auto config_maps = config.getMaps();
 
 	std::map<std::string, std::array<mc::World, 4> > worlds;
-	std::map<std::string, std::array<TileSet, 4> > tilesets;
+	std::map<std::string, std::array<std::shared_ptr<TileSet>, 4> > tilesets;
 
 	// find out which rotations are needed for which world
 	// ...and...
@@ -598,15 +597,15 @@ bool RenderManager::run() {
 				std::cerr << "Unable to load world " << it->first << "!" << std::endl;
 				return false;
 			}
-			TileSet tileset(world);
-			zoomlevels_max = std::max(zoomlevels_max, tileset.getMinDepth());
+			std::shared_ptr<TileSet> tileset(new TileSet(world));
+			zoomlevels_max = std::max(zoomlevels_max, tileset->getMinDepth());
 
 			worlds[it->first][*it2] = world;
 			tilesets[it->first][*it2] = tileset;
 		}
 
 		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2) {
-			tilesets[it->first][*it2].setDepth(zoomlevels_max);
+			tilesets[it->first][*it2]->setDepth(zoomlevels_max);
 		}
 		confighelper.setWorldZoomlevel(it->first, zoomlevels_max);
 	}
@@ -763,16 +762,16 @@ bool RenderManager::run() {
 			int start = time(NULL);
 
 			// create block images and render the world
-			BlockImages images;
-			images.setSettings(map.getTextureSize(), rotation, map.renderUnknownBlocks(),
+			std::shared_ptr<BlockImages> blockimages(new BlockImages);
+			blockimages->setSettings(map.getTextureSize(), rotation, map.renderUnknownBlocks(),
 					map.renderLeavesTransparent(), map.getRendermode());
-			if (!images.loadAll(map.getTextureDir().string())) {
+			if (!blockimages->loadAll(map.getTextureDir().string())) {
 				std::cerr << "Skipping remaining rotations." << std::endl << std::endl;
 				break;
 			}
 
 			std::string output_dir = config.getOutputPath(mapname + "/" + config2::ROTATION_NAMES_SHORT[rotation]);
-			render(map, output_dir, worlds[worldname][rotation], tilesets[worldname][rotation], images);
+			render(map, output_dir, worlds[worldname][rotation], tilesets[worldname][rotation], blockimages);
 
 			// update the settings file
 			settings.rotations[rotation] = true;
