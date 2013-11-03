@@ -141,6 +141,9 @@ private:
 	std::set<TilePath> composite_tiles;
 	std::set<TilePath> required_composite_tiles;
 
+	// count of render tiles (= tree leaves) in a composite tile
+	std::map<TilePath, int> containing_render_tiles;
+
 	void initMapSize();
 	void findRenderTiles(const mc::World& world);
 	void findRequiredCompositeTiles(const std::set<TilePos>& render_tiles,
@@ -168,6 +171,8 @@ public:
 
 	int getRequiredRenderTilesCount() const;
 	int getRequiredCompositeTilesCount() const;
+
+	int getContainingRenderTiles(const TilePath& tile) const;
 
 	int findRenderTasks(int worker_count, std::vector<std::map<TilePath, int> >& workers) const;
 };

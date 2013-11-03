@@ -303,9 +303,21 @@ void TileSet::setDepth(int depth) {
 	// clear already calculated composite tiles and recalculate them
 	composite_tiles.clear();
 	required_composite_tiles.clear();
+	containing_render_tiles.clear();
 
 	findRequiredCompositeTiles(render_tiles, composite_tiles);
 	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
+
+	// go through all required render tiles
+	// set the containing render tiles for every parent composite tile +1
+	// to have the number of required render tiles in every composite tile
+	for (auto it = required_render_tiles.begin(); it != required_render_tiles.end(); ++it) {
+		TilePath tile = TilePath::byTilePos(*it, depth);
+		while (tile.getDepth() != 0) {
+			tile = tile.parent();
+			containing_render_tiles[tile]++;
+		}
+	}
 }
 
 /**
@@ -452,19 +464,8 @@ int TileSet::getRequiredCompositeTilesCount() const {
 	return required_composite_tiles.size();
 }
 
-/**
- * This function counts the render tiles, which are in composite tile. The childs map is a map
- * with tiles and a list of their childs.
- */
-int countTiles(const TilePath& tile, std::map<TilePath, std::set<TilePath> >& childs, int level) {
-	int count = 0;
-	if (tile.getDepth() == level)
-		return 1;
-	for (std::set<TilePath>::const_iterator it = childs[tile].begin(); it != childs[tile].end();
-			++it) {
-		count += countTiles(*it, childs, level);
-	}
-	return count;
+int TileSet::getContainingRenderTiles(const TilePath& tile) const {
+	return containing_render_tiles.at(tile);
 }
 
 /**
@@ -602,8 +603,8 @@ int TileSet::findRenderTasks(int worker_count,
 			// create tasks
 			Task task;
 			task.tile = *it;
-			// count render tiles for this task
-			task.costs = countTiles(*it, tile_childs, depth);
+			// get the number of render tiles to render
+			task.costs = containing_render_tiles.at(*it);
 			tasks.push_back(task);
 		}
 
@@ -622,8 +623,7 @@ int TileSet::findRenderTasks(int worker_count,
 		for (int i = 0; i < worker_count; i++) {
 			TaskWorker w = workers_zoomlevel[i];
 			for (size_t j = 0; j < w.tasks.size(); j++)
-				assignment.workers[i][w.tasks[j].tile] = countTiles(w.tasks[j].tile,
-						tile_childs, depth);
+				assignment.workers[i][w.tasks[j].tile] = containing_render_tiles.at(w.tasks[j].tile);
 		}
 		assignments.push_back(assignment);
 
