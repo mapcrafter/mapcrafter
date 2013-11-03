@@ -51,7 +51,7 @@ void DummyProgressHandler::setValue(int value) {
 
 ProgressBar::ProgressBar(int max, bool animated)
 		: animated(animated),
-		  start(time(NULL)), last_update(0), last_percent(0) {
+		  start(time(NULL)), last_update(0), last_value(0), last_percent(0) {
 	setMax(max);
 }
 
@@ -67,14 +67,14 @@ bool ProgressBar::isAnimated() const {
 }
 
 void ProgressBar::setValue(int value) {
-	update(value, this->value > value);
+	update(value);
 	this->value = value;
 }
 
 void ProgressBar::update(int value, bool force) {
 	// check when animated if we are at 100% and this is this the first time we are at 100%
 	// so we show the progress bar only one time at the end
-	if (!force && !animated && (value != max || (value == max && this->value == max)))
+	if (!force && !animated && (value != max || (value == max && last_value == max)))
 		return;
 	int now = time(NULL);
 	// check if the time since the last show and the change was big enough to show a progress
@@ -83,7 +83,7 @@ void ProgressBar::update(int value, bool force) {
 		return;
 
 	// now calculate the speed
-	double speed = (double) (value - this->value) / (now - last_update);
+	double speed = (double) (value - last_value) / (now - last_update);
 	if (value == max)
 		// at the end an average speed
 		speed = (double) value / (now - start);
@@ -114,7 +114,7 @@ void ProgressBar::update(int value, bool force) {
 		std::cout << std::endl;
 	// set this as last shown
 	last_update = now;
-	this->value = value;
+	last_value = value;
 	last_percent = percent;
 }
 

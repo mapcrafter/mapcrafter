@@ -62,7 +62,9 @@ private:
 	int start;
 	// time of last update
 	int last_update;
-	// current percentage of last update
+	// value of last update
+	int last_value;
+	// percentage of last update
 	int last_percent;
 public:
 	ProgressBar(int max = 0, bool animated = true);
