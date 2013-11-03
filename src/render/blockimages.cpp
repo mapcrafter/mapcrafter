@@ -308,7 +308,7 @@ Image BlockImage::buildImage(double dleft, double dright) const {
 }
 
 BlockImages::BlockImages()
-		: texture_size(16), rotation(0), render_unknown_blocks(false),
+		: texture_size(12), rotation(0), render_unknown_blocks(false),
 		  render_leaves_transparent(false), max_water(99),
 		  dleft(0.75), dright(0.6) {
 }
