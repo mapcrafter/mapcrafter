@@ -39,7 +39,7 @@ namespace render {
 class RenderWorker {
 private:
 	// cache and tileset of the map to render
-	std::shared_ptr<mc::WorldCache> world;
+	std::shared_ptr<mc::WorldCache> worldcache;
 	std::shared_ptr<TileSet> tileset;
 	
 	// configuration of the map to render
@@ -56,11 +56,12 @@ private:
 	
 	// progress handler
 	std::shared_ptr<util::IProgressHandler> progress;
+	std::shared_ptr<bool> finished;
 public:
 	RenderWorker();
 	~RenderWorker();
 
-	void setWorld(std::shared_ptr<mc::WorldCache> world,
+	void setWorld(std::shared_ptr<mc::WorldCache> worldcache,
 			std::shared_ptr<TileSet> tileset);
 	
 	void setMapConfig(std::shared_ptr<BlockImages> blockimages,
@@ -69,7 +70,8 @@ public:
 
 	void setWork(const std::set<TilePath>& tiles, const std::set<TilePath>& tiles_skip);
 
-	void setProgressHandler(std::shared_ptr<util::IProgressHandler> progress);
+	void setProgressHandler(std::shared_ptr<util::IProgressHandler> progress,
+			std::shared_ptr<bool> finished = std::shared_ptr<bool>(new bool));
 
 	void saveTile(const TilePath& tile, const Image& image);
 	void renderRecursive(const TilePath& path, Image& image);

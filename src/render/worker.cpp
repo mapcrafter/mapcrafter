@@ -31,9 +31,9 @@ RenderWorker::~RenderWorker() {
 
 }
 
-void RenderWorker::setWorld(std::shared_ptr<mc::WorldCache> world,
+void RenderWorker::setWorld(std::shared_ptr<mc::WorldCache> worldcache,
 		std::shared_ptr<TileSet> tileset) {
-	this->world = world;
+	this->worldcache = worldcache;
 	this->tileset = tileset;
 }
 
@@ -50,8 +50,10 @@ void RenderWorker::setWork(const std::set<TilePath>& tiles, const std::set<TileP
 	this->tiles_skip = tiles_skip;
 }
 
-void RenderWorker::setProgressHandler(std::shared_ptr<util::IProgressHandler> progress) {
+void RenderWorker::setProgressHandler(std::shared_ptr<util::IProgressHandler> progress,
+		std::shared_ptr<bool> finished) {
 	this->progress = progress;
+	this->finished = finished;
 }
 
 void RenderWorker::saveTile(const TilePath& tile, const Image& image) {
@@ -144,13 +146,14 @@ void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 }
 
 void RenderWorker::operator()() {
-	renderer = TileRenderer(world, blockimages, map_config);
+	renderer = TileRenderer(worldcache, blockimages, map_config);
 	
 	int work = 0;
 	for (auto it = tiles.begin(); it != tiles.end(); ++it)
 		work += tileset->getContainingRenderTiles(*it);
 	progress->setMax(work);
 	progress->setValue(0);
+	*finished = false;
 	
 	Image image;
 	// iterate through the start composite tiles
@@ -161,6 +164,8 @@ void RenderWorker::operator()() {
 		// clear image
 		image.clear();
 	}
+
+	*finished = true;
 }
 
 } /* namespace render */

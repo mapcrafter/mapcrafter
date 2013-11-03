@@ -24,6 +24,7 @@
 #include <array>
 #include <fstream>
 #include <ctime>
+#include <thread>
 #include <pthread.h>
 
 #if defined(__WIN32__) || defined(__WIN64__)
@@ -377,7 +378,7 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 /**
  * Renders render tiles and composite tiles.
  */
-void RenderManager::render(const config2::MapSection& map, const std::string& output_dir,
+void RenderManager::render(const config2::MapSection& map_config, const std::string& output_dir,
 		const mc::World& world, std::shared_ptr<TileSet> tileset,
 		std::shared_ptr<BlockImages> blockimages) {
 	if(tileset->getRequiredCompositeTilesCount() == 0) {
@@ -396,7 +397,7 @@ void RenderManager::render(const config2::MapSection& map, const std::string& ou
 		// create the worker and set required data
 		RenderWorker worker;
 		worker.setWorld(cache, tileset);
-		worker.setMapConfig(blockimages, map, output_dir);
+		worker.setMapConfig(blockimages, map_config, output_dir);
 
 		std::set<TilePath> tiles, tiles_skip;
 		tiles.insert(TilePath());
@@ -409,7 +410,7 @@ void RenderManager::render(const config2::MapSection& map, const std::string& ou
 		worker();
 		progress->finish();
 	} else {
-		renderMultithreaded(map, output_dir, world, tileset, blockimages);
+		renderMultithreaded(map_config, output_dir, world, tileset, blockimages);
 	}
 }
 
@@ -441,7 +442,7 @@ void* runWorker(void* settings_ptr) {
 /**
  * This method starts the render threads when multithreading is enabled.
  */
-void RenderManager::renderMultithreaded(const config2::MapSection& map,
+void RenderManager::renderMultithreaded(const config2::MapSection& map_config,
 		const std::string& output_dir, const mc::World& world, std::shared_ptr<TileSet> tileset,
 		std::shared_ptr<BlockImages> blockimages) {
 	// a list of workers
@@ -449,6 +450,61 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map,
 	// find task/worker assignemt
 	int remaining = tileset->findRenderTasks(opts.jobs, workers);
 
+	std::vector<std::thread> threads;
+	std::vector<std::shared_ptr<mc::WorldCache>> threads_worldcache;
+	std::vector<std::shared_ptr<util::IProgressHandler>> threads_progress;
+	std::vector<std::shared_ptr<bool>> threads_finished;
+
+	for (int i = 0; i < opts.jobs; i++) {
+		std::shared_ptr<mc::WorldCache> worldcache(new mc::WorldCache(world));
+		std::shared_ptr<util::IProgressHandler> progress(new util::DummyProgressHandler);
+		std::shared_ptr<bool> finished(new bool);
+
+		threads_worldcache.push_back(worldcache);
+		threads_progress.push_back(progress);
+		threads_finished.push_back(finished);
+
+		RenderWorker worker;
+		worker.setWorld(worldcache, tileset);
+		worker.setMapConfig(blockimages, map_config, output_dir);
+
+		std::set<TilePath> tiles, tiles_skip;
+		int work = 0;
+		for (auto it = workers[i].begin(); it != workers[i].end(); ++it) {
+			tiles.insert(it->first);
+			work += it->second;
+		}
+		worker.setWork(tiles, tiles_skip);
+		worker.setProgressHandler(progress, finished);
+
+		threads.push_back(std::thread(worker));
+
+		std::cout << "Thread " << i << " renders " << work << " tiles" << std::endl;
+	}
+
+	util::ProgressBar progress;
+	progress.setMax(tileset->getContainingRenderTiles(TilePath()));
+
+	while (1) {
+		int value = 0;
+		bool finished = true;
+		for (int i = 0; i < opts.jobs; i++) {
+			value += threads_progress[i]->getValue();
+			finished = finished && *threads_finished[i];
+		}
+		progress.setValue(value);
+
+		if (finished)
+			break;
+
+		sleep(1);
+	}
+
+	// make sure all threads are finished
+	for (int i = 0;  i < opts.jobs; i++)
+		threads[i].join();
+
+	/*
 	// create render settings for the remaining composite tiles at the end
 	RecursiveRenderSettings remaining_settings(*tileset, TileRenderer());
 	remaining_settings.tile_size = blockimages->getTileSize();
@@ -464,7 +520,7 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map,
 		// create all informations needed for the worker
 
 		std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(world));
-		TileRenderer* renderer = new TileRenderer(cache, blockimages, map);
+		TileRenderer* renderer = new TileRenderer(cache, blockimages, map_config);
 		RecursiveRenderSettings render_settings(*tileset, *renderer);
 		render_settings.tile_size = blockimages->getTileSize();
 		render_settings.output_dir = output_dir;
@@ -529,6 +585,7 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map,
 	remaining_settings.progress_bar = util::ProgressBar(remaining, !opts.batch);
 	renderRecursive(remaining_settings, TilePath(), tile);
 	remaining_settings.progress_bar.finish();
+	*/
 }
 
 /**
@@ -619,25 +676,24 @@ bool RenderManager::run() {
 	// go through all maps
 	for (size_t i = 0; i < config_maps.size(); i++) {
 		config2::MapSection map = config_maps[i];
-		std::string mapname = map.getShortName();
-		std::string worldname = map.getWorld();
+		std::string map_name = map.getShortName();
+		std::string world_name = map.getWorld();
 		// continue, if all rotations for this map are skipped
-		if (confighelper.isCompleteRenderSkip(mapname))
+		if (confighelper.isCompleteRenderSkip(map_name))
 			continue;
 
 		int i_from = i+1;
-		std::cout << "(" << i_from << "/" << i_to << ") Rendering map "
-				<< map.getShortName() << " (\"" << map.getLongName() << "\"):"
-				<< std::endl;
+		std::cout << "(" << i_from << "/" << i_to << ") Rendering map " << map.getShortName();
+		std::cout << " (\"" << map.getLongName() << "\"):" << std::endl;
 
-		if (!fs::is_directory(config.getOutputDir() / mapname))
-			fs::create_directories(config.getOutputDir() / mapname);
+		if (!fs::is_directory(config.getOutputDir() / map_name))
+			fs::create_directories(config.getOutputDir() / map_name);
 
-		std::string settings_filename = config.getOutputPath(mapname + "/map.settings");
+		std::string settings_filename = config.getOutputPath(map_name + "/map.settings");
 		MapSettings settings;
 		// check if we have already an old settings file,
 		// but ignore the settings file if the whole world is force-rendered
-		bool old_settings = !confighelper.isCompleteRenderForce(mapname) && fs::exists(settings_filename);
+		bool old_settings = !confighelper.isCompleteRenderForce(map_name) && fs::exists(settings_filename);
 		if (old_settings) {
 			if (!settings.read(settings_filename)) {
 				std::cerr << "Error: Unable to load old map.settings file!" << std::endl << std::endl;
@@ -647,7 +703,7 @@ bool RenderManager::run() {
 			// check if the config file was not changed when rendering incrementally
 			if (!settings.equalsMapConfig(map)) {
 				std::cerr << "Error: The configuration does not equal the settings of the already rendered map." << std::endl;
-				std::cerr << "Force-render the whole map (" << mapname
+				std::cerr << "Force-render the whole map (" << map_name
 						<< ") or reset the configuration to the old settings."
 						<< std::endl << std::endl;
 				continue;
@@ -656,7 +712,7 @@ bool RenderManager::run() {
 			// for force-render rotations, set the last render time to 0
 			// to render all tiles
 			for (int i = 0; i < 4; i++)
-				if (confighelper.getRenderBehavior(mapname, i) == config2::MapcrafterConfigHelper::RENDER_FORCE)
+				if (confighelper.getRenderBehavior(map_name, i) == config2::MapcrafterConfigHelper::RENDER_FORCE)
 					settings.last_render[i] = 0;
 		} else {
 			// if we don't have a settings file or force-render the whole map
@@ -694,7 +750,7 @@ bool RenderManager::run() {
 			continue;
 		*/
 
-		int world_zoomlevels = confighelper.getWorldZoomlevel(worldname);
+		int world_zoomlevels = confighelper.getWorldZoomlevel(world_name);
 		// check if the max zoom level has increased
 		if (old_settings && settings.max_zoom < world_zoomlevels) {
 			std::cout << "The max zoom level was increased from " << settings.max_zoom
@@ -731,7 +787,7 @@ bool RenderManager::run() {
 		settings.max_zoom = world_zoomlevels;
 		settings.write(settings_filename);
 		// and also to the template
-		confighelper.setMapZoomlevel(mapname, settings.max_zoom);
+		confighelper.setMapZoomlevel(map_name, settings.max_zoom);
 		writeTemplateIndexHtml();
 
 		// go through the rotations and render them
@@ -748,9 +804,9 @@ bool RenderManager::run() {
 					== config2::MapcrafterConfigHelper::RENDER_SKIP)
 				continue;
 
-			std::cout << "(" << i_from << "." << j_from << "/" << i_from << "."
-					<< j_to << ") Rendering rotation " << config2::ROTATION_NAMES[rotation]
-					<< ":" << std::endl;
+			std::cout << "(" << i_from << "." << j_from << "/" << i_from << ".";
+			std::cout << j_to << ") Rendering rotation " << config2::ROTATION_NAMES[rotation];
+			std::cout << ":" << std::endl;
 
 			if (settings.last_render[rotation] != 0) {
 				time_t t = settings.last_render[*it];
@@ -770,8 +826,8 @@ bool RenderManager::run() {
 				break;
 			}
 
-			std::string output_dir = config.getOutputPath(mapname + "/" + config2::ROTATION_NAMES_SHORT[rotation]);
-			render(map, output_dir, worlds[worldname][rotation], tilesets[worldname][rotation], blockimages);
+			std::string output_dir = config.getOutputPath(map_name + "/" + config2::ROTATION_NAMES_SHORT[rotation]);
+			render(map, output_dir, worlds[world_name][rotation], tilesets[world_name][rotation], blockimages);
 
 			// update the settings file
 			settings.rotations[rotation] = true;
@@ -779,9 +835,9 @@ bool RenderManager::run() {
 			settings.write(settings_filename);
 
 			int took = time(NULL) - start;
-			std::cout << "(" << i_from << "." << j_from << "/" << i_from << "."
-					<< j_to << ") Rendering rotation " << config::ROTATION_NAMES[*it]
-					<< " took " << took << " seconds." << std::endl << std::endl;
+			std::cout << "(" << i_from << "." << j_from << "/" << i_from << "." << j_to;
+			std::cout << ") Rendering rotation " << config::ROTATION_NAMES[*it];
+			std::cout << " took " << took << " seconds." << std::endl << std::endl;
 
 		}
 	}
