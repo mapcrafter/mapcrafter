@@ -146,7 +146,10 @@ void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 void RenderWorker::operator()() {
 	renderer = TileRenderer(world, blockimages, map_config);
 	
-	progress->setMax(42); // TODO
+	int work = 0;
+	for (auto it = tiles.begin(); it != tiles.end(); ++it)
+		work += tileset->getContainingRenderTiles(*it);
+	progress->setMax(work);
 	progress->setValue(0);
 	
 	Image image;
