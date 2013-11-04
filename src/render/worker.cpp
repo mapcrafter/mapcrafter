@@ -75,6 +75,7 @@ void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 			std::cerr << "Unable to read tile " << tile.toString() << " from " << file << std::endl;
 			std::cerr << tileset->isTileRequired(tile) << " " << tiles_skip.count(tile) << std::endl;
 		}
+		progress->setValue(progress->getValue() + tileset->getContainingRenderTiles(tile));
 	} else if (tile.getDepth() == tileset->getDepth()) {
 		// this tile is a render tile, render it
 		renderer.renderTile(tile.getTilePos(), image);

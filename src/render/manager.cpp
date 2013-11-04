@@ -445,6 +445,9 @@ void* runWorker(void* settings_ptr) {
 void RenderManager::renderMultithreaded(const config2::MapSection& map_config,
 		const std::string& output_dir, const mc::World& world, std::shared_ptr<TileSet> tileset,
 		std::shared_ptr<BlockImages> blockimages) {
+	std::cout << "Rendering " << tileset->getContainingRenderTiles(TilePath());
+	std::cout << " render tiles on zoom level " << tileset->getDepth() << "." << std::endl;
+
 	// a list of workers
 	std::vector<std::map<TilePath, int> > workers;
 	// find task/worker assignemt
@@ -454,6 +457,9 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map_config,
 	std::vector<std::shared_ptr<mc::WorldCache>> threads_worldcache;
 	std::vector<std::shared_ptr<util::IProgressHandler>> threads_progress;
 	std::vector<std::shared_ptr<bool>> threads_finished;
+
+	std::set<TilePath> remaining_tiles, remaining_tiles_skip;
+	remaining_tiles.insert(TilePath());
 
 	for (int i = 0; i < opts.jobs; i++) {
 		std::shared_ptr<mc::WorldCache> worldcache(new mc::WorldCache(world));
@@ -472,6 +478,7 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map_config,
 		int work = 0;
 		for (auto it = workers[i].begin(); it != workers[i].end(); ++it) {
 			tiles.insert(it->first);
+			remaining_tiles_skip.insert(it->first);
 			work += it->second;
 		}
 		worker.setWork(tiles, tiles_skip);
@@ -479,7 +486,7 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map_config,
 
 		threads.push_back(std::thread(worker));
 
-		std::cout << "Thread " << i << " renders " << work << " tiles" << std::endl;
+		std::cout << "Thread " << i << " renders " << work << " tiles." << std::endl;
 	}
 
 	util::ProgressBar progress;
@@ -503,6 +510,19 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map_config,
 	// make sure all threads are finished
 	for (int i = 0;  i < opts.jobs; i++)
 		threads[i].join();
+	progress.finish();
+
+	std::cout << "Rendering remaining " << remaining << " composite tiles." << std::endl;
+
+	RenderWorker worker;
+	worker.setWorld(std::make_shared<mc::WorldCache>(world), tileset);
+	worker.setMapConfig(blockimages, map_config, output_dir);
+	worker.setWork(remaining_tiles, remaining_tiles_skip);
+
+	std::shared_ptr<util::ProgressBar> remaining_progress(new util::ProgressBar);
+	worker.setProgressHandler(remaining_progress);
+	worker();
+	remaining_progress->finish();
 
 	/*
 	// create render settings for the remaining composite tiles at the end
