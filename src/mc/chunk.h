@@ -28,6 +28,9 @@
 namespace mapcrafter {
 namespace mc {
 
+// chunk height in sections, 16 per default
+const int CHUNK_HEIGHT = 16;
+
 /**
  * A 16x16x16 section of a chunk.
  */
@@ -60,8 +63,8 @@ private:
 	int rotation;
 
 	// the index of the chunk sections in the sections array
-	// or -1 if section does not exists
-	int section_offsets[16];
+	// or -1 if section does not exist
+	int section_offsets[CHUNK_HEIGHT];
 	// the array with the sections, see indexes above
 	std::vector<ChunkSection> sections;
 

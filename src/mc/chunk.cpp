@@ -97,6 +97,8 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 			continue;
 		
 		nbt::TagByte& y = section_tag.findTag<nbt::TagByte>("Y");
+		if (y.payload >= CHUNK_HEIGHT)
+			continue;
 		nbt::TagByteArray& blocks = section_tag.findTag<nbt::TagByteArray>("Blocks");
 		nbt::TagByteArray& data = section_tag.findTag<nbt::TagByteArray>("Data");
 
