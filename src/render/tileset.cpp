@@ -321,27 +321,47 @@ void TileSet::setDepth(int depth) {
 }
 
 /**
+ * Calculates the tiles a row and column covers.
+ */
+void addRowColTiles(int row, int col, std::set<TilePos>& tiles) {
+	// the tiles have are 2 * TILE_WIDTH columns wide
+	// and 4 * TILE_WIDTH row tall
+	// calculate the approximate position of the tile
+	int x = col / (2 * TILE_WIDTH);
+	int y = row / (4 * TILE_WIDTH);
+
+	// add this tile
+	tiles.insert(TilePos(x, y));
+
+	// check if this row/col is on the border of two tiles
+	bool edge_col = col % (2 * TILE_WIDTH) == 0;
+	bool edge_row = row % (4 * TILE_WIDTH) == 0;
+	// if yes, we have to add the neighbor tiles
+	if (edge_col)
+		tiles.insert(TilePos(x-1, y));
+	if (edge_row)
+		tiles.insert(TilePos(x, y-1));
+	if (edge_col && edge_row)
+		tiles.insert(TilePos(x-1, y-1));
+}
+
+/**
  * This function calculates the tiles a chunk covers.
  */
 void getChunkTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles) {
 	// at first get row and column of the top of the chunk
 	int row = chunk.getRow();
 	int col = chunk.getCol();
-	// then get from this the tile position
-	// (every tile is 2 * TILE_WIDTH columns wide and 4 * TILE_WIDTH rows tall)
-	int base_x = col / (2 * TILE_WIDTH);
-	int base_y = row / (4 * TILE_WIDTH);
-	// now add all tiles:
-	// a chunk is 9 tiles tall
-	// and one or two tiles wide (two tiles if column is even)
 
 	// TODO fix this for different TILE_WIDTH
-	// TODO fix this for different CHUNK_HEIGHT
-	for (int tile_y = base_y - 1; tile_y <= base_y + 8; tile_y++) {
-		tiles.insert(TilePos(base_x, tile_y));
-		if (col % 2 == 0)
-			tiles.insert(TilePos(base_x - 1, tile_y));
-	}
+
+	// then we go through all sections of the chunk plus one on the bottom side
+	// and add the tiles the individual sections cover,
+
+	// plus one on the bottom side because with chunk section is here
+	// only the top of a chunk section meant
+	for (int i = 0; i <= mc::CHUNK_HEIGHT; i++)
+		addRowColTiles(row + 2*i, col, tiles);
 }
 
 /**

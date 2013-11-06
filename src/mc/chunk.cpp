@@ -132,12 +132,12 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
  */
 void Chunk::clear() {
 	sections.clear();
-	for (int i = 0; i < 16; i++)
+	for (int i = 0; i < CHUNK_HEIGHT; i++)
 		section_offsets[i] = -1;
 }
 
 bool Chunk::hasSection(int section) const {
-	return section_offsets[section] != -1;
+	return section < CHUNK_HEIGHT && section_offsets[section] != -1;
 }
 
 void rotateBlockPos(int& x, int& z, int rotation) {
@@ -155,7 +155,7 @@ void rotateBlockPos(int& x, int& z, int rotation) {
  */
 uint16_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 	int section = pos.y / 16;
-	if (section_offsets[section] == -1)
+	if (section >= CHUNK_HEIGHT || section_offsets[section] == -1)
 		return 0;
 	// FIXME sometimes this happens, fix this
 	if (sections.size() > 16 || sections.size() <= (unsigned) section_offsets[section]) {
@@ -178,7 +178,7 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 
 uint8_t Chunk::getData(const LocalBlockPos& pos, int array) const {
 	int section = pos.y / 16;
-	if (section_offsets[section] == -1) {
+	if (section >= CHUNK_HEIGHT || section_offsets[section] == -1) {
 		if (array == 2)
 			return 15;
 		return 0;

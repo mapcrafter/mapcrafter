@@ -40,7 +40,7 @@ TileTopBlockIterator::TileTopBlockIterator(const TilePos& tile, int block_size,
 			2 * TILE_WIDTH * tile.getX() + 2);
 
 	// now get the first visible block from this chunk in this tile
-	top = mc::LocalBlockPos(8, 6, mc::CHUNK_HEIGHT * 16).toGlobalPos(topright_chunk);
+	top = mc::LocalBlockPos(8, 6, mc::CHUNK_HEIGHT * 16 - 1).toGlobalPos(topright_chunk);
 	// and set this as start
 	current = top;
 
