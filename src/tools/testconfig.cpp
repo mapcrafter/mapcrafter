@@ -22,7 +22,7 @@
 #include <iostream>
 #include <string>
 
-namespace config = mapcrafter::config2;
+namespace config = mapcrafter::config;
 
 int main(int argc, char **argv) {
 	if (argc < 2) {

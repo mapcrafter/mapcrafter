@@ -25,7 +25,7 @@
 #include <sstream>
 #include <boost/test/unit_test.hpp>
 
-namespace config = mapcrafter::config2;
+namespace config = mapcrafter::config;
 
 BOOST_AUTO_TEST_CASE(config_test) {
 	/*
