@@ -318,7 +318,7 @@ void RenderManager::render(const config2::MapSection& map_config, const std::str
 void RenderManager::renderMultithreaded(const config2::MapSection& map_config,
 		const std::string& output_dir, const mc::World& world, std::shared_ptr<TileSet> tileset,
 		std::shared_ptr<BlockImages> blockimages) {
-	std::cout << "Rendering " << tileset->getContainingRenderTiles(TilePath());
+	std::cout << "Rendering " << tileset->getRequiredRenderTilesCount();
 	std::cout << " render tiles on zoom level " << tileset->getDepth() << "." << std::endl;
 
 	// a list of workers
@@ -581,9 +581,8 @@ bool RenderManager::run() {
 		}
 
 		/*
-		// now go through the rotations and set the max zoom level
-		for (std::set<int>::iterator it = world.rotations.begin();
-				it != world.rotations.end(); ++it) {
+		// now go through the rotations and scan required tiles
+		for (std::set<int>::iterator it = world.rotations.begin(); it != world.rotations.end(); ++it) {
 			tilesets[*it].setDepth(depth);
 
 			fs::path output_dir = config.getOutputDir() / world.name_short / config::ROTATION_NAMES_SHORT[*it];
@@ -613,16 +612,16 @@ bool RenderManager::run() {
 		writeTemplateIndexHtml();
 
 		// go through the rotations and render them
-		int j_from = 0;
-		int j_to = map.getRotations().size();
 		auto rotations = map.getRotations();
+		int j_from = 0;
+		int j_to = rotations.size();
 		for (auto it = rotations.begin(); it != rotations.end(); ++it) {
 			j_from++;
 
 			int rotation = *it;
 
 			// continue if we should skip this rotation
-			if (confighelper.getRenderBehavior(map.getShortName(), rotation)
+			if (confighelper.getRenderBehavior(map_name, rotation)
 					== config2::MapcrafterConfigHelper::RENDER_SKIP)
 				continue;
 
@@ -631,10 +630,22 @@ bool RenderManager::run() {
 			std::cout << ":" << std::endl;
 
 			if (settings.last_render[rotation] != 0) {
-				time_t t = settings.last_render[*it];
+				time_t t = settings.last_render[rotation];
 				char buffer[100];
 				strftime(buffer, 100, "%d %b %Y, %H:%M:%S", localtime(&t));
 				std::cout << "Last rendering was on " << buffer << "." << std::endl;
+			}
+
+			std::string output_dir = config.getOutputPath(map_name + "/" + config2::ROTATION_NAMES_SHORT[rotation]);
+			// if incremental render: scan which tiles might have changed
+			std::shared_ptr<TileSet> tileset(new TileSet(*tilesets[world_name][rotation]));
+			if (confighelper.getRenderBehavior(map_name, rotation)
+					== config2::MapcrafterConfigHelper::RENDER_AUTO) {
+				std::cout << "Scanning required tiles..." << std::endl;
+				//if (map.get.incremental_detection == "filetimes")
+					tileset->scanRequiredByFiletimes(output_dir);
+				//else
+				//	tileset->scanRequiredByTimestamp(settings.last_render[rotation]);
 			}
 
 			int start = time(NULL);
@@ -648,8 +659,7 @@ bool RenderManager::run() {
 				break;
 			}
 
-			std::string output_dir = config.getOutputPath(map_name + "/" + config2::ROTATION_NAMES_SHORT[rotation]);
-			render(map, output_dir, worlds[world_name][rotation], tilesets[world_name][rotation], blockimages);
+			render(map, output_dir, worlds[world_name][rotation], tileset, blockimages);
 
 			// update the settings file
 			settings.rotations[rotation] = true;
