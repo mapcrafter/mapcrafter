@@ -131,7 +131,7 @@ public:
 	TileRenderer();
 	TileRenderer(std::shared_ptr<mc::WorldCache> world,
 			std::shared_ptr<BlockImages> images,
-			const config2::MapSection& map);
+			const config::MapSection& map);
 	~TileRenderer();
 
 	void renderTile(const TilePos& pos, Image& tile);

@@ -38,7 +38,7 @@ void RenderWorker::setWorld(std::shared_ptr<mc::WorldCache> worldcache,
 }
 
 void RenderWorker::setMapConfig(std::shared_ptr<BlockImages> blockimages,
-		const config2::MapSection map_config,
+		const config::MapSection map_config,
 		const fs::path& map_output_dir) {
 	this->blockimages = blockimages;
 	this->map_config = map_config;

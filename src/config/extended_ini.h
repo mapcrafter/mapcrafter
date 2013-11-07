@@ -29,7 +29,7 @@
 #include <map>
 
 namespace mapcrafter {
-namespace config2 {
+namespace config {
 
 class ValidationMessage;
 

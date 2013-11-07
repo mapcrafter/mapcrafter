@@ -133,7 +133,7 @@ TileRenderer::TileRenderer()
 }
 
 TileRenderer::TileRenderer(std::shared_ptr<mc::WorldCache> world,
-		std::shared_ptr<BlockImages> images, const config2::MapSection& map)
+		std::shared_ptr<BlockImages> images, const config::MapSection& map)
 		: state(world, images), render_biomes(map.renderBiomes()),
 		  water_preblit(map.getRendermode() != "daylight"
 				  && map.getRendermode() != "nightlight") {
@@ -443,6 +443,8 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 			// and if the chunk wasn't replaced in the cache (i.e. position changed)
 			if (state.chunk == nullptr || state.chunk->getPos() != current_chunk)
 				// get chunk if not
+				//if (!state.world->hasChunkSection(current_chunk, block.current.y))
+				//	continue;
 				state.chunk = state.world->getChunk(current_chunk);
 			if (state.chunk == nullptr) {
 				// here is nothing (= air),

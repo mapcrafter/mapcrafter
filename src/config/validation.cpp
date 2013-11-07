@@ -20,7 +20,7 @@
 #include "validation.h"
 
 namespace mapcrafter {
-namespace config2 {
+namespace config {
 
 std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg) {
 	switch (msg.getType()) {

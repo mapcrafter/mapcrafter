@@ -23,7 +23,7 @@
 #include "validation.h"
 
 namespace mapcrafter {
-namespace config2 {
+namespace config {
 
 bool WorldSection::parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation) {
 	if (input_dir.load(validation, section, "input_dir")) {

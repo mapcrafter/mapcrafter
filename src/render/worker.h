@@ -44,7 +44,7 @@ private:
 	
 	// configuration of the map to render
 	std::shared_ptr<BlockImages> blockimages;
-	config2::MapSection map_config;
+	config::MapSection map_config;
 	fs::path map_output_dir;
 	// and a TileRenderer instance
 	TileRenderer renderer;
@@ -65,7 +65,7 @@ public:
 			std::shared_ptr<TileSet> tileset);
 	
 	void setMapConfig(std::shared_ptr<BlockImages> blockimages,
-			const config2::MapSection map_config,
+			const config::MapSection map_config,
 			const fs::path& map_output_dir);
 
 	void setWork(const std::set<TilePath>& tiles, const std::set<TilePath>& tiles_skip);

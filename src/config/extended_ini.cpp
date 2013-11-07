@@ -24,7 +24,7 @@
 #include <fstream>
 
 namespace mapcrafter {
-namespace config2 {
+namespace config {
 
 int ConfigSection::getEntryIndex(const std::string& key) const {
 	for (size_t i = 0; i < entries.size(); i++)

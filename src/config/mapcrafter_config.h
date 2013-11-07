@@ -33,7 +33,7 @@
 namespace fs = boost::filesystem;
 
 namespace mapcrafter {
-namespace config2 {
+namespace config {
 
 class WorldSection {
 private:

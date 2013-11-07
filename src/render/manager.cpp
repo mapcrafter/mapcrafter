@@ -46,11 +46,11 @@ MapSettings::MapSettings()
  * This method reads the map settings from a file.
  */
 bool MapSettings::read(const std::string& filename) {
-	config2::ConfigFile config;
+	config::ConfigFile config;
 	if (!config.loadFile(filename))
 		return false;
 
-	config2::ConfigSection& root = config.getRootSection();
+	config::ConfigSection& root = config.getRootSection();
 
 	texture_size = root.get<int>("texture_size");
 	tile_size = root.get<int>("tile_size");
@@ -74,8 +74,8 @@ bool MapSettings::read(const std::string& filename) {
  * This method writes the map settings to a file.
  */
 bool MapSettings::write(const std::string& filename) const {
-	config2::ConfigFile config;
-	config2::ConfigSection& root = config.getRootSection();
+	config::ConfigFile config;
+	config::ConfigSection& root = config.getRootSection();
 
 	root.set("texture_size", util::str(texture_size));
 	root.set("tile_size", util::str(tile_size));
@@ -94,14 +94,14 @@ bool MapSettings::write(const std::string& filename) const {
 	return config.writeFile(filename);
 }
 
-bool MapSettings::equalsMapConfig(const config2::MapSection& map) const {
+bool MapSettings::equalsMapConfig(const config::MapSection& map) const {
 	return texture_size == map.getTextureSize()
 			&& render_unknown_blocks == map.renderUnknownBlocks()
 			&& render_leaves_transparent == map.renderLeavesTransparent()
 			&& render_biomes == map.renderBiomes();
 }
 
-MapSettings MapSettings::byMapConfig(const config2::MapSection& map) {
+MapSettings MapSettings::byMapConfig(const config::MapSection& map) {
 	MapSettings settings;
 
 	settings.texture_size = map.getTextureSize();
@@ -276,7 +276,7 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 /**
  * Renders render tiles and composite tiles.
  */
-void RenderManager::render(const config2::MapSection& map_config, const std::string& output_dir,
+void RenderManager::render(const config::MapSection& map_config, const std::string& output_dir,
 		const mc::World& world, std::shared_ptr<TileSet> tileset,
 		std::shared_ptr<BlockImages> blockimages) {
 	if(tileset->getRequiredCompositeTilesCount() == 0) {
@@ -315,7 +315,7 @@ void RenderManager::render(const config2::MapSection& map_config, const std::str
 /**
  * This method starts the render threads when multithreading is enabled.
  */
-void RenderManager::renderMultithreaded(const config2::MapSection& map_config,
+void RenderManager::renderMultithreaded(const config::MapSection& map_config,
 		const std::string& output_dir, const mc::World& world, std::shared_ptr<TileSet> tileset,
 		std::shared_ptr<BlockImages> blockimages) {
 	std::cout << "Rendering " << tileset->getRequiredRenderTilesCount();
@@ -403,7 +403,7 @@ void RenderManager::renderMultithreaded(const config2::MapSection& map_config,
  */
 bool RenderManager::run() {
 
-	config2::ValidationMap validation;
+	config::ValidationMap validation;
 	bool ok = config.parse(opts.config_file, validation);
 
 	if (validation.size() > 0) {
@@ -432,7 +432,7 @@ bool RenderManager::run() {
 		return false;
 	}
 
-	confighelper = config2::MapcrafterConfigHelper(config);
+	confighelper = config::MapcrafterConfigHelper(config);
 	confighelper.parseRenderBehaviors(opts.skip_all, opts.render_skip, opts.render_auto, opts.render_force);
 	auto config_worlds = config.getWorlds();
 	auto config_maps = config.getMaps();
@@ -497,7 +497,7 @@ bool RenderManager::run() {
 
 	// go through all maps
 	for (size_t i = 0; i < config_maps.size(); i++) {
-		config2::MapSection map = config_maps[i];
+		config::MapSection map = config_maps[i];
 		std::string map_name = map.getShortName();
 		std::string world_name = map.getWorld();
 		// continue, if all rotations for this map are skipped
@@ -534,7 +534,7 @@ bool RenderManager::run() {
 			// for force-render rotations, set the last render time to 0
 			// to render all tiles
 			for (int i = 0; i < 4; i++)
-				if (confighelper.getRenderBehavior(map_name, i) == config2::MapcrafterConfigHelper::RENDER_FORCE)
+				if (confighelper.getRenderBehavior(map_name, i) == config::MapcrafterConfigHelper::RENDER_FORCE)
 					settings.last_render[i] = 0;
 		} else {
 			// if we don't have a settings file or force-render the whole map
@@ -622,11 +622,11 @@ bool RenderManager::run() {
 
 			// continue if we should skip this rotation
 			if (confighelper.getRenderBehavior(map_name, rotation)
-					== config2::MapcrafterConfigHelper::RENDER_SKIP)
+					== config::MapcrafterConfigHelper::RENDER_SKIP)
 				continue;
 
 			std::cout << "(" << i_from << "." << j_from << "/" << i_from << ".";
-			std::cout << j_to << ") Rendering rotation " << config2::ROTATION_NAMES[rotation];
+			std::cout << j_to << ") Rendering rotation " << config::ROTATION_NAMES[rotation];
 			std::cout << ":" << std::endl;
 
 			if (settings.last_render[rotation] != 0) {
@@ -636,11 +636,11 @@ bool RenderManager::run() {
 				std::cout << "Last rendering was on " << buffer << "." << std::endl;
 			}
 
-			std::string output_dir = config.getOutputPath(map_name + "/" + config2::ROTATION_NAMES_SHORT[rotation]);
+			std::string output_dir = config.getOutputPath(map_name + "/" + config::ROTATION_NAMES_SHORT[rotation]);
 			// if incremental render: scan which tiles might have changed
 			std::shared_ptr<TileSet> tileset(new TileSet(*tilesets[world_name][rotation]));
 			if (confighelper.getRenderBehavior(map_name, rotation)
-					== config2::MapcrafterConfigHelper::RENDER_AUTO) {
+					== config::MapcrafterConfigHelper::RENDER_AUTO) {
 				std::cout << "Scanning required tiles..." << std::endl;
 				//if (map.get.incremental_detection == "filetimes")
 					tileset->scanRequiredByFiletimes(output_dir);
