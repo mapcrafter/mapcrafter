@@ -76,48 +76,6 @@ struct MapSettings {
 };
 
 /**
- * This are the options for the recursive rendering, i.e. function parameters, but this
- * are a lot of parameters and most of them don't change, so let's put them into a struct.
- */
-struct RecursiveRenderSettings {
-	TileSet tiles;
-	TileRenderer renderer;
-
-	int tile_size;
-	fs::path output_dir;
-	std::set<TilePath> skip_tiles;
-
-	int progress;
-	bool show_progress;
-	util::ProgressBar progress_bar;
-
-	RecursiveRenderSettings()
-		: tile_size(0), progress(0), show_progress(true) {}
-	RecursiveRenderSettings(const TileSet& tiles, const TileRenderer& renderer)
-		: tiles(tiles), renderer(renderer), tile_size(0), progress(0), show_progress(true) {}
-};
-
-/**
- * This are the options for a render worker.
- */
-struct RenderWorkerSettings {
-
-	RenderWorkerSettings()
-		: thread(-1), base_progress(0), finished(false) {}
-
-	int thread;
-	RecursiveRenderSettings render_settings;
-
-	std::set<TilePath> tiles;
-
-	int base_progress;
-	bool finished;
-};
-
-void saveTile(const fs::path& output_dir, const TilePath& path, const Image& tile);
-void renderRecursive(RecursiveRenderSettings& settings, const TilePath& path, Image& tile);
-
-/**
  * This does the whole rendering process.
  */
 class RenderManager {
