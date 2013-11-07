@@ -455,26 +455,38 @@ bool RenderManager::run() {
 
 	std::cout << "Scanning worlds..." << std::endl;
 
-	for (auto it = config_worlds.begin(); it != config_worlds.end(); ++it) {
+	for (auto world_it = config_worlds.begin(); world_it != config_worlds.end(); ++world_it) {
+		// at first check if we really need to scan this world
+		// scan only if the world is not skipped
+		bool used = false;
+		for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
+			if (!confighelper.isCompleteRenderSkip(map_it->getShortName())) {
+				used = true;
+				break;
+			}
+		}
+		if (!used)
+			continue;
+
 		int zoomlevels_max = 0;
-		auto rotations = confighelper.getUsedRotations(it->first);
-		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2) {
+		auto rotations = confighelper.getUsedRotations(world_it->first);
+		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
 			mc::World world;
-			if (!world.load(it->second.getInputDir().string(), *it2)) {
-				std::cerr << "Unable to load world " << it->first << "!" << std::endl;
+			if (!world.load(world_it->second.getInputDir().string(), *rotation_it)) {
+				std::cerr << "Unable to load world " << world_it->first << "!" << std::endl;
 				return false;
 			}
 			std::shared_ptr<TileSet> tileset(new TileSet(world));
 			zoomlevels_max = std::max(zoomlevels_max, tileset->getMinDepth());
 
-			worlds[it->first][*it2] = world;
-			tilesets[it->first][*it2] = tileset;
+			worlds[world_it->first][*rotation_it] = world;
+			tilesets[world_it->first][*rotation_it] = tileset;
 		}
 
 		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2) {
-			tilesets[it->first][*it2]->setDepth(zoomlevels_max);
+			tilesets[world_it->first][*it2]->setDepth(zoomlevels_max);
 		}
-		confighelper.setWorldZoomlevel(it->first, zoomlevels_max);
+		confighelper.setWorldZoomlevel(world_it->first, zoomlevels_max);
 	}
 
 	// write all template files
