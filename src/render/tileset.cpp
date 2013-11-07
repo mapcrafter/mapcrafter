@@ -244,82 +244,6 @@ TileSet::TileSet(const mc::World& world)
 TileSet::~TileSet() {
 }
 
-void TileSet::scan(const mc::World& world) {
-	findRenderTiles(world);
-	setDepth(min_depth);
-}
-
-/**
- * This method finds all render tiles, which where changed since a specific timestamp.
- */
-void TileSet::scanRequiredByTimestamp(int last_change) {
-	required_render_tiles.clear();
-
-	for (std::map<TilePos, int>::iterator it = tile_timestamps.begin();
-			it != tile_timestamps.end(); ++it) {
-		if (it->second >= last_change)
-			required_render_tiles.insert(it->first);
-	}
-
-	required_composite_tiles.clear();
-	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
-}
-
-/**
- * This method finds all render tiles, which are required based on the modification
- * times of the tile image files.
- */
-void TileSet::scanRequiredByFiletimes(const fs::path& output_dir) {
-	required_render_tiles.clear();
-
-	for (std::map<TilePos, int>::iterator it = tile_timestamps.begin();
-			it != tile_timestamps.end(); ++it) {
-		TilePath path = TilePath::byTilePos(it->first, depth);
-		fs::path file = output_dir / (path.toString() + ".png");
-		//std::cout << file.string() << " " << fs::exists(file) << std::endl ;
-		if (!fs::exists(file) || fs::last_write_time(file) <= it->second)
-			required_render_tiles.insert(it->first);
-	}
-
-	required_composite_tiles.clear();
-	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
-}
-
-int TileSet::getMinDepth() const {
-	return min_depth;
-}
-
-int TileSet::getDepth() const {
-	return depth;
-}
-
-void TileSet::setDepth(int depth) {
-	// only calculate the composite tiles new when the depth has changed
-	if (this->depth == depth || depth < min_depth)
-		return;
-
-	this->depth = depth;
-
-	// clear already calculated composite tiles and recalculate them
-	composite_tiles.clear();
-	required_composite_tiles.clear();
-	containing_render_tiles.clear();
-
-	findRequiredCompositeTiles(render_tiles, composite_tiles);
-	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
-
-	// go through all required render tiles
-	// set the containing render tiles for every parent composite tile +1
-	// to have the number of required render tiles in every composite tile
-	for (auto it = required_render_tiles.begin(); it != required_render_tiles.end(); ++it) {
-		TilePath tile = TilePath::byTilePos(*it, depth);
-		while (tile.getDepth() != 0) {
-			tile = tile.parent();
-			containing_render_tiles[tile]++;
-		}
-	}
-}
-
 /**
  * Calculates the tiles a row and column covers.
  */
@@ -449,6 +373,90 @@ void TileSet::findRequiredCompositeTiles(const std::set<TilePos>& render_tiles,
 		for (std::set<TilePath>::iterator it = tmp.begin(); it != tmp.end(); ++it)
 			tiles.insert(*it);
 	}
+}
+
+void TileSet::updateContainingRenderTiles() {
+	containing_render_tiles.clear();
+	// go through all required render tiles
+	// set the containing render tiles for every parent composite tile +1
+	// to have the number of required render tiles in every composite tile
+	for (auto it = required_render_tiles.begin(); it != required_render_tiles.end(); ++it) {
+		TilePath tile = TilePath::byTilePos(*it, depth);
+		while (tile.getDepth() != 0) {
+			tile = tile.parent();
+			containing_render_tiles[tile]++;
+		}
+	}
+}
+
+void TileSet::scan(const mc::World& world) {
+	findRenderTiles(world);
+	setDepth(min_depth);
+}
+
+/**
+ * This method finds all render tiles, which where changed since a specific timestamp.
+ */
+void TileSet::scanRequiredByTimestamp(int last_change) {
+	required_render_tiles.clear();
+
+	for (std::map<TilePos, int>::iterator it = tile_timestamps.begin();
+			it != tile_timestamps.end(); ++it) {
+		if (it->second >= last_change)
+			required_render_tiles.insert(it->first);
+	}
+
+	required_composite_tiles.clear();
+	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
+
+	updateContainingRenderTiles();
+}
+
+/**
+ * This method finds all render tiles, which are required based on the modification
+ * times of the tile image files.
+ */
+void TileSet::scanRequiredByFiletimes(const fs::path& output_dir) {
+	required_render_tiles.clear();
+
+	for (std::map<TilePos, int>::iterator it = tile_timestamps.begin();
+			it != tile_timestamps.end(); ++it) {
+		TilePath path = TilePath::byTilePos(it->first, depth);
+		fs::path file = output_dir / (path.toString() + ".png");
+		//std::cout << file.string() << " " << fs::exists(file) << std::endl ;
+		if (!fs::exists(file) || fs::last_write_time(file) <= it->second)
+			required_render_tiles.insert(it->first);
+	}
+
+	required_composite_tiles.clear();
+	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
+
+	updateContainingRenderTiles();
+}
+
+int TileSet::getMinDepth() const {
+	return min_depth;
+}
+
+int TileSet::getDepth() const {
+	return depth;
+}
+
+void TileSet::setDepth(int depth) {
+	// only calculate the composite tiles new when the depth has changed
+	if (this->depth == depth || depth < min_depth)
+		return;
+
+	this->depth = depth;
+
+	// clear already calculated composite tiles and recalculate them
+	composite_tiles.clear();
+	required_composite_tiles.clear();
+
+	findRequiredCompositeTiles(render_tiles, composite_tiles);
+	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
+
+	updateContainingRenderTiles();
 }
 
 bool TileSet::hasTile(const TilePath& path) const {

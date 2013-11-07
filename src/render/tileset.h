@@ -141,13 +141,14 @@ private:
 	std::set<TilePath> composite_tiles;
 	std::set<TilePath> required_composite_tiles;
 
-	// count of render tiles (= tree leaves) in a composite tile
+	// count of required render tiles (= tree leaves) in a composite tile
 	std::map<TilePath, int> containing_render_tiles;
 
-	void initMapSize();
 	void findRenderTiles(const mc::World& world);
 	void findRequiredCompositeTiles(const std::set<TilePos>& render_tiles,
 			std::set<TilePath>& tiles);
+
+	void updateContainingRenderTiles();
 public:
 	TileSet();
 	TileSet(const mc::World& World);
