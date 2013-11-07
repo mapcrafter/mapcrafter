@@ -21,6 +21,8 @@
 
 #include "../util.h"
 
+#include "chunk.h"
+
 #include <cmath>
 #include <cstdio>
 #include <boost/filesystem.hpp>
@@ -150,7 +152,7 @@ BlockPos::BlockPos(int x, int z, int y)
 }
 
 int BlockPos::getRow() const {
-	return z - x + (256 - y) * 4;
+	return z - x + (CHUNK_HEIGHT*16 - y) * 4;
 }
 
 int BlockPos::getCol() const {
@@ -214,7 +216,7 @@ LocalBlockPos::LocalBlockPos(const BlockPos& pos)
 }
 
 int LocalBlockPos::getRow() const {
-	return z - x + (256 - y) * 4;
+	return z - x + (CHUNK_HEIGHT*16 - y) * 4;
 }
 
 int LocalBlockPos::getCol() const {
