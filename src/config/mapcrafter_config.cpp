@@ -177,6 +177,9 @@ bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& val
 		if (hasMap(it->getName())) {
 			msgs.push_back(ValidationMessage::error("Map name '" + it->getName() + "' already used!"));
 			ok = false;
+		} else if (map.getWorld() != "" && !hasWorld(map.getWorld())) {
+			msgs.push_back(ValidationMessage::error("World '" + map.getWorld() + "' does not exist!"));
+			ok = false;
 		} else
 			maps.push_back(map);
 
@@ -259,13 +262,15 @@ MapcrafterConfigHelper::MapcrafterConfigHelper() {
 MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfigFile& config)
 	: config(config) {
 	auto maps = config.getMaps();
-	for (auto it = maps.begin(); it != maps.end(); ++it)
+	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it)
 		for (int i = 0; i < 4; i++)
-			render_behaviors[it->getShortName()][i] = RENDER_AUTO;
+			render_behaviors[map_it->getShortName()][i] = RENDER_AUTO;
 
 	auto worlds = config.getWorlds();
-	for (auto it = worlds.begin(); it != worlds.end(); ++it)
-		world_zoomlevels[it->first] = 0;
+	for (auto world_it = worlds.begin(); world_it != worlds.end(); ++world_it) {
+		world_rotations[world_it->first] = std::set<int>();
+		world_zoomlevels[world_it->first] = 0;
+	}
 }
 
 MapcrafterConfigHelper::~MapcrafterConfigHelper() {
@@ -301,8 +306,8 @@ const std::set<int>& MapcrafterConfigHelper::getUsedRotations(const std::string&
 }
 
 void MapcrafterConfigHelper::setUsedRotations(const std::string& world, const std::set<int>& rotations) {
-	for (auto it = rotations.begin(); it != rotations.end(); ++it)
-		world_rotations[world].insert(*it);
+	for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it)
+		world_rotations[world].insert(*rotation_it);
 }
 
 int MapcrafterConfigHelper::getWorldZoomlevel(const std::string& world) const {

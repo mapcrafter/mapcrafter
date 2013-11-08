@@ -445,17 +445,19 @@ bool RenderManager::run() {
 	// check for already existing rendered maps
 	// and get the (old) zoom levels for the template,
 	// so the user can still view the other maps while rendering
-	for (auto it = config_maps.begin(); it != config_maps.end(); ++it) {
-		confighelper.setUsedRotations(it->getWorld(), it->getRotations());
+	for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
+		confighelper.setUsedRotations(map_it->getWorld(), map_it->getRotations());
 
 		MapSettings settings;
-		if (settings.read(config.getOutputPath(it->getShortName() + "/map.settings")))
-			confighelper.setMapZoomlevel(it->getShortName(), settings.max_zoom);
+		if (settings.read(config.getOutputPath(map_it->getShortName() + "/map.settings")))
+			confighelper.setMapZoomlevel(map_it->getShortName(), settings.max_zoom);
 	}
 
 	std::cout << "Scanning worlds..." << std::endl;
 
 	for (auto world_it = config_worlds.begin(); world_it != config_worlds.end(); ++world_it) {
+		std::string world_name = world_it->first;
+
 		// at first check if we really need to scan this world
 		// scan only if the world is not skipped
 		bool used = false;
@@ -469,24 +471,24 @@ bool RenderManager::run() {
 			continue;
 
 		int zoomlevels_max = 0;
-		auto rotations = confighelper.getUsedRotations(world_it->first);
+		auto rotations = confighelper.getUsedRotations(world_name);
 		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
 			mc::World world;
 			if (!world.load(world_it->second.getInputDir().string(), *rotation_it)) {
-				std::cerr << "Unable to load world " << world_it->first << "!" << std::endl;
+				std::cerr << "Unable to load world " << world_name << "!" << std::endl;
 				return false;
 			}
 			std::shared_ptr<TileSet> tileset(new TileSet(world));
 			zoomlevels_max = std::max(zoomlevels_max, tileset->getMinDepth());
 
-			worlds[world_it->first][*rotation_it] = world;
-			tilesets[world_it->first][*rotation_it] = tileset;
+			worlds[world_name][*rotation_it] = world;
+			tilesets[world_name][*rotation_it] = tileset;
 		}
 
-		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2) {
-			tilesets[world_it->first][*it2]->setDepth(zoomlevels_max);
+		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
+			tilesets[world_name][*rotation_it]->setDepth(zoomlevels_max);
 		}
-		confighelper.setWorldZoomlevel(world_it->first, zoomlevels_max);
+		confighelper.setWorldZoomlevel(world_name, zoomlevels_max);
 	}
 
 	// write all template files
