@@ -377,6 +377,9 @@ void TileSet::findRequiredCompositeTiles(const std::set<TilePos>& render_tiles,
 
 void TileSet::updateContainingRenderTiles() {
 	containing_render_tiles.clear();
+	// initialize every composite tile with 0
+	for (auto it = composite_tiles.begin(); it != composite_tiles.end(); ++it)
+		containing_render_tiles[*it] = 0;
 	// go through all required render tiles
 	// set the containing render tiles for every parent composite tile +1
 	// to have the number of required render tiles in every composite tile
