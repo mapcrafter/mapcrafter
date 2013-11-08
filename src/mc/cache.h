@@ -127,11 +127,15 @@ private:
 	CacheStats regionstats;
 	CacheStats chunkstats;
 
+	std::map<ChunkPos, std::bitset<CHUNK_HEIGHT>> chunk_section_bitset;
+
 	int getRegionCacheIndex(const RegionPos& pos) const;
 	int getChunkCacheIndex(const ChunkPos& pos) const;
 
 public:
 	WorldCache(const World& world = World());
+
+	bool hasChunkSection(const ChunkPos& chunk, int block_y) const;
 
 	RegionFile* getRegion(const RegionPos& pos);
 	Chunk* getChunk(const ChunkPos& pos);

@@ -23,13 +23,15 @@
 #include "nbt.h"
 #include "pos.h"
 
+#include <bitset>
 #include <stdint.h>
 
 namespace mapcrafter {
 namespace mc {
 
 // chunk height in sections, 16 per default
-const int CHUNK_HEIGHT = 16;
+const int WORLD_LAYERS = 7;
+const int CHUNK_HEIGHT = 16*WORLD_LAYERS - 4*WORLD_LAYERS + 3 + 1;
 
 /**
  * A 16x16x16 section of a chunk.
@@ -65,6 +67,7 @@ private:
 	// the index of the chunk sections in the sections array
 	// or -1 if section does not exist
 	int section_offsets[CHUNK_HEIGHT];
+	std::bitset<CHUNK_HEIGHT> section_bitset;
 	// the array with the sections, see indexes above
 	std::vector<ChunkSection> sections;
 
@@ -82,6 +85,8 @@ public:
 	void clear();
 
 	bool hasSection(int section) const;
+	std::bitset<CHUNK_HEIGHT> getSectionBitset() const;
+
 	uint16_t getBlockID(const LocalBlockPos& pos) const;
 	uint8_t getBlockData(const LocalBlockPos& pos) const;
 

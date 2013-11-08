@@ -59,6 +59,16 @@ int WorldCache::getChunkCacheIndex(const ChunkPos& pos) const {
 	return (((pos.x + 131072) & CMASK) * CWIDTH + (pos.z + 131072)) & CMASK;
 }
 
+bool WorldCache::hasChunkSection(const ChunkPos& chunk, int block_y) const {
+	int section = block_y / 16;
+	if (section >= CHUNK_HEIGHT)
+		return false;
+	std::map<ChunkPos, std::bitset<CHUNK_HEIGHT>>::const_iterator it = chunk_section_bitset.find(chunk);
+	if (it == chunk_section_bitset.end())
+		return true;
+	return it->second[section];
+}
+
 RegionFile* WorldCache::getRegion(const RegionPos& pos) {
 	CacheEntry<RegionPos, RegionFile>& entry = regioncache[getRegionCacheIndex(pos)];
 	// check if region is already in cache
@@ -113,6 +123,7 @@ Chunk* WorldCache::getChunk(const ChunkPos& pos) {
 		return nullptr;
 	}
 
+	chunk_section_bitset[pos] = entry.value.getSectionBitset();
 	entry.used = true;
 	entry.key = pos;
 	//chunkstats.misses++;
