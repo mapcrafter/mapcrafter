@@ -80,7 +80,7 @@ bool MapSection::parse(const ConfigSection& section, const fs::path& config_dir,
 		if (texture_size.getValue() <= 0 || texture_size.getValue() > 32)
 			validation.push_back(ValidationMessage::error("'texture_size' must a number between 1 and 32!"));
 
-	render_unknown_blocks.load(validation, section, "render_unkown_blocks", false);
+	render_unknown_blocks.load(validation, section, "render_unknown_blocks", false);
 	render_leaves_transparent.load(validation, section, "render_leaves_transparent", true);
 	render_biomes.load(validation, section, "render_biomes", true);
 	use_image_timestamps.load(validation, section, "use_image_timestamps", true);
