@@ -239,7 +239,7 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 
 		if (south.isFullWater())
 			data |= DATA_SOUTH;
-	} else if (id == 54 || id == 95 || id == 130 || id == 146) { // chests
+	} else if (id == 54 || id == 130 || id == 146) { // chests
 		// at first get all neighbor blocks
 		north = state.getBlock(pos + mc::DIR_NORTH);
 		south = state.getBlock(pos + mc::DIR_SOUTH);

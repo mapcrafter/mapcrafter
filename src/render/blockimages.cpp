@@ -567,7 +567,7 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & (0xff00 | 0b00000011);
 	else if (id == 26) // bed
 		return data & (0xff00 | 0b00001011);
-	else if (id == 54 || id == 95 || id == 130) { // chests
+	else if (id == 54 || id == 130) { // chests
 		// at first get the direction of the chest and rotate if needed
 		uint16_t dir_rotate = (data >> 4) & 0xf;
 		uint16_t dir = util::rotate_shift_l(dir_rotate, rotation, 4) << 4;
@@ -576,7 +576,7 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 
 		// if no neighbors, this is a small chest
 		// the data contains only the direction
-		if (neighbors == 0 || id == 95 || id == 130)
+		if (neighbors == 0 || id == 130)
 			return dir;
 
 		// this is a double chest
@@ -1388,7 +1388,7 @@ void BlockImages::createStairs(uint16_t id, const Image& texture) { // id 53, 67
 	setBlockImage(id, 3 | 4, north);
 }
 
-void BlockImages::createChest(uint16_t id, Image* textures) { // id 54, 95, 130
+void BlockImages::createChest(uint16_t id, Image* textures) { // id 54, 130
 	BlockImage chest;
 	chest.setFace(FACE_SOUTH, textures[CHEST_FRONT]);
 	chest.setFace(FACE_NORTH | FACE_EAST | FACE_WEST, textures[CHEST_SIDE]);
