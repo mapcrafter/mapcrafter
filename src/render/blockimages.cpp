@@ -600,6 +600,8 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & 0b1111110000;
 	else if (id == 81 || id == 83 || id == 92) // cactus, sugar cane, cake
 		return data & 0xff00;
+	else if (id == 84) // jukebox
+		return 0;
 	else if (id == 93 || id == 94) // redstone repeater
 		return data & (0xff00 | 0b00000011);
 	else if (id == 117) // brewing stand
@@ -2174,7 +2176,7 @@ void BlockImages::loadBlocks() {
 	createCactus(); // id 81
 	createBlock(82, 0, t.CLAY); // clay block
 	createItemStyleBlock(83, 0, t.REEDS); // sugar cane
-	createBlock(84, 0, t.NOTEBLOCK, t.JUKEBOX_TOP); // jukebox
+	createBlock(84, 0, t.NOTEBLOCK, t.JUKEBOX_TOP.rotate(1)); // jukebox
 	createFence(85, 0, t.PLANKS_OAK); // fence
 	createPumkin(86, t.PUMPKIN_FACE_OFF); // pumpkin
 	createBlock(87, 0, t.NETHERRACK); // netherrack
