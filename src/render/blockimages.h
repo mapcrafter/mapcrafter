@@ -355,7 +355,7 @@ private:
 	void createSnow(); // id 78
 	void createIce(uint8_t id); // id 79
 	void createCactus(); // id 81
-	void createFence(uint16_t id, const Image& texture); // id 85, 113
+	void createFence(uint16_t id, uint16_t extra_data, const Image& texture); // id 85, 113
 	void createPumkin(uint16_t id, const Image& front); // id 86, 91
 	void createCake(); // id 92
 	void createRedstoneRepeater(uint16_t id, const Image& texture); // id 93, 94

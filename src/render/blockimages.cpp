@@ -1633,7 +1633,7 @@ Image createFenceTexture(bool left, bool right, Image texture) {
  * This method creates the fence block images. It generates textures for fences and makes
  * with this textures item style block images.
  */
-void BlockImages::createFence(uint16_t id, const Image& texture) { // id 85, 113
+void BlockImages::createFence(uint16_t id, uint16_t extra_data, const Image& texture) { // id 85, 113
 	Image fence_empty = createFenceTexture(false, false, texture);
 	Image fence_left = createFenceTexture(true, false, texture);
 	Image fence_right = createFenceTexture(false, true, texture);
@@ -1668,7 +1668,7 @@ void BlockImages::createFence(uint16_t id, const Image& texture) { // id 85, 113
 		BlockImage block(BlockImage::ITEM_STYLE);
 		block.setFace(FACE_NORTH | FACE_SOUTH, left);
 		block.setFace(FACE_EAST | FACE_WEST, right);
-		setBlockImage(id, data, buildImage(block));
+		setBlockImage(id, data | extra_data, buildImage(block));
 	}
 }
 
@@ -2175,7 +2175,7 @@ void BlockImages::loadBlocks() {
 	createBlock(82, 0, t.CLAY); // clay block
 	createItemStyleBlock(83, 0, t.REEDS); // sugar cane
 	createBlock(84, 0, t.NOTEBLOCK, t.JUKEBOX_TOP); // jukebox
-	createFence(85, t.PLANKS_OAK); // fence
+	createFence(85, 0, t.PLANKS_OAK); // fence
 	createPumkin(86, t.PUMPKIN_FACE_OFF); // pumpkin
 	createBlock(87, 0, t.NETHERRACK); // netherrack
 	createBlock(88, 0, t.SOUL_SAND); // soul sand
@@ -2229,7 +2229,7 @@ void BlockImages::loadBlocks() {
 	createBlock(110, 0, t.MYCELIUM_SIDE, t.MYCELIUM_TOP); // mycelium
 	createSingleFaceBlock(111, 0, FACE_BOTTOM, t.WATERLILY); // lily pad
 	createBlock(112, 0, t.NETHER_BRICK); // nether brick
-	createFence(113, t.NETHER_BRICK); // nether brick fence
+	createFence(113, 0, t.NETHER_BRICK); // nether brick fence
 	createStairs(114, t.NETHER_BRICK); // nether brick stairs
 	// -- nether wart
 	createItemStyleBlock(115, 0, t.NETHER_WART_STAGE_0);
@@ -2264,7 +2264,8 @@ void BlockImages::loadBlocks() {
 	createStairs(136, t.PLANKS_JUNGLE); // jungle wood stairs
 	createBlock(137, 0, t.COMMAND_BLOCK); // command block
 	createBeacon(); // beacon
-	// id 139 // cobblestone wall
+	createFence(139, 0, t.COBBLESTONE); // cobblestone wall
+	createFence(139, 1, t.COBBLESTONE_MOSSY); // cobblestone wall mossy
 	createFlowerPot(); // id 140
 	// carrots --
 	createItemStyleBlock(141, 0, t.CARROTS_STAGE_0);
