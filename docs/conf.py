@@ -30,6 +30,7 @@ extensions = []
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 if os.environ.get('READTHEDOCS', None) == 'True':
+    print "On readthedocs."
     templates_path = ['_readthedocs_templates']
 
 # The suffix of source filenames.
