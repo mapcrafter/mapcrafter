@@ -48,7 +48,7 @@ to add your own map to this list.
 
 ## Help ##
 
-Please read the [documentation](http://mapcrafter.readthedocs.org) to find out
+Please read the [documentation](http://docs.mapcrafter.org) to find out
 how to use the renderer.
 
 If you find bugs or problems when using mapcrafter or if you have ideas for new
