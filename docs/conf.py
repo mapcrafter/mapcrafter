@@ -13,6 +13,10 @@
 
 import sys, os
 
+buildbot = os.environ.get('MAPCRAFTER_BUILDBOT', None) == '42'
+if buildbot:
+    import sphinx_rtd_theme
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -29,7 +33,7 @@ extensions = []
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
-if os.environ.get('READTHEDOCS', None) == 'True':
+if os.environ.get('READTHEDOCS', None) == 'True' or buildbot:
     templates_path = ['_readthedocs_templates']
 
 # The suffix of source filenames.
@@ -105,6 +109,10 @@ html_theme = 'default'
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
+
+if buildbot:
+    html_theme = 'sphinx_rtd_theme'
+    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
