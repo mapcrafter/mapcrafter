@@ -25,6 +25,17 @@
 namespace mapcrafter {
 namespace config {
 
+WorldSection::WorldSection(bool global)
+		: global(global) {
+}
+
+WorldSection::~WorldSection() {
+}
+
+void WorldSection::setGlobal(bool global) {
+	this->global = global;
+}
+
 bool WorldSection::parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation) {
 	if (input_dir.load(validation, section, "input_dir")) {
 		input_dir.setValue(BOOST_FS_ABSOLUTE(input_dir.getValue(), config_dir));
@@ -38,6 +49,22 @@ bool WorldSection::parse(const ConfigSection& section, const fs::path& config_di
 	}
 
 	return isValidationValid(validation);
+}
+
+fs::path WorldSection::getInputDir() const {
+	return input_dir.getValue();
+}
+
+MapSection::MapSection(bool global)
+		: global(global), texture_size(12),  render_unknown_blocks(false),
+		  render_leaves_transparent(false), render_biomes(false) {
+}
+
+MapSection::~MapSection() {
+}
+
+void MapSection::setGlobal(bool global) {
+	this->global = global;
 }
 
 bool MapSection::parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation) {
@@ -90,6 +117,57 @@ bool MapSection::parse(const ConfigSection& section, const fs::path& config_dir,
 	}
 
 	return isValidationValid(validation);
+}
+
+std::string MapSection::getShortName() const {
+	return name_short;
+}
+
+std::string MapSection::getLongName() const {
+	return name_long;
+}
+
+std::string MapSection::getWorld() const {
+	return world.getValue();
+}
+
+fs::path MapSection::getTextureDir() const {
+	return texture_dir.getValue();
+}
+
+std::set<int> MapSection::getRotations() const {
+	return rotations_set;
+}
+
+std::string MapSection::getRendermode() const {
+	return rendermode.getValue();
+}
+
+int MapSection::getTextureSize() const {
+	return texture_size.getValue();
+}
+
+bool MapSection::renderUnknownBlocks() const {
+	return render_unknown_blocks.getValue();
+}
+
+bool MapSection::renderLeavesTransparent() const {
+	return render_leaves_transparent.getValue();
+}
+
+bool MapSection::renderBiomes() const {
+	return render_biomes.getValue();
+}
+
+bool MapSection::useImageTimestamps() const {
+	return use_image_timestamps.getValue();
+}
+
+MapcrafterConfigFile::MapcrafterConfigFile()
+		: world_global(true), map_global(true) {
+}
+
+MapcrafterConfigFile::~MapcrafterConfigFile() {
 }
 
 bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& validation) {
@@ -242,11 +320,46 @@ void MapcrafterConfigFile::dump(std::ostream& out) const {
 	}
 }
 
+fs::path MapcrafterConfigFile::getOutputDir() const {
+	return output_dir.getValue();
+}
+
+fs::path MapcrafterConfigFile::getTemplateDir() const {
+	return template_dir.getValue();
+}
+
+std::string MapcrafterConfigFile::getOutputPath(
+		const std::string& path) const {
+	return (output_dir.getValue() / path).string();
+}
+
+std::string MapcrafterConfigFile::getTemplatePath(
+		const std::string& path) const {
+	return (template_dir.getValue() / path).string();
+}
+
+bool MapcrafterConfigFile::hasWorld(const std::string& world) const {
+	return worlds.count(world);
+}
+
+const std::map<std::string, WorldSection>& MapcrafterConfigFile::getWorlds() const {
+	return worlds;
+}
+
+const WorldSection& MapcrafterConfigFile::getWorld(
+		const std::string& world) const {
+	return worlds.at(world);
+}
+
 bool MapcrafterConfigFile::hasMap(const std::string& map) const {
 	for (auto it = maps.begin(); it != maps.end(); ++it)
 		if (it->getShortName() == map)
 			return true;
 	return false;
+}
+
+const std::vector<MapSection>& MapcrafterConfigFile::getMaps() const {
+	return maps;
 }
 
 const MapSection& MapcrafterConfigFile::getMap(const std::string& map) const {

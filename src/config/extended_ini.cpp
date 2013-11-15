@@ -26,11 +26,38 @@
 namespace mapcrafter {
 namespace config {
 
+ConfigSection::ConfigSection(const std::string& type, const std::string& name)
+		: type(type), name(name) {
+}
+
+ConfigSection::~ConfigSection() {
+}
+
 int ConfigSection::getEntryIndex(const std::string& key) const {
 	for (size_t i = 0; i < entries.size(); i++)
 		if (entries[i].first == key)
 			return i;
 	return -1;
+}
+
+const std::string& ConfigSection::getType() const {
+	return type;
+}
+
+const std::string& ConfigSection::getName() const {
+	return name;
+}
+
+std::string ConfigSection::getNameType() const {
+	return type + ":" + name;
+}
+
+bool ConfigSection::isNamed() const {
+	return !name.empty();
+}
+
+bool ConfigSection::isEmpty() const {
+	return entries.size() == 0;
 }
 
 bool ConfigSection::has(const std::string& key) const {
@@ -42,6 +69,10 @@ std::string ConfigSection::get(const std::string& key, const std::string& defaul
 	if (index == -1)
 		return default_value;
 	return entries[index].second;
+}
+
+const std::vector<ConfigEntry> ConfigSection::getEntries() const {
+	return entries;
 }
 
 void ConfigSection::set(const std::string& key, const std::string& value) {
@@ -70,6 +101,19 @@ std::ostream& operator<<(std::ostream& out, const ConfigSection& section) {
 	for (std::vector<ConfigEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
 		out << it->first << " = " << it->second << std::endl;
 	return out;
+}
+
+ConfigFile::ConfigFile() {
+}
+
+ConfigFile::~ConfigFile() {
+}
+
+int ConfigFile::getSectionIndex(const std::string& type, const std::string& name) const {
+	for (size_t i = 0; i < sections.size(); i++)
+		if (sections[i].getType() == type && sections[i].getName() == name)
+			return i;
+	return -1;
 }
 
 bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
@@ -171,15 +215,25 @@ bool ConfigFile::writeFile(const std::string& filename) const {
 	return write(out);
 }
 
-int ConfigFile::getSectionIndex(const std::string& type, const std::string& name) const {
-	for (size_t i = 0; i < sections.size(); i++)
-		if (sections[i].getType() == type && sections[i].getName() == name)
-			return i;
-	return -1;
-}
-
 bool ConfigFile::hasSection(const std::string& type, const std::string& name) const {
 	return getSectionIndex(type, name) != -1;
+}
+
+const ConfigSection& ConfigFile::getRootSection() const {
+	return root;
+}
+
+ConfigSection& ConfigFile::getRootSection() {
+	return root;
+}
+
+const std::vector<ConfigSection> ConfigFile::getSections() const {
+	return sections;
+}
+
+ConfigSection& ConfigFile::addSection(const std::string& type,
+		const std::string& name) {
+	return getSection(type, name);
 }
 
 const ConfigSection& ConfigFile::getSection(const std::string& type, const std::string& name) const {

@@ -33,22 +33,15 @@ private:
 	int type;
 	std::string message;
 public:
-	ValidationMessage(int type = -1, const std::string& message = "")
-		: type(type), message(message) {}
-	~ValidationMessage() {}
+	ValidationMessage(int type = -1, const std::string& message = "");
+	~ValidationMessage();
 
-	int getType() const { return type; }
-	const std::string& getMessage() const { return message; };
+	int getType() const;
+	const std::string& getMessage() const;
 
-	static ValidationMessage info(const std::string& message) {
-		return ValidationMessage(INFO, message);
-	}
-	static ValidationMessage warning(const std::string& message) {
-		return ValidationMessage(WARNING, message);
-	}
-	static ValidationMessage error(const std::string& message) {
-		return ValidationMessage(ERROR, message);
-	}
+	static ValidationMessage info(const std::string& message);
+	static ValidationMessage warning(const std::string& message);
+	static ValidationMessage error(const std::string& message);
 
 	static const int INFO = 0;
 	static const int WARNING = 1;
