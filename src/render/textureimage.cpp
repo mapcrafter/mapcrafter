@@ -7,6 +7,8 @@
 
 #include "textureimage.h"
 
+#include "../util.h"
+
 namespace mapcrafter {
 namespace render {
 
@@ -42,11 +44,8 @@ bool TextureImage::load(const std::string& path, int size) {
 	// good for performance and makes redstone looking not very good and identifiable,
 	// instead of that the nearest neighbor interpolation preserves the pixelated
 	// style of the textures and prevents fuzziness when resizing
-	if (name == "leaves"
-		|| name == "leaves_jungle"
-		|| name == "leaves_spruce"
-		|| name == "redstoneDust_cross"
-		|| name == "redstoneDust_line")
+	if ((util::startswith(name, "leaves") && !util::endswith(name, "opaque"))
+		|| util::startswith(name, "redstone_dust"))
 		tmp.resizeSimple(size, size, *this);
 	else
 		tmp.resizeAuto(size, size, *this);

@@ -115,5 +115,13 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
 	}
 }
 
+bool startswith(const std::string& str, const std::string& start) {
+	return str.substr(0, start.size()) == start;
+}
+
+bool endswith(const std::string& str, const std::string& end) {
+	return str.substr(str.size() - end.size(), end.size()) == end;
+}
+
 } /* namespace util */
 } /* namespace mapcrafter */
