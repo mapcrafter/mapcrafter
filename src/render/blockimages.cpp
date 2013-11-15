@@ -346,9 +346,9 @@ bool loadChestTexture(const Image& image, Image* textures, int texture_size) {
 	Image top = image.clip(size, 0, size, size);
 
 	// resize the chest images to texture size
-	front.resizeInterpolated(texture_size, texture_size, textures[CHEST_FRONT]);
-	side.resizeInterpolated(texture_size, texture_size, textures[CHEST_SIDE]);
-	top.resizeInterpolated(texture_size, texture_size, textures[CHEST_TOP]);
+	front.resizeAuto(texture_size, texture_size, textures[CHEST_FRONT]);
+	side.resizeAuto(texture_size, texture_size, textures[CHEST_SIDE]);
+	top.resizeAuto(texture_size, texture_size, textures[CHEST_TOP]);
 
 	return true;
 }
@@ -387,18 +387,18 @@ bool loadLargeChestTexture(const Image& image, Image* textures, int texture_size
 	back_right.alphablit(image.clip(5 * size + 4, size, size, 4 * ratio), 0, 0);
 
 	// resize the chest images to texture size
-	front_left.resizeInterpolated(texture_size, texture_size,
+	front_left.resizeAuto(texture_size, texture_size,
 	        textures[LARGECHEST_FRONT_LEFT]);
-	front_right.resizeInterpolated(texture_size, texture_size,
+	front_right.resizeAuto(texture_size, texture_size,
 	        textures[LARGECHEST_FRONT_RIGHT]);
-	side.resizeInterpolated(texture_size, texture_size, textures[LARGECHEST_SIDE]);
-	top_left.resizeInterpolated(texture_size, texture_size,
+	side.resizeAuto(texture_size, texture_size, textures[LARGECHEST_SIDE]);
+	top_left.resizeAuto(texture_size, texture_size,
 	        textures[LARGECHEST_TOP_LEFT]);
-	top_right.resizeInterpolated(texture_size, texture_size,
+	top_right.resizeAuto(texture_size, texture_size,
 	        textures[LARGECHEST_TOP_RIGHT]);
-	back_left.resizeInterpolated(texture_size, texture_size,
+	back_left.resizeAuto(texture_size, texture_size,
 	        textures[LARGECHEST_BACK_LEFT]);
-	back_right.resizeInterpolated(texture_size, texture_size,
+	back_right.resizeAuto(texture_size, texture_size,
 	        textures[LARGECHEST_BACK_RIGHT]);
 
 	return true;
@@ -427,7 +427,7 @@ bool BlockImages::loadOther(const std::string& endportal) {
 	Image endportal_img;
 	if(!endportal_img.readPNG(endportal))
 		return false;
-	endportal_img.resizeInterpolated(texture_size, texture_size, endportal_texture);
+	endportal_img.resizeAuto(texture_size, texture_size, endportal_texture);
 	return true;
 }
 
@@ -1936,8 +1936,7 @@ void BlockImages::createBeacon() { // id 138
 
 	// at first create this little block in the middle
 	Image beacon_texture;
-	textures.BEACON.resizeInterpolated(texture_size * 0.75, texture_size * 0.75,
-			beacon_texture);
+	textures.BEACON.resizeAuto(texture_size * 0.75, texture_size * 0.75, beacon_texture);
 	Image smallblock(texture_size * 2, texture_size * 2);
 	blitFace(smallblock, FACE_WEST, beacon_texture, 0, 0, true, dleft, dright);
 	blitFace(smallblock, FACE_SOUTH, beacon_texture, 0, 0, true, dleft, dright);
@@ -1967,7 +1966,7 @@ void BlockImages::createFlowerPot() { // id 140
 	Image pot_texture;
 	
 	s = (double) texture_size / 16;
-	tmptex.resizeInterpolated(s*6, s*6, pot_texture);
+	tmptex.resizeAuto(s*6, s*6, pot_texture);
 	
 	int xoff = std::ceil(s*10);
 	int yoff = std::ceil(s*16);

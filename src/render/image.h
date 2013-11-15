@@ -91,6 +91,8 @@ public:
 
 	void resizeInterpolated(int new_width, int new_height, Image& dest) const;
 	void resizeSimple(int new_width, int new_height, Image& dest) const;
+	// automatically chooses an image resize interpolation
+	void resizeAuto(int new_width, int new_height, Image& dest) const;
 	void resizeHalf(Image& dest) const;
 
 	bool readPNG(const std::string& filename);

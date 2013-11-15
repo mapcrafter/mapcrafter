@@ -35,17 +35,21 @@ bool TextureImage::load(const std::string& path, int size) {
 	if (tmp.getWidth() < tmp.getHeight())
 		tmp = tmp.clip(0, 0, tmp.getWidth(), tmp.getWidth());
 
-	// we resize the transparent version of the leaves without interpolation,
-	// because this can cause half-transparent pixels, which aren't good for performance
-	// redstone also without interpolation
+	// resize some textures with the nearest neighbor interpolation:
+	// - transparent leaves
+	// - redstone
+	// because smooth interpolation causes here half-transparent pixel which are not
+	// good for performance and makes redstone looking not very good and identifiable,
+	// instead of that the nearest neighbor interpolation preserves the pixelated
+	// style of the textures and prevents fuzziness when resizing
 	if (name == "leaves"
-			|| name == "leaves_jungle"
-			|| name == "leaves_spruce"
-			|| name == "redstoneDust_cross"
-			|| name == "redstoneDust_line")
+		|| name == "leaves_jungle"
+		|| name == "leaves_spruce"
+		|| name == "redstoneDust_cross"
+		|| name == "redstoneDust_line")
 		tmp.resizeSimple(size, size, *this);
 	else
-		tmp.resizeInterpolated(size, size, *this);
+		tmp.resizeAuto(size, size, *this);
 	return true;
 }
 
