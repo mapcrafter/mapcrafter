@@ -52,6 +52,12 @@ You can now install mapcrafter system-wide for all users if you want::
 
 Make sure that you still have to install the texture files needed for mapcrafter.
 
+Arch Linux
+==========
+
+If you are running Arch Linux as operating system you can install mapcrafter
+from the `AUR <https://aur.archlinux.org/packages/mapcrafter-git/>`_. 
+
 Debian Packages
 ===============
 
@@ -83,7 +89,7 @@ Resources and Textures
 .. note::
 
     You don't need to install the Minecraft texture files manually if you
-    installed mapcrafter with the Debian package.
+    installed mapcrafter from the AUR or with the Debian package.
 
 mapcrafter needs some resources to render maps: Minecraft texture files and
 some template files for the web output.
