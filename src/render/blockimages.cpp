@@ -589,7 +589,7 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 				|| (dir == DATA_WEST && neighbors == DATA_SOUTH))
 			new_data |= LARGECHEST_DATA_LEFT;
 		return new_data;
-	} else if (id == 55) { // redstone wire
+	} else if (id == 55) { // redstone wire, tripwire
 		// check if powered
 		if ((data & 0b1111) != 0)
 			return (data & ~(0b1111)) | REDSTONE_POWERED;
@@ -608,6 +608,8 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & 0xff00;
 	else if (id == 119 || id == 120) // end portal, end portal frame
 		return data & 0xff00;
+	else if (id == 132) // trip wire
+		return data & ~0xf;
 	// the light sensor shouldn't have any data, but I had problems with it...
 	else if (id == 151)
 		return 0;
@@ -1429,13 +1431,14 @@ void BlockImages::createDoubleChest(uint16_t id, Image* textures) { // id 54
 	setBlockImage(id, DATA_WEST | l, buildImage(right.rotate(1)));
 }
 
-void BlockImages::createRedstoneWire(bool powered) { // id 55
+void BlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data,
+		uint8_t r, uint8_t g, uint8_t b) { // id 55
 	Image redstone_cross = textures.REDSTONE_DUST_CROSS;
 	Image redstone_line = textures.REDSTONE_DUST_LINE;
 
-	uint8_t color = powered ? 50 : 255;
-	redstone_cross = redstone_cross.colorize(color, 0, 0);
-	redstone_line = redstone_line.colorize(color, 0, 0);
+	//uint8_t color = powered ? 50 : 255;
+	redstone_cross = redstone_cross.colorize(r, g, b);
+	redstone_line = redstone_line.colorize(r, g, b);
 
 	// 1/16 of the texture size
 	double s = (double) texture_size / 16;
@@ -1489,13 +1492,10 @@ void BlockImages::createRedstoneWire(bool powered) { // id 55
 		texture = texture.rotate(ROTATE_270);
 		block.setFace(FACE_BOTTOM, texture);
 
-		// set extra data
-		if (powered)
-			data |= REDSTONE_POWERED;
 		// we can add the block like this without rotation
 		// because we calculate the neighbors on our own,
 		// it does not depend on the rotation of the map
-		setBlockImage(55, data, buildImage(block));
+		setBlockImage(id, data | extra_data, buildImage(block));
 	}
 }
 
@@ -2133,8 +2133,8 @@ void BlockImages::loadBlocks() {
 	createStairs(53, t.PLANKS_OAK); // oak wood stairs
 	createChest(54, chest); // chest
 	createDoubleChest(54, largechest); // chest
-	createRedstoneWire(true); // id 55
-	createRedstoneWire(false);
+	createRedstoneWire(55, 0, 48, 0, 0); // redstone wire not powered
+	createRedstoneWire(55, REDSTONE_POWERED, 192, 0, 0); // redstone wire powered
 	createBlock(56, 0, t.DIAMOND_ORE); // diamond ore
 	createBlock(57, 0, t.DIAMOND_BLOCK); // block of diamond
 	createBlock(58, 0, t.CRAFTING_TABLE_SIDE, t.CRAFTING_TABLE_FRONT, t.CRAFTING_TABLE_TOP); // crafting table
@@ -2260,7 +2260,7 @@ void BlockImages::loadBlocks() {
 	createBlock(129, 0, t.EMERALD_ORE); // emerald ore
 	createChest(130, enderchest); // ender chest
 	// id 131 // tripwire hook
-	// id 132 // tripwire
+	createRedstoneWire(132, 0, 192, 192, 192); // tripwire
 	createBlock(133, 0, t.EMERALD_BLOCK); // block of emerald
 	createStairs(134, t.PLANKS_SPRUCE); // spruce wood stairs
 	createStairs(135, t.PLANKS_BIRCH); // birch wood stairs

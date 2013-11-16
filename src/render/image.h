@@ -85,6 +85,7 @@ public:
 
 	Image clip(int x, int y, int width, int height) const;
 	Image colorize(double r, double g, double b, double a = 1) const;
+	Image colorize(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) const;
 	Image rotate(int rotation) const;
 	Image flip(bool flip_x, bool flip_y) const;
 	Image move(int x_off, int y_off) const;

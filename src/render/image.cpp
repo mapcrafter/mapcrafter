@@ -267,6 +267,16 @@ Image Image::colorize(double r, double g, double b, double a) const {
 	return img;
 }
 
+Image Image::colorize(uint8_t r, uint8_t g, uint8_t b, uint8_t a) const {
+	Image img(width, height);
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			img.setPixel(x, y, rgba_multiply(getPixel(x, y), r, g, b, a));
+		}
+	}
+	return img;
+}
+
 Image Image::rotate(int rotation) const {
 	int newWidth = rotation == ROTATE_90 || rotation == ROTATE_270 ? height : width;
 	int newHeight = rotation == ROTATE_90 || rotation == ROTATE_270 ? width : height;
