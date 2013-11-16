@@ -33,7 +33,7 @@ if __name__ == "__main__":
 		if not os.path.exists(os.path.join(args["outdir"], dir)):
 			os.mkdir(os.path.join(args["outdir"], dir))
 	
-	print "Extracting block images:"
+	print("Extracting block images:")
 	found, extracted, skipped = 0, 0, 0
 	for info in jar.infolist():
 		if info.filename.startswith("assets/minecraft/textures/blocks/"):
@@ -47,31 +47,30 @@ if __name__ == "__main__":
 			
 			fin = jar.open(info)
 			fout = open(filename, "w")
-			fout.write(fin.read())
+			fout.write(str(fin.read()))
 			fin.close()
 			fout.close()
 			extracted += 1
 	
-	print " - Found %d block images." % found
-	print " - Extracted %d." % extracted
-	print " - Skipped %d (Use -f to force overwrite)." % skipped
+	print(" - Found %d block images." % found)
+	print(" - Extracted %d." % extracted)
+	print(" - Skipped %d (Use -f to force overwrite)." % skipped)
 	
-	print ""
-	print "Extracting other textures:"
+	print("")
+	print("Extracting other textures:")
 	
 	for filename, zipname in files.items():
 		try:
-			print " - Extracting" , filename , "...",
 			info = jar.getinfo(zipname)
 			filename = os.path.join(args["outdir"], filename)
 			if os.path.exists(filename) and not args["force"]:
-				print "skipped."
+				print(" - Extracting %s ... skipped." % filename)
 			else:
 				fin = jar.open(info)
 				fout = open(filename, "w")
-				fout.write(fin.read())
+				fout.write(str(fin.read()))
 				fin.close()
 				fout.close()
-				print "extracted."
+				print(" - Extracting %s ... extracted." % filename)
 		except KeyError:
-			print "not found!"
+			print(" - Extracting %s ... not found!")
