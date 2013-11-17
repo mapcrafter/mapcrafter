@@ -369,6 +369,8 @@ private:
 	void createBrewingStand(); // id 117
 	void createCauldron(); // id 118
 	void createDragonEgg(); // id 122
+	Image buildCocoa(int stage);
+	void createCocoas(); // id 127
 	void createBeacon(); // id 138
 	void createFlowerPot(); // id 140
 	void createLargePlant(uint16_t data, const Image& texture, const Image& top_texture); // id 175

@@ -133,11 +133,13 @@ void blitFace(Image& image, int face, const Image& texture, int xoff, int yoff,
 			d = darken_right;
 	}
 
-	int size = texture.getWidth();
+	int xsize = texture.getWidth();
+	int ysize = texture.getHeight();
+	int size = std::max(xsize, ysize);
 
 	if (face == FACE_BOTTOM || face == FACE_TOP) {
 		if (face == FACE_BOTTOM)
-			yoff += size;
+			yoff += ysize;
 		for (TopFaceIterator it(size); !it.end(); it.next()) {
 			uint32_t pixel = texture.getPixel(it.src_x, it.src_y);
 			image.blendPixel(rgba_multiply(pixel, d, d, d), it.dest_x + xoff,
@@ -149,9 +151,9 @@ void blitFace(Image& image, int face, const Image& texture, int xoff, int yoff,
 			itside = SideFaceIterator::RIGHT;
 
 		if (face == FACE_EAST || face == FACE_SOUTH)
-			xoff += size;
+			xoff += xsize;
 		if (face == FACE_WEST || face == FACE_SOUTH)
-			yoff += size / 2;
+			yoff += ysize / 2;
 		for (SideFaceIterator it(size, itside); !it.end(); it.next()) {
 			uint32_t pixel = texture.getPixel(it.src_x, it.src_y);
 			image.blendPixel(rgba_multiply(pixel, d, d, d), it.dest_x + xoff,
@@ -608,6 +610,8 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & 0xff00;
 	else if (id == 119 || id == 120) // end portal, end portal frame
 		return data & 0xff00;
+	else if (id == 127)
+		return data & 0b1100;
 	else if (id == 132) // trip wire
 		return data & ~0xf;
 	// the light sensor shouldn't have any data, but I had problems with it...
@@ -1931,6 +1935,61 @@ void BlockImages::createDragonEgg() { // id 122
 	createItemStyleBlock(122, 0, texture);
 }
 
+Image BlockImages::buildCocoa(int stage) {
+	int original_size = textures.COCOA_STAGE_0.original.getWidth();
+	double r = (double) original_size / 16;
+
+	int i = stage + 2;
+	int width = 2*i;
+	int height = 2*i+1;
+
+	Image texture;
+	if (stage == 0)
+		texture = textures.COCOA_STAGE_0.original;
+	else if (stage == 1)
+		texture = textures.COCOA_STAGE_1.original;
+	else if (stage == 2)
+		texture = textures.COCOA_STAGE_2.original;
+
+	Image cocoa_texture_side = texture.clip(original_size - 1 - width*r, 4*r, width*r, height*r);
+
+	Image cocoa_texture_top;
+	if (stage == 2) {
+		texture.clip(0, 0, 7*r, 7*r).resizeSimple(width*r, width*r, cocoa_texture_top);
+	} else
+		cocoa_texture_top = texture.clip(0, 0, width*r, width*r);
+
+	r = (double) texture_size / 16;
+	Image cocoa_texture_side_tmp = cocoa_texture_side;
+	Image cocoa_texture_top_tmp = cocoa_texture_top;
+	cocoa_texture_side_tmp.resizeSimple(width*r, height*r, cocoa_texture_side);
+	cocoa_texture_top_tmp.resizeSimple(width*r, width*r, cocoa_texture_top);
+
+	Image cocoa(width*r*2, height*r*2 - 1);
+	blitFace(cocoa, FACE_WEST, cocoa_texture_side);
+	blitFace(cocoa, FACE_SOUTH, cocoa_texture_side);
+	blitFace(cocoa, FACE_TOP, cocoa_texture_top);
+	return cocoa;
+}
+
+void BlockImages::createCocoas() { // id 127
+	for (int i = 0; i < 3; i++) {
+		Image cocoa = buildCocoa(i);
+		Image block(texture_size * 2, texture_size * 2);
+		int xoff = (block.getWidth() - cocoa.getWidth()) / 2;
+		int yoff = (block.getHeight() - cocoa.getHeight()) / 2;
+		block.simpleblit(cocoa, xoff, yoff);
+		//block.writePNG("cocoa" + util::str(i) + ".png");
+
+		uint16_t data = i == 0 ? 0 : (i == 1 ? 0b0100 : 0b1000);
+		setBlockImage(127, data, block);
+	}
+
+	//buildCocoa(0).writePNG("cocoa0.png");
+	//buildCocoa(1).writePNG("cocoa1.png");
+	//buildCocoa(2).writePNG("cocoa2.png");
+}
+
 void BlockImages::createBeacon() { // id 138
 	Image beacon(texture_size * 2, texture_size * 2);
 
@@ -2256,6 +2315,7 @@ void BlockImages::loadBlocks() {
 	createSlabs(125, false, true); // wooden double slabs
 	createSlabs(126, false, false); // wooden normal slabs
 	// id 127 // cocoa plant
+	createCocoas();
 	createStairs(128, t.SANDSTONE_NORMAL); // sandstone stairs
 	createBlock(129, 0, t.EMERALD_ORE); // emerald ore
 	createChest(130, enderchest); // ender chest
