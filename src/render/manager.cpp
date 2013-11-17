@@ -25,7 +25,6 @@
 #include <fstream>
 #include <ctime>
 #include <thread>
-#include <pthread.h>
 
 #if defined(__WIN32__) || defined(__WIN64__)
   #include <windows.h>
@@ -517,20 +516,23 @@ bool RenderManager::run() {
 	// ### Third big step: Render the maps
 	// ###
 
-	int i_to = config_maps.size();
-	int start_all = time(NULL);
+	int progress_maps_all = config_maps.size();
+	int time_start_all = time(NULL);
 
 	// go through all maps
 	for (size_t i = 0; i < config_maps.size(); i++) {
+		// get things like map section, map/world name
 		config::MapSection map = config_maps[i];
 		std::string map_name = map.getShortName();
 		std::string world_name = map.getWorld();
-		// continue, if all rotations for this map are skipped
+
+		// continue if all rotations of this map are skipped
 		if (confighelper.isCompleteRenderSkip(map_name))
 			continue;
 
-		int i_from = i+1;
-		std::cout << "(" << i_from << "/" << i_to << ") Rendering map " << map.getShortName();
+		int progress_maps = i+1;
+		std::cout << "(" << progress_maps << "/" << progress_maps_all << ") ";
+		std::cout << "Rendering map " << map.getShortName();
 		std::cout << " (\"" << map.getLongName() << "\"):" << std::endl;
 
 		if (!fs::is_directory(config.getOutputDir() / map_name))
@@ -593,10 +595,10 @@ bool RenderManager::run() {
 		writeTemplateIndexHtml();
 
 		// go through the rotations and render them
-		int j_from = 0;
-		int j_to = rotations.size();
+		int progress_rotations = 0;
+		int progress_rotations_all = rotations.size();
 		for (auto it = rotations.begin(); it != rotations.end(); ++it) {
-			j_from++;
+			progress_rotations++;
 
 			int rotation = *it;
 
@@ -605,8 +607,9 @@ bool RenderManager::run() {
 					== config::MapcrafterConfigHelper::RENDER_SKIP)
 				continue;
 
-			std::cout << "(" << i_from << "." << j_from << "/" << i_from << ".";
-			std::cout << j_to << ") Rendering rotation " << config::ROTATION_NAMES[rotation];
+			std::cout << "(" << progress_maps << "." << progress_rotations << "/";
+			std::cout << progress_maps << "." << progress_rotations_all << ") ";
+			std::cout << "Rendering rotation " << config::ROTATION_NAMES[rotation];
 			std::cout << ":" << std::endl;
 
 			if (settings.last_render[rotation] != 0) {
@@ -628,7 +631,7 @@ bool RenderManager::run() {
 				//	tileset->scanRequiredByTimestamp(settings.last_render[rotation]);
 			}
 
-			int start = time(NULL);
+			int time_start = time(NULL);
 
 			// create block images and render the world
 			std::shared_ptr<BlockImages> blockimages(new BlockImages);
@@ -646,15 +649,16 @@ bool RenderManager::run() {
 			settings.last_render[rotation] = start_scanning;
 			settings.write(settings_filename);
 
-			int took = time(NULL) - start;
-			std::cout << "(" << i_from << "." << j_from << "/" << i_from << "." << j_to;
-			std::cout << ") Rendering rotation " << config::ROTATION_NAMES[*it];
+			int took = time(NULL) - time_start;
+			std::cout << "(" << progress_maps << "." << progress_rotations << "/";
+			std::cout << progress_maps << "." << progress_rotations_all << ") ";
+			std::cout << "Rendering rotation " << config::ROTATION_NAMES[*it];
 			std::cout << " took " << took << " seconds." << std::endl << std::endl;
 
 		}
 	}
 
-	int took_all = time(NULL) - start_all;
+	int took_all = time(NULL) - time_start_all;
 	std::cout << "Rendering all worlds took " << took_all << " seconds." << std::endl;
 
 	std::cout << std::endl << "Finished.....aaand it's gone!" << std::endl;
