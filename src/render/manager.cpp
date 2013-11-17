@@ -403,63 +403,72 @@ void RenderManager::renderMultithreaded(const config::MapSection& map_config,
  */
 bool RenderManager::run() {
 
+	// ###
+	// ### First big step: Load/parse/validate the configuration file
+	// ###
+
 	config::ValidationMap validation;
 	bool ok = config.parse(opts.config_file, validation);
 
+	// show infos/warnings/errors if configuration file has something
 	if (validation.size() > 0) {
-		std::cout << (ok ? "Some notes on your configuration file:" : "Your configuration file is invalid!") << std::endl;
-		for (auto it = validation.begin(); it != validation.end(); ++it) {
-			if (it->second.empty())
+		if (ok)
+			std::cout << "Some notes on your configuration file:" << std::endl;
+		else
+			std::cout << "Your configuration file is invalid!" << std::endl;
+		for (auto section_it = validation.begin(); section_it != validation.end(); ++section_it) {
+			if (section_it->second.empty())
 				continue;
-			std::cout << it->first << ":" << std::endl;
-			for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2)
-				std::cout << " - " << *it2 << std::endl;
+			std::cout << section_it->first << ":" << std::endl;
+			for (auto message_it = section_it->second.begin(); message_it != section_it->second.end(); ++message_it)
+				std::cout << " - " << *message_it << std::endl;
 		}
 	}
 	if (!ok)
 		return false;
 
-	/*
-	// set the maps to render/skip/force-render from the command line options
-	config.setRenderBehaviors(opts.skip_all, opts.render_skip, opts.render_auto,
-			opts.render_force);
-	*/
-
-	// we need an output directory
-	if (!fs::is_directory(config.getOutputDir())
-			&& !fs::create_directories(config.getOutputDir())) {
+	// an output directory would be nice -- create one if it does not exist
+	if (!fs::is_directory(config.getOutputDir()) && !fs::create_directories(config.getOutputDir())) {
 		std::cerr << "Error: Unable to create output directory!" << std::endl;
 		return false;
 	}
 
+	// create a helper for the configuration
 	confighelper = config::MapcrafterConfigHelper(config);
+	// set the render behaviors the user specified with the -rsaf flags
 	confighelper.parseRenderBehaviors(opts.skip_all, opts.render_skip, opts.render_auto, opts.render_force);
+
+	// and get the maps and worlds of the configuration
 	auto config_worlds = config.getWorlds();
 	auto config_maps = config.getMaps();
-
+	// maps for world- and tileset objects
 	std::map<std::string, std::array<mc::World, 4> > worlds;
 	std::map<std::string, std::array<std::shared_ptr<TileSet>, 4> > tilesets;
 
-	// find out which rotations are needed for which world
-	// ...and...
-	// check for already existing rendered maps
-	// and get the (old) zoom levels for the template,
-	// so the user can still view the other maps while rendering
+	// go through all maps and:
+	// 1. - find out which rotations are needed for which world
+	// 2. - and check if there are already rendered maps
+	//    - get the old max zoom levels of these maps for the template
+	//    -> so the user can still view his already rendered maps while new ones are rendering
 	for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
 		confighelper.setUsedRotations(map_it->getWorld(), map_it->getRotations());
-
 		MapSettings settings;
 		if (settings.read(config.getOutputPath(map_it->getShortName() + "/map.settings")))
 			confighelper.setMapZoomlevel(map_it->getShortName(), settings.max_zoom);
 	}
 
-	std::cout << "Scanning worlds..." << std::endl;
+	// ###
+	// ### Second big step: Scan the worlds
+	// ###
 
+	std::cout << "Scanning worlds..." << std::endl;
 	for (auto world_it = config_worlds.begin(); world_it != config_worlds.end(); ++world_it) {
 		std::string world_name = world_it->first;
 
 		// at first check if we really need to scan this world
-		// scan only if the world is not skipped
+		// scan only if there is at least one map which...
+		//  ... is rendered with this world and which
+		//  ... is not set to skip
 		bool used = false;
 		for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
 			if (!confighelper.isCompleteRenderSkip(map_it->getShortName())) {
@@ -470,29 +479,43 @@ bool RenderManager::run() {
 		if (!used)
 			continue;
 
+		// scan the different rotated versions of the world
+		// -> the rotations which are used by maps, so not necessarily all rotations
+		// find the highest max zoom level of these tilesets to use this for all rotations
+		// -> all rotations should have the same max zoom level
+		//    to allow a nice interactively rotatable map
 		int zoomlevels_max = 0;
 		auto rotations = confighelper.getUsedRotations(world_name);
 		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
+			// load the world
 			mc::World world;
 			if (!world.load(world_it->second.getInputDir().string(), *rotation_it)) {
 				std::cerr << "Unable to load world " << world_name << "!" << std::endl;
 				return false;
 			}
+			// create a tileset for this world
 			std::shared_ptr<TileSet> tileset(new TileSet(world));
+			// update the highest max zoom level
 			zoomlevels_max = std::max(zoomlevels_max, tileset->getMinDepth());
 
+			// set world- and tileset object in the map
 			worlds[world_name][*rotation_it] = world;
 			tilesets[world_name][*rotation_it] = tileset;
 		}
 
-		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
+		// now apply this highest max zoom level
+		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it)
 			tilesets[world_name][*rotation_it]->setDepth(zoomlevels_max);
-		}
+		// also give this highest max zoom level to the config helper
 		confighelper.setWorldZoomlevel(world_name, zoomlevels_max);
 	}
 
 	// write all template files
 	writeTemplates();
+
+	// ###
+	// ### Third big step: Render the maps
+	// ###
 
 	int i_to = config_maps.size();
 	int start_all = time(NULL);
@@ -516,7 +539,7 @@ bool RenderManager::run() {
 		std::string settings_filename = config.getOutputPath(map_name + "/map.settings");
 		MapSettings settings;
 		// check if we have already an old settings file,
-		// but ignore the settings file if the whole world is force-rendered
+		// but ignore the settings file if the whole map is force-rendered
 		bool old_settings = !confighelper.isCompleteRenderForce(map_name) && fs::exists(settings_filename);
 		if (old_settings) {
 			if (!settings.read(settings_filename)) {
@@ -539,72 +562,28 @@ bool RenderManager::run() {
 				if (confighelper.getRenderBehavior(map_name, i) == config::MapcrafterConfigHelper::RENDER_FORCE)
 					settings.last_render[i] = 0;
 		} else {
-			// if we don't have a settings file or force-render the whole map
-			// -> create a new one
+			// if we don't have a settings file or if we should force-render the whole map
+			// -> create a new settings file
 			settings = MapSettings::byMapConfig(map);
 		}
 
 		int start_scanning = time(NULL);
-		/*
-		// scan the different rotated versions of the world
-		// find the highest max zoom level of these tilesets to use this for all rotations
-		// all rotations should have the same max zoom level
-		// to allow a nice interactively rotateable map
-		std::cout << "Scanning the world..." << std::endl;
 
-		mc::World worlds[4];
-		TileSet tilesets[4];
-		bool world_ok = true;
-
-		int start_scanning = time(NULL);
-		int depth = 0;
-		for (std::set<int>::iterator it = world.rotations.begin();
-				it != world.rotations.end(); ++it) {
-			if (!worlds[*it].load(world.input_dir, *it)) {
-				std::cerr << "Unable to load the world!" << std::endl;
-				std::cerr << "Skipping this world." << std::endl << std::endl;
-				world_ok = false;
-				break;
-			}
-			tilesets[*it] = TileSet(worlds[*it]/*, settings.last_render[*it]*//*);
-			depth = std::max(depth, tilesets[*it].getMinDepth());
-		}
-
-		if (!world_ok)
-			continue;
-		*/
-
+		auto rotations = map.getRotations();
 		int world_zoomlevels = confighelper.getWorldZoomlevel(world_name);
 		// check if the max zoom level has increased
 		if (old_settings && settings.max_zoom < world_zoomlevels) {
-			std::cout << "The max zoom level was increased from " << settings.max_zoom
-					<< " to " << world_zoomlevels << "." << std::endl;
+			std::cout << "The max zoom level was increased from " << settings.max_zoom;
+			std::cout << " to " << world_zoomlevels << "." << std::endl;
 			std::cout << "I will move some files around..." << std::endl;
-		}
 
-		/*
-		// now go through the rotations and scan required tiles
-		for (std::set<int>::iterator it = world.rotations.begin(); it != world.rotations.end(); ++it) {
-			tilesets[*it].setDepth(depth);
-
-			fs::path output_dir = config.getOutputDir() / world.name_short / config::ROTATION_NAMES_SHORT[*it];
-			// check if this rotation was already rendered on a lower max zoom level
-			// -> then: increase max zoom level
-			if (old_settings && settings.rotations[*it] && settings.max_zoom < depth) {
-				for (int i = settings.max_zoom; i < depth; i++)
+			for (auto rotation_it = rotations.begin(); rotation_it != rotations.end();
+					++rotation_it) {
+				std::string output_dir = config.getOutputPath(map_name + "/" + config::ROTATION_NAMES_SHORT[*rotation_it]);
+				for (int i = settings.max_zoom; i < world_zoomlevels; i++)
 					increaseMaxZoom(output_dir);
 			}
-
-			// if this is an incremental rendering...
-			if (world.render_behaviors[*it] == config::RenderWorldConfig::RENDER_AUTO) {
-				// ...scan the required tiles
-				if (world.incremental_detection == "filetimes")
-					tilesets[*it].scanRequiredByFiletimes(output_dir);
-				else
-					tilesets[*it].scanRequiredByTimestamp(settings.last_render[*it]);
-			}
 		}
-		*/
 
 		// now write the zoomlevel to the settings file
 		settings.max_zoom = world_zoomlevels;
@@ -614,7 +593,6 @@ bool RenderManager::run() {
 		writeTemplateIndexHtml();
 
 		// go through the rotations and render them
-		auto rotations = map.getRotations();
 		int j_from = 0;
 		int j_to = rotations.size();
 		for (auto it = rotations.begin(); it != rotations.end(); ++it) {
