@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 # From Minecraft Overviewer (https://github.com/overviewer/Minecraft-Overviewer)
 # png-it.py script -- modified version which works with mapcrafter maps
 
