@@ -197,7 +197,8 @@ bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& val
 	else
 		template_dir.require(general_msgs, "You have to specify a template directory ('template_dir')!");
 
-	validation.push_back(std::make_pair("Configuration file", general_msgs));
+	if (!general_msgs.empty())
+		validation.push_back(std::make_pair("Configuration file", general_msgs));
 
 	if (config.hasSection("global", "worlds")) {
 		ValidationList msgs;
@@ -241,7 +242,8 @@ bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& val
 		} else
 			worlds[it->getName()] = world;
 
-		validation.push_back(std::make_pair("World section '" + it->getName() + "'", msgs));
+		if (!msgs.empty())
+			validation.push_back(std::make_pair("World section '" + it->getName() + "'", msgs));
 	}
 
 	for (auto it = sections.begin(); it != sections.end(); ++it) {
@@ -261,7 +263,8 @@ bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& val
 		} else
 			maps.push_back(map);
 
-		validation.push_back(std::make_pair("Map section '" + it->getName() + "'", msgs));
+		if (!msgs.empty())
+			validation.push_back(std::make_pair("Map section '" + it->getName() + "'", msgs));
 	}
 
 	return ok;

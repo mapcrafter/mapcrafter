@@ -422,6 +422,7 @@ bool RenderManager::run() {
 			for (auto message_it = section_it->second.begin(); message_it != section_it->second.end(); ++message_it)
 				std::cout << " - " << *message_it << std::endl;
 		}
+		std::cout << "Please read the documentation about the new configuration file format." << std::endl;
 	}
 	if (!ok)
 		return false;
@@ -516,6 +517,7 @@ bool RenderManager::run() {
 	// ### Third big step: Render the maps
 	// ###
 
+	// some progress and timing stuff
 	int progress_maps_all = config_maps.size();
 	int time_start_all = time(NULL);
 
