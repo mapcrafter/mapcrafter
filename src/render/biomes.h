@@ -66,8 +66,8 @@ static const Biome BIOMES[] = {
 	{5, 0.05, 0.8}, // Taiga
 	{6, 0.8, 0.9, 205, 128, 255}, // Swampland
 	{7, 0.5, 0.5}, // River
-	{8, 2.0, 0.0}, // Hell
-	{9, 0.5, 0.5}, // Sky
+	{8, 2.0, 0.0}, // Hell (Nether)
+	{9, 0.5, 0.5}, // Sky (End)
 
 	{10, 0.0, 0.5}, // Frozen Ocean
 	{11, 0.0, 0.5}, // Frozen River
@@ -83,7 +83,48 @@ static const Biome BIOMES[] = {
 
 	{20, 0.2, 0.3}, // Extreme Hills Edge
 	{21, 2.0, 0.45}, // Jungle
-	{22, 2.0, 0.25}, // Jungle Mountains
+	{22, 2.0, 0.25}, // Jungle Hills
+
+	// id 23 // Jungle Edge
+	// id 24 // Deep Ocean
+	// id 25 // Stone Beach
+	// id 26 // Cold Beach
+	// id 27 // Birch Forest
+	// id 28 // Birch Forest Hills
+	// id 39 // Roofed Forest
+	// id 30 // Cold Taiga
+	// id 31 // Cold Taiga Hills
+	// id 32 // Mega Taiga
+	// id 33 // Mega Taiga Hills
+	// id 34 // Extreme Hills+
+	// id 35 // Savanna
+	// id 36 // Savanna Plateau
+	// id 37 // Mesa
+	// id 38 // Mesa Plateau F
+	// id 39 // Mesa Pleateau
+
+	// id 129 // Sunflower Plains
+	// id 130 // Desert M
+	// id 131 // Extreme Hills M
+	// id 132 // Flower Forest
+	// id 133 // Taiga M
+	// id 134 // Swampland M
+	// id 140 // Ice Plains Spikes
+	// id 141 // Ice Mountains Spikes
+	// id 149 // Jungle M
+	// id 151 // Jungle Edge M
+	// id 155 // Birch Forest M
+	// id 156 // Birch Forest Hills M
+	// id 157 // Roffed Forest M
+	// id 158 // Cold Taiga M
+	// id 160 // Mega Spruce Taiga
+	// id 161 // Mega Spruce Taiga Hills
+	// id 162 // Extreme Hills+ M
+	// id 163 // Savanna M
+	// id 164 // Savanna Plateau M
+	// id 165 // Mesa (Bryce)
+	// id 166 // Mesa Plateau F M
+	// id 167 // Mesa Pleatau M
 };
 
 static const size_t BIOMES_SIZE = sizeof(BIOMES) / sizeof(Biome);
