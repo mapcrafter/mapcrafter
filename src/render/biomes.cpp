@@ -118,11 +118,28 @@ bool Biome::isBiomeBlock(uint16_t id, uint16_t data) {
 	return false;
 }
 
+// binary search to find the biome with a specific ID from the BIOMES array
+int biomeBinarySearch(uint8_t id, size_t start, size_t end) {
+	if (start > end)
+		return -1;
+	size_t middle = start + (end - start) / 2;
+	uint8_t middle_id = BIOMES[middle].getID();
+	if (middle_id == id)
+		return middle;
+	if (middle_id < id)
+		return biomeBinarySearch(id, middle + 1, end);
+	return biomeBinarySearch(id, start, middle - 1);
+}
+
 Biome getBiome(uint8_t id) {
-	for (size_t i = 0; i < BIOMES_SIZE; i++)
-		if (BIOMES[i].getID() == id)
-			return BIOMES[i];
-	return BIOMES[DEFAULT_BIOME];
+	int found = biomeBinarySearch(id, 0, BIOMES_SIZE - 1);
+	if (found == -1) {
+		found = biomeBinarySearch(DEFAULT_BIOME, 0, BIOMES_SIZE - 1);
+		// should not happen if DEFAULT_BIOME is an ID of an existing biome
+		if (found == -1)
+			return Biome(0, 0, 0);
+	}
+	return BIOMES[found];
 }
 
 } /* namespace render */
