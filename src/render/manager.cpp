@@ -627,10 +627,10 @@ bool RenderManager::run() {
 			if (confighelper.getRenderBehavior(map_name, rotation)
 					== config::MapcrafterConfigHelper::RENDER_AUTO) {
 				std::cout << "Scanning required tiles..." << std::endl;
-				//if (map.get.incremental_detection == "filetimes")
+				if (map.useImageModificationTimes())
 					tileset->scanRequiredByFiletimes(output_dir);
-				//else
-				//	tileset->scanRequiredByTimestamp(settings.last_render[rotation]);
+				else
+					tileset->scanRequiredByTimestamp(settings.last_render[rotation]);
 			}
 
 			int time_start = time(NULL);

@@ -99,7 +99,7 @@ bool MapSection::parse(const ConfigSection& section, const fs::path& config_dir,
 	render_unknown_blocks.setDefault(false);
 	render_leaves_transparent.setDefault(true);
 	render_biomes.setDefault(true);
-	use_image_timestamps.setDefault(true);
+	use_image_mtimes.setDefault(true);
 
 	// go through all configuration options in this section
 	//   - load/parse the individual options
@@ -154,8 +154,8 @@ bool MapSection::parse(const ConfigSection& section, const fs::path& config_dir,
 			render_leaves_transparent.load(key, value, validation);
 		} else if (key == "render_biomes") {
 			render_biomes.load(key, value, validation);
-		} else if (key == "use_image_timestamps") {
-			use_image_timestamps.load(key, value, validation);
+		} else if (key == "use_image_mtimes") {
+			use_image_mtimes.load(key, value, validation);
 		} else {
 			validation.push_back(ValidationMessage::warning(
 					"Unknown configuration option '" + key + "'!"));
@@ -215,8 +215,8 @@ bool MapSection::renderBiomes() const {
 	return render_biomes.getValue();
 }
 
-bool MapSection::useImageTimestamps() const {
-	return use_image_timestamps.getValue();
+bool MapSection::useImageModificationTimes() const {
+	return use_image_mtimes.getValue();
 }
 
 MapcrafterConfigFile::MapcrafterConfigFile()
@@ -365,7 +365,7 @@ void dumpMapSection(std::ostream& out, const MapSection& section) {
 	out << "  render_unknown_blocks = " << section.renderUnknownBlocks() << std::endl;
 	out << "  render_leaves_transparent = " << section.renderLeavesTransparent() << std::endl;
 	out << "  render_biomes = " << section.renderBiomes() << std::endl;
-	out << "  use_image_timestamps = " << section.useImageTimestamps() << std::endl;
+	out << "  use_image_timestamps = " << section.useImageModificationTimes() << std::endl;
 }
 
 void MapcrafterConfigFile::dump(std::ostream& out) const {
