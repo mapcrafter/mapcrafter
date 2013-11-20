@@ -471,7 +471,8 @@ bool RenderManager::run() {
 		//  ... is not set to skip
 		bool used = false;
 		for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
-			if (!confighelper.isCompleteRenderSkip(map_it->getShortName())) {
+			if (map_it->getWorld() == world_name &&
+					!confighelper.isCompleteRenderSkip(map_it->getShortName())) {
 				used = true;
 				break;
 			}

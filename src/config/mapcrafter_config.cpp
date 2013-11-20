@@ -122,20 +122,7 @@ bool MapSection::parse(const ConfigSection& section, const fs::path& config_dir,
 							+ texture_dir.getValue().string() + "' does not exist!"));
 			}
 		} else if (key == "rotations") {
-			if (rotations.load(key, value ,validation)) {
-				std::string str = rotations.getValue();
-				std::stringstream ss;
-				ss << str;
-				std::string elem;
-				while (ss >> elem) {
-					int r = stringToRotation(elem);
-					if (r != -1)
-						rotations_set.insert(r);
-					else
-						validation.push_back(ValidationMessage::error(
-								"Invalid rotation '" + elem + "'!"));
-				}
-			}
+			rotations.load(key, value ,validation);
 		} else if (key == "rendermode") {
 			if (rendermode.load(key, value, validation)) {
 				std::string r = rendermode.getValue();
@@ -161,6 +148,21 @@ bool MapSection::parse(const ConfigSection& section, const fs::path& config_dir,
 					"Unknown configuration option '" + key + "'!"));
 		}
 
+	}
+
+
+	// parse rotations
+	rotations_set.clear();
+	std::string str = rotations.getValue();
+	std::stringstream ss;
+	ss << str;
+	std::string elem;
+	while (ss >> elem) {
+		int r = stringToRotation(elem);
+		if (r != -1)
+			rotations_set.insert(r);
+		else
+			validation.push_back(ValidationMessage::error("Invalid rotation '" + elem + "'!"));
 	}
 
 	// check if required options were specified
