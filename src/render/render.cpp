@@ -169,10 +169,8 @@ Biome TileRenderer::getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* ch
 				other_id = other_chunk->getBiomeAt(mc::LocalBlockPos(other));
 			}
 
-			if (other_id < BIOMES_SIZE) {
-				biome += getBiome(other_id);
-				count++;
-			}
+			biome += getBiome(other_id);
+			count++;
 		}
 
 	biome /= count;
