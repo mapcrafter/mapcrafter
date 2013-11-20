@@ -118,5 +118,12 @@ bool Biome::isBiomeBlock(uint16_t id, uint16_t data) {
 	return false;
 }
 
+Biome getBiome(uint8_t id) {
+	for (size_t i = 0; i < BIOMES_SIZE; i++)
+		if (BIOMES[i].getID() == id)
+			return BIOMES[i];
+	return BIOMES[DEFAULT_BIOME];
+}
+
 } /* namespace render */
 } /* namespace mapcrafter */

@@ -2435,7 +2435,7 @@ Image BlockImages::getBiomeDependBlock(uint16_t id, uint16_t data,
 		return unknown_block;
 
 	// check if this biome block is precalculated
-	if (biome == BIOMES[biome.getID()]) {
+	if (biome == getBiome(biome.getID())) {
 		int64_t key = id | (((int64_t) data) << 16) | (((int64_t) biome.getID()) << 32);
 		if (!biome_images.count(key))
 			return unknown_block;

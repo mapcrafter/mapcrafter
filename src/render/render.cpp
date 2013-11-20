@@ -143,11 +143,11 @@ TileRenderer::TileRenderer(std::shared_ptr<mc::WorldCache> world,
 TileRenderer::~TileRenderer() {
 }
 
-Biome TileRenderer::getBiome(const mc::BlockPos& pos, const mc::Chunk* chunk) {
+Biome TileRenderer::getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk) {
 	uint8_t biome_id = chunk->getBiomeAt(mc::LocalBlockPos(pos));
-	Biome biome = BIOMES[DEFAULT_BIOME];
+	Biome biome = getBiome(DEFAULT_BIOME);
 	if (render_biomes && biome_id < BIOMES_SIZE)
-		biome = BIOMES[biome_id];
+		biome = getBiome(biome_id);
 	else
 		return biome;
 	int count = 1;
@@ -170,7 +170,7 @@ Biome TileRenderer::getBiome(const mc::BlockPos& pos, const mc::Chunk* chunk) {
 			}
 
 			if (other_id < BIOMES_SIZE) {
-				biome += BIOMES[other_id];
+				biome += getBiome(other_id);
 				count++;
 			}
 		}
@@ -562,7 +562,7 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 
 			// check for biome data
 			if (Biome::isBiomeBlock(id, data))
-				image = state.images->getBiomeDependBlock(id, data, getBiome(block.current, state.chunk));
+				image = state.images->getBiomeDependBlock(id, data, getBiomeOfBlock(block.current, state.chunk));
 			else
 				image = state.images->getBlock(id, data);
 
