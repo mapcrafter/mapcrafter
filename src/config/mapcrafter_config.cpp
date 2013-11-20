@@ -36,14 +36,31 @@ void WorldSection::setGlobal(bool global) {
 	this->global = global;
 }
 
-bool WorldSection::parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation) {
-	if (input_dir.load(validation, section, "input_dir")) {
-		input_dir.setValue(BOOST_FS_ABSOLUTE(input_dir.getValue(), config_dir));
-		if(!fs::is_directory(input_dir.getValue()))
-			validation.push_back(ValidationMessage::error("'input_dir' must be an existing directory! '"
-					+ input_dir.getValue().string() + "' does not exist!"));
+bool WorldSection::parse(const ConfigSection& section, const fs::path& config_dir,
+		ValidationList& validation) {
+	// go through all configuration options in this section
+	//   - load/parse the individual options
+	//   - warn the user about unknown options
+	auto entries = section.getEntries();
+	for (auto entry_it = entries.begin(); entry_it != entries.end(); ++entry_it) {
+		std::string key = entry_it->first;
+		std::string value = entry_it->second;
+
+		if (key == "input_dir") {
+			if (!input_dir.load(key, value, validation)) {
+				input_dir.setValue(BOOST_FS_ABSOLUTE(input_dir.getValue(), config_dir));
+				if (!fs::is_directory(input_dir.getValue()))
+					validation.push_back(ValidationMessage::error(
+							"'input_dir' must be an existing directory! '"
+							+ input_dir.getValue().string() + "' does not exist!"));
+			}
+		} else {
+			validation.push_back(ValidationMessage::warning(
+					"Unknown configuration option '" + key + "'!"));
+		}
 	}
 
+	// check if required options were specified
 	if (!global) {
 		input_dir.require(validation, "You have to specify an input directory ('input_dir')!");
 	}
@@ -69,51 +86,90 @@ void MapSection::setGlobal(bool global) {
 
 bool MapSection::parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation) {
 	name_short = section.getName();
-	name_long = section.has("name") ? section.get("name") : name_short;
+	name_long = name_short;
 
-	world.load(validation, section, "world");
+	// set some default configuration values
+	// check if we can find a default texture directory
+	bool has_default_textures = !util::findTextureDir().empty();
+	if (has_default_textures)
+		texture_dir.setDefault(util::findTextureDir());
+	rotations.setDefault("top-left");
+	rendermode.setDefault("normal");
+	texture_size.setDefault(12);
+	render_unknown_blocks.setDefault(false);
+	render_leaves_transparent.setDefault(true);
+	render_biomes.setDefault(true);
+	use_image_timestamps.setDefault(true);
 
-	if (texture_dir.load(validation, section, "texture_dir")) {
-		texture_dir.setValue(BOOST_FS_ABSOLUTE(texture_dir.getValue(), config_dir));
-		if (!fs::is_directory(texture_dir.getValue()))
-			validation.push_back(ValidationMessage::error("'texture_dir' must be an existing directory! '"
-					+ texture_dir.getValue().string() + "' does not exist!"));
-	} else if (!util::findTextureDir().empty())
-		texture_dir.setValue(util::findTextureDir());
-	else if (!global)
-		texture_dir.require(validation, "You have to specify a texture directory ('texture_dir')!");
+	// go through all configuration options in this section
+	//   - load/parse the individual options
+	//   - warn the user about unknown options
+	auto entries = section.getEntries();
+	for (auto entry_it = entries.begin(); entry_it != entries.end(); ++entry_it) {
+		std::string key = entry_it->first;
+		std::string value = entry_it->second;
 
-	if (rotations.load(validation, section, "rotations", "top-left")) {
-		std::string str = rotations.getValue();
-		std::stringstream ss;
-		ss << str;
-		std::string elem;
-		while (ss >> elem) {
-			int r = stringToRotation(elem);
-			if (r != -1)
-				rotations_set.insert(r);
-			else
-				validation.push_back(ValidationMessage::error("Invalid rotation '" + elem + "'!"));
+		if (key == "name") {
+			name_long = value;
+		} else if (key == "world") {
+			world.load(key, value, validation);
+		} else if (key == "texture_dir") {
+			if (texture_dir.load(key, value, validation)) {
+				texture_dir.setValue(BOOST_FS_ABSOLUTE(texture_dir.getValue(), config_dir));
+				if (!fs::is_directory(texture_dir.getValue()))
+					validation.push_back(ValidationMessage::error(
+							"'texture_dir' must be an existing directory! '"
+							+ texture_dir.getValue().string() + "' does not exist!"));
+			}
+		} else if (key == "rotations") {
+			if (rotations.load(key, value ,validation)) {
+				std::string str = rotations.getValue();
+				std::stringstream ss;
+				ss << str;
+				std::string elem;
+				while (ss >> elem) {
+					int r = stringToRotation(elem);
+					if (r != -1)
+						rotations_set.insert(r);
+					else
+						validation.push_back(ValidationMessage::error(
+								"Invalid rotation '" + elem + "'!"));
+				}
+			}
+		} else if (key == "rendermode") {
+			if (rendermode.load(key, value, validation)) {
+				std::string r = rendermode.getValue();
+				if (r != "normal" && r != "daylight" && r != "nightlight" && r != "cave")
+					validation.push_back(ValidationMessage::error(
+							"'rendermode' must be one of: normal, daylight, nightlight, cave"));
+			}
+		} else if (key == "texture_size") {
+			if (texture_size.load(key, value, validation)
+					&& (texture_size.getValue() <= 0  || texture_size.getValue() > 32))
+					validation.push_back(ValidationMessage::error(
+							"'texture_size' must a number between 1 and 32!"));
+		} else if (key == "render_unknown_blocks") {
+			render_unknown_blocks.load(key, value, validation);
+		} else if (key == "render_leaves_transparent") {
+			render_leaves_transparent.load(key, value, validation);
+		} else if (key == "render_biomes") {
+			render_biomes.load(key, value, validation);
+		} else if (key == "use_image_timestamps") {
+			use_image_timestamps.load(key, value, validation);
+		} else {
+			validation.push_back(ValidationMessage::warning(
+					"Unknown configuration option '" + key + "'!"));
 		}
+
 	}
 
-	if (rendermode.load(validation, section, "rendermode", "normal")) {
-		std::string r = rendermode.getValue();
-		if (r != "normal" && r != "daylight" && r != "nightlight" && r != "cave")
-			validation.push_back(ValidationMessage::error("'rendermode' must be one of: normal, daylight, nightlight, cave"));
-	}
-
-	if (texture_size.load(validation, section, "texture_size", 12))
-		if (texture_size.getValue() <= 0 || texture_size.getValue() > 32)
-			validation.push_back(ValidationMessage::error("'texture_size' must a number between 1 and 32!"));
-
-	render_unknown_blocks.load(validation, section, "render_unknown_blocks", false);
-	render_leaves_transparent.load(validation, section, "render_leaves_transparent", true);
-	render_biomes.load(validation, section, "render_biomes", true);
-	use_image_timestamps.load(validation, section, "use_image_timestamps", true);
-
+	// check if required options were specified
 	if (!global) {
 		world.require(validation, "You have to specify a world ('world')!");
+		// a texture directory is only required
+		// if mapcrafter can not find a default texture directory
+		if (!has_default_textures)
+			texture_dir.require(validation, "You have to specify a texture directory ('texture_dir')!");
 	}
 
 	return isValidationValid(validation);
@@ -183,18 +239,34 @@ bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& val
 	bool ok = true;
 
 	ValidationList general_msgs;
-	output_dir.load(general_msgs, config.getRootSection(), "output_dir");
-	if (output_dir.isLoaded())
-		output_dir.setValue(BOOST_FS_ABSOLUTE(output_dir.getValue(), config_dir));
-	output_dir.require(general_msgs, "You have to specify an output directory ('output_dir')!");
-	if (template_dir.load(general_msgs, config.getRootSection(), "template_dir")) {
-		template_dir.setValue(BOOST_FS_ABSOLUTE(template_dir.getValue(), config_dir));
-		if (!fs::is_directory(template_dir.getValue()))
-			general_msgs.push_back(ValidationMessage::error("'template_dir' must be an existing directory! '"
-					+ template_dir.getValue().string() + "' does not exist!"));
-	} else if (!util::findTemplateDir().empty())
-		template_dir.setValue(util::findTemplateDir());
-	else
+
+	bool has_default_template = !util::findTemplateDir().empty();
+	if (has_default_template)
+		template_dir.setDefault(util::findTemplateDir());
+
+	auto entries = config.getRootSection().getEntries();
+	for (auto entry_it = entries.begin(); entry_it != entries.end(); ++entry_it) {
+		std::string key = entry_it->first;
+		std::string value = entry_it->second;
+
+		if (key == "output_dir") {
+			if (output_dir.load(key, value, general_msgs))
+				output_dir.setValue(BOOST_FS_ABSOLUTE(output_dir.getValue(), config_dir));
+		} else if (key == "template_dir") {
+			if (template_dir.load(key, value, general_msgs)) {
+				template_dir.setValue(BOOST_FS_ABSOLUTE(template_dir.getValue(), config_dir));
+				if (!fs::is_directory(template_dir.getValue()))
+					general_msgs.push_back(ValidationMessage::error(
+							"'template_dir' must be an existing directory! '"
+							+ template_dir.getValue().string() + "' does not exist!"));
+			}
+		} else {
+			general_msgs.push_back(ValidationMessage::warning(
+					"Unknown configuration option '" + key + "'!"));
+		}
+	}
+
+	if (!has_default_template)
 		template_dir.require(general_msgs, "You have to specify a template directory ('template_dir')!");
 
 	if (!general_msgs.empty())
