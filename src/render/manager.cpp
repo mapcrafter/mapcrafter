@@ -537,33 +537,39 @@ bool RenderManager::run() {
 		std::cout << "Rendering map " << map.getShortName();
 		std::cout << " (\"" << map.getLongName() << "\"):" << std::endl;
 
+		// check again if the output directory for the tiles of this map exists
 		if (!fs::is_directory(config.getOutputDir() / map_name))
 			fs::create_directories(config.getOutputDir() / map_name);
 
-		std::string settings_filename = config.getOutputPath(map_name + "/map.settings");
-		MapSettings settings;
 		// check if we have already an old settings file,
 		// but ignore the settings file if the whole map is force-rendered
-		bool old_settings = !confighelper.isCompleteRenderForce(map_name) && fs::exists(settings_filename);
+		MapSettings settings;
+		std::string settings_filename = config.getOutputPath(map_name + "/map.settings");
+		bool old_settings = !confighelper.isCompleteRenderForce(map_name)
+				&& fs::exists(settings_filename);
 		if (old_settings) {
+			// try to read the map.settings filename
 			if (!settings.read(settings_filename)) {
-				std::cerr << "Error: Unable to load old map.settings file!" << std::endl << std::endl;
+				std::cerr << "Error: Unable to load old map.settings file!";
+				std::cerr << std::endl << std::endl;
 				continue;
 			}
 
 			// check if the config file was not changed when rendering incrementally
 			if (!settings.equalsMapConfig(map)) {
-				std::cerr << "Error: The configuration does not equal the settings of the already rendered map." << std::endl;
-				std::cerr << "Force-render the whole map (" << map_name
-						<< ") or reset the configuration to the old settings."
-						<< std::endl << std::endl;
+				std::cerr << "Error: The configuration does not equal the settings of"
+						"the already rendered map." << std::endl;
+				std::cerr << "Force-render the whole map ('" << map_name;
+				std::cerr << "') or reset the configuration of the map to the old settings.";
+				std::cerr << std::endl << std::endl;
 				continue;
 			}
 
-			// for force-render rotations, set the last render time to 0
-			// to render all tiles
+			// for force-render rotations
+			// -> set the last render time to 0 -> to render all tiles
 			for (int i = 0; i < 4; i++)
-				if (confighelper.getRenderBehavior(map_name, i) == config::MapcrafterConfigHelper::RENDER_FORCE)
+				if (confighelper.getRenderBehavior(map_name, i)
+						== config::MapcrafterConfigHelper::RENDER_FORCE)
 					settings.last_render[i] = 0;
 		} else {
 			// if we don't have a settings file or if we should force-render the whole map
@@ -574,35 +580,42 @@ bool RenderManager::run() {
 		int start_scanning = time(NULL);
 
 		auto rotations = map.getRotations();
+		// get the max zoom level calculated with the current tile set
 		int world_zoomlevels = confighelper.getWorldZoomlevel(world_name);
-		// check if the max zoom level has increased
+		// check if the zoom level of the world has increased
+		// since the map was rendered last time (if it was already rendered)
 		if (old_settings && settings.max_zoom < world_zoomlevels) {
 			std::cout << "The max zoom level was increased from " << settings.max_zoom;
 			std::cout << " to " << world_zoomlevels << "." << std::endl;
 			std::cout << "I will move some files around..." << std::endl;
 
+			// if zoom level has increased, increase zoom levels of tile sets
 			for (auto rotation_it = rotations.begin(); rotation_it != rotations.end();
 					++rotation_it) {
-				std::string output_dir = config.getOutputPath(map_name + "/" + config::ROTATION_NAMES_SHORT[*rotation_it]);
+				std::string output_dir = config.getOutputPath(map_name + "/"
+						+ config::ROTATION_NAMES_SHORT[*rotation_it]);
 				for (int i = settings.max_zoom; i < world_zoomlevels; i++)
 					increaseMaxZoom(output_dir);
 			}
 		}
 
-		// now write the zoomlevel to the settings file
+		// now write the (possibly new) max zoom level to the settings file
 		settings.max_zoom = world_zoomlevels;
 		settings.write(settings_filename);
-		// and also to the template
+		// and also update the template with the max zoom level
 		confighelper.setMapZoomlevel(map_name, settings.max_zoom);
 		writeTemplateIndexHtml();
 
-		// go through the rotations and render them
+		// again some progress stuff
 		int progress_rotations = 0;
 		int progress_rotations_all = rotations.size();
-		for (auto it = rotations.begin(); it != rotations.end(); ++it) {
+
+		// now go through the rotations and render them
+		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end();
+				++rotation_it) {
 			progress_rotations++;
 
-			int rotation = *it;
+			int rotation = *rotation_it;
 
 			// continue if we should skip this rotation
 			if (confighelper.getRenderBehavior(map_name, rotation)
@@ -614,6 +627,7 @@ bool RenderManager::run() {
 			std::cout << "Rendering rotation " << config::ROTATION_NAMES[rotation];
 			std::cout << ":" << std::endl;
 
+			// output a small notice if we render this map incrementally
 			if (settings.last_render[rotation] != 0) {
 				time_t t = settings.last_render[rotation];
 				char buffer[100];
@@ -621,12 +635,14 @@ bool RenderManager::run() {
 				std::cout << "Last rendering was on " << buffer << "." << std::endl;
 			}
 
-			std::string output_dir = config.getOutputPath(map_name + "/" + config::ROTATION_NAMES_SHORT[rotation]);
-			// if incremental render: scan which tiles might have changed
+			std::string output_dir = config.getOutputPath(map_name + "/"
+					+ config::ROTATION_NAMES_SHORT[rotation]);
+			// if incremental render scan which tiles might have changed
 			std::shared_ptr<TileSet> tileset(new TileSet(*tilesets[world_name][rotation]));
 			if (confighelper.getRenderBehavior(map_name, rotation)
 					== config::MapcrafterConfigHelper::RENDER_AUTO) {
 				std::cout << "Scanning required tiles..." << std::endl;
+				// use the incremental check specified in the config
 				if (map.useImageModificationTimes())
 					tileset->scanRequiredByFiletimes(output_dir);
 				else
@@ -635,18 +651,21 @@ bool RenderManager::run() {
 
 			int time_start = time(NULL);
 
-			// create block images and render the world
+			// create block images
 			std::shared_ptr<BlockImages> blockimages(new BlockImages);
 			blockimages->setSettings(map.getTextureSize(), rotation, map.renderUnknownBlocks(),
 					map.renderLeavesTransparent(), map.getRendermode());
+			// if textures do not work, it does not make much sense
+			// to try the other rotations with the same textures
 			if (!blockimages->loadAll(map.getTextureDir().string())) {
 				std::cerr << "Skipping remaining rotations." << std::endl << std::endl;
 				break;
 			}
 
+			// render the map
 			render(map, output_dir, worlds[world_name][rotation], tileset, blockimages);
 
-			// update the settings file
+			// update the settings file with last render time
 			settings.rotations[rotation] = true;
 			settings.last_render[rotation] = start_scanning;
 			settings.write(settings_filename);
@@ -654,7 +673,7 @@ bool RenderManager::run() {
 			int took = time(NULL) - time_start;
 			std::cout << "(" << progress_maps << "." << progress_rotations << "/";
 			std::cout << progress_maps << "." << progress_rotations_all << ") ";
-			std::cout << "Rendering rotation " << config::ROTATION_NAMES[*it];
+			std::cout << "Rendering rotation " << config::ROTATION_NAMES[*rotation_it];
 			std::cout << " took " << took << " seconds." << std::endl << std::endl;
 
 		}
