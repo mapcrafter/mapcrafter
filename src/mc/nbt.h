@@ -260,7 +260,14 @@ public:
 	static const int8_t TAG_TYPE = (int8_t) TagType::TAG_STRING;
 };
 
-#define TagPtrType std::unique_ptr
+// use shared_ptr in gcc == 4.4.* instead of unique_ptr,
+// because there are problems with moving to containers
+#if __GNUC__ == 4 && __GNUC_MINOR__ == 4
+# define TagPtrType std::shared_ptr
+#else
+# define TagPtrType std::unique_ptr
+#endif
+
 typedef TagPtrType<Tag> TagPtr;
 
 class TagList: public Tag {

@@ -283,7 +283,7 @@ Tag& TagCompound::read(std::istream& stream) {
 						   + ". NBT data stream may be corrupted.");
 		tag->read(stream);
 		tag->setName(name);
-		payload[name] = TagPtrType<Tag>(tag);
+		payload[name] = TagPtr(tag);
 	}
 	return *this;
 }
