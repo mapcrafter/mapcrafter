@@ -331,9 +331,10 @@ const Tag& TagCompound::findTag(const std::string& name) const {
 	return *payload.at(name);
 }
 
-void TagCompound::addTag(const std::string& name, TagPtr tag) {
-	tag->setName(name);
-	payload[name] = std::move(tag);
+void TagCompound::addTag(const std::string& name, const Tag& tag) {
+	Tag* tag_ptr = tag.clone();
+	tag_ptr->setName(name);
+	payload[name] = TagPtr(tag_ptr);
 }
 
 NBTFile::NBTFile() {

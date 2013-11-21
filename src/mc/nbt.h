@@ -337,7 +337,7 @@ public:
 		return findTag(name).cast<T>();
 	}
 
-	void addTag(const std::string& name, TagPtr tag);
+	void addTag(const std::string& name, const Tag& tag);
 
 	std::map<std::string, TagPtr> payload;
 	

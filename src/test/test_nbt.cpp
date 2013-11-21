@@ -45,20 +45,20 @@ BOOST_AUTO_TEST_CASE(nbt_testIO) {
 		std::stringstream stream;
 		
 		nbt::NBTFile out("TestNBTFile");
-		out.addTag("byte", nbt::tag<nbt::TagByte>(42));
-		out.addTag("short", nbt::tag<nbt::TagShort>(1337));
-		out.addTag("int", nbt::tag<nbt::TagInt>(-23));
-		out.addTag("long", nbt::tag<nbt::TagLong>(123456));
-		out.addTag("float", nbt::tag<nbt::TagFloat>(3.1415926));
-		out.addTag("double", nbt::tag<nbt::TagDouble>(2.7182818));
-		out.addTag("string", nbt::tag<nbt::TagString>("foobar"));
+		out.addTag("byte", nbt::TagByte(42));
+		out.addTag("short", nbt::TagShort(1337));
+		out.addTag("int", nbt::TagInt(-23));
+		out.addTag("long", nbt::TagLong(123456));
+		out.addTag("float", nbt::TagFloat(3.1415926));
+		out.addTag("double", nbt::TagDouble(2.7182818));
+		out.addTag("string", nbt::TagString("foobar"));
 
-		TagPtrType<nbt::TagList> list = nbt::tag<nbt::TagList>(nbt::TagString::TAG_TYPE);
+		nbt::TagList list = nbt::TagList(nbt::TagString::TAG_TYPE);
 		for (size_t i = 0; i < list_data.size(); i++)
-			list->payload.push_back(nbt::tag<nbt::TagString>(list_data[i]));
-		out.addTag("list", std::move(list));
-		out.addTag("bytearray", nbt::tag<nbt::TagByteArray>(bytearray_data));
-		out.addTag("intarray", nbt::tag<nbt::TagIntArray>(intarray_data));
+			list.payload.push_back(nbt::tag<nbt::TagString>(list_data[i]));
+		out.addTag("list", list);
+		out.addTag("bytearray", nbt::TagByteArray(bytearray_data));
+		out.addTag("intarray", nbt::TagIntArray(intarray_data));
 		
 		//out.dump(std::cout);
 		out.writeNBT(stream, compression);
