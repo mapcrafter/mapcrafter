@@ -133,6 +133,13 @@ public:
 		throw InvalidTagCast();
 	}
 
+	template<typename T>
+	const T& cast() const {
+		if (type == T::TAG_TYPE)
+			return dynamic_cast<const T&>(*this);
+		throw InvalidTagCast();
+	}
+
 	bool isWriteType() const;
 	void setWriteType(bool write_type);
 	
@@ -305,10 +312,16 @@ public:
 		return tag.tag_type == T::TAG_TYPE && (len == -1 || (unsigned) len == tag.payload.size());
 	}
 
-	Tag& findTag(const std::string& name) const;
+	Tag& findTag(const std::string& name);
+	const Tag& findTag(const std::string& name) const;
 	
 	template<typename T>
-	T& findTag(const std::string& name) const {
+	T& findTag(const std::string& name) {
+		return findTag(name).cast<T>();
+	}
+
+	template<typename T>
+	const T& findTag(const std::string& name) const {
 		return findTag(name).cast<T>();
 	}
 
