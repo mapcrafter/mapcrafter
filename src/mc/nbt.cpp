@@ -200,6 +200,10 @@ void Tag::write(std::ostream& stream) const {
 void Tag::dump(std::ostream& stream, const std::string& indendation) const {
 }
 
+Tag* Tag::clone() const {
+	return new Tag(*this);
+}
+
 Tag& TagString::read(std::istream& stream) {
 	payload = nbtstream::read<std::string>(stream);
 	return *this;
@@ -212,6 +216,10 @@ void TagString::write(std::ostream& stream) const {
 
 void TagString::dump(std::ostream& stream, const std::string& indendation) const {
 	dumpTag(stream, indendation, *this);
+}
+
+Tag* TagString::clone() const {
+	return new TagString(*this);
 }
 
 TagList::~TagList() {
@@ -253,6 +261,13 @@ void TagList::dump(std::ostream& stream, const std::string& indendation) const {
 	stream << indendation << "{" << std::endl;
 }
 
+Tag* TagList::clone() const {
+	TagList* tag = new TagList(tag_type);
+	for (auto it = payload.begin(); it != payload.end(); ++it)
+		tag->payload.push_back(TagPtr((*it)->clone()));
+	return tag;
+}
+
 TagCompound::~TagCompound() {
 }
 
@@ -291,6 +306,14 @@ void TagCompound::dump(std::ostream& stream, const std::string& indendation) con
 	stream << indendation << "}" << std::endl;
 }
 
+Tag* TagCompound::clone() const {
+	TagCompound* tag = new TagCompound;
+	if (named)
+		tag->setName(name);
+	for (auto it = payload.begin(); it != payload.end(); ++it)
+		tag->payload[it->first] = TagPtr(it->second->clone());
+	return tag;
+}
 
 bool TagCompound::hasTag(const std::string& name) const {
 	return payload.count(name);

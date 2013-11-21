@@ -152,6 +152,7 @@ public:
 	virtual Tag& read(std::istream& stream);
 	virtual void write(std::ostream& stream) const;
 	virtual void dump(std::ostream& stream, const std::string& indendation = "") const;
+	virtual Tag* clone() const;
 };
 
 class TagEnd: public Tag {
@@ -181,6 +182,10 @@ public:
 			dumpTag(stream, indendation, *this, static_cast<int>(payload));
 		else
 			dumpTag(stream, indendation, *this);
+	}
+
+	Tag* clone() const {
+		return new ScalarTag<T, tag_type>(*this);
 	}
 
 	T payload;
@@ -228,6 +233,10 @@ public:
 		dumpTag(stream, indendation, *this, util::str(payload.size()) + " entries");
 	}
 
+	Tag* clone() const {
+		return new TagArray<T, tag_type>(*this);
+	}
+
 	std::vector<T> payload;
 	
 	static const int8_t TAG_TYPE = (int8_t) tag_type;
@@ -244,6 +253,7 @@ public:
 	Tag& read(std::istream& stream);
 	void write(std::ostream& stream) const;
 	void dump(std::ostream& stream, const std::string& indendation = "") const;
+	Tag* clone() const;
 
 	std::string payload;
 	
@@ -268,6 +278,7 @@ public:
 	Tag& read(std::istream& stream);
 	void write(std::ostream& stream) const;
 	void dump(std::ostream& stream, const std::string& indendation = "") const;
+	Tag* clone() const;
 
 	int8_t tag_type;
 	std::vector<TagPtr> payload;
@@ -283,6 +294,7 @@ public:
 	Tag& read(std::istream& stream);
 	void write(std::ostream& stream) const;
 	void dump(std::ostream& stream, const std::string& indendation = "") const;
+	Tag* clone() const;
 
 	bool hasTag(const std::string& name) const;
 	
