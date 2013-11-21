@@ -53,9 +53,9 @@ BOOST_AUTO_TEST_CASE(nbt_testIO) {
 		out.addTag("double", nbt::TagDouble(2.7182818));
 		out.addTag("string", nbt::TagString("foobar"));
 
-		nbt::TagList list = nbt::TagList(nbt::TagString::TAG_TYPE);
+		nbt::TagList list(nbt::TagString::TAG_TYPE);
 		for (size_t i = 0; i < list_data.size(); i++)
-			list.payload.push_back(nbt::tag<nbt::TagString>(list_data[i]));
+			list.payload.push_back(nbt::TagPtr(new nbt::TagString(list_data[i])));
 		out.addTag("list", list);
 		out.addTag("bytearray", nbt::TagByteArray(bytearray_data));
 		out.addTag("intarray", nbt::TagIntArray(intarray_data));

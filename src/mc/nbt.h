@@ -260,14 +260,7 @@ public:
 	static const int8_t TAG_TYPE = (int8_t) TagType::TAG_STRING;
 };
 
-// use shared_ptr in gcc <= 4.4.* instead of unique_ptr,
-// because there are some bugs
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
-# define TagPtrType std::shared_ptr
-#else
-# define TagPtrType std::unique_ptr
-#endif
-
+#define TagPtrType std::unique_ptr
 typedef TagPtrType<Tag> TagPtr;
 
 class TagList: public Tag {
@@ -363,12 +356,6 @@ public:
 };
 
 Tag* createTag(int8_t type);
-
-template<typename T, typename ... Args>
-TagPtrType<T> tag(Args ... args) {
-	static_assert(std::is_base_of<Tag, T>::value, "The template type is not a subclass of Tag!");
-	return TagPtrType<T>(new T(args...));
-}
 
 }
 }
