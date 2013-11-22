@@ -13,8 +13,6 @@ from os.path import join, split, exists
 from glob import glob
 import sys
 
-TEXTURE_SIZE = 12
-
 def main():
     
     usage = 'usage: %prog [options] <tile-set-folder>'
@@ -41,14 +39,13 @@ def main():
         metavar = '<output>', type = str, dest = 'output', default = "output.png")
 
     (options, args) = parser.parse_args()
-    tileset = args[0]
 
-    # arg is overviewer tile set folder
     if len(args) > 1:
         parser.error("Error! Only one overviewer tile set accepted as input. Use --help for a complete list of options.")
 
     if not args:
         parser.error("Error! Need an overviewer tile set folder. Use --help for a complete list of options.")
+    tileset = args[0]
     
     if not options.zoom_level:
         parser.error("Error! The option zoom-level is mandatory.")
@@ -64,7 +61,17 @@ def main():
     # calculate stuff
     n = options.zoom_level
     length_in_tiles = 2**n
-    tile_size = (TEXTURE_SIZE*32, TEXTURE_SIZE*32)
+
+    tile_size = (0, 0)
+    try:
+        image = Image.open(join(tileset, "base.png"))
+        if image.size[0] != image.size[1]:
+            print "Error! Invalid image size {0} of base.png tile!".format(image.size)
+            sys.exit(1)
+        tile_size = image.size
+    except IOError:
+        print "Error! Can't open base.png tile in tileset to determine tile size!"
+        sys.exit(1)
     px_size = 4 # bytes
 
     # create a list with all the images in the zoom level
