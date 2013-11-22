@@ -2317,7 +2317,6 @@ void BlockImages::loadBlocks() {
 	// --
 	createSmallerBlock(116, 0, t.ENCHANTING_TABLE_SIDE,
 			t.ENCHANTING_TABLE_TOP, 0, texture_size * 0.75); // enchantment table
-	//createItemStyleBlock(117, 0, t.BREWING_STAND); // brewing stand
 	createBrewingStand(); // id 117
 	createCauldron(); // id 118 // cauldron
 	createSmallerBlock(119, 0, endportal_texture, endportal_texture,
@@ -2330,12 +2329,10 @@ void BlockImages::loadBlocks() {
 	createBlock(124, 0, t.REDSTONE_LAMP_ON); // redstone lamp active
 	createSlabs(125, false, true); // wooden double slabs
 	createSlabs(126, false, false); // wooden normal slabs
-	// id 127 // cocoa plant
-	createCocoas();
+	createCocoas(); // id 127
 	createStairs(128, t.SANDSTONE_NORMAL); // sandstone stairs
 	createBlock(129, 0, t.EMERALD_ORE); // emerald ore
 	createChest(130, enderchest); // ender chest
-	// id 131 // tripwire hook
 	createTripwireHook(); // tripwire hook
 	createRedstoneWire(132, 0, 192, 192, 192); // tripwire
 	createBlock(133, 0, t.EMERALD_BLOCK); // block of emerald
@@ -2463,7 +2460,7 @@ void BlockImages::loadBlocks() {
 	createBlock(174, 0, t.ICE_PACKED); // packed ice
 	
 	// large plants, id 175 --
-	// the top texture of the sunflower has get modified a bit
+	// the top texture of the sunflower is a bit modified
 	Image sunflower_top = t.DOUBLE_PLANT_SUNFLOWER_TOP;
 	sunflower_top.alphablit(t.DOUBLE_PLANT_SUNFLOWER_FRONT, 0, -texture_size * 0.25);
 	createLargePlant(0, t.DOUBLE_PLANT_SUNFLOWER_BOTTOM, sunflower_top);
