@@ -61,7 +61,9 @@ def main():
     # calculate stuff
     n = options.zoom_level
     length_in_tiles = 2**n
+    px_size = 4 # bytes
 
+    # determine the size of the tiles with the base.png tile
     tile_size = (0, 0)
     try:
         image = Image.open(join(tileset, "base.png"))
@@ -72,7 +74,6 @@ def main():
     except IOError:
         print "Error! Can't open base.png tile in tileset to determine tile size!"
         sys.exit(1)
-    px_size = 4 # bytes
 
     # create a list with all the images in the zoom level
     path = tileset
