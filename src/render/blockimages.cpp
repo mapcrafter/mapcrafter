@@ -1977,22 +1977,18 @@ Image BlockImages::buildCocoa(int stage) {
 }
 
 void BlockImages::createCocoas() { // id 127
+	// create the cubic cocoa beans images
+	// and just use a centered version of it as block images
 	for (int i = 0; i < 3; i++) {
 		Image cocoa = buildCocoa(i);
-		std::cout << i << " " << cocoa.getWidth() << std::endl;
 		Image block(texture_size * 2, texture_size * 2);
 		int xoff = (block.getWidth() - cocoa.getWidth()) / 2;
 		int yoff = (block.getHeight() - cocoa.getHeight()) / 2;
 		block.simpleblit(cocoa, xoff, yoff);
-		//block.writePNG("cocoa" + util::str(i) + ".png");
 
 		uint16_t data = i == 0 ? 0 : (i == 1 ? 0b0100 : 0b1000);
 		setBlockImage(127, data, block);
 	}
-
-	//buildCocoa(0).writePNG("cocoa0.png");
-	//buildCocoa(1).writePNG("cocoa1.png");
-	//buildCocoa(2).writePNG("cocoa2.png");
 }
 
 void BlockImages::createBeacon() { // id 138
