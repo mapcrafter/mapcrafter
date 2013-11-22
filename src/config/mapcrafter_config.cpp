@@ -268,6 +268,8 @@ bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& val
 		}
 	}
 
+	if (!output_dir.require(general_msgs, "You have to specify an output directory ('output_dir')!"))
+		ok = false;
 	if (!has_default_template)
 		template_dir.require(general_msgs, "You have to specify a template directory ('template_dir')!");
 
