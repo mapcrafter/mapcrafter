@@ -612,6 +612,8 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & 0xff00;
 	else if (id == 127)
 		return data & 0b1100;
+	else if (id == 131) // trip wire hook
+		return data & 0b11;
 	else if (id == 132) // trip wire
 		return data & ~0xf;
 	// the light sensor shouldn't have any data, but I had problems with it...
@@ -1991,6 +1993,19 @@ void BlockImages::createCocoas() { // id 127
 	}
 }
 
+void BlockImages::createTripwireHook() { // id 131
+	Image tripwire = textures.REDSTONE_DUST_LINE.colorize((uint8_t) 192, 192, 192);
+
+	BlockImage block;
+	block.setFace(FACE_NORTH, textures.TRIP_WIRE_SOURCE);
+	block.setFace(FACE_BOTTOM, tripwire);
+
+	setBlockImage(131, 0, block); // trip wire hook on the north side
+	setBlockImage(131, 1, block.rotate(1)); // on the east side
+	setBlockImage(131, 2, block.rotate(2)); // on the south side
+	setBlockImage(131, 3, block.rotate(3)); // on the west side
+}
+
 void BlockImages::createBeacon() { // id 138
 	Image beacon(texture_size * 2, texture_size * 2);
 
@@ -2321,6 +2336,7 @@ void BlockImages::loadBlocks() {
 	createBlock(129, 0, t.EMERALD_ORE); // emerald ore
 	createChest(130, enderchest); // ender chest
 	// id 131 // tripwire hook
+	createTripwireHook(); // tripwire hook
 	createRedstoneWire(132, 0, 192, 192, 192); // tripwire
 	createBlock(133, 0, t.EMERALD_BLOCK); // block of emerald
 	createStairs(134, t.PLANKS_SPRUCE); // spruce wood stairs
