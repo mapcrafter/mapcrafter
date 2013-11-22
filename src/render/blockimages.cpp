@@ -1936,13 +1936,6 @@ void BlockImages::createDragonEgg() { // id 122
 }
 
 Image BlockImages::buildCocoa(int stage) {
-	int original_size = textures.COCOA_STAGE_0.original.getWidth();
-	double r = (double) original_size / 16;
-
-	int i = stage + 2;
-	int width = 2*i;
-	int height = 2*i+1;
-
 	Image texture;
 	if (stage == 0)
 		texture = textures.COCOA_STAGE_0.original;
@@ -1951,30 +1944,42 @@ Image BlockImages::buildCocoa(int stage) {
 	else if (stage == 2)
 		texture = textures.COCOA_STAGE_2.original;
 
-	Image cocoa_texture_side = texture.clip(original_size - 1 - width*r, 4*r, width*r, height*r);
+	// at first use the original size of the provided texture image
+	int original_size = texture.getWidth();
+	double r = (double) original_size / 16;
+	// the sizes of the 16px texture size cocoa bean textures are 4/6/8px
+	// multiply with r to get the correct size according to the texture
+	int size = 2 * (stage+2) * r;
 
-	Image cocoa_texture_top;
-	if (stage == 2) {
-		texture.clip(0, 0, 7*r, 7*r).resizeSimple(width*r, width*r, cocoa_texture_top);
-	} else
-		cocoa_texture_top = texture.clip(0, 0, width*r, width*r);
+	// get the size * size top texture
+	// only the top texture is used to create a cubic cocoa bean
+	// because it's too difficult to use the original cocoa bean
+	// proportions for all the texture sizes
+	Image top = texture.clip(0, 0, size, size);
 
+	// however, the size of the third stage is not 8px, it's 7px. why?
+	// just resize it to 8px...
+	if (stage == 2)
+		texture.clip(0, 0, size-1, size-1).resizeSimple(size, size, top);
+
+	// now size according to the texture size the renderer should use
 	r = (double) texture_size / 16;
-	Image cocoa_texture_side_tmp = cocoa_texture_side;
-	Image cocoa_texture_top_tmp = cocoa_texture_top;
-	cocoa_texture_side_tmp.resizeSimple(width*r, height*r, cocoa_texture_side);
-	cocoa_texture_top_tmp.resizeSimple(width*r, width*r, cocoa_texture_top);
+	size = 2 * (stage+2) * r;
+	// resize the texture to this size
+	Image(top).resizeSimple(size, size, top);
 
-	Image cocoa(width*r*2, height*r*2 - 1);
-	blitFace(cocoa, FACE_WEST, cocoa_texture_side);
-	blitFace(cocoa, FACE_SOUTH, cocoa_texture_side);
-	blitFace(cocoa, FACE_TOP, cocoa_texture_top);
+	// and create a simple cubic cocoa bean
+	Image cocoa(size*2, size*2);
+	blitFace(cocoa, FACE_WEST, top);
+	blitFace(cocoa, FACE_SOUTH, top);
+	blitFace(cocoa, FACE_TOP, top);
 	return cocoa;
 }
 
 void BlockImages::createCocoas() { // id 127
 	for (int i = 0; i < 3; i++) {
 		Image cocoa = buildCocoa(i);
+		std::cout << i << " " << cocoa.getWidth() << std::endl;
 		Image block(texture_size * 2, texture_size * 2);
 		int xoff = (block.getWidth() - cocoa.getWidth()) / 2;
 		int yoff = (block.getHeight() - cocoa.getHeight()) / 2;
