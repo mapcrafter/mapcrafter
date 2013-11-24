@@ -62,7 +62,9 @@ Prerequisites:
 * `Xcode <https://itunes.apple.com/us/app/xcode/id497799835?ls=1&mt=12>`_ 
 * `Homebrew <http://brew.sh/>`_
 
-Depending on your version of OS X you may or may not have git installed. Starting from 10.9 Mavericks git is installed with Xcode, if you got 10.8 Mountain Lion or older, you must install command line tools from Xcode and run the following command::
+Depending on your version of OS X you may or may not have git installed. 
+Starting from 10.9 Mavericks git is installed with Xcode, if you got 10.8 Mountain Lion or older, 
+you must install command line tools from Xcode and run the following command::
 	
 	brew install git
 
