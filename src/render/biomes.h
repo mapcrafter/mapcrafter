@@ -41,7 +41,7 @@ private:
 	// extra color values, for example for the swampland biome
 	int extra_r, extra_g, extra_b;
 public:
-	Biome(uint8_t id, double temperature, double rainfall,
+	Biome(uint8_t id = 0, double temperature = 0, double rainfall = 0,
 			uint8_t r = 255, uint8_t g = 255, uint8_t b = 255);
 
 	Biome& operator+=(const Biome& other);
@@ -57,6 +57,7 @@ public:
 // different Minecraft Biomes
 // first few biomes from Minecraft Overviewer
 // temperature/rainfall data from Minecraft source code (via MCP)
+// DO NOT directly access this array, use the getBiome function
 static const Biome BIOMES[] = {
 	{0, 0.5, 0.5}, // Ocean
 	{1, 0.8, 0.4}, // Plains
@@ -93,8 +94,11 @@ static const Biome BIOMES[] = {
 	{27, 0.6, 0.6}, // Birch Forest
 	{28, 0.6, 0.6}, // Birch Forest Hills
 	{29, 0.7, 0.8}, // Roofed Forest
-	{30, -0.5, 0.4}, // Cold Taiga
-	{31, -0.5, 0.4}, // Cold Taiga Hills
+	// Cold Taiga/Cold Taiga Hills have -0.5/0.4 as temperature/rainfall
+	// but I'm not sure yet how to handle negative temperatures
+	// so they just have the colors of normal Taiga
+	{30, 0.05, 0.8}, // Cold Taiga
+	{31, 0.05, 0.8}, // Cold Taiga Hills
 	{32, 0.3, 0.8}, // Mega Taiga
 	{33, 0.3, 0.8}, // Mega Taiga Hills
 	{34, 0.2, 0.3}, // Extreme Hills+

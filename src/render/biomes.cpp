@@ -20,6 +20,7 @@
 #include "biomes.h"
 
 #include <cmath>
+#include <iostream>
 
 namespace mapcrafter {
 namespace render {
@@ -84,7 +85,7 @@ uint32_t Biome::getColor(const Image& colors, bool flip_xy) const {
 	// check if temperature and rainfall are valid
 	if(tmp_temperature > 1)
 		tmp_temperature = 1;
-	if(tmp_rainfall > 1)
+	if (tmp_rainfall > 1)
 		tmp_rainfall = 1;
 
 	// calculate positions
@@ -118,28 +119,30 @@ bool Biome::isBiomeBlock(uint16_t id, uint16_t data) {
 	return false;
 }
 
-// binary search to find the biome with a specific ID from the BIOMES array
-int biomeBinarySearch(uint8_t id, size_t start, size_t end) {
-	if (start > end)
-		return -1;
-	size_t middle = start + (end - start) / 2;
-	uint8_t middle_id = BIOMES[middle].getID();
-	if (middle_id == id)
-		return middle;
-	if (middle_id < id)
-		return biomeBinarySearch(id, middle + 1, end);
-	return biomeBinarySearch(id, start, middle - 1);
+// array with all possible biomes with IDs 0 ... 255
+// empty/unknown biomes in this array have the ID 0
+static Biome ALL_BIOMES[256] = {};
+static bool biomes_initialized;
+
+void initializeBiomes() {
+	// put all biomes with their IDs into the array with all possible biomes
+	for (size_t i = 0; i < BIOMES_SIZE; i++) {
+		Biome biome = BIOMES[i];
+		ALL_BIOMES[biome.getID()] = biome;
+	}
+
+	biomes_initialized = true;
 }
 
 Biome getBiome(uint8_t id) {
-	int found = biomeBinarySearch(id, 0, BIOMES_SIZE - 1);
-	if (found == -1) {
-		found = biomeBinarySearch(DEFAULT_BIOME, 0, BIOMES_SIZE - 1);
-		// should not happen if DEFAULT_BIOME is an ID of an existing biome
-		if (found == -1)
-			return Biome(0, 0, 0);
-	}
-	return BIOMES[found];
+	// initialize biomes at the first time we access them
+	if (!biomes_initialized)
+		initializeBiomes();
+
+	// check if this biome exists and return the default biome otherwise
+	if (ALL_BIOMES[id].getID() == id)
+		return ALL_BIOMES[id];
+	return ALL_BIOMES[DEFAULT_BIOME];
 }
 
 } /* namespace render */
