@@ -55,7 +55,8 @@ public:
 };
 
 // different Minecraft Biomes
-// from Minecraft Overviewer (from Minecraft MCP source code)
+// first few biomes from Minecraft Overviewer
+// temperature/rainfall data from Minecraft source code (via MCP)
 static const Biome BIOMES[] = {
 	{0, 0.5, 0.5}, // Ocean
 	{1, 0.8, 0.4}, // Plains
@@ -83,7 +84,48 @@ static const Biome BIOMES[] = {
 
 	{20, 0.2, 0.3}, // Extreme Hills Edge
 	{21, 2.0, 0.45}, // Jungle
-	{22, 2.0, 0.25}, // Jungle Mountains
+	{22, 2.0, 0.25}, // Jungle Hills
+
+	{23, 0.95, 0.8}, // Jungle Edge
+	{24, 0.5, 0.5}, // Deep Ocean
+	{25, 0.2, 0.3}, // Stone Beach
+	{26, 0.05, 0.3}, // Cold Beach
+	{27, 0.6, 0.6}, // Birch Forest
+	{28, 0.6, 0.6}, // Birch Forest Hills
+	{29, 0.7, 0.8}, // Roofed Forest
+	{30, -0.5, 0.4}, // Cold Taiga
+	{31, -0.5, 0.4}, // Cold Taiga Hills
+	{32, 0.3, 0.8}, // Mega Taiga
+	{33, 0.3, 0.8}, // Mega Taiga Hills
+	{34, 0.2, 0.3}, // Extreme Hills+
+	{35, 1.2, 0.0}, // Savanna
+	{36, 1.0, 0.0},// id 36 // Savanna Plateau
+	{37, 2.0, 0}, // Mesa
+	{38, 2.0, 0}, // Mesa Plateau F
+	{39, 2.0, 0}, // Mesa Pleateau
+
+	// id 129 // Sunflower Plains
+	// id 130 // Desert M
+	// id 131 // Extreme Hills M
+	// id 132 // Flower Forest
+	// id 133 // Taiga M
+	// id 134 // Swampland M
+	// id 140 // Ice Plains Spikes
+	// id 141 // Ice Mountains Spikes
+	// id 149 // Jungle M
+	// id 151 // Jungle Edge M
+	// id 155 // Birch Forest M
+	// id 156 // Birch Forest Hills M
+	// id 157 // Roffed Forest M
+	// id 158 // Cold Taiga M
+	// id 160 // Mega Spruce Taiga
+	// id 161 // Mega Spruce Taiga Hills
+	// id 162 // Extreme Hills+ M
+	// id 163 // Savanna M
+	// id 164 // Savanna Plateau M
+	// id 165 // Mesa (Bryce)
+	// id 166 // Mesa Plateau F M
+	// id 167 // Mesa Pleatau M
 };
 
 static const size_t BIOMES_SIZE = sizeof(BIOMES) / sizeof(Biome);
