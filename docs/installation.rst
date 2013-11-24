@@ -58,28 +58,31 @@ Mac OS X
 Currently there is no pre built packages available for Mac OS X but building it is relatively simple.
 
 Prerequisites:
+
 * `Xcode <https://itunes.apple.com/us/app/xcode/id497799835?ls=1&mt=12>`_ 
 * `Homebrew <http://brew.sh/>`_
 
-Depending on your version of OS X you may or may not have git installed. Starting from 10.9 Mavericks git is installed with Xcode, if you got 10.8 Mountain Lion or older, you must install command line tools from Xcode and run the following command:
+Depending on your version of OS X you may or may not have git installed. 
+Starting from 10.9 Mavericks git is installed with Xcode, if you got 10.8 Mountain Lion or older, 
+you must install command line tools from Xcode and run the following command::
 	
 	brew install git
 
-On 10.9 Mavericks systems you will have to run the following command after you've installed Xcode:
+On 10.9 Mavericks systems you will have to run the following command after you've installed Xcode::
 
 	xcode-selected --install
 
 and select install in the window that pops up, and accept the EULA.
 
-First you will have to clone the latest mapcrafter source by running
+First you will have to clone the latest mapcrafter source by running::
 
 	git clone https://github.com/m0r13/mapcrafter.git
 
-After this, install the dependencies using brew
+After this, install the dependencies using brew::
 
 	brew install boost libpng cmake
 	
-once you have run this, you should have a working build system for mapcrafter.
+once you have run this, you should have a working build system for mapcrafter::
 
 	cd mapcrafter
 	cmake .
