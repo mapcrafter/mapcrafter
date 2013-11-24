@@ -55,7 +55,8 @@ public:
 };
 
 // different Minecraft Biomes
-// from Minecraft Overviewer (from Minecraft MCP source code)
+// first few biomes from Minecraft Overviewer
+// temperature/rainfall data from Minecraft source code (via MCP)
 static const Biome BIOMES[] = {
 	{0, 0.5, 0.5}, // Ocean
 	{1, 0.8, 0.4}, // Plains
@@ -85,23 +86,23 @@ static const Biome BIOMES[] = {
 	{21, 2.0, 0.45}, // Jungle
 	{22, 2.0, 0.25}, // Jungle Hills
 
-	// id 23 // Jungle Edge
-	// id 24 // Deep Ocean
-	// id 25 // Stone Beach
-	// id 26 // Cold Beach
-	// id 27 // Birch Forest
-	// id 28 // Birch Forest Hills
-	// id 39 // Roofed Forest
-	// id 30 // Cold Taiga
-	// id 31 // Cold Taiga Hills
-	// id 32 // Mega Taiga
-	// id 33 // Mega Taiga Hills
-	// id 34 // Extreme Hills+
-	// id 35 // Savanna
-	// id 36 // Savanna Plateau
-	// id 37 // Mesa
-	// id 38 // Mesa Plateau F
-	// id 39 // Mesa Pleateau
+	{23, 0.95, 0.8}, // Jungle Edge
+	{24, 0.5, 0.5}, // Deep Ocean
+	{25, 0.2, 0.3}, // Stone Beach
+	{26, 0.05, 0.3}, // Cold Beach
+	{27, 0.6, 0.6}, // Birch Forest
+	{28, 0.6, 0.6}, // Birch Forest Hills
+	{29, 0.7, 0.8}, // Roofed Forest
+	{30, -0.5, 0.4}, // Cold Taiga
+	{31, -0.5, 0.4}, // Cold Taiga Hills
+	{32, 0.3, 0.8}, // Mega Taiga
+	{33, 0.3, 0.8}, // Mega Taiga Hills
+	{34, 0.2, 0.3}, // Extreme Hills+
+	{35, 1.2, 0.0}, // Savanna
+	{36, 1.0, 0.0},// id 36 // Savanna Plateau
+	{37, 2.0, 0}, // Mesa
+	{38, 2.0, 0}, // Mesa Plateau F
+	{39, 2.0, 0}, // Mesa Pleateau
 
 	// id 129 // Sunflower Plains
 	// id 130 // Desert M
