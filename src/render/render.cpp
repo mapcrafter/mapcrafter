@@ -143,13 +143,12 @@ TileRenderer::TileRenderer(const mc::WorldCache& world, const BlockImages& image
 TileRenderer::~TileRenderer() {
 }
 
-Biome TileRenderer::getBiome(const mc::BlockPos& pos, const mc::Chunk* chunk) {
+Biome TileRenderer::getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk) {
+	// return default biome if we don't want to render different biomes
+	if (!render_biomes)
+		return getBiome(DEFAULT_BIOME);
 	uint8_t biome_id = chunk->getBiomeAt(mc::LocalBlockPos(pos));
-	Biome biome = BIOMES[DEFAULT_BIOME];
-	if (render_biomes && biome_id < BIOMES_SIZE)
-		biome = BIOMES[biome_id];
-	else
-		return biome;
+	Biome biome = getBiome(biome_id);
 	int count = 1;
 
 	// get average biome data to make smooth edges between
