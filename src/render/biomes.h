@@ -59,38 +59,38 @@ public:
 // temperature/rainfall data from Minecraft source code (via MCP)
 // DO NOT directly access this array, use the getBiome function
 static const Biome BIOMES[] = {
-	{0, 0.5, 0.5},      // Ocean
-	{1, 0.8, 0.4},      // Plains
-	{2, 2.0, 0.0},      // Desert
-	{3, 0.2, 0.3},      // Extreme Hills
-	{4, 0.7, 0.8},      // Forest
-	{5, 0.05, 0.8},     // Taiga
+	{0, 0.5, 0.5},     // Ocean
+	{1, 0.8, 0.4},     // Plains
+	{2, 2.0, 0.0},     // Desert
+	{3, 0.2, 0.3},     // Extreme Hills
+	{4, 0.7, 0.8},     // Forest
+	{5, 0.05, 0.8},    // Taiga
 	{6, 0.8, 0.9, 205, 128, 255}, // Swampland
-	{7, 0.5, 0.5},      // River
-	{8, 2.0, 0.0},      // Hell (Nether)
-	{9, 0.5, 0.5},      // Sky (End)
+	{7, 0.5, 0.5},     // River
+	{8, 2.0, 0.0},     // Hell (Nether)
+	{9, 0.5, 0.5},     // Sky (End)
 
-	{10, 0.0, 0.5},     // Frozen Ocean
-	{11, 0.0, 0.5},     // Frozen River
-	{12, 0.0, 0.5},     // Ice Plains
-	{13, 0.0, 0.5},     // Ice Mountains
-	{14, 0.9, 1.0},     // Mushroom Island
-	{15, 0.9, 1.0},     // Mushroom Island Shore
-	{16, 0.8, 0.4},     // Beach
-	{17, 2.0, 0.0},     // Desert Hills
-	{18, 0.7, 0.8},     // Forest Hills
-	{19, 0.05, 0.8},    // Taiga Hills
+	{10, 0.0, 0.5},    // Frozen Ocean
+	{11, 0.0, 0.5},    // Frozen River
+	{12, 0.0, 0.5},    // Ice Plains
+	{13, 0.0, 0.5},    // Ice Mountains
+	{14, 0.9, 1.0},    // Mushroom Island
+	{15, 0.9, 1.0},    // Mushroom Island Shore
+	{16, 0.8, 0.4},    // Beach
+	{17, 2.0, 0.0},    // Desert Hills
+	{18, 0.7, 0.8},    // Forest Hills
+	{19, 0.05, 0.8},   // Taiga Hills
 
-	{20, 0.2, 0.3},     // Extreme Hills Edge
-	{21, 0.95, 0.9},    // Jungle
-	{22, 0.95, 0.9},    // Jungle Hills
-	{23, 0.95, 0.8},    // Jungle Edge
-	{24, 0.5, 0.5},     // Deep Ocean
-	{25, 0.2, 0.3},     // Stone Beach
-	{26, 0.05, 0.3},    // Cold Beach
-	{27, 0.6, 0.6},     // Birch Forest
-	{28, 0.6, 0.6},     // Birch Forest Hills
-	{29, 0.7, 0.8},     // Roofed Forest
+	{20, 0.2, 0.3},    // Extreme Hills Edge
+	{21, 0.95, 0.9},   // Jungle
+	{22, 0.95, 0.9},   // Jungle Hills
+	{23, 0.95, 0.8},   // Jungle Edge
+	{24, 0.5, 0.5},    // Deep Ocean
+	{25, 0.2, 0.3},    // Stone Beach
+	{26, 0.05, 0.3},   // Cold Beach
+	{27, 0.6, 0.6},    // Birch Forest
+	{28, 0.6, 0.6},    // Birch Forest Hills
+	{29, 0.7, 0.8},    // Roofed Forest
 
 	// Cold Taiga/Cold Taiga Hills have -0.5/0.4 as temperature/rainfall
 	// but I'm not sure yet how to handle negative temperatures
