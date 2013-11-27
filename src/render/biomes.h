@@ -133,6 +133,8 @@ static const Biome BIOMES[] = {
 static const size_t BIOMES_SIZE = sizeof(BIOMES) / sizeof(Biome);
 static const int DEFAULT_BIOME = 21;		// Jungle
 
+Biome getBiome(uint8_t id);
+
 } /* namespace render */
 } /* namespace mapcrafter */
 #endif /* BIOMES_H_ */

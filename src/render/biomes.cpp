@@ -142,7 +142,6 @@ Biome getBiome(uint8_t id) {
 	// check if this biome exists and return the default biome otherwise
 	if (ALL_BIOMES[id].getID() == id)
 		return ALL_BIOMES[id];
-	std::cout << "Unknown biome: " << (int) id << std::endl;
 	return ALL_BIOMES[DEFAULT_BIOME];
 }
 

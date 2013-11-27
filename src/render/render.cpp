@@ -585,7 +585,7 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 
 			// check for biome data
 			if (Biome::isBiomeBlock(id, data))
-				image = state.images.getBiomeDependBlock(id, data, getBiome(block.current, state.chunk));
+				image = state.images.getBiomeDependBlock(id, data, getBiomeOfBlock(block.current, state.chunk));
 			else
 				image = state.images.getBlock(id, data);
 

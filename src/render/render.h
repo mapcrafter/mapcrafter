@@ -120,7 +120,7 @@ private:
 
 	std::vector<std::shared_ptr<Rendermode>> rendermodes;
 
-	Biome getBiome(const mc::BlockPos& pos, const mc::Chunk* chunk);
+	Biome getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk);
 
 	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 public:
