@@ -20,6 +20,7 @@
 #include "biomes.h"
 
 #include <cmath>
+#include <iostream>
 
 namespace mapcrafter {
 namespace render {
@@ -84,7 +85,7 @@ uint32_t Biome::getColor(const Image& colors, bool flip_xy) const {
 	// check if temperature and rainfall are valid
 	if(tmp_temperature > 1)
 		tmp_temperature = 1;
-	if(tmp_rainfall > 1)
+	if (tmp_rainfall > 1)
 		tmp_rainfall = 1;
 
 	// calculate positions
@@ -116,6 +117,32 @@ bool Biome::isBiomeBlock(uint16_t id, uint16_t data) {
 			|| id == 111 // lily pad
 			|| (id == 175 && ((data & 0b11) == 2 || (data & 0b11) == 3)); // large flowers (tallgrass, fern)
 	return false;
+}
+
+// array with all possible biomes with IDs 0 ... 255
+// empty/unknown biomes in this array have the ID 0
+static Biome ALL_BIOMES[256] = {};
+static bool biomes_initialized;
+
+void initializeBiomes() {
+	// put all biomes with their IDs into the array with all possible biomes
+	for (size_t i = 0; i < BIOMES_SIZE; i++) {
+		Biome biome = BIOMES[i];
+		ALL_BIOMES[biome.getID()] = biome;
+	}
+
+	biomes_initialized = true;
+}
+
+Biome getBiome(uint8_t id) {
+	// initialize biomes at the first time we access them
+	if (!biomes_initialized)
+		initializeBiomes();
+
+	// check if this biome exists and return the default biome otherwise
+	if (ALL_BIOMES[id].getID() == id)
+		return ALL_BIOMES[id];
+	return ALL_BIOMES[DEFAULT_BIOME];
 }
 
 } /* namespace render */

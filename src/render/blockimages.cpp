@@ -739,8 +739,9 @@ void BlockImages::createBiomeBlocks() {
 		if (!Biome::isBiomeBlock(id, data))
 			continue;
 
-		for (uint64_t b = 0; b < BIOMES_SIZE; b++) {
-			Biome biome = BIOMES[b];
+		for (size_t i = 0; i < BIOMES_SIZE; i++) {
+			Biome biome = BIOMES[i];
+			uint64_t b = biome.getID();
 			biome_images[id | ((uint64_t) data << 16) | (b << 32)] =
 					createBiomeBlock(id, data, biome);
 		}
@@ -2502,9 +2503,8 @@ const Image& BlockImages::getBlock(uint16_t id, uint16_t data) const {
 Image BlockImages::getBiomeDependBlock(uint16_t id, uint16_t data,
         const Biome& biome) const {
 	data = filterBlockData(id, data);
-	// just return the block if biome is invalid
-	// special case for the snowy grass block
-	if (biome.getID() >= BIOMES_SIZE || (id == 2 && (data & GRASS_SNOW)))
+	// return normal block for the snowy grass block
+	if (id == 2 && (data & GRASS_SNOW))
 		return getBlock(id, data);
 
 	if (!hasBlock(id, data))
