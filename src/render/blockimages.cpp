@@ -24,6 +24,7 @@
 #include <iostream>
 #include <map>
 #include <cstdlib>
+#include <cmath>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
