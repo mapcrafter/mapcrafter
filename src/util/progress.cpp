@@ -19,12 +19,41 @@
 
 #include "progress.h"
 
+#include "other.h"
+
 #include <iostream>
 #include <cstdio>
 #include <ctime>
 
 namespace mapcrafter {
 namespace util {
+
+std::string format_eta(int eta) {
+	int MINUTES = 60;
+	int HOURS = 60*MINUTES;
+	int DAYS = 24*HOURS;
+
+	int days = eta / DAYS;
+	eta -= days * DAYS;
+	int hours = eta / HOURS;
+	eta -= hours * HOURS;
+	int minutes = eta / MINUTES;
+	eta -= minutes * MINUTES;
+	int seconds = eta;
+
+	std::string str_days = util::str(days) + "d";
+	std::string str_hours = util::str(hours) + "h";
+	std::string str_minutes = util::str(minutes) + "m";
+	std::string str_seconds = util::str(seconds) + "s";
+
+	if (days > 0)
+		return str_days + " " + str_hours;
+	if (hours > 0)
+		return str_hours + " " + str_minutes;
+	if (minutes > 0)
+		return str_minutes + " " + str_seconds;
+	return str_seconds;
+}
 
 DummyProgressHandler::DummyProgressHandler()
 	: max(0), value(0) {
@@ -50,8 +79,8 @@ void DummyProgressHandler::setValue(int value) {
 }
 
 ProgressBar::ProgressBar(int max, bool animated)
-		: animated(animated),
-		  start(time(NULL)), last_update(0), last_value(0), last_percent(0) {
+		: animated(animated), start(time(NULL)), last_update(0),
+		  last_value(0), last_percent(0), last_output_len(0) {
 	setMax(max);
 }
 
@@ -82,33 +111,49 @@ void ProgressBar::update(int value, bool force) {
 	if (!force && last_update + 1 > now && !(last_percent != max && value == max))
 		return;
 
-	// now calculate the speed
+	// now calculate the current and average speed
 	double speed = (double) (value - last_value) / (now - last_update);
+	double average_speed = (double) value / (now - start);
 	if (value == max)
-		// at the end an average speed
-		speed = (double) value / (now - start);
+		// at the end use the average speed
+		speed = average_speed;
 
-	// go to the begin of the line
-	if (animated)
-		std::cout << "\r";
 	// show the progress bar
-	std::cout << "[";
+	std::string output = "[";
 	for (int i = 0; i <= 100; i += 2) {
 		if (i > percent)
-			std::cout << " ";
+			output += " ";
 		else if (percent - 2 < i)
-			std::cout << ">";
+			output += ">";
 		else
-			std::cout << "=";
+			output += "=";
 	}
 	// and the progress, current value and speed
 	char fpercent[20];
 	char fspeed[20];
 	sprintf(&fpercent[0], "%.2f%%", percent);
 	sprintf(&fspeed[0], "%.2f", speed);
-	std::cout << "] " << fpercent << " " << value << "/" << max << " " << fspeed;
+	output += "] ";
+	output += std::string(fpercent) + " ";
+	output += util::str(value) + "/" + util::str(max) + " ";
+	output += std::string(fspeed) + "/s ";
+
+	// show ETA, but not at the end
+	if (value != max) {
+		int eta = (max - value) / average_speed;
+		output += "ETA " + format_eta(eta);
+	}
+
+	// go to the begin of the line and clear it
 	if (animated) {
-		std::cout << "/s\r";
+		std::cout << "\r";
+		for (int i = 0; i < last_output_len; i++)
+			std::cout << " ";
+		std::cout << "\r";
+	}
+
+	std::cout << output;
+	if (animated) {
 		std::cout.flush();
 	} else
 		std::cout << std::endl;
@@ -116,6 +161,7 @@ void ProgressBar::update(int value, bool force) {
 	last_update = now;
 	last_value = value;
 	last_percent = percent;
+	last_output_len = output.size();
 }
 
 void ProgressBar::finish() {
