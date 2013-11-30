@@ -548,38 +548,18 @@ bool MapcrafterConfigHelper::isCompleteRenderForce(const std::string& map) const
 	return true;
 }
 
-bool nextRenderBehaviorSplit(std::string& string, std::string& world, std::string& rotation) {
-	if (string.empty()) {
-		world = "";
-		rotation = "";
-		return false;
-	}
+void MapcrafterConfigHelper::setRenderBehaviors(std::vector<std::string> maps, int behavior) {
+	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
+		std::string map = *map_it;
+		std::string rotation;
 
-	size_t pos = string.find(",");
-	std::string sub = string;
-	if (pos != std::string::npos) {
-		sub = string.substr(0, pos);
-		string = string.substr(pos+1);
-	} else {
-		string = "";
-	}
+		size_t pos = map_it->find(":");
+		if (pos != std::string::npos) {
+			rotation = map.substr(pos+1);
+			map = map.substr(0, pos);
+		} else
+			rotation = "";
 
-	world = sub;
-	pos = world.find(":");
-	if (pos != std::string::npos) {
-		rotation = world.substr(pos+1);
-		world = world.substr(0, pos);
-	} else {
-		rotation = "";
-	}
-
-	return true;
-}
-
-void MapcrafterConfigHelper::setRenderBehaviors(std::string maps, int behavior) {
-	std::string map, rotation;
-
-	while (nextRenderBehaviorSplit(maps, map, rotation)) {
 		int r = stringToRotation(rotation, ROTATION_NAMES_SHORT);
 		if (!config.hasMap(map)) {
 			std::cout << "Warning: Unknown map '" << map << "'." << std::endl;
@@ -604,8 +584,10 @@ void MapcrafterConfigHelper::setRenderBehaviors(std::string maps, int behavior) 
 	}
 }
 
-void MapcrafterConfigHelper::parseRenderBehaviors(bool skip_all, const std::string& render_skip,
-		const std::string& render_auto, const std::string& render_force) {
+void MapcrafterConfigHelper::parseRenderBehaviors(bool skip_all,
+		std::vector<std::string> render_skip,
+		std::vector<std::string> render_auto,
+		std::vector<std::string> render_force) {
 	if (!skip_all)
 		setRenderBehaviors(render_skip, RENDER_SKIP);
 	else

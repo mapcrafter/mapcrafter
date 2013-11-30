@@ -127,7 +127,7 @@ private:
 
 	std::map<std::string, std::array<int, 4> > render_behaviors;
 
-	void setRenderBehaviors(std::string maps, int behavior);
+	void setRenderBehaviors(std::vector<std::string> maps, int behavior);
 public:
 	MapcrafterConfigHelper();
 	MapcrafterConfigHelper(const MapcrafterConfigFile& config);
@@ -149,8 +149,10 @@ public:
 	bool isCompleteRenderSkip(const std::string& map) const;
 	bool isCompleteRenderForce(const std::string& map) const;
 
-	void parseRenderBehaviors(bool skip_all, const std::string& render_skip,
-			const std::string& render_auto, const std::string& render_force);
+	void parseRenderBehaviors(bool skip_all,
+			std::vector<std::string>,
+			std::vector<std::string> render_auto,
+			std::vector<std::string> render_force);
 
 	static const int RENDER_SKIP = 0;
 	static const int RENDER_AUTO = 1;
