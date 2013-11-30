@@ -94,7 +94,7 @@ bool MapSection::parse(const ConfigSection& section, const fs::path& config_dir,
 	if (has_default_textures)
 		texture_dir.setDefault(util::findTextureDir());
 	rotations.setDefault("top-left");
-	rendermode.setDefault("normal");
+	rendermode.setDefault("daylight");
 	texture_size.setDefault(12);
 	render_unknown_blocks.setDefault(false);
 	render_leaves_transparent.setDefault(true);
@@ -128,7 +128,7 @@ bool MapSection::parse(const ConfigSection& section, const fs::path& config_dir,
 				std::string r = rendermode.getValue();
 				if (r != "normal" && r != "daylight" && r != "nightlight" && r != "cave")
 					validation.push_back(ValidationMessage::error(
-							"'rendermode' must be one of: normal, daylight, nightlight, cave"));
+							"'rendermode' must be one of: 'normal', 'daylight', 'nightlight', 'cave'"));
 			}
 		} else if (key == "texture_size") {
 			if (texture_size.load(key, value, validation)

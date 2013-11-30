@@ -196,7 +196,7 @@ Map Options
 
 ``rendermode = normal|cave|daylight|nightlight``
 	
-    **Default:** ``normal``
+    **Default:** ``daylight``
 
     This is the rendermode to use when rendering the world. Possible
     rendermodes are:
@@ -204,8 +204,7 @@ Map Options
     ``normal``
         The default rendermode.  
     ``daylight``
-        Renders the world with lighting. This lighting rendermode is
-        still a bit experimental, but already useable and looks good in most cases.
+        Renders the world with lighting.
     ``nightlight``
         Like ``daylight``, but renders at night.
     ``cave``
