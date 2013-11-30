@@ -66,6 +66,11 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.0.6**
+
+* Added support for Minecraft 1.7 blocks and biomes
+* Added some more blocks such as trip wire, trip wire hook and (magic floating) cocoa beans
+
 **v.0.5.1**
 
 * Added support for Minecraft 1.6 Resource Packs
