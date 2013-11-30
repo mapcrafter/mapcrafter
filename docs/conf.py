@@ -14,8 +14,11 @@
 import sys, os
 
 buildbot = os.environ.get('MAPCRAFTER_BUILDBOT', None) == '42'
-if buildbot:
+has_sphinx_theme = True
+try:
     import sphinx_rtd_theme
+except ImportError:
+    has_sphinx_theme = False
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -33,8 +36,8 @@ extensions = []
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
-if os.environ.get('READTHEDOCS', None) == 'True' or buildbot:
-    templates_path = ['_readthedocs_templates']
+if buildbot:
+    templates_path = ['_templates_tracking']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -54,7 +57,8 @@ copyright = u'2013, Moritz Hilscher'
 # built documents.
 #
 # The short X.Y version.
-version = '0.5.1'
+version = open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'VERSION')).read().strip()
+print version
 # The full version, including alpha/beta/rc tags.
 release = '0.5.1'
 
@@ -110,7 +114,7 @@ html_theme = 'default'
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
 
-if buildbot:
+if has_sphinx_theme:
     html_theme = 'sphinx_rtd_theme'
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
