@@ -20,7 +20,7 @@ Here is a simple example of a configuration file (let's call it
     input_dir = worlds/myworld
 
     [map:map_myworld]
-    name = My World world = myworld
+    name = My World world
 
 As you can see the configuration files consist of different types of sections
 (e.g. ``[section]``) and containing assignments of configuration options to
@@ -36,7 +36,7 @@ Every world section represents a Minecraft World you want to render and needs a
 directory where it can find the Minecraft World (``input_dir`` of the world
 section ``myworld`` in the example above).
 
-Every map sections represents a rendered Minecraft World. You can specifiy
+Every map section represents a rendered Minecraft World. You can specifiy
 things like rotation of the world, rendermode, texture pack and texture size
 for each map.
 
@@ -101,7 +101,7 @@ A More Advanced Example
 Here we have some more worlds and maps defined. We have a "normal" world which
 is rendered with the day, night and cave rendermode and we have a "creative"
 world which is rendered super fancy with a special texture pack, higher texture
-size, all available world rotations with the day and night rendermode.
+size and all available world rotations with the day and night rendermode.
 
 As you can see there is a new section ``global:maps``. This section is used to
 set default values for all map sections. Because of this in this example every
