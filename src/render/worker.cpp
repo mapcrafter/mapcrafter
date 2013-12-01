@@ -68,17 +68,20 @@ void RenderWorker::saveTile(const TilePath& tile, const Image& image) {
 }
 
 void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
-	// if this is tile is not required or we should skip it, load it from file
+	// if this is tile is not required or we should skip it, try to load it from file
 	if (!tileset->isTileRequired(tile) || tiles_skip.count(tile)) {
 		fs::path file = map_output_dir / (tile.toString() + ".png");
-		if (!image.readPNG(file.string())) {
-			std::cerr << "Unable to read tile " << tile.toString() << " from " << file << std::endl;
-			std::cerr << tileset->isTileRequired(tile) << " " << tiles_skip.count(tile) << std::endl;
+		if (image.readPNG(file.string())) {
+			if (tiles_skip.count(tile))
+				progress->setValue(progress->getValue() + tileset->getContainingRenderTiles(tile));
+			return;
 		}
 
-		if (tiles_skip.count(tile))
-			progress->setValue(progress->getValue() + tileset->getContainingRenderTiles(tile));
-	} else if (tile.getDepth() == tileset->getDepth()) {
+		std::cout << "Unable to read tile " << tile.toString();
+		std::cout << ", I will just render it again." << std::endl;
+	}
+
+	if (tile.getDepth() == tileset->getDepth()) {
 		// this tile is a render tile, render it
 		renderer.renderTile(tile.getTilePos(), image);
 
