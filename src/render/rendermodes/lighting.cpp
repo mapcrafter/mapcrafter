@@ -174,7 +174,9 @@ bool isSpecialTransparent(uint16_t id) {
 			|| id == 135 // birch wood stairs
 			|| id == 136 // jungle wood stairs
 			|| id == 145 // anvil
-			|| id == 156;// quartz stairs
+			|| id == 156 // quartz stairs
+			|| id == 163 // acacia wood stairs
+			|| id == 164; // dark oak wood stairs
 }
 
 /**

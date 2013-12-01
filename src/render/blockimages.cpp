@@ -136,11 +136,13 @@ void blitFace(Image& image, int face, const Image& texture, int xoff, int yoff,
 			d = darken_right;
 	}
 
-	int size = texture.getWidth();
+	int xsize = texture.getWidth();
+	int ysize = texture.getHeight();
+	int size = std::max(xsize, ysize);
 
 	if (face == FACE_BOTTOM || face == FACE_TOP) {
 		if (face == FACE_BOTTOM)
-			yoff += size;
+			yoff += ysize;
 		for (TopFaceIterator it(size); !it.end(); it.next()) {
 			uint32_t pixel = texture.getPixel(it.src_x, it.src_y);
 			image.blendPixel(rgba_multiply(pixel, d, d, d), it.dest_x + xoff,
@@ -152,9 +154,9 @@ void blitFace(Image& image, int face, const Image& texture, int xoff, int yoff,
 			itside = SideFaceIterator::RIGHT;
 
 		if (face == FACE_EAST || face == FACE_SOUTH)
-			xoff += size;
+			xoff += xsize;
 		if (face == FACE_WEST || face == FACE_SOUTH)
-			yoff += size / 2;
+			yoff += ysize / 2;
 		for (SideFaceIterator it(size, itside); !it.end(); it.next()) {
 			uint32_t pixel = texture.getPixel(it.src_x, it.src_y);
 			image.blendPixel(rgba_multiply(pixel, d, d, d), it.dest_x + xoff,
@@ -349,9 +351,9 @@ bool loadChestTexture(const Image& image, Image* textures, int texture_size) {
 	Image top = image.clip(size, 0, size, size);
 
 	// resize the chest images to texture size
-	front.resizeInterpolated(texture_size, texture_size, textures[CHEST_FRONT]);
-	side.resizeInterpolated(texture_size, texture_size, textures[CHEST_SIDE]);
-	top.resizeInterpolated(texture_size, texture_size, textures[CHEST_TOP]);
+	front.resizeAuto(texture_size, texture_size, textures[CHEST_FRONT]);
+	side.resizeAuto(texture_size, texture_size, textures[CHEST_SIDE]);
+	top.resizeAuto(texture_size, texture_size, textures[CHEST_TOP]);
 
 	return true;
 }
@@ -390,18 +392,18 @@ bool loadLargeChestTexture(const Image& image, Image* textures, int texture_size
 	back_right.alphablit(image.clip(5 * size + 4, size, size, 4 * ratio), 0, 0);
 
 	// resize the chest images to texture size
-	front_left.resizeInterpolated(texture_size, texture_size,
+	front_left.resizeAuto(texture_size, texture_size,
 	        textures[LARGECHEST_FRONT_LEFT]);
-	front_right.resizeInterpolated(texture_size, texture_size,
+	front_right.resizeAuto(texture_size, texture_size,
 	        textures[LARGECHEST_FRONT_RIGHT]);
-	side.resizeInterpolated(texture_size, texture_size, textures[LARGECHEST_SIDE]);
-	top_left.resizeInterpolated(texture_size, texture_size,
+	side.resizeAuto(texture_size, texture_size, textures[LARGECHEST_SIDE]);
+	top_left.resizeAuto(texture_size, texture_size,
 	        textures[LARGECHEST_TOP_LEFT]);
-	top_right.resizeInterpolated(texture_size, texture_size,
+	top_right.resizeAuto(texture_size, texture_size,
 	        textures[LARGECHEST_TOP_RIGHT]);
-	back_left.resizeInterpolated(texture_size, texture_size,
+	back_left.resizeAuto(texture_size, texture_size,
 	        textures[LARGECHEST_BACK_LEFT]);
-	back_right.resizeInterpolated(texture_size, texture_size,
+	back_right.resizeAuto(texture_size, texture_size,
 	        textures[LARGECHEST_BACK_RIGHT]);
 
 	return true;
@@ -430,7 +432,7 @@ bool BlockImages::loadOther(const std::string& endportal) {
 	Image endportal_img;
 	if(!endportal_img.readPNG(endportal))
 		return false;
-	endportal_img.resizeInterpolated(texture_size, texture_size, endportal_texture);
+	endportal_img.resizeAuto(texture_size, texture_size, endportal_texture);
 	return true;
 }
 
@@ -570,7 +572,7 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & (0xff00 | 0b00000011);
 	else if (id == 26) // bed
 		return data & (0xff00 | 0b00001011);
-	else if (id == 54 || id == 95 || id == 130) { // chests
+	else if (id == 54 || id == 130) { // chests
 		// at first get the direction of the chest and rotate if needed
 		uint16_t dir_rotate = (data >> 4) & 0xf;
 		uint16_t dir = util::rotate_shift_l(dir_rotate, rotation, 4) << 4;
@@ -579,7 +581,7 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 
 		// if no neighbors, this is a small chest
 		// the data contains only the direction
-		if (neighbors == 0 || id == 95 || id == 130)
+		if (neighbors == 0 || id == 130)
 			return dir;
 
 		// this is a double chest
@@ -592,7 +594,7 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 				|| (dir == DATA_WEST && neighbors == DATA_SOUTH))
 			new_data |= LARGECHEST_DATA_LEFT;
 		return new_data;
-	} else if (id == 55) { // redstone wire
+	} else if (id == 55) { // redstone wire, tripwire
 		// check if powered
 		if ((data & 0b1111) != 0)
 			return (data & ~(0b1111)) | REDSTONE_POWERED;
@@ -603,12 +605,20 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & 0b1111110000;
 	else if (id == 81 || id == 83 || id == 92) // cactus, sugar cane, cake
 		return data & 0xff00;
+	else if (id == 84) // jukebox
+		return 0;
 	else if (id == 93 || id == 94) // redstone repeater
 		return data & (0xff00 | 0b00000011);
 	else if (id == 117) // brewing stand
 		return data & 0xff00;
 	else if (id == 119 || id == 120) // end portal, end portal frame
 		return data & 0xff00;
+	else if (id == 127)
+		return data & 0b1100;
+	else if (id == 131) // trip wire hook
+		return data & 0b11;
+	else if (id == 132) // trip wire
+		return data & ~0xf;
 	// the light sensor shouldn't have any data, but I had problems with it...
 	else if (id == 151)
 		return 0;
@@ -1392,7 +1402,7 @@ void BlockImages::createStairs(uint16_t id, const Image& texture) { // id 53, 67
 	setBlockImage(id, 3 | 4, north);
 }
 
-void BlockImages::createChest(uint16_t id, Image* textures) { // id 54, 95, 130
+void BlockImages::createChest(uint16_t id, Image* textures) { // id 54, 130
 	BlockImage chest;
 	chest.setFace(FACE_SOUTH, textures[CHEST_FRONT]);
 	chest.setFace(FACE_NORTH | FACE_EAST | FACE_WEST, textures[CHEST_SIDE]);
@@ -1431,13 +1441,14 @@ void BlockImages::createDoubleChest(uint16_t id, Image* textures) { // id 54
 	setBlockImage(id, DATA_WEST | l, buildImage(right.rotate(1)));
 }
 
-void BlockImages::createRedstoneWire(bool powered) { // id 55
+void BlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data,
+		uint8_t r, uint8_t g, uint8_t b) { // id 55
 	Image redstone_cross = textures.REDSTONE_DUST_CROSS;
 	Image redstone_line = textures.REDSTONE_DUST_LINE;
 
-	uint8_t color = powered ? 50 : 255;
-	redstone_cross = redstone_cross.colorize(color, 0, 0);
-	redstone_line = redstone_line.colorize(color, 0, 0);
+	//uint8_t color = powered ? 50 : 255;
+	redstone_cross = redstone_cross.colorize(r, g, b);
+	redstone_line = redstone_line.colorize(r, g, b);
 
 	// 1/16 of the texture size
 	double s = (double) texture_size / 16;
@@ -1491,13 +1502,10 @@ void BlockImages::createRedstoneWire(bool powered) { // id 55
 		texture = texture.rotate(ROTATE_270);
 		block.setFace(FACE_BOTTOM, texture);
 
-		// set extra data
-		if (powered)
-			data |= REDSTONE_POWERED;
 		// we can add the block like this without rotation
 		// because we calculate the neighbors on our own,
 		// it does not depend on the rotation of the map
-		setBlockImage(55, data, buildImage(block));
+		setBlockImage(id, data | extra_data, buildImage(block));
 	}
 }
 
@@ -1637,7 +1645,7 @@ Image createFenceTexture(bool left, bool right, Image texture) {
  * This method creates the fence block images. It generates textures for fences and makes
  * with this textures item style block images.
  */
-void BlockImages::createFence(uint16_t id, const Image& texture) { // id 85, 113
+void BlockImages::createFence(uint16_t id, uint16_t extra_data, const Image& texture) { // id 85, 113
 	Image fence_empty = createFenceTexture(false, false, texture);
 	Image fence_left = createFenceTexture(true, false, texture);
 	Image fence_right = createFenceTexture(false, true, texture);
@@ -1672,7 +1680,7 @@ void BlockImages::createFence(uint16_t id, const Image& texture) { // id 85, 113
 		BlockImage block(BlockImage::ITEM_STYLE);
 		block.setFace(FACE_NORTH | FACE_SOUTH, left);
 		block.setFace(FACE_EAST | FACE_WEST, right);
-		setBlockImage(id, data, buildImage(block));
+		setBlockImage(id, data | extra_data, buildImage(block));
 	}
 }
 
@@ -1933,13 +1941,81 @@ void BlockImages::createDragonEgg() { // id 122
 	createItemStyleBlock(122, 0, texture);
 }
 
+Image BlockImages::buildCocoa(int stage) {
+	Image texture;
+	if (stage == 0)
+		texture = textures.COCOA_STAGE_0.original;
+	else if (stage == 1)
+		texture = textures.COCOA_STAGE_1.original;
+	else if (stage == 2)
+		texture = textures.COCOA_STAGE_2.original;
+
+	// at first use the original size of the provided texture image
+	int original_size = texture.getWidth();
+	double r = (double) original_size / 16;
+	// the sizes of the 16px texture size cocoa bean textures are 4/6/8px
+	// multiply with r to get the correct size according to the texture
+	int size = 2 * (stage+2) * r;
+
+	// get the size * size top texture
+	// only the top texture is used to create a cubic cocoa bean
+	// because it's too difficult to use the original cocoa bean
+	// proportions for all the texture sizes
+	Image top = texture.clip(0, 0, size, size);
+
+	// however, the size of the third stage is not 8px, it's 7px. why?
+	// just resize it to 8px...
+	if (stage == 2)
+		texture.clip(0, 0, size-1, size-1).resizeSimple(size, size, top);
+
+	// now size according to the texture size the renderer should use
+	r = (double) texture_size / 16;
+	size = 2 * (stage+2) * r;
+	// resize the texture to this size
+	Image(top).resizeSimple(size, size, top);
+
+	// and create a simple cubic cocoa bean
+	Image cocoa(size*2, size*2);
+	blitFace(cocoa, FACE_WEST, top);
+	blitFace(cocoa, FACE_SOUTH, top);
+	blitFace(cocoa, FACE_TOP, top);
+	return cocoa;
+}
+
+void BlockImages::createCocoas() { // id 127
+	// create the cubic cocoa beans images
+	// and just use a centered version of it as block images
+	for (int i = 0; i < 3; i++) {
+		Image cocoa = buildCocoa(i);
+		Image block(texture_size * 2, texture_size * 2);
+		int xoff = (block.getWidth() - cocoa.getWidth()) / 2;
+		int yoff = (block.getHeight() - cocoa.getHeight()) / 2;
+		block.simpleblit(cocoa, xoff, yoff);
+
+		uint16_t data = i == 0 ? 0 : (i == 1 ? 0b0100 : 0b1000);
+		setBlockImage(127, data, block);
+	}
+}
+
+void BlockImages::createTripwireHook() { // id 131
+	Image tripwire = textures.REDSTONE_DUST_LINE.colorize((uint8_t) 192, 192, 192);
+
+	BlockImage block;
+	block.setFace(FACE_NORTH, textures.TRIP_WIRE_SOURCE);
+	block.setFace(FACE_BOTTOM, tripwire);
+
+	setBlockImage(131, 0, block); // trip wire hook on the north side
+	setBlockImage(131, 1, block.rotate(1)); // on the east side
+	setBlockImage(131, 2, block.rotate(2)); // on the south side
+	setBlockImage(131, 3, block.rotate(3)); // on the west side
+}
+
 void BlockImages::createBeacon() { // id 138
 	Image beacon(texture_size * 2, texture_size * 2);
 
 	// at first create this little block in the middle
 	Image beacon_texture;
-	textures.BEACON.resizeInterpolated(texture_size * 0.75, texture_size * 0.75,
-			beacon_texture);
+	textures.BEACON.resizeAuto(texture_size * 0.75, texture_size * 0.75, beacon_texture);
 	Image smallblock(texture_size * 2, texture_size * 2);
 	blitFace(smallblock, FACE_WEST, beacon_texture, 0, 0, true, dleft, dright);
 	blitFace(smallblock, FACE_SOUTH, beacon_texture, 0, 0, true, dleft, dright);
@@ -1969,7 +2045,7 @@ void BlockImages::createFlowerPot() { // id 140
 	Image pot_texture;
 	
 	s = (double) texture_size / 16;
-	tmptex.resizeInterpolated(s*6, s*6, pot_texture);
+	tmptex.resizeAuto(s*6, s*6, pot_texture);
 	
 	int xoff = std::ceil(s*10);
 	int yoff = std::ceil(s*16);
@@ -2037,6 +2113,8 @@ void BlockImages::loadBlocks() {
 	createBlock(5, 1, t.PLANKS_SPRUCE); // pine/spruce
 	createBlock(5, 2, t.PLANKS_BIRCH); // birch
 	createBlock(5, 3, t.PLANKS_BIRCH); // jungle
+	createBlock(5, 4, t.PLANKS_ACACIA); // acacia
+	createBlock(5, 5, t.PLANKS_BIG_OAK); // dark oak
 	// -- saplings
 	createItemStyleBlock(6, 0, t.SAPLING_OAK); // oak
 	createItemStyleBlock(6, 1, t.SAPLING_SPRUCE); // spruce
@@ -2062,7 +2140,7 @@ void BlockImages::loadBlocks() {
 	// --
 	createLeaves(); // id 18
 	createBlock(19, 0, t.SPONGE); // sponge
-	createGlass(20, 1, t.GLASS);
+	createGlass(20, 0, t.GLASS);
 	createBlock(21, 0, t.LAPIS_ORE); // lapis lazuli ore
 	createBlock(22, 0, t.LAPIS_BLOCK); // lapis lazuli block
 	createDispenserDropper(23, t.DISPENSER_FRONT_HORIZONTAL); // dispenser
@@ -2134,8 +2212,8 @@ void BlockImages::loadBlocks() {
 	createStairs(53, t.PLANKS_OAK); // oak wood stairs
 	createChest(54, chest); // chest
 	createDoubleChest(54, largechest); // chest
-	createRedstoneWire(true); // id 55
-	createRedstoneWire(false);
+	createRedstoneWire(55, 0, 48, 0, 0); // redstone wire not powered
+	createRedstoneWire(55, REDSTONE_POWERED, 192, 0, 0); // redstone wire powered
 	createBlock(56, 0, t.DIAMOND_ORE); // diamond ore
 	createBlock(57, 0, t.DIAMOND_BLOCK); // block of diamond
 	createBlock(58, 0, t.CRAFTING_TABLE_SIDE, t.CRAFTING_TABLE_FRONT, t.CRAFTING_TABLE_TOP); // crafting table
@@ -2178,8 +2256,8 @@ void BlockImages::loadBlocks() {
 	createCactus(); // id 81
 	createBlock(82, 0, t.CLAY); // clay block
 	createItemStyleBlock(83, 0, t.REEDS); // sugar cane
-	createBlock(84, 0, t.NOTEBLOCK, t.JUKEBOX_TOP); // jukebox
-	createFence(85, t.PLANKS_OAK); // fence
+	createBlock(84, 0, t.NOTEBLOCK, t.JUKEBOX_TOP.rotate(1)); // jukebox
+	createFence(85, 0, t.PLANKS_OAK); // fence
 	createPumkin(86, t.PUMPKIN_FACE_OFF); // pumpkin
 	createBlock(87, 0, t.NETHERRACK); // netherrack
 	createBlock(88, 0, t.SOUL_SAND); // soul sand
@@ -2233,7 +2311,7 @@ void BlockImages::loadBlocks() {
 	createBlock(110, 0, t.MYCELIUM_SIDE, t.MYCELIUM_TOP); // mycelium
 	createSingleFaceBlock(111, 0, FACE_BOTTOM, t.WATERLILY); // lily pad
 	createBlock(112, 0, t.NETHER_BRICK); // nether brick
-	createFence(113, t.NETHER_BRICK); // nether brick fence
+	createFence(113, 0, t.NETHER_BRICK); // nether brick fence
 	createStairs(114, t.NETHER_BRICK); // nether brick stairs
 	// -- nether wart
 	createItemStyleBlock(115, 0, t.NETHER_WART_STAGE_0);
@@ -2243,7 +2321,6 @@ void BlockImages::loadBlocks() {
 	// --
 	createSmallerBlock(116, 0, t.ENCHANTING_TABLE_SIDE,
 			t.ENCHANTING_TABLE_TOP, 0, texture_size * 0.75); // enchantment table
-	//createItemStyleBlock(117, 0, t.BREWING_STAND); // brewing stand
 	createBrewingStand(); // id 117
 	createCauldron(); // id 118 // cauldron
 	createSmallerBlock(119, 0, endportal_texture, endportal_texture,
@@ -2256,19 +2333,20 @@ void BlockImages::loadBlocks() {
 	createBlock(124, 0, t.REDSTONE_LAMP_ON); // redstone lamp active
 	createSlabs(125, false, true); // wooden double slabs
 	createSlabs(126, false, false); // wooden normal slabs
-	// id 127 // cocoa plant
+	createCocoas(); // id 127
 	createStairs(128, t.SANDSTONE_NORMAL); // sandstone stairs
 	createBlock(129, 0, t.EMERALD_ORE); // emerald ore
 	createChest(130, enderchest); // ender chest
-	// id 131 // tripwire hook
-	// id 132 // tripwire
+	createTripwireHook(); // tripwire hook
+	createRedstoneWire(132, 0, 192, 192, 192); // tripwire
 	createBlock(133, 0, t.EMERALD_BLOCK); // block of emerald
 	createStairs(134, t.PLANKS_SPRUCE); // spruce wood stairs
 	createStairs(135, t.PLANKS_BIRCH); // birch wood stairs
 	createStairs(136, t.PLANKS_JUNGLE); // jungle wood stairs
 	createBlock(137, 0, t.COMMAND_BLOCK); // command block
 	createBeacon(); // beacon
-	// id 139 // cobblestone wall
+	createFence(139, 0, t.COBBLESTONE); // cobblestone wall
+	createFence(139, 1, t.COBBLESTONE_MOSSY); // cobblestone wall mossy
 	createFlowerPot(); // id 140
 	// carrots --
 	createItemStyleBlock(141, 0, t.CARROTS_STAGE_0);
@@ -2386,7 +2464,7 @@ void BlockImages::loadBlocks() {
 	createBlock(174, 0, t.ICE_PACKED); // packed ice
 	
 	// large plants, id 175 --
-	// the top texture of the sunflower has get modified a bit
+	// the top texture of the sunflower is a bit modified
 	Image sunflower_top = t.DOUBLE_PLANT_SUNFLOWER_TOP;
 	sunflower_top.alphablit(t.DOUBLE_PLANT_SUNFLOWER_FRONT, 0, -texture_size * 0.25);
 	createLargePlant(0, t.DOUBLE_PLANT_SUNFLOWER_BOTTOM, sunflower_top);

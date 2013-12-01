@@ -48,7 +48,7 @@ to add your own map to this list.
 
 ## Help ##
 
-Please read the [documentation](http://mapcrafter.readthedocs.org) to find out
+Please read the [documentation](http://docs.mapcrafter.org) to find out
 how to use the renderer.
 
 If you find bugs or problems when using mapcrafter or if you have ideas for new
@@ -65,6 +65,11 @@ You can also ask questions in the [Minecraft Forum
 thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-map-renderer/).
 
 ## Version history ##
+
+**v.0.6**
+
+* Added support for Minecraft 1.7 blocks and biomes
+* Added some more blocks such as trip wire, trip wire hook and (magic floating) cocoa beans
 
 **v.0.5.1**
 

@@ -348,14 +348,15 @@ private:
 	void createStairs(uint16_t id, const Image& texture); // id 53, 67, 108, 109, 114, 128, 134, 135, 136
 	void createChest(uint16_t id, Image* textures); // id 54, 95, 130
 	void createDoubleChest(uint16_t id, Image* textures); // id 54
-	void createRedstoneWire(bool powered); // id 55
+	void createRedstoneWire(uint16_t id, uint16_t extra_data,
+			uint8_t r, uint8_t g, uint8_t b); // id 55
 	void createDoor(uint16_t id, const Image& bottom, const Image& top); // id 64, 71
 	void createRails(); // id 66
 	void createButton(uint16_t id, const Image& tex); // id 77, 143
 	void createSnow(); // id 78
 	void createIce(uint8_t id); // id 79
 	void createCactus(); // id 81
-	void createFence(uint16_t id, const Image& texture); // id 85, 113
+	void createFence(uint16_t id, uint16_t extra_data, const Image& texture); // id 85, 113
 	void createPumkin(uint16_t id, const Image& front); // id 86, 91
 	void createCake(); // id 92
 	void createRedstoneRepeater(uint16_t id, const Image& texture); // id 93, 94
@@ -368,6 +369,9 @@ private:
 	void createBrewingStand(); // id 117
 	void createCauldron(); // id 118
 	void createDragonEgg(); // id 122
+	Image buildCocoa(int stage);
+	void createCocoas(); // id 127
+	void createTripwireHook(); // id 131
 	void createBeacon(); // id 138
 	void createFlowerPot(); // id 140
 	void createLargePlant(uint16_t data, const Image& texture, const Image& top_texture); // id 175
