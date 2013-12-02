@@ -71,12 +71,12 @@ Here is a list of available command line options:
 .. cmdoption:: -s <maps>, --render-skip <maps>
 
     You can specify maps the renderer should skip when rendering. This is a
-    comma-separated list of map names (the map section names from the
+    space-separated list of map names (the map section names from the
     configuration file). You can also specify the rotation of the maps to skip
     by adding a ``:`` and the short name of the rotation (``tl``, ``tr``,
     ``br``, ``bl``). 
 	
-    For example: ``world,world2`` or ``world:tl,world:bl,world2:bl,world3``.
+    For example: ``-s world world2`` or ``-s world:tl world:bl world2:bl world3``.
 
 .. cmdoption:: -r, --render-reset
 
