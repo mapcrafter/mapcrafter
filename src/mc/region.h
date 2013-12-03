@@ -33,44 +33,90 @@ namespace mc {
  * This class represents a Minecraft region file.
  */
 class RegionFile {
-private:
-	std::string filename;
-	RegionPos regionpos;
-
-	int rotation;
-
-	// a set with all available chunks
-	std::set<ChunkPos> containing_chunks;
-
-	// the offsets, where the chunkdata starts
-	int chunk_offsets[1024];
-	// timestamps of the chunks
-	int chunk_timestamps[1024];
-	// data from the region file
-	std::vector<uint8_t> regiondata;
-
-	bool readHeaders(std::ifstream& file);
 public:
-	RegionFile();
-	RegionFile(const std::string& filename, int rotation = 0);
-	virtual ~RegionFile();
+	typedef std::set<ChunkPos> ChunkMap;
 
-	bool loadAll();
-	bool loadHeaders();
-
-	const std::string& getFilename() const;
-	const RegionPos& getPos() const;
-
-	const std::set<ChunkPos>& getContainingChunks() const;
-	bool hasChunk(const ChunkPos& chunk) const;
-
-	int getChunkTimestamp(const ChunkPos& chunk) const;
-	int loadChunk(const ChunkPos& pos, Chunk& chunk);
-
+	// status codes for loadChunk method
 	static const int CHUNK_OK = 1;
 	static const int CHUNK_DOES_NOT_EXIST = 2;
 	static const int CHUNK_DATA_INVALID = 3;
 	static const int CHUNK_NBT_ERROR = 4;
+
+	RegionFile();
+	RegionFile(const std::string& filename, int rotation = 0);
+	~RegionFile();
+
+	/**
+	 * Reads the whole region file with the data of all chunks. Returns false if the
+	 * region file is corrupted.
+	 */
+	bool read();
+
+	/**
+	 * Reads only the headers (timestamps and which chunks exist) of the region file.
+	 * Returns false if the region header is corrupted (size < 8192).
+	 */
+	bool readOnlyHeaders();
+
+	/**
+	 * Returns the filename of the region file.
+	 */
+	const std::string& getFilename() const;
+
+	/**
+	 * Returns the region position of the region file.
+	 */
+	const RegionPos& getPos() const;
+
+	/**
+	 * Returns the count of containing chunks.
+	 */
+	int getContainingChunksCount() const;
+
+	/**
+	 * Returns a set of containing chunks.
+	 */
+	const RegionFile::ChunkMap& getContainingChunks() const;
+
+	/**
+	 * Returns whether a specific chunk is contained in the region file.
+	 */
+	bool hasChunk(const ChunkPos& chunk) const;
+
+	/**
+	 * Returns/Sets the timestamp of a specific chunk.
+	 */
+	int getChunkTimestamp(const ChunkPos& chunk) const;
+	void setChunkTimestamp(const ChunkPos& chunk, int timestamp);
+
+	/**
+	 * Loads a specific chunk into the supplied Chunk-object.
+	 * Returns as integer one of the RegionFile::CHUNK_* status codes.
+	 */
+	int loadChunk(const ChunkPos& pos, Chunk& chunk);
+
+private:
+	std::string filename;
+	RegionPos regionpos;
+
+	// rotation of the region file
+	int rotation;
+
+	// a set with all available chunks
+	ChunkMap containing_chunks;
+
+	// the offsets where the chunk data of each chunk starts
+	int chunk_offsets[1024];
+	// timestamps of the chunks
+	int chunk_timestamps[1024];
+	// actual chunk data
+	uint8_t chunk_data_compression[1024];
+	std::vector<uint8_t> chunk_data[1024];
+
+	/**
+	 * Reads the headers of a region file.
+	 */
+	bool readHeaders(std::ifstream& file);
 };
 
 }
