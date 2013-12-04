@@ -3,7 +3,7 @@ Using mapcrafter
 ================
 
 First Render
-===========
+============
 
 At first you have to create a configuration file like this:
 
