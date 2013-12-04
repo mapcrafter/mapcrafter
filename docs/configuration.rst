@@ -277,18 +277,18 @@ Map Options
     improvement) and it is not very easy to preblit all biome color variants.
     And also, there is not a big difference with different water colors.
 
-``incremental_detection = timestamp|filetimes``
+``use_image_mtimes = true|false``
 
-    **Default:** ``timestamp``
+    **Default:** ``true``
 
-    This setting specifies the way the renderer should check if tiles are
-    required when rendering incremental.  Possible options are:
+    This setting specifies the way the renderer should check if tiles 
+    are required when rendering incremental. Different behaviors are:
 
-    ``timestamp``
-        The renderer saves the time of the last rendering.  All tiles
-        whoose chunk timestamps are newer than this last-render-time are
-        required.
-    ``filetimes``
+    Use the tile image modification times (``true``):
         The renderer checks the modification times of the already rendered 
         tile images.  All tiles whoose chunk timestamps are newer than
         this modification time are required.
+    Use the time of the last rendering (``false``):
+        The renderer saves the time of the last rendering.  All tiles
+        whoose chunk timestamps are newer than this last-render-time are
+        required.
