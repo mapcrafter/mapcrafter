@@ -209,7 +209,7 @@ Map Options
         Like ``daylight``, but renders at night.
     ``cave``
         Renders only caves and colors blocks depending on their height 
-        to make them better recognizable.
+        to make them easier to recognize.
 
 ``textures_dir = <directory>``
 
