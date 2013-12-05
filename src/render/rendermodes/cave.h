@@ -30,7 +30,7 @@ protected:
 	bool isLight(const mc::BlockPos& pos);
 	bool isTransparentBlock(const mc::Block& block) const;
 public:
-	CaveRendermode(RenderState& state);
+	CaveRendermode(const RenderState& state);
 	virtual ~CaveRendermode();
 
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);

@@ -84,25 +84,25 @@ private:
 	void createShade(Image& image, const CornerColors& corners) const;
 	
 	LightingColor calculateLightingColor(uint8_t block_light, uint8_t sky_light) const;
-	void estimateBlockLight(mc::Block& block, const mc::BlockPos& pos) const;
-	LightingData getBlockLight(const mc::BlockPos& pos) const;
+	void estimateBlockLight(mc::Block& block, const mc::BlockPos& pos);
+	LightingData getBlockLight(const mc::BlockPos& pos);
 
-	LightingColor getLightingColor(const mc::BlockPos& pos) const;
-	LightingColor getCornerColor(const mc::BlockPos& pos, const CornerNeighbors& corner) const;
-	CornerColors getCornerColors(const mc::BlockPos& pos, const FaceCorners& corners) const;
+	LightingColor getLightingColor(const mc::BlockPos& pos);
+	LightingColor getCornerColor(const mc::BlockPos& pos, const CornerNeighbors& corner);
+	CornerColors getCornerColors(const mc::BlockPos& pos, const FaceCorners& corners);
 	
 	void lightLeft(Image& image, const CornerColors& colors,
-			bool top = true, bool bottom = true) const;
+			bool top = true, bool bottom = true);
 	void lightRight(Image& image, const CornerColors& colors,
-			bool top = true, bool bottom = true) const;
-	void lightTop(Image& image, const CornerColors& colors, int yoff = 0) const;
+			bool top = true, bool bottom = true);
+	void lightTop(Image& image, const CornerColors& colors, int yoff = 0);
 	
 	void doSlabLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 	void doSimpleLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 	void doSmoothLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 public:
-	LightingRendermode(RenderState& state, bool day);
+	LightingRendermode(const RenderState& state, bool day);
 	virtual ~LightingRendermode();
 
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);

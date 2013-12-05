@@ -125,7 +125,7 @@ void drawTopTriangle(Image& image, int size, double c1, double c2, double c3) {
 	}
 }
 
-LightingRendermode::LightingRendermode(RenderState& state, bool day)
+LightingRendermode::LightingRendermode(const RenderState& state, bool day)
 		: Rendermode(state), day(day) {
 }
 
@@ -182,7 +182,7 @@ bool isSpecialTransparent(uint16_t id) {
 /**
  * Estimates the light of a block from its neighbors.
  */
-void LightingRendermode::estimateBlockLight(mc::Block& block, const mc::BlockPos& pos) const {
+void LightingRendermode::estimateBlockLight(mc::Block& block, const mc::BlockPos& pos) {
 	// get the sky light from the block above
 	mc::BlockPos off(0, 0, 0);
 	mc::Block above;
@@ -219,7 +219,7 @@ void LightingRendermode::estimateBlockLight(mc::Block& block, const mc::BlockPos
  * Returns the light of a block (sky/block light). This also means that the light is
  * estimated if this is a special transparent block.
  */
-LightingData LightingRendermode::getBlockLight(const mc::BlockPos& pos) const {
+LightingData LightingRendermode::getBlockLight(const mc::BlockPos& pos) {
 	mc::Block block = state.getBlock(pos, mc::GET_ID | mc::GET_LIGHT);
 	if (isSpecialTransparent(block.id))
 		estimateBlockLight(block, pos);
@@ -229,7 +229,7 @@ LightingData LightingRendermode::getBlockLight(const mc::BlockPos& pos) const {
 /**
  * Returns the lighting color of a block.
  */
-LightingColor LightingRendermode::getLightingColor(const mc::BlockPos& pos) const {
+LightingColor LightingRendermode::getLightingColor(const mc::BlockPos& pos) {
 	LightingData lighting = getBlockLight(pos);
 	return calculateLightingColor(lighting.block, lighting.sky);
 }
@@ -238,7 +238,7 @@ LightingColor LightingRendermode::getLightingColor(const mc::BlockPos& pos) cons
  * Returns the lighting color of a corner by calculating the average lighting color of
  * the four neighbor blocks.
  */
-LightingColor LightingRendermode::getCornerColor(const mc::BlockPos& pos, const CornerNeighbors& corner) const {
+LightingColor LightingRendermode::getCornerColor(const mc::BlockPos& pos, const CornerNeighbors& corner) {
 	LightingColor color = 0;
 	color += getLightingColor(pos + corner.pos1) * 0.25;
 	color += getLightingColor(pos + corner.pos2) * 0.25;
@@ -250,7 +250,7 @@ LightingColor LightingRendermode::getCornerColor(const mc::BlockPos& pos, const 
 /**
  * Returns the corner lighting colors of a block face.
  */
-CornerColors LightingRendermode::getCornerColors(const mc::BlockPos& pos, const FaceCorners& corners) const {
+CornerColors LightingRendermode::getCornerColors(const mc::BlockPos& pos, const FaceCorners& corners) {
 	CornerColors colors = {{
 		getCornerColor(pos, corners.corner1),
 		getCornerColor(pos, corners.corner2),
@@ -264,7 +264,7 @@ CornerColors LightingRendermode::getCornerColors(const mc::BlockPos& pos, const 
  * Adds smooth lighting to the left face of a block image.
  */
 void LightingRendermode::lightLeft(Image& image, const CornerColors& colors,
-		bool top, bool bottom) const {
+		bool top, bool bottom) {
 	int size = image.getWidth() / 2;
 	Image tex(size, size);
 	createShade(tex, colors);
@@ -284,7 +284,7 @@ void LightingRendermode::lightLeft(Image& image, const CornerColors& colors,
  * Adds smooth lighting to the right face of a block image.
  */
 void LightingRendermode::lightRight(Image& image, const CornerColors& colors,
-		bool top, bool bottom) const {
+		bool top, bool bottom) {
 	int size = image.getWidth() / 2;
 	Image tex(size, size);
 	createShade(tex, colors);
@@ -303,7 +303,7 @@ void LightingRendermode::lightRight(Image& image, const CornerColors& colors,
 /**
  * Adds smooth lighting to the top face of a block image.
  */
-void LightingRendermode::lightTop(Image& image, const CornerColors& colors, int yoff) const {
+void LightingRendermode::lightTop(Image& image, const CornerColors& colors, int yoff) {
 	int size = image.getWidth() / 2;
 	Image tex(size, size);
 	// we need to rotate the corners a bit to make them suitable for the TopFaceIterator
