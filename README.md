@@ -66,6 +66,13 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.1.0**
+
+* Added new configuration file format (consult the documentation for more information):
+  * Different section types for Minecraft Worlds/rendered maps
+  * Better validation of configuration files
+* Some internal reworkings
+
 **v.0.6**
 
 * Added support for Minecraft 1.7 blocks and biomes
@@ -74,7 +81,7 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 **v.0.5.1**
 
 * Added support for Minecraft 1.6 Resource Packs
-    **(You have to delete your old textures and get them new from a new Minecraft Jar file)**
+  *  **(You have to delete your old textures and get them new from a new Minecraft Jar file)**
 * Added some new blocks from Minecraft 1.6
 * Better compatibility for older gcc (4.4 +) and boost versions
 * Some code reworkings, replaced plain Makefile with CMake
