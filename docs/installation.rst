@@ -50,6 +50,8 @@ You can now install mapcrafter system-wide for all users if you want::
 
     sudo make install
 
+If you get an error concerning ``libmapcraftercore.so`` not found you have to run 
+``ldconfig`` (as root).
 Make sure that you still have to install the texture files needed for mapcrafter.
 
 Mac OS X
