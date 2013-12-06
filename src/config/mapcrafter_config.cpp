@@ -47,7 +47,7 @@ bool WorldSection::parse(const ConfigSection& section, const fs::path& config_di
 		std::string value = entry_it->second;
 
 		if (key == "input_dir") {
-			if (!input_dir.load(key, value, validation)) {
+			if (input_dir.load(key, value, validation)) {
 				input_dir.setValue(BOOST_FS_ABSOLUTE(input_dir.getValue(), config_dir));
 				if (!fs::is_directory(input_dir.getValue()))
 					validation.push_back(ValidationMessage::error(
