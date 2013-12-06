@@ -300,7 +300,8 @@ void RenderManager::render(const config::MapSection& map_config, const std::stri
 		tiles.insert(TilePath());
 		worker.setWork(tiles, tiles_skip);
 
-		std::shared_ptr<util::ProgressBar> progress(new util::ProgressBar(0, !opts.batch));
+		std::shared_ptr<util::ProgressBar> progress(new util::ProgressBar);
+		progress->setAnimated(!opts.batch);
 		worker.setProgressHandler(progress);
 
 		// start rendering
@@ -363,6 +364,7 @@ void RenderManager::renderMultithreaded(const config::MapSection& map_config,
 
 	util::ProgressBar progress;
 	progress.setMax(tileset->getContainingRenderTiles(TilePath()));
+	progress.setAnimated(!opts.batch);
 
 	while (1) {
 		int value = 0;
@@ -392,6 +394,7 @@ void RenderManager::renderMultithreaded(const config::MapSection& map_config,
 	worker.setWork(remaining_tiles, remaining_tiles_skip);
 
 	std::shared_ptr<util::ProgressBar> remaining_progress(new util::ProgressBar);
+	remaining_progress->setAnimated(!opts.batch);
 	worker.setProgressHandler(remaining_progress);
 	worker();
 	remaining_progress->finish();
