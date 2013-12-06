@@ -54,6 +54,15 @@ T as(const std::string& from) {
 	return to;
 }
 
+template<>
+std::string as(const std::string& from);
+
+template<>
+fs::path as(const std::string& from);
+
+template<>
+bool as<bool>(const std::string& from);
+
 void trim(std::string& str);
 void replaceAll(std::string& str, const std::string& from, const std::string& to);
 
