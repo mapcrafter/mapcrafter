@@ -154,6 +154,7 @@ void ProgressBar::update(int value, bool force) {
 
 	std::cout << output;
 	if (animated) {
+		std::cout << "\r";
 		std::cout.flush();
 	} else
 		std::cout << std::endl;
