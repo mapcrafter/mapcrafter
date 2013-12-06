@@ -24,9 +24,7 @@
 #include <iostream>
 #include <cstdio>
 #include <ctime>
-
 #include <sys/ioctl.h>
-#include <stdio.h>
 #include <unistd.h>
 
 namespace mapcrafter {
