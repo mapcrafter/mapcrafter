@@ -6,6 +6,18 @@ mapcrafter is a fast Minecraft World Renderer written in C++. It renders
 Minecraft Worlds to a bunch of images which are viewable in any webbrowser
 using Leaflet.
 
+mapcrafter is not yet finished. At the moment a few blocks are not supported
+yet, but all rendering routines are implemented. The renderer works with the
+Anvil World Format and the new Minecraft 1.6 Resource Packs.
+
+mapcrafter is free software and available under the GPL license.  You can
+access the latest source code of mapcrafter on GitHub:
+http://github.com/m0r13/mapcrafter
+
+Thanks to pigmap and Minecraft Overviewer, whose documentations and source code
+were very helpful. I also used the alpha blending code of pigmap and some maps
+stuff of the template from Minecraft Overviewer.
+
 <div align="center">
     <img src="http://i.imgur.com/c5tC43X.png" />
 </div>
@@ -37,18 +49,6 @@ using Leaflet.
 * For your Minecraft Worlds:
   * Anvil World Format
   * Minecraft 1.6 Resource Packs
-
-mapcrafter is not yet finished. At the moment a few blocks are not supported
-yet, but all rendering routines are implemented. The renderer works with the
-Anvil World Format and the new Minecraft 1.6 Resource Packs.
-
-mapcrafter is free software and available under the GPL license.  You can
-access the latest source code of mapcrafter at:
-http://github.com/m0r13/mapcrafter
-
-Thanks to pigmap and Minecraft Overviewer, whose documentations and source code
-were very helpful. I also used the alpha blending code of pigmap and some maps
-stuff of the template from Minecraft Overviewer.
 
 ## Documentation ##
 
