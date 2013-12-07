@@ -2,28 +2,45 @@
 
 by Moritz Hilscher
 
-mapcrafter is a fast Minecraft World renderer written in C++. It renders
-Minecraft Worlds to a bunch of images, which are viewable in any webbrowser
+mapcrafter is a fast Minecraft World Renderer written in C++. It renders
+Minecraft Worlds to a bunch of images which are viewable in any webbrowser
 using Leaflet.
 
-mapcrafter runs on linux (maybe also Mac OS or W****** with cygwin) and needs
-libpng, libpthread, libboost-iostreams,libboost-system, libboost-filesystem,
-and libboost-program-options (and libboost-test if you want to use the tests).
-You can build it with g++ and CMake/make.
+<div align="center">
+    <img src="http://i.imgur.com/c5tC43X.png" />
+</div>
+
+## Features ##
+
+* **Web output:** Render your Minecraft Worlds to maps with an isometric 3D perspective 
+      viewable in any webbrowser!
+* **Different directions:** Choose from four different directions to render your worlds!
+* **Different rendermodes:** Choose between different rendermodes like day, night and cave 
+     for your maps!
+* **Configuration files:** Control which worlds are rendered from which direction and with 
+     which rendermodes!
+* **Markers:** Define your own markers for your maps!
+* **Other stuff:** Biome colors, incremental rendering, multithreading
+
+## Requirements ##
+
+* A Linux-based or Unix-like operating system like Mac OS
+* A decent C++ compiler (gcc >= 4.4, clang), CMake and make if you want to build
+      mapcrafter from source
+* Some libraries:
+  * libpng
+  * libboost-iostreams
+  * libboost-system
+  * libboost-filesystem
+  * libboost-program-options
+  * (libboost-test if you want to use the tests)
+* For your Minecraft Worlds:
+  * Anvil World Format
+  * Minecraft 1.6 Resource Packs
 
 mapcrafter is not yet finished. At the moment a few blocks are not supported
 yet, but all rendering routines are implemented. The renderer works with the
 Anvil World Format and the new Minecraft 1.6 Resource Packs.
-
-Some features of the renderer are:
-
-* Rendering Minecraft Worlds to maps viewable in any webbrowser
-* Configuration files to control the renderer
-* Four different directions to render your worlds from with an isometric 3D view
-* Different rendermodes
-* Biome colors
-* Incremental rendering, multithreading
-* User-defined markers on your maps
 
 mapcrafter is free software and available under the GPL license.  You can
 access the latest source code of mapcrafter at:
@@ -76,7 +93,7 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 **v.0.6**
 
 * Added support for Minecraft 1.7 blocks and biomes
-* Added some more blocks such as trip wire, trip wire hook and (magic floating) cocoa beans
+* Added some more blocks such as trip wire, trip wire hook and *magic floating* cocoa beans
 
 **v.0.5.1**
 
