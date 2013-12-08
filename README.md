@@ -6,10 +6,6 @@ mapcrafter is a fast Minecraft World Renderer written in C++. It renders
 Minecraft Worlds to a bunch of images which are viewable in any webbrowser
 using Leaflet.
 
-mapcrafter is not yet finished. At the moment a few blocks are not supported
-yet, but all rendering routines are implemented. The renderer works with the
-Anvil World Format and the new Minecraft 1.6 Resource Packs.
-
 mapcrafter is free software and available under the GPL license.  You can
 access the latest source code of mapcrafter on GitHub:
 http://github.com/m0r13/mapcrafter
@@ -50,23 +46,18 @@ stuff of the template from Minecraft Overviewer.
   * Anvil World Format
   * Minecraft 1.6 Resource Packs
 
-## Documentation ##
-
-The documentation is in the `docs/` directory and you can build it yourself
-with Sphinx. You can read a built version of the documentation from
-[Read the Docs](http://docs.mapcrafter.org) and you can also [download
-other builds](https://readthedocs.org/projects/mapcrafter/downloads/).
-
 ## Examples ##
 
 There are a few example maps of the renderer on the [GitHub
 Wiki](https://github.com/m0r13/mapcrafter/wiki/Example-maps).  Please feel free
 to add your own map to this list.
 
-## Help ##
+## Documentation and Help ##
 
-Please read the [documentation](http://docs.mapcrafter.org) to find out
-how to use the renderer.
+The documentation is in the `docs/` directory and you can build it yourself
+with Sphinx. You can read a built version of the documentation from
+[Read the Docs](http://docs.mapcrafter.org) and you can also [download
+other builds](https://readthedocs.org/projects/mapcrafter/downloads/).
 
 If you find bugs or problems when using mapcrafter or if you have ideas for new
 features, then please feel free to add an issue to the [GitHub issue
@@ -145,7 +136,8 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 **v.0.1 (December 2012)**
 
-* First version on github, features:
-* Rendering minecraft worlds to tiles and an html file to view them like a
-  Google Map
-* Incremental rendering, multithreading
+* First version on GitHub
+* Features:
+  * Render Minecraft Worlds to tiles and an HTML-File to view them like a
+    Google Map
+  * Incremental rendering, multithreading
