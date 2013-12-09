@@ -28,16 +28,35 @@ namespace mc {
 template <typename T>
 class Bounds {
 public:
-	Bounds();
-	~Bounds();
+	Bounds() : min_set(false), max_set(false) {}
+	~Bounds() {}
 
-	void setMin(T min);
-	void setMax(T max);
+	void setMin(T min) { this->min = min; min_set = true; }
+	void setMax(T max) { this->max = max; max_set = true; }
 
-	void resetMin();
-	void resetMax();
+	void resetMin() { min_set = false; }
+	void resetMax() { max_set = false; }
 
-	bool contains(T value) const;
+	bool contains(T value) const {
+		// case 1: no borders
+		// value is definitely included
+		if (!min_set && !max_set)
+			return true;
+
+		// case 2: only a minimum border
+		// value is included if value >= minimum
+		if (min_set && !max_set)
+			return value >= min;
+
+		// case 3: only a maximum border
+		// value is included if value <= maximum
+		if (max_set && !min_set)
+			return value <= max;
+
+		// case 3: two borders
+		// value is included if value >= minimum and value <= maximum
+		return min <= value && value <= max;
+	}
 
 private:
 	T min, max;

@@ -30,16 +30,16 @@ BOOST_AUTO_TEST_CASE(worldcrop_bounds) {
 	BOOST_CHECK(bounds.contains(42));
 	BOOST_CHECK(bounds.contains(-73));
 
-	// case 2: only a maximum border
-	bounds.setMax(42);
-	BOOST_CHECK(bounds.contains(42));
-	BOOST_CHECK(!bounds.contains(43));
-
-	// case 3: only a minimum border
+	// case 2: only a minimum border
 	bounds.resetMax();
 	bounds.setMin(42);
 	BOOST_CHECK(bounds.contains(42));
 	BOOST_CHECK(!bounds.contains(21));
+
+	// case 3: only a maximum border
+	bounds.setMax(42);
+	BOOST_CHECK(bounds.contains(42));
+	BOOST_CHECK(!bounds.contains(43));
 
 	// case 3: two borders
 	bounds.setMax(73);
