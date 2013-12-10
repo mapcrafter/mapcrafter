@@ -49,3 +49,42 @@ BOOST_AUTO_TEST_CASE(worldcrop_bounds) {
 	BOOST_CHECK(!bounds.contains(21));
 	BOOST_CHECK(!bounds.contains(89));
 }
+
+BOOST_AUTO_TEST_CASE(worlcrop_crop_rectangular) {
+	mc::WorldCrop crop;
+
+	BOOST_CHECK(crop.isRegionContained(mc::RegionPos(0, 0)));
+	BOOST_CHECK(crop.isRegionContained(mc::RegionPos(-1000, 2000)));
+
+	crop.setMinX(0);
+	crop.setMaxX(1023);
+	crop.setMinZ(0);
+	crop.setMaxZ(1023);
+	BOOST_CHECK(crop.isRegionContained(mc::RegionPos(0, 0)));
+	BOOST_CHECK(!crop.isRegionContained(mc::RegionPos(-1, 0)));
+	BOOST_CHECK(!crop.isRegionContained(mc::RegionPos(1, 1)));
+	BOOST_CHECK(!crop.isRegionContained(mc::RegionPos(3, 4)));
+
+	crop.setMinX(1000);
+	crop.setMaxX(1200);
+	crop.setMinZ(1000);
+	crop.setMaxZ(1200);
+	BOOST_CHECK(crop.isRegionContained(mc::RegionPos(0, 0)));
+	BOOST_CHECK(crop.isRegionContained(mc::RegionPos(1, 0)));
+	BOOST_CHECK(crop.isRegionContained(mc::RegionPos(0, 1)));
+	BOOST_CHECK(crop.isRegionContained(mc::RegionPos(1, 1)));
+	BOOST_CHECK(!crop.isRegionContained(mc::RegionPos(0, 2)));
+	BOOST_CHECK(!crop.isRegionContained(mc::RegionPos(2, 1)));
+
+	crop = mc::WorldCrop();
+	crop.setMaxX(-1);
+	crop.setMaxZ(-1);
+	BOOST_CHECK(crop.isRegionContained(mc::RegionPos(-1, -1)));
+	BOOST_CHECK(crop.isRegionContained(mc::RegionPos(-42, -73)));
+	BOOST_CHECK(!crop.isRegionContained(mc::RegionPos(0, 0)));
+	BOOST_CHECK(!crop.isRegionContained(mc::RegionPos(-1, 2)));
+}
+
+BOOST_AUTO_TEST_CASE(worlcrop_crop_circular) {
+	// TODO
+}
