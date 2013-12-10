@@ -59,9 +59,9 @@ BOOST_AUTO_TEST_CASE(worlcrop_crop_rectangular) {
 	BOOST_CHECK(crop.isChunkContained(mc::ChunkPos(42, -73)));
 
 	crop.setMinX(0);
-	crop.setMaxX(1023);
+	crop.setMaxX(511);
 	crop.setMinZ(0);
-	crop.setMaxZ(1023);
+	crop.setMaxZ(511);
 	BOOST_CHECK(crop.isRegionContained(mc::RegionPos(0, 0)));
 	BOOST_CHECK(!crop.isRegionContained(mc::RegionPos(-1, 0)));
 	BOOST_CHECK(!crop.isRegionContained(mc::RegionPos(1, 1)));
