@@ -59,25 +59,62 @@ private:
 	bool min_set, max_set;
 };
 
+/**
+ * Boundaries to crop a Minecraft World.
+ */
 class WorldCrop {
 public:
+	// different types of boundaries -- either rectangular or circular
+	const static int RECTANGULAR = 1;
+	const static int CIRCULAR = 2;
+
 	WorldCrop();
 	~WorldCrop();
 
-	void setMinX(int value);
-	void setMaxX(int value);
-
-	void setMinZ(int value);
-	void setMaxZ(int value);
-
+	/**
+	 * Sets the minimum/maximum values for y-coordinates.
+	 */
 	void setMinY(int value);
 	void setMaxY(int value);
 
+	/**
+	 * Sets the limits (in block coordinates) of the rectangular boundaries.
+	 */
+	void setMinX(int value);
+	void setMaxX(int value);
+	void setMinZ(int value);
+	void setMaxZ(int value);
+
+	/**
+	 * Sets the limits (in block coordinates) of the circular boundaries.
+	 */
+	void setCenter(const BlockPos& pos);
+	void setRadius(int radius);
+
+	/**
+	 * Returns whether a specific region/chunk is contained.
+	 */
 	bool isRegionContained(const mc::RegionPos& region) const;
 	bool isChunkContained(const mc::ChunkPos& chunk) const;
 
 private:
-	Bounds<int> bounds_x, bounds_z, bounds_y;
+	// type of world boundaries -- either RECTANGULAR or CIRCULAR
+	int type;
+
+	// usable for both rectangular and circular
+	Bounds<int> bounds_y;
+
+	// rectangular limits:
+	// in block coordinates
+	Bounds<int> bounds_x, bounds_z;
+	// in chunk coordinates
+	Bounds<int> bounds_chunk_x, bounds_chunk_z;
+	// in region coordinates
+	Bounds<int> bounds_region_x, bounds_region_z;
+
+	// circular limits
+	BlockPos center;
+	int radius;
 };
 
 template <typename T>
