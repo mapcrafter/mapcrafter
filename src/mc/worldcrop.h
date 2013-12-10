@@ -25,41 +25,37 @@
 namespace mapcrafter {
 namespace mc {
 
+/**
+ * A 1-dimensional boundary.
+ * Has either two limits, one limit (minimum or maximum) or no limit.
+ */
 template <typename T>
 class Bounds {
 public:
-	Bounds() : min_set(false), max_set(false) {}
-	~Bounds() {}
+	Bounds();
+	~Bounds();
 
-	void setMin(T min) { this->min = min; min_set = true; }
-	void setMax(T max) { this->max = max; max_set = true; }
+	/**
+	 * Sets the minimum/maximum limit.
+	 */
+	void setMin(T min);
+	void setMax(T max);
 
-	void resetMin() { min_set = false; }
-	void resetMax() { max_set = false; }
+	/**
+	 * Resets the minimum/maximum, i.e. sets it to infinity (or -infinity for minimum).
+	 */
+	void resetMin();
+	void resetMax();
 
-	bool contains(T value) const {
-		// case 1: no borders
-		// value is definitely included
-		if (!min_set && !max_set)
-			return true;
-
-		// case 2: only a minimum border
-		// value is included if value >= minimum
-		if (min_set && !max_set)
-			return value >= min;
-
-		// case 3: only a maximum border
-		// value is included if value <= maximum
-		if (max_set && !min_set)
-			return value <= max;
-
-		// case 3: two borders
-		// value is included if value >= minimum and value <= maximum
-		return min <= value && value <= max;
-	}
+	/**
+	 * Returns whether a specific value is within in the bounds.
+	 */
+	bool contains(T value) const;
 
 private:
+	// minimum, maximum
 	T min, max;
+	// whether minimum, maximum is set to infinity (or -infinity for minimum)
 	bool min_set, max_set;
 };
 
@@ -83,6 +79,59 @@ public:
 private:
 	Bounds<int> bounds_x, bounds_z, bounds_y;
 };
+
+template <typename T>
+Bounds<T>::Bounds()
+	: min_set(false), max_set(false) {
+}
+
+template <typename T>
+Bounds<T>::~Bounds() {
+}
+
+template <typename T>
+void Bounds<T>::setMin(T min) {
+	this->min = min;
+	min_set = true;
+}
+
+template <typename T>
+void Bounds<T>::setMax(T max) {
+	this->max = max;
+	max_set = true;
+}
+
+template <typename T>
+void Bounds<T>::resetMin() {
+	min_set = false;
+}
+
+template <typename T>
+void Bounds<T>::resetMax() {
+	max_set = false;
+}
+
+template <typename T>
+bool Bounds<T>::contains(T value) const {
+	// case 1: no limits
+	// value is definitely included
+	if (!min_set && !max_set)
+		return true;
+
+	// case 2: only a minimum limit
+	// value is included if value >= minimum
+	if (min_set && !max_set)
+		return value >= min;
+
+	// case 3: only a maximum limits
+	// value is included if value <= maximum
+	if (max_set && !min_set)
+		return value <= max;
+
+	// case 3: two limits
+	// value is included if value >= minimum and value <= maximum
+	return min <= value && value <= max;
+}
 
 }
 }
