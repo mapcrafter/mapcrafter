@@ -23,6 +23,8 @@
 #include "extended_ini.h"
 #include "validation.h"
 
+#include "../mc/worldcrop.h"
+
 #include <string>
 #include <vector>
 #include <set>
@@ -40,6 +42,11 @@ private:
 	bool global;
 
 	Field<fs::path> input_dir;
+
+	Field<int> min_y, max_y;
+	Field<int> min_x, max_x, min_z, max_z;
+	Field<int> center_x, center_z, radius;
+	mc::WorldCrop worldcrop;
 public:
 	WorldSection(bool global = false);
 	~WorldSection();
@@ -48,6 +55,7 @@ public:
 	bool parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation);
 
 	fs::path getInputDir() const;
+	const mc::WorldCrop getWorldCrop() const;
 };
 
 class MapSection {

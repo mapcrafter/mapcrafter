@@ -38,6 +38,8 @@ void WorldSection::setGlobal(bool global) {
 
 bool WorldSection::parse(const ConfigSection& section, const fs::path& config_dir,
 		ValidationList& validation) {
+	mc::BlockPos crop_center;
+
 	// go through all configuration options in this section
 	//   - load/parse the individual options
 	//   - warn the user about unknown options
@@ -54,10 +56,37 @@ bool WorldSection::parse(const ConfigSection& section, const fs::path& config_di
 							"'input_dir' must be an existing directory! '"
 							+ input_dir.getValue().string() + "' does not exist!"));
 			}
-		} else {
+		}
+
+		else if (key == "crop_min_y" && min_y.load(key, value, validation))
+			worldcrop.setMinY(min_y.getValue());
+		else if (key == "crop_max_y" && max_y.load(key, value, validation))
+			worldcrop.setMaxY(max_y.getValue());
+		else if (key == "crop_min_x" && min_x.load(key, value, validation))
+			worldcrop.setMinX(min_x.getValue());
+		else if (key == "crop_max_x" && max_x.load(key, value, validation))
+			worldcrop.setMaxX(max_x.getValue());
+		else if (key == "crop_min_z" && min_z.load(key, value, validation))
+			worldcrop.setMinZ(min_z.getValue());
+		else if (key == "crop_max_z" && max_z.load(key, value, validation))
+			worldcrop.setMaxZ(max_z.getValue());
+
+		else if (key == "crop_center_x")
+			center_x.load(key, value, validation);
+		else if (key == "crop_center_z")
+			center_z.load(key, value, validation);
+		else if (key == "crop_radius")
+			radius.load(key, value, validation);
+
+		else {
 			validation.push_back(ValidationMessage::warning(
 					"Unknown configuration option '" + key + "'!"));
 		}
+	}
+
+	if (center_x.isLoaded() && center_z.isLoaded()) {
+		worldcrop.setCenter(mc::BlockPos(center_x.getValue(), center_z.getValue(), 0));
+		worldcrop.setRadius(radius.getValue());
 	}
 
 	// check if required options were specified
@@ -70,6 +99,10 @@ bool WorldSection::parse(const ConfigSection& section, const fs::path& config_di
 
 fs::path WorldSection::getInputDir() const {
 	return input_dir.getValue();
+}
+
+const mc::WorldCrop WorldSection::getWorldCrop() const {
+	return worldcrop;
 }
 
 MapSection::MapSection(bool global)

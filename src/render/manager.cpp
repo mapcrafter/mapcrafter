@@ -494,6 +494,7 @@ bool RenderManager::run() {
 			// load the world
 			mc::World world;
 			world.setRotation(*rotation_it);
+			world.setWorldCrop(world_it->second.getWorldCrop());
 			if (!world.load(world_it->second.getInputDir().string())) {
 				std::cerr << "Unable to load world " << world_name << "!" << std::endl;
 				return false;
