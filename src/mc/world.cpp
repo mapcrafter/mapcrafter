@@ -64,8 +64,15 @@ bool World::readRegions(const std::string& path) {
 	return true;
 }
 
-bool World::load(const std::string& dir, int rotation) {
+void World::setRotation(int rotation) {
 	this->rotation = rotation;
+}
+
+void World::setWorldCrop(const WorldCrop& worldcrop) {
+	this->worldcrop = worldcrop;
+}
+
+bool World::load(const std::string& dir) {
 	fs::path world_dir(dir);
 	fs::path region_dir = world_dir / "region";
 	if(!fs::exists(world_dir)) {

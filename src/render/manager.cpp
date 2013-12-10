@@ -493,7 +493,8 @@ bool RenderManager::run() {
 		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
 			// load the world
 			mc::World world;
-			if (!world.load(world_it->second.getInputDir().string(), *rotation_it)) {
+			world.setRotation(*rotation_it);
+			if (!world.load(world_it->second.getInputDir().string())) {
 				std::cerr << "Unable to load world " << world_name << "!" << std::endl;
 				return false;
 			}
