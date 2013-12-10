@@ -72,6 +72,11 @@ public:
 	~WorldCrop();
 
 	/**
+	 * Returns the type of the boundaries.
+	 */
+	int getType() const;
+
+	/**
 	 * Sets the minimum/maximum values for y-coordinates.
 	 */
 	void setMinY(int value);
@@ -92,10 +97,11 @@ public:
 	void setRadius(int radius);
 
 	/**
-	 * Returns whether a specific region/chunk is contained.
+	 * Returns whether a specific region/chunk/block is contained.
 	 */
 	bool isRegionContained(const mc::RegionPos& region) const;
 	bool isChunkContained(const mc::ChunkPos& chunk) const;
+	bool isBlockContained(const mc::BlockPos& block) const;
 
 private:
 	// type of world boundaries -- either RECTANGULAR or CIRCULAR

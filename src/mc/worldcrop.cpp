@@ -119,5 +119,18 @@ bool WorldCrop::isChunkContained(const mc::ChunkPos& chunk) const {
 	return true;
 }
 
+bool WorldCrop::isBlockContained(const mc::BlockPos& block) const {
+	if (!bounds_y.contains(block.y))
+		return false;
+
+	if (type == RECTANGULAR)
+		return bounds_x.contains(block.x) && bounds_z.contains(block.z);
+	else if (type == CIRCULAR) {
+		// TODO
+	}
+
+	return true;
+}
+
 }
 }
