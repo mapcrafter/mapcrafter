@@ -86,11 +86,11 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 			timestamp = util::bigEndian32(timestamp);
 
 			ChunkPos pos(x + regionpos.x * 32, z + regionpos.z * 32);
+			if (rotation)
+				pos.rotate(rotation);
 			// check if this chunk is not cropped
 			if (!worldcrop.isChunkContained(pos))
 				continue;
-			if (rotation)
-				pos.rotate(rotation);
 
 			containing_chunks.insert(pos);
 
