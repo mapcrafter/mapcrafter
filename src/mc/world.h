@@ -99,7 +99,7 @@ public:
 	bool getRegion(const RegionPos& pos, RegionFile& region) const;
 
 private:
-	// rotation and possible crop of the world
+	// rotation and possible boundaries of the world
 	int rotation;
 	WorldCrop worldcrop;
 

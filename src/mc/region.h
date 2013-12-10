@@ -22,6 +22,7 @@
 
 #include "pos.h"
 #include "chunk.h"
+#include "worldcrop.h"
 
 #include <string>
 #include <set>
@@ -43,8 +44,18 @@ public:
 	static const int CHUNK_NBT_ERROR = 4;
 
 	RegionFile();
-	RegionFile(const std::string& filename, int rotation = 0);
+	RegionFile(const std::string& filename);
 	~RegionFile();
+
+	/**
+	 * Sets the rotation of the world. You have to call this before loading a world.
+	 */
+	void setRotation(int rotation);
+
+	/**
+	 * Sets the boundaries of the world.
+	 */
+	void setWorldCrop(const WorldCrop& worldcrop);
 
 	/**
 	 * Reads the whole region file with the data of all chunks. Returns false if the
@@ -97,10 +108,12 @@ public:
 
 private:
 	std::string filename;
-	RegionPos regionpos;
+	RegionPos regionpos, regionpos_original;
 
 	// rotation of the region file
 	int rotation;
+	// and possible boundaries of the world
+	WorldCrop worldcrop;
 
 	// a set with all available chunks
 	ChunkMap containing_chunks;

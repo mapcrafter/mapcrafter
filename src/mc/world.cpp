@@ -44,8 +44,7 @@ bool World::readRegions(const std::string& path) {
 	if(!fs::exists(region_dir))
 		return false;
 	std::string ending = ".mca";
-	for(fs::directory_iterator it(region_dir); it != fs::directory_iterator();
-			++it) {
+	for(fs::directory_iterator it(region_dir); it != fs::directory_iterator(); ++it) {
 		std::string region_file = (*it).path().string();
 		std::string filename = BOOST_FS_FILENAME((*it).path());
 
@@ -56,6 +55,9 @@ bool World::readRegions(const std::string& path) {
 		if(sscanf(filename.c_str(), "r.%d.%d.mca", &x, &z) != 2)
 			continue;
 		RegionPos pos(x, z);
+		// check if we should not crop this region
+		if (!worldcrop.isRegionContained(pos))
+			continue;
 		if (rotation)
 			pos.rotate(rotation);
 		available_regions.insert(pos);
@@ -101,7 +103,9 @@ bool World::getRegion(const RegionPos& pos, RegionFile& region) const {
 	RegionMap::const_iterator it = region_files.find(pos);
 	if (it == region_files.end())
 		return false;
-	region = RegionFile(it->second, rotation);
+	region = RegionFile(it->second);
+	region.setRotation(rotation);
+	region.setWorldCrop(worldcrop);
 	return true;
 }
 

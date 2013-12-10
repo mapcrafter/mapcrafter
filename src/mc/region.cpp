@@ -29,14 +29,27 @@ RegionFile::RegionFile()
 		: rotation(0) {
 }
 
-RegionFile::RegionFile(const std::string& filename, int rotation)
-		: filename(filename), rotation(rotation) {
-	regionpos = RegionPos::byFilename(filename);
-	if (rotation)
-		regionpos.rotate(rotation);
+RegionFile::RegionFile(const std::string& filename)
+		: filename(filename), rotation(0) {
+	regionpos_original = RegionPos::byFilename(filename);
+	regionpos = regionpos_original;
 }
 
 RegionFile::~RegionFile() {
+}
+
+void RegionFile::setRotation(int rotation) {
+	this->rotation = rotation;
+
+	// TODO properly handle this
+	if (rotation) {
+		regionpos = regionpos_original;
+		regionpos.rotate(rotation);
+	}
+}
+
+void RegionFile::setWorldCrop(const WorldCrop& worldcrop) {
+	this->worldcrop = worldcrop;
 }
 
 bool RegionFile::readHeaders(std::ifstream& file) {
@@ -73,6 +86,9 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 			timestamp = util::bigEndian32(timestamp);
 
 			ChunkPos pos(x + regionpos.x * 32, z + regionpos.z * 32);
+			// check if this chunk is not cropped
+			if (!worldcrop.isChunkContained(pos))
+				continue;
 			if (rotation)
 				pos.rotate(rotation);
 
