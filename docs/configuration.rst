@@ -87,7 +87,7 @@ A More Advanced Example
     name = Creative World - Day
     world = creative
     rotations = top-left top-right bottom-right bottom-left
-    textures_dir = textures/special_textures
+    texture_dir = textures/special_textures
     texture_size = 16
     
     [map:map_creative_night]
@@ -95,7 +95,7 @@ A More Advanced Example
     world = creative
     rendermode = nightlight
     rotations = top-left top-right bottom-right bottom-left
-    textures_dir = textures/special_textures
+    texture_dir = textures/special_textures
     texture_size = 16
 
 Here we have some more worlds and maps defined. We have a "normal" world which
@@ -211,7 +211,7 @@ Map Options
         Renders only caves and colors blocks depending on their height 
         to make them easier to recognize.
 
-``textures_dir = <directory>``
+``texture_dir = <directory>``
 
     **Default:** default texture directory (see :ref:`resources_textures`)
 
