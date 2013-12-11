@@ -19,6 +19,7 @@
 
 #include "../mc/worldcrop.h"
 
+#include <set>
 #include <boost/test/unit_test.hpp>
 
 namespace mc = mapcrafter::mc;
@@ -95,5 +96,31 @@ BOOST_AUTO_TEST_CASE(worlcrop_crop_rectangular) {
 }
 
 BOOST_AUTO_TEST_CASE(worlcrop_crop_circular) {
-	// TODO
+	mc::WorldCrop crop;
+	mc::BlockPos center(14, 14, 0);
+	int radius = 20;
+	crop.setCenter(center);
+	crop.setRadius(radius);
+
+	std::set<mc::RegionPos> regions;
+	std::set<mc::ChunkPos> chunks;
+
+	for (int x = center.x - radius; x <= center.x + radius; x++)
+		for (int z = center.z - radius; z <= center.z + radius; z++) {
+			mc::BlockPos pos(x, z, 0);
+			if (crop.isBlockContained(pos)) {
+				mc::ChunkPos chunk(pos);
+				chunks.insert(chunk);
+				regions.insert(chunk.getRegion());
+			}
+		}
+
+	for (auto it = regions.begin(); it != regions.end(); ++it)
+		if (!crop.isRegionContained(*it)) {
+			std::cout << "Region " << *it << std::endl;
+		}
+
+	for (auto it = chunks.begin(); it != chunks.end(); ++it)
+		if (!crop.isChunkContained(*it))
+			std::cout << "Chunk " << *it << std::endl;
 }
