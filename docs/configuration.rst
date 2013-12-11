@@ -169,9 +169,39 @@ World Options
 ``input_dir = <directory>``
 
     **Required**
-	
+
     This is the directory of your Minecraft World. The directory should contain
     a directory ``region/`` with the .mca region files.
+
+By using the following options you can crop your world and render only 
+a specific part of it. There two different types of world cropping:
+
+1. Rectangular cropping:
+
+  * You can specify limits for the x-, z- and y-coordinates.
+    The renderer will render only blocks contained in these boundaries.
+    You can use the following options whereas all options are optional
+    and default to infinite (or -infinite for minimum limits):
+    
+    * ``crop_min_x`` (minimum limit of x-coordinate)
+    * ``crop_max_x`` (maximum limit of x-coordinate)
+    * ``crop_min_z`` (minimum limit of z-coordinate)
+    * ``crop_max_z`` (maximum limit of z-coordinate)
+    * ``crop_min_y`` (minimum limit of y-coordinate)
+    * ``crop_max_y`` (maximum limit of y-coordinate)
+
+2. Circular cropping:
+
+  * You can specify a block position as center and a radius.
+    The renderer will render only blocks contained in this circle.
+    You can also use the ``crop_min_y`` and ``crop_max_y`` options.
+    This are the available options:
+    
+    * ``crop_center_x`` (**required**, x-coordinate of the center)
+    * ``crop_center_z``` (**required**, z-coordinate of the center)
+    * ``crop_radius``` (**required**, radius of the circle)
+    * ``crop_min_y`` (minimum limit of y-coordinate)
+    * ``crop_max_y`` (maximum limit of y-coordinate)
 
 Map Options
 -----------
