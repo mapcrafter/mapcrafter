@@ -22,6 +22,7 @@
 
 #include "nbt.h"
 #include "pos.h"
+#include "worldcrop.h"
 
 #include <stdint.h>
 
@@ -58,9 +59,12 @@ struct ChunkSection {
  */
 class Chunk {
 private:
-	ChunkPos pos;
+	// internal original chunk position and public chunk position (which may be rotated)
+	ChunkPos chunkpos, chunkpos_original;
 
+	// rotation and cropping of the world
 	int rotation;
+	WorldCrop worldcrop;
 
 	// the index of the chunk sections in the sections array
 	// or -1 if section does not exist
@@ -76,6 +80,7 @@ public:
 	virtual ~Chunk();
 
 	void setRotation(int rotation);
+	void setWorldCrop(const WorldCrop& worldcrop);
 
 	bool readNBT(const char* data, size_t len, nbt::Compression compression =
 	        nbt::Compression::ZLIB);

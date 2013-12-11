@@ -26,7 +26,7 @@ namespace mapcrafter {
 namespace mc {
 
 Chunk::Chunk()
-		: pos(42, 42), rotation(0) {
+		: chunkpos(42, 42), rotation(0) {
 	clear();
 }
 
@@ -35,6 +35,10 @@ Chunk::~Chunk() {
 
 void Chunk::setRotation(int rotation) {
 	this->rotation = rotation;
+}
+
+void Chunk::setWorldCrop(const WorldCrop& worldcrop) {
+	this->worldcrop = worldcrop;
 }
 
 /**
@@ -58,16 +62,17 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 		std::cerr << "Warning: Corrupt chunk (No x/z position found)!" << std::endl;
 		return false;
 	}
-	pos = ChunkPos(level.findTag<nbt::TagInt>("xPos").payload,
-				   level.findTag<nbt::TagInt>("zPos").payload);
+	chunkpos_original = ChunkPos(level.findTag<nbt::TagInt>("xPos").payload,
+				                 level.findTag<nbt::TagInt>("zPos").payload);
+	chunkpos = chunkpos_original;
 	if (rotation)
-		pos.rotate(rotation);
+		chunkpos.rotate(rotation);
 
 	if (level.hasArray<nbt::TagByteArray>("Biomes", 256)) {
 		const nbt::TagByteArray& biomes_tag = level.findTag<nbt::TagByteArray>("Biomes");
 		std::copy(biomes_tag.payload.begin(), biomes_tag.payload.end(), biomes);
 	} else
-		std::cerr << "Warning: Corrupt chunk at " << pos.x << ":" << pos.z
+		std::cerr << "Warning: Corrupt chunk at " << chunkpos.x << ":" << chunkpos.z
 				<< " (No biome data found)!" << std::endl;
 
 	// find sections list
@@ -75,7 +80,7 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 	// in this list, ignore them, they are empty
 	if (!level.hasList<nbt::TagCompound>("Sections")
 			&& !level.hasList<nbt::TagByte>("Sections", 0)) {
-		std::cerr << "Warning: Corrupt chunk at " << pos.x << ":" << pos.z
+		std::cerr << "Warning: Corrupt chunk at " << chunkpos.x << ":" << chunkpos.z
 			<< " (No valid sections list found)!" << std::endl;
 		return false;
 	}
@@ -167,6 +172,12 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 	if (rotation)
 		rotateBlockPos(x, z, rotation);
 
+	// TODO
+	BlockPos global = LocalBlockPos(x, z, pos.y).toGlobalPos(chunkpos_original);
+	if (!worldcrop.isBlockContained(global)) {
+		return 0;
+	}
+
 	int offset = ((pos.y % 16) * 16 + z) * 16 + x;
 	uint16_t add = 0;
 	if ((offset % 2) == 0)
@@ -188,6 +199,14 @@ uint8_t Chunk::getData(const LocalBlockPos& pos, int array) const {
 	int z = pos.z;
 	if (rotation)
 		rotateBlockPos(x, z, rotation);
+
+	// TODO
+	BlockPos global = LocalBlockPos(x, z, pos.y).toGlobalPos(chunkpos_original);
+	if (!worldcrop.isBlockContained(global)) {
+		if (array == 2)
+			return 15;
+		return 0;
+	}
 
 	int offset = ((pos.y % 16) * 16 + z) * 16 + x;
 	if ((offset % 2) == 0)
@@ -220,7 +239,7 @@ uint8_t Chunk::getBiomeAt(const LocalBlockPos& pos) const {
 }
 
 const ChunkPos& Chunk::getPos() const {
-	return pos;
+	return chunkpos;
 }
 
 }

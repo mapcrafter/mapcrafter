@@ -206,6 +206,7 @@ int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 
 	// set the chunk rotation
 	chunk.setRotation(rotation);
+	chunk.setWorldCrop(worldcrop);
 	// try to load the chunk
 	try {
 		if (!chunk.readNBT(reinterpret_cast<char*>(&chunk_data[z*32 + x][0]), size, comp))
