@@ -118,11 +118,14 @@ private:
 	// a set with all available chunks
 	ChunkMap containing_chunks;
 
+	// indexes of the following arrays are chunk coordinates: z*32 + x
+	// where x and z are the original local chunk coordinates -- not the rotated ones
+
 	// the offsets where the chunk data of each chunk starts
 	int chunk_offsets[1024];
 	// timestamps of the chunks
 	int chunk_timestamps[1024];
-	// actual chunk data
+	// actual chunk data with compression type
 	uint8_t chunk_data_compression[1024];
 	std::vector<uint8_t> chunk_data[1024];
 

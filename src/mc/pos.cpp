@@ -130,17 +130,11 @@ ChunkPos ChunkPos::byRowCol(int row, int col) {
 }
 
 void ChunkPos::rotate(int count) {
-	int nx = getLocalX(), nz = getLocalZ(), nnx, nnz;
 	for (int i = 0; i < count; i++) {
-		nnx = 31 - nz;
-		nnz = nx;
-		nx = nnx;
-		nz = nnz;
+		int nx = 31 - z;
+		z = x;
+		x = nx;
 	}
-
-	RegionPos region = getRegion();
-	x = nx + region.x * 32;
-	z = nz + region.z * 32;
 }
 
 BlockPos::BlockPos()

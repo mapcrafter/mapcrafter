@@ -85,17 +85,19 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 			file.read(reinterpret_cast<char*>(&timestamp), 4);
 			timestamp = util::bigEndian32(timestamp);
 
-			// TODO fix this mess here
-			ChunkPos pos(x + regionpos.x * 32, z + regionpos.z * 32);
-			ChunkPos pos_original(x + regionpos_original.x * 32, z + regionpos_original.z * 32);
+			// get the original (not rotated) position of the chunk
+			ChunkPos chunkpos(x + regionpos_original.x * 32, z + regionpos_original.z * 32);
 			// check if this chunk is not cropped
-			if (!worldcrop.isChunkContained(pos_original))
+			if (!worldcrop.isChunkContained(chunkpos))
 				continue;
+
+			// now rotate this chunk position for the public set with available chunks
 			if (rotation)
-				pos.rotate(rotation);
+				chunkpos.rotate(rotation);
+			containing_chunks.insert(chunkpos);
 
-			containing_chunks.insert(pos);
-
+			// set offset and timestamp of this chunk
+			// now with the original coordinates again
 			chunk_offsets[z * 32 + x] = offset;
 			chunk_timestamps[z * 32 + x] = timestamp;
 		}
