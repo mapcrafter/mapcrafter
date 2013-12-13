@@ -173,6 +173,17 @@ World Options
     This is the directory of your Minecraft World. The directory should contain
     a directory ``region/`` with the .mca region files.
 
+
+.. note::
+
+    If you want to render the Nether or End of your world, just specify the path to the
+    Nether or End of your world as world path. This should be my_world/DIM-1 or
+    my_world_nether/DIM1 for the Nether and my_world/DIM1 or my_world_the_end/DIM1
+    for the End.
+    
+    The only way to render the Nether is the cave rendermode at the moment.
+    You will be able to skip the top bedrock layers with the next mapcrafter version.
+
 Map Options
 -----------
 
