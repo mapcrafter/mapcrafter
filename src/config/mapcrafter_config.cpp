@@ -473,11 +473,9 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 
 	auto maps = config.getMaps();
 	for (auto it = maps.begin(); it != maps.end(); ++it) {
-		std::string world_name = BOOST_FS_FILENAME(config.getWorld(it->getWorld()).getInputDir());
-
 		js += "\"" + it->getShortName() + "\" : {\n";
 		js += "\tname: \"" + it->getLongName() + "\",\n";
-		js += "\tworldName: \"" + world_name + "\",\n";
+		js += "\tworldName: \"" + it->getWorld() + "\",\n";
 		js += "\ttextureSize: " + util::str(it->getTextureSize()) + ",\n";
 		js += "\ttileSize: " + util::str(32 * it->getTextureSize()) + ",\n";
 		js += "\tmaxZoom: " + util::str(getMapZoomlevel(it->getShortName())) + ",\n";
