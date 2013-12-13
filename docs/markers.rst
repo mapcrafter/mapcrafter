@@ -11,8 +11,9 @@ exists.
 
 The file has a associative Javascript-Array called ``MARKERS``. In this 
 array keys are assigned to values. The keys are strings which represent 
-names of rendered Minecraft Worlds. Each world has an array with markers
-for this world.
+names of rendered Minecraft Worlds. The names of the world sections
+(``world:world1`` and ``world:world2`` in the example) are here used as world names. 
+Each world has an array with markers for this world.
 
 For example:
 
