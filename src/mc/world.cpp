@@ -39,26 +39,6 @@ World::World()
 World::~World() {
 }
 
-/**
- * Loads a world from a directory.
- */
-bool World::load(const std::string& dir, int rotation) {
-	this->rotation = rotation;
-	fs::path world_dir(dir);
-	fs::path region_dir = world_dir / "region";
-	if(!fs::exists(world_dir)) {
-		std::cerr << "Error: World directory " << world_dir << " does not exists!" << std::endl;
-	} else if(!fs::exists(region_dir)) {
-		std::cerr << "Error: Region directory " << region_dir << " does not exists!" << std::endl;
-	} else {
-		return readRegions(region_dir.string());
-	}
-	return false;
-}
-
-/**
- * Scans the region directory for available Anvil region files.
- */
 bool World::readRegions(const std::string& path) {
 	fs::path region_dir(path);
 	if(!fs::exists(region_dir))
@@ -84,24 +64,34 @@ bool World::readRegions(const std::string& path) {
 	return true;
 }
 
-int World::getRegionCount() const {
+bool World::load(const std::string& dir, int rotation) {
+	this->rotation = rotation;
+	fs::path world_dir(dir);
+	fs::path region_dir = world_dir / "region";
+	if(!fs::exists(world_dir)) {
+		std::cerr << "Error: World directory " << world_dir << " does not exist!" << std::endl;
+	} else if(!fs::exists(region_dir)) {
+		std::cerr << "Error: Region directory " << region_dir << " does not exist!" << std::endl;
+	} else {
+		return readRegions(region_dir.string());
+	}
+	return false;
+}
+
+int World::getAvailableRegionCount() const {
 	return available_regions.size();
+}
+
+const World::RegionSet& World::getAvailableRegions() const {
+	return available_regions;
 }
 
 bool World::hasRegion(const RegionPos& pos) const {
 	return available_regions.count(pos) != 0;
 }
 
-const std::unordered_set<RegionPos, hash_function>& World::getAvailableRegions() const {
-	return available_regions;
-}
-
-/**
- * Returns a region file with a specific position.
- */
 bool World::getRegion(const RegionPos& pos, RegionFile& region) const {
-	std::unordered_map<RegionPos, std::string, hash_function>::const_iterator it
-		= region_files.find(pos);
+	RegionMap::const_iterator it = region_files.find(pos);
 	if (it == region_files.end())
 		return false;
 	region = RegionFile(it->second, rotation);

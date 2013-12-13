@@ -143,13 +143,12 @@ TileRenderer::TileRenderer(std::shared_ptr<mc::WorldCache> world,
 TileRenderer::~TileRenderer() {
 }
 
-Biome TileRenderer::getBiome(const mc::BlockPos& pos, const mc::Chunk* chunk) {
+Biome TileRenderer::getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk) {
+	// return default biome if we don't want to render different biomes
+	if (!render_biomes)
+		return getBiome(DEFAULT_BIOME);
 	uint8_t biome_id = chunk->getBiomeAt(mc::LocalBlockPos(pos));
-	Biome biome = BIOMES[DEFAULT_BIOME];
-	if (render_biomes && biome_id < BIOMES_SIZE)
-		biome = BIOMES[biome_id];
-	else
-		return biome;
+	Biome biome = getBiome(biome_id);
 	int count = 1;
 
 	// get average biome data to make smooth edges between
@@ -169,10 +168,8 @@ Biome TileRenderer::getBiome(const mc::BlockPos& pos, const mc::Chunk* chunk) {
 				other_id = other_chunk->getBiomeAt(mc::LocalBlockPos(other));
 			}
 
-			if (other_id < BIOMES_SIZE) {
-				biome += BIOMES[other_id];
-				count++;
-			}
+			biome += getBiome(other_id);
+			count++;
 		}
 
 	biome /= count;
@@ -239,7 +236,7 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 
 		if (south.isFullWater())
 			data |= DATA_SOUTH;
-	} else if (id == 54 || id == 95 || id == 130 || id == 146) { // chests
+	} else if (id == 54 || id == 130 || id == 146) { // chests
 		// at first get all neighbor blocks
 		north = state.getBlock(pos + mc::DIR_NORTH);
 		south = state.getBlock(pos + mc::DIR_SOUTH);
@@ -268,7 +265,7 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			if (west.id == 54)
 				data |= DATA_WEST << 4;
 		}
-	} else if (id == 55) { // redstone wire
+	} else if (id == 55 || id == 132) { // redstone wire, tripwire
 		// check if the redstone wire is connected to other redstone wires
 		if (state.getBlock(pos + mc::DIR_NORTH).id == id
 				|| state.getBlock(pos + mc::DIR_NORTH + mc::DIR_BOTTOM).id == id)
@@ -293,6 +290,32 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			data |= REDSTONE_WEST;
 		else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_WEST).id == id)
 			data |= REDSTONE_WEST | REDSTONE_TOPWEST;
+
+		if (id == 132) {
+			if (state.getBlock(pos + mc::DIR_NORTH).id == 131
+					|| state.getBlock(pos + mc::DIR_NORTH + mc::DIR_BOTTOM).id == 131)
+				data |= REDSTONE_NORTH;
+			else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_NORTH).id == 131)
+				data |= REDSTONE_NORTH | REDSTONE_TOPNORTH;
+
+			if (state.getBlock(pos + mc::DIR_SOUTH).id == 131
+					|| state.getBlock(pos + mc::DIR_SOUTH + mc::DIR_BOTTOM).id == 131)
+				data |= REDSTONE_SOUTH;
+			else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_SOUTH).id == 131)
+				data |= REDSTONE_SOUTH | REDSTONE_TOPSOUTH;
+
+			if (state.getBlock(pos + mc::DIR_EAST).id == 131
+					|| state.getBlock(pos + mc::DIR_EAST + mc::DIR_BOTTOM).id == 131)
+				data |= REDSTONE_EAST;
+			else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_EAST).id == 131)
+				data |= REDSTONE_EAST | REDSTONE_TOPEAST;
+
+			if (state.getBlock(pos + mc::DIR_WEST).id == 131
+					|| state.getBlock(pos + mc::DIR_WEST + mc::DIR_BOTTOM).id == 131)
+				data |= REDSTONE_WEST;
+			else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_WEST).id == 131)
+				data |= REDSTONE_WEST | REDSTONE_TOPWEST;
+		}
 	} else if (id == 64 || id == 71) {
 		// doors
 		uint16_t top = data & 8 ? DOOR_TOP : 0;
@@ -345,8 +368,8 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		if (south.id == 79)
 			data |= DATA_SOUTH;
 
-	} else if (id == 85 || id == 101 || id == 102 || id == 113) {
-		// fence, iron bars, glas panes, nether fence
+	} else if (id == 85 || id == 101 || id == 102 || id == 139 || id == 113 || id == 160) {
+		// fence, iron bars, glass panes, cobblestone walls, nether fence, stained glass pane
 		north = state.getBlock(pos + mc::DIR_NORTH);
 		south = state.getBlock(pos + mc::DIR_SOUTH);
 		east = state.getBlock(pos + mc::DIR_EAST);
@@ -562,7 +585,7 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 
 			// check for biome data
 			if (Biome::isBiomeBlock(id, data))
-				image = state.images->getBiomeDependBlock(id, data, getBiome(block.current, state.chunk));
+				image = state.images->getBiomeDependBlock(id, data, getBiomeOfBlock(block.current, state.chunk));
 			else
 				image = state.images->getBlock(id, data);
 

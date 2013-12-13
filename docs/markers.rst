@@ -11,8 +11,9 @@ exists.
 
 The file has a associative Javascript-Array called ``MARKERS``. In this 
 array keys are assigned to values. The keys are strings which represent 
-names of rendered Minecraft Worlds. Each world has an array with markers
-for this world.
+names of rendered Minecraft Worlds. The names of the world sections
+(``world:world1`` and ``world:world2`` in the example) are here used as world names. 
+Each world has an array with markers for this world.
 
 For example:
 
@@ -73,8 +74,8 @@ Here are all available options for the markers:
 	This is the name of an icon image for the marker. If you do not specify
 	an icon, the default icon is used. If you specifiy your own icon,
 	you should also specify the size of the image (especially for the
-	Leaflet template). You can copy your own icons in the ``icons``
-	directory of the template and then you can use your icons with something
+	Leaflet template). You can copy your own icons to the ``icons``
+	directory of the template and then use them with something
 	like ``icons/myicon.png``.
 
 ``iconsize``

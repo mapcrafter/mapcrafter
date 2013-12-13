@@ -99,7 +99,7 @@ int64_t bigEndian64(int64_t x) {
  * Why? Converting the string 'This is a test.' would just result in 'This'
  */
 template<>
-std::string as(const std::string& from) {
+std::string as<std::string>(const std::string& from) {
 	return from;
 }
 
@@ -107,17 +107,17 @@ std::string as(const std::string& from) {
  * Same thing with string -> string conversion.
  */
 template<>
-fs::path as(const std::string& from) {
+fs::path as<fs::path>(const std::string& from) {
 	return fs::path(from);
 }
 
 template<>
-bool as(const std::string& from) {
-	if (from == "yes" || from == "on" || from == "1")
+bool as<bool>(const std::string& from) {
+	if (from == "true" || from == "1")
 		return true;
-	if (from == "no" || from == "off" || from == "0")
+	if (from == "false" || from == "0")
 		return false;
-	throw std::invalid_argument("Must be one of yes/no, on/off or 0/1.");
+	throw std::invalid_argument("Must be one of true/false or 0/1.");
 }
 
 void trim(std::string& str) {
@@ -139,6 +139,14 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
 		str.replace(start, from.length(), to);
 		start += to.length();
 	}
+}
+
+bool startswith(const std::string& str, const std::string& start) {
+	return str.substr(0, start.size()) == start;
+}
+
+bool endswith(const std::string& str, const std::string& end) {
+	return str.substr(str.size() - end.size(), end.size()) == end;
 }
 
 } /* namespace util */

@@ -44,16 +44,15 @@ private:
 
 	int getEntryIndex(const std::string& key) const;
 public:
-	ConfigSection(const std::string& type = "", const std::string& name = "")
-		: type(type), name(name) {}
-	~ConfigSection() {}
+	ConfigSection(const std::string& type = "", const std::string& name = "");
+	~ConfigSection();
 	
-	const std::string& getType() const { return type; }
-	const std::string& getName() const { return name; }
-	std::string getNameType() const { return type + ":" + name; }
+	const std::string& getType() const;
+	const std::string& getName() const;
+	std::string getNameType() const;
 
-	bool isNamed() const { return !name.empty(); }
-	bool isEmpty() const { return entries.size() == 0; }
+	bool isNamed() const;
+	bool isEmpty() const;
 
 	bool has(const std::string& key) const;
 	
@@ -65,7 +64,7 @@ public:
 		return default_value;
 	}
 	
-	const std::vector<ConfigEntry> getEntries() const { return entries; }
+	const std::vector<ConfigEntry> getEntries() const;
 
 	void set(const std::string& key, const std::string& value);
 	void remove(const std::string& key);
@@ -82,8 +81,8 @@ private:
 
 	int getSectionIndex(const std::string& type, const std::string& name) const;
 public:
-	ConfigFile() {}
-	~ConfigFile() {}
+	ConfigFile();
+	~ConfigFile();
 
 	bool load(std::istream& in, ValidationMessage& msg);
 	bool load(std::istream& in);
@@ -95,16 +94,14 @@ public:
 
 	bool hasSection(const std::string& type, const std::string& name) const;
 
-	const ConfigSection& getRootSection() const { return root; }
-	ConfigSection& getRootSection() { return root; }
+	const ConfigSection& getRootSection() const;
+	ConfigSection& getRootSection();
 	const ConfigSection& getSection(const std::string& type, const std::string& name) const;
 	ConfigSection& getSection(const std::string& type, const std::string& name);
 
-	const std::vector<ConfigSection> getSections() const { return sections; }
+	const std::vector<ConfigSection> getSections() const;
 
-	ConfigSection& addSection(const std::string& type, const std::string& name) {
-		return getSection(type, name);
-	}
+	ConfigSection& addSection(const std::string& type, const std::string& name);
 	ConfigSection& addSection(const ConfigSection& section);
 
 	void removeSection(const std::string& type, const std::string& name);

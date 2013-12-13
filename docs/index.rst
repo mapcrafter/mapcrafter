@@ -6,7 +6,7 @@ Welcome
 =======
 
 mapcrafter is a fast Minecraft Map Renderer written in C++. It renders
-Minecraft Worlds to a bunch of images, which are viewable using Leaflet like a
+Minecraft Worlds to a bunch of images which are viewable using Leaflet like a
 big map in any webbrowser.
 
 It runs on Linux and other Unix-like operating systems like Mac OS.  The
@@ -24,6 +24,7 @@ add your own map to this list.
 .. image:: mapcrafter.png
 	:align: center
 	:width: 700px
+
 
 Features
 ========
@@ -53,14 +54,14 @@ features, then please feel free to add an issue to the `GitHub issue tracker
 You can contact me in IRC (#mapcrafter on Freenode). Use the `webclient
 <http://webchat.freenode.net/?channels=mapcrafter>`_ if you are new to IRC. I
 will be there most of the time, but please bear in mind that I can't be
-available all the time. If I'm not there, wait some time or try another time of
+available all the time. If I'm not there wait some time or try another time of
 the day.
 
 Documentation Contents
 ======================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    
    installation
    using_mapcrafter

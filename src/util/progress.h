@@ -20,8 +20,12 @@
 #ifndef PROGRESS_H_
 #define PROGRESS_H_
 
+#include <string>
+
 namespace mapcrafter {
 namespace util {
+
+std::string format_eta(int eta);
 
 class IProgressHandler {
 public:
@@ -66,6 +70,8 @@ private:
 	int last_value;
 	// percentage of last update
 	int last_percent;
+	// length of last output needed to clear the line
+	int last_output_len;
 public:
 	ProgressBar(int max = 0, bool animated = true);
 	virtual ~ProgressBar();

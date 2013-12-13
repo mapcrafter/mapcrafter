@@ -39,9 +39,9 @@ namespace render {
  */
 class Rendermode {
 protected:
-	RenderState& state;
+	RenderState state;
 public:
-	Rendermode(RenderState& state);
+	Rendermode(const RenderState& state);
 	virtual ~Rendermode();
 
 	// is called when the tile renderer starts rendering a tile
@@ -56,7 +56,7 @@ public:
 };
 
 bool createRendermode(const std::string& name, const config::MapSection& config,
-		RenderState& state, std::vector<std::shared_ptr<Rendermode>>& modes);
+		const RenderState& state, std::vector<std::shared_ptr<Rendermode>>& modes);
 
 } /* namespace render */
 } /* namespace mapcrafter */

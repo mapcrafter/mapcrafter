@@ -41,13 +41,13 @@ private:
 
 	Field<fs::path> input_dir;
 public:
-	WorldSection(bool global = false) : global(global) {}
-	~WorldSection() {}
+	WorldSection(bool global = false);
+	~WorldSection();
 
-	void setGlobal(bool global) { this->global = global; }
+	void setGlobal(bool global);
 	bool parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation);
 
-	fs::path getInputDir() const { return input_dir.getValue(); }
+	fs::path getInputDir() const;
 };
 
 class MapSection {
@@ -63,29 +63,27 @@ private:
 	Field<std::string> rendermode;
 	Field<int> texture_size;
 
-	Field<bool> render_unknown_blocks, render_leaves_transparent, render_biomes, use_image_timestamps;
+	Field<bool> render_unknown_blocks, render_leaves_transparent, render_biomes, use_image_mtimes;
 public:
-	MapSection(bool global = false)
-		: global(global), texture_size(12),
-		  render_unknown_blocks(false), render_leaves_transparent(false), render_biomes(false) {}
-	~MapSection() {}
+	MapSection(bool global = false);
+	~MapSection();
 
-	void setGlobal(bool global) { this->global = global; }
+	void setGlobal(bool global);
 	bool parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation);
 
-	std::string getShortName() const { return name_short; }
-	std::string getLongName() const { return name_long; }
-	std::string getWorld() const { return world.getValue(); }
+	std::string getShortName() const;
+	std::string getLongName() const;
+	std::string getWorld() const;
 
-	fs::path getTextureDir() const { return texture_dir.getValue(); }
-	std::set<int> getRotations() const { return rotations_set; }
-	std::string getRendermode() const { return rendermode.getValue(); }
-	int getTextureSize() const { return texture_size.getValue(); }
+	fs::path getTextureDir() const;
+	std::set<int> getRotations() const;
+	std::string getRendermode() const;
+	int getTextureSize() const;
 
-	bool renderUnknownBlocks() const { return render_unknown_blocks.getValue(); }
-	bool renderLeavesTransparent() const { return render_leaves_transparent.getValue(); }
-	bool renderBiomes() const { return render_biomes.getValue(); }
-	bool useImageTimestamps() const { return use_image_timestamps.getValue(); }
+	bool renderUnknownBlocks() const;
+	bool renderLeavesTransparent() const;
+	bool renderBiomes() const;
+	bool useImageModificationTimes() const;
 };
 
 class MapcrafterConfigFile {
@@ -98,24 +96,24 @@ private:
 	std::map<std::string, WorldSection> worlds;
 	std::vector<MapSection> maps;
 public:
-	MapcrafterConfigFile() : world_global(true), map_global(true) {}
-	~MapcrafterConfigFile() {}
+	MapcrafterConfigFile();
+	~MapcrafterConfigFile();
 
 	bool parse(const std::string& filename, ValidationMap& validation);
 	void dump(std::ostream& out) const;
 
-	fs::path getOutputDir() const { return output_dir.getValue(); }
-	fs::path getTemplateDir() const { return template_dir.getValue(); }
+	fs::path getOutputDir() const;
+	fs::path getTemplateDir() const;
 
-	std::string getOutputPath(const std::string& path) const { return (output_dir.getValue() / path).string(); }
-	std::string getTemplatePath(const std::string& path) const { return (template_dir.getValue() / path).string(); }
+	std::string getOutputPath(const std::string& path) const;
+	std::string getTemplatePath(const std::string& path) const;
 
-	bool hasWorld(const std::string& world) const { return worlds.count(world); }
-	const std::map<std::string, WorldSection>& getWorlds() const { return worlds; }
-	const WorldSection& getWorld(const std::string& world) const { return worlds.at(world); }
+	bool hasWorld(const std::string& world) const;
+	const std::map<std::string, WorldSection>& getWorlds() const;
+	const WorldSection& getWorld(const std::string& world) const;
 
 	bool hasMap(const std::string& map) const;
-	const std::vector<MapSection>& getMaps() const { return maps; }
+	const std::vector<MapSection>& getMaps() const;
 	const MapSection& getMap(const std::string& map) const;
 };
 
@@ -129,7 +127,7 @@ private:
 
 	std::map<std::string, std::array<int, 4> > render_behaviors;
 
-	void setRenderBehaviors(std::string maps, int behavior);
+	void setRenderBehaviors(std::vector<std::string> maps, int behavior);
 public:
 	MapcrafterConfigHelper();
 	MapcrafterConfigHelper(const MapcrafterConfigFile& config);
@@ -151,8 +149,10 @@ public:
 	bool isCompleteRenderSkip(const std::string& map) const;
 	bool isCompleteRenderForce(const std::string& map) const;
 
-	void parseRenderBehaviors(bool skip_all, const std::string& render_skip,
-			const std::string& render_auto, const std::string& render_force);
+	void parseRenderBehaviors(bool skip_all,
+			std::vector<std::string>,
+			std::vector<std::string> render_auto,
+			std::vector<std::string> render_force);
 
 	static const int RENDER_SKIP = 0;
 	static const int RENDER_AUTO = 1;

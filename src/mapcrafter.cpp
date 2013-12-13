@@ -37,7 +37,7 @@ using namespace mapcrafter;
 int main(int argc, char** argv) {
 	std::string config_file;
 	std::string output_dir;
-	std::string render_skip, render_auto, render_force;
+	std::vector<std::string> render_skip, render_auto, render_force;
 	int jobs;
 
 	po::options_description all("Allowed options");
@@ -49,12 +49,12 @@ int main(int argc, char** argv) {
 		("config,c",po::value<std::string>(&config_file),
 			"the path of the world to render (required)")
 
-		("render-skip,s", po::value<std::string>(&render_skip),
+		("render-skip,s", po::value<std::vector<std::string>>(&render_skip)->multitoken(),
 			"skips rendering the specified map(s)")
 		("render-reset,r", "skips rendering all maps")
-		("render-auto,a", po::value<std::string>(&render_auto),
+		("render-auto,a", po::value<std::vector<std::string>>(&render_auto)->multitoken(),
 			"renders the specified map(s)")
-		("render-force,f", po::value<std::string>(&render_force),
+		("render-force,f", po::value<std::vector<std::string>>(&render_force)->multitoken(),
 			"renders the specified map(s) completely")
 
 		("jobs,j", po::value<int>(&jobs),

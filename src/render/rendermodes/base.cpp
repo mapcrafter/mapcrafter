@@ -22,7 +22,7 @@
 namespace mapcrafter {
 namespace render {
 
-Rendermode::Rendermode(RenderState& state)
+Rendermode::Rendermode(const RenderState& state)
 		: state(state) {
 }
 
@@ -43,7 +43,7 @@ void Rendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16
 }
 
 bool createRendermode(const std::string& name, const config::MapSection& config,
-		RenderState& state, std::vector<std::shared_ptr<Rendermode>>& modes) {
+		const RenderState& state, std::vector<std::shared_ptr<Rendermode>>& modes) {
 	if (name.empty() || name == "normal")
 		return true;
 

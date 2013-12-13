@@ -54,8 +54,20 @@ T as(const std::string& from) {
 	return to;
 }
 
+template<>
+std::string as(const std::string& from);
+
+template<>
+fs::path as(const std::string& from);
+
+template<>
+bool as<bool>(const std::string& from);
+
 void trim(std::string& str);
 void replaceAll(std::string& str, const std::string& from, const std::string& to);
+
+bool startswith(const std::string& str, const std::string& start);
+bool endswith(const std::string& str, const std::string& end);
 
 /**
  * Does a rotated shift by m bytes to the right. n is the length of the bits.

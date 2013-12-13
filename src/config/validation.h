@@ -33,22 +33,15 @@ private:
 	int type;
 	std::string message;
 public:
-	ValidationMessage(int type = -1, const std::string& message = "")
-		: type(type), message(message) {}
-	~ValidationMessage() {}
+	ValidationMessage(int type = -1, const std::string& message = "");
+	~ValidationMessage();
 
-	int getType() const { return type; }
-	const std::string& getMessage() const { return message; };
+	int getType() const;
+	const std::string& getMessage() const;
 
-	static ValidationMessage info(const std::string& message) {
-		return ValidationMessage(INFO, message);
-	}
-	static ValidationMessage warning(const std::string& message) {
-		return ValidationMessage(WARNING, message);
-	}
-	static ValidationMessage error(const std::string& message) {
-		return ValidationMessage(ERROR, message);
-	}
+	static ValidationMessage info(const std::string& message);
+	static ValidationMessage warning(const std::string& message);
+	static ValidationMessage error(const std::string& message);
 
 	static const int INFO = 0;
 	static const int WARNING = 1;
@@ -68,38 +61,42 @@ class Field {
 private:
 	T value;
 	bool loaded;
-	bool valid;
 public:
-	Field(T value = T()) : value(value), loaded(false), valid(false) {}
+	Field(T value = T()) : value(value), loaded(false) {}
 	~Field() {}
 
-	bool load(ValidationList& validation, const ConfigSection& section, const std::string& key) {
-		if (section.has(key)) {
-			try {
-				value = section.get<T>(key);
-				loaded = true;
-				valid = true;
-				return true;
-			} catch (std::invalid_argument& e) {
-				validation.push_back(ValidationMessage::error("Invalid value for '" + key + "': " + e.what()));
-			}
+	/**
+	 * Sets the default value of a configuration option.
+	 */
+	void setDefault(T value) {
+		// do not overwrite an already loaded value with a default value
+		if (!loaded) {
+			this->value = value;
+			loaded = true;
+		}
+	}
+
+	/**
+	 * Tries to load/parse the value of a configuration option.
+	 * Uses the util::as function to convert the string value to the type of this field.
+	 * Returns false if this function threw an std::invalid_argument exception
+	 * and adds an error message to the validation list.
+	 */
+	bool load(const std::string& key, const std::string& value, ValidationList& validation) {
+		try {
+			this->value = util::as<T>(value);
+			loaded = true;
+			return true;
+		} catch (std::invalid_argument& e) {
+			validation.push_back(ValidationMessage::error("Invalid value for '" + key + "': " + e.what()));
 		}
 		return false;
 	}
 
-	bool load(ValidationList& validation, const ConfigSection& section, const std::string& key, T default_value) {
-		if (loaded && !section.has(key))
-			return false;
-		try {
-			value = section.get<T>(key, default_value);
-			loaded = true;
-			valid = true;
-		} catch (std::invalid_argument& e) {
-			validation.push_back(ValidationMessage::error("Invalid value for '" + key + "': " + e.what()));
-		}
-		return loaded;
-	}
-
+	/**
+	 * Checks if the configuration option was specified and adds an error to the
+	 * validation list if not.
+	 */
 	bool require(ValidationList& validation, std::string message) const {
 		if (!loaded) {
 			validation.push_back(ValidationMessage::error(message));
@@ -112,7 +109,6 @@ public:
 	void setValue(T value) { this->value = value; }
 
 	bool isLoaded() const { return loaded; }
-	bool isValid() const { return valid; }
 };
 
 static std::string ROTATION_NAMES[4] = {"top-left", "top-right", "bottom-right", "bottom-left"};

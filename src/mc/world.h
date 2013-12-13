@@ -34,7 +34,7 @@ namespace mc {
 /**
  * Simple hash function to use regions in unordered_set/map.
  * This just assumes that there are maximal 8096 regions on x/z axis, this are
- * all in all 8096^2=67108864 regions. I think this should be enough.
+ * all in all 8096^2=67108864 regions. I think this should be enough for now.
  */
 struct hash_function {
 	long operator()(const RegionPos& region) const {
@@ -43,31 +43,64 @@ struct hash_function {
 };
 
 /**
- * This class represents a Minecraft world. It manages only the available region files.
- * Access to the chunks is with the region files possible. If you want full reading
- * access to the world, use the WorldCache class.
+ * This class represents a Minecraft World.
+ *
+ * It manages only the available region files. Access to the chunks is with the region
+ * files possible. If you want full reading access to the world, use the WorldCache class.
  */
 class World {
-private:
-	int rotation;
-
-	std::unordered_set<RegionPos, hash_function> available_regions;
-	std::unordered_map<RegionPos, std::string, hash_function> region_files;
-
-	bool readRegions(const std::string& path);
 public:
+	typedef std::unordered_set<RegionPos, hash_function> RegionSet;
+	typedef std::unordered_map<RegionPos, std::string, hash_function> RegionMap;
+
 	World();
 	~World();
 
+	/**
+	 * Loads a world from a directory. Returns false if the world- or region directory
+	 * does not exist.
+	 *
+	 * You can specify a rotation for the world (must be an integer 0, 1, 2 or 3)
+	 * If you specify a rotation, everything of the world will be rotated internally,
+	 * you can use it like a normal world.
+	 */
 	bool load(const std::string& dir, int rotation = 0);
 
-	int getRegionCount() const;
+	/**
+	 * Returns the count of available region files.
+	 */
+	int getAvailableRegionCount() const;
 
+	/**
+	 * Returns the positions of all available regions.
+	 */
+	const World::RegionSet& getAvailableRegions() const;
+
+	/**
+	 * Returns whether a specific region exists.
+	 */
 	bool hasRegion(const RegionPos& pos) const;
-	const std::unordered_set<RegionPos, hash_function>& getAvailableRegions() const;
 
+	/**
+	 * Creates the Region-object for a specific region and assigns the supplied reference
+	 * 'region' to it. Returns false if the region does not exist.
+	 */
 	bool getRegion(const RegionPos& pos, RegionFile& region) const;
 
+private:
+	// rotation of the world
+	int rotation;
+
+	// (hash-) set containing positions of available region files
+	RegionSet available_regions;
+	// (hash-) map containing positions of available region files and their file paths
+	RegionMap region_files;
+
+	/**
+	 * Scans a directory for Anvil *.mca region files and adds them to the available
+	 * region files. Returns false if the directory does not exist.
+	 */
+	bool readRegions(const std::string& path);
 };
 
 }

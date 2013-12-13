@@ -23,7 +23,7 @@ namespace mapcrafter {
 namespace render {
 
 
-CaveRendermode::CaveRendermode(RenderState& state)
+CaveRendermode::CaveRendermode(const RenderState& state)
 		: Rendermode(state) {
 }
 

@@ -304,7 +304,7 @@ void TileSet::findRenderTiles(const mc::World& world) {
 	auto regions = world.getAvailableRegions();
 	for (auto region_it = regions.begin(); region_it != regions.end(); ++region_it) {
 		mc::RegionFile region;
-		if (!world.getRegion(*region_it, region) || !region.loadHeaders())
+		if (!world.getRegion(*region_it, region) || !region.readOnlyHeaders())
 			continue;
 		const std::set<mc::ChunkPos>& region_chunks = region.getContainingChunks();
 		for (auto chunk_it = region_chunks.begin(); chunk_it != region_chunks.end();

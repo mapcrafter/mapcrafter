@@ -133,6 +133,13 @@ public:
 		throw InvalidTagCast();
 	}
 
+	template<typename T>
+	const T& cast() const {
+		if (type == T::TAG_TYPE)
+			return dynamic_cast<const T&>(*this);
+		throw InvalidTagCast();
+	}
+
 	bool isWriteType() const;
 	void setWriteType(bool write_type);
 	
@@ -145,6 +152,7 @@ public:
 	virtual Tag& read(std::istream& stream);
 	virtual void write(std::ostream& stream) const;
 	virtual void dump(std::ostream& stream, const std::string& indendation = "") const;
+	virtual Tag* clone() const;
 };
 
 class TagEnd: public Tag {
@@ -174,6 +182,10 @@ public:
 			dumpTag(stream, indendation, *this, static_cast<int>(payload));
 		else
 			dumpTag(stream, indendation, *this);
+	}
+
+	Tag* clone() const {
+		return new ScalarTag<T, tag_type>(*this);
 	}
 
 	T payload;
@@ -221,6 +233,10 @@ public:
 		dumpTag(stream, indendation, *this, util::str(payload.size()) + " entries");
 	}
 
+	Tag* clone() const {
+		return new TagArray<T, tag_type>(*this);
+	}
+
 	std::vector<T> payload;
 	
 	static const int8_t TAG_TYPE = (int8_t) tag_type;
@@ -237,15 +253,16 @@ public:
 	Tag& read(std::istream& stream);
 	void write(std::ostream& stream) const;
 	void dump(std::ostream& stream, const std::string& indendation = "") const;
+	Tag* clone() const;
 
 	std::string payload;
 	
 	static const int8_t TAG_TYPE = (int8_t) TagType::TAG_STRING;
 };
 
-// use shared_ptr in gcc <= 4.4.* instead of unique_ptr,
-// because there are some bugs
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
+// use shared_ptr in gcc == 4.4.* instead of unique_ptr,
+// because there are problems with moving to containers
+#if __GNUC__ == 4 && __GNUC_MINOR__ == 4
 # define TagPtrType std::shared_ptr
 #else
 # define TagPtrType std::unique_ptr
@@ -261,6 +278,7 @@ public:
 	Tag& read(std::istream& stream);
 	void write(std::ostream& stream) const;
 	void dump(std::ostream& stream, const std::string& indendation = "") const;
+	Tag* clone() const;
 
 	int8_t tag_type;
 	std::vector<TagPtr> payload;
@@ -276,6 +294,7 @@ public:
 	Tag& read(std::istream& stream);
 	void write(std::ostream& stream) const;
 	void dump(std::ostream& stream, const std::string& indendation = "") const;
+	Tag* clone() const;
 
 	bool hasTag(const std::string& name) const;
 	
@@ -305,14 +324,20 @@ public:
 		return tag.tag_type == T::TAG_TYPE && (len == -1 || (unsigned) len == tag.payload.size());
 	}
 
-	Tag& findTag(const std::string& name) const;
+	Tag& findTag(const std::string& name);
+	const Tag& findTag(const std::string& name) const;
 	
 	template<typename T>
-	T& findTag(const std::string& name) const {
+	T& findTag(const std::string& name) {
 		return findTag(name).cast<T>();
 	}
 
-	void addTag(const std::string& name, TagPtr tag);
+	template<typename T>
+	const T& findTag(const std::string& name) const {
+		return findTag(name).cast<T>();
+	}
+
+	void addTag(const std::string& name, const Tag& tag);
 
 	std::map<std::string, TagPtr> payload;
 	
@@ -338,12 +363,6 @@ public:
 };
 
 Tag* createTag(int8_t type);
-
-template<typename T, typename ... Args>
-TagPtrType<T> tag(Args ... args) {
-	static_assert(std::is_base_of<Tag, T>::value, "The template type is not a subclass of Tag!");
-	return TagPtrType<T>(new T(args...));
-}
 
 }
 }

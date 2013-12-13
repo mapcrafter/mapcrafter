@@ -2,43 +2,49 @@
 
 by Moritz Hilscher
 
-mapcrafter is a fast Minecraft World renderer written in C++. It renders
-Minecraft Worlds to a bunch of images, which are viewable in any webbrowser
+mapcrafter is a fast Minecraft World Renderer written in C++. It renders
+Minecraft Worlds to a bunch of images which are viewable in any webbrowser
 using Leaflet.
 
-mapcrafter runs on linux (maybe also Mac OS or W****** with cygwin) and needs
-libpng, libpthread, libboost-iostreams,libboost-system, libboost-filesystem,
-and libboost-program-options (and libboost-test if you want to use the tests).
-You can build it with g++ and CMake/make.
-
-mapcrafter is not yet finished. At the moment a few blocks are not supported
-yet, but all rendering routines are implemented. The renderer works with the
-Anvil World Format and the new Minecraft 1.6 Resource Packs.
-
-Some features of the renderer are:
-
-* Rendering Minecraft Worlds to maps viewable in any webbrowser
-* Configuration files to control the renderer
-* Four different directions to render your worlds from with an isometric 3D view
-* Different rendermodes
-* Biome colors
-* Incremental rendering, multithreading
-* User-defined markers on your maps
-
 mapcrafter is free software and available under the GPL license.  You can
-access the latest source code of mapcrafter at:
+access the latest source code of mapcrafter on GitHub:
 http://github.com/m0r13/mapcrafter
 
 Thanks to pigmap and Minecraft Overviewer, whose documentations and source code
 were very helpful. I also used the alpha blending code of pigmap and some maps
 stuff of the template from Minecraft Overviewer.
 
-## Documentation ##
+<div align="center">
+    <img src="http://i.imgur.com/c5tC43X.png" />
+</div>
 
-The documentation is in the `docs/` directory and you can build it yourself
-with Sphinx. You can read a built version of the documentation from
-[Read the Docs](http://docs.mapcrafter.org) and you can also [download
-other builds](https://readthedocs.org/projects/mapcrafter/downloads/).
+## Features ##
+
+* **Web output:** Render your Minecraft Worlds to maps with an isometric 3D perspective 
+      viewable in any webbrowser!
+* **Different directions:** Choose from four different directions to render your worlds!
+* **Different rendermodes:** Choose between different rendermodes like day, night and cave 
+     for your maps!
+* **Configuration files:** Control which worlds are rendered from which direction and with 
+     which rendermodes!
+* **Markers:** Define your own markers for your maps!
+* **Other stuff:** Biome colors, incremental rendering, multithreading
+
+## Requirements ##
+
+* A Linux-based or Unix-like operating system like Mac OS
+* A decent C++ compiler (gcc >= 4.4, clang), CMake and make if you want to build
+      mapcrafter from source
+* Some libraries:
+  * libpng
+  * libboost-iostreams
+  * libboost-system
+  * libboost-filesystem
+  * libboost-program-options
+  * (libboost-test if you want to use the tests)
+* For your Minecraft Worlds:
+  * Anvil World Format
+  * Minecraft 1.6 Resource Packs
 
 ## Examples ##
 
@@ -46,10 +52,12 @@ There are a few example maps of the renderer on the [GitHub
 Wiki](https://github.com/m0r13/mapcrafter/wiki/Example-maps).  Please feel free
 to add your own map to this list.
 
-## Help ##
+## Documentation and Help ##
 
-Please read the [documentation](http://mapcrafter.readthedocs.org) to find out
-how to use the renderer.
+The documentation is in the `docs/` directory and you can build it yourself
+with Sphinx. You can read a built version of the documentation
+[here](http://docs.mapcrafter.org) and you can also [download
+other builds](https://readthedocs.org/projects/mapcrafter/downloads/).
 
 If you find bugs or problems when using mapcrafter or if you have ideas for new
 features, then please feel free to add an issue to the [GitHub issue
@@ -66,10 +74,29 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.1.0.1**
+
+* Fixed jungle wooden planks rendering as birch planks
+* Changed worldName attribute in template from part of the world path 
+  to the name of the world section
+* Added hint about rendering the Nether/End to documentation
+
+**v.1.0**
+
+* Added new configuration file format (consult the documentation for more information):
+  * Different section types for Minecraft Worlds/rendered maps
+  * Better validation of configuration files
+* Some internal reworkings
+
+**v.0.6**
+
+* Added support for Minecraft 1.7 blocks and biomes
+* Added some more blocks such as trip wire, trip wire hook and *magic floating* cocoa beans
+
 **v.0.5.1**
 
 * Added support for Minecraft 1.6 Resource Packs
-    **(You have to delete your old textures and get them new from a new Minecraft Jar file)**
+  *  **(You have to delete your old textures and get them new from a new Minecraft Jar file)**
 * Added some new blocks from Minecraft 1.6
 * Better compatibility for older gcc (4.4 +) and boost versions
 * Some code reworkings, replaced plain Makefile with CMake
@@ -116,7 +143,8 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 **v.0.1 (December 2012)**
 
-* First version on github, features:
-* Rendering minecraft worlds to tiles and an html file to view them like a
-  Google Map
-* Incremental rendering, multithreading
+* First version on GitHub
+* Features:
+  * Render Minecraft Worlds to tiles and an HTML-File to view them like a
+    Google Map
+  * Incremental rendering, multithreading

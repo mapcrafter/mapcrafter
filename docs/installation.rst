@@ -50,7 +50,55 @@ You can now install mapcrafter system-wide for all users if you want::
 
     sudo make install
 
+If you get an error concerning ``libmapcraftercore.so`` not found you have to run 
+``ldconfig`` (as root).
 Make sure that you still have to install the texture files needed for mapcrafter.
+
+Mac OS X
+========
+
+Currently there is no pre built packages available for Mac OS X but building it is relatively simple.
+
+Prerequisites:
+
+* `Xcode <https://itunes.apple.com/us/app/xcode/id497799835?ls=1&mt=12>`_ 
+* `Homebrew <http://brew.sh/>`_
+
+Depending on your version of OS X you may or may not have git installed. 
+Starting from 10.9 Mavericks git is installed with Xcode, if you got 10.8 Mountain Lion or older, 
+you must install command line tools from Xcode and run the following command::
+	
+	brew install git
+
+On 10.9 Mavericks systems you will have to run the following command after you've installed Xcode::
+
+	xcode-selected --install
+
+and select install in the window that pops up, and accept the EULA.
+
+First you will have to clone the latest mapcrafter source by running::
+
+	git clone https://github.com/m0r13/mapcrafter.git
+
+After this, install the dependencies using brew::
+
+	brew install boost libpng cmake
+	
+once you have run this, you should have a working build system for mapcrafter::
+
+	cd mapcrafter
+	cmake .
+	make
+	
+this will build mapcrafter and put the ready to use binary in the ``src/`` directory
+
+
+
+Arch Linux
+==========
+
+If you are running Arch Linux as operating system you can install mapcrafter
+from the `AUR <https://aur.archlinux.org/packages/mapcrafter-git/>`_. 
 
 Debian Packages
 ===============
@@ -83,7 +131,7 @@ Resources and Textures
 .. note::
 
     You don't need to install the Minecraft texture files manually if you
-    installed mapcrafter with the Debian package.
+    installed mapcrafter from the AUR or with the Debian package.
 
 mapcrafter needs some resources to render maps: Minecraft texture files and
 some template files for the web output.

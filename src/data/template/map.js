@@ -109,7 +109,7 @@ MapPosHashHandler.prototype.gotoHash = function(hash) {
 		return;
 	
 	if(!(hash[0] in this.ui.getAllConfig()) 
-			|| !(hash[1] in this.ui.getConfig(hash[0]).rotations))
+			|| this.ui.getConfig(hash[0]).rotations.indexOf(hash[1]) < 0)
 		return null;
 		
 	this.ui.setMapTypeAndRotation(hash[0], hash[1]);
