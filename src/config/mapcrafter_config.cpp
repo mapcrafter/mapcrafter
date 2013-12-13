@@ -84,10 +84,31 @@ bool WorldSection::parse(const ConfigSection& section, const fs::path& config_di
 		}
 	}
 
-	if (center_x.isLoaded() && center_z.isLoaded()) {
+	// validate the world croppping
+	bool crop_rectangular = min_x.isLoaded() || max_x.isLoaded() || min_z.isLoaded() || max_z.isLoaded();
+	bool crop_circular = center_x.isLoaded() || center_z.isLoaded() || radius.isLoaded();
+
+	if (crop_rectangular && crop_circular) {
+		validation.push_back(ValidationMessage::error(
+				"You can not use both world cropping types at the same time!"));
+	} else if (crop_rectangular) {
+		if (min_x.isLoaded() && max_x.isLoaded() && min_x.getValue() > max_x.getValue())
+			validation.push_back(ValidationMessage::error("min_x must be smaller than or equal to max_x!"));
+		if (min_z.isLoaded() && max_z.isLoaded() && min_z.getValue() > max_z.getValue())
+			validation.push_back(ValidationMessage::error("min_z must be smaller than or equal to max_z!"));
+	} else if (crop_circular) {
+		std::string message = "You have to specify crop_center_x, crop_center_z "
+				"and crop_radius for circular world cropping!";
+		center_x.require(validation, message)
+			&& center_z.require(validation, message)
+			&& radius.require(validation, message);
+
 		worldcrop.setCenter(mc::BlockPos(center_x.getValue(), center_z.getValue(), 0));
 		worldcrop.setRadius(radius.getValue());
 	}
+
+	if (min_y.isLoaded() && max_y.isLoaded() && min_y.getValue() > max_y.getValue())
+		validation.push_back(ValidationMessage::error("min_y must be smaller than or equal to max_y!"));
 
 	// check if required options were specified
 	if (!global) {
