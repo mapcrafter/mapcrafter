@@ -74,6 +74,13 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.1.0.1**
+
+* Fixed jungle wooden planks rendering as birch planks
+* Changed worldName attribute in template from part of the world path 
+  to the name of the world section
+* Added hint about rendering the Nether/End to documentation
+
 **v.1.0**
 
 * Added new configuration file format (consult the documentation for more information):
