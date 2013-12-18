@@ -47,6 +47,7 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 	for (int i = 0; i < 1024; i++) {
 		chunk_offsets[i] = 0;
 		chunk_timestamps[i] = 0;
+		chunk_data_compression[i] = 0;
 	}
 
 	file.seekg(0, std::ios::end);
@@ -156,6 +157,31 @@ void RegionFile::setChunkTimestamp(const ChunkPos& chunk, int timestamp) {
 	if (rotation)
 		unrotated.rotate(4 - rotation);
 	chunk_timestamps[unrotated.getLocalZ() * 32 + unrotated.getLocalX()] = timestamp;
+}
+
+const std::vector<uint8_t>& RegionFile::getChunkData(const ChunkPos& chunk) const {
+	ChunkPos unrotated = chunk;
+	if (rotation)
+		unrotated.rotate(4 - rotation);
+	return chunk_data[unrotated.getLocalZ() * 32 + unrotated.getLocalX()];
+}
+
+uint8_t RegionFile::getChunkDataCompression(const ChunkPos& chunk) const {
+	ChunkPos unrotated = chunk;
+	if (rotation)
+		unrotated.rotate(4 - rotation);
+	return chunk_data_compression[unrotated.getLocalZ() * 32 + unrotated.getLocalX()];
+}
+
+void RegionFile::setChunkData(const ChunkPos& chunk, const std::vector<uint8_t>& data,
+		uint8_t compression) {
+	ChunkPos unrotated = chunk;
+	if (rotation)
+		unrotated.rotate(4 - rotation);
+	int x = unrotated.getLocalX();
+	int z = unrotated.getLocalZ();
+	chunk_data[z * 32 + x] = data;
+	chunk_data_compression[z * 32 + x] = compression;
 }
 
 /**
