@@ -97,22 +97,21 @@ bool RegionFile::read() {
 	std::vector<uint8_t> regiondata(filesize);
 	file.read(reinterpret_cast<char*>(&regiondata[0]), filesize);
 
-	for (int x = 0; x < 32; x++)
-		for (int z = 0; z < 32; z++) {
-			// get the offsets, where the chunk data starts
-			int offset = chunk_offsets[z*32 + x];
-			if (offset == 0)
-				continue;
+	for (int i = 0; i < 1024; i++) {
+		// get the offsets, where the chunk data starts
+		int offset = chunk_offsets[i];
+		if (offset == 0)
+			continue;
 
-			// get data size and compression type
-			int size = *(reinterpret_cast<int*>(&regiondata[offset]));
-			size = util::bigEndian32(size) - 1;
-			uint8_t compression = regiondata[offset + 4];
+		// get data size and compression type
+		int size = *(reinterpret_cast<int*>(&regiondata[offset]));
+		size = util::bigEndian32(size) - 1;
+		uint8_t compression = regiondata[offset + 4];
 
-			chunk_data_compression[z*32 + x] = compression;
-			chunk_data[z*32 + x].resize(size);
-			std::copy(&regiondata[offset+5], &regiondata[offset+5+size], chunk_data[z*32 + x].begin());
-		}
+		chunk_data_compression[i] = compression;
+		chunk_data[i].resize(size);
+		std::copy(&regiondata[offset+5], &regiondata[offset+5+size], chunk_data[i].begin());
+	}
 
 	return true;
 }
@@ -120,6 +119,67 @@ bool RegionFile::read() {
 bool RegionFile::readOnlyHeaders() {
 	std::ifstream file(filename.c_str(), std::ios_base::binary);
 	return readHeaders(file);
+}
+
+bool RegionFile::write(std::string filename) const {
+	if (filename.empty())
+		filename = this->filename;
+	if (filename.empty())
+		throw std::invalid_argument("You have to specify a filename!");
+
+	uint32_t offsets[1024];
+	for (int i = 0; i < 1024; i++)
+		offsets[i] = 0;
+
+	std::stringstream out_data, out_header;
+
+	// write chunk data to a temporary string stream
+	int position = 8192;
+	for (int i = 0; i < 1024; i++) {
+		if (chunk_data[i].size() == 0)
+			continue;
+		// pad every chunk data with zeros to the next n*4096 bytes
+		if (position % 4096 != 0) {
+			int append = 4096 - position % 4096;
+			position += append;
+			for (int j = 0; j < append; j++)
+				out_data.put(0);
+		}
+
+		// calculate the offset, the chunk starts at 4096*offset bytes
+		offsets[i] = position / 4096;
+
+		// get chunk data, size and compression type
+		const std::vector<uint8_t>& data = chunk_data[i];
+		uint32_t size = data.size();
+		size = util::bigEndian32(size + 1);
+		uint8_t compression = chunk_data_compression[i];
+
+		// append everything to the data
+		out_data.write(reinterpret_cast<char*>(&size), 4);
+		out_data.write(reinterpret_cast<char*>(&compression), 1);
+		out_data.write(reinterpret_cast<const char*>(&data[0]), data.size());
+		position += data.size() + 5;
+	}
+
+	// create the header with offsets and timestamps
+	for (int i = 0; i < 1024; i++) {
+		int offset_big_endian = util::bigEndian32(offsets[i]) >> 8;
+		out_header.write(reinterpret_cast<char*>(&offset_big_endian), 4);
+	}
+
+	for (int i = 0; i < 1024; i++) {
+		int timestamp_big_endian = util::bigEndian32(chunk_timestamps[i]);
+		out_header.write(reinterpret_cast<char*>(&timestamp_big_endian), 4);
+	}
+
+	// write complete region file
+	std::ofstream out(filename, std::ios::binary);
+	if (!out)
+		return false;
+	out << out_header.rdbuf() << out_data.rdbuf();
+	out.close();
+	return !out.fail();
 }
 
 const std::string& RegionFile::getFilename() const {
@@ -152,7 +212,7 @@ int RegionFile::getChunkTimestamp(const ChunkPos& chunk) const {
 	return chunk_timestamps[unrotated.getLocalZ() * 32 + unrotated.getLocalX()];
 }
 
-void RegionFile::setChunkTimestamp(const ChunkPos& chunk, int timestamp) {
+void RegionFile::setChunkTimestamp(const ChunkPos& chunk, uint32_t timestamp) {
 	ChunkPos unrotated = chunk;
 	if (rotation)
 		unrotated.rotate(4 - rotation);
@@ -198,7 +258,7 @@ int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 	int z = unrotated.getLocalZ();
 
 	// check if the chunk exists
-	if (chunk_offsets[z*32 + x] == 0)
+	if (chunk_data[z*32 + x].size() == 0)
 		return CHUNK_DOES_NOT_EXIST;
 
 	// get compression type and size of the data
