@@ -222,7 +222,20 @@ Tag* TagString::clone() const {
 	return new TagString(*this);
 }
 
+TagList::TagList(const TagList& other)
+	: TagList() {
+	*this = other;
+}
+
 TagList::~TagList() {
+}
+
+void TagList::operator=(const TagList& other) {
+	tag_type = other.tag_type;
+
+	payload.clear();
+	for (auto it = other.payload.begin(); it != other.payload.end(); ++it)
+		payload.push_back(TagPtr((*it)->clone()));
 }
 
 Tag& TagList::read(std::istream& stream) {
@@ -262,13 +275,21 @@ void TagList::dump(std::ostream& stream, const std::string& indendation) const {
 }
 
 Tag* TagList::clone() const {
-	TagList* tag = new TagList(tag_type);
-	for (auto it = payload.begin(); it != payload.end(); ++it)
-		tag->payload.push_back(TagPtr((*it)->clone()));
-	return tag;
+	return new TagList(*this);
+}
+
+TagCompound::TagCompound(const TagCompound& other)
+	: TagCompound() {
+	*this = other;
 }
 
 TagCompound::~TagCompound() {
+}
+
+void TagCompound::operator=(const TagCompound& other) {
+	payload.clear();
+	for (auto it = other.payload.begin(); it != other.payload.end(); ++it)
+		payload[it->first] = TagPtr(it->second->clone());
 }
 
 Tag& TagCompound::read(std::istream& stream) {
