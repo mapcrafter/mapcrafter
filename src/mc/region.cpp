@@ -39,14 +39,16 @@ RegionFile::RegionFile(const std::string& filename, int rotation)
 RegionFile::~RegionFile() {
 }
 
-bool RegionFile::readHeaders(std::ifstream& file) {
+bool RegionFile::readHeaders(std::ifstream& file, int chunk_offsets[1024]) {
 	if (!file)
 		return false;
-	containing_chunks.clear();
 
+	containing_chunks.clear();
 	for (int i = 0; i < 1024; i++) {
 		chunk_offsets[i] = 0;
+		chunk_exists[i] = false;
 		chunk_timestamps[i] = 0;
+		chunk_data_compression[i] = 0;
 	}
 
 	file.seekg(0, std::ios::end);
@@ -76,6 +78,7 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 			if (rotation)
 				pos.rotate(rotation);
 
+			chunk_exists[z * 32 + x] = true;
 			containing_chunks.insert(pos);
 
 			chunk_offsets[z * 32 + x] = offset;
@@ -85,9 +88,17 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 	return true;
 }
 
+size_t RegionFile::getChunkIndex(const mc::ChunkPos& chunkpos) const {
+	ChunkPos unrotated = chunkpos;
+	if (rotation)
+		unrotated.rotate(4 - rotation);
+	return unrotated.getLocalZ() * 32 + unrotated.getLocalX();
+}
+
 bool RegionFile::read() {
 	std::ifstream file(filename.c_str(), std::ios_base::binary);
-	if (!readHeaders(file))
+	int chunk_offsets[1024];
+	if (!readHeaders(file, chunk_offsets))
 		return false;
 	file.seekg(0, std::ios::end);
 	int filesize = file.tellg();
@@ -96,29 +107,90 @@ bool RegionFile::read() {
 	std::vector<uint8_t> regiondata(filesize);
 	file.read(reinterpret_cast<char*>(&regiondata[0]), filesize);
 
-	for (int x = 0; x < 32; x++)
-		for (int z = 0; z < 32; z++) {
-			// get the offsets, where the chunk data starts
-			int offset = chunk_offsets[z*32 + x];
-			if (offset == 0)
-				continue;
+	for (int i = 0; i < 1024; i++) {
+		// get the offsets, where the chunk data starts
+		int offset = chunk_offsets[i];
+		if (offset == 0)
+			continue;
 
-			// get data size and compression type
-			int size = *(reinterpret_cast<int*>(&regiondata[offset]));
-			size = util::bigEndian32(size) - 1;
-			uint8_t compression = regiondata[offset + 4];
+		// get data size and compression type
+		int size = *(reinterpret_cast<int*>(&regiondata[offset]));
+		size = util::bigEndian32(size) - 1;
+		uint8_t compression = regiondata[offset + 4];
 
-			chunk_data_compression[z*32 + x] = compression;
-			chunk_data[z*32 + x].resize(size);
-			std::copy(&regiondata[offset+5], &regiondata[offset+5+size], chunk_data[z*32 + x].begin());
-		}
+		chunk_data_compression[i] = compression;
+		chunk_data[i].resize(size);
+		std::copy(&regiondata[offset+5], &regiondata[offset+5+size], chunk_data[i].begin());
+	}
 
 	return true;
 }
 
 bool RegionFile::readOnlyHeaders() {
 	std::ifstream file(filename.c_str(), std::ios_base::binary);
-	return readHeaders(file);
+	int chunk_offsets[1024];
+	return readHeaders(file, chunk_offsets);
+}
+
+bool RegionFile::write(std::string filename) const {
+	if (filename.empty())
+		filename = this->filename;
+	if (filename.empty())
+		throw std::invalid_argument("You have to specify a filename!");
+
+	uint32_t offsets[1024];
+	for (int i = 0; i < 1024; i++)
+		offsets[i] = 0;
+
+	std::stringstream out_data, out_header;
+
+	// write chunk data to a temporary string stream
+	int position = 8192;
+	for (int i = 0; i < 1024; i++) {
+		if (chunk_data[i].size() == 0)
+			continue;
+		// pad every chunk data with zeros to the next n*4096 bytes
+		if (position % 4096 != 0) {
+			int append = 4096 - position % 4096;
+			position += append;
+			for (int j = 0; j < append; j++)
+				out_data.put(0);
+		}
+
+		// calculate the offset, the chunk starts at 4096*offset bytes
+		offsets[i] = position / 4096;
+
+		// get chunk data, size and compression type
+		const std::vector<uint8_t>& data = chunk_data[i];
+		uint32_t size = data.size();
+		size = util::bigEndian32(size + 1);
+		uint8_t compression = chunk_data_compression[i];
+
+		// append everything to the data
+		out_data.write(reinterpret_cast<char*>(&size), 4);
+		out_data.write(reinterpret_cast<char*>(&compression), 1);
+		out_data.write(reinterpret_cast<const char*>(&data[0]), data.size());
+		position += data.size() + 5;
+	}
+
+	// create the header with offsets and timestamps
+	for (int i = 0; i < 1024; i++) {
+		int offset_big_endian = util::bigEndian32(offsets[i]) >> 8;
+		out_header.write(reinterpret_cast<char*>(&offset_big_endian), 4);
+	}
+
+	for (int i = 0; i < 1024; i++) {
+		int timestamp_big_endian = util::bigEndian32(chunk_timestamps[i]);
+		out_header.write(reinterpret_cast<char*>(&timestamp_big_endian), 4);
+	}
+
+	// write complete region file
+	std::ofstream out(filename, std::ios::binary);
+	if (!out)
+		return false;
+	out << out_header.rdbuf() << out_data.rdbuf();
+	out.close();
+	return !out.fail();
 }
 
 const std::string& RegionFile::getFilename() const {
@@ -138,57 +210,64 @@ const RegionFile::ChunkMap& RegionFile::getContainingChunks() const {
 }
 
 bool RegionFile::hasChunk(const ChunkPos& chunk) const {
-	ChunkPos unrotated = chunk;
-	if (rotation)
-		unrotated.rotate(4 - rotation);
-	return chunk_offsets[unrotated.getLocalZ() * 32 + unrotated.getLocalX()] != 0;
+	return chunk_exists[getChunkIndex(chunk)];
 }
 
 int RegionFile::getChunkTimestamp(const ChunkPos& chunk) const {
-	ChunkPos unrotated = chunk;
-	if (rotation)
-		unrotated.rotate(4 - rotation);
-	return chunk_timestamps[unrotated.getLocalZ() * 32 + unrotated.getLocalX()];
+	return chunk_timestamps[getChunkIndex(chunk)];
 }
 
-void RegionFile::setChunkTimestamp(const ChunkPos& chunk, int timestamp) {
-	ChunkPos unrotated = chunk;
-	if (rotation)
-		unrotated.rotate(4 - rotation);
-	chunk_timestamps[unrotated.getLocalZ() * 32 + unrotated.getLocalX()] = timestamp;
+void RegionFile::setChunkTimestamp(const ChunkPos& chunk, uint32_t timestamp) {
+	chunk_timestamps[getChunkIndex(chunk)] = timestamp;
+}
+
+const std::vector<uint8_t>& RegionFile::getChunkData(const ChunkPos& chunk) const {
+	return chunk_data[getChunkIndex(chunk)];
+}
+
+uint8_t RegionFile::getChunkDataCompression(const ChunkPos& chunk) const {
+	return chunk_data_compression[getChunkIndex(chunk)];
+}
+
+void RegionFile::setChunkData(const ChunkPos& chunk, const std::vector<uint8_t>& data,
+		uint8_t compression) {
+	int index = getChunkIndex(chunk);
+	chunk_data[index] = data;
+	chunk_data_compression[index] = compression;
+
+	if (data.size() == 0) {
+		chunk_exists[index] = false;
+		containing_chunks.erase(chunk);
+	} else {
+		chunk_exists[index] = true;
+		containing_chunks.insert(chunk);
+	}
 }
 
 /**
  * This method tries to load a chunk from the region data and returns a status.
  */
 int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
-	// unrotate the chunk position,
-	// because the chunks are stored internally with their original positions
-	ChunkPos unrotated = pos;
-	if (rotation)
-		unrotated.rotate(4 - rotation);
-
-	int x = unrotated.getLocalX();
-	int z = unrotated.getLocalZ();
+	int index = getChunkIndex(pos);
 
 	// check if the chunk exists
-	if (chunk_offsets[z*32 + x] == 0)
+	if (chunk_data[index].size() == 0)
 		return CHUNK_DOES_NOT_EXIST;
 
 	// get compression type and size of the data
-	uint8_t compression = chunk_data_compression[z*32 + x];
+	uint8_t compression = chunk_data_compression[index];
 	nbt::Compression comp = nbt::Compression::NO_COMPRESSION;
 	if (compression == 1)
 		comp = nbt::Compression::GZIP;
 	else if (compression == 2)
 		comp = nbt::Compression::ZLIB;
-	int size = chunk_data[z*32 + x].size();
+	int size = chunk_data[index].size();
 
 	// set the chunk rotation
 	chunk.setRotation(rotation);
 	// try to load the chunk
 	try {
-		if (!chunk.readNBT(reinterpret_cast<char*>(&chunk_data[z*32 + x][0]), size, comp))
+		if (!chunk.readNBT(reinterpret_cast<char*>(&chunk_data[index][0]), size, comp))
 			return CHUNK_DATA_INVALID;
 	} catch (const nbt::NBTError& err) {
 		std::cout << "Error: Unable to read chunk at " << pos << " : " << err.what() << std::endl;

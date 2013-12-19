@@ -59,6 +59,12 @@ public:
 	bool readOnlyHeaders();
 
 	/**
+	 * Writes the region to a file. You can also specify a different filename to write
+	 * the region file to.
+	 */
+	bool write(std::string filename = "") const;
+
+	/**
 	 * Returns the filename of the region file.
 	 */
 	const std::string& getFilename() const;
@@ -87,7 +93,27 @@ public:
 	 * Returns/Sets the timestamp of a specific chunk.
 	 */
 	int getChunkTimestamp(const ChunkPos& chunk) const;
-	void setChunkTimestamp(const ChunkPos& chunk, int timestamp);
+	void setChunkTimestamp(const ChunkPos& chunk, uint32_t timestamp);
+
+	/**
+	 * Returns the raw (compressed) data of a specific chunk. Returns an empty array if
+	 * the chunk does not exist.
+	 */
+	const std::vector<uint8_t>& getChunkData(const ChunkPos& chunk) const;
+
+	/**
+	 * Returns the type of the compressed chunk data (one byte, see specification of
+	 * region format).
+	 */
+	uint8_t getChunkDataCompression(const ChunkPos& chunk) const;
+
+	/**
+	 * Sets the raw (compressed) data of a specific chunk. You also need to specify
+	 * a compression type (one byte, see specification of region format).
+	 * You can remove a chunk by setting its chunk data to an empty array.
+	 */
+	void setChunkData(const ChunkPos& chunk, const std::vector<uint8_t>& data,
+			uint8_t compression);
 
 	/**
 	 * Loads a specific chunk into the supplied Chunk-object.
@@ -104,11 +130,11 @@ private:
 
 	// a set with all available chunks
 	ChunkMap containing_chunks;
-
-	// the offsets where the chunk data of each chunk starts
-	int chunk_offsets[1024];
+	// and also as array
+	bool chunk_exists[1024];
+	
 	// timestamps of the chunks
-	int chunk_timestamps[1024];
+	uint32_t chunk_timestamps[1024];
 	// actual chunk data
 	uint8_t chunk_data_compression[1024];
 	std::vector<uint8_t> chunk_data[1024];
@@ -116,7 +142,13 @@ private:
 	/**
 	 * Reads the headers of a region file.
 	 */
-	bool readHeaders(std::ifstream& file);
+	bool readHeaders(std::ifstream& file, int chunk_offsets[1024]);
+
+	/**
+	 * Calculates the index (chunk_* arrays) for a specific chunks.
+	 * The chunk position is rotated to the original rotation if the region is rotated.
+	 */
+	size_t getChunkIndex(const mc::ChunkPos& chunkpos) const;
 };
 
 }

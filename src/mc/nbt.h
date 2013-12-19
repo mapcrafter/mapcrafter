@@ -272,8 +272,11 @@ typedef TagPtrType<Tag> TagPtr;
 
 class TagList: public Tag {
 public:
-	TagList(int8_t tag_type = -1) : Tag(TAG_TYPE), tag_type(tag_type) {}
+	TagList(int8_t tag_type = -1);
+	TagList(const TagList& other);
 	~TagList();
+
+	void operator=(const TagList& other);
 
 	Tag& read(std::istream& stream);
 	void write(std::ostream& stream) const;
@@ -288,8 +291,11 @@ public:
 
 class TagCompound: public Tag {
 public:
-	TagCompound(const std::string& name = "") : Tag(TAG_TYPE) { setName(name); }
+	TagCompound(const std::string& name = "");
+	TagCompound(const TagCompound& other);
 	~TagCompound();
+
+	void operator=(const TagCompound& other);
 
 	Tag& read(std::istream& stream);
 	void write(std::ostream& stream) const;

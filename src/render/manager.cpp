@@ -378,7 +378,11 @@ void RenderManager::renderMultithreaded(const config::MapSection& map_config,
 		if (finished)
 			break;
 
+#if defined(__WIN32__) || defined(__WIN64__)
+		Sleep(1)
+#else
 		sleep(1);
+#endif
 	}
 
 	// make sure all threads are finished
