@@ -59,12 +59,12 @@ BOOST_AUTO_TEST_CASE(nbt_testIO) {
 		out.addTag("list", list);
 		out.addTag("bytearray", nbt::TagByteArray(bytearray_data));
 		out.addTag("intarray", nbt::TagIntArray(intarray_data));
+		out.addTag("compound", out);
 		
 		//out.dump(std::cout);
 		out.writeNBT(stream, compression);
 
 		stream.seekg(0, std::ios_base::beg);
-
 		nbt::NBTFile in;
 		in.readNBT(stream, compression);
 		//in.dump(std::cout);

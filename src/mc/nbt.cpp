@@ -231,6 +231,9 @@ TagList::~TagList() {
 }
 
 void TagList::operator=(const TagList& other) {
+	name = other.name;
+	named = other.named;
+
 	tag_type = other.tag_type;
 
 	payload.clear();
@@ -271,7 +274,7 @@ void TagList::dump(std::ostream& stream, const std::string& indendation) const {
 	stream << indendation << "{" << std::endl;
 	for (auto it = payload.begin(); it != payload.end(); ++it)
 		(*it)->dump(stream, indendation + "   ");
-	stream << indendation << "{" << std::endl;
+	stream << indendation << "}" << std::endl;
 }
 
 Tag* TagList::clone() const {
@@ -287,6 +290,9 @@ TagCompound::~TagCompound() {
 }
 
 void TagCompound::operator=(const TagCompound& other) {
+	name = other.name;
+	named = other.named;
+
 	payload.clear();
 	for (auto it = other.payload.begin(); it != other.payload.end(); ++it)
 		payload[it->first] = TagPtr(it->second->clone());
@@ -328,12 +334,7 @@ void TagCompound::dump(std::ostream& stream, const std::string& indendation) con
 }
 
 Tag* TagCompound::clone() const {
-	TagCompound* tag = new TagCompound;
-	if (named)
-		tag->setName(name);
-	for (auto it = payload.begin(); it != payload.end(); ++it)
-		tag->payload[it->first] = TagPtr(it->second->clone());
-	return tag;
+	return new TagCompound(*this);
 }
 
 bool TagCompound::hasTag(const std::string& name) const {
