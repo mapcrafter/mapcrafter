@@ -350,7 +350,7 @@ bool TagCompound::hasTag(const std::string& name) const {
 Tag& TagCompound::findTag(const std::string& name) {
 	if (!hasTag(name))
 		throw TagNotFound();
-	return *payload.at(name);
+	return *payload[name];
 }
 
 const Tag& TagCompound::findTag(const std::string& name) const {
