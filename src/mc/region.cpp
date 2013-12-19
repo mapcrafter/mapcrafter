@@ -88,6 +88,13 @@ bool RegionFile::readHeaders(std::ifstream& file, int chunk_offsets[1024]) {
 	return true;
 }
 
+size_t RegionFile::getChunkIndex(const mc::ChunkPos& chunkpos) const {
+	ChunkPos unrotated = chunkpos;
+	if (rotation)
+		unrotated.rotate(4 - rotation);
+	return unrotated.getLocalZ() * 32 + unrotated.getLocalX();
+}
+
 bool RegionFile::read() {
 	std::ifstream file(filename.c_str(), std::ios_base::binary);
 	int chunk_offsets[1024];
@@ -203,55 +210,36 @@ const RegionFile::ChunkMap& RegionFile::getContainingChunks() const {
 }
 
 bool RegionFile::hasChunk(const ChunkPos& chunk) const {
-	ChunkPos unrotated = chunk;
-	if (rotation)
-		unrotated.rotate(4 - rotation);
-	return chunk_exists[unrotated.getLocalZ() * 32 + unrotated.getLocalX()];
+	return chunk_exists[getChunkIndex(chunk)];
 }
 
 int RegionFile::getChunkTimestamp(const ChunkPos& chunk) const {
-	ChunkPos unrotated = chunk;
-	if (rotation)
-		unrotated.rotate(4 - rotation);
-	return chunk_timestamps[unrotated.getLocalZ() * 32 + unrotated.getLocalX()];
+	return chunk_timestamps[getChunkIndex(chunk)];
 }
 
 void RegionFile::setChunkTimestamp(const ChunkPos& chunk, uint32_t timestamp) {
-	ChunkPos unrotated = chunk;
-	if (rotation)
-		unrotated.rotate(4 - rotation);
-	chunk_timestamps[unrotated.getLocalZ() * 32 + unrotated.getLocalX()] = timestamp;
+	chunk_timestamps[getChunkIndex(chunk)] = timestamp;
 }
 
 const std::vector<uint8_t>& RegionFile::getChunkData(const ChunkPos& chunk) const {
-	ChunkPos unrotated = chunk;
-	if (rotation)
-		unrotated.rotate(4 - rotation);
-	return chunk_data[unrotated.getLocalZ() * 32 + unrotated.getLocalX()];
+	return chunk_data[getChunkIndex(chunk)];
 }
 
 uint8_t RegionFile::getChunkDataCompression(const ChunkPos& chunk) const {
-	ChunkPos unrotated = chunk;
-	if (rotation)
-		unrotated.rotate(4 - rotation);
-	return chunk_data_compression[unrotated.getLocalZ() * 32 + unrotated.getLocalX()];
+	return chunk_data_compression[getChunkIndex(chunk)];
 }
 
 void RegionFile::setChunkData(const ChunkPos& chunk, const std::vector<uint8_t>& data,
 		uint8_t compression) {
-	ChunkPos unrotated = chunk;
-	if (rotation)
-		unrotated.rotate(4 - rotation);
-	int x = unrotated.getLocalX();
-	int z = unrotated.getLocalZ();
-	chunk_data[z * 32 + x] = data;
-	chunk_data_compression[z * 32 + x] = compression;
+	int index = getChunkIndex(chunk);
+	chunk_data[index] = data;
+	chunk_data_compression[index] = compression;
 
 	if (data.size() == 0) {
-		chunk_exists[z * 32 + x] = false;
+		chunk_exists[index] = false;
 		containing_chunks.erase(chunk);
 	} else {
-		chunk_exists[z * 32 + x] = true;
+		chunk_exists[index] = true;
 		containing_chunks.insert(chunk);
 	}
 }
@@ -260,33 +248,26 @@ void RegionFile::setChunkData(const ChunkPos& chunk, const std::vector<uint8_t>&
  * This method tries to load a chunk from the region data and returns a status.
  */
 int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
-	// unrotate the chunk position,
-	// because the chunks are stored internally with their original positions
-	ChunkPos unrotated = pos;
-	if (rotation)
-		unrotated.rotate(4 - rotation);
-
-	int x = unrotated.getLocalX();
-	int z = unrotated.getLocalZ();
+	int index = getChunkIndex(pos);
 
 	// check if the chunk exists
-	if (chunk_data[z*32 + x].size() == 0)
+	if (chunk_data[index].size() == 0)
 		return CHUNK_DOES_NOT_EXIST;
 
 	// get compression type and size of the data
-	uint8_t compression = chunk_data_compression[z*32 + x];
+	uint8_t compression = chunk_data_compression[index];
 	nbt::Compression comp = nbt::Compression::NO_COMPRESSION;
 	if (compression == 1)
 		comp = nbt::Compression::GZIP;
 	else if (compression == 2)
 		comp = nbt::Compression::ZLIB;
-	int size = chunk_data[z*32 + x].size();
+	int size = chunk_data[index].size();
 
 	// set the chunk rotation
 	chunk.setRotation(rotation);
 	// try to load the chunk
 	try {
-		if (!chunk.readNBT(reinterpret_cast<char*>(&chunk_data[z*32 + x][0]), size, comp))
+		if (!chunk.readNBT(reinterpret_cast<char*>(&chunk_data[index][0]), size, comp))
 			return CHUNK_DATA_INVALID;
 	} catch (const nbt::NBTError& err) {
 		std::cout << "Error: Unable to read chunk at " << pos << " : " << err.what() << std::endl;
