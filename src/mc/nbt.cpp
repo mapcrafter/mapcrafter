@@ -222,8 +222,12 @@ Tag* TagString::clone() const {
 	return new TagString(*this);
 }
 
+TagList::TagList(int8_t tag_type)
+	: Tag(TAG_TYPE), tag_type(tag_type) {
+}
+
 TagList::TagList(const TagList& other)
-	: TagList() {
+	: Tag(TAG_TYPE) {
 	*this = other;
 }
 
@@ -283,8 +287,13 @@ Tag* TagList::clone() const {
 	return new TagList(*this);
 }
 
+TagCompound::TagCompound(const std::string& name)
+	: Tag(TAG_TYPE) {
+	setName(name);
+}
+
 TagCompound::TagCompound(const TagCompound& other)
-	: TagCompound() {
+	: Tag(TAG_TYPE) {
 	*this = other;
 }
 
