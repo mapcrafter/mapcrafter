@@ -39,13 +39,14 @@ RegionFile::RegionFile(const std::string& filename, int rotation)
 RegionFile::~RegionFile() {
 }
 
-bool RegionFile::readHeaders(std::ifstream& file) {
+bool RegionFile::readHeaders(std::ifstream& file, int chunk_offsets[1024]) {
 	if (!file)
 		return false;
-	containing_chunks.clear();
 
+	containing_chunks.clear();
 	for (int i = 0; i < 1024; i++) {
 		chunk_offsets[i] = 0;
+		chunk_exists[i] = false;
 		chunk_timestamps[i] = 0;
 		chunk_data_compression[i] = 0;
 	}
@@ -77,6 +78,7 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 			if (rotation)
 				pos.rotate(rotation);
 
+			chunk_exists[z * 32 + x] = true;
 			containing_chunks.insert(pos);
 
 			chunk_offsets[z * 32 + x] = offset;
@@ -88,7 +90,8 @@ bool RegionFile::readHeaders(std::ifstream& file) {
 
 bool RegionFile::read() {
 	std::ifstream file(filename.c_str(), std::ios_base::binary);
-	if (!readHeaders(file))
+	int chunk_offsets[1024];
+	if (!readHeaders(file, chunk_offsets))
 		return false;
 	file.seekg(0, std::ios::end);
 	int filesize = file.tellg();
@@ -118,7 +121,8 @@ bool RegionFile::read() {
 
 bool RegionFile::readOnlyHeaders() {
 	std::ifstream file(filename.c_str(), std::ios_base::binary);
-	return readHeaders(file);
+	int chunk_offsets[1024];
+	return readHeaders(file, chunk_offsets);
 }
 
 bool RegionFile::write(std::string filename) const {
@@ -202,7 +206,7 @@ bool RegionFile::hasChunk(const ChunkPos& chunk) const {
 	ChunkPos unrotated = chunk;
 	if (rotation)
 		unrotated.rotate(4 - rotation);
-	return chunk_offsets[unrotated.getLocalZ() * 32 + unrotated.getLocalX()] != 0;
+	return chunk_exists[unrotated.getLocalZ() * 32 + unrotated.getLocalX()];
 }
 
 int RegionFile::getChunkTimestamp(const ChunkPos& chunk) const {
@@ -242,6 +246,14 @@ void RegionFile::setChunkData(const ChunkPos& chunk, const std::vector<uint8_t>&
 	int z = unrotated.getLocalZ();
 	chunk_data[z * 32 + x] = data;
 	chunk_data_compression[z * 32 + x] = compression;
+
+	if (data.size() == 0) {
+		chunk_exists[z * 32 + x] = false;
+		containing_chunks.erase(chunk);
+	} else {
+		chunk_exists[z * 32 + x] = true;
+		containing_chunks.insert(chunk);
+	}
 }
 
 /**

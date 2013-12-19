@@ -130,9 +130,9 @@ private:
 
 	// a set with all available chunks
 	ChunkMap containing_chunks;
-
-	// the offsets where the chunk data of each chunk starts
-	uint32_t chunk_offsets[1024];
+	// and also as array
+	bool chunk_exists[1024];
+	
 	// timestamps of the chunks
 	uint32_t chunk_timestamps[1024];
 	// actual chunk data
@@ -142,7 +142,7 @@ private:
 	/**
 	 * Reads the headers of a region file.
 	 */
-	bool readHeaders(std::ifstream& file);
+	bool readHeaders(std::ifstream& file, int chunk_offsets[1024]);
 };
 
 }
