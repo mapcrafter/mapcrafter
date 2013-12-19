@@ -251,6 +251,7 @@ Tag& TagList::read(std::istream& stream) {
 						   + ". NBT data stream may be corrupted.");
 		tag->read(stream);
 		tag->setWriteType(false);
+		tag->setNamed(false);
 		payload.push_back(TagPtrType<Tag>(tag));
 	}
 	return *this;
@@ -262,6 +263,7 @@ void TagList::write(std::ostream& stream) const {
 	nbtstream::write<int32_t>(stream, payload.size());
 	for (auto it = payload.begin(); it != payload.end(); ++it) {
 		(*it)->setWriteType(false);
+		(*it)->setNamed(false);
 		(*it)->write(stream);
 	}
 }
@@ -310,6 +312,7 @@ Tag& TagCompound::read(std::istream& stream) {
 						   + ". NBT data stream may be corrupted.");
 		tag->read(stream);
 		tag->setName(name);
+		tag->setWriteType(true);
 		payload[name] = TagPtr(tag);
 	}
 	return *this;
@@ -317,8 +320,11 @@ Tag& TagCompound::read(std::istream& stream) {
 
 void TagCompound::write(std::ostream& stream) const {
 	Tag::write(stream);
-	for (auto it = payload.begin(); it != payload.end(); ++it)
+	for (auto it = payload.begin(); it != payload.end(); ++it) {
+		it->second->setWriteType(true);
+		it->second->setNamed(true);
 		it->second->write(stream);
+	}
 	nbtstream::write<int8_t>(stream, TagEnd::TAG_TYPE);
 }
 
@@ -356,6 +362,7 @@ const Tag& TagCompound::findTag(const std::string& name) const {
 void TagCompound::addTag(const std::string& name, const Tag& tag) {
 	Tag* tag_ptr = tag.clone();
 	tag_ptr->setName(name);
+	tag_ptr->setWriteType(true);
 	payload[name] = TagPtr(tag_ptr);
 }
 
