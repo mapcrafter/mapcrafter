@@ -137,11 +137,15 @@ bool WorldCrop::isChunkContained(const mc::ChunkPos& chunk) const {
 	return true;
 }
 
-bool WorldCrop::isBlockContained(const mc::BlockPos& block) const {
-	// at first check for y-coordinate boundaries
-	if (!bounds_y.contains(block.y))
-		return false;
+bool WorldCrop::isChunkCompletelyContained(const mc::ChunkPos& chunk) const {
+	mc::BlockPos corner(chunk.x * 16, chunk.z * 16, 0);
+	return isBlockContainedXZ(corner)
+			&& isBlockContainedXZ(corner + mc::BlockPos(16, 0, 0))
+			&& isBlockContainedXZ(corner + mc::BlockPos(0, 16, 0))
+			&& isBlockContainedXZ(corner + mc::BlockPos(16, 16, 0));
+}
 
+bool WorldCrop::isBlockContainedXZ(const mc::BlockPos& block) const {
 	if (type == RECTANGULAR) {
 		// rectangular crop:
 		// just check if the chunk is contained in the bounds
@@ -155,6 +159,10 @@ bool WorldCrop::isBlockContained(const mc::BlockPos& block) const {
 	}
 
 	return true;
+}
+
+bool WorldCrop::isBlockContainedY(const mc::BlockPos& block) const {
+	return bounds_y.contains(block.y);
 }
 
 }

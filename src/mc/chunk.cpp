@@ -174,7 +174,7 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 
 	// TODO
 	BlockPos global = LocalBlockPos(x, z, pos.y).toGlobalPos(chunkpos_original);
-	if (!worldcrop.isBlockContained(global)) {
+	if (!worldcrop.isBlockContainedY(global) || !worldcrop.isBlockContainedXZ(global)) {
 		return 0;
 	}
 
@@ -202,7 +202,7 @@ uint8_t Chunk::getData(const LocalBlockPos& pos, int array) const {
 
 	// TODO
 	BlockPos global = LocalBlockPos(x, z, pos.y).toGlobalPos(chunkpos_original);
-	if (!worldcrop.isBlockContained(global)) {
+	if (!worldcrop.isBlockContainedY(global) || !worldcrop.isBlockContainedXZ(global)) {
 		if (array == 2)
 			return 15;
 		return 0;
