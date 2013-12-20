@@ -444,7 +444,7 @@ MapcrafterUI.prototype.setMapType = function(type) {
 	var other = this.getConfig(type);
 	
 	var sameWorld = current.worldName == other.worldName;
-	if(sameWorld && this.currentRotation in other.rotations)
+	if(sameWorld && other.rotations.indexOf(this.currentRotation) != -1)
 		this.setMapTypeAndRotation(type, this.currentRotation);
 	else
 		this.setMapTypeAndRotation(type, other.rotations[0]);
