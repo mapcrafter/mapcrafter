@@ -140,9 +140,9 @@ bool WorldCrop::isChunkContained(const mc::ChunkPos& chunk) const {
 bool WorldCrop::isChunkCompletelyContained(const mc::ChunkPos& chunk) const {
 	mc::BlockPos corner(chunk.x * 16, chunk.z * 16, 0);
 	return isBlockContainedXZ(corner)
-			&& isBlockContainedXZ(corner + mc::BlockPos(16, 0, 0))
-			&& isBlockContainedXZ(corner + mc::BlockPos(0, 16, 0))
-			&& isBlockContainedXZ(corner + mc::BlockPos(16, 16, 0));
+			&& isBlockContainedXZ(corner + mc::BlockPos(15, 0, 0))
+			&& isBlockContainedXZ(corner + mc::BlockPos(0, 15, 0))
+			&& isBlockContainedXZ(corner + mc::BlockPos(15, 15, 0));
 }
 
 bool WorldCrop::isBlockContainedXZ(const mc::BlockPos& block) const {
