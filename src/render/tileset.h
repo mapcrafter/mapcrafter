@@ -153,17 +153,97 @@ std::ostream& operator<<(std::ostream& stream, const TilePos& tile);
  * This class manages all tiles required to render a world.
  */
 class TileSet {
+public:
+	TileSet();
+	TileSet(const mc::World& World);
+	~TileSet();
+
+	/**
+	 * Scans the tiles of a world.
+	 * If you use the constructor with a world object as parameter, this method is
+	 * automatically called.
+	 */
+	void scan(const mc::World& world);
+
+	/**
+	 * Scans which tiles are required by testing which tiles were probably changed since
+	 * the timestamp last_change.
+	 */
+	void scanRequiredByTimestamp(int last_change);
+
+	/**
+	 * Scans which tiles are required by using the modification times of the already
+	 * rendered image files.
+	 */
+	void scanRequiredByFiletimes(const fs::path& output_dir);
+
+	/**
+	 * Returns the minimum maximum zoom level required to render all render tiles.
+	 */
+	int getMinDepth() const;
+
+	/**
+	 * Returns the actual used maximum zoom level of the tile set.
+	 */
+	int getDepth() const;
+
+	/**
+	 * Sets the maximum zoom level to use. The supplied zoom level must be at least
+	 * the minimum maximum zoom level.
+	 */
+	void setDepth(int depth);
+
+	/**
+	 * Returns if a specific tile is contained in the tile set.
+	 */
+	bool hasTile(const TilePath& path) const;
+
+	/**
+	 * Returns if a specific tile is required, e.g. needs to get rendered.
+	 */
+	bool isTileRequired(const TilePath& path) const;
+
+	/**
+	 * Returns the count of required render tiles.
+	 */
+	int getRequiredRenderTilesCount() const;
+
+	/**
+	 * Returns the required render tiles.
+	 */
+	const std::set<TilePos>& getRequiredRenderTiles() const;
+
+	/**
+	 * Returns the count of required composite tiles.
+	 */
+	int getRequiredCompositeTilesCount() const;
+
+	/**
+	 * Returns the required composite tiles.
+	 */
+	const std::set<TilePath>& getRequiredCompositeTiles() const;
+
+	/**
+	 * Returns the count of required render tiles a specific composite tiles contains.
+	 */
+	int getContainingRenderTiles(const TilePath& tile) const;
+
+	/**
+	 * Assigns subtrees of the tile quadtree to render to multiple workers.
+	 */
+	int findWorkTasks(int worker_count, std::vector<std::map<TilePath, int> >& workers) const;
 private:
-	// the depth needed to render all tiles
+	// the minimum maximum zoom level which would be required to render all tiles
 	int min_depth;
-	// depth of the tile set = maximum zoom level
+	// actual maximum zoom level used by the tile set
 	int depth;
 
-	// all available top level tiles
+	// all available render tiles
+	// (= tiles with the highest zoom level, tree leaves in the quadtree)
 	std::set<TilePos> render_tiles;
-	// the top level tiles which actually need to get rendered
+	// the render tiles which actually need to get rendered
 	std::set<TilePos> required_render_tiles;
-	// timestamps of render tiles required to rerender a tile
+	// timestamps of render tiles required to re-render a tile
 	// (= highest timestamp of all chunks in a tile)
 	std::map<TilePos, int> tile_timestamps;
 
@@ -171,41 +251,28 @@ private:
 	std::set<TilePath> composite_tiles;
 	std::set<TilePath> required_composite_tiles;
 
-	// count of required render tiles (= tree leaves) in a composite tile
+	// count of required render tiles contained in a composite tile
 	std::map<TilePath, int> containing_render_tiles;
 
+	/**
+	 * This method finds out which render level tiles a world has and which maximum
+	 * zoom level would be required to render them.
+	 */
 	void findRenderTiles(const mc::World& world);
+
+	/**
+	 * This method finds out which composite tiles are needed, depending on a
+	 * list of available/required render tiles, and puts them into a set.
+	 * So we can find out which composite tiles are available and which composite tiles
+	 * need to get rendered.
+	 */
 	void findRequiredCompositeTiles(const std::set<TilePos>& render_tiles,
 			std::set<TilePath>& tiles);
 
+	/**
+	 * Updates the containing_render_tiles map.
+	 */
 	void updateContainingRenderTiles();
-public:
-	TileSet();
-	TileSet(const mc::World& World);
-	virtual ~TileSet();
-
-	void scan(const mc::World& world);
-	void scanRequiredByTimestamp(int last_change);
-	void scanRequiredByFiletimes(const fs::path& output_dir);
-
-	int getMinDepth() const;
-	int getDepth() const;
-	void setDepth(int depth);
-
-	bool hasTile(const TilePath& path) const;
-	bool isTileRequired(const TilePath& path) const;
-
-	const std::set<TilePos>& getAvailableRenderTiles() const;
-	const std::set<TilePath>& getAvailableCompositeTiles() const;
-	const std::set<TilePos>& getRequiredRenderTiles() const;
-	const std::set<TilePath>& getRequiredCompositeTiles() const;
-
-	int getRequiredRenderTilesCount() const;
-	int getRequiredCompositeTilesCount() const;
-
-	int getContainingRenderTiles(const TilePath& tile) const;
-
-	int findRenderTasks(int worker_count, std::vector<std::map<TilePath, int> >& workers) const;
 };
 
 }

@@ -221,11 +221,11 @@ std::string TilePath::toString() const {
 }
 
 TileSet::TileSet()
-		: min_depth(0), depth(0) {
+	: min_depth(0), depth(0) {
 }
 
 TileSet::TileSet(const mc::World& world)
-		: min_depth(0), depth(0) {
+	: min_depth(0), depth(0) {
 	scan(world);
 }
 
@@ -276,10 +276,6 @@ void getChunkTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles) {
 		addRowColTiles(row + 2*i, col, tiles);
 }
 
-/**
- * This method finds out which top level tiles a world has and which of them need to
- * get rendered.
- */
 void TileSet::findRenderTiles(const mc::World& world) {
 	// clear maybe already calculated tiles
 	render_tiles.clear();
@@ -340,11 +336,6 @@ void TileSet::findRenderTiles(const mc::World& world) {
 	}
 }
 
-/**
- * This method finds out, which composite tiles are needed, depending on a
- * list of available/required render tiles, and puts them into a set. So we can find out
- * which composite tiles are available and which composite tiles need to get rendered.
- */
 void TileSet::findRequiredCompositeTiles(const std::set<TilePos>& render_tiles,
 		std::set<TilePath>& tiles) {
 
@@ -390,9 +381,6 @@ void TileSet::scan(const mc::World& world) {
 	setDepth(min_depth);
 }
 
-/**
- * This method finds all render tiles, which where changed since a specific timestamp.
- */
 void TileSet::scanRequiredByTimestamp(int last_change) {
 	required_render_tiles.clear();
 
@@ -408,10 +396,6 @@ void TileSet::scanRequiredByTimestamp(int last_change) {
 	updateContainingRenderTiles();
 }
 
-/**
- * This method finds all render tiles, which are required based on the modification
- * times of the tile image files.
- */
 void TileSet::scanRequiredByFiletimes(const fs::path& output_dir) {
 	required_render_tiles.clear();
 
@@ -467,28 +451,20 @@ bool TileSet::isTileRequired(const TilePath& path) const {
 	return required_composite_tiles.count(path) != 0;
 }
 
-const std::set<TilePos>& TileSet::getAvailableRenderTiles() const {
-	return render_tiles;
-}
-
-const std::set<TilePath>& TileSet::getAvailableCompositeTiles() const {
-	return composite_tiles;
+int TileSet::getRequiredRenderTilesCount() const {
+	return required_render_tiles.size();
 }
 
 const std::set<TilePos>& TileSet::getRequiredRenderTiles() const {
 	return required_render_tiles;
 }
 
-const std::set<TilePath>& TileSet::getRequiredCompositeTiles() const {
-	return required_composite_tiles;
-}
-
-int TileSet::getRequiredRenderTilesCount() const {
-	return required_render_tiles.size();
-}
-
 int TileSet::getRequiredCompositeTilesCount() const {
 	return required_composite_tiles.size();
+}
+
+const std::set<TilePath>& TileSet::getRequiredCompositeTiles() const {
+	return required_composite_tiles;
 }
 
 int TileSet::getContainingRenderTiles(const TilePath& tile) const {
@@ -580,7 +556,7 @@ struct Assigment {
  * This method tries to find an assignment of render tasks to a specific count of workers.
  * The workers should do the same amount of work.
  */
-int TileSet::findRenderTasks(int worker_count,
+int TileSet::findWorkTasks(int worker_count,
 		std::vector<std::map<TilePath, int> >& workers) const {
 	//std::cout << "Render tiles: " << required_render_tiles.size() << std::endl;
 	//std::cout << "Composite tiles: " << required_composite_tiles.size() << std::endl;

@@ -324,7 +324,7 @@ void RenderManager::renderMultithreaded(const config::MapSection& map_config,
 	// a list of workers
 	std::vector<std::map<TilePath, int> > workers;
 	// find task/worker assignemt
-	int remaining = tileset->findRenderTasks(opts.jobs, workers);
+	int remaining = tileset->findWorkTasks(opts.jobs, workers);
 
 	std::vector<std::thread> threads;
 	std::vector<std::shared_ptr<mc::WorldCache>> threads_worldcache;
