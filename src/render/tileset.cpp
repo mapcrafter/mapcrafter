@@ -289,7 +289,7 @@ void getChunkTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles) {
 }
 
 /**
- * This method finds out, which top level tiles a world has and which of them need to
+ * This method finds out which top level tiles a world has and which of them need to
  * get rendered.
  */
 void TileSet::findRenderTiles(const mc::World& world) {
@@ -298,7 +298,10 @@ void TileSet::findRenderTiles(const mc::World& world) {
 	required_render_tiles.clear();
 
 	// the min/max x/y coordinates of the tiles in the world
-	int tiles_x_min = 0, tiles_x_max = 0, tiles_y_min = 0, tiles_y_max = 0;
+	int tiles_x_min = std::numeric_limits<int>::max(),
+	    tiles_x_max = std::numeric_limits<int>::min(),
+	    tiles_y_min = std::numeric_limits<int>::max(),
+	    tiles_y_max = std::numeric_limits<int>::min();
 
 	// go through all chunks in the world
 	auto regions = world.getAvailableRegions();
@@ -327,9 +330,9 @@ void TileSet::findRenderTiles(const mc::World& world) {
 				if (!render_tiles.count(*tile_it))
 					tile_timestamps[*tile_it] = timestamp;
 				else
-					tile_timestamps[*tile_it] = MAX(tile_timestamps[*tile_it], timestamp);
+					tile_timestamps[*tile_it] = std::max(tile_timestamps[*tile_it], timestamp);
 
-				// insert the tile in the set of available render tiles
+				// insert the tile to the set of available render tiles
 				// and also make it required by default
 				render_tiles.insert(*tile_it);
 				required_render_tiles.insert(*tile_it);
@@ -341,8 +344,10 @@ void TileSet::findRenderTiles(const mc::World& world) {
 	for (min_depth = 0; min_depth < 32; min_depth++) {
 		// for each level calculate the radius and check if the tiles fit in this bounds
 		int radius = pow(2, min_depth) / 2;
-		if (tiles_x_min > -radius && tiles_x_max < radius && tiles_y_min > -radius
-		        && tiles_y_max < radius)
+		if (tiles_x_min > -radius
+				&& tiles_x_max < radius
+				&& tiles_y_min > -radius
+				&& tiles_y_max < radius)
 			break;
 	}
 }
