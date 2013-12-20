@@ -65,6 +65,8 @@ private:
 	// rotation and cropping of the world
 	int rotation;
 	WorldCrop worldcrop;
+	// whether the chunk is completely (according x- and z-coordinates, not y) contained
+	bool chunk_completely_contained;
 
 	// the index of the chunk sections in the sections array
 	// or -1 if section does not exist
@@ -73,6 +75,12 @@ private:
 	std::vector<ChunkSection> sections;
 
 	uint8_t biomes[256];
+
+	/**
+	 * Checks whether a block (local coordinates, original/unrotated) is in the cropped
+	 * part of the world and therefore not rendered.
+	 */
+	bool checkBlockWorldCrop(int x, int z, int y) const;
 
 	uint8_t getData(const LocalBlockPos& pos, int array) const;
 public:

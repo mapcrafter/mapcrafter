@@ -63,10 +63,14 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 		return false;
 	}
 	chunkpos_original = ChunkPos(level.findTag<nbt::TagInt>("xPos").payload,
-				                 level.findTag<nbt::TagInt>("zPos").payload);
+	                             level.findTag<nbt::TagInt>("zPos").payload);
 	chunkpos = chunkpos_original;
 	if (rotation)
 		chunkpos.rotate(rotation);
+
+	// now we have the original chunk position:
+	// check whether this chunk is completely contained within the cropped world
+	chunk_completely_contained = worldcrop.isChunkCompletelyContained(chunkpos_original);
 
 	if (level.hasArray<nbt::TagByteArray>("Biomes", 256)) {
 		const nbt::TagByteArray& biomes_tag = level.findTag<nbt::TagByteArray>("Biomes");
@@ -172,11 +176,9 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 	if (rotation)
 		rotateBlockPos(x, z, rotation);
 
-	// TODO
-	BlockPos global = LocalBlockPos(x, z, pos.y).toGlobalPos(chunkpos_original);
-	if (!worldcrop.isBlockContainedY(global) || !worldcrop.isBlockContainedXZ(global)) {
+	// check whether this block is really rendered
+	if (!checkBlockWorldCrop(x, z, pos.y))
 		return 0;
-	}
 
 	int offset = ((pos.y % 16) * 16 + z) * 16 + x;
 	uint16_t add = 0;
@@ -187,12 +189,22 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 	return sections[section_offsets[section]].blocks[offset] + (add << 8);
 }
 
+bool Chunk::checkBlockWorldCrop(int x, int z, int y) const {
+	// at first get the global position of the block, with the original world rotation
+	BlockPos global_pos = LocalBlockPos(x, z, y).toGlobalPos(chunkpos_original);
+	// check whether the block is contained in the y-bounds.
+	if (!worldcrop.isBlockContainedY(global_pos))
+		return false;
+	// only check x/z-bounds if the chunk is not completely contained
+	if (!chunk_completely_contained && !worldcrop.isBlockContainedXZ(global_pos))
+		return false;
+	return true;
+}
+
 uint8_t Chunk::getData(const LocalBlockPos& pos, int array) const {
 	int section = pos.y / 16;
 	if (section >= CHUNK_HEIGHT || section_offsets[section] == -1) {
-		if (array == 2)
-			return 15;
-		return 0;
+		return array == 2 ? 15 : 0;
 	}
 
 	int x = pos.x;
@@ -200,13 +212,9 @@ uint8_t Chunk::getData(const LocalBlockPos& pos, int array) const {
 	if (rotation)
 		rotateBlockPos(x, z, rotation);
 
-	// TODO
-	BlockPos global = LocalBlockPos(x, z, pos.y).toGlobalPos(chunkpos_original);
-	if (!worldcrop.isBlockContainedY(global) || !worldcrop.isBlockContainedXZ(global)) {
-		if (array == 2)
-			return 15;
-		return 0;
-	}
+	// check whether this block is really rendered
+	if (!checkBlockWorldCrop(x, z, pos.y))
+		return array == 2 ? 15 : 0;
 
 	int offset = ((pos.y % 16) * 16 + z) * 16 + x;
 	if ((offset % 2) == 0)
