@@ -65,18 +65,19 @@ namespace render {
 const int TILE_WIDTH = 1;
 
 /**
- * This class represents the position of a render tile.
+ * This class represents the position of a tile in the quadtree.
  */
 class TilePos {
-private:
-	int x, y;
 public:
-	TilePos();
-	TilePos(int x, int y);
+	TilePos(int x = 0, int y = 0);
 
+	/**
+	 * Returns x/y tile coordinate.
+	 */
 	int getX() const;
 	int getY() const;
 
+	// some operations with tile positions
 	TilePos& operator+=(const TilePos& p);
 	TilePos& operator-=(const TilePos& p);
 	TilePos operator+(const TilePos& p2) const;
@@ -84,36 +85,65 @@ public:
 
 	bool operator==(const TilePos& other) const;
 	bool operator<(const TilePos& other) const;
+private:
+	// actual coordinates
+	int x, y;
 };
 
 /**
- * This class represents the path to a tile in the quadtree. Every part in the path
- * is a 1, 2, 3 or 4.
+ * This class represents the path of a tile in the quadtree.
+ * Every part in the path is a 1, 2, 3 or 4.
  * The length of the path is the zoom level of the tile.
  */
 class TilePath {
-private:
-	std::vector<int> path;
 public:
 	TilePath();
 	TilePath(const std::vector<int>& path);
 	~TilePath();
 
-	const std::vector<int>& getPath() const;
+	/**
+	 * Returns the zoom level of the path.
+	 */
 	int getDepth() const;
+
+	/**
+	 * Returns the path.
+	 */
+	const std::vector<int>& getPath() const;
+
+	/**
+	 * Returns the path of the parent tile.
+	 * For example: The parent path of 1/2/3/4 is 1/2/3.
+	 */
+	TilePath parent() const;
+
+	/**
+	 * Calculates the tile position of the path.
+	 */
 	TilePos getTilePos() const;
 
+	/**
+	 * Calculates the path (with a specified zoom level) of a tile position.
+	 * Opposite of getTilePos-method.
+	 */
+	static TilePath byTilePos(const TilePos& tile, int depth);
+
+	/**
+	 * Adds a node to the path.
+	 */
 	TilePath& operator+=(int node);
 	TilePath operator+(int node) const;
 
-	TilePath parent() const;
-
+	// some more comparison operations
 	bool operator==(const TilePath& other) const;
 	bool operator<(const TilePath& other) const;
 
+	/**
+	 * Returns the string representation of the path, for example "1/2/3/4".
+	 */
 	std::string toString() const;
-
-	static TilePath byTilePos(const TilePos& tile, int depth);
+private:
+	std::vector<int> path;
 };
 
 std::ostream& operator<<(std::ostream& stream, const TilePath& path);

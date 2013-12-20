@@ -34,12 +34,8 @@
 namespace mapcrafter {
 namespace render {
 
-TilePos::TilePos()
-		: x(0), y(0) {
-}
-
 TilePos::TilePos(int x, int y)
-		: x(x), y(y) {
+	: x(x), y(y) {
 }
 
 int TilePos::getX() const {
@@ -86,23 +82,26 @@ TilePath::TilePath() {
 }
 
 TilePath::TilePath(const std::vector<int>& path)
-		: path(path) {
+	: path(path) {
 }
 
 TilePath::~TilePath() {
-}
-
-const std::vector<int>& TilePath::getPath() const {
-	return path;
 }
 
 int TilePath::getDepth() const {
 	return path.size();
 }
 
-/**
- * This method calculates the
- */
+const std::vector<int>& TilePath::getPath() const {
+	return path;
+}
+
+TilePath TilePath::parent() const {
+	TilePath copy(path);
+	copy.path.pop_back();
+	return copy;
+}
+
 TilePos TilePath::getTilePos() const {
 	// calculate the radius of all tiles on the top zoom level (2^zoomlevel / 2)
 	int radius = pow(2, path.size()) / 2;
@@ -116,7 +115,7 @@ TilePos TilePath::getTilePos() const {
 		// increase x by the radius if this tile is on the right side (2 or 4)
 		if (tile == 2 || tile == 4)
 			x += radius;
-		// increase y by the radius if this tile is bottom (3 or 4)
+		// increase y by the radius if this tile is on the bottom side (3 or 4)
 		if (tile == 3 || tile == 4)
 			y += radius;
 		// divide size by two, because the next zoom level has only the half radius
@@ -125,56 +124,16 @@ TilePos TilePath::getTilePos() const {
 	return TilePos(x, y);
 }
 
-std::string TilePath::toString() const {
-	std::stringstream ss;
-	for (size_t i = 0; i < path.size(); i++) {
-		ss << path[i];
-		if (i != path.size() - 1)
-			ss << "/";
-	}
-	return ss.str();
-}
-
-TilePath& TilePath::operator+=(int node) {
-	path.push_back(node);
-	return *this;
-}
-
-TilePath TilePath::operator+(int node) const {
-	TilePath copy(path);
-	copy.path.push_back(node);
-	return copy;
-}
-
-TilePath TilePath::parent() const {
-	TilePath copy(path);
-	copy.path.pop_back();
-	return copy;
-}
-
-bool TilePath::operator==(const TilePath& other) const {
-	return path == other.path;
-}
-
-bool TilePath::operator<(const TilePath& other) const {
-	return path < other.path;
-}
-
-/**
- * This method calculates the path by a specific tile position on a specific level.
- * This is the opposite of Path::getTilePos().
- */
 TilePath TilePath::byTilePos(const TilePos& tile, int depth) {
 	TilePath path;
 
 	// at first calculate the radius in tiles of this zoom level
 	int radius = pow(2, depth) / 2;
 	// check if the tile is in this bounds
-	if (tile.getX() > radius || tile.getY() > radius || tile.getX() < -radius
-	        || tile.getY() < -radius)
-		throw std::runtime_error(
-		        "Invalid tile position " + util::str(tile.getX()) + ":" + util::str(tile.getY())
-		                + " on depth " + util::str(depth));
+	if (tile.getX() > radius  || tile.getY() > radius
+			|| tile.getX() < -radius || tile.getY() < -radius)
+		throw std::runtime_error("Invalid tile position " + util::str(tile.getX())
+			+ ":" + util::str(tile.getY()) + " on depth " + util::str(depth));
 	// the tactic is here to calculate the bounds where the tile is inside
 	int bounds_left = -radius;
 	int bounds_right = radius;
@@ -222,6 +181,25 @@ TilePath TilePath::byTilePos(const TilePos& tile, int depth) {
 	return path;
 }
 
+TilePath& TilePath::operator+=(int node) {
+	path.push_back(node);
+	return *this;
+}
+
+TilePath TilePath::operator+(int node) const {
+	TilePath copy(path);
+	copy.path.push_back(node);
+	return copy;
+}
+
+bool TilePath::operator==(const TilePath& other) const {
+	return path == other.path;
+}
+
+bool TilePath::operator<(const TilePath& other) const {
+	return path < other.path;
+}
+
 std::ostream& operator<<(std::ostream& stream, const TilePos& tile) {
 	stream << tile.getX() << ":" << tile.getY();
 	return stream;
@@ -230,6 +208,16 @@ std::ostream& operator<<(std::ostream& stream, const TilePos& tile) {
 std::ostream& operator<<(std::ostream& stream, const TilePath& path) {
 	stream << path.toString();
 	return stream;
+}
+
+std::string TilePath::toString() const {
+	std::stringstream ss;
+	for (size_t i = 0; i < path.size(); i++) {
+		ss << path[i];
+		if (i != path.size() - 1)
+			ss << "/";
+	}
+	return ss.str();
 }
 
 TileSet::TileSet()
