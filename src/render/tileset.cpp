@@ -439,6 +439,10 @@ void TileSet::setDepth(int depth) {
 	updateContainingRenderTiles();
 }
 
+const TilePos& TileSet::getTileOffset() const {
+	return tile_offset;
+}
+
 bool TileSet::hasTile(const TilePath& path) const {
 	if (path.getDepth() == depth)
 		return render_tiles.count(path.getTilePos()) != 0;

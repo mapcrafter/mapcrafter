@@ -194,6 +194,11 @@ public:
 	void setDepth(int depth);
 
 	/**
+	 * Returns the tile position offset.
+	 */
+	const TilePos& getTileOffset() const;
+
+	/**
 	 * Returns if a specific tile is contained in the tile set.
 	 */
 	bool hasTile(const TilePath& path) const;
@@ -237,6 +242,11 @@ private:
 	int min_depth;
 	// actual maximum zoom level used by the tile set
 	int depth;
+
+	// offset of render tiles, used to center the map
+	// tile_offset means, that all render tiles have the position pos,
+	// but are actually rendered as pos+tile_offset
+	TilePos tile_offset;
 
 	// all available render tiles
 	// (= tiles with the highest zoom level, tree leaves in the quadtree)
