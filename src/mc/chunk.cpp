@@ -25,8 +25,17 @@
 namespace mapcrafter {
 namespace mc {
 
+const uint8_t* ChunkSection::getArray(int i) const {
+	if (i == 0)
+		return data;
+	else if (i == 1)
+		return block_light;
+	else
+		return sky_light;
+}
+
 Chunk::Chunk()
-		: chunkpos(42, 42), rotation(0) {
+	: chunkpos(42, 42), rotation(0) {
 	clear();
 }
 
@@ -41,9 +50,6 @@ void Chunk::setWorldCrop(const WorldCrop& worldcrop) {
 	this->worldcrop = worldcrop;
 }
 
-/**
- * Reads the chunk from (compressed) nbt data.
- */
 bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) {
 	clear();
 
@@ -114,7 +120,7 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 		const nbt::TagByteArray& block_light = section_tag.findTag<nbt::TagByteArray>("BlockLight");
 		const nbt::TagByteArray& sky_light = section_tag.findTag<nbt::TagByteArray>("SkyLight");
 
-		// add it
+		// create a ChunkSection-object
 		ChunkSection section;
 		section.y = y.payload;
 		std::copy(blocks.payload.begin(), blocks.payload.end(), section.blocks);
@@ -125,10 +131,10 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 			std::copy(add.payload.begin(), add.payload.end(), section.add);
 		}
 		std::copy(data.payload.begin(), data.payload.end(), section.data);
-
 		std::copy(block_light.payload.begin(), block_light.payload.end(), section.block_light);
 		std::copy(sky_light.payload.begin(), sky_light.payload.end(), section.sky_light);
-		// set the position of this section
+
+		// add this section to the section list
 		section_offsets[section.y] = sections.size();
 		sections.push_back(section);
 	}
@@ -136,9 +142,6 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 	return true;
 }
 
-/**
- * Clears the whole chunk data.
- */
 void Chunk::clear() {
 	sections.clear();
 	for (int i = 0; i < CHUNK_HEIGHT; i++)
@@ -159,18 +162,17 @@ void rotateBlockPos(int& x, int& z, int rotation) {
 	}
 }
 
-/**
- * Returns the block id at a position.
- */
 uint16_t Chunk::getBlockID(const LocalBlockPos& pos) const {
+	// at first find out the section and check if it's valid and contained
 	int section = pos.y / 16;
 	if (section >= CHUNK_HEIGHT || section_offsets[section] == -1)
 		return 0;
 	// FIXME sometimes this happens, fix this
-	if (sections.size() > 16 || sections.size() <= (unsigned) section_offsets[section]) {
-		return 0;
-	}
+	//if (sections.size() > 16 || sections.size() <= (unsigned) section_offsets[section]) {
+	//	return 0;
+	//}
 
+	// if rotated: rotate position to position with original rotation
 	int x = pos.x;
 	int z = pos.z;
 	if (rotation)
@@ -180,6 +182,8 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 	if (!checkBlockWorldCrop(x, z, pos.y))
 		return 0;
 
+	// calculate the offset and get the block ID
+	// and don't forget the add data
 	int offset = ((pos.y % 16) * 16 + z) * 16 + x;
 	uint16_t add = 0;
 	if ((offset % 2) == 0)
@@ -202,11 +206,13 @@ bool Chunk::checkBlockWorldCrop(int x, int z, int y) const {
 }
 
 uint8_t Chunk::getData(const LocalBlockPos& pos, int array) const {
+	// at first find out the section and check if it's valid and contained
 	int section = pos.y / 16;
-	if (section >= CHUNK_HEIGHT || section_offsets[section] == -1) {
+	if (section >= CHUNK_HEIGHT || section_offsets[section] == -1)
+		// not existing sections should always have skylight
 		return array == 2 ? 15 : 0;
-	}
 
+	// if rotated: rotate position to position with original rotation
 	int x = pos.x;
 	int z = pos.z;
 	if (rotation)
@@ -216,15 +222,14 @@ uint8_t Chunk::getData(const LocalBlockPos& pos, int array) const {
 	if (!checkBlockWorldCrop(x, z, pos.y))
 		return array == 2 ? 15 : 0;
 
+	// calculate the offset and get the block data
 	int offset = ((pos.y % 16) * 16 + z) * 16 + x;
+	// handle bottom/top nibble
 	if ((offset % 2) == 0)
 		return sections[section_offsets[section]].getArray(array)[offset / 2] & 0xf;
 	return (sections[section_offsets[section]].getArray(array)[offset / 2] >> 4) & 0x0f;
 }
 
-/**
- * Returns the block data at a position.
- */
 uint8_t Chunk::getBlockData(const LocalBlockPos& pos) const {
 	return getData(pos, 0);
 }
