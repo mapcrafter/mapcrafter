@@ -72,6 +72,10 @@ bool TilePos::operator==(const TilePos& other) const {
 	return x == other.x && y == other.y;
 }
 
+bool TilePos::operator!=(const TilePos& other) const {
+	return !(*this == other);
+}
+
 bool TilePos::operator<(const TilePos& other) const {
 	if (x == other.x)
 		return y < other.y;
@@ -276,7 +280,8 @@ void getChunkTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles) {
 		addRowColTiles(row + 2*i, col, tiles);
 }
 
-void TileSet::findRenderTiles(const mc::World& world) {
+void TileSet::findRenderTiles(const mc::World& world, bool auto_center,
+		TilePos& tile_offset) {
 	// clear maybe already calculated tiles
 	render_tiles.clear();
 	required_render_tiles.clear();
@@ -324,14 +329,37 @@ void TileSet::findRenderTiles(const mc::World& world) {
 		}
 	}
 
+	// center tiles
+	if (auto_center || tile_offset != TilePos(0, 0)) {
+		// find a tile center if we should do it automatically
+		if (auto_center)
+			tile_offset = TilePos((tiles_x_min + tiles_x_max) / 2, (tiles_y_min + tiles_y_max) / 2);
+
+		// update all tile positions
+		std::set<TilePos> render_tiles_tmp, required_render_tiles_tmp;
+		std::map<TilePos, int> tile_timestamps_tmp;
+		for (auto it = render_tiles.begin(); it != render_tiles.end(); ++it)
+			render_tiles_tmp.insert(*it - tile_offset);
+		for (auto it = required_render_tiles.begin(); it != required_render_tiles.end(); ++it)
+			required_render_tiles_tmp.insert(*it - tile_offset);
+		for (auto it = tile_timestamps.begin(); it != tile_timestamps.end(); ++it)
+			tile_timestamps_tmp[it->first - tile_offset] = it->second;
+
+		render_tiles = render_tiles_tmp;
+		required_render_tiles = required_render_tiles_tmp;
+		tile_timestamps = tile_timestamps_tmp;
+		this->tile_offset = tile_offset;
+	}
+
 	// now get the necessary depth of the tile quadtree
 	for (min_depth = 0; min_depth < 32; min_depth++) {
 		// for each level calculate the radius and check if the tiles fit in this bounds
+		// also don't forget the tile offset
 		int radius = pow(2, min_depth) / 2;
-		if (tiles_x_min > -radius
-				&& tiles_x_max < radius
-				&& tiles_y_min > -radius
-				&& tiles_y_max < radius)
+		if (tiles_x_min - tile_offset.getX() > -radius
+				&& tiles_x_max - tile_offset.getX() < radius
+				&& tiles_y_min - tile_offset.getY() > -radius
+				&& tiles_y_max - tile_offset.getY() < radius)
 			break;
 	}
 }
@@ -377,7 +405,13 @@ void TileSet::updateContainingRenderTiles() {
 }
 
 void TileSet::scan(const mc::World& world) {
-	findRenderTiles(world);
+	TilePos tile_offset(0, 0);
+	scan(world, false, tile_offset);
+	setDepth(min_depth);
+}
+
+void TileSet::scan(const mc::World& world, bool auto_center, TilePos& tile_offset) {
+	findRenderTiles(world, auto_center, tile_offset);
 	setDepth(min_depth);
 }
 

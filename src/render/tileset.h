@@ -84,6 +84,7 @@ public:
 	TilePos operator-(const TilePos& p2) const;
 
 	bool operator==(const TilePos& other) const;
+	bool operator!=(const TilePos& other) const;
 	bool operator<(const TilePos& other) const;
 private:
 	// actual coordinates
@@ -162,8 +163,14 @@ public:
 	 * Scans the tiles of a world.
 	 * If you use the constructor with a world object as parameter, this method is
 	 * automatically called.
+	 *
+	 * The auto_center parameter describes whether it should automatically center the
+	 * found tiles. If set to false (default), it will use tile_offset as center. The
+	 * default value for tile_offset is (0, 0) when using scan without the
+	 * auto_center and tile_offset parameters.
 	 */
 	void scan(const mc::World& world);
+	void scan(const mc::World& world, bool auto_center, TilePos& tile_offset);
 
 	/**
 	 * Scans which tiles are required by testing which tiles were probably changed since
@@ -267,8 +274,11 @@ private:
 	/**
 	 * This method finds out which render level tiles a world has and which maximum
 	 * zoom level would be required to render them.
+	 *
+	 * The auto_center parameter describes whether it should automatically center the
+	 * found tiles. If set to false (default), it will use tile_offset as center.
 	 */
-	void findRenderTiles(const mc::World& world);
+	void findRenderTiles(const mc::World& world, bool auto_center, TilePos& tile_offset);
 
 	/**
 	 * This method finds out which composite tiles are needed, depending on a
