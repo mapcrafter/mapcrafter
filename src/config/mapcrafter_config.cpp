@@ -127,8 +127,8 @@ const mc::WorldCrop WorldSection::getWorldCrop() const {
 }
 
 bool WorldSection::needsWorldCentering() const {
-	return min_x.isLoaded() || max_x.isLoaded()
-			|| min_y.isLoaded() || max_y.isLoaded()
+	// circular cropped worlds and cropped worlds with complete x- and z-bounds
+	return (min_x.isLoaded() && max_x.isLoaded() && min_z.isLoaded() && max_z.isLoaded())
 			|| center_x.isLoaded() || center_z.isLoaded() || radius.isLoaded();
 }
 

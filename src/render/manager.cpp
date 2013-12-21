@@ -501,8 +501,10 @@ bool RenderManager::run() {
 			}
 			// create a tileset for this world
 			std::shared_ptr<TileSet> tileset(new TileSet);
-			// and scan for tiles of this world
-			// we automatically center the tiles for cropped worlds
+			// and scan for tiles of this world,
+			// we automatically center the tiles for cropped worlds, but only...
+			//  - the circular cropped ones and
+			//  - the ones with complete specified x- AND z-bounds
 			if (world_it->second.needsWorldCentering()) {
 				TilePos tile_offset;
 				tileset->scan(world, true, tile_offset);
