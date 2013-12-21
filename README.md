@@ -74,6 +74,10 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.1.1**
+
+* Added ability to crop the world and render only a specific part of it
+
 **v.1.0**
 
 * Added new configuration file format (consult the documentation for more information):
