@@ -174,11 +174,26 @@ World Options
     a directory ``region/`` with the .mca region files.
 
 By using the following options you can crop your world and render only 
-a specific part of it. There two different types of world cropping:
+a specific part of it. With these two options you can skip blocks above or
+below a specific level:
+
+``crop_min_y = <number>``
+
+    **Default:** -infinity
+
+    This is the minimum y-coordinate of blocks mapcrafter will render.
+
+``crop_max_y = <number>``
+
+    **Default:** infinity
+
+    This is the maximum y-coordinate of blocks mapcrafter will render.
+
+Furthermore there are two different types of world cropping:
 
 1. Rectangular cropping:
 
-  * You can specify limits for the x-, z- and y-coordinates.
+  * You can specify limits for the x- and z-coordinates.
     The renderer will render only blocks contained in these boundaries.
     You can use the following options whereas all options are optional
     and default to infinite (or -infinite for minimum limits):
@@ -187,21 +202,15 @@ a specific part of it. There two different types of world cropping:
     * ``crop_max_x`` (maximum limit of x-coordinate)
     * ``crop_min_z`` (minimum limit of z-coordinate)
     * ``crop_max_z`` (maximum limit of z-coordinate)
-    * ``crop_min_y`` (minimum limit of y-coordinate)
-    * ``crop_max_y`` (maximum limit of y-coordinate)
 
 2. Circular cropping:
 
   * You can specify a block position as center and a radius.
-    The renderer will render only blocks contained in this circle.
-    You can also use the ``crop_min_y`` and ``crop_max_y`` options.
-    This are the available options:
+    The renderer will render only blocks contained in this circle:
     
     * ``crop_center_x`` (**required**, x-coordinate of the center)
     * ``crop_center_z``` (**required**, z-coordinate of the center)
     * ``crop_radius``` (**required**, radius of the circle)
-    * ``crop_min_y`` (minimum limit of y-coordinate)
-    * ``crop_max_y`` (maximum limit of y-coordinate)
 
 Map Options
 -----------
