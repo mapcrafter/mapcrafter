@@ -324,7 +324,7 @@ void RenderManager::renderMultithreaded(const config::MapSection& map_config,
 	// a list of workers
 	std::vector<std::map<TilePath, int> > workers;
 	// find task/worker assignemt
-	int remaining = tileset->findRenderTasks(opts.jobs, workers);
+	int remaining = tileset->findWorkTasks(opts.jobs, workers);
 
 	std::vector<std::thread> threads;
 	std::vector<std::shared_ptr<mc::WorldCache>> threads_worldcache;
@@ -497,12 +497,24 @@ bool RenderManager::run() {
 		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
 			// load the world
 			mc::World world;
-			if (!world.load(world_it->second.getInputDir().string(), *rotation_it)) {
+			world.setRotation(*rotation_it);
+			world.setWorldCrop(world_it->second.getWorldCrop());
+			if (!world.load(world_it->second.getInputDir().string())) {
 				std::cerr << "Unable to load world " << world_name << "!" << std::endl;
 				return false;
 			}
 			// create a tileset for this world
-			std::shared_ptr<TileSet> tileset(new TileSet(world));
+			std::shared_ptr<TileSet> tileset(new TileSet);
+			// and scan for tiles of this world,
+			// we automatically center the tiles for cropped worlds, but only...
+			//  - the circular cropped ones and
+			//  - the ones with complete specified x- AND z-bounds
+			if (world_it->second.needsWorldCentering()) {
+				TilePos tile_offset;
+				tileset->scan(world, true, tile_offset);
+			} else {
+				tileset->scan(world);
+			}
 			// update the highest max zoom level
 			zoomlevels_max = std::max(zoomlevels_max, tileset->getMinDepth());
 

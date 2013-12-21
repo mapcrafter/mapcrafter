@@ -169,7 +169,7 @@ void blitFace(Image& image, int face, const Image& texture, int xoff, int yoff,
  * Blits the two faces (like a cross from top) to make an item-style block.
  */
 void blitItemStyleBlock(Image& image, const Image& north_south, const Image& east_west) {
-	int size = MAX(north_south.getWidth(), east_west.getWidth());
+	int size = std::max(north_south.getWidth(), east_west.getWidth());
 	SideFaceIterator it(size, SideFaceIterator::RIGHT);
 	for (; !it.end(); it.next()) {
 		if (it.src_x > size / 2) {
@@ -287,7 +287,7 @@ Image BlockImage::buildImage(double dleft, double dright) const {
 
 	int size = 0;
 	for(int i = 0; i < 6; i++)
-		size = MAX(size, faces[i].getWidth());
+		size = std::max(size, faces[i].getWidth());
 	image.setSize(size * 2, size * 2);
 
 	if (type == NORMAL) {
@@ -782,9 +782,12 @@ void BlockImages::testWaterTransparency() {
 		tmp.alphablit(tmp, 0, 0);
 
 		// then check alpha
-		uint16_t min_alpha = 255;
-		for (TopFaceIterator it(texture_size); !it.end(); it.next())
-			min_alpha = MIN(min_alpha, ALPHA(tmp.getPixel(it.dest_x, it.dest_y)));
+		uint8_t min_alpha = 255;
+		for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
+			uint8_t alpha = ALPHA(tmp.getPixel(it.dest_x, it.dest_y));
+			if (alpha < min_alpha)
+				min_alpha = alpha;
+		}
 
 		// images are "enough" opaque
 		if (min_alpha == 255) {

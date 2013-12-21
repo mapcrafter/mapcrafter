@@ -185,10 +185,10 @@ void Image::simpleblit(const Image& image, int x, int y) {
 	}
 	*/
 
-	int sx = MAX(0, -x);
+	int sx = std::max(0, -x);
 	int sy;
 	for (; sx < image.width && sx+x < width; sx++) {
-		sy = MAX(0, -y);
+		sy = std::max(0, -y);
 		for (; sy < image.height && sy+y < height; sy++) {
 			if (ALPHA(image.data[sy*image.width+sx]) != 0) {
 				data[(sy+y) * width + (sx+x)] = image.data[sy * image.width + sx];
@@ -213,10 +213,10 @@ void Image::alphablit(const Image& image, int x, int y) {
 	}
 	*/
 
-	int sx = MAX(0, -x);
+	int sx = std::max(0, -x);
 	int sy;
 	for (; sx < image.width && sx+x < width; sx++) {
-		sy = MAX(0, -y);
+		sy = std::max(0, -y);
 		for (; sy < image.height && sy+y < height; sy++) {
 			blend(data[(sy+y) * width + (sx+x)], image.data[sy * image.width + sx]);
 		}
@@ -232,11 +232,11 @@ void Image::fill(uint32_t color, int x, int y, int w, int h) {
 	if (x >= width || y >= height)
 		return;
 
-	int dx = MAX(x, 0);
-	int sx = MAX(0, -x);
+	int dx = std::max(x, 0);
+	int sx = std::max(0, -x);
 	for (; sx < w && dx < width; sx++, dx++) {
-		int dy = MAX(y, 0);
-		int sy = MAX(0, -y);
+		int dy = std::max(y, 0);
+		int sy = std::max(0, -y);
 		for (; sy < h && dy < height; sy++, dy++) {
 			data[dy * width + dx] = color;
 		}
