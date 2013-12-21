@@ -56,6 +56,7 @@ public:
 
 	fs::path getInputDir() const;
 	const mc::WorldCrop getWorldCrop() const;
+	bool needsWorldCentering() const;
 };
 
 class MapSection {

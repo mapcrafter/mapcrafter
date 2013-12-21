@@ -500,7 +500,15 @@ bool RenderManager::run() {
 				return false;
 			}
 			// create a tileset for this world
-			std::shared_ptr<TileSet> tileset(new TileSet(world));
+			std::shared_ptr<TileSet> tileset(new TileSet);
+			// and scan for tiles of this world
+			// we automatically center the tiles for cropped worlds
+			if (world_it->second.needsWorldCentering()) {
+				TilePos tile_offset;
+				tileset->scan(world, true, tile_offset);
+			} else {
+				tileset->scan(world);
+			}
 			// update the highest max zoom level
 			zoomlevels_max = std::max(zoomlevels_max, tileset->getMinDepth());
 

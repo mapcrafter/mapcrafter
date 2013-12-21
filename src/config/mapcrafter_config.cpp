@@ -126,6 +126,12 @@ const mc::WorldCrop WorldSection::getWorldCrop() const {
 	return worldcrop;
 }
 
+bool WorldSection::needsWorldCentering() const {
+	return min_x.isLoaded() || max_x.isLoaded()
+			|| min_y.isLoaded() || max_y.isLoaded()
+			|| center_x.isLoaded() || center_z.isLoaded() || radius.isLoaded();
+}
+
 MapSection::MapSection(bool global)
 		: global(global), texture_size(12),  render_unknown_blocks(false),
 		  render_leaves_transparent(false), render_biomes(false) {
