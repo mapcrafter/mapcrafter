@@ -42,6 +42,16 @@ T rotate_shift_l(T x, int m, int n) {
 	return ((x << m) & ((1 << n) - 1)) | (x >> (n - m));
 }
 
+/**
+ * Does a floor division a/b towards -infinity.
+ */
+template<typename T>
+T floordiv(T a, T b) {
+	if (a >= 0)
+		return a / b;
+	return (a - b + 1) / b;
+}
+
 } /* namespace util */
 } /* namespace mapcrafter */
 

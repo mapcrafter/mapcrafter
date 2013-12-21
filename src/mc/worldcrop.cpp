@@ -17,6 +17,8 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "../util.h"
+
 #include "worldcrop.h"
 
 #include <cmath>
@@ -41,52 +43,32 @@ void WorldCrop::setMaxY(int value) {
 
 void WorldCrop::setMinX(int value) {
 	bounds_x.setMin(value);
-	if (value < 0) {
-		bounds_chunk_x.setMin((value - 15) / 16);
-		bounds_region_x.setMin((value - 511) / 512);
-	} else {
-		bounds_chunk_x.setMin(value / 16);
-		bounds_region_x.setMin(value / 512);
-	}
+	bounds_chunk_x.setMin(util::floordiv(value, 16));
+	bounds_region_x.setMin(util::floordiv(value, 512));
 
 	type = RECTANGULAR;
 }
 
 void WorldCrop::setMaxX(int value) {
 	bounds_x.setMax(value);
-	if (value < 0) {
-		bounds_chunk_x.setMax((value - 15) / 16);
-		bounds_region_x.setMax((value - 511) / 512);
-	} else {
-		bounds_chunk_x.setMax(value / 16);
-		bounds_region_x.setMax(value / 512);
-	}
+	bounds_chunk_x.setMax(util::floordiv(value, 16));
+	bounds_region_x.setMax(util::floordiv(value, 512));
 
 	type = RECTANGULAR;
 }
 
 void WorldCrop::setMinZ(int value) {
 	bounds_z.setMin(value);
-	if (value < 0) {
-		bounds_chunk_z.setMin((value - 15) / 16);
-		bounds_region_z.setMin((value - 511) / 512);
-	} else {
-		bounds_chunk_z.setMin(value / 16);
-		bounds_region_z.setMin(value / 512);
-	}
+	bounds_chunk_z.setMin(util::floordiv(value, 16));
+	bounds_region_z.setMin(util::floordiv(value, 512));
 
 	type = RECTANGULAR;
 }
 
 void WorldCrop::setMaxZ(int value) {
 	bounds_z.setMax(value);
-	if (value < 0) {
-		bounds_chunk_z.setMax((value - 15) / 16);
-		bounds_region_z.setMax((value - 511) / 512);
-	} else {
-		bounds_chunk_z.setMax(value / 16);
-		bounds_region_z.setMax(value / 512);
-	}
+	bounds_chunk_z.setMax(util::floordiv(value, 16));
+	bounds_region_z.setMax(util::floordiv(value, 512));
 
 	type = RECTANGULAR;
 }
