@@ -134,7 +134,7 @@ public:
 			const config::MapSection& map);
 	~TileRenderer();
 
-	void renderTile(const TilePos& pos, Image& tile);
+	void renderTile(const TilePos& tile_pos, const TilePos& tile_offset, Image& tile);
 };
 
 }
