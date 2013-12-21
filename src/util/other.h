@@ -69,24 +69,6 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
 bool startswith(const std::string& str, const std::string& start);
 bool endswith(const std::string& str, const std::string& end);
 
-/**
- * Does a rotated shift by m bytes to the right. n is the length of the bits.
- * Example: 0b0010 >> 2 = 0b1000
- */
-template<typename T>
-T rotate_shift_r(T x, int m, int n) {
-	return (x >> m) | ((x & ((1 << m) - 1)) << (n - m));
-}
-
-/**
- * Does a rotated shift by m bytes to the left. n is the length of the bits.
- * Example: 0b0100 << 2 = 0b0001
- */
-template<typename T>
-T rotate_shift_l(T x, int m, int n) {
-	return ((x << m) & ((1 << n) - 1)) | (x >> (n - m));
-}
-
 } /* namespace util */
 } /* namespace mapcrafter */
 #endif /* OTHER_H_ */

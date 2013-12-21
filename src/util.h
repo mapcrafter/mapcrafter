@@ -63,6 +63,7 @@ private:
 
 #include "util/filesystem.h"
 #include "util/progress.h"
+#include "util/math.h"
 #include "util/other.h"
 
 #endif /* UTIL_H_ */
