@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <stdint.h>
 #include <set>
+#include <limits>
 
 namespace mapcrafter {
 namespace render {
