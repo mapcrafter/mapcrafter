@@ -310,10 +310,10 @@ void TileSet::findRenderTiles(const mc::World& world, bool auto_center,
 			        tile_it != tiles.end(); ++tile_it) {
 
 				// and update the bounds
-				tiles_x_min = MIN(tiles_x_min, tile_it->getX());
-				tiles_x_max = MAX(tiles_x_max, tile_it->getX());
-				tiles_y_min = MIN(tiles_y_min, tile_it->getY());
-				tiles_y_max = MAX(tiles_y_max, tile_it->getY());
+				tiles_x_min = std::min(tiles_x_min, tile_it->getX());
+				tiles_x_max = std::max(tiles_x_max, tile_it->getX());
+				tiles_y_min = std::min(tiles_y_min, tile_it->getY());
+				tiles_y_max = std::max(tiles_y_max, tile_it->getY());
 
 				// update tile timestamp
 				if (!render_tiles.count(*tile_it))
@@ -574,7 +574,7 @@ double assignTasks(std::vector<Task> tasks, std::vector<TaskWorker>& workers) {
 	int max_diff = 0;
 	int avg = sumTasks(tasks) / worker_count;
 	for (int i = 0; i < worker_count; i++)
-		max_diff = MAX(max_diff, std::abs(workers[i].work - avg));
+		max_diff = std::max(max_diff, std::abs(workers[i].work - avg));
 	return (double) max_diff / sumTasks(tasks);
 }
 
