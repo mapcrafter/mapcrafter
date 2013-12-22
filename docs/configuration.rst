@@ -219,8 +219,8 @@ Furthermore there are two different types of world cropping:
     The renderer will render only blocks contained in this circle:
     
     * ``crop_center_x`` (**required**, x-coordinate of the center)
-    * ``crop_center_z``` (**required**, z-coordinate of the center)
-    * ``crop_radius``` (**required**, radius of the circle)
+    * ``crop_center_z`` (**required**, z-coordinate of the center)
+    * ``crop_radius`` (**required**, radius of the circle)
 
 Map Options
 -----------
