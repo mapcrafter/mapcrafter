@@ -419,17 +419,17 @@ bool RenderManager::run() {
 	// show infos/warnings/errors if configuration file has something
 	if (validation.size() > 0) {
 		if (ok)
-			std::cout << "Some notes on your configuration file:" << std::endl;
+			std::cerr << "Some notes on your configuration file:" << std::endl;
 		else
-			std::cout << "Your configuration file is invalid!" << std::endl;
+			std::cerr << "Your configuration file is invalid!" << std::endl;
 		for (auto section_it = validation.begin(); section_it != validation.end(); ++section_it) {
 			if (section_it->second.empty())
 				continue;
-			std::cout << section_it->first << ":" << std::endl;
+			std::cerr << section_it->first << ":" << std::endl;
 			for (auto message_it = section_it->second.begin(); message_it != section_it->second.end(); ++message_it)
-				std::cout << " - " << *message_it << std::endl;
+				std::cerr << " - " << *message_it << std::endl;
 		}
-		std::cout << "Please read the documentation about the new configuration file format." << std::endl;
+		std::cerr << "Please read the documentation about the new configuration file format." << std::endl;
 	}
 	if (!ok)
 		return false;
