@@ -34,11 +34,13 @@ namespace mapcrafter {
 namespace render {
 
 MapSettings::MapSettings()
-		: texture_size(12), tile_size(0), max_zoom(0),
-		  render_unknown_blocks(0), render_leaves_transparent(0),
-		  render_biomes(false) {
-	rotations.resize(4, false);
-	last_render.resize(4, 0);
+	: texture_size(12), tile_size(0), max_zoom(0),
+	  render_unknown_blocks(0), render_leaves_transparent(0), render_biomes(false) {
+	for (int i = 0; i < 4; i++) {
+		rotations[i] = false;
+		last_render[i] = 0;
+		tile_offsets[i] = TilePos(0, 0);
+	}
 }
 
 /**
@@ -62,8 +64,13 @@ bool MapSettings::read(const std::string& filename) {
 	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
 	for (int i = 0; i < 4; i++) {
 		rotations[i] = config.hasSection("rotation", rotation_names[i]);
-		if (rotations[i])
-			last_render[i] = config.getSection("rotation", rotation_names[i]).get<int>("last_render");
+		if (rotations[i]) {
+			auto section = config.getSection("rotation", rotation_names[i]);
+			last_render[i] = section.get<int>("last_render");
+			int offset_x = section.get<int>("tile_offset_x", 0);
+			int offset_y = section.get<int>("tile_offset_y", 0);
+			tile_offsets[i] = TilePos(offset_x, offset_y);
+		}
 	}
 
 	return true;
@@ -86,8 +93,12 @@ bool MapSettings::write(const std::string& filename) const {
 
 	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
 	for (int i = 0; i < 4; i++) {
-		if (rotations[i])
-			config.getSection("rotation", rotation_names[i]).set("last_render", util::str(last_render[i]));
+		if (rotations[i]) {
+			auto& section = config.getSection("rotation", rotation_names[i]);
+			section.set("last_render", util::str(last_render[i]));
+			section.set("tile_offset_x", util::str(tile_offsets[i].getX()));
+			section.set("tile_offset_y", util::str(tile_offsets[i].getY()));
+		}
 	}
 
 	return config.writeFile(filename);
@@ -118,7 +129,7 @@ MapSettings MapSettings::byMapConfig(const config::MapSection& map) {
 }
 
 RenderManager::RenderManager(const RenderOpts& opts)
-		: opts(opts) {
+	: opts(opts) {
 }
 
 /**
@@ -460,8 +471,11 @@ bool RenderManager::run() {
 	for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
 		confighelper.setUsedRotations(map_it->getWorld(), map_it->getRotations());
 		MapSettings settings;
-		if (settings.read(config.getOutputPath(map_it->getShortName() + "/map.settings")))
+		if (settings.read(config.getOutputPath(map_it->getShortName() + "/map.settings"))) {
 			confighelper.setMapZoomlevel(map_it->getShortName(), settings.max_zoom);
+			for (int i = 0; i < 4; i++)
+				confighelper.setWorldTileOffset(map_it->getWorld(), i, settings.tile_offsets[i]);
+		}
 	}
 
 	// ###
@@ -619,6 +633,11 @@ bool RenderManager::run() {
 					increaseMaxZoom(output_dir);
 			}
 		}
+
+		// also write the tile offsets to the map settings file
+		// to have them next time available even if we don't render/scan this world
+		for (int rotation = 0; rotation < 4; rotation++)
+			settings.tile_offsets[rotation] = confighelper.getWorldTileOffset(world_name, rotation);
 
 		// now write the (possibly new) max zoom level to the settings file
 		settings.max_zoom = world_zoomlevels;
