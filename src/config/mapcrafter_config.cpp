@@ -58,20 +58,26 @@ bool WorldSection::parse(const ConfigSection& section, const fs::path& config_di
 			}
 		}
 
-		else if (key == "crop_min_y" && min_y.load(key, value, validation))
-			worldcrop.setMinY(min_y.getValue());
-		else if (key == "crop_max_y" && max_y.load(key, value, validation))
-			worldcrop.setMaxY(max_y.getValue());
-		else if (key == "crop_min_x" && min_x.load(key, value, validation))
-			worldcrop.setMinX(min_x.getValue());
-		else if (key == "crop_max_x" && max_x.load(key, value, validation))
-			worldcrop.setMaxX(max_x.getValue());
-		else if (key == "crop_min_z" && min_z.load(key, value, validation))
-			worldcrop.setMinZ(min_z.getValue());
-		else if (key == "crop_max_z" && max_z.load(key, value, validation))
-			worldcrop.setMaxZ(max_z.getValue());
+		else if (key == "crop_min_y") {
+			if (min_y.load(key, value, validation))
+				worldcrop.setMinY(min_y.getValue());
+		} else if (key == "crop_max_y") {
+			if (max_y.load(key, value, validation))
+				worldcrop.setMaxY(max_y.getValue());
+		} else if (key == "crop_min_x") {
+			if (min_x.load(key, value, validation))
+				worldcrop.setMinX(min_x.getValue());
+		} else if (key == "crop_max_x") {
+			if (max_x.load(key, value, validation))
+				worldcrop.setMaxX(max_x.getValue());
+		} else if (key == "crop_min_z") {
+			if (min_z.load(key, value, validation))
+				worldcrop.setMinZ(min_z.getValue());
+		} else if (key == "crop_max_z") {
+			if (max_z.load(key, value, validation))
+				worldcrop.setMaxZ(max_z.getValue());
 
-		else if (key == "crop_center_x")
+		} else if (key == "crop_center_x")
 			center_x.load(key, value, validation);
 		else if (key == "crop_center_z")
 			center_z.load(key, value, validation);
