@@ -520,14 +520,17 @@ MapcrafterConfigHelper::MapcrafterConfigHelper() {
 MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfigFile& config)
 	: config(config) {
 	auto maps = config.getMaps();
-	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it)
+	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
+		map_zoomlevels[map_it->getShortName()] = 0;
 		for (int i = 0; i < 4; i++)
 			render_behaviors[map_it->getShortName()][i] = RENDER_AUTO;
+	}
 
 	auto worlds = config.getWorlds();
 	for (auto world_it = worlds.begin(); world_it != worlds.end(); ++world_it) {
 		world_rotations[world_it->first] = std::set<int>();
 		world_zoomlevels[world_it->first] = 0;
+		world_tile_offsets[world_it->first] = std::array<render::TilePos, 4>();
 	}
 }
 
@@ -550,6 +553,15 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2)
 			js += util::str(*it2) + ",";
 		js += "],\n";
+
+		std::string tile_offsets = "[";
+		auto offsets = world_tile_offsets.at(it->getWorld());
+		for (auto it2 = offsets.begin(); it2 != offsets.end(); ++it2)
+			tile_offsets += "[" + util::str(it2->getX()) + ", " + util::str(it2->getY()) + "], ";
+		tile_offsets += "]";
+
+		js += "\ttileOffsets: " + tile_offsets + ",\n";
+
 		js += "},";
 	}
 
@@ -582,6 +594,16 @@ void MapcrafterConfigHelper::setWorldZoomlevel(const std::string& world, int zoo
 
 void MapcrafterConfigHelper::setMapZoomlevel(const std::string& map, int zoomlevel) {
 	map_zoomlevels[map] = zoomlevel;
+}
+
+void MapcrafterConfigHelper::setWorldTileOffset(const std::string& world,
+		int rotation, const render::TilePos& tile_offset) {
+	world_tile_offsets[world][rotation] = tile_offset;
+}
+
+const render::TilePos& MapcrafterConfigHelper::getWorldTileOffset(
+		const std::string& world, int rotation) {
+	return world_tile_offsets.at(world).at(rotation);
 }
 
 int MapcrafterConfigHelper::getRenderBehavior(const std::string& map, int rotation) const {

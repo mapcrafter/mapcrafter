@@ -512,6 +512,7 @@ bool RenderManager::run() {
 			if (world_it->second.needsWorldCentering()) {
 				TilePos tile_offset;
 				tileset->scan(world, true, tile_offset);
+				confighelper.setWorldTileOffset(world_name, *rotation_it, tile_offset);
 			} else {
 				tileset->scan(world);
 			}

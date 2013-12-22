@@ -24,6 +24,7 @@
 #include "validation.h"
 
 #include "../mc/worldcrop.h"
+#include "../render/tileset.h"
 
 #include <string>
 #include <vector>
@@ -133,6 +134,7 @@ private:
 	std::map<std::string, std::set<int> > world_rotations;
 	std::map<std::string, int> world_zoomlevels;
 	std::map<std::string, int> map_zoomlevels;
+	std::map<std::string, std::array<render::TilePos, 4> > world_tile_offsets;
 
 	std::map<std::string, std::array<int, 4> > render_behaviors;
 
@@ -151,6 +153,10 @@ public:
 	int getMapZoomlevel(const std::string& map) const;
 	void setWorldZoomlevel(const std::string& world, int zoomlevel);
 	void setMapZoomlevel(const std::string& map, int zoomlevel);
+
+	void setWorldTileOffset(const std::string& world, int rotation,
+			const render::TilePos& tile_offset);
+	const render::TilePos& getWorldTileOffset(const std::string& world, int rotation);
 
 	int getRenderBehavior(const std::string& map, int rotation) const;
 	void setRenderBehavior(const std::string& map, int rotation, int behavior);
