@@ -180,8 +180,8 @@ World Options
     my_world_nether/DIM-1 for the Nether and my_world/DIM1 or my_world_the_end/DIM1
     for the End.
     
-    The only way to render the Nether is the cave rendermode at the moment.
-    You will be able to skip the top bedrock layers with the next mapcrafter version.
+    You can render the nether with the cave rendermode or you can remove the
+    top bedrock layers with the crop_max_y option.
 
 By using the following options you can crop your world and render only 
 a specific part of it. With these two options you can skip blocks above or
@@ -221,6 +221,19 @@ Furthermore there are two different types of world cropping:
     * ``crop_center_x`` (**required**, x-coordinate of the center)
     * ``crop_center_z`` (**required**, z-coordinate of the center)
     * ``crop_radius`` (**required**, radius of the circle)
+
+.. note::
+
+    The renderer automatically centers circular cropped worlds and rectangular
+    cropped worlds which have all four limits specified so the maximum
+    zoom level of the rendered map does not unnecessarily become as high as 
+    the original map. 
+    
+    Changing the center of an already rendered map is complicated and 
+    therefore not supported by the renderer. Due to that you should 
+    completely rerender the map when you want to change the boundaries of 
+    a cropped world. This also means that you should delete the already 
+    rendered map (delete <output_dir>/<map_name>). 
 
 Map Options
 -----------
