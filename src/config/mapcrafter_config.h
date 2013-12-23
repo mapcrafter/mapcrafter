@@ -43,6 +43,7 @@ private:
 	bool global;
 
 	Field<fs::path> input_dir;
+	Field<std::string> world_name;
 
 	Field<int> min_y, max_y;
 	Field<int> min_x, max_x, min_z, max_z;
@@ -56,6 +57,7 @@ public:
 	bool parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation);
 
 	fs::path getInputDir() const;
+	std::string getWorldName() const;
 	const mc::WorldCrop getWorldCrop() const;
 	bool needsWorldCentering() const;
 };

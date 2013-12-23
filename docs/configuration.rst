@@ -183,6 +183,14 @@ World Options
     You can render the nether with the cave rendermode or you can remove the
     top bedrock layers with the crop_max_y option.
 
+``world_name = <name>``
+
+    **Default**: ``<name of the world section>``
+    
+    This is another name of the world, usually the name of the world the server uses.
+    You don't usually need to specify this manually unless your server uses different
+    world names and you want to use the mapcrafter-playermarkers script.
+
 By using the following options you can crop your world and render only 
 a specific part of it. With these two options you can skip blocks above or
 below a specific level:

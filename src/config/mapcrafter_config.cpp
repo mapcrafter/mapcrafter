@@ -38,6 +38,9 @@ void WorldSection::setGlobal(bool global) {
 
 bool WorldSection::parse(const ConfigSection& section, const fs::path& config_dir,
 		ValidationList& validation) {
+	// set default configuration values
+	world_name.setDefault(section.getName());
+
 	mc::BlockPos crop_center;
 
 	// go through all configuration options in this section
@@ -56,7 +59,8 @@ bool WorldSection::parse(const ConfigSection& section, const fs::path& config_di
 							"'input_dir' must be an existing directory! '"
 							+ input_dir.getValue().string() + "' does not exist!"));
 			}
-		}
+		} else if (key == "world_name")
+			world_name.load(key, value, validation);
 
 		else if (key == "crop_min_y") {
 			if (min_y.load(key, value, validation))
@@ -126,6 +130,10 @@ bool WorldSection::parse(const ConfigSection& section, const fs::path& config_di
 
 fs::path WorldSection::getInputDir() const {
 	return input_dir.getValue();
+}
+
+std::string WorldSection::getWorldName() const {
+	return world_name.getValue();
 }
 
 const mc::WorldCrop WorldSection::getWorldCrop() const {
@@ -542,9 +550,11 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 
 	auto maps = config.getMaps();
 	for (auto it = maps.begin(); it != maps.end(); ++it) {
+		auto world = config.getWorld(it->getWorld());
+
 		js += "\"" + it->getShortName() + "\" : {\n";
 		js += "\tname: \"" + it->getLongName() + "\",\n";
-		js += "\tworldName: \"" + it->getWorld() + "\",\n";
+		js += "\tworldName: \"" + world.getWorldName() + "\",\n";
 		js += "\ttextureSize: " + util::str(it->getTextureSize()) + ",\n";
 		js += "\ttileSize: " + util::str(32 * it->getTextureSize()) + ",\n";
 		js += "\tmaxZoom: " + util::str(getMapZoomlevel(it->getShortName())) + ",\n";
