@@ -1,8 +1,10 @@
+add_executable(merge_azeroth merge_azeroth.cpp)
 add_executable(merge_regions merge_regions.cpp)
 add_executable(nbtdump nbtdump.cpp)
 add_executable(testconfig testconfig.cpp)
 add_executable(testtextures testtextures.cpp)
 
+target_link_libraries(merge_azeroth mapcraftercore)
 target_link_libraries(merge_regions mapcraftercore)
 target_link_libraries(nbtdump mapcraftercore)
 target_link_libraries(testconfig mapcraftercore)
