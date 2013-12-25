@@ -135,24 +135,24 @@ void runWorker(const Work& work) {
 }
 
 int main(int argc, char** argv) {
-	if (argc < 3) {
-		std::cerr << "Usage: ./merge_azeroth [input-regions] [output-regions]" << std::endl;
+	if (argc < 4) {
+		std::cerr << "Usage: ./merge_azeroth [worker-count] [input-regions] [output-regions]" << std::endl;
 		return 1;
 	}
 
-	std::string input(argv[1]), output(argv[2]);
+	int worker_count = util::as<int>(argv[1]);
+	std::string input(argv[2]), output(argv[3]);
 	if (input[input.size()-1] != '/')
 		input += '/';
 	if (output[output.size()-1] != '/')
 		output += '/';
 
 	std::vector<int> layers = {-1, 0, 1, 2, 3, 4, 5};
-	int min_x = -24, max_x = -18;
-	int min_z = 3, max_z = 9;
+	int min_x = -49, max_x = 49;
+	int min_z = -49, max_z = 49;
 	int region_count = (max_x - min_x + 1) * (max_z - min_z + 1);
-	std::cout << "Merging " << region_count << " regions..." << std::endl;
+	std::cout << "Merging " << region_count << " regions with " << worker_count << " workers..." << std::endl;
 
-	int worker_count = 8;
 	std::vector<Work> workers(worker_count);
 	int cur_worker = worker_count-1;
 
