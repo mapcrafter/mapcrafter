@@ -13,6 +13,10 @@ namespace mc = mapcrafter::mc;
 namespace nbt = mapcrafter::mc::nbt;
 
 bool mergeRegions(std::string outname, const std::vector<std::string>& regions) {
+	if (boost::filesystem::exists(outname)) {
+		std::cout << "Region " << outname << " is already merged; Skipping" << std::endl;
+		return false;
+	}
 	if (!boost::filesystem::exists(regions[0])) {
 		std::cout << "Can skip " << outname << std::endl;
 		return false;
@@ -60,6 +64,10 @@ bool mergeRegions(std::string outname, const std::vector<std::string>& regions) 
 	for (size_t i = 1; i < regions.size(); i++) {
 		std::string filename = regions[i];
 		mc::RegionFile region2(filename);
+		if (!boost::filesystem::exists(filename)) {
+			//std::cerr << "Warning: Region " << filename << " does not exist." << std::endl;
+			continue;
+		}
 		if (!region2.read()) {
 			std::cerr << "Warning: Unable to read region " << filename << std::endl;
 			continue;
