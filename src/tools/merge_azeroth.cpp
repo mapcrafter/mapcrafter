@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
+#include <thread>
 #include <boost/filesystem.hpp>
 
 namespace util = mapcrafter::util;
@@ -115,11 +117,21 @@ bool mergeRegions(std::string outname, const std::vector<std::string>& regions) 
 	if (!region0.write()) {
 		std::cerr << "Unable to write back region " << outname << std::endl;
 	}
+	return true;
 }
 
 std::string getRegionName(int x, int z, int layer) {
 	z += layer*100;
 	return std::string("r.") + util::str(x) + "." + util::str(z) + ".mca";
+}
+
+typedef std::pair<std::string, std::vector<std::string>> Job;
+typedef std::vector<Job> Work;
+
+void runWorker(const Work& work) {
+	for(auto job_it = work.begin(); job_it != work.end(); ++job_it) {
+		mergeRegions(job_it->first, job_it->second);
+	}
 }
 
 int main(int argc, char** argv) {
@@ -135,13 +147,18 @@ int main(int argc, char** argv) {
 		output += '/';
 
 	std::vector<int> layers = {-1, 0, 1, 2, 3, 4, 5};
-	int min_x = -49, max_x = 49;
-	int min_z = -49, max_z = 49;
+	int min_x = -24, max_x = -18;
+	int min_z = 3, max_z = 9;
 	int region_count = (max_x - min_x + 1) * (max_z - min_z + 1);
+	std::cout << "Merging " << region_count << " regions..." << std::endl;
 
-	util::ProgressBar progress;
-	progress.setMax(region_count);
-	progress.setValue(0);
+	int worker_count = 8;
+	std::vector<Work> workers(worker_count);
+	int cur_worker = worker_count-1;
+
+	//util::ProgressBar progress;
+	//progress.setMax(region_count);
+	//progress.setValue(0);
 	for (int x = min_x; x <= max_x; x++) {
 		for (int z = min_z; z <= max_z; z++) {
 			std::string outname(output + getRegionName(x, z, layers[0]));
@@ -151,10 +168,19 @@ int main(int argc, char** argv) {
 				regions.push_back(input + getRegionName(x, z, layer));
 			}
 
-			if (mergeRegions(outname, regions))
-				progress.setValue(progress.getValue()+1);
-			else
-				progress.setMax(progress.getMax()-1);
+			cur_worker = (cur_worker+1) % worker_count;
+			workers[cur_worker].push_back(Job(outname, regions));
+
+			//if (mergeRegions(outname, regions))
+			//	progress.setValue(progress.getValue()+1);
+			//else
+			//	progress.setMax(progress.getMax()-1);
 		}
 	}
+
+	std::vector<std::thread> threads;
+	for (int i = 0; i < worker_count; i++)
+		threads.push_back(std::thread(runWorker, workers[i]));
+	for (int i = 0; i < worker_count; i++)
+		threads[i].join();
 }
