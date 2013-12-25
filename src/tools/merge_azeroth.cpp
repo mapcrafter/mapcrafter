@@ -10,10 +10,10 @@ namespace util = mapcrafter::util;
 namespace mc = mapcrafter::mc;
 namespace nbt = mapcrafter::mc::nbt;
 
-void mergeRegions(std::string outname, const std::vector<std::string>& regions) {
+bool mergeRegions(std::string outname, const std::vector<std::string>& regions) {
 	if (!boost::filesystem::exists(regions[0])) {
 		std::cout << "Can skip " << outname << std::endl;
-		return;
+		return false;
 	}
 
 	// cp regions[0] outname
@@ -22,7 +22,7 @@ void mergeRegions(std::string outname, const std::vector<std::string>& regions) 
 	mc::RegionFile region0(outname);
 	if (!region0.read()) {
 		std::cerr << "Unable to read " << outname << " (" << regions[0] << ")!" << std::endl;
-		return;
+		return false;
 	}
 
 	bool has_chunk[1024];
@@ -135,12 +135,15 @@ int main(int argc, char** argv) {
 		output += '/';
 
 	std::vector<int> layers = {-1, 0, 1, 2, 3, 4, 5};
+	int min_x = -49, max_x = 49;
+	int min_z = -49, max_z = 49;
+	int region_count = (max_x - min_x + 1) * (max_z - min_z + 1);
 
 	util::ProgressBar progress;
-	progress.setMax(100*100);
+	progress.setMax(region_count);
 	progress.setValue(0);
-	for (int x = -49; x <= 49; x++) {
-		for (int z = -49; z <= 49; z++) {
+	for (int x = min_x; x <= max_x; x++) {
+		for (int z = min_z; z <= max_z; z++) {
 			std::string outname(output + getRegionName(x, z, layers[0]));
 			std::vector<std::string> regions;
 			for (size_t i = 0; i < layers.size(); i++) {
@@ -148,9 +151,10 @@ int main(int argc, char** argv) {
 				regions.push_back(input + getRegionName(x, z, layer));
 			}
 
-			mergeRegions(outname, regions);
-
-			progress.setValue(progress.getValue()+1);
+			if (mergeRegions(outname, regions))
+				progress.setValue(progress.getValue()+1);
+			else
+				progress.setMax(progress.getMax()-1);
 		}
 	}
 }
