@@ -1371,6 +1371,13 @@ void BlockImages::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) 
 			createSmallerBlock(id, 0x8 | it->first, side, top, texture_size / 2, texture_size);
 		}
 	}
+
+	// special double slabs
+	if (stone_slabs) {
+		createBlock(id, 0x8, textures.STONE_SLAB_TOP);
+		createBlock(id, 0x9, textures.SANDSTONE_TOP);
+		createBlock(id, 0xF, textures.QUARTZ_BLOCK_TOP);
+	}
 }
 
 void BlockImages::createTorch(uint16_t id, const Image& texture) { // id 50, 75, 76
