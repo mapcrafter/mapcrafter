@@ -46,7 +46,11 @@ std::string format_eta(int eta) {
 	std::string str_days = util::str(days) + "d";
 	std::string str_hours = util::str(hours) + "h";
 	std::string str_minutes = util::str(minutes) + "m";
+	if (minutes < 10)
+		str_minutes = "0" + str_minutes;
 	std::string str_seconds = util::str(seconds) + "s";
+	if (seconds < 10)
+		str_seconds = "0" + str_seconds;
 
 	if (days > 0)
 		return str_days + " " + str_hours;
