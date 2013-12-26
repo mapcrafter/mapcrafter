@@ -700,11 +700,14 @@ Image BlockImages::createBiomeBlock(uint16_t id, uint16_t data,
 		return unknown_block;
 
 	uint32_t color;
-	// leaves have the foliage colors
-	// for birches, the color x/y coordinate is flipped
-	if (id == 18)
-		color = biome_data.getColor(foliagecolors, (data & 0b11) == 2);
-	else
+	// leaves have the foliage colors,
+	// the color x/y coordinate is flipped for pine tress and birches
+	// -> they use the top triangle on the foliage color image
+	//if ((id == 18 && (data & 0b11) != 1) || id == 161)
+	if (id == 18 || id == 161) {
+		bool flip_xy = id == 18 && ((data & 0b11) == 1 || (data & 0b11) == 2);
+		color = biome_data.getColor(foliagecolors, flip_xy);
+	} else
 		color = biome_data.getColor(grasscolors, false);
 
 	double r = (double) RED(color) / 255;
