@@ -63,8 +63,9 @@ struct MapSettings {
 	bool render_leaves_transparent;
 	bool render_biomes;
 
-	std::vector<bool> rotations;
-	std::vector<int> last_render;
+	std::array<bool, 4> rotations;
+	std::array<int, 4> last_render;
+	std::array<TilePos, 4> tile_offsets;
 
 	MapSettings();
 

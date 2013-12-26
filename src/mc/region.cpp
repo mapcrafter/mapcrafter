@@ -26,14 +26,13 @@ namespace mapcrafter {
 namespace mc {
 
 RegionFile::RegionFile()
-		: rotation(0) {
+	: rotation(0) {
 }
 
-RegionFile::RegionFile(const std::string& filename, int rotation)
-		: filename(filename), rotation(rotation) {
-	regionpos = RegionPos::byFilename(filename);
-	if (rotation)
-		regionpos.rotate(rotation);
+RegionFile::RegionFile(const std::string& filename)
+	: filename(filename), rotation(0) {
+	regionpos_original = RegionPos::byFilename(filename);
+	regionpos = regionpos_original;
 }
 
 RegionFile::~RegionFile() {
@@ -74,13 +73,21 @@ bool RegionFile::readHeaders(std::ifstream& file, int chunk_offsets[1024]) {
 			file.read(reinterpret_cast<char*>(&timestamp), 4);
 			timestamp = util::bigEndian32(timestamp);
 
-			ChunkPos pos(x + regionpos.x * 32, z + regionpos.z * 32);
+			// get the original (not rotated) position of the chunk
+			ChunkPos chunkpos(x + regionpos_original.x * 32, z + regionpos_original.z * 32);
+			// check if this chunk is not cropped
+			if (!worldcrop.isChunkContained(chunkpos))
+				continue;
+
+			// now rotate this chunk position for the public set with available chunks
 			if (rotation)
-				pos.rotate(rotation);
-
+				chunkpos.rotate(rotation);
+			
 			chunk_exists[z * 32 + x] = true;
-			containing_chunks.insert(pos);
+			containing_chunks.insert(chunkpos);
 
+			// set offset and timestamp of this chunk
+			// now with the original coordinates again
 			chunk_offsets[z * 32 + x] = offset;
 			chunk_timestamps[z * 32 + x] = timestamp;
 		}
@@ -93,6 +100,20 @@ size_t RegionFile::getChunkIndex(const mc::ChunkPos& chunkpos) const {
 	if (rotation)
 		unrotated.rotate(4 - rotation);
 	return unrotated.getLocalZ() * 32 + unrotated.getLocalX();
+}
+
+void RegionFile::setRotation(int rotation) {
+	this->rotation = rotation;
+
+	// TODO properly handle this
+	if (rotation) {
+		regionpos = regionpos_original;
+		regionpos.rotate(rotation);
+	}
+}
+
+void RegionFile::setWorldCrop(const WorldCrop& worldcrop) {
+	this->worldcrop = worldcrop;
 }
 
 bool RegionFile::read() {
@@ -265,6 +286,7 @@ int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 
 	// set the chunk rotation
 	chunk.setRotation(rotation);
+	chunk.setWorldCrop(worldcrop);
 	// try to load the chunk
 	try {
 		if (!chunk.readNBT(reinterpret_cast<char*>(&chunk_data[index][0]), size, comp))

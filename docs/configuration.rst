@@ -169,10 +169,9 @@ World Options
 ``input_dir = <directory>``
 
     **Required**
-	
+
     This is the directory of your Minecraft World. The directory should contain
     a directory ``region/`` with the .mca region files.
-
 
 .. note::
 
@@ -181,8 +180,68 @@ World Options
     my_world_nether/DIM-1 for the Nether and my_world/DIM1 or my_world_the_end/DIM1
     for the End.
     
-    The only way to render the Nether is the cave rendermode at the moment.
-    You will be able to skip the top bedrock layers with the next mapcrafter version.
+    You can render the nether with the cave rendermode or you can remove the
+    top bedrock layers with the crop_max_y option.
+
+``world_name = <name>``
+
+    **Default**: ``<name of the world section>``
+    
+    This is another name of the world, usually the name of the world the server uses.
+    You don't usually need to specify this manually unless your server uses different
+    world names and you want to use the mapcrafter-playermarkers script.
+
+By using the following options you can crop your world and render only 
+a specific part of it. With these two options you can skip blocks above or
+below a specific level:
+
+``crop_min_y = <number>``
+
+    **Default:** -infinity
+
+    This is the minimum y-coordinate of blocks mapcrafter will render.
+
+``crop_max_y = <number>``
+
+    **Default:** infinity
+
+    This is the maximum y-coordinate of blocks mapcrafter will render.
+
+Furthermore there are two different types of world cropping:
+
+1. Rectangular cropping:
+
+  * You can specify limits for the x- and z-coordinates.
+    The renderer will render only blocks contained in these boundaries.
+    You can use the following options whereas all options are optional
+    and default to infinite (or -infinite for minimum limits):
+    
+    * ``crop_min_x`` (minimum limit of x-coordinate)
+    * ``crop_max_x`` (maximum limit of x-coordinate)
+    * ``crop_min_z`` (minimum limit of z-coordinate)
+    * ``crop_max_z`` (maximum limit of z-coordinate)
+
+2. Circular cropping:
+
+  * You can specify a block position as center and a radius.
+    The renderer will render only blocks contained in this circle:
+    
+    * ``crop_center_x`` (**required**, x-coordinate of the center)
+    * ``crop_center_z`` (**required**, z-coordinate of the center)
+    * ``crop_radius`` (**required**, radius of the circle)
+
+.. note::
+
+    The renderer automatically centers circular cropped worlds and rectangular
+    cropped worlds which have all four limits specified so the maximum
+    zoom level of the rendered map does not unnecessarily become as high as 
+    the original map. 
+    
+    Changing the center of an already rendered map is complicated and 
+    therefore not supported by the renderer. Due to that you should 
+    completely rerender the map when you want to change the boundaries of 
+    a cropped world. This also means that you should delete the already 
+    rendered map (delete <output_dir>/<map_name>). 
 
 Map Options
 -----------

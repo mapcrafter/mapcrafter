@@ -30,7 +30,7 @@ GitHub if you want the newest version::
 
     git clone https://github.com/m0r13/mapcrafter.git
 
-Make sure you have all requirements installed. If your are on a Debian-like
+Make sure you have all requirements installed. If you are on a Debian-like
 Linux system, you can install these packages with apt::
 
     sudo apt-get install libpng12-dev libboost-iostreams-dev \

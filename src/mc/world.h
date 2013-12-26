@@ -20,9 +20,10 @@
 #ifndef WORLD_H_
 #define WORLD_H_
 
-#include "pos.h"
 #include "chunk.h"
+#include "pos.h"
 #include "region.h"
+#include "worldcrop.h"
 
 #include <string>
 #include <unordered_set>
@@ -57,6 +58,16 @@ public:
 	~World();
 
 	/**
+	 * Sets the rotation of the world. You have to call this before loading a world.
+	 */
+	void setRotation(int rotation);
+
+	/**
+	 * Sets the boundaries of the world.
+	 */
+	void setWorldCrop(const WorldCrop& worldcrop);
+
+	/**
 	 * Loads a world from a directory. Returns false if the world- or region directory
 	 * does not exist.
 	 *
@@ -64,7 +75,7 @@ public:
 	 * If you specify a rotation, everything of the world will be rotated internally,
 	 * you can use it like a normal world.
 	 */
-	bool load(const std::string& dir, int rotation = 0);
+	bool load(const std::string& dir);
 
 	/**
 	 * Returns the count of available region files.
@@ -88,8 +99,9 @@ public:
 	bool getRegion(const RegionPos& pos, RegionFile& region) const;
 
 private:
-	// rotation of the world
+	// rotation and possible boundaries of the world
 	int rotation;
+	WorldCrop worldcrop;
 
 	// (hash-) set containing positions of available region files
 	RegionSet available_regions;

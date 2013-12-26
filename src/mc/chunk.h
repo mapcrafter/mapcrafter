@@ -22,6 +22,7 @@
 
 #include "nbt.h"
 #include "pos.h"
+#include "worldcrop.h"
 
 #include <bitset>
 #include <stdint.h>
@@ -44,19 +45,17 @@ struct ChunkSection {
 	uint8_t block_light[16 * 16 * 8];
 	uint8_t sky_light[16 * 16 * 8];
 
-	const uint8_t* getArray(int i) const {
-		if (i == 0)
-			return data;
-		else if (i == 1)
-			return block_light;
-		else
-			return sky_light;
-	}
+	/**
+	 * Returns one of the data arrays (1: block data, 2: block light, 3: sky light).
+	 */
+	const uint8_t* getArray(int i) const;
 };
 
 /**
- * This is a Minecraft chunk from the Anvil world format. The class stores only the
- * sections, which exist in the nbt data, to save memory.
+ * This class represents a Minecraft Chunk and provides an read-only interface to chunk
+ * data such as block IDs, block data values and block lighting data.
+ *
+ * To save memory, the class stores only the sections which exist in the NBT data.
  */
 class Chunk {
 private:
@@ -76,26 +75,100 @@ private:
 	uint8_t getData(const LocalBlockPos& pos, int array) const;
 public:
 	Chunk();
-	virtual ~Chunk();
+	~Chunk();
 
+	/**
+	 * Sets the rotation of the world. You have to call this before loading the NBT data.
+	 */
 	void setRotation(int rotation);
 
-	bool readNBT(const char* data, size_t len, nbt::Compression compression =
-	        nbt::Compression::ZLIB);
+	/**
+	 * Sets the boundaries of the world.
+	 */
+	void setWorldCrop(const WorldCrop& worldcrop);
+
+	/**
+	 * Reads the NBT data of the chunk from a buffer. You need to specify a compression
+	 * type of the raw data.
+	 */
+	bool readNBT(const char* data, size_t len,
+			nbt::Compression compression = nbt::Compression::ZLIB);
+
+	/**
+	 * Clears all loaded chunk data.
+	 */
 	void clear();
 
+	/**
+	 * Returns whether the chunk has a specific section.
+	 */
 	bool hasSection(int section) const;
+	
 	std::bitset<CHUNK_HEIGHT> getSectionBitset() const;
 
+	/**
+	 * Returns the block ID at a specific position (local coordinates).
+	 */
 	uint16_t getBlockID(const LocalBlockPos& pos) const;
+
+	/**
+	 * Returns the block data value at a specific position (local coordinates).
+	 */
 	uint8_t getBlockData(const LocalBlockPos& pos) const;
 
+	/**
+	 * Returns the block light at a specific position (local coordinates).
+	 */
 	uint8_t getBlockLight(const LocalBlockPos& pos) const;
+
+	/**
+	 * Returns the block sky light at a specific position (local coordinates).
+	 */
 	uint8_t getSkyLight(const LocalBlockPos& pos) const;
 
+	/**
+	 * Returns the block light at a specific position (local coordinates).
+	 */
 	uint8_t getBiomeAt(const LocalBlockPos& pos) const;
 
+	/**
+	 * Returns the position of the chunk. This position may be, depending on the map,
+	 * the rotated version of the original position.
+	 */
 	const ChunkPos& getPos() const;
+
+private:
+	// internal original chunk position and public chunk position (which may be rotated)
+	ChunkPos chunkpos, chunkpos_original;
+
+	// rotation and cropping of the world
+	int rotation;
+	WorldCrop worldcrop;
+	// whether the chunk is completely contained (according x- and z-coordinates, not y)
+	bool chunk_completely_contained;
+
+	// the index of the chunk sections in the sections array
+	// or -1 if section does not exist
+	int section_offsets[CHUNK_HEIGHT];
+	// the array with the sections, see indexes above
+	std::vector<ChunkSection> sections;
+
+	// the biomes in this chunk, as index z*16+x
+	uint8_t biomes[256];
+
+	/**
+	 * Checks whether a block (local coordinates, original/unrotated) is in the cropped
+	 * part of the world and therefore not rendered.
+	 */
+	bool checkBlockWorldCrop(int x, int z, int y) const;
+	/**
+	 * Returns a specific block data (block data value, block light, sky light) at a
+	 * specific position. The parameter array specifies which one:
+	 *   0: block data value,
+	 *   1: block light,
+	 *   2: sky light
+	 */
+	uint8_t getData(const LocalBlockPos& pos, int array) const;
 };
 
 }

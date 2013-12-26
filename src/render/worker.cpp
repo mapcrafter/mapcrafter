@@ -83,7 +83,7 @@ void RenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 
 	if (tile.getDepth() == tileset->getDepth()) {
 		// this tile is a render tile, render it
-		renderer.renderTile(tile.getTilePos(), image);
+		renderer.renderTile(tile.getTilePos(), tileset->getTileOffset(), image);
 
 		/*
 		// draws a border on the tile

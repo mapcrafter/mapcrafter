@@ -33,11 +33,11 @@ namespace mapcrafter {
 namespace mc {
 
 RegionPos::RegionPos()
-		: x(0), z(0) {
+	: x(0), z(0) {
 }
 
 RegionPos::RegionPos(int x, int z)
-		: x(x), z(z) {
+	: x(x), z(z) {
 }
 
 bool RegionPos::operator==(const RegionPos& other) const {
@@ -72,24 +72,16 @@ void RegionPos::rotate(int count) {
 }
 
 ChunkPos::ChunkPos()
-		: x(0), z(0) {
+	: x(0), z(0) {
 }
 
 ChunkPos::ChunkPos(int x, int z)
-		: x(x), z(z) {
+	: x(x), z(z) {
 }
 
 ChunkPos::ChunkPos(const BlockPos& block) {
-	x = block.x;
-	z = block.z;
-	if (x < 0)
-		x = (x - 15) / 16;
-	else
-		x = x >> 4;
-	if (z < 0)
-		z = (z - 15) / 16;
-	else
-		z = z >> 4;
+	x = util::floordiv(block.x, 16);
+	z = util::floordiv(block.z, 16);
 }
 
 int ChunkPos::getLocalX() const {
@@ -100,7 +92,7 @@ int ChunkPos::getLocalZ() const {
 }
 
 RegionPos ChunkPos::getRegion() const {
-	return RegionPos(x >> 5, z >> 5);
+	return RegionPos(util::floordiv(x, 32), util::floordiv(z, 32));
 }
 
 bool ChunkPos::operator==(const ChunkPos& other) const {
@@ -130,25 +122,19 @@ ChunkPos ChunkPos::byRowCol(int row, int col) {
 }
 
 void ChunkPos::rotate(int count) {
-	int nx = getLocalX(), nz = getLocalZ(), nnx, nnz;
 	for (int i = 0; i < count; i++) {
-		nnx = 31 - nz;
-		nnz = nx;
-		nx = nnx;
-		nz = nnz;
+		int nx = 31 - z;
+		z = x;
+		x = nx;
 	}
-
-	RegionPos region = getRegion();
-	x = nx + region.x * 32;
-	z = nz + region.z * 32;
 }
 
 BlockPos::BlockPos()
-		: x(0), z(0), y(0) {
+	: x(0), z(0), y(0) {
 }
 
 BlockPos::BlockPos(int x, int z, int y)
-		: x(x), z(z), y(y) {
+	: x(x), z(z), y(y) {
 }
 
 int BlockPos::getRow() const {
@@ -200,11 +186,11 @@ extern const mc::BlockPos DIR_TOP(0, 0, 1);
 extern const mc::BlockPos DIR_BOTTOM(0, 0, -1);
 
 LocalBlockPos::LocalBlockPos()
-		: x(0), z(0), y(0) {
+	: x(0), z(0), y(0) {
 }
 
 LocalBlockPos::LocalBlockPos(int x, int z, int y)
-		: x(x), z(z), y(y) {
+	: x(x), z(z), y(y) {
 }
 
 LocalBlockPos::LocalBlockPos(const BlockPos& pos)

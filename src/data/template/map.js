@@ -444,7 +444,7 @@ MapcrafterUI.prototype.setMapType = function(type) {
 	var other = this.getConfig(type);
 	
 	var sameWorld = current.worldName == other.worldName;
-	if(sameWorld && this.currentRotation in other.rotations)
+	if(sameWorld && other.rotations.indexOf(this.currentRotation) != -1)
 		this.setMapTypeAndRotation(type, this.currentRotation);
 	else
 		this.setMapTypeAndRotation(type, other.rotations[0]);
@@ -518,6 +518,7 @@ MapcrafterUI.prototype.mcToLatLng = function(x, z, y) {
 	// converts Minecraft x,z,y to a Google Map lat/lng
 	
 	var config = this.getCurrentConfig();
+	var rotation = this.getCurrentRotation();
 	
 	// rotate the position to the map rotation
 	for(var i = 0; i < this.currentRotation; i++) {
@@ -531,11 +532,13 @@ MapcrafterUI.prototype.mcToLatLng = function(x, z, y) {
 	// on the highest zoom level
 	var block = (config.textureSize/2.0) / (config.tileSize * Math.pow(2, config.maxZoom));
 	
-	// at first calculate the row and the column of the block
-	// column is just x+z 
-	var col = x+z;
+	// at first calculate the row and the column of the block:
+	// column is just x+z
+	// also don't forget the possible tile offset: one tile has 32 columns
+	var col = x+z - config.tileOffsets[rotation][0]*32;
 	// row is z-x, and every y to bottom adds 2 rows
-	var row = z-x + (256-y)*2;
+	// tile offset again: one tile has 64 rows
+	var row = z-x + (256-y)*2 - config.tileOffsets[rotation][1]*64;
 
 	// midpoint of the map is in lat/lng 0.5|0.5
 	// we have to move the lng by the size of one tile
@@ -575,16 +578,25 @@ MapcrafterUI.prototype.latLngToMC = function(latlng, y) {
 	// => z = (4y*block - 1024*block + 2*lat + lng + tile - 1.5) / (4*block)
 	
 	var config = this.getCurrentConfig();
+	var rotation = this.getCurrentRotation();
 	
-	// same way like in the other method
+	// same way like in the other method:
 	// we convert the lat/lng coordinates to pixel coordinates
-	// then we need to convert the pixel coordinates to lat/lng coordinates in the range [0; 1]
-	// to use them for the lat/lng -> MC algorithm
+	// in the range [0; count of tiles * tile size]
 	var point = this.lmap.project(latlng);
+	// size = count of tiles on this zoom level * tile size
 	var size = config.tileSize * Math.pow(2, this.lmap.getZoom());
+	// then we need to convert the pixel coordinates to lat/lng coordinates
+	// in the range [0; 1] to use them for the lat/lng -> MC algorithm
 	var lat = point.y / size;
 	var lng = point.x / size;
+	// add tile offset to lat/lng coordinates,
+	// as we have now lat/lng coordinates in the range [0; 1],
+	// divide tile offset by the count of tiles on max zoom level 
+	lat += config.tileOffsets[rotation][1] / Math.pow(2, config.maxZoom);
+	lng += config.tileOffsets[rotation][0] / Math.pow(2, config.maxZoom);
 	
+	// convert lat/lng coordinates to Minecraft coordinates
 	var tile = (1.0 / Math.pow(2, config.maxZoom + 1));
 	var block = (config.textureSize/2.0) / (config.tileSize * Math.pow(2, config.maxZoom));
 	

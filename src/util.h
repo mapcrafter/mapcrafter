@@ -61,11 +61,9 @@ private:
 # define BOOST_FS_ABSOLUTE1(p) fs::absolute((p))
 #endif
 
-#define MIN(a, b) (a < b ? a : b)
-#define MAX(a, b) (a > b ? a : b)
-
 #include "util/filesystem.h"
 #include "util/progress.h"
+#include "util/math.h"
 #include "util/other.h"
 
 #endif /* UTIL_H_ */

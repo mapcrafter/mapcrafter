@@ -38,6 +38,11 @@ void WorldSection::setGlobal(bool global) {
 
 bool WorldSection::parse(const ConfigSection& section, const fs::path& config_dir,
 		ValidationList& validation) {
+	// set default configuration values
+	world_name.setDefault(section.getName());
+
+	mc::BlockPos crop_center;
+
 	// go through all configuration options in this section
 	//   - load/parse the individual options
 	//   - warn the user about unknown options
@@ -54,11 +59,66 @@ bool WorldSection::parse(const ConfigSection& section, const fs::path& config_di
 							"'input_dir' must be an existing directory! '"
 							+ input_dir.getValue().string() + "' does not exist!"));
 			}
-		} else {
+		} else if (key == "world_name")
+			world_name.load(key, value, validation);
+
+		else if (key == "crop_min_y") {
+			if (min_y.load(key, value, validation))
+				worldcrop.setMinY(min_y.getValue());
+		} else if (key == "crop_max_y") {
+			if (max_y.load(key, value, validation))
+				worldcrop.setMaxY(max_y.getValue());
+		} else if (key == "crop_min_x") {
+			if (min_x.load(key, value, validation))
+				worldcrop.setMinX(min_x.getValue());
+		} else if (key == "crop_max_x") {
+			if (max_x.load(key, value, validation))
+				worldcrop.setMaxX(max_x.getValue());
+		} else if (key == "crop_min_z") {
+			if (min_z.load(key, value, validation))
+				worldcrop.setMinZ(min_z.getValue());
+		} else if (key == "crop_max_z") {
+			if (max_z.load(key, value, validation))
+				worldcrop.setMaxZ(max_z.getValue());
+
+		} else if (key == "crop_center_x")
+			center_x.load(key, value, validation);
+		else if (key == "crop_center_z")
+			center_z.load(key, value, validation);
+		else if (key == "crop_radius")
+			radius.load(key, value, validation);
+
+		else {
 			validation.push_back(ValidationMessage::warning(
 					"Unknown configuration option '" + key + "'!"));
 		}
 	}
+
+	// validate the world croppping
+	bool crop_rectangular = min_x.isLoaded() || max_x.isLoaded() || min_z.isLoaded() || max_z.isLoaded();
+	bool crop_circular = center_x.isLoaded() || center_z.isLoaded() || radius.isLoaded();
+
+	if (crop_rectangular && crop_circular) {
+		validation.push_back(ValidationMessage::error(
+				"You can not use both world cropping types at the same time!"));
+	} else if (crop_rectangular) {
+		if (min_x.isLoaded() && max_x.isLoaded() && min_x.getValue() > max_x.getValue())
+			validation.push_back(ValidationMessage::error("min_x must be smaller than or equal to max_x!"));
+		if (min_z.isLoaded() && max_z.isLoaded() && min_z.getValue() > max_z.getValue())
+			validation.push_back(ValidationMessage::error("min_z must be smaller than or equal to max_z!"));
+	} else if (crop_circular) {
+		std::string message = "You have to specify crop_center_x, crop_center_z "
+				"and crop_radius for circular world cropping!";
+		center_x.require(validation, message)
+			&& center_z.require(validation, message)
+			&& radius.require(validation, message);
+
+		worldcrop.setCenter(mc::BlockPos(center_x.getValue(), center_z.getValue(), 0));
+		worldcrop.setRadius(radius.getValue());
+	}
+
+	if (min_y.isLoaded() && max_y.isLoaded() && min_y.getValue() > max_y.getValue())
+		validation.push_back(ValidationMessage::error("min_y must be smaller than or equal to max_y!"));
 
 	// check if required options were specified
 	if (!global) {
@@ -70,6 +130,20 @@ bool WorldSection::parse(const ConfigSection& section, const fs::path& config_di
 
 fs::path WorldSection::getInputDir() const {
 	return input_dir.getValue();
+}
+
+std::string WorldSection::getWorldName() const {
+	return world_name.getValue();
+}
+
+const mc::WorldCrop WorldSection::getWorldCrop() const {
+	return worldcrop;
+}
+
+bool WorldSection::needsWorldCentering() const {
+	// circular cropped worlds and cropped worlds with complete x- and z-bounds
+	return (min_x.isLoaded() && max_x.isLoaded() && min_z.isLoaded() && max_z.isLoaded())
+			|| center_x.isLoaded() || center_z.isLoaded() || radius.isLoaded();
 }
 
 MapSection::MapSection(bool global)
@@ -454,14 +528,17 @@ MapcrafterConfigHelper::MapcrafterConfigHelper() {
 MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfigFile& config)
 	: config(config) {
 	auto maps = config.getMaps();
-	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it)
+	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
+		map_zoomlevels[map_it->getShortName()] = 0;
 		for (int i = 0; i < 4; i++)
 			render_behaviors[map_it->getShortName()][i] = RENDER_AUTO;
+	}
 
 	auto worlds = config.getWorlds();
 	for (auto world_it = worlds.begin(); world_it != worlds.end(); ++world_it) {
 		world_rotations[world_it->first] = std::set<int>();
 		world_zoomlevels[world_it->first] = 0;
+		world_tile_offsets[world_it->first] = std::array<render::TilePos, 4>();
 	}
 }
 
@@ -473,9 +550,11 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 
 	auto maps = config.getMaps();
 	for (auto it = maps.begin(); it != maps.end(); ++it) {
+		auto world = config.getWorld(it->getWorld());
+
 		js += "\"" + it->getShortName() + "\" : {\n";
 		js += "\tname: \"" + it->getLongName() + "\",\n";
-		js += "\tworldName: \"" + it->getWorld() + "\",\n";
+		js += "\tworldName: \"" + world.getWorldName() + "\",\n";
 		js += "\ttextureSize: " + util::str(it->getTextureSize()) + ",\n";
 		js += "\ttileSize: " + util::str(32 * it->getTextureSize()) + ",\n";
 		js += "\tmaxZoom: " + util::str(getMapZoomlevel(it->getShortName())) + ",\n";
@@ -484,6 +563,15 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2)
 			js += util::str(*it2) + ",";
 		js += "],\n";
+
+		std::string tile_offsets = "[";
+		auto offsets = world_tile_offsets.at(it->getWorld());
+		for (auto it2 = offsets.begin(); it2 != offsets.end(); ++it2)
+			tile_offsets += "[" + util::str(it2->getX()) + ", " + util::str(it2->getY()) + "], ";
+		tile_offsets += "]";
+
+		js += "\ttileOffsets: " + tile_offsets + ",\n";
+
 		js += "},";
 	}
 
@@ -516,6 +604,16 @@ void MapcrafterConfigHelper::setWorldZoomlevel(const std::string& world, int zoo
 
 void MapcrafterConfigHelper::setMapZoomlevel(const std::string& map, int zoomlevel) {
 	map_zoomlevels[map] = zoomlevel;
+}
+
+void MapcrafterConfigHelper::setWorldTileOffset(const std::string& world,
+		int rotation, const render::TilePos& tile_offset) {
+	world_tile_offsets[world][rotation] = tile_offset;
+}
+
+const render::TilePos& MapcrafterConfigHelper::getWorldTileOffset(
+		const std::string& world, int rotation) {
+	return world_tile_offsets.at(world).at(rotation);
 }
 
 int MapcrafterConfigHelper::getRenderBehavior(const std::string& map, int rotation) const {

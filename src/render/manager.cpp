@@ -34,11 +34,13 @@ namespace mapcrafter {
 namespace render {
 
 MapSettings::MapSettings()
-		: texture_size(12), tile_size(0), max_zoom(0),
-		  render_unknown_blocks(0), render_leaves_transparent(0),
-		  render_biomes(false) {
-	rotations.resize(4, false);
-	last_render.resize(4, 0);
+	: texture_size(12), tile_size(0), max_zoom(0),
+	  render_unknown_blocks(0), render_leaves_transparent(0), render_biomes(false) {
+	for (int i = 0; i < 4; i++) {
+		rotations[i] = false;
+		last_render[i] = 0;
+		tile_offsets[i] = TilePos(0, 0);
+	}
 }
 
 /**
@@ -62,8 +64,13 @@ bool MapSettings::read(const std::string& filename) {
 	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
 	for (int i = 0; i < 4; i++) {
 		rotations[i] = config.hasSection("rotation", rotation_names[i]);
-		if (rotations[i])
-			last_render[i] = config.getSection("rotation", rotation_names[i]).get<int>("last_render");
+		if (rotations[i]) {
+			auto section = config.getSection("rotation", rotation_names[i]);
+			last_render[i] = section.get<int>("last_render");
+			int offset_x = section.get<int>("tile_offset_x", 0);
+			int offset_y = section.get<int>("tile_offset_y", 0);
+			tile_offsets[i] = TilePos(offset_x, offset_y);
+		}
 	}
 
 	return true;
@@ -86,8 +93,12 @@ bool MapSettings::write(const std::string& filename) const {
 
 	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
 	for (int i = 0; i < 4; i++) {
-		if (rotations[i])
-			config.getSection("rotation", rotation_names[i]).set("last_render", util::str(last_render[i]));
+		if (rotations[i]) {
+			auto& section = config.getSection("rotation", rotation_names[i]);
+			section.set("last_render", util::str(last_render[i]));
+			section.set("tile_offset_x", util::str(tile_offsets[i].getX()));
+			section.set("tile_offset_y", util::str(tile_offsets[i].getY()));
+		}
 	}
 
 	return config.writeFile(filename);
@@ -118,7 +129,7 @@ MapSettings MapSettings::byMapConfig(const config::MapSection& map) {
 }
 
 RenderManager::RenderManager(const RenderOpts& opts)
-		: opts(opts) {
+	: opts(opts) {
 }
 
 /**
@@ -324,7 +335,7 @@ void RenderManager::renderMultithreaded(const config::MapSection& map_config,
 	// a list of workers
 	std::vector<std::map<TilePath, int> > workers;
 	// find task/worker assignemt
-	int remaining = tileset->findRenderTasks(opts.jobs, workers);
+	int remaining = tileset->findWorkTasks(opts.jobs, workers);
 
 	std::vector<std::thread> threads;
 	std::vector<std::shared_ptr<mc::WorldCache>> threads_worldcache;
@@ -419,17 +430,17 @@ bool RenderManager::run() {
 	// show infos/warnings/errors if configuration file has something
 	if (validation.size() > 0) {
 		if (ok)
-			std::cout << "Some notes on your configuration file:" << std::endl;
+			std::cerr << "Some notes on your configuration file:" << std::endl;
 		else
-			std::cout << "Your configuration file is invalid!" << std::endl;
+			std::cerr << "Your configuration file is invalid!" << std::endl;
 		for (auto section_it = validation.begin(); section_it != validation.end(); ++section_it) {
 			if (section_it->second.empty())
 				continue;
-			std::cout << section_it->first << ":" << std::endl;
+			std::cerr << section_it->first << ":" << std::endl;
 			for (auto message_it = section_it->second.begin(); message_it != section_it->second.end(); ++message_it)
-				std::cout << " - " << *message_it << std::endl;
+				std::cerr << " - " << *message_it << std::endl;
 		}
-		std::cout << "Please read the documentation about the new configuration file format." << std::endl;
+		std::cerr << "Please read the documentation about the new configuration file format." << std::endl;
 	}
 	if (!ok)
 		return false;
@@ -460,8 +471,11 @@ bool RenderManager::run() {
 	for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
 		confighelper.setUsedRotations(map_it->getWorld(), map_it->getRotations());
 		MapSettings settings;
-		if (settings.read(config.getOutputPath(map_it->getShortName() + "/map.settings")))
+		if (settings.read(config.getOutputPath(map_it->getShortName() + "/map.settings"))) {
 			confighelper.setMapZoomlevel(map_it->getShortName(), settings.max_zoom);
+			for (int i = 0; i < 4; i++)
+				confighelper.setWorldTileOffset(map_it->getWorld(), i, settings.tile_offsets[i]);
+		}
 	}
 
 	// ###
@@ -497,12 +511,25 @@ bool RenderManager::run() {
 		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
 			// load the world
 			mc::World world;
-			if (!world.load(world_it->second.getInputDir().string(), *rotation_it)) {
+			world.setRotation(*rotation_it);
+			world.setWorldCrop(world_it->second.getWorldCrop());
+			if (!world.load(world_it->second.getInputDir().string())) {
 				std::cerr << "Unable to load world " << world_name << "!" << std::endl;
 				return false;
 			}
 			// create a tileset for this world
-			std::shared_ptr<TileSet> tileset(new TileSet(world));
+			std::shared_ptr<TileSet> tileset(new TileSet);
+			// and scan for tiles of this world,
+			// we automatically center the tiles for cropped worlds, but only...
+			//  - the circular cropped ones and
+			//  - the ones with complete specified x- AND z-bounds
+			if (world_it->second.needsWorldCentering()) {
+				TilePos tile_offset;
+				tileset->scan(world, true, tile_offset);
+				confighelper.setWorldTileOffset(world_name, *rotation_it, tile_offset);
+			} else {
+				tileset->scan(world);
+			}
 			// update the highest max zoom level
 			zoomlevels_max = std::max(zoomlevels_max, tileset->getMinDepth());
 
@@ -606,6 +633,11 @@ bool RenderManager::run() {
 					increaseMaxZoom(output_dir);
 			}
 		}
+
+		// also write the tile offsets to the map settings file
+		// to have them next time available even if we don't render/scan this world
+		for (int rotation = 0; rotation < 4; rotation++)
+			settings.tile_offsets[rotation] = confighelper.getWorldTileOffset(world_name, rotation);
 
 		// now write the (possibly new) max zoom level to the settings file
 		settings.max_zoom = world_zoomlevels;

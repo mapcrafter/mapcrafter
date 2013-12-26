@@ -30,16 +30,13 @@
 #include <algorithm>
 #include <stdint.h>
 #include <set>
+#include <limits>
 
 namespace mapcrafter {
 namespace render {
 
-TilePos::TilePos()
-		: x(0), y(0) {
-}
-
 TilePos::TilePos(int x, int y)
-		: x(x), y(y) {
+	: x(x), y(y) {
 }
 
 int TilePos::getX() const {
@@ -76,6 +73,10 @@ bool TilePos::operator==(const TilePos& other) const {
 	return x == other.x && y == other.y;
 }
 
+bool TilePos::operator!=(const TilePos& other) const {
+	return !(*this == other);
+}
+
 bool TilePos::operator<(const TilePos& other) const {
 	if (x == other.x)
 		return y < other.y;
@@ -86,23 +87,26 @@ TilePath::TilePath() {
 }
 
 TilePath::TilePath(const std::vector<int>& path)
-		: path(path) {
+	: path(path) {
 }
 
 TilePath::~TilePath() {
-}
-
-const std::vector<int>& TilePath::getPath() const {
-	return path;
 }
 
 int TilePath::getDepth() const {
 	return path.size();
 }
 
-/**
- * This method calculates the
- */
+const std::vector<int>& TilePath::getPath() const {
+	return path;
+}
+
+TilePath TilePath::parent() const {
+	TilePath copy(path);
+	copy.path.pop_back();
+	return copy;
+}
+
 TilePos TilePath::getTilePos() const {
 	// calculate the radius of all tiles on the top zoom level (2^zoomlevel / 2)
 	int radius = pow(2, path.size()) / 2;
@@ -116,7 +120,7 @@ TilePos TilePath::getTilePos() const {
 		// increase x by the radius if this tile is on the right side (2 or 4)
 		if (tile == 2 || tile == 4)
 			x += radius;
-		// increase y by the radius if this tile is bottom (3 or 4)
+		// increase y by the radius if this tile is on the bottom side (3 or 4)
 		if (tile == 3 || tile == 4)
 			y += radius;
 		// divide size by two, because the next zoom level has only the half radius
@@ -125,56 +129,16 @@ TilePos TilePath::getTilePos() const {
 	return TilePos(x, y);
 }
 
-std::string TilePath::toString() const {
-	std::stringstream ss;
-	for (size_t i = 0; i < path.size(); i++) {
-		ss << path[i];
-		if (i != path.size() - 1)
-			ss << "/";
-	}
-	return ss.str();
-}
-
-TilePath& TilePath::operator+=(int node) {
-	path.push_back(node);
-	return *this;
-}
-
-TilePath TilePath::operator+(int node) const {
-	TilePath copy(path);
-	copy.path.push_back(node);
-	return copy;
-}
-
-TilePath TilePath::parent() const {
-	TilePath copy(path);
-	copy.path.pop_back();
-	return copy;
-}
-
-bool TilePath::operator==(const TilePath& other) const {
-	return path == other.path;
-}
-
-bool TilePath::operator<(const TilePath& other) const {
-	return path < other.path;
-}
-
-/**
- * This method calculates the path by a specific tile position on a specific level.
- * This is the opposite of Path::getTilePos().
- */
 TilePath TilePath::byTilePos(const TilePos& tile, int depth) {
 	TilePath path;
 
 	// at first calculate the radius in tiles of this zoom level
 	int radius = pow(2, depth) / 2;
 	// check if the tile is in this bounds
-	if (tile.getX() > radius || tile.getY() > radius || tile.getX() < -radius
-	        || tile.getY() < -radius)
-		throw std::runtime_error(
-		        "Invalid tile position " + util::str(tile.getX()) + ":" + util::str(tile.getY())
-		                + " on depth " + util::str(depth));
+	if (tile.getX() > radius  || tile.getY() > radius
+			|| tile.getX() < -radius || tile.getY() < -radius)
+		throw std::runtime_error("Invalid tile position " + util::str(tile.getX())
+			+ ":" + util::str(tile.getY()) + " on depth " + util::str(depth));
 	// the tactic is here to calculate the bounds where the tile is inside
 	int bounds_left = -radius;
 	int bounds_right = radius;
@@ -222,6 +186,25 @@ TilePath TilePath::byTilePos(const TilePos& tile, int depth) {
 	return path;
 }
 
+TilePath& TilePath::operator+=(int node) {
+	path.push_back(node);
+	return *this;
+}
+
+TilePath TilePath::operator+(int node) const {
+	TilePath copy(path);
+	copy.path.push_back(node);
+	return copy;
+}
+
+bool TilePath::operator==(const TilePath& other) const {
+	return path == other.path;
+}
+
+bool TilePath::operator<(const TilePath& other) const {
+	return path < other.path;
+}
+
 std::ostream& operator<<(std::ostream& stream, const TilePos& tile) {
 	stream << tile.getX() << ":" << tile.getY();
 	return stream;
@@ -232,12 +215,22 @@ std::ostream& operator<<(std::ostream& stream, const TilePath& path) {
 	return stream;
 }
 
+std::string TilePath::toString() const {
+	std::stringstream ss;
+	for (size_t i = 0; i < path.size(); i++) {
+		ss << path[i];
+		if (i != path.size() - 1)
+			ss << "/";
+	}
+	return ss.str();
+}
+
 TileSet::TileSet()
-		: min_depth(0), depth(0) {
+	: min_depth(0), depth(0) {
 }
 
 TileSet::TileSet(const mc::World& world)
-		: min_depth(0), depth(0) {
+	: min_depth(0), depth(0) {
 	scan(world);
 }
 
@@ -288,17 +281,17 @@ void getChunkTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles) {
 		addRowColTiles(row + 2*i, col, tiles);
 }
 
-/**
- * This method finds out, which top level tiles a world has and which of them need to
- * get rendered.
- */
-void TileSet::findRenderTiles(const mc::World& world) {
+void TileSet::findRenderTiles(const mc::World& world, bool auto_center,
+		TilePos& tile_offset) {
 	// clear maybe already calculated tiles
 	render_tiles.clear();
 	required_render_tiles.clear();
 
 	// the min/max x/y coordinates of the tiles in the world
-	int tiles_x_min = 0, tiles_x_max = 0, tiles_y_min = 0, tiles_y_max = 0;
+	int tiles_x_min = std::numeric_limits<int>::max(),
+	    tiles_x_max = std::numeric_limits<int>::min(),
+	    tiles_y_min = std::numeric_limits<int>::max(),
+	    tiles_y_max = std::numeric_limits<int>::min();
 
 	// go through all chunks in the world
 	auto regions = world.getAvailableRegions();
@@ -318,18 +311,18 @@ void TileSet::findRenderTiles(const mc::World& world) {
 			        tile_it != tiles.end(); ++tile_it) {
 
 				// and update the bounds
-				tiles_x_min = MIN(tiles_x_min, tile_it->getX());
-				tiles_x_max = MAX(tiles_x_max, tile_it->getX());
-				tiles_y_min = MIN(tiles_y_min, tile_it->getY());
-				tiles_y_max = MAX(tiles_y_max, tile_it->getY());
+				tiles_x_min = std::min(tiles_x_min, tile_it->getX());
+				tiles_x_max = std::max(tiles_x_max, tile_it->getX());
+				tiles_y_min = std::min(tiles_y_min, tile_it->getY());
+				tiles_y_max = std::max(tiles_y_max, tile_it->getY());
 
 				// update tile timestamp
 				if (!render_tiles.count(*tile_it))
 					tile_timestamps[*tile_it] = timestamp;
 				else
-					tile_timestamps[*tile_it] = MAX(tile_timestamps[*tile_it], timestamp);
+					tile_timestamps[*tile_it] = std::max(tile_timestamps[*tile_it], timestamp);
 
-				// insert the tile in the set of available render tiles
+				// insert the tile to the set of available render tiles
 				// and also make it required by default
 				render_tiles.insert(*tile_it);
 				required_render_tiles.insert(*tile_it);
@@ -337,21 +330,41 @@ void TileSet::findRenderTiles(const mc::World& world) {
 		}
 	}
 
+	// center tiles
+	if (auto_center || tile_offset != TilePos(0, 0)) {
+		// find a tile center if we should do it automatically
+		if (auto_center)
+			tile_offset = TilePos((tiles_x_min + tiles_x_max) / 2, (tiles_y_min + tiles_y_max) / 2);
+
+		// update all tile positions
+		std::set<TilePos> render_tiles_tmp, required_render_tiles_tmp;
+		std::map<TilePos, int> tile_timestamps_tmp;
+		for (auto it = render_tiles.begin(); it != render_tiles.end(); ++it)
+			render_tiles_tmp.insert(*it - tile_offset);
+		for (auto it = required_render_tiles.begin(); it != required_render_tiles.end(); ++it)
+			required_render_tiles_tmp.insert(*it - tile_offset);
+		for (auto it = tile_timestamps.begin(); it != tile_timestamps.end(); ++it)
+			tile_timestamps_tmp[it->first - tile_offset] = it->second;
+
+		render_tiles = render_tiles_tmp;
+		required_render_tiles = required_render_tiles_tmp;
+		tile_timestamps = tile_timestamps_tmp;
+		this->tile_offset = tile_offset;
+	}
+
 	// now get the necessary depth of the tile quadtree
 	for (min_depth = 0; min_depth < 32; min_depth++) {
 		// for each level calculate the radius and check if the tiles fit in this bounds
+		// also don't forget the tile offset
 		int radius = pow(2, min_depth) / 2;
-		if (tiles_x_min > -radius && tiles_x_max < radius && tiles_y_min > -radius
-		        && tiles_y_max < radius)
+		if (tiles_x_min - tile_offset.getX() > -radius
+				&& tiles_x_max - tile_offset.getX() < radius
+				&& tiles_y_min - tile_offset.getY() > -radius
+				&& tiles_y_max - tile_offset.getY() < radius)
 			break;
 	}
 }
 
-/**
- * This method finds out, which composite tiles are needed, depending on a
- * list of available/required render tiles, and puts them into a set. So we can find out
- * which composite tiles are available and which composite tiles need to get rendered.
- */
 void TileSet::findRequiredCompositeTiles(const std::set<TilePos>& render_tiles,
 		std::set<TilePath>& tiles) {
 
@@ -393,13 +406,16 @@ void TileSet::updateContainingRenderTiles() {
 }
 
 void TileSet::scan(const mc::World& world) {
-	findRenderTiles(world);
+	TilePos tile_offset(0, 0);
+	scan(world, false, tile_offset);
 	setDepth(min_depth);
 }
 
-/**
- * This method finds all render tiles, which where changed since a specific timestamp.
- */
+void TileSet::scan(const mc::World& world, bool auto_center, TilePos& tile_offset) {
+	findRenderTiles(world, auto_center, tile_offset);
+	setDepth(min_depth);
+}
+
 void TileSet::scanRequiredByTimestamp(int last_change) {
 	required_render_tiles.clear();
 
@@ -415,10 +431,6 @@ void TileSet::scanRequiredByTimestamp(int last_change) {
 	updateContainingRenderTiles();
 }
 
-/**
- * This method finds all render tiles, which are required based on the modification
- * times of the tile image files.
- */
 void TileSet::scanRequiredByFiletimes(const fs::path& output_dir) {
 	required_render_tiles.clear();
 
@@ -462,6 +474,10 @@ void TileSet::setDepth(int depth) {
 	updateContainingRenderTiles();
 }
 
+const TilePos& TileSet::getTileOffset() const {
+	return tile_offset;
+}
+
 bool TileSet::hasTile(const TilePath& path) const {
 	if (path.getDepth() == depth)
 		return render_tiles.count(path.getTilePos()) != 0;
@@ -474,28 +490,20 @@ bool TileSet::isTileRequired(const TilePath& path) const {
 	return required_composite_tiles.count(path) != 0;
 }
 
-const std::set<TilePos>& TileSet::getAvailableRenderTiles() const {
-	return render_tiles;
-}
-
-const std::set<TilePath>& TileSet::getAvailableCompositeTiles() const {
-	return composite_tiles;
+int TileSet::getRequiredRenderTilesCount() const {
+	return required_render_tiles.size();
 }
 
 const std::set<TilePos>& TileSet::getRequiredRenderTiles() const {
 	return required_render_tiles;
 }
 
-const std::set<TilePath>& TileSet::getRequiredCompositeTiles() const {
-	return required_composite_tiles;
-}
-
-int TileSet::getRequiredRenderTilesCount() const {
-	return required_render_tiles.size();
-}
-
 int TileSet::getRequiredCompositeTilesCount() const {
 	return required_composite_tiles.size();
+}
+
+const std::set<TilePath>& TileSet::getRequiredCompositeTiles() const {
+	return required_composite_tiles;
 }
 
 int TileSet::getContainingRenderTiles(const TilePath& tile) const {
@@ -567,7 +575,7 @@ double assignTasks(std::vector<Task> tasks, std::vector<TaskWorker>& workers) {
 	int max_diff = 0;
 	int avg = sumTasks(tasks) / worker_count;
 	for (int i = 0; i < worker_count; i++)
-		max_diff = MAX(max_diff, std::abs(workers[i].work - avg));
+		max_diff = std::max(max_diff, std::abs(workers[i].work - avg));
 	return (double) max_diff / sumTasks(tasks);
 }
 
@@ -587,7 +595,7 @@ struct Assigment {
  * This method tries to find an assignment of render tasks to a specific count of workers.
  * The workers should do the same amount of work.
  */
-int TileSet::findRenderTasks(int worker_count,
+int TileSet::findWorkTasks(int worker_count,
 		std::vector<std::map<TilePath, int> >& workers) const {
 	//std::cout << "Render tiles: " << required_render_tiles.size() << std::endl;
 	//std::cout << "Composite tiles: " << required_composite_tiles.size() << std::endl;

@@ -427,17 +427,18 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 	return data;
 }
 
-void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
+void TileRenderer::renderTile(const TilePos& tile_pos, const TilePos& tile_offset,
+		Image& tile) {
 	// some vars, set correct image size
 	int block_size = state.images->getBlockImageSize();
 	int tile_size = state.images->getTileSize();
 	tile.setSize(tile_size, tile_size);
 
-	// get the maximum count of water blocks,
+	// get the maximum count of water blocks
 	// blitted about each over, until they are nearly opaque
 	int max_water = state.images->getMaxWaterNeededOpaque();
 
-	// all visible blocks, which are rendered in this tile
+	// all visible blocks which are rendered in this tile
 	std::set<RenderBlock> blocks;
 
 	// call start method of the rendermodes
@@ -445,7 +446,10 @@ void TileRenderer::renderTile(const TilePos& pos, Image& tile) {
 		rendermodes[i]->start();
 
 	// iterate over the highest blocks in the tile
-	for (TileTopBlockIterator it(pos, block_size, tile_size); !it.end(); it.next()) {
+	// we use as tile position tile_pos+tile_offset because the offset means that
+	// we treat the tile position as tile_pos, but it's actually tile_pos+tile_offset
+	for (TileTopBlockIterator it(tile_pos + tile_offset, block_size, tile_size);
+			!it.end(); it.next()) {
 		// water render behavior n1:
 		// are we already in a row of water?
 		bool in_water = false;
