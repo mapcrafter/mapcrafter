@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <ctime>
 #include <thread>
 #include <boost/filesystem.hpp>
 
@@ -119,6 +120,7 @@ bool mergeRegions(std::string outname, const std::vector<std::string>& regions) 
 			out.seekg(0, std::ios::beg);
 			out.read(reinterpret_cast<char*>(&data[0]), out.str().size());
 			region0.setChunkData(chunkpos, data, 2);
+			region0.setChunkTimestamp(chunkpos, time(nullptr));
 
 		}
 
