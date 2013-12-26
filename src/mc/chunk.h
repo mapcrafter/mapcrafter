@@ -58,21 +58,6 @@ struct ChunkSection {
  * To save memory, the class stores only the sections which exist in the NBT data.
  */
 class Chunk {
-private:
-	ChunkPos pos;
-
-	int rotation;
-
-	// the index of the chunk sections in the sections array
-	// or -1 if section does not exist
-	int section_offsets[CHUNK_HEIGHT];
-	std::bitset<CHUNK_HEIGHT> section_bitset;
-	// the array with the sections, see indexes above
-	std::vector<ChunkSection> sections;
-
-	uint8_t biomes[256];
-
-	uint8_t getData(const LocalBlockPos& pos, int array) const;
 public:
 	Chunk();
 	~Chunk();
@@ -150,6 +135,8 @@ private:
 	// the index of the chunk sections in the sections array
 	// or -1 if section does not exist
 	int section_offsets[CHUNK_HEIGHT];
+	// bitset which shows which sections the chunk has
+	std::bitset<CHUNK_HEIGHT> section_bitset;
 	// the array with the sections, see indexes above
 	std::vector<ChunkSection> sections;
 
