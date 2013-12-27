@@ -26,6 +26,8 @@
 namespace mapcrafter {
 namespace render {
 
+const double LIGHTNING_INTENSITY = 1.0;
+
 // corner definitions of the faces
 extern const FaceCorners CORNERS_LEFT = FaceCorners(CornerNeighbors(
 		mc::DIR_WEST + mc::DIR_NORTH + mc::DIR_TOP,
@@ -94,6 +96,7 @@ void drawBottomTriangle(Image& image, int size, double c1, double c2, double c3)
 			fx = 1;
 		for (int x = 0; x <= y; x++, fx+=fxStep) {
 			double color = color1 + colordiff*fx;
+			//color += (1-color)*(1-LIGHTNING_INTENSITY);
 			image.pixel(x, y) = rgba(0, 0, 0, color * 255);
 		}
 	}
@@ -120,6 +123,7 @@ void drawTopTriangle(Image& image, int size, double c1, double c2, double c3) {
 			fx = 1;
 		for (int x = 0; x <= y; x++, fx+=fxStep) {
 			double color = color1 + colordiff*fx;
+			//color += (1-color)*(1-LIGHTNING_INTENSITY);
 			image.pixel(size-1-x, size-1-y) = rgba(0, 0, 0, color * 255);
 		}
 	}
@@ -231,7 +235,8 @@ LightingData LightingRendermode::getBlockLight(const mc::BlockPos& pos) {
  */
 LightingColor LightingRendermode::getLightingColor(const mc::BlockPos& pos) {
 	LightingData lighting = getBlockLight(pos);
-	return calculateLightingColor(lighting.block, lighting.sky);
+	LightingColor color = calculateLightingColor(lighting.block, lighting.sky);
+	return color + (1-color)*(1-LIGHTNING_INTENSITY);
 }
 
 /**
@@ -263,14 +268,28 @@ CornerColors LightingRendermode::getCornerColors(const mc::BlockPos& pos, const 
 /**
  * Adds smooth lighting to the left face of a block image.
  */
-void LightingRendermode::lightLeft(Image& image, const CornerColors& colors,
-		bool top, bool bottom) {
+void LightingRendermode::lightLeft(Image& image, const CornerColors& colors) {
 	int size = image.getWidth() / 2;
 	Image tex(size, size);
 	createShade(tex, colors);
 
 	for (SideFaceIterator it(size, SideFaceIterator::LEFT); !it.end(); it.next()) {
-		if ((it.src_y < size/2 && !top) || (it.src_y >= size/2 && !bottom))
+		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + size/2);
+		if (pixel != 0) {
+			uint8_t d = ALPHA(tex.pixel(it.src_x, it.src_y));
+			pixel = rgba_multiply(pixel, d, d, d);
+		}
+	}
+}
+
+void LightingRendermode::lightLeft(Image& image, const CornerColors& colors,
+		int ystart, int yend) {
+	int size = image.getWidth() / 2;
+	Image tex(size, size);
+	createShade(tex, colors);
+
+	for (SideFaceIterator it(size, SideFaceIterator::LEFT); !it.end(); it.next()) {
+		if (it.src_y < ystart || it.src_y > yend)
 			continue;
 		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + size/2);
 		if (pixel != 0) {
@@ -283,14 +302,28 @@ void LightingRendermode::lightLeft(Image& image, const CornerColors& colors,
 /**
  * Adds smooth lighting to the right face of a block image.
  */
-void LightingRendermode::lightRight(Image& image, const CornerColors& colors,
-		bool top, bool bottom) {
+void LightingRendermode::lightRight(Image& image, const CornerColors& colors) {
 	int size = image.getWidth() / 2;
 	Image tex(size, size);
 	createShade(tex, colors);
 
 	for (SideFaceIterator it(size, SideFaceIterator::RIGHT); !it.end(); it.next()) {
-		if ((it.src_y < size/2 && !top) || (it.src_y >= size/2 && !bottom))
+		uint32_t& pixel = image.pixel(it.dest_x + size, it.dest_y + size/2);
+		if (pixel != 0) {
+			uint8_t d = ALPHA(tex.pixel(it.src_x, it.src_y));
+			pixel = rgba_multiply(pixel, d, d, d);
+		}
+	}
+}
+
+void LightingRendermode::lightRight(Image& image, const CornerColors& colors,
+		int ystart, int yend) {
+	int size = image.getWidth() / 2;
+	Image tex(size, size);
+	createShade(tex, colors);
+
+	for (SideFaceIterator it(size, SideFaceIterator::RIGHT); !it.end(); it.next()) {
+		if (it.src_y < ystart || it.src_y > yend)
 			continue;
 		uint32_t& pixel = image.pixel(it.dest_x + size, it.dest_y + size/2);
 		if (pixel != 0) {
@@ -329,19 +362,21 @@ void LightingRendermode::doSlabLight(Image& image, const mc::BlockPos& pos, uint
 
 	// check if the slab is the top or the bottom half of the block
 	bool top = data & 0x8;
-	bool bottom = !top;
 	// set y-offset for the top face shadow
 	int yoff = top ? 0 : image.getHeight()/4;
+	// set limits for the sides where it should apply lighting
+	int ystart = yoff;
+	int yend = yoff + image.getHeight()/4;
 
 	// light the faces
 	mc::Block block;
 	block = state.getBlock(pos + mc::DIR_WEST);
 	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
-		lightLeft(image, getCornerColors(pos, CORNERS_LEFT), top, bottom);
+		lightLeft(image, getCornerColors(pos, CORNERS_LEFT), ystart, yend);
 
 	block = state.getBlock(pos + mc::DIR_SOUTH);
 	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
-		lightRight(image, getCornerColors(pos, CORNERS_RIGHT), top, bottom);
+		lightRight(image, getCornerColors(pos, CORNERS_RIGHT), ystart, yend);
 
 	block = state.getBlock(pos + mc::DIR_TOP);
 	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
@@ -415,9 +450,13 @@ void LightingRendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id
 	bool transparent = state.images->isBlockTransparent(id, data);
 	bool water = (id == 8 || id == 9) && (data & 0b1111) == 0;
 
+	int texture_size = image.getHeight() / 2;
 	if(id == 78 && (data & 0b1111) == 0) {
 		// flat snow gets also smooth lighting
-		lightTop(image, getCornerColors(pos, CORNERS_BOTTOM), image.getHeight() / 2);
+		int height = ((data & 0b1111)+1) / 8.0 * texture_size;
+		lightTop(image, getCornerColors(pos, CORNERS_BOTTOM), texture_size - height);
+		lightLeft(image, getCornerColors(pos, CORNERS_LEFT), texture_size-height, texture_size);
+		lightRight(image, getCornerColors(pos, CORNERS_RIGHT), texture_size-height, texture_size);
 	} else if (id == 44 || id == 126) {
 		// slabs and wooden slabs
 		doSlabLight(image, pos, id, data);

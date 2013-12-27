@@ -91,10 +91,10 @@ private:
 	LightingColor getCornerColor(const mc::BlockPos& pos, const CornerNeighbors& corner);
 	CornerColors getCornerColors(const mc::BlockPos& pos, const FaceCorners& corners);
 	
-	void lightLeft(Image& image, const CornerColors& colors,
-			bool top = true, bool bottom = true);
-	void lightRight(Image& image, const CornerColors& colors,
-			bool top = true, bool bottom = true);
+	void lightLeft(Image& image, const CornerColors& colors);
+	void lightLeft(Image& image, const CornerColors& colors, int ystart, int yend);
+	void lightRight(Image& image, const CornerColors& colors);
+	void lightRight(Image& image, const CornerColors& colors, int ystart, int yend);
 	void lightTop(Image& image, const CornerColors& colors, int yoff = 0);
 	
 	void doSlabLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
