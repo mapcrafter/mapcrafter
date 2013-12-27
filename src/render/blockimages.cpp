@@ -1588,7 +1588,7 @@ void BlockImages::createButton(uint16_t id, const Image& tex) { // id 77, 143
 void BlockImages::createSnow() { // id 78
 	Image snow = textures.SNOW;
 	for (int data = 0; data < 8; data++) {
-		int height = data / 8.0 * texture_size;
+		int height = (data+1) / 8.0 * texture_size;
 		setBlockImage(78, data, buildSmallerBlock(snow, snow, snow, 0, height));
 	}
 }
