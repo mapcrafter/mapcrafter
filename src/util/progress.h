@@ -27,6 +27,9 @@ namespace util {
 
 std::string format_eta(int eta);
 
+/**
+ * A basic interface for a progress handler.
+ */
 class IProgressHandler {
 public:
 	virtual ~IProgressHandler() {};
@@ -38,10 +41,11 @@ public:
 	virtual void setValue(int value) = 0;
 };
 
+/**
+ * A dummy progress handler. Implements progress handler interface and allows setting
+ * and getting the progress values.
+ */
 class DummyProgressHandler : public IProgressHandler {
-protected:
-	// the maximum and current value of the progress
-	int max, value;
 public:
 	DummyProgressHandler();
 	virtual ~DummyProgressHandler();
@@ -51,12 +55,24 @@ public:
 
 	virtual int getValue() const;
 	virtual void setValue(int value);
+protected:
+	// the maximum and current value of the progress
+	int max, value;
 };
 
 /**
  * Shows a nice command line progress bar.
  */
 class ProgressBar : public DummyProgressHandler {
+public:
+	ProgressBar(int max = 0, bool animated = true);
+	virtual ~ProgressBar();
+
+	void setAnimated(bool animated);
+	bool isAnimated() const;
+
+	virtual void setValue(int value);
+	void finish();
 private:
 	// animated? if yes, it updates the progress bar and makes it "animated"
 	// but not good if you pipe the output in a file, so you can disable it
@@ -69,21 +85,15 @@ private:
 	// value of last update
 	int last_value;
 	// percentage of last update
-	int last_percent;
+	int last_percentage;
 	// length of last output needed to clear the line
 	int last_output_len;
-public:
-	ProgressBar(int max = 0, bool animated = true);
-	virtual ~ProgressBar();
 
-	void setAnimated(bool animated);
-	bool isAnimated() const;
+	void update(int value);
 
-	void update(int value, bool force = false);
-	void finish();
-
-	virtual void setValue(int value);
-
+	std::string createProgressBar(int width, double percentage) const;
+	std::string createProgressStats(double percentage, int value, int max,
+			double speed, int eta = -1) const;
 };
 
 } /* namespace util */
