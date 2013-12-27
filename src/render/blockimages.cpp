@@ -1373,7 +1373,7 @@ void BlockImages::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) 
 	}
 
 	// special double slabs
-	if (stone_slabs) {
+	if (stone_slabs && double_slabs) {
 		createBlock(id, 0x8, textures.STONE_SLAB_TOP);
 		createBlock(id, 0x9, textures.SANDSTONE_TOP);
 		createBlock(id, 0xF, textures.QUARTZ_BLOCK_TOP);
