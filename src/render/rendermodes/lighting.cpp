@@ -26,6 +26,8 @@
 namespace mapcrafter {
 namespace render {
 
+const double LIGHTNING_INTENSITY = 1.0;
+
 // corner definitions of the faces
 extern const FaceCorners CORNERS_LEFT = FaceCorners(CornerNeighbors(
 		mc::DIR_WEST + mc::DIR_NORTH + mc::DIR_TOP,
@@ -94,6 +96,7 @@ void drawBottomTriangle(Image& image, int size, double c1, double c2, double c3)
 			fx = 1;
 		for (int x = 0; x <= y; x++, fx+=fxStep) {
 			double color = color1 + colordiff*fx;
+			//color += (1-color)*(1-LIGHTNING_INTENSITY);
 			image.pixel(x, y) = rgba(0, 0, 0, color * 255);
 		}
 	}
@@ -120,6 +123,7 @@ void drawTopTriangle(Image& image, int size, double c1, double c2, double c3) {
 			fx = 1;
 		for (int x = 0; x <= y; x++, fx+=fxStep) {
 			double color = color1 + colordiff*fx;
+			//color += (1-color)*(1-LIGHTNING_INTENSITY);
 			image.pixel(size-1-x, size-1-y) = rgba(0, 0, 0, color * 255);
 		}
 	}
@@ -231,7 +235,8 @@ LightingData LightingRendermode::getBlockLight(const mc::BlockPos& pos) {
  */
 LightingColor LightingRendermode::getLightingColor(const mc::BlockPos& pos) {
 	LightingData lighting = getBlockLight(pos);
-	return calculateLightingColor(lighting.block, lighting.sky);
+	LightingColor color = calculateLightingColor(lighting.block, lighting.sky);
+	return color + (1-color)*(1-LIGHTNING_INTENSITY);
 }
 
 /**
