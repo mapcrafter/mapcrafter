@@ -508,6 +508,9 @@ bool BlockImages::saveBlocks(const std::string& filename) {
 	blocks.push_back(opaque_water[2]);
 	blocks.push_back(opaque_water[3]);
 
+	blocks.push_back(getBiomeDependBlock(18, 1, getBiome(1)));
+	blocks.push_back(getBiomeDependBlock(18, 2, getBiome(1)));
+
 	/*
 	for (std::unordered_map<uint64_t, Image>::const_iterator it = biome_images.begin();
 			it != biome_images.end(); ++it)
@@ -709,6 +712,13 @@ Image BlockImages::createBiomeBlock(uint16_t id, uint16_t data,
 		color = biome_data.getColor(foliagecolors, flip_xy);
 	} else
 		color = biome_data.getColor(grasscolors, false);
+
+	// hardcoded biome colors for birch and pine trees
+	// ... minecraft pls
+	if (id == 18 && (data & 0b11) == 1)
+		color = rgba(96, 151, 96, 0);
+	if (id == 18 && (data & 0b11) == 2)
+		color = rgba(126, 165, 84, 0);
 
 	double r = (double) RED(color) / 255;
 	double g = (double) GREEN(color) / 255;
