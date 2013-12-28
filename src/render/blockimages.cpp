@@ -569,9 +569,15 @@ bool BlockImages::saveBlocks(const std::string& filename) {
 uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	if (id == 6)
 		return data & (0xff00 | 0b00000011);
-	else if (id >= 8 && id <= 11) // water, lava
+	else if (id == 8 || id == 9) // water
 		return data & (0xff00 | 0b11110111);
-	else if (id == 18 || id == 161) // leaves
+	else if (id == 10 || id == 11) { // lava
+		// 0x8 bit means that this is a lava block spreading downwards
+		// -> return data 0 (full block)
+		if (data & 0x8)
+			return 0;
+		return data;
+	} else if (id == 18 || id == 161) // leaves
 		return data & (0xff00 | 0b00000011);
 	else if (id == 26) // bed
 		return data & (0xff00 | 0b00001011);
@@ -1187,8 +1193,9 @@ void BlockImages::createWater() { // id 8, 9
 
 void BlockImages::createLava() { // id 10, 11
 	Image lava = textures.LAVA_STILL;
-	for (int data = 0; data < 7; data += 2) {
-		int smaller = data / 8.0 * texture_size;
+	for (int data = 0; data < 8; data++) {
+		int smaller = (data) / 8.0 * texture_size;
+		std::cout << data << " " << smaller << std::endl;
 		Image side_texture = lava.move(0, smaller);
 
 		BlockImage block;
