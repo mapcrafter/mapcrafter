@@ -24,7 +24,9 @@
 #include <iostream>
 #include <fstream>
 
-#if defined(__WIN32__) || defined(__WIN64__)
+#if defined(__APPLE__)
+  #include <mach-o/dyld.h>
+#elif defined(__WIN32__) || defined(__WIN64__)
   #include <windows.h>
 #endif
 
@@ -89,7 +91,16 @@ fs::path findHomeDir() {
 // see also http://stackoverflow.com/questions/12468104/multi-os-get-executable-path
 fs::path findExecutablePath() {
 	char buf[1024];
-#if defined(unix) || defined(__unix) || defined(__unix__) || defined(__linux__) || defined(__APPLE__)
+#if defined(__APPLE__)
+	uint32_t size = sizeof(buf);
+	if (_NSGetExecutablePath(buf, &size) == 0) {
+		char real_path[1024];
+		if (realpath(buf, real_path)) {
+			size_t len = strlen(real_path);
+			return fs::path(std::string(real_path, len));
+		}
+	}
+#elif defined(unix) || defined(__unix) || defined(__unix__) || defined(__linux__)
 	int len;
 	if ((len = readlink("/proc/self/exe", buf, sizeof(buf))) != -1)
 		return fs::path(std::string(buf, len));
