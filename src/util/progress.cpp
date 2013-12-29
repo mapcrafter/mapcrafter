@@ -24,8 +24,8 @@
 #include <iostream>
 #include <cstdio>
 #include <ctime>
-#include <sys/ioctl.h>
-#include <unistd.h>
+#include <sys/ioctl.h> // ioctl, TIOCGWINSZ
+#include <unistd.h> // STDOUT_FILENO
 
 namespace mapcrafter {
 namespace util {
@@ -86,11 +86,117 @@ void DummyProgressHandler::setValue(int value) {
 
 ProgressBar::ProgressBar(int max, bool animated)
 		: animated(animated), start(time(NULL)), last_update(0),
-		  last_value(0), last_percent(0), last_output_len(0) {
+		  last_value(0), last_percentage(0), last_output_len(0) {
 	setMax(max);
 }
 
 ProgressBar::~ProgressBar() {
+}
+
+void ProgressBar::update(int value) {
+	// check when animated if we are at 100% and this is this the first time we are at 100%
+	// so we show the progress bar only one time at the end
+	if (!animated && (value != max || (value == max && last_value == max)))
+		return;
+	int now = time(NULL);
+	// check whether the time since the last show and the change was big enough to show a progress
+	double percentage = value / (double) max * 100.;
+	if (last_update + 1 > now && !(last_percentage != max && value == max))
+		return;
+
+	// now calculate the current and average speed
+	double speed = (double) (value - last_value) / (now - last_update);
+	double average_speed = (double) value / (now - start);
+	if (value == max)
+		// use the average speed at the end
+		speed = average_speed;
+
+	// try to determine the width of the terminal
+	// use 80 columns as default if we can't determine a terminal size
+	int terminal_width = 80;
+#ifdef TIOCGWINSZ
+	struct winsize ws = {0, 0, 0, 0};
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
+	if (ws.ws_col != 0)
+		terminal_width = ws.ws_col;
+#endif
+
+	// create the progress stats: percentage, current/maximum value, speed, eta
+	std::string stats;
+	// show eta only when progress is not finished, and only when speed != 0
+	// (speed = 0 can sometimes happen at the begin of rendering)
+	if (value != max && speed != 0) {
+		int eta = (max - value) / average_speed;
+		stats = createProgressStats(percentage, value, max, speed, eta);
+	} else {
+		stats = createProgressStats(percentage, value, max, speed);
+	}
+
+	// now create the progress bar
+	// with the remaining size minus one as size
+	// (because the space between progress and stats)
+	int progressbar_width = terminal_width - stats.size() - 1;
+	std::string progressbar = createProgressBar(progressbar_width, percentage);
+
+	// go to the begin of the line and clear it
+	if (animated) {
+		std::cout << "\r";
+		for (int i = 0; i < last_output_len; i++)
+			std::cout << " ";
+		std::cout << "\r";
+	}
+
+	// now show everything
+	std::cout << progressbar << " " << stats;
+	if (animated) {
+		std::cout << "\r";
+		std::cout.flush();
+	} else
+		std::cout << std::endl;
+
+	// set this as last shown
+	last_update = now;
+	last_value = value;
+	last_percentage = percentage;
+	last_output_len = progressbar.size() + 1 + stats.size();
+}
+
+std::string ProgressBar::createProgressBar(int width, double percentage) const {
+	// width - 2 because we need two characters for [ and ]
+	width -= 2;
+
+	std::string progressbar = "[";
+	double progress_step = (double) 100 / width;
+	for (int i = 0; i < width; i++) {
+		double current = progress_step * i;
+		if (current > percentage)
+			progressbar += " ";
+		else if (percentage - progress_step < current)
+			progressbar += ">";
+		else
+			progressbar += "=";
+	}
+	return progressbar + "]";
+}
+
+std::string ProgressBar::createProgressStats(double percentage, int value, int max,
+		double speed, int eta) const {
+	std::string stats;
+	char fpercent[20];
+	char fspeed[20];
+	sprintf(&fpercent[0], "%.2f%%", percentage);
+	sprintf(&fspeed[0], "%.2f", speed);
+	stats += std::string(fpercent) + " ";
+	stats += util::str(value) + "/" + util::str(max) + " ";
+	stats += std::string(fspeed) + "/s ";
+
+	if (eta != -1)
+		stats += "ETA " + format_eta(eta);
+
+	// add some padding to these stats
+	// to prevent the progress bar changing the size all the time
+	int padding = 20 - (stats.size() % 20);
+	return stats + std::string(padding, ' ');
 }
 
 void ProgressBar::setAnimated(bool animated) {
@@ -106,96 +212,8 @@ void ProgressBar::setValue(int value) {
 	this->value = value;
 }
 
-void ProgressBar::update(int value, bool force) {
-	// check when animated if we are at 100% and this is this the first time we are at 100%
-	// so we show the progress bar only one time at the end
-	if (!animated && (value != max || (value == max && last_value == max)))
-		return;
-	int now = time(NULL);
-	// check if the time since the last show and the change was big enough to show a progress
-	double percent = value / (double) max * 100.;
-	if (!force && last_update + 1 > now && !(last_percent != max && value == max))
-		return;
-
-	// now calculate the current and average speed
-	double speed = (double) (value - last_value) / (now - last_update);
-	double average_speed = (double) value / (now - start);
-	if (value == max)
-		// at the end use the average speed
-		speed = average_speed;
-
-	// try to determine the width of the terminal
-	// use 80 columns as default if we can't determine a terminal size
-	int terminal_width = 80;
-#ifdef TIOCGWINSZ
-	struct winsize ws = {0, 0, 0, 0};
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
-	if (ws.ws_col != 0)
-		terminal_width = ws.ws_col;
-#endif
-
-	// create the output stats: percentage, current/maximum value, speed, eta
-	std::string output_stats = "";
-	char fpercent[20];
-	char fspeed[20];
-	sprintf(&fpercent[0], "%.2f%%", percent);
-	sprintf(&fspeed[0], "%.2f", speed);
-	output_stats += std::string(fpercent) + " ";
-	output_stats += util::str(value) + "/" + util::str(max) + " ";
-	output_stats += std::string(fspeed) + "/s ";
-
-	// show ETA, but not at the end
-	if (value != max) {
-		int eta = (max - value) / average_speed;
-		output_stats += "ETA " + format_eta(eta);
-	}
-
-	// add some padding to these stats
-	// to prevent the progress bar changing the size all the time
-	int padding = 20 - (output_stats.size() % 20);
-	output_stats += std::string(padding, ' ');
-
-	// now create the progress bar
-	// we use the remaining size minus 3 (for '[]' and a space between progress and stats)
-	int progressbar_width = terminal_width - output_stats.size() - 3;
-	std::string output_progressbar = "[";
-	double progress_step = (double) 100 / progressbar_width;
-	for (int i = 0; i < progressbar_width; i++) {
-		double current = progress_step * i;
-		if (current > percent)
-			output_progressbar += " ";
-		else if (percent - progress_step < current)
-			output_progressbar += ">";
-		else
-			output_progressbar += "=";
-	}
-	output_progressbar += "]";
-
-	// go to the begin of the line and clear it
-	if (animated) {
-		std::cout << "\r";
-		for (int i = 0; i < last_output_len; i++)
-			std::cout << " ";
-		std::cout << "\r";
-	}
-
-	// now show everything
-	std::cout << output_progressbar << " " << output_stats;
-	if (animated) {
-		std::cout << "\r";
-		std::cout.flush();
-	} else
-		std::cout << std::endl;
-
-	// set this as last shown
-	last_update = now;
-	last_value = value;
-	last_percent = percent;
-	last_output_len = output_progressbar.size() + 1 + output_stats.size();
-}
-
 void ProgressBar::finish() {
-	update(max);
+	setValue(max);
 	if (animated)
 		std::cout << std::endl;
 }
