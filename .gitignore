@@ -13,3 +13,6 @@ Makefile
 *.o
 *.a
 gmon.out
+
+# OSX
+.DS_Store
