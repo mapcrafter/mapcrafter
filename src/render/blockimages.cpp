@@ -1181,8 +1181,7 @@ void BlockImages::createWater() { // id 8, 9
 void BlockImages::createLava() { // id 10, 11
 	Image lava = textures.LAVA_STILL;
 	for (int data = 0; data < 8; data++) {
-		int smaller = (data) / 8.0 * texture_size;
-		std::cout << data << " " << smaller << std::endl;
+		int smaller = data / 8.0 * texture_size;
 		Image side_texture = lava.move(0, smaller);
 
 		BlockImage block;
