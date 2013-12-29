@@ -117,10 +117,11 @@ int ConfigFile::getSectionIndex(const std::string& type, const std::string& name
 }
 
 bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
-	int section = -1, i = 0;
+	int section = -1;
 	std::string line;
+	int linenumber = 0;
 	while (std::getline(in, line)) {
-		i++;
+		linenumber++;
 		if (line.empty())
 			continue;
 
@@ -131,7 +132,7 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 		// a line with a new section
 		else if (line[0] == '[') {
 			if (line[line.size() - 1] != ']') {
-				msg = ValidationMessage::error("Expecting ']' at end of line " + util::str(i) + ".");
+				msg = ValidationMessage::error("Expecting ']' at end of line " + util::str(linenumber) + ".");
 				return false;
 			}
 
@@ -146,7 +147,7 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 			}
 
 			if (name.empty()) {
-				msg = ValidationMessage::error("Invalid section name on line " + util::str(i) + ".");
+				msg = ValidationMessage::error("Invalid section name on line " + util::str(linenumber) + ".");
 				return false;
 			}
 
@@ -162,7 +163,7 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 					break;
 				}
 				if (i == line.size() - 1) {
-					msg = ValidationMessage::error("No '=' found on line " + util::str(i) + ".");
+					msg = ValidationMessage::error("No '=' found on line " + util::str(linenumber) + ".");
 					return false;
 				}
 			}
