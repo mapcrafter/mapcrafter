@@ -125,6 +125,9 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 		if (line.empty())
 			continue;
 
+		// trim the line
+		util::trim(line);
+
 		// a line starting with a # is a comment
 		if (line[0] == '#')
 			continue;
