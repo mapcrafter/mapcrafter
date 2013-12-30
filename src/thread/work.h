@@ -17,25 +17,21 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WORKER_MANAGER_H_
-#define WORKER_MANAGER_H_
+#ifndef WORK_H_
+#define WORK_H_
 
 namespace mapcrafter {
 namespace thread {
 
-/**
- * This is an interface for a class managing the work of render workers.
- */
-template<typename Work, typename WorkResult>
-class WorkerManager {
-public:
-	virtual ~WorkerManager() {};
+// TODO, add data required to render something
+struct RenderWork {
+};
 
-	bool getWork(Work& work);
-	void workFinished(const Work& work, const WorkResult& result);
+// TODO, add render result data
+struct RenderWorkResult {
 };
 
 } /* namespace thread */
 } /* namespace mapcrafter */
 
-#endif /* WORKER_MANAGER_H_ */
+#endif /* WORK_H_ */

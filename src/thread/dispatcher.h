@@ -20,6 +20,12 @@
 #ifndef DISPATCHER_H_
 #define DISPATCHER_H_
 
+#include <memory> // shared_ptr
+
+#include "../util.h"
+
+#include "work.h"
+
 namespace mapcrafter {
 namespace thread {
 
@@ -31,10 +37,11 @@ class Dispatcher {
 public:
 	virtual ~Dispatcher() {};
 
-	virtual void dispatch() = 0;
+	virtual void dispatch(const RenderWork& work,
+			std::shared_ptr<util::IProgressHandler> progress) = 0;
 };
 
-} /* namespace util */
+} /* namespace thread */
 } /* namespace mapcrafter */
 
 #endif /* DISPATCHER_H_ */
