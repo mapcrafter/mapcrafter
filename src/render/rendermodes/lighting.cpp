@@ -337,12 +337,21 @@ void LightingRendermode::lightRight(Image& image, const CornerColors& colors,
  * Adds smooth lighting to the top face of a block image.
  */
 void LightingRendermode::lightTop(Image& image, const CornerColors& colors, int yoff) {
-	int size = image.getWidth() / 2;
+	int size = image.getWidth();
 	Image tex(size, size);
 	// we need to rotate the corners a bit to make them suitable for the TopFaceIterator
-	CornerColors rotated = {{colors[1], colors[3], colors[0], colors[2]}};
-	createShade(tex, rotated);
+	//CornerColors rotated = {{colors[1], colors[3], colors[0], colors[2]}};
+	createShade(tex, colors);
 
+	for (int x = 0; x < size; x++)
+		for (int y = 0; y < size; y++) {
+			uint32_t& pixel = image.pixel(x, y);
+			if (pixel != 0) {
+				uint8_t d = ALPHA(tex.pixel(x, y));
+				pixel = rgba_multiply(pixel, d, d, d);
+			}
+		}
+	/*
 	for (TopFaceIterator it(size); !it.end(); it.next()) {
 		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + yoff);
 		if (pixel != 0) {
@@ -350,6 +359,7 @@ void LightingRendermode::lightTop(Image& image, const CornerColors& colors, int 
 			pixel = rgba_multiply(pixel, d, d, d);
 		}
 	}
+	*/
 }
 
 /**
@@ -371,12 +381,12 @@ void LightingRendermode::doSlabLight(Image& image, const mc::BlockPos& pos, uint
 	// light the faces
 	mc::Block block;
 	block = state.getBlock(pos + mc::DIR_WEST);
-	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
-		lightLeft(image, getCornerColors(pos, CORNERS_LEFT), ystart, yend);
+	//if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
+	//	lightLeft(image, getCornerColors(pos, CORNERS_LEFT), ystart, yend);
 
 	block = state.getBlock(pos + mc::DIR_SOUTH);
-	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
-		lightRight(image, getCornerColors(pos, CORNERS_RIGHT), ystart, yend);
+	//if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
+	//	lightRight(image, getCornerColors(pos, CORNERS_RIGHT), ystart, yend);
 
 	block = state.getBlock(pos + mc::DIR_TOP);
 	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
@@ -432,11 +442,11 @@ void LightingRendermode::doSmoothLight(Image& image, const mc::BlockPos& pos, ui
 	}
 
 	// do the lighting
-	if (light_left)
-		lightLeft(image, getCornerColors(pos, CORNERS_LEFT));
+	//if (light_left)
+	//	lightLeft(image, getCornerColors(pos, CORNERS_LEFT));
 
-	if (light_right)
-		lightRight(image, getCornerColors(pos, CORNERS_RIGHT));
+	//if (light_right)
+	//	lightRight(image, getCornerColors(pos, CORNERS_RIGHT));
 
 	if (light_top)
 		lightTop(image, getCornerColors(pos, CORNERS_TOP));
@@ -455,11 +465,11 @@ void LightingRendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id
 		// flat snow gets also smooth lighting
 		int height = ((data & 0b1111)+1) / 8.0 * texture_size;
 		lightTop(image, getCornerColors(pos, CORNERS_BOTTOM), texture_size - height);
-		lightLeft(image, getCornerColors(pos, CORNERS_LEFT), texture_size-height, texture_size);
-		lightRight(image, getCornerColors(pos, CORNERS_RIGHT), texture_size-height, texture_size);
+		//lightLeft(image, getCornerColors(pos, CORNERS_LEFT), texture_size-height, texture_size);
+		//lightRight(image, getCornerColors(pos, CORNERS_RIGHT), texture_size-height, texture_size);
 	} else if (id == 44 || id == 126) {
 		// slabs and wooden slabs
-		doSlabLight(image, pos, id, data);
+		//doSlabLight(image, pos, id, data);
 	} else if (transparent && !water && id != 79) {
 		// transparent blocks (except full water blocks and ice)
 		// get simple lighting, they are completely lighted, not per face

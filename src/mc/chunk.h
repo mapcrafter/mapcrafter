@@ -112,6 +112,8 @@ public:
 	 */
 	uint8_t getBiomeAt(const LocalBlockPos& pos) const;
 
+	uint32_t getHeightAt(const LocalBlockPos& pos) const;
+
 	/**
 	 * Returns the position of the chunk. This position may be, depending on the map,
 	 * the rotated version of the original position.
@@ -136,6 +138,7 @@ private:
 
 	// the biomes in this chunk, as index z*16+x
 	uint8_t biomes[256];
+	uint32_t heightmap[256];
 
 	/**
 	 * Checks whether a block (local coordinates, original/unrotated) is in the cropped

@@ -28,6 +28,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <deque>
 
 namespace mapcrafter {
 namespace render {
@@ -427,214 +428,74 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 	return data;
 }
 
+void TileRenderer::renderChunk(const mc::Chunk& chunk, Image& tile, int dx, int dy) {
+	int texture_size = state.images->getTextureSize();
+
+	for (int x = 0; x < 16; x++)
+		for (int z = 0; z < 16; z++) {
+			std::deque<Image> blocks;
+
+			mc::LocalBlockPos localpos(x, z, 0);
+			int height = chunk.getHeightAt(localpos);
+			localpos.y = height;
+			if (localpos.y > 256 || localpos.y < 0)
+				localpos.y = 255;
+
+			uint16_t id = chunk.getBlockID(localpos);
+			while (id == 0 && localpos.y > 0) {
+				localpos.y--;
+				id = chunk.getBlockID(localpos);
+			}
+			if (localpos.y < 0)
+				continue;
+
+			while (localpos.y > 0) {
+				mc::BlockPos globalpos = localpos.toGlobalPos(chunk.getPos());
+
+				id = chunk.getBlockID(localpos);
+				if (id == 0) {
+					localpos.y--;
+					continue;
+				}
+				uint16_t data = chunk.getBlockData(localpos);
+				Image block = state.images->getBlock(id, data);
+				if (Biome::isBiomeBlock(id, data)) {
+					block = state.images->getBiomeDependBlock(id, data, getBiomeOfBlock(globalpos, &chunk));
+				}
+				for (size_t i = 0; i < rendermodes.size(); i++)
+					rendermodes[i]->draw(block, globalpos, id, data);
+				blocks.push_back(block);
+				if (!state.images->isBlockTransparent(id, data)) {
+					break;
+				}
+				localpos.y--;
+			}
+
+			while (blocks.size() > 0) {
+				Image block = blocks.front();
+				tile.alphablit(block, dx + x*texture_size, dy + z*texture_size);
+				blocks.pop_back();
+			}
+		}
+}
+
 void TileRenderer::renderTile(const TilePos& tile_pos, const TilePos& tile_offset,
 		Image& tile) {
-	// some vars, set correct image size
-	int block_size = state.images->getBlockImageSize();
-	int tile_size = state.images->getTileSize();
+	int texture_size = state.images->getTextureSize();
+	int tile_size = texture_size * 16 * TILE_WIDTH;
 	tile.setSize(tile_size, tile_size);
-
-	// get the maximum count of water blocks
-	// blitted about each over, until they are nearly opaque
-	int max_water = state.images->getMaxWaterNeededOpaque();
-
-	// all visible blocks which are rendered in this tile
-	std::set<RenderBlock> blocks;
 
 	// call start method of the rendermodes
 	for (size_t i = 0; i < rendermodes.size(); i++)
 		rendermodes[i]->start();
 
-	// iterate over the highest blocks in the tile
-	// we use as tile position tile_pos+tile_offset because the offset means that
-	// we treat the tile position as tile_pos, but it's actually tile_pos+tile_offset
-	for (TileTopBlockIterator it(tile_pos + tile_offset, block_size, tile_size);
-			!it.end(); it.next()) {
-		// water render behavior n1:
-		// are we already in a row of water?
-		bool in_water = false;
-
-		// water render behavior n2:
-		// water counter, how many water blocks are at the moment in this row?
-		int water = 0;
-
-		// the render block objects in our current block row
-		std::set<RenderBlock> row_nodes;
-		// then iterate over the blocks, which are on the tile at the same position,
-		// beginning from the highest block
-		for (BlockRowIterator block(it.current); !block.end(); block.next()) {
-			// get current chunk position
-			mc::ChunkPos current_chunk(block.current);
-
-			// check if current chunk is not null
-			// and if the chunk wasn't replaced in the cache (i.e. position changed)
-			if (state.chunk == nullptr || state.chunk->getPos() != current_chunk)
-				// get chunk if not
-				//if (!state.world->hasChunkSection(current_chunk, block.current.y))
-				//	continue;
-				state.chunk = state.world->getChunk(current_chunk);
-			if (state.chunk == nullptr) {
-				// here is nothing (= air),
-				// so reset state if we are in water
-				in_water = false;
-				continue;
-			}
-
-			// get local block position
-			mc::LocalBlockPos local(block.current);
-
-			// now get block id
-			uint16_t id = state.chunk->getBlockID(local);
-			// air is completely transparent so continue
-			if (id == 0) {
-				in_water = false;
-				continue;
-			}
-
-			// now get the block data
-			uint16_t data = state.chunk->getBlockData(local);
-
-			// check if a rendermode hides this block
-			bool visible = true;
-			for (size_t i = 0; i < rendermodes.size(); i++) {
-				if (rendermodes[i]->isHidden(block.current, id, data)) {
-					visible = false;
-					break;
-				}
-			}
-			if (!visible)
-				continue;
-
-			bool is_water = (id == 8 || id == 9) && data == 0;
-			if (is_water && !water_preblit) {
-				// water render behavior n1:
-				// render only the top sides of the water blocks
-				// and darken the ground with the lighting data
-				// used for lighting rendermode
-
-				// if we are already in water, skip checking this water block
-				if (is_water && in_water)
-					continue;
-				in_water = is_water;
-
-			} else if (water_preblit) {
-				// water render behavior n2:
-				// render the top side of every water block
-				// have also preblit water blocks to skip redundant alphablitting
-
-				// no lighting is needed because the 'opaque-water-effect'
-				// is created by blitting the top sides of the water blocks
-				// one above the other
-
-				if (!is_water) {
-					// if not water, reset the counter
-					water = 0;
-				} else {
-					water++;
-
-					// when we have enough water in a row
-					// we can stop searching more blocks
-					// and replace the already added render blocks with a preblit water block
-					if (water > max_water) {
-						std::set<RenderBlock>::const_iterator it = row_nodes.begin();
-						// iterate through the render blocks in this row
-						while (it != row_nodes.end()) {
-							std::set<RenderBlock>::const_iterator current = it++;
-							// check if we have reached the top most water block
-							if (it == row_nodes.end() || (it->id != 8 && it->id != 9)) {
-								RenderBlock top = *current;
-								row_nodes.erase(current);
-
-								// check for neighbors
-								mc::Block south, west;
-								south = state.getBlock(top.pos + mc::DIR_SOUTH);
-								west = state.getBlock(top.pos + mc::DIR_WEST);
-
-								bool neighbor_south = (south.id == 8 || south.id == 9);
-								if (neighbor_south)
-									data |= DATA_SOUTH;
-								bool neighbor_west = (west.id == 8 || west.id == 9);
-								if (neighbor_west)
-									data |= DATA_WEST;
-
-								// get image and replace the old render block with this
-								top.image = state.images->getOpaqueWater(neighbor_south,
-										neighbor_west);
-
-								// don't forget the rendermodes
-								for (size_t i = 0; i < rendermodes.size(); i++)
-									rendermodes[i]->draw(top.image, top.pos, id, data);
-
-								row_nodes.insert(top);
-								break;
-
-							} else {
-								// water render block
-								row_nodes.erase(current);
-							}
-						}
-
-						break;
-					}
-				}
-			}
-
-			// check for special data (neighbor related)
-			// get block image, check for transparency, create render block...
-			data = checkNeighbors(block.current, id, data);
-			//if (is_water && (data & DATA_WEST) && (data & DATA_SOUTH))
-			//	continue;
-			Image image;
-			bool transparent = state.images->isBlockTransparent(id, data);
-
-			// check for biome data
-			if (Biome::isBiomeBlock(id, data))
-				image = state.images->getBiomeDependBlock(id, data, getBiomeOfBlock(block.current, state.chunk));
-			else
-				image = state.images->getBlock(id, data);
-
-			RenderBlock node;
-			node.x = it.draw_x;
-			node.y = it.draw_y;
-			node.pos = block.current;
-			node.image = image;
-			node.id = id;
-			node.data = data;
-
-			// let the rendermodes do their magic with the block image
-			for (size_t i = 0; i < rendermodes.size(); i++)
-				rendermodes[i]->draw(node.image, node.pos, id, data);
-
-			// insert into current row
-			row_nodes.insert(node);
-
-			// if this block is not transparent, then break
-			if (!transparent)
-				break;
+	for (int x = 0; x < TILE_WIDTH; x++)
+		for (int z = 0; z < TILE_WIDTH; z++) {
+			mc::ChunkPos chunkpos(tile_pos.getX() * TILE_WIDTH + x, tile_pos.getY() * TILE_WIDTH + z);
+			mc::Chunk* chunk = state.world->getChunk(chunkpos);
+			if (chunk != nullptr)
+				renderChunk(*chunk, tile, texture_size*16*x, texture_size*16*z);
 		}
-
-		// iterate through the created render blocks
-		for (std::set<RenderBlock>::const_iterator it = row_nodes.begin();
-		        it != row_nodes.end(); ++it) {
-			std::set<RenderBlock>::const_iterator next = it;
-			next++;
-			// insert render block to
-			if (next == row_nodes.end()) {
-				blocks.insert(*it);
-			} else {
-				// skip unnecessary leaves
-				if (it->id == 18 && next->id == 18 && (next->data & 3) == (it->data & 3))
-					continue;
-				blocks.insert(*it);
-			}
-		}
-	}
-
-	// now blit all blocks
-	for (std::set<RenderBlock>::const_iterator it = blocks.begin(); it != blocks.end();
-			++it) {
-		tile.alphablit(it->image, it->x, it->y);
-	}
 
 	// call the end method of the rendermodes
 	for (size_t i = 0; i < rendermodes.size(); i++)

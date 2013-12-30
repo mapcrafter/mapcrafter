@@ -556,7 +556,7 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 		js += "\tname: \"" + it->getLongName() + "\",\n";
 		js += "\tworldName: \"" + world.getWorldName() + "\",\n";
 		js += "\ttextureSize: " + util::str(it->getTextureSize()) + ",\n";
-		js += "\ttileSize: " + util::str(32 * it->getTextureSize()) + ",\n";
+		js += "\ttileSize: " + util::str(16 * it->getTextureSize()) + ",\n";
 		js += "\tmaxZoom: " + util::str(getMapZoomlevel(it->getShortName())) + ",\n";
 		js += "\trotations: [";
 		auto rotations = it->getRotations();

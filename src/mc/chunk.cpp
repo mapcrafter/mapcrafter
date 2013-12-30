@@ -85,6 +85,11 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 		std::cerr << "Warning: Corrupt chunk at " << chunkpos.x << ":" << chunkpos.z
 				<< " (No biome data found)!" << std::endl;
 
+	if (level.hasArray<nbt::TagIntArray>("HeightMap", 256)) {
+		const nbt::TagIntArray& heightmap_tag = level.findTag<nbt::TagIntArray>("HeightMap");
+		std::copy(heightmap_tag.payload.begin(), heightmap_tag.payload.end(), heightmap);
+	}
+
 	// find sections list
 	// I already saw (empty) chunks from the end with TagByte instead of TagCompound
 	// in this list, ignore them, they are empty
@@ -249,6 +254,15 @@ uint8_t Chunk::getBiomeAt(const LocalBlockPos& pos) const {
 		rotateBlockPos(x, z, rotation);
 
 	return biomes[z * 16 + x];
+}
+
+uint32_t Chunk::getHeightAt(const LocalBlockPos& pos) const {
+	int x = pos.x;
+	int z = pos.z;
+	if (rotation)
+		rotateBlockPos(x, z, rotation);
+
+	return heightmap[z * 16 + x];
 }
 
 const ChunkPos& Chunk::getPos() const {

@@ -134,6 +134,7 @@ public:
 			const config::MapSection& map);
 	~TileRenderer();
 
+	void renderChunk(const mc::Chunk& chunk, Image& tile, int dx, int dy);
 	void renderTile(const TilePos& tile_pos, const TilePos& tile_offset, Image& tile);
 };
 

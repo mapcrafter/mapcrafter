@@ -240,6 +240,7 @@ TileSet::~TileSet() {
 /**
  * Calculates the tiles a row and column covers.
  */
+/*
 void addRowColTiles(int row, int col, std::set<TilePos>& tiles) {
 	// the tiles have are 2 * TILE_WIDTH columns wide
 	// and 4 * TILE_WIDTH row tall
@@ -261,11 +262,15 @@ void addRowColTiles(int row, int col, std::set<TilePos>& tiles) {
 	if (edge_col && edge_row)
 		tiles.insert(TilePos(x-1, y-1));
 }
+*/
 
 /**
  * This function calculates the tiles a chunk covers.
  */
 void getChunkTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles) {
+	tiles.insert(TilePos(chunk.x, chunk.z));
+
+	/*
 	// at first get row and column of the top of the chunk
 	int row = chunk.getRow();
 	int col = chunk.getCol();
@@ -279,6 +284,7 @@ void getChunkTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles) {
 	// only the top of a chunk section meant
 	for (int i = 0; i <= mc::CHUNK_HEIGHT; i++)
 		addRowColTiles(row + 2*i, col, tiles);
+	*/
 }
 
 void TileSet::findRenderTiles(const mc::World& world, bool auto_center,
