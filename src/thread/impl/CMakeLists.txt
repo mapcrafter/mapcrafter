@@ -1,0 +1,12 @@
+set(SOURCE
+	${SOURCE}
+	${CMAKE_CURRENT_SOURCE_DIR}/single_thread.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/multi_threading.cpp
+	PARENT_SCOPE
+)
+set(HEADERS
+	${HEADERS}
+	${CMAKE_CURRENT_SOURCE_DIR}/single_thread.h
+	${CMAKE_CURRENT_SOURCE_DIR}/multi_threading.h
+	PARENT_SCOPE
+)
