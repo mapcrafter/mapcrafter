@@ -635,6 +635,13 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
  * Checks, if a block images has transparent pixels.
  */
 bool BlockImages::checkImageTransparency(const Image& image) const {
+	for (int x = 0; x < image.getWidth(); x++)
+		for (int y = 0; y < image.getHeight(); y++) {
+			if (ALPHA(image.getPixel(x, y)) < 255)
+				return true;
+		}
+	return false;
+	/*
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
 		if (ALPHA(image.getPixel(it.dest_x, it.dest_y + texture_size/2)) < 255)
@@ -650,6 +657,7 @@ bool BlockImages::checkImageTransparency(const Image& image) const {
 		if (ALPHA(image.getPixel(it.dest_x, it.dest_y)) < 255)
 			return true;
 	}
+	*/
 	return false;
 }
 
@@ -696,8 +704,8 @@ void BlockImages::setBlockImage(uint16_t id, uint16_t data, const Image& block) 
 	if (checkImageTransparency(block))
 		block_transparency.insert(id | (data << 16));
 	// if block is not transparent, add shadow edges
-	else
-		addBlockShadowEdges(id, data, block);
+	//else
+	//	addBlockShadowEdges(id, data, block);
 }
 
 Image BlockImages::createBiomeBlock(uint16_t id, uint16_t data,
@@ -718,7 +726,7 @@ Image BlockImages::createBiomeBlock(uint16_t id, uint16_t data,
 	double b = (double) BLUE(color) / 255;
 
 	// grass block needs something special
-	if (id == 2) {
+	if (id == 2 && false) {
 		Image block = block_images.at(id | (data << 16));
 		Image side = textures.GRASS_SIDE_OVERLAY.colorize(r, g, b);
 
@@ -2114,10 +2122,28 @@ void BlockImages::createLargePlant(uint16_t data, const Image& texture, const Im
 
 void BlockImages::loadBlocks() {
 	buildCustomTextures();
-	unknown_block = buildImage(BlockImage().setFace(0b11111, unknown_block));
+	//unknown_block = buildImage(BlockImage().setFace(0b11111, unknown_block));
 
 	BlockTextures& t = textures;
 
+	setBlockImage(1, 0, t.STONE);
+	setBlockImage(2, 0, t.GRASS_TOP);
+	setBlockImage(3, 0, t.DIRT);
+	setBlockImage(3, 1, t.DIRT);
+	setBlockImage(3, 2, t.DIRT_PODZOL_TOP);
+
+	setBlockImage(8, 0, t.WATER_STILL);
+	setBlockImage(9, 0, t.WATER_STILL);
+
+	setBlockImage(18, 0, textures.LEAVES_OAK); // oak
+	setBlockImage(18, 1, textures.LEAVES_SPRUCE); // pine/spruce
+	setBlockImage(18, 2, textures.LEAVES_OAK); // birch
+	setBlockImage(18, 3, textures.LEAVES_JUNGLE); // jungle
+
+	setBlockImage(161, 0, textures.LEAVES_ACACIA); // acacia
+	setBlockImage(161, 1, textures.LEAVES_BIG_OAK); // dark oak
+
+	/*
 	createBlock(1, 0, t.STONE); // stone
 	createGrassBlock(); // id 2
 	createBlock(3, 0, t.DIRT); // dirt
@@ -2490,6 +2516,7 @@ void BlockImages::loadBlocks() {
 	createLargePlant(4, t.DOUBLE_PLANT_ROSE_BOTTOM, t.DOUBLE_PLANT_ROSE_TOP);
 	createLargePlant(5, t.DOUBLE_PLANT_PAEONIA_BOTTOM, t.DOUBLE_PLANT_PAEONIA_TOP);
 	// --
+	*/
 }
 
 bool BlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
