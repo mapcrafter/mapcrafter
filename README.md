@@ -2,7 +2,7 @@
 
 by Moritz Hilscher
 
-mapcrafter is a fast Minecraft World Renderer written in C++. It renders
+mapcrafter is a high performance Minecraft map renderer written in C++. It renders
 Minecraft Worlds to a bunch of images which are viewable in any webbrowser
 using Leaflet.
 
