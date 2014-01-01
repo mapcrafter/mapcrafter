@@ -17,31 +17,37 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DISPATCHER_H_
-#define DISPATCHER_H_
+#include "singlethread.h"
 
-#include <memory> // shared_ptr
+#include "../../mc/cache.h"
+#include "../../render/worker.h"
 
-#include "../util.h"
-
-#include "renderwork.h"
+#include <set>
 
 namespace mapcrafter {
 namespace thread {
 
-/**
- * This is an interface for a class responsible for managing and distributing the render
- * work.
- */
-class Dispatcher {
-public:
-	virtual ~Dispatcher() {};
+SingleThreadDispatcher::SingleThreadDispatcher() {
+}
 
-	virtual void dispatch(const RenderWorkContext& context,
-			std::shared_ptr<util::IProgressHandler> progress) = 0;
-};
+SingleThreadDispatcher::~SingleThreadDispatcher() {
+}
+
+void SingleThreadDispatcher::dispatch(const RenderWorkContext& context,
+		std::shared_ptr<util::IProgressHandler> progress) {
+	render::RenderWorker worker;
+
+	std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(context.world));
+	worker.setMapConfig(context.blockimages, context.map_config, context.output_dir);
+	worker.setWorld(cache, context.tileset);
+
+	std::set<render::TilePath> tiles, tiles_skip;
+	tiles.insert(render::TilePath());
+	worker.setWork(tiles, tiles_skip);
+
+	worker.setProgressHandler(progress);
+	worker();
+}
 
 } /* namespace thread */
 } /* namespace mapcrafter */
-
-#endif /* DISPATCHER_H_ */

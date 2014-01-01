@@ -17,31 +17,35 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DISPATCHER_H_
-#define DISPATCHER_H_
+#ifndef MULTITHREADING_H_
+#define MULTITHREADING_H_
 
-#include <memory> // shared_ptr
-
-#include "../util.h"
-
-#include "renderwork.h"
+#include "../dispatcher.h"
+#include "../renderwork.h"
+#include "../workermanager.h"
 
 namespace mapcrafter {
 namespace thread {
 
-/**
- * This is an interface for a class responsible for managing and distributing the render
- * work.
- */
-class Dispatcher {
+class ThreadManager : public WorkerManager<RenderWork, RenderWorkResult> {
 public:
-	virtual ~Dispatcher() {};
+	ThreadManager();
+	virtual ~ThreadManager();
+
+	virtual bool getWork(RenderWork& work);
+	virtual void workFinished(const RenderWork& work, const RenderWorkResult& result);
+};
+
+class MultiThreadingDispatcher : public Dispatcher {
+public:
+	MultiThreadingDispatcher();
+	virtual ~MultiThreadingDispatcher();
 
 	virtual void dispatch(const RenderWorkContext& context,
-			std::shared_ptr<util::IProgressHandler> progress) = 0;
+			std::shared_ptr<util::IProgressHandler> progress);
 };
 
 } /* namespace thread */
 } /* namespace mapcrafter */
 
-#endif /* DISPATCHER_H_ */
+#endif /* MULTITHREADING_H_ */

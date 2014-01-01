@@ -17,36 +17,19 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "single_thread.h"
-
-#include "../../mc/cache.h"
-#include "../../render/worker.h"
-
-#include <set>
+#include "multithreading.h"
 
 namespace mapcrafter {
 namespace thread {
 
-SingleThreadDispatcher::SingleThreadDispatcher() {
+MultiThreadingDispatcher::MultiThreadingDispatcher() {
 }
 
-SingleThreadDispatcher::~SingleThreadDispatcher() {
+MultiThreadingDispatcher::~MultiThreadingDispatcher() {
 }
 
-void SingleThreadDispatcher::dispatch(const RenderWorkContext& context,
+void MultiThreadingDispatcher::dispatch(const RenderWorkContext& context,
 		std::shared_ptr<util::IProgressHandler> progress) {
-	render::RenderWorker worker;
-
-	std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(context.world));
-	worker.setMapConfig(context.blockimages, context.map_config, context.output_dir);
-	worker.setWorld(cache, context.tileset);
-
-	std::set<render::TilePath> tiles, tiles_skip;
-	tiles.insert(render::TilePath());
-	worker.setWork(tiles, tiles_skip);
-
-	worker.setProgressHandler(progress);
-	worker();
 }
 
 } /* namespace thread */

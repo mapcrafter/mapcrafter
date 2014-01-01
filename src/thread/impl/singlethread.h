@@ -17,25 +17,24 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WORKER_MANAGER_H_
-#define WORKER_MANAGER_H_
+#ifndef SINGLETHREAD_H_
+#define SINGLETHREAD_H_
+
+#include "../dispatcher.h"
 
 namespace mapcrafter {
 namespace thread {
 
-/**
- * This is an interface for a class managing the work of render workers.
- */
-template<typename Work, typename WorkResult>
-class WorkerManager {
+class SingleThreadDispatcher : public Dispatcher {
 public:
-	virtual ~WorkerManager() {};
+	SingleThreadDispatcher();
+	virtual ~SingleThreadDispatcher();
 
-	bool getWork(Work& work);
-	void workFinished(const Work& work, const WorkResult& result);
+	virtual void dispatch(const RenderWorkContext& context,
+			std::shared_ptr<util::IProgressHandler> progress);
 };
 
 } /* namespace thread */
 } /* namespace mapcrafter */
 
-#endif /* WORKER_MANAGER_H_ */
+#endif /* SINGLETHREAD_H_ */
