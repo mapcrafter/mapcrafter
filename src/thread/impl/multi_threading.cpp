@@ -16,7 +16,7 @@ MultiThreadingDispatcher::MultiThreadingDispatcher() {
 MultiThreadingDispatcher::~MultiThreadingDispatcher() {
 }
 
-void MultiThreadingDispatcher::dispatch(const RenderWork& work,
+void MultiThreadingDispatcher::dispatch(const RenderWorkContext& context,
 		std::shared_ptr<util::IProgressHandler> progress) {
 }
 

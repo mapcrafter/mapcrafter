@@ -24,7 +24,7 @@
 
 #include "../util.h"
 
-#include "work.h"
+#include "render_work.h"
 
 namespace mapcrafter {
 namespace thread {
@@ -37,7 +37,7 @@ class Dispatcher {
 public:
 	virtual ~Dispatcher() {};
 
-	virtual void dispatch(const RenderWork& work,
+	virtual void dispatch(const RenderWorkContext& context,
 			std::shared_ptr<util::IProgressHandler> progress) = 0;
 };
 

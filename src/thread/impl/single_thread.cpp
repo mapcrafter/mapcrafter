@@ -19,6 +19,11 @@
 
 #include "single_thread.h"
 
+#include "../../mc/cache.h"
+#include "../../render/worker.h"
+
+#include <set>
+
 namespace mapcrafter {
 namespace thread {
 
@@ -28,8 +33,20 @@ SingleThreadDispatcher::SingleThreadDispatcher() {
 SingleThreadDispatcher::~SingleThreadDispatcher() {
 }
 
-void SingleThreadDispatcher::dispatch(const RenderWork& work,
+void SingleThreadDispatcher::dispatch(const RenderWorkContext& context,
 		std::shared_ptr<util::IProgressHandler> progress) {
+	render::RenderWorker worker;
+
+	std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(context.world));
+	worker.setMapConfig(context.blockimages, context.map_config, context.output_dir);
+	worker.setWorld(cache, context.tileset);
+
+	std::set<render::TilePath> tiles, tiles_skip;
+	tiles.insert(render::TilePath());
+	worker.setWork(tiles, tiles_skip);
+
+	worker.setProgressHandler(progress);
+	worker();
 }
 
 } /* namespace thread */

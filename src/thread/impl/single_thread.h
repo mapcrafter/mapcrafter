@@ -30,8 +30,8 @@ public:
 	SingleThreadDispatcher();
 	virtual ~SingleThreadDispatcher();
 
-	virtual void dispatch(const RenderWork& work,
-			std::shared_ptr<util::IProgressHandler> progress) = 0;
+	virtual void dispatch(const RenderWorkContext& context,
+			std::shared_ptr<util::IProgressHandler> progress);
 };
 
 } /* namespace thread */

@@ -17,21 +17,40 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WORK_H_
-#define WORK_H_
+#ifndef RENDER_WORK_H_
+#define RENDER_WORK_H_
+
+#include "../config/mapcrafter_config.h"
+#include "../mc/world.h"
+#include "../render/blockimages.h"
+#include "../render/tileset.h"
+
+#include <boost/filesystem.hpp>
+#include <memory> // shared_ptr
+
+namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace thread {
 
-// TODO, add data required to render something
-struct RenderWork {
+struct RenderWorkContext {
+	fs::path output_dir;
+	config::MapSection map_config;
+	std::shared_ptr<render::BlockImages> blockimages;
+
+	mc::World world;
+	std::shared_ptr<render::TileSet> tileset;
 };
 
-// TODO, add render result data
+struct RenderWork {
+	render::TilePos tile_pos;
+};
+
 struct RenderWorkResult {
+	int tiles_rendered;
 };
 
 } /* namespace thread */
 } /* namespace mapcrafter */
 
-#endif /* WORK_H_ */
+#endif /* RENDER_WORK_H_ */
