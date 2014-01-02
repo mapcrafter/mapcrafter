@@ -33,7 +33,7 @@ public:
 	ConcurrentQueue();
 	~ConcurrentQueue();
 
-	bool empty() const;
+	bool empty();
 	void push(T item);
 	T pop();
 
@@ -52,7 +52,7 @@ ConcurrentQueue<T>::~ConcurrentQueue() {
 }
 
 template<typename T>
-bool ConcurrentQueue<T>::empty() const {
+bool ConcurrentQueue<T>::empty() {
 	std::unique_lock<std::mutex> lock(mutex);
 	return queue.empty();
 }

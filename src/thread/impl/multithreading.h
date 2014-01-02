@@ -20,9 +20,15 @@
 #ifndef MULTITHREADING_H_
 #define MULTITHREADING_H_
 
+#include "concurrentqueue.h"
 #include "../dispatcher.h"
 #include "../renderwork.h"
 #include "../workermanager.h"
+
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 namespace mapcrafter {
 namespace thread {
@@ -34,15 +40,43 @@ public:
 
 	virtual bool getWork(RenderWork& work);
 	virtual void workFinished(const RenderWork& work, const RenderWorkResult& result);
+
+	bool getResult(RenderWorkResult& result);
+private:
+	ConcurrentQueue<RenderWork> work_queue;
+	ConcurrentQueue<RenderWorkResult> result_queue;
+
+	std::vector<RenderWork> work_list;
+	std::vector<RenderWorkResult> result_list;
+
+	std::mutex mutex;
+	std::condition_variable condition_variable;
+};
+
+class ThreadWorker {
+public:
+	ThreadWorker(const RenderWorkContext& context,
+			WorkerManager<RenderWork, RenderWorkResult>& manager);
+	~ThreadWorker();
+
+	void operator()();
+private:
+	RenderWorkContext work_context;
+	WorkerManager<RenderWork, RenderWorkResult>& manager;
 };
 
 class MultiThreadingDispatcher : public Dispatcher {
 public:
-	MultiThreadingDispatcher();
+	MultiThreadingDispatcher(int threads);
 	virtual ~MultiThreadingDispatcher();
 
 	virtual void dispatch(const RenderWorkContext& context,
 			std::shared_ptr<util::IProgressHandler> progress);
+private:
+	int thread_count;
+
+	ThreadManager manager;
+	std::vector<std::thread> threads;
 };
 
 } /* namespace thread */
