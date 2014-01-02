@@ -472,7 +472,7 @@ void TileRenderer::renderChunk(const mc::Chunk& chunk, Image& tile, int dx, int 
 			}
 
 			while (blocks.size() > 0) {
-				Image block = blocks.front();
+				Image block = blocks.back();
 				tile.alphablit(block, dx + x*texture_size, dy + z*texture_size);
 				blocks.pop_back();
 			}
