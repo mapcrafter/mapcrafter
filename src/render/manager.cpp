@@ -21,9 +21,15 @@
 
 #include "worker.h"
 
+#include "../thread/renderwork.h"
+#include "../thread/dispatcher.h"
+#include "../thread/impl/singlethread.h"
+#include "../thread/impl/multithreading.h"
+
 #include <array>
-#include <fstream>
 #include <ctime>
+#include <fstream>
+#include <memory>
 #include <thread>
 
 #if defined(__WIN32__) || defined(__WIN64__)
@@ -703,7 +709,25 @@ bool RenderManager::run() {
 			}
 
 			// render the map
-			render(map, output_dir, worlds[world_name][rotation], tileset, blockimages);
+
+			thread::RenderWorkContext context;
+			context.output_dir = output_dir;
+			context.map_config = map;
+			context.blockimages = blockimages;
+			context.world = worlds[world_name][rotation];
+			context.tileset = tileset;
+
+			std::shared_ptr<thread::Dispatcher> dispatcher;
+			if (opts.jobs == 1)
+				dispatcher = std::make_shared<thread::SingleThreadDispatcher>();
+			else
+				dispatcher = std::make_shared<thread::MultiThreadingDispatcher>(opts.jobs);
+
+			std::shared_ptr<util::ProgressBar> progress(new util::ProgressBar);
+			dispatcher->dispatch(context, progress);
+			progress->finish();
+
+			//render(map, output_dir, worlds[world_name][rotation], tileset, blockimages);
 
 			// update the settings file with last render time
 			settings.rotations[rotation] = true;
