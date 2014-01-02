@@ -27,11 +27,8 @@
 namespace mapcrafter {
 namespace thread {
 
-ThreadManager::ThreadManager() {
-	//for (int i = 0; i < 100; i++)
-	//	work_list.push_back({{ render::TilePos(i, 0) }});
-	//for (auto it = work_list.begin(); it != work_list.end(); ++it)
-	//	work_queue.push(*it);
+ThreadManager::ThreadManager()
+	: finished(false) {
 }
 
 ThreadManager::~ThreadManager() {
@@ -45,20 +42,28 @@ void ThreadManager::setWork(const std::vector<RenderWork>& work) {
 
 void ThreadManager::addExtraWork(const RenderWork& work) {
 	std::unique_lock<std::mutex> lock(mutex);
+	work_list.push_back(work);
 	work_extra_queue.push(work);
+	condition_wait_jobs.notify_one();
+}
+
+void ThreadManager::setFinished() {
+	std::unique_lock<std::mutex> lock(mutex);
+	this->finished = true;
+	condition_wait_jobs.notify_all();
+	condition_wait_results.notify_all();
 }
 
 bool ThreadManager::getWork(RenderWork& work) {
 	std::unique_lock<std::mutex> lock(mutex);
-	if (!work_extra_queue.empty()) {
-		work = work_extra_queue.pop();
-		//std::cout << "Start " << work.tile_path << std::endl;
-		return true;
-	}
-	if (work_queue.empty())
+	while (!finished && (work_queue.empty() && work_extra_queue.empty()))
+		condition_wait_jobs.wait(lock);
+	if (finished)
 		return false;
-	work = work_queue.pop();
-	//std::cout << "Start " << work.tile_path << std::endl;
+	if (!work_queue.empty())
+		work = work_queue.pop();
+	else if (!work_extra_queue.empty())
+		work = work_extra_queue.pop();
 	return true;
 }
 
@@ -70,19 +75,16 @@ void ThreadManager::workFinished(const RenderWork& work,
 		result_queue.push(result);
 	else {
 		result_queue.push(result);
-		condition_variable.notify_one();
+		condition_wait_results.notify_one();
 	}
 }
 
 bool ThreadManager::getResult(RenderWorkResult& result) {
 	std::unique_lock<std::mutex> lock(mutex);
-	if (result_queue.empty() && work_list.size() == result_list.size())
+	while (!finished && result_queue.empty())
+		condition_wait_results.wait(lock);
+	if (finished)
 		return false;
-	while (result_queue.empty()) {
-		condition_variable.wait(lock);
-		if (result_queue.empty() && work_list.size() == result_list.size())
-			return false;
-	}
 	result = result_queue.pop();
 	return true;
 }
@@ -149,9 +151,10 @@ void MultiThreadingDispatcher::dispatch(const RenderWorkContext& context,
 	while (manager.getResult(result)) {
 		progress->setValue(progress->getValue() + result.tiles_rendered);
 		rendered_tiles.insert(result.tile_path);
-
-		//if (result.tile_path.getDepth() < 5)
-		//	std::cout << result.tile_path << " " << result.tiles_rendered << std::endl;
+		if (result.tile_path == render::TilePath()) {
+			manager.setFinished();
+			continue;
+		}
 
 		render::TilePath parent = result.tile_path.parent();
 		bool childs_rendered = true;
@@ -165,9 +168,7 @@ void MultiThreadingDispatcher::dispatch(const RenderWorkContext& context,
 			job.tile_path = parent;
 			job.skip_childs = true;
 			manager.addExtraWork(job);
-			//std::cout << "queued " << parent << std::endl;
 		}
-		//std::cout << "Finished " << result.tiles_rendered << std::endl;
 	}
 
 	for (int i = 0; i < thread_count; i++)

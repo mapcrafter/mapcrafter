@@ -42,6 +42,7 @@ public:
 
 	void setWork(const std::vector<RenderWork>& work);
 	void addExtraWork(const RenderWork& work);
+	void setFinished();
 
 	virtual bool getWork(RenderWork& work);
 	virtual void workFinished(const RenderWork& work, const RenderWorkResult& result);
@@ -54,8 +55,9 @@ private:
 	std::vector<RenderWork> work_list;
 	std::vector<RenderWorkResult> result_list;
 
+	bool finished;
 	std::mutex mutex;
-	std::condition_variable condition_variable;
+	std::condition_variable condition_wait_jobs, condition_wait_results;
 };
 
 class ThreadWorker {
