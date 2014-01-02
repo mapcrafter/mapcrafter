@@ -24,9 +24,11 @@
 #include "../dispatcher.h"
 #include "../renderwork.h"
 #include "../workermanager.h"
+#include "../../render/worker.h"
 
 #include <condition_variable>
 #include <mutex>
+#include <set>
 #include <thread>
 #include <vector>
 
@@ -38,12 +40,15 @@ public:
 	ThreadManager();
 	virtual ~ThreadManager();
 
+	void setWork(const std::vector<RenderWork>& work);
+	void addExtraWork(const RenderWork& work);
+
 	virtual bool getWork(RenderWork& work);
 	virtual void workFinished(const RenderWork& work, const RenderWorkResult& result);
 
 	bool getResult(RenderWorkResult& result);
 private:
-	ConcurrentQueue<RenderWork> work_queue;
+	ConcurrentQueue<RenderWork> work_queue, work_extra_queue;
 	ConcurrentQueue<RenderWorkResult> result_queue;
 
 	std::vector<RenderWork> work_list;
@@ -61,7 +66,8 @@ public:
 
 	void operator()();
 private:
-	RenderWorkContext work_context;
+	RenderWorkContext render_context;
+	render::RenderWorker render_worker;
 	WorkerManager<RenderWork, RenderWorkResult>& manager;
 };
 
@@ -77,6 +83,8 @@ private:
 
 	ThreadManager manager;
 	std::vector<std::thread> threads;
+
+	std::set<render::TilePath> rendered_tiles;
 };
 
 } /* namespace thread */

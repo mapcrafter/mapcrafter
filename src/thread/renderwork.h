@@ -43,10 +43,12 @@ struct RenderWorkContext {
 };
 
 struct RenderWork {
-	render::TilePos tile_pos;
+	render::TilePath tile_path;
+	bool skip_childs;
 };
 
 struct RenderWorkResult {
+	render::TilePath tile_path;
 	int tiles_rendered;
 };
 
