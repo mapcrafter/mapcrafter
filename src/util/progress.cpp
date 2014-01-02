@@ -127,9 +127,9 @@ void ProgressBar::update(int value) {
 	// (speed = 0 can sometimes happen at the begin of rendering)
 	if (value != max && speed != 0) {
 		int eta = (max - value) / average_speed;
-		stats = createProgressStats(percentage, value, max, speed, eta);
+		stats = createProgressStats(percentage, value, max, speed, average_speed, eta);
 	} else {
-		stats = createProgressStats(percentage, value, max, speed);
+		stats = createProgressStats(percentage, value, max, speed, average_speed);
 	}
 
 	// now create the progress bar
@@ -180,15 +180,16 @@ std::string ProgressBar::createProgressBar(int width, double percentage) const {
 }
 
 std::string ProgressBar::createProgressStats(double percentage, int value, int max,
-		double speed, int eta) const {
+		double speed, double speed_average, int eta) const {
 	std::string stats;
-	char fpercent[20];
-	char fspeed[20];
+	char fpercent[20], fspeed[20], fspeed_average[20];
 	sprintf(&fpercent[0], "%.2f%%", percentage);
 	sprintf(&fspeed[0], "%.2f", speed);
+	sprintf(&fspeed_average[0], "%.2f", speed_average);
 	stats += std::string(fpercent) + " ";
 	stats += util::str(value) + "/" + util::str(max) + " ";
 	stats += std::string(fspeed) + "/s ";
+	stats += "avg~" + std::string(fspeed_average) + "/s ";
 
 	if (eta != -1)
 		stats += "ETA " + format_eta(eta);
