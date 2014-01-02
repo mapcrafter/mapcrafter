@@ -23,8 +23,7 @@ namespace mapcrafter {
 namespace render {
 
 RenderWorker::RenderWorker()
-		: progress(new util::DummyProgressHandler) {
-
+	: progress(new util::DummyProgressHandler), finished(new bool) {
 }
 
 RenderWorker::~RenderWorker() {
