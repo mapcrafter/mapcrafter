@@ -566,15 +566,9 @@ bool BlockImages::saveBlocks(const std::string& filename) {
 uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	if (id == 6)
 		return data & (0xff00 | 0b00000011);
-	else if (id == 8 || id == 9) // water
-		return data & (0xff00 | 0b11110111);
-	else if (id == 10 || id == 11) { // lava
-		// 0x8 bit means that this is a lava block spreading downwards
-		// -> return data 0 (full block)
-		if (data & 0x8)
-			return 0;
-		return data;
-	} else if (id == 18 || id == 161) // leaves
+	else if (id >= 8 && id <= 11) // water
+		return 0;
+	else if (id == 18 || id == 161) // leaves
 		return data & (0xff00 | 0b00000011);
 	else if (id == 26) // bed
 		return data & (0xff00 | 0b00001011);
@@ -2124,6 +2118,8 @@ void BlockImages::loadBlocks() {
 	buildCustomTextures();
 	//unknown_block = buildImage(BlockImage().setFace(0b11111, unknown_block));
 
+	Image empty(texture_size, texture_size);
+
 	BlockTextures& t = textures;
 
 	setBlockImage(1, 0, t.STONE);
@@ -2134,14 +2130,34 @@ void BlockImages::loadBlocks() {
 
 	setBlockImage(8, 0, t.WATER_STILL);
 	setBlockImage(9, 0, t.WATER_STILL);
+	setBlockImage(10, 0, t.LAVA_STILL);
+	setBlockImage(11, 0, t.LAVA_STILL);
+
+	setBlockImage(12, 0, t.SAND); // sand
+	setBlockImage(12, 1, t.RED_SAND); // red sand
+	setBlockImage(13, 0, t.GRAVEL); // gravel
+
+	setBlockImage(17, 0, t.LOG_OAK_TOP); // oak
+	setBlockImage(17, 1, t.LOG_SPRUCE_TOP); // pine/spruce
+	setBlockImage(17, 2, t.LOG_BIRCH_TOP); // birch
+	setBlockImage(17, 3, t.LOG_JUNGLE_TOP); // jungle
 
 	setBlockImage(18, 0, textures.LEAVES_OAK); // oak
 	setBlockImage(18, 1, textures.LEAVES_SPRUCE); // pine/spruce
 	setBlockImage(18, 2, textures.LEAVES_OAK); // birch
 	setBlockImage(18, 3, textures.LEAVES_JUNGLE); // jungle
 
+	setBlockImage(31, 0, empty); // dead bush style
+	setBlockImage(31, 1, empty); // tall grass
+	setBlockImage(31, 2, empty); // fern
+	setBlockImage(32, 0, empty); // dead bush
+
 	setBlockImage(161, 0, textures.LEAVES_ACACIA); // acacia
 	setBlockImage(161, 1, textures.LEAVES_BIG_OAK); // dark oak
+	setBlockImage(162, 0, t.LOG_ACACIA_TOP); // acacia
+	setBlockImage(162, 1, t.LOG_BIG_OAK_TOP); // acacia (placeholder)
+	setBlockImage(162, 2, t.LOG_ACACIA_TOP); // dark wood
+	setBlockImage(162, 3, t.LOG_BIG_OAK_TOP); // dark wood (placeholder)
 
 	/*
 	createBlock(1, 0, t.STONE); // stone
