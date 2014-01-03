@@ -40,7 +40,7 @@ public:
 	ThreadManager();
 	virtual ~ThreadManager();
 
-	void setWork(const std::vector<RenderWork>& work);
+	void addWork(const RenderWork& work);
 	void addExtraWork(const RenderWork& work);
 	void setFinished();
 
@@ -51,9 +51,6 @@ public:
 private:
 	ConcurrentQueue<RenderWork> work_queue, work_extra_queue;
 	ConcurrentQueue<RenderWorkResult> result_queue;
-
-	std::vector<RenderWork> work_list;
-	std::vector<RenderWorkResult> result_list;
 
 	bool finished;
 	std::mutex mutex;

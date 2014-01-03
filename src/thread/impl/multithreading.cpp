@@ -34,15 +34,13 @@ ThreadManager::ThreadManager()
 ThreadManager::~ThreadManager() {
 }
 
-void ThreadManager::setWork(const std::vector<RenderWork>& work) {
-	work_list = work;
-	for (auto work_it = work_list.begin(); work_it != work_list.end(); ++work_it)
-		work_queue.push(*work_it);
+void ThreadManager::addWork(const RenderWork& work) {
+	std::unique_lock<std::mutex> lock(mutex);
+	work_queue.push(work);
 }
 
 void ThreadManager::addExtraWork(const RenderWork& work) {
 	std::unique_lock<std::mutex> lock(mutex);
-	work_list.push_back(work);
 	work_extra_queue.push(work);
 	condition_wait_jobs.notify_one();
 }
@@ -70,7 +68,6 @@ bool ThreadManager::getWork(RenderWork& work) {
 void ThreadManager::workFinished(const RenderWork& work,
 		const RenderWorkResult& result) {
 	std::unique_lock<std::mutex> lock(mutex);
-	result_list.push_back(result);
 	if (!result_queue.empty())
 		result_queue.push(result);
 	else {
@@ -131,17 +128,17 @@ MultiThreadingDispatcher::~MultiThreadingDispatcher() {
 void MultiThreadingDispatcher::dispatch(const RenderWorkContext& context,
 		std::shared_ptr<util::IProgressHandler> progress) {
 	auto tiles = context.tileset->getRequiredCompositeTiles();
-	std::vector<RenderWork> work;
+	int jobs = 0;
 	for (auto tile_it = tiles.begin(); tile_it != tiles.end(); ++tile_it)
 		if (tile_it->getDepth() == context.tileset->getDepth() - 2) {
-			RenderWork job;
-			job.tile_path = *tile_it;
-			job.skip_childs = false;
-			work.push_back(job);
+			RenderWork work;
+			work.tile_path = *tile_it;
+			work.skip_childs = false;
+			manager.addWork(work);
+			jobs++;
 		}
 
-	manager.setWork(work);
-	std::cout << work.size() << " jobs" << std::endl;
+	std::cout << jobs << " jobs" << std::endl;
 
 	for (int i = 0; i < thread_count; i++)
 		threads.push_back(std::thread(ThreadWorker(context, manager)));
@@ -164,10 +161,10 @@ void MultiThreadingDispatcher::dispatch(const RenderWorkContext& context,
 			}
 
 		if (childs_rendered) {
-			RenderWork job;
-			job.tile_path = parent;
-			job.skip_childs = true;
-			manager.addExtraWork(job);
+			RenderWork work;
+			work.tile_path = parent;
+			work.skip_childs = true;
+			manager.addExtraWork(work);
 		}
 	}
 
