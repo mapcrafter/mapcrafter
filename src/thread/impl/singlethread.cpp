@@ -20,7 +20,6 @@
 #include "singlethread.h"
 
 #include "../../mc/worldcache.h"
-#include "../../renderer/tilerenderworker.h"
 
 #include <set>
 
@@ -33,7 +32,7 @@ SingleThreadDispatcher::SingleThreadDispatcher() {
 SingleThreadDispatcher::~SingleThreadDispatcher() {
 }
 
-void SingleThreadDispatcher::dispatch(const RenderWorkContext& context,
+void SingleThreadDispatcher::dispatch(const renderer::RenderWorkContext& context,
 		std::shared_ptr<util::IProgressHandler> progress) {
 	int render_tiles = context.tileset->getRequiredRenderTilesCount();
 	std::cout << "Single thread will render " << render_tiles;

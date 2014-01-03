@@ -34,12 +34,12 @@ ThreadManager::ThreadManager()
 ThreadManager::~ThreadManager() {
 }
 
-void ThreadManager::addWork(const RenderWork& work) {
+void ThreadManager::addWork(const renderer::RenderWork& work) {
 	std::unique_lock<std::mutex> lock(mutex);
 	work_queue.push(work);
 }
 
-void ThreadManager::addExtraWork(const RenderWork& work) {
+void ThreadManager::addExtraWork(const renderer::RenderWork& work) {
 	std::unique_lock<std::mutex> lock(mutex);
 	work_extra_queue.push(work);
 	condition_wait_jobs.notify_one();
@@ -52,7 +52,7 @@ void ThreadManager::setFinished() {
 	condition_wait_results.notify_all();
 }
 
-bool ThreadManager::getWork(RenderWork& work) {
+bool ThreadManager::getWork(renderer::RenderWork& work) {
 	std::unique_lock<std::mutex> lock(mutex);
 	while (!finished && (work_queue.empty() && work_extra_queue.empty()))
 		condition_wait_jobs.wait(lock);
@@ -65,8 +65,8 @@ bool ThreadManager::getWork(RenderWork& work) {
 	return true;
 }
 
-void ThreadManager::workFinished(const RenderWork& work,
-		const RenderWorkResult& result) {
+void ThreadManager::workFinished(const renderer::RenderWork& work,
+		const renderer::RenderWorkResult& result) {
 	std::unique_lock<std::mutex> lock(mutex);
 	if (!result_queue.empty())
 		result_queue.push(result);
@@ -76,7 +76,7 @@ void ThreadManager::workFinished(const RenderWork& work,
 	}
 }
 
-bool ThreadManager::getResult(RenderWorkResult& result) {
+bool ThreadManager::getResult(renderer::RenderWorkResult& result) {
 	std::unique_lock<std::mutex> lock(mutex);
 	while (!finished && result_queue.empty())
 		condition_wait_results.wait(lock);
@@ -86,8 +86,8 @@ bool ThreadManager::getResult(RenderWorkResult& result) {
 	return true;
 }
 
-ThreadWorker::ThreadWorker(WorkerManager<RenderWork, RenderWorkResult>& manager,
-		const RenderWorkContext& context)
+ThreadWorker::ThreadWorker(WorkerManager<renderer::RenderWork, renderer::RenderWorkResult>& manager,
+		const renderer::RenderWorkContext& context)
 	: manager(manager), render_context(context) {
 	std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(context.world));
 	render_worker.setWorld(cache, context.tileset);
@@ -98,22 +98,20 @@ ThreadWorker::~ThreadWorker() {
 }
 
 void ThreadWorker::operator()() {
-	RenderWork work;
+	renderer::RenderWork work;
 
 	while (manager.getWork(work)) {
-		std::set<renderer::TilePath> tiles, tiles_skip;
-		tiles.insert(work.tile_path);
-		if (work.skip_childs)
-			for (int i = 1; i <= 4; i++)
-				tiles_skip.insert(work.tile_path + i);
-		render_worker.setWork(tiles, tiles_skip);
+		render_worker.setWork(work.tiles, work.tiles_skip);
 		render_worker();
 
-		RenderWorkResult result;
-		result.tile_path = work.tile_path;
-		result.tiles_rendered = render_context.tileset->getContainingRenderTiles(work.tile_path);
-		if (work.skip_childs)
-			result.tiles_rendered = 0;
+		renderer::RenderWorkResult result;
+		result.tiles = work.tiles;
+		result.tiles_skip = work.tiles_skip;
+		result.tiles_rendered = 0;
+		for (auto it = work.tiles.begin(); it != work.tiles.end(); ++it)
+			result.tiles_rendered += render_context.tileset->getContainingRenderTiles(*it);
+		for (auto it = work.tiles_skip.begin(); it != work.tiles_skip.end(); ++it)
+			result.tiles_rendered -= render_context.tileset->getContainingRenderTiles(*it);
 		manager.workFinished(work, result);
 	}
 }
@@ -125,15 +123,14 @@ MultiThreadingDispatcher::MultiThreadingDispatcher(int threads)
 MultiThreadingDispatcher::~MultiThreadingDispatcher() {
 }
 
-void MultiThreadingDispatcher::dispatch(const RenderWorkContext& context,
+void MultiThreadingDispatcher::dispatch(const renderer::RenderWorkContext& context,
 		std::shared_ptr<util::IProgressHandler> progress) {
 	auto tiles = context.tileset->getRequiredCompositeTiles();
 	int jobs = 0;
 	for (auto tile_it = tiles.begin(); tile_it != tiles.end(); ++tile_it)
 		if (tile_it->getDepth() == context.tileset->getDepth() - 2) {
-			RenderWork work;
-			work.tile_path = *tile_it;
-			work.skip_childs = false;
+			renderer::RenderWork work;
+			work.tiles.insert(*tile_it);
 			manager.addWork(work);
 			jobs++;
 		}
@@ -148,28 +145,32 @@ void MultiThreadingDispatcher::dispatch(const RenderWorkContext& context,
 		threads.push_back(std::thread(ThreadWorker(manager, context)));
 
 	progress->setMax(context.tileset->getRequiredRenderTilesCount());
-	RenderWorkResult result;
+	renderer::RenderWorkResult result;
 	while (manager.getResult(result)) {
 		progress->setValue(progress->getValue() + result.tiles_rendered);
-		rendered_tiles.insert(result.tile_path);
-		if (result.tile_path == renderer::TilePath()) {
-			manager.setFinished();
-			continue;
-		}
-
-		renderer::TilePath parent = result.tile_path.parent();
-		bool childs_rendered = true;
-		for (int i = 1; i <= 4; i++)
-			if (context.tileset->isTileRequired(parent + i)
-					&& !rendered_tiles.count(parent + i)) {
-				childs_rendered = false;
+		for (auto tile_it = result.tiles.begin(); tile_it != result.tiles.end(); ++tile_it) {
+			rendered_tiles.insert(*tile_it);
+			if (*tile_it == renderer::TilePath()) {
+				manager.setFinished();
+				continue;
 			}
 
-		if (childs_rendered) {
-			RenderWork work;
-			work.tile_path = parent;
-			work.skip_childs = true;
-			manager.addExtraWork(work);
+			renderer::TilePath parent = tile_it->parent();
+			bool childs_rendered = true;
+			for (int i = 1; i <= 4; i++)
+				if (context.tileset->isTileRequired(parent + i)
+						&& !rendered_tiles.count(parent + i)) {
+					childs_rendered = false;
+				}
+
+			if (childs_rendered) {
+				renderer::RenderWork work;
+				work.tiles.insert(parent);
+				for (int i = 1; i <= 4; i++)
+					if (context.tileset->hasTile(parent + i))
+						work.tiles_skip.insert(parent + i);
+				manager.addExtraWork(work);
+			}
 		}
 	}
 

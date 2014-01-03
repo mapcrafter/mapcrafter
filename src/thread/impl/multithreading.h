@@ -22,7 +22,6 @@
 
 #include "concurrentqueue.h"
 #include "../dispatcher.h"
-#include "../renderwork.h"
 #include "../workermanager.h"
 #include "../../renderer/tilerenderworker.h"
 
@@ -35,22 +34,22 @@
 namespace mapcrafter {
 namespace thread {
 
-class ThreadManager : public WorkerManager<RenderWork, RenderWorkResult> {
+class ThreadManager : public WorkerManager<renderer::RenderWork, renderer::RenderWorkResult> {
 public:
 	ThreadManager();
 	virtual ~ThreadManager();
 
-	void addWork(const RenderWork& work);
-	void addExtraWork(const RenderWork& work);
+	void addWork(const renderer::RenderWork& work);
+	void addExtraWork(const renderer::RenderWork& work);
 	void setFinished();
 
-	virtual bool getWork(RenderWork& work);
-	virtual void workFinished(const RenderWork& work, const RenderWorkResult& result);
+	virtual bool getWork(renderer::RenderWork& work);
+	virtual void workFinished(const renderer::RenderWork& work, const renderer::RenderWorkResult& result);
 
-	bool getResult(RenderWorkResult& result);
+	bool getResult(renderer::RenderWorkResult& result);
 private:
-	ConcurrentQueue<RenderWork> work_queue, work_extra_queue;
-	ConcurrentQueue<RenderWorkResult> result_queue;
+	ConcurrentQueue<renderer::RenderWork> work_queue, work_extra_queue;
+	ConcurrentQueue<renderer::RenderWorkResult> result_queue;
 
 	bool finished;
 	std::mutex mutex;
@@ -59,15 +58,15 @@ private:
 
 class ThreadWorker {
 public:
-	ThreadWorker(WorkerManager<RenderWork, RenderWorkResult>& manager,
-			const RenderWorkContext& context);
+	ThreadWorker(WorkerManager<renderer::RenderWork, renderer::RenderWorkResult>& manager,
+			const renderer::RenderWorkContext& context);
 	~ThreadWorker();
 
 	void operator()();
 private:
-	WorkerManager<RenderWork, RenderWorkResult>& manager;
+	WorkerManager<renderer::RenderWork, renderer::RenderWorkResult>& manager;
 
-	RenderWorkContext render_context;
+	renderer::RenderWorkContext render_context;
 	renderer::TileRenderWorker render_worker;
 };
 
@@ -76,7 +75,7 @@ public:
 	MultiThreadingDispatcher(int threads);
 	virtual ~MultiThreadingDispatcher();
 
-	virtual void dispatch(const RenderWorkContext& context,
+	virtual void dispatch(const renderer::RenderWorkContext& context,
 			std::shared_ptr<util::IProgressHandler> progress);
 private:
 	int thread_count;

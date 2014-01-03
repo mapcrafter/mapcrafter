@@ -20,8 +20,6 @@
 #include "manager.h"
 
 #include "tilerenderworker.h"
-
-#include "../thread/renderwork.h"
 #include "../thread/dispatcher.h"
 #include "../thread/impl/singlethread.h"
 #include "../thread/impl/multithreading.h"
@@ -710,7 +708,7 @@ bool RenderManager::run() {
 
 			// render the map
 
-			thread::RenderWorkContext context;
+			RenderWorkContext context;
 			context.output_dir = output_dir;
 			context.map_config = map;
 			context.blockimages = blockimages;

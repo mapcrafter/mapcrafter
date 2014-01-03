@@ -20,21 +20,42 @@
 #ifndef TILERENDERWORKER_H_
 #define TILERENDERWORKER_H_
 
-#include "../util.h"
-
-#include "../config/mapcrafter_config.h"
-
-#include "../mc/worldcache.h"
-
 #include "blockimages.h"
 #include "tileset.h"
 #include "tilerenderer.h"
+#include "../config/mapcrafter_config.h"
+#include "../mc/world.h"
+#include "../mc/worldcache.h"
+#include "../renderer/blockimages.h"
+#include "../renderer/tileset.h"
+#include "../util.h"
 
-#include <memory>
+#include <memory> // shared_ptr
 #include <set>
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace renderer {
+
+struct RenderWorkContext {
+	fs::path output_dir;
+	config::MapSection map_config;
+	std::shared_ptr<renderer::BlockImages> blockimages;
+
+	mc::World world;
+	std::shared_ptr<renderer::TileSet> tileset;
+};
+
+struct RenderWork {
+	std::set<renderer::TilePath> tiles, tiles_skip;
+};
+
+struct RenderWorkResult {
+	std::set<renderer::TilePath> tiles, tiles_skip;
+	int tiles_rendered;
+};
 
 class TileRenderWorker {
 private:
