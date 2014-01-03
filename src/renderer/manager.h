@@ -94,12 +94,6 @@ private:
 
 	void increaseMaxZoom(const fs::path& dir) const;
 
-	void render(const config::MapSection& map_config, const std::string& output_dir,
-			const mc::World& world, std::shared_ptr<TileSet> tileset,
-			std::shared_ptr<BlockImages> blockimages);
-	void renderMultithreaded(const config::MapSection& map_config, const std::string& output_dir,
-			const mc::World& world, std::shared_ptr<TileSet> tileset,
-			std::shared_ptr<BlockImages> blockimages);
 public:
 	RenderManager(const RenderOpts& opts);
 
