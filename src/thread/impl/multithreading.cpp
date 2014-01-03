@@ -86,9 +86,9 @@ bool ThreadManager::getResult(RenderWorkResult& result) {
 	return true;
 }
 
-ThreadWorker::ThreadWorker(const RenderWorkContext& context,
-		WorkerManager<RenderWork, RenderWorkResult>& manager)
-	: render_context(context), manager(manager) {
+ThreadWorker::ThreadWorker(WorkerManager<RenderWork, RenderWorkResult>& manager,
+		const RenderWorkContext& context)
+	: manager(manager), render_context(context) {
 	std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(context.world));
 	render_worker.setWorld(cache, context.tileset);
 	render_worker.setMapConfig(context.blockimages, context.map_config, context.output_dir);
@@ -138,10 +138,14 @@ void MultiThreadingDispatcher::dispatch(const RenderWorkContext& context,
 			jobs++;
 		}
 
+	int render_tiles = context.tileset->getRequiredRenderTilesCount();
+	std::cout << thread_count << " threads will render " << render_tiles;
+	std::cout << " render tiles." << std::endl;
+
 	std::cout << jobs << " jobs" << std::endl;
 
 	for (int i = 0; i < thread_count; i++)
-		threads.push_back(std::thread(ThreadWorker(context, manager)));
+		threads.push_back(std::thread(ThreadWorker(manager, context)));
 
 	progress->setMax(context.tileset->getRequiredRenderTilesCount());
 	RenderWorkResult result;
@@ -156,7 +160,8 @@ void MultiThreadingDispatcher::dispatch(const RenderWorkContext& context,
 		render::TilePath parent = result.tile_path.parent();
 		bool childs_rendered = true;
 		for (int i = 1; i <= 4; i++)
-			if (context.tileset->isTileRequired(parent + i) && !rendered_tiles.count(parent + i)) {
+			if (context.tileset->isTileRequired(parent + i)
+					&& !rendered_tiles.count(parent + i)) {
 				childs_rendered = false;
 			}
 

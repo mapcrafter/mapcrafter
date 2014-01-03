@@ -59,15 +59,16 @@ private:
 
 class ThreadWorker {
 public:
-	ThreadWorker(const RenderWorkContext& context,
-			WorkerManager<RenderWork, RenderWorkResult>& manager);
+	ThreadWorker(WorkerManager<RenderWork, RenderWorkResult>& manager,
+			const RenderWorkContext& context);
 	~ThreadWorker();
 
 	void operator()();
 private:
+	WorkerManager<RenderWork, RenderWorkResult>& manager;
+
 	RenderWorkContext render_context;
 	render::RenderWorker render_worker;
-	WorkerManager<RenderWork, RenderWorkResult>& manager;
 };
 
 class MultiThreadingDispatcher : public Dispatcher {

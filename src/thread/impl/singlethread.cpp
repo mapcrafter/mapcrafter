@@ -35,6 +35,10 @@ SingleThreadDispatcher::~SingleThreadDispatcher() {
 
 void SingleThreadDispatcher::dispatch(const RenderWorkContext& context,
 		std::shared_ptr<util::IProgressHandler> progress) {
+	int render_tiles = context.tileset->getRequiredRenderTilesCount();
+	std::cout << "Single thread will render " << render_tiles;
+	std::cout << " render tiles." << std::endl;
+
 	render::RenderWorker worker;
 
 	std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(context.world));
