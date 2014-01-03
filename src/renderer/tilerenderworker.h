@@ -34,7 +34,7 @@
 #include <set>
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 class TileRenderWorker {
 private:

@@ -538,7 +538,7 @@ MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfigFile& confi
 	for (auto world_it = worlds.begin(); world_it != worlds.end(); ++world_it) {
 		world_rotations[world_it->first] = std::set<int>();
 		world_zoomlevels[world_it->first] = 0;
-		world_tile_offsets[world_it->first] = std::array<render::TilePos, 4>();
+		world_tile_offsets[world_it->first] = std::array<renderer::TilePos, 4>();
 	}
 }
 
@@ -607,11 +607,11 @@ void MapcrafterConfigHelper::setMapZoomlevel(const std::string& map, int zoomlev
 }
 
 void MapcrafterConfigHelper::setWorldTileOffset(const std::string& world,
-		int rotation, const render::TilePos& tile_offset) {
+		int rotation, const renderer::TilePos& tile_offset) {
 	world_tile_offsets[world][rotation] = tile_offset;
 }
 
-const render::TilePos& MapcrafterConfigHelper::getWorldTileOffset(
+const renderer::TilePos& MapcrafterConfigHelper::getWorldTileOffset(
 		const std::string& world, int rotation) {
 	return world_tile_offsets.at(world).at(rotation);
 }

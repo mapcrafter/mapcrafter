@@ -37,7 +37,7 @@ namespace fs = boost::filesystem;
 namespace config = mapcrafter::config;
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 /**
  * This are the render options from the command line.

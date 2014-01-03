@@ -68,7 +68,7 @@ private:
 	WorkerManager<RenderWork, RenderWorkResult>& manager;
 
 	RenderWorkContext render_context;
-	render::TileRenderWorker render_worker;
+	renderer::TileRenderWorker render_worker;
 };
 
 class MultiThreadingDispatcher : public Dispatcher {
@@ -84,7 +84,7 @@ private:
 	ThreadManager manager;
 	std::vector<std::thread> threads;
 
-	std::set<render::TilePath> rendered_tiles;
+	std::set<renderer::TilePath> rendered_tiles;
 };
 
 } /* namespace thread */

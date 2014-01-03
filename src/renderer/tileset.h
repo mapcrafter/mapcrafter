@@ -60,7 +60,7 @@ namespace fs = boost::filesystem;
  */
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 const int TILE_WIDTH = 1;
 

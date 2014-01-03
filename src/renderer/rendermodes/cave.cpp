@@ -20,7 +20,7 @@
 #include "cave.h"
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 
 CaveRendermode::CaveRendermode(const RenderState& state)

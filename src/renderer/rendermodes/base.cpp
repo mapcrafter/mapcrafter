@@ -20,7 +20,7 @@
 #include "base.h"
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 Rendermode::Rendermode(const RenderState& state)
 		: state(state) {

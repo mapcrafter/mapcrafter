@@ -20,7 +20,7 @@
 #include "tilerenderworker.h"
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 TileRenderWorker::TileRenderWorker()
 	: progress(new util::DummyProgressHandler), finished(new bool) {

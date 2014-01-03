@@ -32,7 +32,7 @@
 namespace fs = boost::filesystem;
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 FaceIterator::FaceIterator()
 		: is_end(false), size(16), src_x(0), src_y(0), dest_x(0), dest_y(0) {

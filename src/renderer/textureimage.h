@@ -11,7 +11,7 @@
 #include "image.h"
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 /**
  * A single Minecraft block texture image.

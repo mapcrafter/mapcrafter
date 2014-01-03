@@ -101,7 +101,7 @@ void ThreadWorker::operator()() {
 	RenderWork work;
 
 	while (manager.getWork(work)) {
-		std::set<render::TilePath> tiles, tiles_skip;
+		std::set<renderer::TilePath> tiles, tiles_skip;
 		tiles.insert(work.tile_path);
 		if (work.skip_childs)
 			for (int i = 1; i <= 4; i++)
@@ -152,12 +152,12 @@ void MultiThreadingDispatcher::dispatch(const RenderWorkContext& context,
 	while (manager.getResult(result)) {
 		progress->setValue(progress->getValue() + result.tiles_rendered);
 		rendered_tiles.insert(result.tile_path);
-		if (result.tile_path == render::TilePath()) {
+		if (result.tile_path == renderer::TilePath()) {
 			manager.setFinished();
 			continue;
 		}
 
-		render::TilePath parent = result.tile_path.parent();
+		renderer::TilePath parent = result.tile_path.parent();
 		bool childs_rendered = true;
 		for (int i = 1; i <= 4; i++)
 			if (context.tileset->isTileRequired(parent + i)

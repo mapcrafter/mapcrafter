@@ -10,7 +10,7 @@
 #include "../util.h"
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 TextureImage::TextureImage() {
 }

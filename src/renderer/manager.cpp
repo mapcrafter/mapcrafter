@@ -37,7 +37,7 @@
 #endif
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 MapSettings::MapSettings()
 	: texture_size(12), tile_size(0), max_zoom(0),

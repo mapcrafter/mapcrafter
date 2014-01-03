@@ -36,19 +36,19 @@ namespace thread {
 struct RenderWorkContext {
 	fs::path output_dir;
 	config::MapSection map_config;
-	std::shared_ptr<render::BlockImages> blockimages;
+	std::shared_ptr<renderer::BlockImages> blockimages;
 
 	mc::World world;
-	std::shared_ptr<render::TileSet> tileset;
+	std::shared_ptr<renderer::TileSet> tileset;
 };
 
 struct RenderWork {
-	render::TilePath tile_path;
+	renderer::TilePath tile_path;
 	bool skip_childs;
 };
 
 struct RenderWorkResult {
-	render::TilePath tile_path;
+	renderer::TilePath tile_path;
 	int tiles_rendered;
 };
 

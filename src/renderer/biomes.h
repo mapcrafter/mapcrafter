@@ -23,7 +23,7 @@
 #include "image.h"
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 /**
  * A Minecraft Biome with data to tint the biome-depend blocks.

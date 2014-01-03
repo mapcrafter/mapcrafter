@@ -25,7 +25,7 @@
 
 namespace po = boost::program_options;
 
-using namespace mapcrafter::render;
+using namespace mapcrafter::renderer;
 
 int main(int argc, char **argv) {
 	std::string texture_dir;

@@ -23,7 +23,7 @@
 #include "base.h"
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 class CaveRendermode: public Rendermode {
 protected:

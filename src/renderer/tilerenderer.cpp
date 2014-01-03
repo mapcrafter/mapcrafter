@@ -30,7 +30,7 @@
 #include <set>
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 TileTopBlockIterator::TileTopBlockIterator(const TilePos& tile, int block_size,
         int tile_size)

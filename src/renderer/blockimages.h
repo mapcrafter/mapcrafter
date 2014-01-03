@@ -86,7 +86,7 @@
  */
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 // count of rotations needed for the block images
 // depending on the north direction

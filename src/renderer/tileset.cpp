@@ -33,7 +33,7 @@
 #include <limits>
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 TilePos::TilePos(int x, int y)
 	: x(x), y(y) {

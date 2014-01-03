@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	render::RenderOpts opts;
+	renderer::RenderOpts opts;
 	opts.config_file = config_file;
 	opts.render_skip = render_skip;
 	opts.skip_all = vm.count("render-reset");
@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
 		opts.jobs = 1;
 
 	opts.batch = vm.count("batch");
-	render::RenderManager manager(opts);
+	renderer::RenderManager manager(opts);
 	if (!manager.run())
 		return 1;
 	return 0;

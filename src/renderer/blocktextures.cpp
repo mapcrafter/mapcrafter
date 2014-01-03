@@ -6,7 +6,7 @@
 namespace fs = boost::filesystem;
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 BlockTextures::BlockTextures()
 	: ANVIL_BASE("anvil_base"),

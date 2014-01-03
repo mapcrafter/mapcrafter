@@ -24,7 +24,7 @@
 #include <cmath>
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 const double LIGHTNING_INTENSITY = 1.0;
 

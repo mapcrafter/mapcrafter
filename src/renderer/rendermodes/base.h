@@ -32,7 +32,7 @@
 #include <vector>
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 /**
  * A simple interface to implement different rendermodes.

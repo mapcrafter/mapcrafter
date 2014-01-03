@@ -25,7 +25,7 @@
 #include <array>
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 /**
  * Lighting rendermode implementation.

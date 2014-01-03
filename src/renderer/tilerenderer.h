@@ -37,7 +37,7 @@
 namespace fs = boost::filesystem;
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 /**
  * Iterates over the top blocks of a tile.

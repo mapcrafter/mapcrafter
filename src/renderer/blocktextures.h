@@ -7,7 +7,7 @@
 #include <vector>
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 /**
  * Collection of Minecraft block textures.

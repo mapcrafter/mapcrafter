@@ -23,7 +23,7 @@
 #include <iostream>
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 
 Biome::Biome(uint8_t id, double temperature, double rainfall, uint8_t r, uint8_t g, uint8_t b)

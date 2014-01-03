@@ -8,7 +8,7 @@ set(SOURCE
 	${CMAKE_CURRENT_SOURCE_DIR}/textureimage.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/tileset.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/tilerenderer.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/worker.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/tilerenderworker.cpp
 	PARENT_SCOPE
 )
 set(HEADERS
@@ -21,6 +21,6 @@ set(HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/textureimage.h
 	${CMAKE_CURRENT_SOURCE_DIR}/tileset.h
 	${CMAKE_CURRENT_SOURCE_DIR}/tilerenderer.h
-	${CMAKE_CURRENT_SOURCE_DIR}/worker.h
+	${CMAKE_CURRENT_SOURCE_DIR}/tilerenderworker.h
 	PARENT_SCOPE
 )
