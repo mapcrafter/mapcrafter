@@ -17,7 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "cache.h"
+#include "worldcache.h"
 
 #include "../util.h"
 

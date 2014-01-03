@@ -24,7 +24,7 @@
 
 #include "../config/mapcrafter_config.h"
 
-#include "../mc/cache.h"
+#include "../mc/worldcache.h"
 
 #include "blockimages.h"
 #include "tileset.h"

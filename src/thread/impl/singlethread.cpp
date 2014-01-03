@@ -19,7 +19,7 @@
 
 #include "singlethread.h"
 
-#include "../../mc/cache.h"
+#include "../../mc/worldcache.h"
 #include "../../renderer/tilerenderworker.h"
 
 #include <set>

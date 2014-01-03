@@ -22,8 +22,8 @@
 
 #include "../config/mapcrafter_config.h"
 
-#include "../mc/cache.h"
 #include "../mc/world.h"
+#include "../mc/worldcache.h"
 
 #include "tileset.h"
 #include "tilerenderer.h"

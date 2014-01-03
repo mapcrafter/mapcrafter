@@ -17,8 +17,8 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CACHE_H_
-#define CACHE_H_
+#ifndef WORLDCACHE_H_
+#define WORLDCACHE_H_
 
 #include "pos.h"
 #include "chunk.h"
@@ -145,4 +145,4 @@ public:
 }
 }
 
-#endif /* CACHE_H_ */
+#endif /* WORLDCACHE_H_ */

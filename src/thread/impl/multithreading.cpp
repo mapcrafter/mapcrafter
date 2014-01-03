@@ -19,7 +19,7 @@
 
 #include "multithreading.h"
 
-#include "../../mc/cache.h"
+#include "../../mc/worldcache.h"
 #include "../../renderer/tileset.h"
 
 #include <cstdlib>
