@@ -24,7 +24,7 @@
 #include "../dispatcher.h"
 #include "../renderwork.h"
 #include "../workermanager.h"
-#include "../../renderer/worker.h"
+#include "../../renderer/tilerenderworker.h"
 
 #include <condition_variable>
 #include <mutex>
@@ -68,7 +68,7 @@ private:
 	WorkerManager<RenderWork, RenderWorkResult>& manager;
 
 	RenderWorkContext render_context;
-	render::RenderWorker render_worker;
+	render::TileRenderWorker render_worker;
 };
 
 class MultiThreadingDispatcher : public Dispatcher {

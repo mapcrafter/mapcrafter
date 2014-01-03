@@ -20,7 +20,7 @@
 #include "singlethread.h"
 
 #include "../../mc/cache.h"
-#include "../../renderer/worker.h"
+#include "../../renderer/tilerenderworker.h"
 
 #include <set>
 
@@ -39,7 +39,7 @@ void SingleThreadDispatcher::dispatch(const RenderWorkContext& context,
 	std::cout << "Single thread will render " << render_tiles;
 	std::cout << " render tiles." << std::endl;
 
-	render::RenderWorker worker;
+	render::TileRenderWorker worker;
 
 	std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(context.world));
 	worker.setMapConfig(context.blockimages, context.map_config, context.output_dir);

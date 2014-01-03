@@ -19,7 +19,7 @@
 
 #include "manager.h"
 
-#include "worker.h"
+#include "tilerenderworker.h"
 
 #include "../thread/renderwork.h"
 #include "../thread/dispatcher.h"
@@ -309,7 +309,7 @@ void RenderManager::render(const config::MapSection& map_config, const std::stri
 		std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(world));
 
 		// create the worker and set required data
-		RenderWorker worker;
+		TileRenderWorker worker;
 		worker.setWorld(cache, tileset);
 		worker.setMapConfig(blockimages, map_config, output_dir);
 
@@ -360,7 +360,7 @@ void RenderManager::renderMultithreaded(const config::MapSection& map_config,
 		threads_progress.push_back(progress);
 		threads_finished.push_back(finished);
 
-		RenderWorker worker;
+		TileRenderWorker worker;
 		worker.setWorld(worldcache, tileset);
 		worker.setMapConfig(blockimages, map_config, output_dir);
 
@@ -409,7 +409,7 @@ void RenderManager::renderMultithreaded(const config::MapSection& map_config,
 
 	std::cout << "Rendering remaining " << remaining << " composite tiles." << std::endl;
 
-	RenderWorker worker;
+	TileRenderWorker worker;
 	worker.setWorld(std::make_shared<mc::WorldCache>(world), tileset);
 	worker.setMapConfig(blockimages, map_config, output_dir);
 	worker.setWork(remaining_tiles, remaining_tiles_skip);
