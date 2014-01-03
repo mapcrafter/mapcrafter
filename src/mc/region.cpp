@@ -19,8 +19,8 @@
 
 #include "region.h"
 
-#include <fstream>
 #include <cstdlib>
+#include <fstream>
 
 namespace mapcrafter {
 namespace mc {

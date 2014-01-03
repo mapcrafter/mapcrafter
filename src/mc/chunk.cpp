@@ -19,8 +19,8 @@
 
 #include "chunk.h"
 
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 namespace mapcrafter {
 namespace mc {

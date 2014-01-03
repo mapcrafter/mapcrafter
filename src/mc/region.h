@@ -20,12 +20,12 @@
 #ifndef REGION_H_
 #define REGION_H_
 
-#include "pos.h"
 #include "chunk.h"
+#include "pos.h"
 #include "worldcrop.h"
 
-#include <string>
 #include <set>
+#include <string>
 
 namespace mapcrafter {
 namespace mc {

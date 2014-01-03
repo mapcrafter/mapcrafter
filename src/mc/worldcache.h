@@ -20,8 +20,8 @@
 #ifndef WORLDCACHE_H_
 #define WORLDCACHE_H_
 
-#include "pos.h"
 #include "chunk.h"
+#include "pos.h"
 #include "region.h"
 #include "world.h"
 

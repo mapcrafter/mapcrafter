@@ -20,7 +20,6 @@
 #include "pos.h"
 
 #include "../util.h"
-
 #include "chunk.h"
 
 #include <cmath>

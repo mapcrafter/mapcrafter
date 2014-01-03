@@ -21,10 +21,10 @@
 
 #include "../util.h"
 
-#include <iostream>
-#include <fstream>
-#include <cstdio>
 #include <cmath>
+#include <cstdio>
+#include <fstream>
+#include <iostream>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;

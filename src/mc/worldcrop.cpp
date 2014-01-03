@@ -17,9 +17,9 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../util.h"
-
 #include "worldcrop.h"
+
+#include "../util.h"
 
 #include <cmath>
 
