@@ -24,7 +24,7 @@
 #include "validation.h"
 
 #include "../mc/worldcrop.h"
-#include "../render/tileset.h"
+#include "../renderer/tileset.h"
 
 #include <string>
 #include <vector>

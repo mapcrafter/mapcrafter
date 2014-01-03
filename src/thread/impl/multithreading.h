@@ -24,7 +24,7 @@
 #include "../dispatcher.h"
 #include "../renderwork.h"
 #include "../workermanager.h"
-#include "../../render/worker.h"
+#include "../../renderer/worker.h"
 
 #include <condition_variable>
 #include <mutex>

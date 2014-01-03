@@ -22,8 +22,8 @@
 
 #include "../config/mapcrafter_config.h"
 #include "../mc/world.h"
-#include "../render/blockimages.h"
-#include "../render/tileset.h"
+#include "../renderer/blockimages.h"
+#include "../renderer/tileset.h"
 
 #include <boost/filesystem.hpp>
 #include <memory> // shared_ptr

@@ -20,7 +20,7 @@
 #include "multithreading.h"
 
 #include "../../mc/cache.h"
-#include "../../render/tileset.h"
+#include "../../renderer/tileset.h"
 
 #include <cstdlib>
 

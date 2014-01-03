@@ -20,7 +20,7 @@
 #include "singlethread.h"
 
 #include "../../mc/cache.h"
-#include "../../render/worker.h"
+#include "../../renderer/worker.h"
 
 #include <set>
 
