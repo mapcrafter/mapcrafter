@@ -5,9 +5,9 @@ set(SOURCE
 	${CMAKE_CURRENT_SOURCE_DIR}/blocktextures.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/image.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/manager.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/render.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/textureimage.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/tileset.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/tilerenderer.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/worker.cpp
 	PARENT_SCOPE
 )
@@ -18,9 +18,9 @@ set(HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/blocktextures.h
 	${CMAKE_CURRENT_SOURCE_DIR}/image.h
 	${CMAKE_CURRENT_SOURCE_DIR}/manager.h
-	${CMAKE_CURRENT_SOURCE_DIR}/render.h
 	${CMAKE_CURRENT_SOURCE_DIR}/textureimage.h
 	${CMAKE_CURRENT_SOURCE_DIR}/tileset.h
+	${CMAKE_CURRENT_SOURCE_DIR}/tilerenderer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/worker.h
 	PARENT_SCOPE
 )

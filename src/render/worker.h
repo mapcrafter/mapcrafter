@@ -28,7 +28,7 @@
 
 #include "blockimages.h"
 #include "tileset.h"
-#include "render.h"
+#include "tilerenderer.h"
 
 #include <memory>
 #include <set>

@@ -26,7 +26,7 @@
 #include "../../mc/cache.h"
 
 #include "../image.h"
-#include "../render.h"
+#include "../tilerenderer.h"
 
 #include <string>
 #include <vector>
