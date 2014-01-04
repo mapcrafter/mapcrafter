@@ -32,22 +32,18 @@ SingleThreadDispatcher::SingleThreadDispatcher() {
 SingleThreadDispatcher::~SingleThreadDispatcher() {
 }
 
-void SingleThreadDispatcher::dispatch(const renderer::RenderWorkContext& context,
+void SingleThreadDispatcher::dispatch(const renderer::RenderContext& context,
 		std::shared_ptr<util::IProgressHandler> progress) {
 	int render_tiles = context.tileset->getRequiredRenderTilesCount();
 	std::cout << "Single thread will render " << render_tiles;
 	std::cout << " render tiles." << std::endl;
 
+	renderer::RenderWork work;
+	work.tiles.insert(renderer::TilePath());
+
 	renderer::TileRenderWorker worker;
-
-	std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(context.world));
-	worker.setMapConfig(context.blockimages, context.map_config, context.output_dir);
-	worker.setWorld(cache, context.tileset);
-
-	std::set<renderer::TilePath> tiles, tiles_skip;
-	tiles.insert(renderer::TilePath());
-	worker.setWork(tiles, tiles_skip);
-
+	worker.setRenderContext(context);
+	worker.setRenderWork(work);
 	worker.setProgressHandler(progress);
 	worker();
 }

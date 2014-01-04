@@ -39,7 +39,7 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace renderer {
 
-struct RenderWorkContext {
+struct RenderContext {
 	fs::path output_dir;
 	config::MapSection map_config;
 	std::shared_ptr<renderer::BlockImages> blockimages;
@@ -58,38 +58,12 @@ struct RenderWorkResult {
 };
 
 class TileRenderWorker {
-private:
-	// cache and tileset of the map to render
-	std::shared_ptr<mc::WorldCache> worldcache;
-	std::shared_ptr<TileSet> tileset;
-	
-	// configuration of the map to render
-	std::shared_ptr<BlockImages> blockimages;
-	config::MapSection map_config;
-	fs::path map_output_dir;
-	// and a TileRenderer instance
-	TileRenderer renderer;
-
-	// information about the work to do:
-	// tiles to render recursively
-	// and tiles we can skip and just read from disk
-	std::set<TilePath> tiles, tiles_skip;
-	
-	// progress handler
-	std::shared_ptr<util::IProgressHandler> progress;
-	std::shared_ptr<bool> finished;
 public:
 	TileRenderWorker();
 	~TileRenderWorker();
 
-	void setWorld(std::shared_ptr<mc::WorldCache> worldcache,
-			std::shared_ptr<TileSet> tileset);
-	
-	void setMapConfig(std::shared_ptr<BlockImages> blockimages,
-			const config::MapSection map_config,
-			const fs::path& map_output_dir);
-
-	void setWork(const std::set<TilePath>& tiles, const std::set<TilePath>& tiles_skip);
+	void setRenderContext(const RenderContext& context);
+	void setRenderWork(const RenderWork& work);
 
 	void setProgressHandler(std::shared_ptr<util::IProgressHandler> progress,
 			std::shared_ptr<bool> finished = std::shared_ptr<bool>(new bool));
@@ -98,6 +72,16 @@ public:
 	void renderRecursive(const TilePath& path, Image& image);
 
 	void operator()();
+
+private:
+	RenderContext render_context;
+	RenderWork render_work;
+
+	// progress handler
+	std::shared_ptr<util::IProgressHandler> progress;
+	std::shared_ptr<bool> finished;
+
+	TileRenderer renderer;
 };
 
 } /* namespace render */

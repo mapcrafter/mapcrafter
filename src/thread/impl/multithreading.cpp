@@ -87,11 +87,9 @@ bool ThreadManager::getResult(renderer::RenderWorkResult& result) {
 }
 
 ThreadWorker::ThreadWorker(WorkerManager<renderer::RenderWork, renderer::RenderWorkResult>& manager,
-		const renderer::RenderWorkContext& context)
+		const renderer::RenderContext& context)
 	: manager(manager), render_context(context) {
-	std::shared_ptr<mc::WorldCache> cache(new mc::WorldCache(context.world));
-	render_worker.setWorld(cache, context.tileset);
-	render_worker.setMapConfig(context.blockimages, context.map_config, context.output_dir);
+	render_worker.setRenderContext(context);
 }
 
 ThreadWorker::~ThreadWorker() {
@@ -101,7 +99,7 @@ void ThreadWorker::operator()() {
 	renderer::RenderWork work;
 
 	while (manager.getWork(work)) {
-		render_worker.setWork(work.tiles, work.tiles_skip);
+		render_worker.setRenderWork(work);
 		render_worker();
 
 		renderer::RenderWorkResult result;
@@ -123,7 +121,7 @@ MultiThreadingDispatcher::MultiThreadingDispatcher(int threads)
 MultiThreadingDispatcher::~MultiThreadingDispatcher() {
 }
 
-void MultiThreadingDispatcher::dispatch(const renderer::RenderWorkContext& context,
+void MultiThreadingDispatcher::dispatch(const renderer::RenderContext& context,
 		std::shared_ptr<util::IProgressHandler> progress) {
 	auto tiles = context.tileset->getRequiredCompositeTiles();
 	int jobs = 0;

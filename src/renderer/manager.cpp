@@ -572,7 +572,7 @@ bool RenderManager::run() {
 
 			// render the map
 
-			RenderWorkContext context;
+			RenderContext context;
 			context.output_dir = output_dir;
 			context.map_config = map;
 			context.blockimages = blockimages;
