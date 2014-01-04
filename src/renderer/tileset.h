@@ -240,10 +240,6 @@ public:
 	 */
 	int getContainingRenderTiles(const TilePath& tile) const;
 
-	/**
-	 * Assigns subtrees of the tile quadtree to render to multiple workers.
-	 */
-	int findWorkTasks(int worker_count, std::vector<std::map<TilePath, int> >& workers) const;
 private:
 	// the minimum maximum zoom level which would be required to render all tiles
 	int min_depth;
