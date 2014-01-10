@@ -86,14 +86,10 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 				<< " (No biome data found)!" << std::endl;
 
 	// find sections list
-	// I already saw (empty) chunks from the end with TagByte instead of TagCompound
-	// in this list, ignore them, they are empty
-	if (!level.hasList<nbt::TagCompound>("Sections")
-			&& !level.hasList<nbt::TagByte>("Sections", 0)) {
-		std::cerr << "Warning: Corrupt chunk at " << chunkpos.x << ":" << chunkpos.z
-			<< " (No valid sections list found)!" << std::endl;
-		return false;
-	}
+	// ignore it if section list does not exist, can happen sometimes with the empty
+	// chunks of the end
+	if (!level.hasList<nbt::TagCompound>("Sections"))
+		return true;
 	
 	const nbt::TagList& sections_tag = level.findTag<nbt::TagList>("Sections");
 	if (sections_tag.tag_type != nbt::TagCompound::TAG_TYPE)
