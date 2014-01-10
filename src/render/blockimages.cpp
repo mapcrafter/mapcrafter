@@ -613,6 +613,8 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & 0xff00;
 	else if (id == 84) // jukebox
 		return 0;
+	else if (id == 90) // nether portal
+		return 0;
 	else if (id == 93 || id == 94) // redstone repeater
 		return data & (0xff00 | 0b00000011);
 	else if (id == 117) // brewing stand
