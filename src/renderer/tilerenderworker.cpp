@@ -35,6 +35,12 @@ void TileRenderWorker::setRenderContext(const RenderContext& context) {
 
 void TileRenderWorker::setRenderWork(const RenderWork& work) {
 	render_work = work;
+	render_work_result = RenderWorkResult();
+	render_work_result.render_work = work;
+}
+
+const RenderWorkResult& TileRenderWorker::getRenderWorkResult() const {
+	return render_work_result;
 }
 
 void TileRenderWorker::setProgressHandler(
@@ -75,6 +81,7 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 		// this tile is a render tile, render it
 		renderer.renderTile(tile.getTilePos(),
 				render_context.tileset->getTileOffset(), image);
+		render_work_result.tiles_rendered++;
 
 		/*
 		// draws a border on the tile

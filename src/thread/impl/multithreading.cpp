@@ -102,15 +102,7 @@ void ThreadWorker::operator()() {
 		render_worker.setRenderWork(work);
 		render_worker();
 
-		renderer::RenderWorkResult result;
-		result.tiles = work.tiles;
-		result.tiles_skip = work.tiles_skip;
-		result.tiles_rendered = 0;
-		for (auto it = work.tiles.begin(); it != work.tiles.end(); ++it)
-			result.tiles_rendered += render_context.tileset->getContainingRenderTiles(*it);
-		for (auto it = work.tiles_skip.begin(); it != work.tiles_skip.end(); ++it)
-			result.tiles_rendered -= render_context.tileset->getContainingRenderTiles(*it);
-		manager.workFinished(work, result);
+		manager.workFinished(work, render_worker.getRenderWorkResult());
 	}
 }
 
@@ -146,7 +138,8 @@ void MultiThreadingDispatcher::dispatch(const renderer::RenderContext& context,
 	renderer::RenderWorkResult result;
 	while (manager.getResult(result)) {
 		progress->setValue(progress->getValue() + result.tiles_rendered);
-		for (auto tile_it = result.tiles.begin(); tile_it != result.tiles.end(); ++tile_it) {
+		for (auto tile_it = result.render_work.tiles.begin();
+				tile_it != result.render_work.tiles.end(); ++tile_it) {
 			rendered_tiles.insert(*tile_it);
 			if (*tile_it == renderer::TilePath()) {
 				manager.setFinished();

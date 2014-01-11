@@ -53,7 +53,10 @@ struct RenderWork {
 };
 
 struct RenderWorkResult {
-	std::set<renderer::TilePath> tiles, tiles_skip;
+	RenderWorkResult() : tiles_rendered(0) {}
+
+	RenderWork render_work;
+
 	int tiles_rendered;
 };
 
@@ -64,6 +67,7 @@ public:
 
 	void setRenderContext(const RenderContext& context);
 	void setRenderWork(const RenderWork& work);
+	const RenderWorkResult& getRenderWorkResult() const;
 
 	void setProgressHandler(std::shared_ptr<util::IProgressHandler> progress,
 			std::shared_ptr<bool> finished = std::shared_ptr<bool>(new bool));
@@ -76,6 +80,7 @@ public:
 private:
 	RenderContext render_context;
 	RenderWork render_work;
+	RenderWorkResult render_work_result;
 
 	// progress handler
 	std::shared_ptr<util::IProgressHandler> progress;
