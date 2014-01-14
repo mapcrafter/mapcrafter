@@ -63,8 +63,8 @@ fs::path as(const std::string& from);
 template<>
 bool as<bool>(const std::string& from);
 
-void trim(std::string& str);
-void replaceAll(std::string& str, const std::string& from, const std::string& to);
+std::string trim(const std::string& str);
+std::string replaceAll(const std::string& str, const std::string& from, const std::string& to);
 
 bool startswith(const std::string& str, const std::string& start);
 bool endswith(const std::string& str, const std::string& end);
