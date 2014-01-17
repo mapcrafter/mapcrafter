@@ -20,7 +20,7 @@
 #ifndef PARSER_H_
 #define PARSER_H_
 
-#include "extended_ini.h"
+#include "iniconfig.h"
 #include "validation.h"
 
 #include "../mc/worldcrop.h"
@@ -54,7 +54,7 @@ public:
 	~WorldSection();
 
 	void setGlobal(bool global);
-	bool parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation);
+	bool parse(const INIConfigSection& section, const fs::path& config_dir, ValidationList& validation);
 
 	fs::path getInputDir() const;
 	std::string getWorldName() const;
@@ -81,7 +81,7 @@ public:
 	~MapSection();
 
 	void setGlobal(bool global);
-	bool parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation);
+	bool parse(const INIConfigSection& section, const fs::path& config_dir, ValidationList& validation);
 
 	std::string getShortName() const;
 	std::string getLongName() const;

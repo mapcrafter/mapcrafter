@@ -47,11 +47,11 @@ MapSettings::MapSettings()
  * This method reads the map settings from a file.
  */
 bool MapSettings::read(const std::string& filename) {
-	config::ConfigFile config;
+	config::INIConfig config;
 	if (!config.loadFile(filename))
 		return false;
 
-	config::ConfigSection& root = config.getRootSection();
+	config::INIConfigSection& root = config.getRootSection();
 
 	texture_size = root.get<int>("texture_size");
 	tile_size = root.get<int>("tile_size");
@@ -80,8 +80,8 @@ bool MapSettings::read(const std::string& filename) {
  * This method writes the map settings to a file.
  */
 bool MapSettings::write(const std::string& filename) const {
-	config::ConfigFile config;
-	config::ConfigSection& root = config.getRootSection();
+	config::INIConfig config;
+	config::INIConfigSection& root = config.getRootSection();
 
 	root.set("texture_size", util::str(texture_size));
 	root.set("tile_size", util::str(tile_size));

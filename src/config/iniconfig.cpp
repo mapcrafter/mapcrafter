@@ -17,7 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "extended_ini.h"
+#include "iniconfig.h"
 
 #include "validation.h"
 
@@ -26,56 +26,56 @@
 namespace mapcrafter {
 namespace config {
 
-ConfigSection::ConfigSection(const std::string& type, const std::string& name)
+INIConfigSection::INIConfigSection(const std::string& type, const std::string& name)
 		: type(type), name(name) {
 }
 
-ConfigSection::~ConfigSection() {
+INIConfigSection::~INIConfigSection() {
 }
 
-int ConfigSection::getEntryIndex(const std::string& key) const {
+int INIConfigSection::getEntryIndex(const std::string& key) const {
 	for (size_t i = 0; i < entries.size(); i++)
 		if (entries[i].first == key)
 			return i;
 	return -1;
 }
 
-const std::string& ConfigSection::getType() const {
+const std::string& INIConfigSection::getType() const {
 	return type;
 }
 
-const std::string& ConfigSection::getName() const {
+const std::string& INIConfigSection::getName() const {
 	return name;
 }
 
-std::string ConfigSection::getNameType() const {
+std::string INIConfigSection::getNameType() const {
 	return type + ":" + name;
 }
 
-bool ConfigSection::isNamed() const {
+bool INIConfigSection::isNamed() const {
 	return !name.empty();
 }
 
-bool ConfigSection::isEmpty() const {
+bool INIConfigSection::isEmpty() const {
 	return entries.size() == 0;
 }
 
-bool ConfigSection::has(const std::string& key) const {
+bool INIConfigSection::has(const std::string& key) const {
 	return getEntryIndex(key) != -1;
 }
 
-std::string ConfigSection::get(const std::string& key, const std::string& default_value) const {
+std::string INIConfigSection::get(const std::string& key, const std::string& default_value) const {
 	int index = getEntryIndex(key);
 	if (index == -1)
 		return default_value;
 	return entries[index].second;
 }
 
-const std::vector<ConfigEntry> ConfigSection::getEntries() const {
+const std::vector<INIConfigEntry> INIConfigSection::getEntries() const {
 	return entries;
 }
 
-void ConfigSection::set(const std::string& key, const std::string& value) {
+void INIConfigSection::set(const std::string& key, const std::string& value) {
 	int index = getEntryIndex(key);
 	if (index != -1)
 		entries[index].second = value;
@@ -83,13 +83,13 @@ void ConfigSection::set(const std::string& key, const std::string& value) {
 		entries.push_back(std::make_pair(key, value));
 }
 
-void ConfigSection::remove(const std::string& key) {
+void INIConfigSection::remove(const std::string& key) {
 	int index = getEntryIndex(key);
 	if (index != -1)
 		entries.erase(entries.begin() + index);
 }
 
-std::ostream& operator<<(std::ostream& out, const ConfigSection& section) {
+std::ostream& operator<<(std::ostream& out, const INIConfigSection& section) {
 	if (section.getName() != "") {
 		if (section.getType() == "")
 			out << "[" << section.getName() << "]" << std::endl;
@@ -97,26 +97,26 @@ std::ostream& operator<<(std::ostream& out, const ConfigSection& section) {
 			out << "[" << section.getType() << ":" << section.getName() << "]" << std::endl;
 	}
 
-	const std::vector<ConfigEntry>& entries = section.getEntries();
-	for (std::vector<ConfigEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
+	const std::vector<INIConfigEntry>& entries = section.getEntries();
+	for (std::vector<INIConfigEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
 		out << it->first << " = " << it->second << std::endl;
 	return out;
 }
 
-ConfigFile::ConfigFile() {
+INIConfig::INIConfig() {
 }
 
-ConfigFile::~ConfigFile() {
+INIConfig::~INIConfig() {
 }
 
-int ConfigFile::getSectionIndex(const std::string& type, const std::string& name) const {
+int INIConfig::getSectionIndex(const std::string& type, const std::string& name) const {
 	for (size_t i = 0; i < sections.size(); i++)
 		if (sections[i].getType() == type && sections[i].getName() == name)
 			return i;
 	return -1;
 }
 
-bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
+bool INIConfig::load(std::istream& in, ValidationMessage& msg) {
 	int section = -1;
 	std::string line;
 	int linenumber = 0;
@@ -155,7 +155,7 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 			}
 
 			section++;
-			sections.push_back(ConfigSection(type, name));
+			sections.push_back(INIConfigSection(type, name));
 		} else {
 			// just a line with key = value
 			std::string key, value;
@@ -184,12 +184,12 @@ bool ConfigFile::load(std::istream& in, ValidationMessage& msg) {
 	return true;
 }
 
-bool ConfigFile::load(std::istream& in) {
+bool INIConfig::load(std::istream& in) {
 	ValidationMessage msg;
 	return load(in, msg);
 }
 
-bool ConfigFile::loadFile(const std::string& filename, ValidationMessage& msg) {
+bool INIConfig::loadFile(const std::string& filename, ValidationMessage& msg) {
 	std::ifstream in(filename);
 	if (!in) {
 		msg = ValidationMessage::error("Unable to read file '" + filename + "'!");
@@ -198,12 +198,12 @@ bool ConfigFile::loadFile(const std::string& filename, ValidationMessage& msg) {
 	return load(in, msg);
 }
 
-bool ConfigFile::loadFile(const std::string& filename) {
+bool INIConfig::loadFile(const std::string& filename) {
 	ValidationMessage msg;
 	return loadFile(filename, msg);
 }
 
-bool ConfigFile::write(std::ostream& out) const {
+bool INIConfig::write(std::ostream& out) const {
 	if (!root.isEmpty())
 		out << root << std::endl;
 	for (size_t i = 0; i < sections.size(); i++)
@@ -212,51 +212,51 @@ bool ConfigFile::write(std::ostream& out) const {
 	return true;
 }
 
-bool ConfigFile::writeFile(const std::string& filename) const {
+bool INIConfig::writeFile(const std::string& filename) const {
 	std::ofstream out(filename);
 	if (!out)
 		return false;
 	return write(out);
 }
 
-bool ConfigFile::hasSection(const std::string& type, const std::string& name) const {
+bool INIConfig::hasSection(const std::string& type, const std::string& name) const {
 	return getSectionIndex(type, name) != -1;
 }
 
-const ConfigSection& ConfigFile::getRootSection() const {
+const INIConfigSection& INIConfig::getRootSection() const {
 	return root;
 }
 
-ConfigSection& ConfigFile::getRootSection() {
+INIConfigSection& INIConfig::getRootSection() {
 	return root;
 }
 
-const std::vector<ConfigSection> ConfigFile::getSections() const {
+const std::vector<INIConfigSection> INIConfig::getSections() const {
 	return sections;
 }
 
-ConfigSection& ConfigFile::addSection(const std::string& type,
+INIConfigSection& INIConfig::addSection(const std::string& type,
 		const std::string& name) {
 	return getSection(type, name);
 }
 
-const ConfigSection& ConfigFile::getSection(const std::string& type, const std::string& name) const {
+const INIConfigSection& INIConfig::getSection(const std::string& type, const std::string& name) const {
 	int index = getSectionIndex(type, name);
 	if (index == -1)
 		return empty_section;
 	return sections.at(index);
 }
 
-ConfigSection& ConfigFile::getSection(const std::string& type, const std::string& name) {
+INIConfigSection& INIConfig::getSection(const std::string& type, const std::string& name) {
 	int index = getSectionIndex(type, name);
 	if (index != -1)
 		return sections[index];
-	ConfigSection section(type, name);
+	INIConfigSection section(type, name);
 	sections.push_back(section);
 	return sections.back();
 }
 
-ConfigSection& ConfigFile::addSection(const ConfigSection& section) {
+INIConfigSection& INIConfig::addSection(const INIConfigSection& section) {
 	int index = getSectionIndex(section.getType(), section.getName());
 	if (index == -1) {
 		sections.push_back(section);
@@ -266,7 +266,7 @@ ConfigSection& ConfigFile::addSection(const ConfigSection& section) {
 	return sections[index];
 }
 
-void ConfigFile::removeSection(const std::string& type, const std::string& name) {
+void INIConfig::removeSection(const std::string& type, const std::string& name) {
 	int index = getSectionIndex(type, name);
 	if (index == -1)
 		sections.erase(sections.begin() + index);

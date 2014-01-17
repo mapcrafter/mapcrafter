@@ -36,7 +36,7 @@ void WorldSection::setGlobal(bool global) {
 	this->global = global;
 }
 
-bool WorldSection::parse(const ConfigSection& section, const fs::path& config_dir,
+bool WorldSection::parse(const INIConfigSection& section, const fs::path& config_dir,
 		ValidationList& validation) {
 	// set default configuration values
 	world_name.setDefault(section.getName());
@@ -158,7 +158,7 @@ void MapSection::setGlobal(bool global) {
 	this->global = global;
 }
 
-bool MapSection::parse(const ConfigSection& section, const fs::path& config_dir, ValidationList& validation) {
+bool MapSection::parse(const INIConfigSection& section, const fs::path& config_dir, ValidationList& validation) {
 	name_short = section.getName();
 	name_long = name_short;
 
@@ -303,7 +303,7 @@ MapcrafterConfigFile::~MapcrafterConfigFile() {
 }
 
 bool MapcrafterConfigFile::parse(const std::string& filename, ValidationMap& validation) {
-	ConfigFile config;
+	INIConfig config;
 	ValidationMessage msg;
 	if (!config.loadFile(filename, msg)) {
 		validation.push_back(std::make_pair("Configuration file", makeValidationList(msg)));

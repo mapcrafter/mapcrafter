@@ -17,8 +17,8 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EXTENDED_CONFIG_H_
-#define EXTENDED_CONFIG_H_
+#ifndef INICONFIG_H
+#define INICONFIG_H
 
 #include "../util.h"
 
@@ -33,19 +33,19 @@ namespace config {
 
 class ValidationMessage;
 
-typedef std::pair<std::string, std::string> ConfigEntry;
+typedef std::pair<std::string, std::string> INIConfigEntry;
 
-class ConfigSection {
+class INIConfigSection {
 private:
 	std::string type;
 	std::string name;
 
-	std::vector<ConfigEntry> entries;
+	std::vector<INIConfigEntry> entries;
 
 	int getEntryIndex(const std::string& key) const;
 public:
-	ConfigSection(const std::string& type = "", const std::string& name = "");
-	~ConfigSection();
+	INIConfigSection(const std::string& type = "", const std::string& name = "");
+	~INIConfigSection();
 	
 	const std::string& getType() const;
 	const std::string& getName() const;
@@ -64,25 +64,25 @@ public:
 		return default_value;
 	}
 	
-	const std::vector<ConfigEntry> getEntries() const;
+	const std::vector<INIConfigEntry> getEntries() const;
 
 	void set(const std::string& key, const std::string& value);
 	void remove(const std::string& key);
 };
 
-std::ostream& operator<<(std::ostream& out, const ConfigSection& section);
+std::ostream& operator<<(std::ostream& out, const INIConfigSection& section);
 
-class ConfigFile {
+class INIConfig {
 private:
-	std::vector<ConfigSection> sections;
-	ConfigSection root;
+	std::vector<INIConfigSection> sections;
+	INIConfigSection root;
 
-	ConfigSection empty_section;
+	INIConfigSection empty_section;
 
 	int getSectionIndex(const std::string& type, const std::string& name) const;
 public:
-	ConfigFile();
-	~ConfigFile();
+	INIConfig();
+	~INIConfig();
 
 	bool load(std::istream& in, ValidationMessage& msg);
 	bool load(std::istream& in);
@@ -94,15 +94,15 @@ public:
 
 	bool hasSection(const std::string& type, const std::string& name) const;
 
-	const ConfigSection& getRootSection() const;
-	ConfigSection& getRootSection();
-	const ConfigSection& getSection(const std::string& type, const std::string& name) const;
-	ConfigSection& getSection(const std::string& type, const std::string& name);
+	const INIConfigSection& getRootSection() const;
+	INIConfigSection& getRootSection();
+	const INIConfigSection& getSection(const std::string& type, const std::string& name) const;
+	INIConfigSection& getSection(const std::string& type, const std::string& name);
 
-	const std::vector<ConfigSection> getSections() const;
+	const std::vector<INIConfigSection> getSections() const;
 
-	ConfigSection& addSection(const std::string& type, const std::string& name);
-	ConfigSection& addSection(const ConfigSection& section);
+	INIConfigSection& addSection(const std::string& type, const std::string& name);
+	INIConfigSection& addSection(const INIConfigSection& section);
 
 	void removeSection(const std::string& type, const std::string& name);
 };
@@ -110,4 +110,4 @@ public:
 } /* namespace config */
 } /* namespace mapcrafter */
 
-#endif /* EXTENDED_CONFIG_H_ */
+#endif /* INICONFIG_H */

@@ -17,7 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../config/extended_ini.h"
+#include "../config/iniconfig.h"
 #include "../config/mapcrafter_config.h"
 
 #include <iostream>
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(config_test) {
 }
 
 BOOST_AUTO_TEST_CASE(config_testReadWrite) {
-	config::ConfigFile c;
+	config::INIConfig c;
 	if (!c.loadFile("data/config/test.conf"))
 		BOOST_ERROR("Unable to load test config file data/config/test.conf!");
 	std::ifstream in("data/config/test.conf");
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(config_testFieldValidation) {
 
 	// test the behavior of loading config entries from different sections
 	// into the field objects
-	config::ConfigSection section1, section2, section3, section4;
+	config::INIConfigSection section1, section2, section3, section4;
 	section2.set("test", "foobar");
 	section4.set("test", "42");
 
