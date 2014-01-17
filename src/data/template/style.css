@@ -38,3 +38,8 @@ img.rotation {
 	margin-left: 3px;
 	margin-right: 3px;
 }
+
+.hidden {
+  display: none;
+}
+
