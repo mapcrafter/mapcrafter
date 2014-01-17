@@ -23,9 +23,9 @@
 			Mapcrafter.init();
 			
 			Mapcrafter.addControl(new MapSelectControl(), "topright", 1);
-			Mapcrafter.addControl(new RotationSelectControl(), "topright", 2);
+			Mapcrafter.addControl(new MapMarkerControl(), "topright", 2);
+			Mapcrafter.addControl(new RotationSelectControl(), "topright", 3);
 			Mapcrafter.addControl(new MousePosControl(), "bottomleft", 1);
-			Mapcrafter.addControl(new MapMarkerControl(), "topleft", 2);
 			
 			Mapcrafter.addHandler(new MapMarkerHandler(MARKERS));
 		}
