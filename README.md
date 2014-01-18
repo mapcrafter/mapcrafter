@@ -74,6 +74,16 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.1.1.1**
+
+* Refactored multi threading and some other things
+* Fixed some small block issues:
+  * Fixed downward spreading lava
+  * Fixed not rendered nether portal blocks
+  * Improved appearance of flat snow
+  * Added some special (not used in the game) slabs
+* Fixed a configuration bug
+
 **v.1.1**
 
 * Added ability to crop the world and render only a specific part of it
