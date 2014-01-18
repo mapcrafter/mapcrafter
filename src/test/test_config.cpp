@@ -18,7 +18,7 @@
  */
 
 #include "../config/iniconfig.h"
-#include "../config/mapcrafter_config.h"
+#include "../config/mapcrafterconfig.h"
 
 #include <iostream>
 #include <fstream>

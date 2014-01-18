@@ -20,7 +20,8 @@
 #ifndef MANAGER_H_
 #define MANAGER_H_
 
-#include "../config/mapcrafter_config.h"
+#include "../config/mapcrafterconfig.h"
+#include "../config/mapcrafterconfighelper.h"
 
 #include "../mc/world.h"
 #include "../mc/worldcache.h"
@@ -82,7 +83,7 @@ struct MapSettings {
 class RenderManager {
 private:
 	RenderOpts opts;
-	config::MapcrafterConfigFile config;
+	config::MapcrafterConfig config;
 	config::MapcrafterConfigHelper confighelper;
 
 	bool copyTemplateFile(const std::string& filename,

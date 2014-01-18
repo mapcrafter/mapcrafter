@@ -23,7 +23,7 @@
 #include "blockimages.h"
 #include "tileset.h"
 #include "tilerenderer.h"
-#include "../config/mapcrafter_config.h"
+#include "../config/mapcrafterconfig.h"
 #include "../mc/world.h"
 #include "../mc/worldcache.h"
 #include "../renderer/blockimages.h"

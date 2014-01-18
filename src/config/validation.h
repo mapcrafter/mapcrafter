@@ -116,6 +116,6 @@ static std::string ROTATION_NAMES_SHORT[4] = {"tl", "tr", "br", "bl"};
 
 int stringToRotation(const std::string& rotation, std::string names[4] = ROTATION_NAMES);
 
-} /* namespace config2 */
+} /* namespace config */
 } /* namespace mapcrafter */
 #endif /* VALIDATION_H_ */

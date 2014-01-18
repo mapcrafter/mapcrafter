@@ -20,7 +20,7 @@
 #ifndef BASE_H_
 #define BASE_H_
 
-#include "../../config/mapcrafter_config.h"
+#include "../../config/mapcrafterconfig.h"
 
 #include "../../mc/pos.h"
 #include "../../mc/worldcache.h"
