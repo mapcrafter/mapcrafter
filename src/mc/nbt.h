@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -22,9 +22,9 @@
 
 #include "../util.h"
 
-#include <iostream>
 #include <cstdint>
 #include <exception>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <sstream>

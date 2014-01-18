@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -26,8 +26,8 @@
 #include "worldcrop.h"
 
 #include <string>
-#include <unordered_set>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace mapcrafter {
 namespace mc {

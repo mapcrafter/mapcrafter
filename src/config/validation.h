@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -20,7 +20,7 @@
 #ifndef VALIDATION_H_
 #define VALIDATION_H_
 
-#include "extended_ini.h"
+#include "iniconfig.h"
 
 #include <map>
 #include <type_traits>
@@ -116,6 +116,6 @@ static std::string ROTATION_NAMES_SHORT[4] = {"tl", "tr", "br", "bl"};
 
 int stringToRotation(const std::string& rotation, std::string names[4] = ROTATION_NAMES);
 
-} /* namespace config2 */
+} /* namespace config */
 } /* namespace mapcrafter */
 #endif /* VALIDATION_H_ */

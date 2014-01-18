@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -17,9 +17,9 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../util.h"
-
 #include "worldcrop.h"
+
+#include "../util.h"
 
 #include <cmath>
 

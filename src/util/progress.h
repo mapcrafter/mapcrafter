@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -93,7 +93,7 @@ private:
 
 	std::string createProgressBar(int width, double percentage) const;
 	std::string createProgressStats(double percentage, int value, int max,
-			double speed, int eta = -1) const;
+			double speed_average, int eta = -1) const;
 };
 
 } /* namespace util */

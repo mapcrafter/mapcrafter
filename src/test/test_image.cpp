@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -17,20 +17,20 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../render/image.h"
+#include "../renderer/image.h"
 
 #include <cstdlib>
 #include <boost/test/unit_test.hpp>
 
-namespace render = mapcrafter::render;
+namespace renderer = mapcrafter::renderer;
 
 BOOST_AUTO_TEST_CASE(image_testIO) {
-	render::Image src(400, 200);
-	render::Image dest;
+	renderer::Image src(400, 200);
+	renderer::Image dest;
 
 	for(int x = 0; x < src.getWidth(); x++) {
 		for(int y = 0; y < src.getHeight(); y++) {
-			src.setPixel(x, y, render::rgba(rand() % 256, rand() % 256, rand() % 256, rand() % 256));
+			src.setPixel(x, y, renderer::rgba(rand() % 256, rand() % 256, rand() % 256, rand() % 256));
 		}
 	}
 

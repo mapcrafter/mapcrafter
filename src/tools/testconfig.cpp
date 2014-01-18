@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -17,7 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../config/mapcrafter_config.h"
+#include "../config/mapcrafterconfig.h"
 
 #include <iostream>
 #include <string>
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 
 	std::string configfile = argv[1];
 
-	config::MapcrafterConfigFile parser;
+	config::MapcrafterConfig parser;
 	config::ValidationMap validation;
 	bool ok = parser.parse(configfile, validation);
 

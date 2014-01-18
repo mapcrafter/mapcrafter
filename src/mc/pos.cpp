@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -20,7 +20,6 @@
 #include "pos.h"
 
 #include "../util.h"
-
 #include "chunk.h"
 
 #include <cmath>

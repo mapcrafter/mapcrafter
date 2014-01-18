@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -17,7 +17,7 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../render/blockimages.h"
+#include "../renderer/blockimages.h"
 
 #include <iostream>
 #include <string>
@@ -25,7 +25,7 @@
 
 namespace po = boost::program_options;
 
-using namespace mapcrafter::render;
+using namespace mapcrafter::renderer;
 
 int main(int argc, char **argv) {
 	std::string texture_dir;

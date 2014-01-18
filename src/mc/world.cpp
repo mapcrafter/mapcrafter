@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
  * This file is part of mapcrafter.
  *
@@ -21,10 +21,10 @@
 
 #include "../util.h"
 
-#include <iostream>
-#include <fstream>
-#include <cstdio>
 #include <cmath>
+#include <cstdio>
+#include <fstream>
+#include <iostream>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
