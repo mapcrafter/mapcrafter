@@ -126,7 +126,7 @@ bool INIConfig::load(std::istream& in, ValidationMessage& msg) {
 			continue;
 
 		// trim the line
-		util::trim(line);
+		std::string line = util::trim(line);
 
 		// a line starting with a # is a comment
 		if (line[0] == '#')
@@ -171,8 +171,8 @@ bool INIConfig::load(std::istream& in, ValidationMessage& msg) {
 				}
 			}
 
-			util::trim(key);
-			util::trim(value);
+			key = util::trim(key);
+			value = util::trim(value);
 
 			if (section == -1)
 				root.set(key, value);

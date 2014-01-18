@@ -148,7 +148,7 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
 
 	for (std::map<std::string, std::string>::const_iterator it = vars.begin();
 			it != vars.end(); ++it) {
-		util::replaceAll(data, "{" + it->first + "}", it->second);
+		data = util::replaceAll(data, "{" + it->first + "}", it->second);
 	}
 
 	std::ofstream out(config.getOutputPath(filename).c_str());

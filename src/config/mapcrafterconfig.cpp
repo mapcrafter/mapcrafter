@@ -155,8 +155,7 @@ std::string rotationsToString(std::set<int> rotations) {
 	for (auto it = rotations.begin(); it != rotations.end(); ++it)
 		if (*it >= 0 && *it < 4)
 			str += " " + ROTATION_NAMES[*it];
-	util::trim(str);
-	return str;
+	return util::trim(str);
 }
 
 void dumpWorldSection(std::ostream& out, const WorldSection& section) {

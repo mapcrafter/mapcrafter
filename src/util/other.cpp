@@ -120,25 +120,29 @@ bool as<bool>(const std::string& from) {
 	throw std::invalid_argument("Must be one of true/false or 0/1.");
 }
 
-void trim(std::string& str) {
+std::string trim(const std::string& str) {
 	// removes trailing and leading whitespaces
-	size_t end = str.find_last_not_of(" \t");
+	std::string trimmed = str;
+	size_t end = trimmed.find_last_not_of(" \t");
 	if (end != std::string::npos)
-		str = str.substr(0, end+1);
-	size_t start = str.find_first_not_of(" \t");
+		trimmed = trimmed.substr(0, end+1);
+	size_t start = trimmed.find_first_not_of(" \t");
 	if (start != std::string::npos)
-		str = str.substr(start);
-	else if (str.find_first_of(" \t") != std::string::npos)
+		trimmed = trimmed.substr(start);
+	else if (trimmed.find_first_of(" \t") != std::string::npos)
 		// special case if all characters are whitespaces
-		str = "";
+		trimmed = "";
+	return trimmed;
 }
 
-void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+std::string replaceAll(const std::string& str, const std::string& from, const std::string& to) {
+	std::string replaced = str;
 	size_t start = 0;
-	while ((start = str.find(from, start)) != std::string::npos) {
-		str.replace(start, from.length(), to);
+	while ((start = replaced.find(from, start)) != std::string::npos) {
+		replaced.replace(start, from.length(), to);
 		start += to.length();
 	}
+	return replaced;
 }
 
 bool startswith(const std::string& str, const std::string& start) {
