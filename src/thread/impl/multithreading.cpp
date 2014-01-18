@@ -129,8 +129,6 @@ void MultiThreadingDispatcher::dispatch(const renderer::RenderContext& context,
 	std::cout << thread_count << " threads will render " << render_tiles;
 	std::cout << " render tiles." << std::endl;
 
-	std::cout << jobs << " jobs" << std::endl;
-
 	for (int i = 0; i < thread_count; i++)
 		threads.push_back(std::thread(ThreadWorker(manager, context)));
 
