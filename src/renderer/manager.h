@@ -20,15 +20,12 @@
 #ifndef MANAGER_H_
 #define MANAGER_H_
 
+#include "tilerenderer.h"
+#include "tileset.h"
 #include "../config/mapcrafterconfig.h"
 #include "../config/mapcrafterconfighelper.h"
-
 #include "../mc/world.h"
 #include "../mc/worldcache.h"
-
-#include "tileset.h"
-#include "tilerenderer.h"
-
 #include "../util.h"
 
 #include <boost/filesystem.hpp>

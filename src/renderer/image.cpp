@@ -21,9 +21,9 @@
 
 #include "../util.h"
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
-#include <algorithm>
 
 namespace mapcrafter {
 namespace renderer {

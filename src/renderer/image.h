@@ -20,10 +20,10 @@
 #ifndef IMAGE_H_
 #define IMAGE_H_
 
+#include <png.h>
+#include <cstdint>
 #include <string>
 #include <vector>
-#include <png.h>
-#include <stdint.h>
 
 #define ROTATE_90 1
 #define ROTATE_180 2

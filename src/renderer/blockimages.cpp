@@ -19,14 +19,13 @@
 
 #include "blockimages.h"
 
+#include "tileset.h"
 #include "../util.h"
 
-#include "tileset.h"
-
+#include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <map>
-#include <cstdlib>
-#include <cmath>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;

@@ -20,17 +20,16 @@
 #include "tileset.h"
 
 #include "../mc/pos.h"
-
 #include "../util.h"
 
-#include <iostream>
-#include <sstream>
-#include <cmath>
-#include <cstdlib>
 #include <algorithm>
-#include <stdint.h>
-#include <set>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <iostream>
 #include <limits>
+#include <set>
+#include <sstream>
 
 namespace mapcrafter {
 namespace renderer {

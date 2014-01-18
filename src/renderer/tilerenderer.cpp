@@ -19,15 +19,15 @@
 
 #include "tilerenderer.h"
 
-#include "biomes.h"
 #include "rendermodes/base.h"
+#include "biomes.h"
 
-#include <iostream>
 #include <fstream>
-#include <sstream>
-#include <vector>
+#include <iostream>
 #include <map>
 #include <set>
+#include <sstream>
+#include <vector>
 
 namespace mapcrafter {
 namespace renderer {

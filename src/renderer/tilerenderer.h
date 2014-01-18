@@ -20,16 +20,13 @@
 #ifndef TILERENDERER_H_
 #define TILERENDERER_H_
 
-#include "../util.h"
-
+#include "blockimages.h"
+#include "image.h"
+#include "tileset.h"
 #include "../config/sections/map.h"
-
 #include "../mc/pos.h"
 #include "../mc/worldcache.h"
-
-#include "image.h"
-#include "blockimages.h"
-#include "tileset.h"
+#include "../util.h"
 
 #include <memory>
 #include <boost/filesystem.hpp>

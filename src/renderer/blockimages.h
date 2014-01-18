@@ -24,10 +24,10 @@
 #include "blocktextures.h"
 #include "image.h"
 
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <stdint.h>
 
 /**
  * For the rendering we need to transform the Minecraft textures to some kind of block

@@ -17,8 +17,8 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIGHT_H_
-#define LIGHT_H_
+#ifndef RENDERMODES_LIGHTING_H_
+#define RENDERMODES_LIGHTING_H_
 
 #include "base.h"
 
@@ -111,4 +111,4 @@ public:
 
 } /* namespace render */
 } /* namespace mapcrafter */
-#endif /* LIGHT_H_ */
+#endif /* RENDERMODES_LIGHTING_H_ */

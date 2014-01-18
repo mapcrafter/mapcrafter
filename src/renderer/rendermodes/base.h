@@ -17,16 +17,14 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BASE_H_
-#define BASE_H_
-
-#include "../../config/mapcrafterconfig.h"
-
-#include "../../mc/pos.h"
-#include "../../mc/worldcache.h"
+#ifndef RENDERMODES_BASE_H_
+#define RENDERMODES_BASE_H_
 
 #include "../image.h"
 #include "../tilerenderer.h"
+#include "../../mc/pos.h"
+#include "../../mc/worldcache.h"
+#include "../../config/mapcrafterconfig.h"
 
 #include <string>
 #include <vector>
@@ -64,4 +62,4 @@ bool createRendermode(const std::string& name, const config::MapSection& config,
 #include "cave.h"
 #include "lighting.h"
 
-#endif /* BASE_H_ */
+#endif /* RENDERMODES_BASE_H_ */

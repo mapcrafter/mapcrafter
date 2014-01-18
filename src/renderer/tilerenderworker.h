@@ -21,8 +21,8 @@
 #define TILERENDERWORKER_H_
 
 #include "blockimages.h"
-#include "tileset.h"
 #include "tilerenderer.h"
+#include "tileset.h"
 #include "../config/mapcrafterconfig.h"
 #include "../mc/world.h"
 #include "../mc/worldcache.h"

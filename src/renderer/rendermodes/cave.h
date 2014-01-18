@@ -17,8 +17,8 @@
  * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CAVE_H_
-#define CAVE_H_
+#ifndef RENDERMODES_CAVE_H_
+#define RENDERMODES_CAVE_H_
 
 #include "base.h"
 
@@ -39,4 +39,4 @@ public:
 
 } /* namespace render */
 } /* namespace mapcrafter */
-#endif /* CAVE_H_ */
+#endif /* RENDERMODES_CAVE_H_ */
