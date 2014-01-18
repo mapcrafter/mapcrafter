@@ -22,7 +22,7 @@
 
 #include "../util.h"
 
-#include "../config/mapcrafterconfig.h"
+#include "../config/sections/map.h"
 
 #include "../mc/pos.h"
 #include "../mc/worldcache.h"

@@ -20,7 +20,69 @@
 #ifndef SECTIONS_BASE_H_
 #define SECTIONS_BASE_H_
 
-#include "map.h"
-#include "world.h"
+#include <string>
+
+#include "../validation.h"
+
+namespace mapcrafter {
+namespace config {
+
+class INIConfigSection;
+
+class ConfigSectionBase {
+public:
+	ConfigSectionBase();
+	virtual ~ConfigSectionBase();
+
+	/**
+	 * Specifies whether this is a global section.
+	 */
+	void setGlobal(bool global);
+
+	/**
+	 * Parses the given configurations section and adds infos/warnings/errors to the
+	 * validation list object.
+	 *
+	 * Returns false if there was an parsing error.
+	 */
+	bool parse(const INIConfigSection& section, ValidationList& validation);
+
+	/**
+	 * This method is called before parsing the section entries. The method can output
+	 * infos/warnings/errors via the validation list object.
+	 *
+	 * Used to set default configuration options for example.
+	 */
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+
+	/**
+	 * This method is called to parse one configuration entry.
+	 *
+	 * Should return false if the configuration key is unknown.
+	 */
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+
+	/**
+	 * This method is called after parsing the section entries. The method can output
+	 * infos/warnings/errors via the validation list object.
+	 *
+	 * Used for further validation things for example.
+	 */
+	virtual void postParse(const INIConfigSection& section,
+			ValidationList& validation);
+
+protected:
+	// whether this is a global section ([global:sections])
+	// might change with future versions, [section:my_glob_*] seems to be a good idea, too
+	bool global;
+
+	// name of this section
+	std::string section_name;
+};
+
+}
+}
 
 #endif /* SECTIONS_BASE_H_ */

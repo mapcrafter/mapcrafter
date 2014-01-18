@@ -26,7 +26,7 @@ namespace mapcrafter {
 namespace config {
 
 MapcrafterConfig::MapcrafterConfig()
-		: world_global(true), map_global(true) {
+	: world_global(true), map_global(true) {
 }
 
 MapcrafterConfig::~MapcrafterConfig() {
@@ -82,7 +82,8 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 
 	if (config.hasSection("global", "worlds")) {
 		ValidationList msgs;
-		ok = world_global.parse(config.getSection("global", "worlds"), config_dir, msgs) && ok;
+		world_global.setConfigDir(config_dir);
+		ok = world_global.parse(config.getSection("global", "worlds"), msgs) && ok;
 		if (!msgs.empty())
 			validation.push_back(std::make_pair("Global world configuration", msgs));
 		if (!ok)
@@ -91,7 +92,8 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 
 	if (config.hasSection("global", "maps")) {
 		ValidationList msgs;
-		ok = map_global.parse(config.getSection("global", "maps"), config_dir, msgs) && ok;
+		map_global.setConfigDir(config_dir);
+		ok = map_global.parse(config.getSection("global", "maps"), msgs) && ok;
 		if (!msgs.empty())
 			validation.push_back(std::make_pair("Global map configuration", msgs));
 		if (!ok)
@@ -114,7 +116,8 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 		ValidationList msgs;
 		WorldSection world = world_global;
 		world.setGlobal(false);
-		ok = world.parse(*it, config_dir, msgs) && ok;
+		world.setConfigDir(config_dir);
+		ok = world.parse(*it, msgs) && ok;
 
 		if (hasWorld(it->getName())) {
 			msgs.push_back(ValidationMessage::error("World name '" + it->getName() + "' already used!"));
@@ -132,7 +135,8 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 		ValidationList msgs;
 		MapSection map = map_global;
 		map.setGlobal(false);
-		ok = map.parse(*it, config_dir, msgs) && ok;
+		map.setConfigDir(config_dir);
+		ok = map.parse(*it, msgs) && ok;
 
 		if (hasMap(it->getName())) {
 			msgs.push_back(ValidationMessage::error("Map name '" + it->getName() + "' already used!"));

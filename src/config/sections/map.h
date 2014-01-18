@@ -20,6 +20,7 @@
 #ifndef SECTIONS_MAP_H_
 #define SECTIONS_MAP_H_
 
+#include "base.h"
 #include "../validation.h"
 
 #include <set>
@@ -33,26 +34,19 @@ namespace config {
 
 class INIConfigSection;
 
-class MapSection {
-private:
-	bool global;
-
-	std::string name_short, name_long;
-	Field<std::string> world;
-
-	Field<fs::path> texture_dir;
-	Field<std::string> rotations;
-	std::set<int> rotations_set;
-	Field<std::string> rendermode;
-	Field<int> texture_size;
-
-	Field<bool> render_unknown_blocks, render_leaves_transparent, render_biomes, use_image_mtimes;
+class MapSection : public ConfigSectionBase {
 public:
 	MapSection(bool global = false);
 	~MapSection();
 
-	void setGlobal(bool global);
-	bool parse(const INIConfigSection& section, const fs::path& config_dir, ValidationList& validation);
+	void setConfigDir(const fs::path& config_dir);
+
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+	virtual void postParse(const INIConfigSection& section,
+			ValidationList& validation);
 
 	std::string getShortName() const;
 	std::string getLongName() const;
@@ -67,6 +61,20 @@ public:
 	bool renderLeavesTransparent() const;
 	bool renderBiomes() const;
 	bool useImageModificationTimes() const;
+
+private:
+	fs::path config_dir;
+
+	std::string name_short, name_long;
+	Field<std::string> world;
+
+	Field<fs::path> texture_dir;
+	Field<std::string> rotations;
+	std::set<int> rotations_set;
+	Field<std::string> rendermode;
+	Field<int> texture_size;
+
+	Field<bool> render_unknown_blocks, render_leaves_transparent, render_biomes, use_image_mtimes;
 };
 
 } /* namespace config */

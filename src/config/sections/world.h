@@ -20,6 +20,7 @@
 #ifndef SECTIONS_WORLD_H_
 #define SECTIONS_WORLD_H_
 
+#include "base.h"
 #include "../validation.h"
 #include "../../mc/worldcrop.h"
 
@@ -33,9 +34,27 @@ namespace config {
 
 class INIConfigSection;
 
-class WorldSection {
+class WorldSection : public ConfigSectionBase {
+public:
+	WorldSection(bool global = false);
+	~WorldSection();
+
+	void setConfigDir(const fs::path& config_dir);
+
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+	virtual void postParse(const INIConfigSection& section,
+			ValidationList& validation);
+
+	fs::path getInputDir() const;
+	std::string getWorldName() const;
+	const mc::WorldCrop getWorldCrop() const;
+	bool needsWorldCentering() const;
+
 private:
-	bool global;
+	fs::path config_dir;
 
 	Field<fs::path> input_dir;
 	Field<std::string> world_name;
@@ -44,17 +63,6 @@ private:
 	Field<int> min_x, max_x, min_z, max_z;
 	Field<int> center_x, center_z, radius;
 	mc::WorldCrop worldcrop;
-public:
-	WorldSection(bool global = false);
-	~WorldSection();
-
-	void setGlobal(bool global);
-	bool parse(const INIConfigSection& section, const fs::path& config_dir, ValidationList& validation);
-
-	fs::path getInputDir() const;
-	std::string getWorldName() const;
-	const mc::WorldCrop getWorldCrop() const;
-	bool needsWorldCentering() const;
 };
 
 } /* namespace config */

@@ -24,75 +24,67 @@
 namespace mapcrafter {
 namespace config {
 
-WorldSection::WorldSection(bool global)
-		: global(global) {
+WorldSection::WorldSection(bool global) {
+	setGlobal(global);
 }
 
 WorldSection::~WorldSection() {
 }
 
-void WorldSection::setGlobal(bool global) {
-	this->global = global;
+void WorldSection::setConfigDir(const fs::path& config_dir) {
+	this->config_dir = config_dir;
 }
 
-bool WorldSection::parse(const INIConfigSection& section, const fs::path& config_dir,
+void WorldSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
-	// set default configuration values
 	world_name.setDefault(section.getName());
+}
 
-	mc::BlockPos crop_center;
-
-	// go through all configuration options in this section
-	//   - load/parse the individual options
-	//   - warn the user about unknown options
-	auto entries = section.getEntries();
-	for (auto entry_it = entries.begin(); entry_it != entries.end(); ++entry_it) {
-		std::string key = entry_it->first;
-		std::string value = entry_it->second;
-
-		if (key == "input_dir") {
-			if (input_dir.load(key, value, validation)) {
-				input_dir.setValue(BOOST_FS_ABSOLUTE(input_dir.getValue(), config_dir));
-				if (!fs::is_directory(input_dir.getValue()))
-					validation.push_back(ValidationMessage::error(
-							"'input_dir' must be an existing directory! '"
-							+ input_dir.getValue().string() + "' does not exist!"));
-			}
-		} else if (key == "world_name")
-			world_name.load(key, value, validation);
-
-		else if (key == "crop_min_y") {
-			if (min_y.load(key, value, validation))
-				worldcrop.setMinY(min_y.getValue());
-		} else if (key == "crop_max_y") {
-			if (max_y.load(key, value, validation))
-				worldcrop.setMaxY(max_y.getValue());
-		} else if (key == "crop_min_x") {
-			if (min_x.load(key, value, validation))
-				worldcrop.setMinX(min_x.getValue());
-		} else if (key == "crop_max_x") {
-			if (max_x.load(key, value, validation))
-				worldcrop.setMaxX(max_x.getValue());
-		} else if (key == "crop_min_z") {
-			if (min_z.load(key, value, validation))
-				worldcrop.setMinZ(min_z.getValue());
-		} else if (key == "crop_max_z") {
-			if (max_z.load(key, value, validation))
-				worldcrop.setMaxZ(max_z.getValue());
-
-		} else if (key == "crop_center_x")
-			center_x.load(key, value, validation);
-		else if (key == "crop_center_z")
-			center_z.load(key, value, validation);
-		else if (key == "crop_radius")
-			radius.load(key, value, validation);
-
-		else {
-			validation.push_back(ValidationMessage::warning(
-					"Unknown configuration option '" + key + "'!"));
+bool WorldSection::parseField(const std::string key, const std::string value,
+		ValidationList& validation) {
+	if (key == "input_dir") {
+		if (input_dir.load(key, value, validation)) {
+			input_dir.setValue(BOOST_FS_ABSOLUTE(input_dir.getValue(), config_dir));
+			if (!fs::is_directory(input_dir.getValue()))
+				validation.push_back(ValidationMessage::error(
+						"'input_dir' must be an existing directory! '"
+						+ input_dir.getValue().string() + "' does not exist!"));
 		}
-	}
+	} else if (key == "world_name")
+		world_name.load(key, value, validation);
 
+	else if (key == "crop_min_y") {
+		if (min_y.load(key, value, validation))
+			worldcrop.setMinY(min_y.getValue());
+	} else if (key == "crop_max_y") {
+		if (max_y.load(key, value, validation))
+			worldcrop.setMaxY(max_y.getValue());
+	} else if (key == "crop_min_x") {
+		if (min_x.load(key, value, validation))
+			worldcrop.setMinX(min_x.getValue());
+	} else if (key == "crop_max_x") {
+		if (max_x.load(key, value, validation))
+			worldcrop.setMaxX(max_x.getValue());
+	} else if (key == "crop_min_z") {
+		if (min_z.load(key, value, validation))
+			worldcrop.setMinZ(min_z.getValue());
+	} else if (key == "crop_max_z") {
+		if (max_z.load(key, value, validation))
+			worldcrop.setMaxZ(max_z.getValue());
+
+	} else if (key == "crop_center_x")
+		center_x.load(key, value, validation);
+	else if (key == "crop_center_z")
+		center_z.load(key, value, validation);
+	else if (key == "crop_radius")
+		radius.load(key, value, validation);
+	else
+		return false;
+	return true;
+}
+
+void WorldSection::postParse(const INIConfigSection& section,
+		ValidationList& validation) {
 	// validate the world croppping
 	bool crop_rectangular = min_x.isLoaded() || max_x.isLoaded() || min_z.isLoaded() || max_z.isLoaded();
 	bool crop_circular = center_x.isLoaded() || center_z.isLoaded() || radius.isLoaded();
@@ -123,8 +115,6 @@ bool WorldSection::parse(const INIConfigSection& section, const fs::path& config
 	if (!global) {
 		input_dir.require(validation, "You have to specify an input directory ('input_dir')!");
 	}
-
-	return isValidationValid(validation);
 }
 
 fs::path WorldSection::getInputDir() const {
