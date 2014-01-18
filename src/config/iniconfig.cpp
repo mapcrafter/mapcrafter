@@ -126,7 +126,7 @@ bool INIConfig::load(std::istream& in, ValidationMessage& msg) {
 			continue;
 
 		// trim the line
-		std::string line = util::trim(line);
+		line = util::trim(line);
 
 		// a line starting with a # is a comment
 		if (line[0] == '#')
