@@ -35,10 +35,8 @@ SingleThreadDispatcher::~SingleThreadDispatcher() {
 void SingleThreadDispatcher::dispatch(const renderer::RenderContext& context,
 		std::shared_ptr<util::IProgressHandler> progress) {
 	int render_tiles = context.tileset->getRequiredRenderTilesCount();
-	if (render_tiles == 0) {
-		std::cout << "No tiles need to get rendered." << std::endl;
+	if (render_tiles == 0)
 		return;
-	}
 
 	std::cout << "Single thread will render " << render_tiles;
 	std::cout << " render tiles." << std::endl;

@@ -116,10 +116,8 @@ MultiThreadingDispatcher::~MultiThreadingDispatcher() {
 void MultiThreadingDispatcher::dispatch(const renderer::RenderContext& context,
 		std::shared_ptr<util::IProgressHandler> progress) {
 	auto tiles = context.tileset->getRequiredCompositeTiles();
-	if (tiles.size() == 0) {
-		std::cout << "No tiles need to get rendered." << std::endl;
+	if (tiles.size() == 0)
 		return;
-	}
 
 	int jobs = 0;
 	for (auto tile_it = tiles.begin(); tile_it != tiles.end(); ++tile_it)

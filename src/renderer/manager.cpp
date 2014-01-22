@@ -571,6 +571,10 @@ bool RenderManager::run() {
 			}
 
 			// render the map
+			if (tileset->getRequiredRenderTilesCount() == 0) {
+				std::cout << "No tiles need to get rendered." << std::endl;
+				continue;
+			}
 
 			RenderContext context;
 			context.output_dir = output_dir;
