@@ -74,6 +74,10 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.1.1.3**
+
+* Fixed the batch mode showing an animated progress bar
+
 **v.1.1.2**
 
 * Fixed a bug (#58) with mapcrafter hanging when there are no tiles to render

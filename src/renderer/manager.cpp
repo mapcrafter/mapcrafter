@@ -589,11 +589,11 @@ bool RenderManager::run() {
 			else
 				dispatcher = std::make_shared<thread::MultiThreadingDispatcher>(opts.jobs);
 
-			std::shared_ptr<util::ProgressBar> progress(new util::ProgressBar);
+			util::ProgressBar* progress_ptr = new util::ProgressBar;
+			progress_ptr->setAnimated(!opts.batch);
+			std::shared_ptr<util::ProgressBar> progress(progress_ptr);
 			dispatcher->dispatch(context, progress);
 			progress->finish();
-
-			//render(map, output_dir, worlds[world_name][rotation], tileset, blockimages);
 
 			// update the settings file with last render time
 			settings.rotations[rotation] = true;
