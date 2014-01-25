@@ -13,7 +13,6 @@
 
 import sys, os
 
-buildbot = os.environ.get('MAPCRAFTER_BUILDBOT', None) == '42'
 has_sphinx_theme = True
 try:
     import sphinx_rtd_theme
@@ -36,8 +35,6 @@ extensions = []
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
-if buildbot:
-    templates_path = ['_templates_tracking']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
