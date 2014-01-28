@@ -2120,6 +2120,12 @@ void BlockImages::loadBlocks() {
 	BlockTextures& t = textures;
 
 	createBlock(1, 0, t.STONE); // stone
+	createBlock(1, 1, t.STONE_GRANITE); // granite
+	createBlock(1, 2, t.STONE_GRANITE_SMOOTH); // polished granite
+	createBlock(1, 3, t.STONE_DIORITE); // diorite
+	createBlock(1, 4, t.STONE_DIORITE_SMOOTH); // polished diorite
+	createBlock(1, 5, t.STONE_ANDESITE); // andesite
+	createBlock(1, 6, t.STONE_ANDESITE_SMOOTH); // polished andesite
 	createGrassBlock(); // id 2
 	createBlock(3, 0, t.DIRT); // dirt
 	createBlock(3, 1, t.DIRT); // grassless dirt
