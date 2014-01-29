@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # developer stuff:
 # lists the block textures in the 'blocks' dir and generates the c++ texture code
@@ -16,7 +16,7 @@ HEADER_TEMPLATE = """#ifndef BLOCKTEXTURES_H_
 #include <vector>
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 /**
  * Collection of Minecraft block textures.
@@ -46,7 +46,7 @@ SOURCE_TEMPLATE = """#include "blocktextures.h"
 namespace fs = boost::filesystem;
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 BlockTextures::BlockTextures()
 	: %(texture_objects)
