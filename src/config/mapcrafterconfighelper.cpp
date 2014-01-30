@@ -113,7 +113,7 @@ void MapcrafterConfigHelper::setWorldTileOffset(const std::string& world,
 
 const renderer::TilePos& MapcrafterConfigHelper::getWorldTileOffset(
 		const std::string& world, int rotation) {
-	return world_tile_offsets.at(world).at(rotation);
+	return world_tile_offsets.at(world)[rotation];
 }
 
 int MapcrafterConfigHelper::getRenderBehavior(const std::string& map, int rotation) const {
