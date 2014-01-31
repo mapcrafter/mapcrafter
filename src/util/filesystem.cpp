@@ -124,7 +124,7 @@ fs::path findExecutablePath() {
 fs::path findExecutableMapcrafterDir(fs::path executable) {
 	std::string filename = executable.filename().string();
 	fs::path directory = executable.parent_path();
-	if (filename == "testconfig" &&
+	if ((filename == "testconfig" || filename == "mapcrafter_markers") &&
 			executable.parent_path().filename().string() == "tools")
 		return directory.parent_path().parent_path();
 	return directory.parent_path();

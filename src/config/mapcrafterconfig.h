@@ -22,6 +22,7 @@
 
 #include "validation.h"
 #include "sections/map.h"
+#include "sections/marker.h"
 #include "sections/world.h"
 
 #include <map>
@@ -38,11 +39,13 @@ class MapcrafterConfig {
 private:
 	WorldSection world_global;
 	MapSection map_global;
+	MarkerSection marker_global;
 
 	Field<fs::path> output_dir, template_dir;
 
 	std::map<std::string, WorldSection> worlds;
 	std::vector<MapSection> maps;
+	std::map<std::string, MarkerSection> markers;
 public:
 	MapcrafterConfig();
 	~MapcrafterConfig();
@@ -63,6 +66,9 @@ public:
 	bool hasMap(const std::string& map) const;
 	const std::vector<MapSection>& getMaps() const;
 	const MapSection& getMap(const std::string& map) const;
+
+	bool hasMarker(const std::string marker) const;
+	const std::map<std::string, MarkerSection>& getMarkers() const;
 };
 
 } /* namespace config */
