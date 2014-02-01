@@ -57,6 +57,7 @@ struct MapSettings {
 	int tile_size;
 	int max_zoom;
 
+	double lighting_intensity;
 	bool render_unknown_blocks;
 	bool render_leaves_transparent;
 	bool render_biomes;

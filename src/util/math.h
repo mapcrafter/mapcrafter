@@ -21,6 +21,8 @@
 #ifndef MATH_H_
 #define MATH_H_
 
+#include <cmath>
+
 namespace mapcrafter {
 namespace util {
 
@@ -50,6 +52,14 @@ T floordiv(T a, T b) {
 	if (a >= 0)
 		return a / b;
 	return (a - b + 1) / b;
+}
+
+/**
+ * Checks whether to floating point numbers are equal with a small deviation.
+ */
+template<typename T>
+bool floatingPointEquals(T a, T b, T epsilon = 0.0001) {
+	return std::abs(a - b) < epsilon;
 }
 
 } /* namespace util */

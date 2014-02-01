@@ -57,6 +57,7 @@ bool MapSettings::read(const std::string& filename) {
 	tile_size = root.get<int>("tile_size");
 	max_zoom = root.get<int>("max_zoom");
 
+	lighting_intensity = root.get<double>("lighting_intensity", 1.0);
 	render_unknown_blocks = root.get<bool>("render_unknown_blocks");
 	render_leaves_transparent = root.get<bool>("render_leaves_transparent");
 	render_biomes = root.get<bool>("render_biomes");
@@ -87,6 +88,7 @@ bool MapSettings::write(const std::string& filename) const {
 	root.set("tile_size", util::str(tile_size));
 	root.set("max_zoom", util::str(max_zoom));
 
+	root.set("lighting_intensity", util::str(lighting_intensity));
 	root.set("render_unknown_blocks", util::str(render_unknown_blocks));
 	root.set("render_leaves_transparent", util::str(render_leaves_transparent));
 	root.set("render_biomes", util::str(render_biomes));
@@ -106,6 +108,7 @@ bool MapSettings::write(const std::string& filename) const {
 
 bool MapSettings::equalsMapConfig(const config::MapSection& map) const {
 	return texture_size == map.getTextureSize()
+			&& util::floatingPointEquals(lighting_intensity, map.getLightingIntensity())
 			&& render_unknown_blocks == map.renderUnknownBlocks()
 			&& render_leaves_transparent == map.renderLeavesTransparent()
 			&& render_biomes == map.renderBiomes();

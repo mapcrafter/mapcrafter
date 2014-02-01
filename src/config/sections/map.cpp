@@ -50,6 +50,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	rotations.setDefault("top-left");
 	rendermode.setDefault("daylight");
 	texture_size.setDefault(12);
+	lighting_intensity.setDefault(1.0);
 	render_unknown_blocks.setDefault(false);
 	render_leaves_transparent.setDefault(true);
 	render_biomes.setDefault(true);
@@ -84,6 +85,8 @@ bool MapSection::parseField(const std::string key, const std::string value,
 				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 32))
 				validation.push_back(ValidationMessage::error(
 						"'texture_size' must a number between 1 and 32!"));
+	} else if (key == "lighting_intensity") {
+		lighting_intensity.load(key, value, validation);
 	} else if (key == "render_unknown_blocks") {
 		render_unknown_blocks.load(key, value, validation);
 	} else if (key == "render_leaves_transparent") {
@@ -146,6 +149,10 @@ std::string MapSection::getRendermode() const {
 
 int MapSection::getTextureSize() const {
 	return texture_size.getValue();
+}
+
+double MapSection::getLightingIntensity() const {
+	return lighting_intensity.getValue();
 }
 
 bool MapSection::renderUnknownBlocks() const {

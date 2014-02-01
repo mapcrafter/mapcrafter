@@ -50,9 +50,11 @@ bool createRendermode(const std::string& name, const config::MapSection& config,
 	if (name == "cave")
 		modes.push_back(std::shared_ptr<Rendermode>(new CaveRendermode(state)));
 	else if (name == "daylight")
-		modes.push_back(std::shared_ptr<Rendermode>(new LightingRendermode(state, true)));
+		modes.push_back(std::shared_ptr<Rendermode>(
+				new LightingRendermode(state, true, config.getLightingIntensity())));
 	else if (name == "nightlight")
-		modes.push_back(std::shared_ptr<Rendermode>(new LightingRendermode(state, false)));
+		modes.push_back(std::shared_ptr<Rendermode>(
+				new LightingRendermode(state, false, config.getLightingIntensity())));
 	else
 		return false;
 	return true;
