@@ -35,6 +35,7 @@ namespace renderer {
 
 MapSettings::MapSettings()
 	: texture_size(12), tile_size(0), max_zoom(0),
+	  lighting_intensity(1.0),
 	  render_unknown_blocks(0), render_leaves_transparent(0), render_biomes(false) {
 	for (int i = 0; i < 4; i++) {
 		rotations[i] = false;
@@ -461,14 +462,12 @@ bool RenderManager::run() {
 				continue;
 			}
 
-			// check if the config file was not changed when rendering incrementally
+			// check whether the config file was changed when rendering incrementally
 			if (!settings.equalsMapConfig(map)) {
-				std::cerr << "Error: The configuration does not equal the settings of"
-						"the already rendered map." << std::endl;
-				std::cerr << "Force-render the whole map ('" << map_name;
-				std::cerr << "') or reset the configuration of the map to the old settings.";
-				std::cerr << std::endl << std::endl;
-				continue;
+				std::cerr << "Warning: It seems that the configuration of the map '";
+				std::cerr << map_name << "' was changed." << std::endl;
+				std::cerr << "Force-render the whole map or reset the configuration ";
+				std::cerr << "of the map to the old settings." << std::endl << std::endl;
 			}
 
 			// for force-render rotations
