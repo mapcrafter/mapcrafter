@@ -21,6 +21,7 @@ Here is a simple example of a configuration file (let's call it
 
     [map:map_myworld]
     name = My World world
+    world = myworld
 
 As you can see the configuration files consist of different types of sections
 (e.g. ``[section]``) and containing assignments of configuration options to
