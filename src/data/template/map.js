@@ -395,18 +395,18 @@ MapcrafterUI.prototype.init = function() {
 		crs: L.CRS.Simple
 	}).setView([0, 0], 0);
 	
-	var firstType = true;
+	var firstMap = null;
 	for(var type in this.config) {
 		this.layers[type] = {};
 		for(var i in this.config[type].rotations) {
 			var rotation = this.config[type].rotations[i];
 			this.layers[type][rotation] = this.createTileLayer(type, this.config[type], rotation);
-			if(firstType) {
-				this.setMapTypeAndRotation(type, rotation);
-				firstType = false;
-			}
+			if(firstMap === null)
+				firstMap = type;
 		}
 	}
+	
+	this.setMapType(firstMap);
 	
 	this.created = true;
 	
@@ -435,7 +435,7 @@ MapcrafterUI.prototype.getCurrentRotation = function() {
 }
 
 MapcrafterUI.prototype.getConfig = function(type) {
-	return this.config[type];
+	return type in this.config ? this.config[type] : null;
 };
 
 MapcrafterUI.prototype.getCurrentConfig = function() {
@@ -463,8 +463,20 @@ MapcrafterUI.prototype.setMapTypeAndRotation = function(type, rotation) {
 	this.lmap.addLayer(this.layers[this.currentType][this.currentRotation]);
 	
 	if(oldLayer == null || oldConfig.worldName != config.worldName) {
-		// set view to the center
-		this.lmap.setView(this.lmap.unproject([config.tileSize/2, config.tileSize/2]), 0);
+		// completely different map, reset view
+		// reset zoom level, 0 or user-defined default zoom level
+		var zoom = 0;
+		if("defaultZoom" in config)
+			zoom = config.defaultZoom;
+		
+		// set view to the center or set it to a user-defined default position
+		if("defaultView" in config) {
+			var x = config.defaultView[0];
+			var z = config.defaultView[1];
+			var y = config.defaultView[2];
+			this.lmap.setView(this.mcToLatLng(x, z, y), zoom);
+		} else
+			this.lmap.setView(this.lmap.unproject([config.tileSize/2, config.tileSize/2]), zoom);
 	} else /*if(this.currentRotation != oldRotation)*/ {
 		this.lmap.setView(this.mcToLatLng(xzy[0], xzy[1], xzy[2]), oldZoom);
 		
@@ -484,11 +496,15 @@ MapcrafterUI.prototype.setMapType = function(type) {
 	var current = this.getCurrentConfig();
 	var other = this.getConfig(type);
 	
-	var sameWorld = current.worldName == other.worldName;
-	if(sameWorld && other.rotations.indexOf(this.currentRotation) != -1)
+	var sameWorld = current === null ? false : current.worldName == other.worldName;
+	if(sameWorld && other.rotations.indexOf(this.currentRotation) != -1) {
 		this.setMapTypeAndRotation(type, this.currentRotation);
-	else
-		this.setMapTypeAndRotation(type, other.rotations[0]);
+	} else {
+		var rotation = other.rotations[0];
+		if("defaultRotation" in other)
+			rotation = other.defaultRotation;
+		this.setMapTypeAndRotation(type, rotation);
+	}
 };
 
 MapcrafterUI.prototype.setMapRotation = function(rotation) {

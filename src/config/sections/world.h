@@ -50,6 +50,11 @@ public:
 
 	fs::path getInputDir() const;
 	std::string getWorldName() const;
+
+	std::string getDefaultView() const;
+	int getDefaultZoom() const;
+	int getDefaultRotation() const;
+
 	const mc::WorldCrop getWorldCrop() const;
 	bool needsWorldCentering() const;
 
@@ -58,6 +63,9 @@ private:
 
 	Field<fs::path> input_dir;
 	Field<std::string> world_name;
+
+	Field<std::string> default_view;
+	Field<int> default_zoom, default_rotation;
 
 	Field<int> min_y, max_y;
 	Field<int> min_x, max_x, min_z, max_z;

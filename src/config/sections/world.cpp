@@ -38,6 +38,10 @@ void WorldSection::setConfigDir(const fs::path& config_dir) {
 void WorldSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	world_name.setDefault(section.getName());
+
+	default_view.setDefault("");
+	default_zoom.setDefault(0);
+	default_rotation.setDefault(-1);
 }
 
 bool WorldSection::parseField(const std::string key, const std::string value,
@@ -52,6 +56,15 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 		}
 	} else if (key == "world_name")
 		world_name.load(key, value, validation);
+
+	else if (key == "default_view")
+		default_view.load(key, value, validation);
+	else if (key == "default_zoom")
+		default_zoom.load(key, value, validation);
+	else if (key == "default_rotation") {
+		int rotation = stringToRotation(value, ROTATION_NAMES);
+		default_rotation.setValue(rotation);
+	}
 
 	else if (key == "crop_min_y") {
 		if (min_y.load(key, value, validation))
@@ -123,6 +136,18 @@ fs::path WorldSection::getInputDir() const {
 
 std::string WorldSection::getWorldName() const {
 	return world_name.getValue();
+}
+
+std::string WorldSection::getDefaultView() const {
+	return default_view.getValue();
+}
+
+int WorldSection::getDefaultZoom() const {
+	return default_zoom.getValue();
+}
+
+int WorldSection::getDefaultRotation() const {
+	return default_rotation.getValue();
 }
 
 const mc::WorldCrop WorldSection::getWorldCrop() const {
