@@ -188,9 +188,32 @@ World Options
 
     **Default**: ``<name of the world section>``
     
-    This is another name of the world, usually the name of the world the server uses.
+    This is another name of the world, the name of the world the server uses.
     You don't usually need to specify this manually unless your server uses different
     world names and you want to use the mapcrafter-playermarkers script.
+
+``default_view = <x>,<z>,<y>``
+
+    **Default**: Center of the map
+    
+    You can specify the default center of the map with this option. Just specify a
+    position in your Minecraft world you want as center when you open the map.
+
+``default_zoom = <zoomlevel>``
+
+    **Default**: ``0``
+    
+    This is the default zoom level shown when you open the map. The default zoom level
+    is 0 (completely zoomed out) and the maximum zoom level (completely zoomed in) is the 
+    one mapcrafter shows when rendering your map.
+
+``default_rotation = top-left|top-right|bottom-right|bottom-left``
+
+    **Default**: First available rotation of the map
+    
+    This is the default rotation shown when you open the map. You can specify one of the 
+    four available rotations. If a map doesn't have this rotation, the first available
+    rotation will be shown. 
 
 By using the following options you can crop your world and render only 
 a specific part of it. With these two options you can skip blocks above or
