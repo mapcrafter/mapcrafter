@@ -1,4 +1,4 @@
-HTMLControl.prototype = new MapControl();
+HTMLControl.prototype = new BaseControl();
 
 /**
  * A simple control with user-defined content.

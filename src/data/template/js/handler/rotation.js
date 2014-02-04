@@ -1,4 +1,4 @@
-MapRotationHandler.prototype = new MapHandler();
+MapRotationHandler.prototype = new BaseHandler();
 
 /**
  * Updates the control widget with the map rotation selection.

@@ -1,4 +1,4 @@
-MapPosHashHandler.prototype = new MapHandler();
+MapPosHashHandler.prototype = new BaseHandler();
 
 /**
  * Is responsible for the url position hash.

@@ -1,4 +1,4 @@
-RotationSelectControl.prototype = new MapControl();
+RotationSelectControl.prototype = new BaseControl();
 
 /**
  * This control widget allows the user to rotate the map.

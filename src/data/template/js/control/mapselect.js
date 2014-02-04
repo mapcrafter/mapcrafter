@@ -1,4 +1,4 @@
-MapSelectControl.prototype = new MapControl();
+MapSelectControl.prototype = new BaseControl();
 
 /**
  * This control widget allows the user to select a map.

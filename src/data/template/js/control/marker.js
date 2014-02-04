@@ -1,4 +1,4 @@
-MapMarkerControl.prototype = new MapControl();
+MapMarkerControl.prototype = new BaseControl();
 
 function MapMarkerControl() {
 }

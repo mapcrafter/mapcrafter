@@ -4,17 +4,17 @@
  * These controls can also have their own handler. Just return
  * in getHandler() your handler.
  */
-function MapControl() {
+function BaseControl() {
 	this.ui = null;
 }
 
-MapControl.prototype.create = function(wrapper) {
+BaseControl.prototype.create = function(wrapper) {
 }
 
-MapControl.prototype.getHandler = function() {
+BaseControl.prototype.getHandler = function() {
 	return null;
 }
 
-MapControl.prototype.getName = function(wrapper) {
+BaseControl.prototype.getName = function(wrapper) {
 	return "";
 }

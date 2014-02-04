@@ -1,3 +1,5 @@
+MapMarkerHandler.prototype = new BaseHandler();
+
 /**
  * Is responsible to show the markers from the markers.js.
  */
