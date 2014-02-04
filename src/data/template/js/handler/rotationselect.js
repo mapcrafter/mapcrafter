@@ -1,20 +1,20 @@
-MapRotationHandler.prototype = new BaseHandler();
+RotationSelectHandler.prototype = new BaseHandler();
 
 /**
  * Updates the control widget with the map rotation selection.
  */
-function MapRotationHandler(control) {
+function RotationSelectHandler(control) {
 	this.control = control
 }
 
-MapRotationHandler.prototype.create = function() {
+RotationSelectHandler.prototype.create = function() {
 }
 
-MapRotationHandler.prototype.onMapChange = function(name, rotation) {
+RotationSelectHandler.prototype.onMapChange = function(name, rotation) {
 	this.update();
 };
 
-MapRotationHandler.prototype.update = function(text) {	
+RotationSelectHandler.prototype.update = function(text) {	
 	var config = this.ui.getCurrentConfig();
 	var currentRotation = this.ui.getCurrentRotation();
 	

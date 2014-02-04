@@ -1,12 +1,12 @@
-MapPosHashHandler.prototype = new BaseHandler();
+PosHashHandler.prototype = new BaseHandler();
 
 /**
  * Is responsible for the url position hash.
  */
-function MapPosHashHandler() {
+function PosHashHandler() {
 }
 
-MapPosHashHandler.prototype.create = function() {
+PosHashHandler.prototype.create = function() {
 	// check if the url has already a position hash
 	// if yes, set the map to this hash
 	var hash = this.parseHash();
@@ -25,11 +25,11 @@ MapPosHashHandler.prototype.create = function() {
 	this.ui.lmap.on("zoomend", handler);
 };
 
-MapPosHashHandler.prototype.onMapChange = function(name, rotation) {
+PosHashHandler.prototype.onMapChange = function(name, rotation) {
 	this.updateHash();
 };
 
-MapPosHashHandler.prototype.parseHash = function() {
+PosHashHandler.prototype.parseHash = function() {
 	if(!location.hash)
 		return null;
 	
@@ -43,7 +43,7 @@ MapPosHashHandler.prototype.parseHash = function() {
 	return split;
 };
 
-MapPosHashHandler.prototype.updateHash = function() {
+PosHashHandler.prototype.updateHash = function() {
 	var type = this.ui.getCurrentType();
 	var rotation = this.ui.getCurrentRotation();
 	var xzy = this.ui.latLngToMC(this.ui.lmap.getCenter(), 64);
@@ -53,7 +53,7 @@ MapPosHashHandler.prototype.updateHash = function() {
 	window.location.replace("#" + type + "/" + rotation + "/" + zoom + "/" + xzy[0] + "/" + xzy[1] + "/" + xzy[2]);
 };
 
-MapPosHashHandler.prototype.gotoHash = function(hash) {
+PosHashHandler.prototype.gotoHash = function(hash) {
 	if(!hash)
 		return;
 	

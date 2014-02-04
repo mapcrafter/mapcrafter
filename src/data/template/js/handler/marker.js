@@ -1,14 +1,14 @@
-MapMarkerHandler.prototype = new BaseHandler();
+MarkerHandler.prototype = new BaseHandler();
 
 /**
  * Is responsible to show the markers from the markers.js.
  */
-function MapMarkerHandler(markers) {
+function MarkerHandler(markers) {
 	this.mapMarkers = [];
 	this.markers = markers;
 }
 
-MapMarkerHandler.prototype.onMapChange = function(name, rotation) {
+MarkerHandler.prototype.onMapChange = function(name, rotation) {
 	for(var i = 0; i < this.mapMarkers.length; i++)
 		this.ui.lmap.removeLayer(this.mapMarkers[i]);
 	this.mapMarkers = [];

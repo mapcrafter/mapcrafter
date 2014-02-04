@@ -1,9 +1,9 @@
-MapMarkerControl.prototype = new BaseControl();
+MarkerControl.prototype = new BaseControl();
 
-function MapMarkerControl() {
+function MarkerControl() {
 }
 
-MapMarkerControl.prototype.create = function(wrapper) {
+MarkerControl.prototype.create = function(wrapper) {
 	var checkbox = document.createElement("input");
 	checkbox.setAttribute("type", "checkbox");
 	checkbox.setAttribute("checked", 1);
@@ -35,8 +35,6 @@ MapMarkerControl.prototype.create = function(wrapper) {
 	wrapper.appendChild(checkbox);
 };
 
-MapMarkerControl.prototype.getName = function() {
+MarkerControl.prototype.getName = function() {
 	return "show-markers";
 };
-
-MapMarkerHandler.prototype = new MapHandler();

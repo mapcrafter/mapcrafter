@@ -4,7 +4,7 @@ RotationSelectControl.prototype = new BaseControl();
  * This control widget allows the user to rotate the map.
  */
 function RotationSelectControl() {
-	this.handler = new MapRotationHandler(this);
+	this.handler = new RotationSelectHandler(this);
 	
 	this.images = [];
 }

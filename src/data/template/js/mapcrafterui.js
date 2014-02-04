@@ -43,7 +43,7 @@ function MapcrafterUI(config) {
 	this.handlersNotCreated = [];
 	this.created = false
 	
-	this.addHandler(new MapPosHashHandler());
+	this.addHandler(new PosHashHandler());
 }
 
 MapcrafterUI.prototype.init = function() {
