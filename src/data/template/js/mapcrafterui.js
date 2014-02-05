@@ -1,5 +1,3 @@
-
-
 var MCTileLayer = L.TileLayer.extend({
 	initialize: function(url, options) {
 		this._url = url;
@@ -32,7 +30,7 @@ var MCTileLayer = L.TileLayer.extend({
 function MapcrafterUI(config) {
 	this.config = config;
 	
-	this.currentType = null;
+	this.currentMap = null;
 	this.currentRotation = null;
 	
 	this.lmap = null;
@@ -41,7 +39,7 @@ function MapcrafterUI(config) {
 	this.handlers = [];
 	this.controlsNotCreated = [];
 	this.handlersNotCreated = [];
-	this.created = false
+	this.created = false;
 	
 	this.addHandler(new PosHashHandler());
 }
@@ -62,7 +60,7 @@ MapcrafterUI.prototype.init = function() {
 		}
 	}
 	
-	this.setMapType(firstMap);
+	this.setMap(firstMap);
 	
 	this.created = true;
 	
@@ -78,45 +76,44 @@ MapcrafterUI.prototype.init = function() {
 	this.handlersNotCreated = [];
 };
 
-MapcrafterUI.prototype.getAllConfig = function() {
-	return this.config;
-};
-
-MapcrafterUI.prototype.getCurrentType = function() {
-	return this.currentType;
+MapcrafterUI.prototype.getCurrentMap = function() {
+	return this.currentMap;
 };
 
 MapcrafterUI.prototype.getCurrentRotation = function() {
 	return this.currentRotation;
-}
-
-MapcrafterUI.prototype.getConfig = function(type) {
-	return type in this.config ? this.config[type] : null;
 };
 
-MapcrafterUI.prototype.getCurrentConfig = function() {
-	return this.getConfig(this.currentType);
+MapcrafterUI.prototype.getConfig = function() {
+	return this.config;
 };
 
-MapcrafterUI.prototype.setMapTypeAndRotation = function(type, rotation) {
-	var oldConfig = this.getCurrentConfig();
-	var oldRotation = this.currentRotation;
+MapcrafterUI.prototype.getMapConfig = function(map) {
+	return map in this.config ? this.config[map] : null;
+};
+
+MapcrafterUI.prototype.getCurrentMapConfig = function() {
+	return this.getMapConfig(this.currentMap);
+};
+
+MapcrafterUI.prototype.setMapAndRotation = function(type, rotation) {
+	var oldConfig = this.getCurrentMapConfig();
 	var oldLayer = null;
 	var xzy = null;
-	if(this.currentType != null && this.currentRotation != null) {
-		oldLayer = this.layers[this.currentType][this.currentRotation];
+	if(this.currentMap != null && this.currentRotation != null) {
+		oldLayer = this.layers[this.currentMap][this.currentRotation];
 		xzy = this.latLngToMC(this.lmap.getCenter(), 64);
 	}
 	
-	this.currentType = type;
+	this.currentMap = type;
 	this.currentRotation = parseInt(rotation);
-	var config = this.getCurrentConfig();
+	var config = this.getCurrentMapConfig();
 	
 	var oldZoom = this.lmap.getZoom();
-	if(oldLayer != null) {
+	if(oldLayer != null)
 		this.lmap.removeLayer(oldLayer);
-	}
-	this.lmap.addLayer(this.layers[this.currentType][this.currentRotation]);
+	
+	this.lmap.addLayer(this.layers[this.currentMap][this.currentRotation]);
 	
 	if(oldLayer == null || oldConfig.worldName != config.worldName) {
 		// completely different map, reset view
@@ -144,27 +141,27 @@ MapcrafterUI.prototype.setMapTypeAndRotation = function(type, rotation) {
 	}
 	
 	for(var i = 0; i < this.handlers.length; i++) {
-		this.handlers[i].onMapChange(this.currentType, this.currentRotation);
+		this.handlers[i].onMapChange(this.currentMap, this.currentRotation);
 	}
 };
 
-MapcrafterUI.prototype.setMapType = function(type) {
-	var current = this.getCurrentConfig();
-	var other = this.getConfig(type);
+MapcrafterUI.prototype.setMap = function(type) {
+	var current = this.getCurrentMapConfig();
+	var other = this.getMapConfig(type);
 	
 	var sameWorld = current === null ? false : current.worldName == other.worldName;
 	if(sameWorld && other.rotations.indexOf(this.currentRotation) != -1) {
-		this.setMapTypeAndRotation(type, this.currentRotation);
+		this.setMapAndRotation(type, this.currentRotation);
 	} else {
 		var rotation = other.rotations[0];
 		if("defaultRotation" in other)
 			rotation = other.defaultRotation;
-		this.setMapTypeAndRotation(type, rotation);
+		this.setMapAndRotation(type, rotation);
 	}
 };
 
 MapcrafterUI.prototype.setMapRotation = function(rotation) {
-	this.setMapTypeAndRotation(this.currentType, rotation);
+	this.setMapAndRotation(this.currentMap, rotation);
 };
 
 MapcrafterUI.prototype.createTileLayer = function(name, config, rotation) {
@@ -189,13 +186,14 @@ MapcrafterUI.prototype.addControl = function(control, pos, index) {
 			var wrapper = document.createElement("div");
 			wrapper.setAttribute("class", "control-wrapper");
 			wrapper.setAttribute("id", "control-wrapper-" + name);
+			
 			// just a dirty hack to prevent the map getting all mouse click events
 			wrapper.onmouseover = function() {
 				map.dragging.disable();
 			};
 			wrapper.onmouseout = function() {
 				map.dragging.enable();
-			}
+			};
 			
 			control.ui = self;
 			control.create(wrapper);
@@ -223,14 +221,14 @@ MapcrafterUI.prototype.addHandler = function(handler) {
 	
 	handler.ui = this;
 	handler.create();
-	handler.onMapChange(this.currentType, this.currentRotation);
+	handler.onMapChange(this.currentMap, this.currentRotation);
 	this.handlers.push(handler);
 };
 
 MapcrafterUI.prototype.mcToLatLng = function(x, z, y) {
 	// converts Minecraft x,z,y to a Google Map lat/lng
 	
-	var config = this.getCurrentConfig();
+	var config = this.getCurrentMapConfig();
 	var rotation = this.getCurrentRotation();
 	
 	// rotate the position to the map rotation
@@ -290,7 +288,7 @@ MapcrafterUI.prototype.latLngToMC = function(latlng, y) {
 	// lets solve for z (yes, I was too lazy and used my CAS):
 	// => z = (4y*block - 1024*block + 2*lat + lng + tile - 1.5) / (4*block)
 	
-	var config = this.getCurrentConfig();
+	var config = this.getCurrentMapConfig();
 	var rotation = this.getCurrentRotation();
 	
 	// same way like in the other method:

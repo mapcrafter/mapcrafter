@@ -10,18 +10,18 @@ MapSelectControl.prototype.create = function(wrapper) {
 	var select = document.createElement("select");
 	select.setAttribute("id", "map-select");
 	
-	for(var type in this.ui.getAllConfig()) {
+	for(var type in this.ui.getConfig()) {
 		var option = document.createElement("option");
-		option.innerHTML = this.ui.getConfig(type).name;
+		option.innerHTML = this.ui.getMapConfig(type).name;
 		option.setAttribute("value", type);
-		if(this.ui.getCurrentType() == type)
+		if(this.ui.getCurrentMap() == type)
 			option.setAttribute("selected", true);
 		select.appendChild(option);
 	}
 	
 	select.addEventListener("change", (function(ui) {
 		return function() {
-			ui.setMapType(select.value);
+			ui.setMap(select.value);
 		}
 	})(this.ui));
 	

@@ -44,7 +44,7 @@ PosHashHandler.prototype.parseHash = function() {
 };
 
 PosHashHandler.prototype.updateHash = function() {
-	var type = this.ui.getCurrentType();
+	var type = this.ui.getCurrentMap();
 	var rotation = this.ui.getCurrentRotation();
 	var xzy = this.ui.latLngToMC(this.ui.lmap.getCenter(), 64);
 	for(var i = 0; i < 3; i++)
@@ -57,11 +57,11 @@ PosHashHandler.prototype.gotoHash = function(hash) {
 	if(!hash)
 		return;
 	
-	if(!(hash[0] in this.ui.getAllConfig()) 
-			|| this.ui.getConfig(hash[0]).rotations.indexOf(hash[1]) < 0)
+	if(!(hash[0] in this.ui.getConfig()) 
+			|| this.ui.getMapConfig(hash[0]).rotations.indexOf(hash[1]) < 0)
 		return null;
 		
-	this.ui.setMapTypeAndRotation(hash[0], hash[1]);
+	this.ui.setMapAndRotation(hash[0], hash[1]);
 		
 	var latlng = this.ui.mcToLatLng(hash[3], hash[4], hash[5]);
 	this.ui.lmap.setView(latlng, hash[2]);

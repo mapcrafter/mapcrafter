@@ -13,7 +13,7 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 		this.ui.lmap.removeLayer(this.mapMarkers[i]);
 	this.mapMarkers = [];
 	
-	var world = this.ui.getCurrentConfig().worldName;
+	var world = this.ui.getCurrentMapConfig().worldName;
 	if(!(world in this.markers))
 		return;
 	for(var i = 0; i < this.markers[world].length; i++) {  
