@@ -2127,6 +2127,7 @@ void BlockImages::loadBlocks() {
 	setBlockImage(3, 0, t.DIRT);
 	setBlockImage(3, 1, t.DIRT);
 	setBlockImage(3, 2, t.DIRT_PODZOL_TOP);
+	setBlockImage(4, 0, t.COBBLESTONE); // cobblestone
 
 	setBlockImage(8, 0, t.WATER_STILL);
 	setBlockImage(9, 0, t.WATER_STILL);
@@ -2151,6 +2152,8 @@ void BlockImages::loadBlocks() {
 	setBlockImage(31, 1, empty); // tall grass
 	setBlockImage(31, 2, empty); // fern
 	setBlockImage(32, 0, empty); // dead bush
+
+	setBlockImage(48, 0, t.COBBLESTONE_MOSSY); // moss stone
 
 	setBlockImage(82, 0, t.CLAY); // clay block
 
@@ -2177,6 +2180,8 @@ void BlockImages::loadBlocks() {
 	setBlockImage(162, 1, t.LOG_BIG_OAK_TOP); // acacia (placeholder)
 	setBlockImage(162, 2, t.LOG_ACACIA_TOP); // dark wood
 	setBlockImage(162, 3, t.LOG_BIG_OAK_TOP); // dark wood (placeholder)
+
+	setBlockImage(172, 0, t.HARDENED_CLAY); // hardened clay
 
 	/*
 	createBlock(1, 0, t.STONE); // stone
