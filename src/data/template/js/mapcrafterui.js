@@ -98,64 +98,78 @@ MapcrafterUI.prototype.getCurrentMapConfig = function() {
 
 MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 	var oldMapConfig = this.getCurrentMapConfig();
-	var oldLayer = null;
-	var xzy = null;
+	var mapConfig = this.getMapConfig(map);
+	
+	// try to get the old map layer and view of the map (center in Minecraft coordinates, zoom)
+	var oldMapLayer = null;
+	var oldView = null;
+	var oldZoom = 0;
 	if(this.currentMap != null && this.currentRotation != null) {
-		oldLayer = this.layers[this.currentMap][this.currentRotation];
-		xzy = this.latLngToMC(this.lmap.getCenter(), 64);
+		oldMapLayer = this.layers[this.currentMap][this.currentRotation];
+		oldView = this.latLngToMC(this.lmap.getCenter(), 64);
+		oldZoom = this.lmap.getZoom();
 	}
 	
+	// set the new map and rotation
 	this.currentMap = map;
 	this.currentRotation = parseInt(rotation);
-	var mapConfig = this.getCurrentMapConfig();
 	
-	var oldZoom = this.lmap.getZoom();
-	if(oldLayer != null)
-		this.lmap.removeLayer(oldLayer);
-	
+	// remove the old map layer and set the new map layer
+	if(oldMapLayer != null)
+		this.lmap.removeLayer(oldMapLayer);
 	this.lmap.addLayer(this.layers[this.currentMap][this.currentRotation]);
 	
-	if(oldLayer == null || oldMapConfig.worldName != mapConfig.worldName) {
+	// check whether we are switching to a completely different map
+	if(oldMapLayer == null || oldMapConfig.worldName != mapConfig.worldName) {
 		// completely different map, reset view
+		
 		// reset zoom level, 0 or user-defined default zoom level
 		var zoom = 0;
 		if("defaultZoom" in mapConfig)
 			zoom = mapConfig.defaultZoom;
 		
-		// set view to the center or set it to a user-defined default position
+		// set view to the map center or a user-defined default center
 		if("defaultView" in mapConfig) {
 			var x = mapConfig.defaultView[0];
 			var z = mapConfig.defaultView[1];
 			var y = mapConfig.defaultView[2];
 			this.lmap.setView(this.mcToLatLng(x, z, y), zoom);
-		} else
-			this.lmap.setView(this.lmap.unproject([mapConfig.tileSize/2, mapConfig.tileSize/2]), zoom);
+		} else {
+			var center = mapConfig.tileSize / 2;
+			this.lmap.setView(this.lmap.unproject([center, center]), zoom);
+		}
+
 	} else {
-		this.lmap.setView(this.mcToLatLng(xzy[0], xzy[1], xzy[2]), oldZoom);
+		// same world, we can set the view to the view of the old map
+		this.lmap.setView(this.mcToLatLng(oldView[0], oldView[1], oldView[2]), oldZoom);
 		
 		// adjust the zoom level
 		// if one switches between maps with different max zoom levels
-		if(oldMapConfig.maxZoom != mapConfig.maxZoom) {
+		if(oldMapConfig.maxZoom != mapConfig.maxZoom)
 			this.lmap.setZoom(oldZoom + mapConfig.maxZoom - oldMapConfig.maxZoom);
-		}
 	}
 	
-	for(var i = 0; i < this.handlers.length; i++) {
+	// call handlers
+	for(var i = 0; i < this.handlers.length; i++)
 		this.handlers[i].onMapChange(this.currentMap, this.currentRotation);
-	}
 };
 
 MapcrafterUI.prototype.setMap = function(map) {
 	var oldMapConfig = this.getCurrentMapConfig();
 	var mapConfig = this.getMapConfig(map);
 	
-	var sameWorld = oldMapConfig === null ? false : oldMapConfig.worldName == mapConfig.worldName;
+	// check whether this the same world and the new map has the current rotation as well
+	// we can use the current rotation then, use the default/first available rotation else
+	var sameWorld = oldMapConfig == null ? false : oldMapConfig.worldName == mapConfig.worldName;
 	if(sameWorld && mapConfig.rotations.indexOf(this.currentRotation) != -1) {
 		this.setMapAndRotation(map, this.currentRotation);
 	} else {
-		var rotation = mapConfig.rotations[0];
+		var rotation = -1;
 		if("defaultRotation" in mapConfig)
 			rotation = mapConfig.defaultRotation;
+		// use first available rotation if given default rotation is not available
+		if(mapConfig.rotations.indexOf(rotation) == -1)
+			rotation = mapConfig.rotations[0];
 		this.setMapAndRotation(map, rotation);
 	}
 };
