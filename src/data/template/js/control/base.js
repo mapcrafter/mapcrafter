@@ -11,10 +11,6 @@ function BaseControl() {
 BaseControl.prototype.create = function(wrapper) {
 }
 
-BaseControl.prototype.getHandler = function() {
-	return null;
-}
-
 BaseControl.prototype.getName = function(wrapper) {
 	return "";
 }

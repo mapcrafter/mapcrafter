@@ -40,11 +40,9 @@ RotationSelectControl.prototype.create = function(wrapper) {
 		this.images.push(a);
 		this.images.push(img2);
 	}
+	
+	this.ui.addHandler(this.handler);
 };
-
-RotationSelectControl.prototype.getHandler = function() {
-	return this.handler;
-}
 
 RotationSelectControl.prototype.getName = function() {
 	return "rotation-select";

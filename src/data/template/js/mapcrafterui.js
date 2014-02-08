@@ -213,11 +213,6 @@ MapcrafterUI.prototype.addControl = function(control, pos, index) {
 			control.create(wrapper);
 			wrapper.index = index;
 			
-			var handler = control.getHandler();
-			if(handler != null) {
-				self.addHandler(handler);
-			}
-			
 			return wrapper;
 		},
 	});
