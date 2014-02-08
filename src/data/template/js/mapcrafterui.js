@@ -96,8 +96,8 @@ MapcrafterUI.prototype.getCurrentMapConfig = function() {
 	return this.getMapConfig(this.currentMap);
 };
 
-MapcrafterUI.prototype.setMapAndRotation = function(type, rotation) {
-	var oldConfig = this.getCurrentMapConfig();
+MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
+	var oldMapConfig = this.getCurrentMapConfig();
 	var oldLayer = null;
 	var xzy = null;
 	if(this.currentMap != null && this.currentRotation != null) {
@@ -105,9 +105,9 @@ MapcrafterUI.prototype.setMapAndRotation = function(type, rotation) {
 		xzy = this.latLngToMC(this.lmap.getCenter(), 64);
 	}
 	
-	this.currentMap = type;
+	this.currentMap = map;
 	this.currentRotation = parseInt(rotation);
-	var config = this.getCurrentMapConfig();
+	var mapConfig = this.getCurrentMapConfig();
 	
 	var oldZoom = this.lmap.getZoom();
 	if(oldLayer != null)
@@ -115,28 +115,28 @@ MapcrafterUI.prototype.setMapAndRotation = function(type, rotation) {
 	
 	this.lmap.addLayer(this.layers[this.currentMap][this.currentRotation]);
 	
-	if(oldLayer == null || oldConfig.worldName != config.worldName) {
+	if(oldLayer == null || oldMapConfig.worldName != mapConfig.worldName) {
 		// completely different map, reset view
 		// reset zoom level, 0 or user-defined default zoom level
 		var zoom = 0;
-		if("defaultZoom" in config)
-			zoom = config.defaultZoom;
+		if("defaultZoom" in mapConfig)
+			zoom = mapConfig.defaultZoom;
 		
 		// set view to the center or set it to a user-defined default position
-		if("defaultView" in config) {
-			var x = config.defaultView[0];
-			var z = config.defaultView[1];
-			var y = config.defaultView[2];
+		if("defaultView" in mapConfig) {
+			var x = mapConfig.defaultView[0];
+			var z = mapConfig.defaultView[1];
+			var y = mapConfig.defaultView[2];
 			this.lmap.setView(this.mcToLatLng(x, z, y), zoom);
 		} else
-			this.lmap.setView(this.lmap.unproject([config.tileSize/2, config.tileSize/2]), zoom);
-	} else /*if(this.currentRotation != oldRotation)*/ {
+			this.lmap.setView(this.lmap.unproject([mapConfig.tileSize/2, mapConfig.tileSize/2]), zoom);
+	} else {
 		this.lmap.setView(this.mcToLatLng(xzy[0], xzy[1], xzy[2]), oldZoom);
 		
 		// adjust the zoom level
 		// if one switches between maps with different max zoom levels
-		if(oldConfig.maxZoom != config.maxZoom) {
-			this.lmap.setZoom(oldZoom + config.maxZoom - oldConfig.maxZoom);
+		if(oldMapConfig.maxZoom != mapConfig.maxZoom) {
+			this.lmap.setZoom(oldZoom + mapConfig.maxZoom - oldMapConfig.maxZoom);
 		}
 	}
 	
@@ -145,18 +145,18 @@ MapcrafterUI.prototype.setMapAndRotation = function(type, rotation) {
 	}
 };
 
-MapcrafterUI.prototype.setMap = function(type) {
-	var current = this.getCurrentMapConfig();
-	var other = this.getMapConfig(type);
+MapcrafterUI.prototype.setMap = function(map) {
+	var oldMapConfig = this.getCurrentMapConfig();
+	var mapConfig = this.getMapConfig(map);
 	
-	var sameWorld = current === null ? false : current.worldName == other.worldName;
-	if(sameWorld && other.rotations.indexOf(this.currentRotation) != -1) {
-		this.setMapAndRotation(type, this.currentRotation);
+	var sameWorld = oldMapConfig === null ? false : oldMapConfig.worldName == mapConfig.worldName;
+	if(sameWorld && mapConfig.rotations.indexOf(this.currentRotation) != -1) {
+		this.setMapAndRotation(map, this.currentRotation);
 	} else {
-		var rotation = other.rotations[0];
-		if("defaultRotation" in other)
-			rotation = other.defaultRotation;
-		this.setMapAndRotation(type, rotation);
+		var rotation = mapConfig.rotations[0];
+		if("defaultRotation" in mapConfig)
+			rotation = mapConfig.defaultRotation;
+		this.setMapAndRotation(map, rotation);
 	}
 };
 
