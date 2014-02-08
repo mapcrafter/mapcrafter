@@ -2152,6 +2152,23 @@ void BlockImages::loadBlocks() {
 	setBlockImage(31, 2, empty); // fern
 	setBlockImage(32, 0, empty); // dead bush
 
+	setBlockImage(159, 0, t.HARDENED_CLAY_STAINED_WHITE);
+	setBlockImage(159, 1, t.HARDENED_CLAY_STAINED_ORANGE);
+	setBlockImage(159, 2, t.HARDENED_CLAY_STAINED_MAGENTA);
+	setBlockImage(159, 3, t.HARDENED_CLAY_STAINED_LIGHT_BLUE);
+	setBlockImage(159, 4, t.HARDENED_CLAY_STAINED_YELLOW);
+	setBlockImage(159, 5, t.HARDENED_CLAY_STAINED_LIME);
+	setBlockImage(159, 6, t.HARDENED_CLAY_STAINED_PINK);
+	setBlockImage(159, 7, t.HARDENED_CLAY_STAINED_GRAY);
+	setBlockImage(159, 8, t.HARDENED_CLAY_STAINED_SILVER);
+	setBlockImage(159, 9, t.HARDENED_CLAY_STAINED_CYAN);
+	setBlockImage(159, 10, t.HARDENED_CLAY_STAINED_PURPLE);
+	setBlockImage(159, 11, t.HARDENED_CLAY_STAINED_BLUE);
+	setBlockImage(159, 12, t.HARDENED_CLAY_STAINED_BROWN);
+	setBlockImage(159, 13, t.HARDENED_CLAY_STAINED_GREEN);
+	setBlockImage(159, 14, t.HARDENED_CLAY_STAINED_RED);
+	setBlockImage(159, 15, t.HARDENED_CLAY_STAINED_BLACK);
+
 	setBlockImage(161, 0, textures.LEAVES_ACACIA); // acacia
 	setBlockImage(161, 1, textures.LEAVES_BIG_OAK); // dark oak
 	setBlockImage(162, 0, t.LOG_ACACIA_TOP); // acacia
