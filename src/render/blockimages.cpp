@@ -2152,6 +2152,8 @@ void BlockImages::loadBlocks() {
 	setBlockImage(31, 2, empty); // fern
 	setBlockImage(32, 0, empty); // dead bush
 
+	setBlockImage(82, 0, t.CLAY); // clay block
+
 	setBlockImage(159, 0, t.HARDENED_CLAY_STAINED_WHITE);
 	setBlockImage(159, 1, t.HARDENED_CLAY_STAINED_ORANGE);
 	setBlockImage(159, 2, t.HARDENED_CLAY_STAINED_MAGENTA);
