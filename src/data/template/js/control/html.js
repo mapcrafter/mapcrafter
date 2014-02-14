@@ -1,4 +1,4 @@
-HTMLControl.prototype = new BaseControl();
+HTMLControl.prototype = new BaseControl("HTMLControl");
 
 /**
  * A simple control with user-defined content.

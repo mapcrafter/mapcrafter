@@ -1,4 +1,4 @@
-RotationSelectControl.prototype = new BaseControl();
+RotationSelectControl.prototype = new BaseControl("RotationSelectControl");
 
 /**
  * This control widget allows the user to rotate the map.
@@ -43,7 +43,3 @@ RotationSelectControl.prototype.create = function(wrapper) {
 	
 	this.ui.addHandler(this.handler);
 };
-
-RotationSelectControl.prototype.getName = function() {
-	return "rotation-select";
-}

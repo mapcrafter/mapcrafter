@@ -1,4 +1,4 @@
-MapSelectControl.prototype = new BaseControl();
+MapSelectControl.prototype = new BaseControl("MapSelectControl");
 
 /**
  * This control widget allows the user to select a map.
@@ -31,7 +31,3 @@ MapSelectControl.prototype.create = function(wrapper) {
 	wrapper.appendChild(text);
 	wrapper.appendChild(select);
 };
-
-MapSelectControl.prototype.getName = function() {
-	return "map-select";
-}

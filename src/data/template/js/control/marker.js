@@ -1,4 +1,4 @@
-MarkerControl.prototype = new BaseControl();
+MarkerControl.prototype = new BaseControl("MarkerControl");
 
 function MarkerControl() {
 }
@@ -33,8 +33,4 @@ MarkerControl.prototype.create = function(wrapper) {
 	
 	wrapper.appendChild(text);
 	wrapper.appendChild(checkbox);
-};
-
-MarkerControl.prototype.getName = function() {
-	return "show-markers";
 };

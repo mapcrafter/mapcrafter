@@ -1,4 +1,4 @@
-MousePosControl.prototype = new BaseControl();
+MousePosControl.prototype = new BaseControl("MousePosControl");
 
 /**
  * This control widget shows the current position of the mouse in Minecraft.

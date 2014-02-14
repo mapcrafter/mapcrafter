@@ -4,13 +4,13 @@
  * These controls can also have their own handler. Just return
  * in getHandler() your handler.
  */
-function BaseControl() {
+function BaseControl(type) {
+	this.TYPE = type;
+	
 	this.ui = null;
 }
 
-BaseControl.prototype.create = function(wrapper) {
-}
+BaseControl.prototype.TYPE = "BaseControl";
 
-BaseControl.prototype.getName = function(wrapper) {
-	return "";
+BaseControl.prototype.create = function(wrapper) {
 }
