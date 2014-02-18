@@ -81,6 +81,7 @@ class LightingRendermode : public Rendermode {
 private:
 	bool day;
 	double lighting_intensity;
+	bool end_smooth_lighting;
 
 	void createShade(Image& image, const CornerColors& corners) const;
 	

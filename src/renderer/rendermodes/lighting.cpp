@@ -129,7 +129,8 @@ void drawTopTriangle(Image& image, int size, double c1, double c2, double c3) {
 
 LightingRendermode::LightingRendermode(const RenderState& state, bool day,
 		double lighting_intensity)
-		: Rendermode(state), day(day), lighting_intensity(lighting_intensity) {
+		: Rendermode(state), day(day), lighting_intensity(lighting_intensity),
+		  end_smooth_lighting(false) {
 }
 
 LightingRendermode::~LightingRendermode() {
@@ -223,10 +224,19 @@ void LightingRendermode::estimateBlockLight(mc::Block& block, const mc::BlockPos
  * estimated if this is a special transparent block.
  */
 LightingData LightingRendermode::getBlockLight(const mc::BlockPos& pos) {
-	mc::Block block = state.getBlock(pos, mc::GET_ID | mc::GET_LIGHT);
+	mc::Block block = state.getBlock(pos, mc::GET_ID | mc::GET_DATA | mc::GET_LIGHT);
 	if (isSpecialTransparent(block.id))
 		estimateBlockLight(block, pos);
-	return {block.block_light, block.sky_light};
+	
+	LightingData light;
+	light.block = block.block_light,
+	light.sky = block.sky_light;
+	if (end_smooth_lighting) {
+		light.sky = 15;
+		if (!state.images->isBlockTransparent(block.id, block.data))
+			light.sky = 0;
+	}
+	return light;
 }
 
 /**
