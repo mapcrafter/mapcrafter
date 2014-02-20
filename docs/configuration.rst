@@ -174,15 +174,20 @@ World Options
     This is the directory of your Minecraft World. The directory should contain
     a directory ``region/`` with the .mca region files.
 
+``dimension = nether|overworld|end``
+
+    **Default**: ``overworld``
+    
+    You can specify with this option the dimension of the world mapcrafter should render.
+    If you choose The Nether or The End, mapcrafter will automagically detect the
+    corresponding region directory. It will try the Bukkit region directory
+    (for example ``myworld_nether/DIM-1/region``) first and then the directory of a normal
+    vanilla server/client (for example ``myworld/DIM-1/region``).
+
 .. note::
 
-    If you want to render the Nether or End of your world, just specify the path to the
-    Nether or End of your world as world path. This should be my_world/DIM-1 or
-    my_world_nether/DIM-1 for the Nether and my_world/DIM1 or my_world_the_end/DIM1
-    for the End.
-    
-    You can render the nether with the cave rendermode or you can remove the
-    top bedrock layers with the crop_max_y option.
+    If you want to render The Nether and want to see something, you should use the cave
+    rendermode or use the crop_max_y option to remove the top bedrock layers.
 
 ``world_name = <name>``
 
