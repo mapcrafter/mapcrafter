@@ -24,7 +24,8 @@
 namespace mapcrafter {
 namespace config {
 
-WorldSection::WorldSection(bool global) {
+WorldSection::WorldSection(bool global)
+	: dimension(mc::Dimension::OVERWORLD) {
 	setGlobal(global);
 }
 
@@ -37,6 +38,7 @@ void WorldSection::setConfigDir(const fs::path& config_dir) {
 
 void WorldSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
+	dimension_name.setDefault("overworld");
 	world_name.setDefault(section.getName());
 
 	default_view.setDefault("");
@@ -54,7 +56,9 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 						"'input_dir' must be an existing directory! '"
 						+ input_dir.getValue().string() + "' does not exist!"));
 		}
-	} else if (key == "world_name")
+	} else if (key == "dimension")
+		dimension_name.load(key, value, validation);
+	else if (key == "world_name")
 		world_name.load(key, value, validation);
 
 	else if (key == "default_view")
@@ -102,6 +106,16 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 
 void WorldSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
+	if (dimension_name.getValue() == "nether")
+		dimension = mc::Dimension::NETHER;
+	else if (dimension_name.getValue() == "overworld")
+		dimension = mc::Dimension::OVERWORLD;
+	else if (dimension_name.getValue() == "end")
+		dimension = mc::Dimension::END;
+	else
+		validation.push_back(ValidationMessage::error(
+				"Unknown dimension '" + dimension_name.getValue() + "'!"));
+
 	if (default_zoom.isLoaded() && default_zoom.getValue() < 0)
 		validation.push_back(ValidationMessage::error(
 				"The default zoom level must be bigger or equal to 0 ('default_zoom')."));
@@ -140,6 +154,10 @@ void WorldSection::postParse(const INIConfigSection& section,
 
 fs::path WorldSection::getInputDir() const {
 	return input_dir.getValue();
+}
+
+mc::Dimension WorldSection::getDimension() const {
+	return dimension;
 }
 
 std::string WorldSection::getWorldName() const {

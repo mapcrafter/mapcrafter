@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include "../validation.h"
+#include "../../mc/world.h"
 #include "../../mc/worldcrop.h"
 
 #include <string>
@@ -49,6 +50,7 @@ public:
 			ValidationList& validation);
 
 	fs::path getInputDir() const;
+	mc::Dimension getDimension() const;
 	std::string getWorldName() const;
 
 	std::string getDefaultView() const;
@@ -62,7 +64,8 @@ private:
 	fs::path config_dir;
 
 	Field<fs::path> input_dir;
-	Field<std::string> world_name;
+	Field<std::string> dimension_name, world_name;
+	mc::Dimension dimension;
 
 	Field<std::string> default_view;
 	Field<int> default_zoom, default_rotation;
