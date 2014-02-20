@@ -33,6 +33,16 @@ namespace mapcrafter {
 namespace mc {
 
 /**
+ * Dimension of the Minecraft world.
+ * The Nether, normal Overworld or The End.
+ */
+enum class Dimension {
+	NETHER,
+	OVERWORLD,
+	END,
+};
+
+/**
  * Simple hash function to use regions in unordered_set/map.
  * This just assumes that there are maximal 8096 regions on x/z axis, this are
  * all in all 8096^2=67108864 regions. I think this should be enough for now.
@@ -74,8 +84,11 @@ public:
 	 * You can specify a rotation for the world (must be an integer 0, 1, 2 or 3)
 	 * If you specify a rotation, everything of the world will be rotated internally,
 	 * you can use it like a normal world.
+	 *
+	 * You can also specify a dimension (Nether, Overworld, End) for the world.
+	 * It will automagically try to find the right region directory.
 	 */
-	bool load(const std::string& dir);
+	bool load(const std::string& dir, Dimension dimension = Dimension::OVERWORLD);
 
 	/**
 	 * Returns the count of available region files.

@@ -74,17 +74,38 @@ void World::setWorldCrop(const WorldCrop& worldcrop) {
 	this->worldcrop = worldcrop;
 }
 
-bool World::load(const std::string& dir) {
+bool World::load(const std::string& dir, Dimension dimension) {
 	fs::path world_dir(dir);
-	fs::path region_dir = world_dir / "region";
 	if(!fs::exists(world_dir)) {
-		std::cerr << "Error: World directory " << world_dir << " does not exist!" << std::endl;
-	} else if(!fs::exists(region_dir)) {
-		std::cerr << "Error: Region directory " << region_dir << " does not exist!" << std::endl;
-	} else {
-		return readRegions(region_dir.string());
+		std::cerr << "Error: World directory " << world_dir;
+		std::cerr << " does not exist!" << std::endl;
+		return false;
 	}
-	return false;
+
+	std::string world_name = BOOST_FS_FILENAME(world_dir);
+	fs::path region_dir;
+
+	// try to find the region directory
+	if (dimension == Dimension::OVERWORLD) {
+		 region_dir = world_dir / "region";
+	} else if (dimension == Dimension::NETHER) {
+		// try the extra bukkit nether directory at first, then the normal directory
+		region_dir = world_dir.parent_path() / (world_name + "_nether") / "DIM-1" / "region";
+		if (!fs::exists(region_dir))
+			region_dir = world_dir / "DIM-1" / "region";
+	} else if (dimension == Dimension::END) {
+		// same here
+		region_dir = world_dir.parent_path() / (world_name + "_the_end") / "DIM1" / "region";
+		if (!fs::exists(region_dir))
+			region_dir = world_dir / "DIM1" / "region";
+	}
+
+	if(!fs::exists(region_dir)) {
+		std::cerr << "Error: Region directory " << region_dir << " does not exist!" << std::endl;
+		return false;
+	}
+
+	return readRegions(region_dir.string());
 }
 
 int World::getAvailableRegionCount() const {
