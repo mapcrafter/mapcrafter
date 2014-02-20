@@ -385,7 +385,8 @@ bool RenderManager::run() {
 			mc::World world;
 			world.setRotation(*rotation_it);
 			world.setWorldCrop(world_it->second.getWorldCrop());
-			if (!world.load(world_it->second.getInputDir().string())) {
+			if (!world.load(world_it->second.getInputDir().string(),
+					world_it->second.getDimension())) {
 				std::cerr << "Unable to load world " << world_name << "!" << std::endl;
 				return false;
 			}
@@ -580,6 +581,7 @@ bool RenderManager::run() {
 
 			RenderContext context;
 			context.output_dir = output_dir;
+			context.world_config = config.getWorld(map.getWorld());
 			context.map_config = map;
 			context.blockimages = blockimages;
 			context.world = worlds[world_name][rotation];

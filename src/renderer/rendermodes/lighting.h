@@ -81,7 +81,7 @@ class LightingRendermode : public Rendermode {
 private:
 	bool day;
 	double lighting_intensity;
-	bool end_smooth_lighting;
+	bool dimension_end;
 
 	void createShade(Image& image, const CornerColors& corners) const;
 	
@@ -104,7 +104,8 @@ private:
 	void doSimpleLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 	void doSmoothLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 public:
-	LightingRendermode(const RenderState& state, bool day, double lighting_intensity);
+	LightingRendermode(const RenderState& state, bool day, double lighting_intensity,
+			bool dimension_end);
 	virtual ~LightingRendermode();
 
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);

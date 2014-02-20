@@ -128,9 +128,9 @@ void drawTopTriangle(Image& image, int size, double c1, double c2, double c3) {
 }
 
 LightingRendermode::LightingRendermode(const RenderState& state, bool day,
-		double lighting_intensity)
+		double lighting_intensity, bool dimension_end)
 		: Rendermode(state), day(day), lighting_intensity(lighting_intensity),
-		  end_smooth_lighting(false) {
+		  dimension_end(dimension_end) {
 }
 
 LightingRendermode::~LightingRendermode() {
@@ -231,9 +231,13 @@ LightingData LightingRendermode::getBlockLight(const mc::BlockPos& pos) {
 	LightingData light;
 	light.block = block.block_light,
 	light.sky = block.sky_light;
-	if (end_smooth_lighting) {
+
+	// lighting fix for The End
+	// The End has no sun light set -> lighting looks ugly
+	// just emulate the sun light for transparent blocks
+	if (dimension_end) {
 		light.sky = 15;
-		if (!state.images->isBlockTransparent(block.id, block.data))
+		if (block.id != 0 && !state.images->isBlockTransparent(block.id, block.data))
 			light.sky = 0;
 	}
 	return light;

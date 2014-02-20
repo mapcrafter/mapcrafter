@@ -153,7 +153,8 @@ void TileRenderWorker::operator()() {
 	// TODO
 	// really create world cache here?
 	std::shared_ptr<mc::WorldCache> world_cache(new mc::WorldCache(render_context.world));
-	renderer = TileRenderer(world_cache, render_context.blockimages, render_context.map_config);
+	renderer = TileRenderer(world_cache, render_context.blockimages,
+			render_context.world_config, render_context.map_config);
 	
 	int work = 0;
 	for (auto it = render_work.tiles.begin(); it != render_work.tiles.end(); ++it)
