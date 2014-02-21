@@ -115,27 +115,27 @@ MultiThreadingDispatcher::~MultiThreadingDispatcher() {
 
 void MultiThreadingDispatcher::dispatch(const renderer::RenderContext& context,
 		std::shared_ptr<util::IProgressHandler> progress) {
-	auto tiles = context.tileset->getRequiredCompositeTiles();
+	auto tiles = context.tile_set->getRequiredCompositeTiles();
 	if (tiles.size() == 0)
 		return;
 
 	int jobs = 0;
 	for (auto tile_it = tiles.begin(); tile_it != tiles.end(); ++tile_it)
-		if (tile_it->getDepth() == context.tileset->getDepth() - 2) {
+		if (tile_it->getDepth() == context.tile_set->getDepth() - 2) {
 			renderer::RenderWork work;
 			work.tiles.insert(*tile_it);
 			manager.addWork(work);
 			jobs++;
 		}
 
-	int render_tiles = context.tileset->getRequiredRenderTilesCount();
+	int render_tiles = context.tile_set->getRequiredRenderTilesCount();
 	std::cout << thread_count << " threads will render " << render_tiles;
 	std::cout << " render tiles." << std::endl;
 
 	for (int i = 0; i < thread_count; i++)
 		threads.push_back(std::thread(ThreadWorker(manager, context)));
 
-	progress->setMax(context.tileset->getRequiredRenderTilesCount());
+	progress->setMax(context.tile_set->getRequiredRenderTilesCount());
 	renderer::RenderWorkResult result;
 	while (manager.getResult(result)) {
 		progress->setValue(progress->getValue() + result.tiles_rendered);
@@ -150,7 +150,7 @@ void MultiThreadingDispatcher::dispatch(const renderer::RenderContext& context,
 			renderer::TilePath parent = tile_it->parent();
 			bool childs_rendered = true;
 			for (int i = 1; i <= 4; i++)
-				if (context.tileset->isTileRequired(parent + i)
+				if (context.tile_set->isTileRequired(parent + i)
 						&& !rendered_tiles.count(parent + i)) {
 					childs_rendered = false;
 				}
@@ -159,7 +159,7 @@ void MultiThreadingDispatcher::dispatch(const renderer::RenderContext& context,
 				renderer::RenderWork work;
 				work.tiles.insert(parent);
 				for (int i = 1; i <= 4; i++)
-					if (context.tileset->hasTile(parent + i))
+					if (context.tile_set->hasTile(parent + i))
 						work.tiles_skip.insert(parent + i);
 				manager.addExtraWork(work);
 			}

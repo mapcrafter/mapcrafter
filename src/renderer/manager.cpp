@@ -333,7 +333,7 @@ bool RenderManager::run() {
 	auto config_maps = config.getMaps();
 	// maps for world- and tileset objects
 	std::map<std::string, std::array<mc::World, 4> > worlds;
-	std::map<std::string, std::array<std::shared_ptr<TileSet>, 4> > tilesets;
+	std::map<std::string, std::array<std::shared_ptr<TileSet>, 4> > tile_sets;
 
 	// go through all maps and:
 	// 1. - find out which rotations are needed for which world
@@ -390,29 +390,29 @@ bool RenderManager::run() {
 				return false;
 			}
 			// create a tileset for this world
-			std::shared_ptr<TileSet> tileset(new TileSet);
+			std::shared_ptr<TileSet> tile_set(new TileSet);
 			// and scan for tiles of this world,
 			// we automatically center the tiles for cropped worlds, but only...
 			//  - the circular cropped ones and
 			//  - the ones with complete specified x- AND z-bounds
 			if (world_it->second.needsWorldCentering()) {
 				TilePos tile_offset;
-				tileset->scan(world, true, tile_offset);
+				tile_set->scan(world, true, tile_offset);
 				confighelper.setWorldTileOffset(world_name, *rotation_it, tile_offset);
 			} else {
-				tileset->scan(world);
+				tile_set->scan(world);
 			}
 			// update the highest max zoom level
-			zoomlevels_max = std::max(zoomlevels_max, tileset->getMinDepth());
+			zoomlevels_max = std::max(zoomlevels_max, tile_set->getMinDepth());
 
 			// set world- and tileset object in the map
 			worlds[world_name][*rotation_it] = world;
-			tilesets[world_name][*rotation_it] = tileset;
+			tile_sets[world_name][*rotation_it] = tile_set;
 		}
 
 		// now apply this highest max zoom level
 		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it)
-			tilesets[world_name][*rotation_it]->setDepth(zoomlevels_max);
+			tile_sets[world_name][*rotation_it]->setDepth(zoomlevels_max);
 		// also give this highest max zoom level to the config helper
 		confighelper.setWorldZoomlevel(world_name, zoomlevels_max);
 	}
@@ -548,32 +548,32 @@ bool RenderManager::run() {
 			std::string output_dir = config.getOutputPath(map_name + "/"
 					+ config::ROTATION_NAMES_SHORT[rotation]);
 			// if incremental render scan which tiles might have changed
-			std::shared_ptr<TileSet> tileset(new TileSet(*tilesets[world_name][rotation]));
+			std::shared_ptr<TileSet> tile_set(new TileSet(*tile_sets[world_name][rotation]));
 			if (confighelper.getRenderBehavior(map_name, rotation)
 					== config::MapcrafterConfigHelper::RENDER_AUTO) {
 				std::cout << "Scanning required tiles..." << std::endl;
 				// use the incremental check specified in the config
 				if (map.useImageModificationTimes())
-					tileset->scanRequiredByFiletimes(output_dir);
+					tile_set->scanRequiredByFiletimes(output_dir);
 				else
-					tileset->scanRequiredByTimestamp(settings.last_render[rotation]);
+					tile_set->scanRequiredByTimestamp(settings.last_render[rotation]);
 			}
 
 			int time_start = time(NULL);
 
 			// create block images
-			std::shared_ptr<BlockImages> blockimages(new BlockImages);
-			blockimages->setSettings(map.getTextureSize(), rotation, map.renderUnknownBlocks(),
+			std::shared_ptr<BlockImages> block_images(new BlockImages);
+			block_images->setSettings(map.getTextureSize(), rotation, map.renderUnknownBlocks(),
 					map.renderLeavesTransparent(), map.getRendermode());
 			// if textures do not work, it does not make much sense
 			// to try the other rotations with the same textures
-			if (!blockimages->loadAll(map.getTextureDir().string())) {
+			if (!block_images->loadAll(map.getTextureDir().string())) {
 				std::cerr << "Skipping remaining rotations." << std::endl << std::endl;
 				break;
 			}
 
 			// render the map
-			if (tileset->getRequiredRenderTilesCount() == 0) {
+			if (tile_set->getRequiredRenderTilesCount() == 0) {
 				std::cout << "No tiles need to get rendered." << std::endl;
 				continue;
 			}
@@ -581,9 +581,9 @@ bool RenderManager::run() {
 			RenderContext context;
 			context.output_dir = output_dir;
 			context.map_config = map;
-			context.blockimages = blockimages;
+			context.block_images = block_images;
 			context.world = worlds[world_name][rotation];
-			context.tileset = tileset;
+			context.tile_set = tile_set;
 
 			std::shared_ptr<thread::Dispatcher> dispatcher;
 			if (opts.jobs == 1)

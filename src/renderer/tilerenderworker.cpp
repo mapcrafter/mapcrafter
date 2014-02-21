@@ -63,13 +63,13 @@ void TileRenderWorker::saveTile(const TilePath& tile, const Image& image) {
 
 void TileRenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 	// if this is tile is not required or we should skip it, try to load it from file
-	if (!render_context.tileset->isTileRequired(tile)
+	if (!render_context.tile_set->isTileRequired(tile)
 			|| render_work.tiles_skip.count(tile)) {
 		fs::path file = render_context.output_dir / (tile.toString() + ".png");
 		if (image.readPNG(file.string())) {
 			if (render_work.tiles_skip.count(tile))
 				progress->setValue(progress->getValue()
-						+ render_context.tileset->getContainingRenderTiles(tile));
+						+ render_context.tile_set->getContainingRenderTiles(tile));
 			return;
 		}
 
@@ -77,10 +77,10 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 		std::cout << ", I will just render it again." << std::endl;
 	}
 
-	if (tile.getDepth() == render_context.tileset->getDepth()) {
+	if (tile.getDepth() == render_context.tile_set->getDepth()) {
 		// this tile is a render tile, render it
 		renderer.renderTile(tile.getTilePos(),
-				render_context.tileset->getTileOffset(), image);
+				render_context.tile_set->getTileOffset(), image);
 		render_work_result.tiles_rendered++;
 
 		/*
@@ -109,25 +109,25 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, Image& image) {
 
 		Image other;
 		Image resized;
-		if (render_context.tileset->hasTile(tile + 1)) {
+		if (render_context.tile_set->hasTile(tile + 1)) {
 			renderRecursive(tile + 1, other);
 			other.resizeHalf(resized);
 			image.simpleblit(resized, 0, 0);
 			other.clear();
 		}
-		if (render_context.tileset->hasTile(tile + 2)) {
+		if (render_context.tile_set->hasTile(tile + 2)) {
 			renderRecursive(tile + 2, other);
 			other.resizeHalf(resized);
 			image.simpleblit(resized, size / 2, 0);
 			other.clear();
 		}
-		if (render_context.tileset->hasTile(tile + 3)) {
+		if (render_context.tile_set->hasTile(tile + 3)) {
 			renderRecursive(tile + 3, other);
 			other.resizeHalf(resized);
 			image.simpleblit(resized, 0, size / 2);
 			other.clear();
 		}
-		if (render_context.tileset->hasTile(tile + 4)) {
+		if (render_context.tile_set->hasTile(tile + 4)) {
 			renderRecursive(tile + 4, other);
 			other.resizeHalf(resized);
 			image.simpleblit(resized, size / 2, size / 2);
@@ -153,11 +153,11 @@ void TileRenderWorker::operator()() {
 	// TODO
 	// really create world cache here?
 	std::shared_ptr<mc::WorldCache> world_cache(new mc::WorldCache(render_context.world));
-	renderer = TileRenderer(world_cache, render_context.blockimages, render_context.map_config);
+	renderer = TileRenderer(world_cache, render_context.block_images, render_context.map_config);
 	
 	int work = 0;
 	for (auto it = render_work.tiles.begin(); it != render_work.tiles.end(); ++it)
-		work += render_context.tileset->getContainingRenderTiles(*it);
+		work += render_context.tile_set->getContainingRenderTiles(*it);
 	progress->setMax(work);
 	progress->setValue(0);
 	*finished = false;

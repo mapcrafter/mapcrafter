@@ -42,10 +42,10 @@ namespace renderer {
 struct RenderContext {
 	fs::path output_dir;
 	config::MapSection map_config;
-	std::shared_ptr<renderer::BlockImages> blockimages;
+	std::shared_ptr<renderer::BlockImages> block_images;
 
 	mc::World world;
-	std::shared_ptr<renderer::TileSet> tileset;
+	std::shared_ptr<renderer::TileSet> tile_set;
 };
 
 struct RenderWork {
