@@ -118,6 +118,7 @@ MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 	if(oldMapLayer != null)
 		this.lmap.removeLayer(oldMapLayer);
 	this.lmap.addLayer(this.layers[this.currentMap][this.currentRotation]);
+	//this.lmap.invalidateSize();
 	
 	// check whether we are switching to a completely different map
 	if(oldMapLayer == null || oldMapConfig.worldName != mapConfig.worldName) {
