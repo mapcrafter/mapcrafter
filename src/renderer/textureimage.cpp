@@ -30,7 +30,7 @@ bool TextureImage::load(const std::string& path, int size) {
 	if (!tmp.readPNG(path + "/" + name + ".png")) {
 		// make sure the texture image does not have zero dimension
 		// even if the texture does not exist
-		*this = Image(size, size);
+		this->setSize(size, size);
 		original = *this;
 		return false;
 	}
