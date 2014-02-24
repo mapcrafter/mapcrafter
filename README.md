@@ -83,6 +83,7 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 * Added new options to specify the default view of a map
 * Added new option to specify the dimension of a world
 * Fixed lighting of The End
+* Fixed a texture bug (#61) causing segfaults
 
 **v.1.1.3**
 
