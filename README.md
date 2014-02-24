@@ -3,7 +3,7 @@
 by Moritz Hilscher
 
 mapcrafter is a high performance Minecraft map renderer written in C++. It renders
-Minecraft Worlds to a bunch of images which are viewable in any webbrowser
+Minecraft worlds to a bunch of images which are viewable in any webbrowser
 using Leaflet.
 
 mapcrafter is free software and available under the GPL license.  You can
@@ -20,7 +20,7 @@ stuff of the template from Minecraft Overviewer.
 
 ## Features ##
 
-* **Web output:** Render your Minecraft Worlds to maps with an isometric 3D perspective 
+* **Web output:** Render your Minecraft worlds to maps with an isometric 3D perspective 
       viewable in any webbrowser!
 * **Different directions:** Choose from four different directions to render your worlds!
 * **Different rendermodes:** Choose between different rendermodes like day, night and cave 
@@ -42,7 +42,7 @@ stuff of the template from Minecraft Overviewer.
   * libboost-filesystem
   * libboost-program-options
   * (libboost-test if you want to use the tests)
-* For your Minecraft Worlds:
+* For your Minecraft worlds:
   * Anvil World Format
   * Minecraft 1.6 Resource Packs
 
@@ -73,6 +73,16 @@ You can also ask questions in the [Minecraft Forum
 thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-map-renderer/).
 
 ## Version history ##
+
+**v.1.2**
+
+* Started refactoring the web template
+  * **Since some files were split up and are now in a separate ``static/`` directory, 
+    you should manually delete the old *.js *.css files in your map directories and
+    update the maps with mapcrafter to prevent a mess with old files.**
+* Added new options to specify the default view of a map
+* Added new option to specify the dimension of a world
+* Fixed lighting of The End
 
 **v.1.1.3**
 
