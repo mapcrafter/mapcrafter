@@ -25,22 +25,18 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
-#include <boost/filesystem.hpp>
-
-namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace mc {
 
-World::World()
-	: rotation(0) {
+World::World(std::string world_dir, Dimension dimension)
+	: world_dir(world_dir), dimension(dimension), rotation(0) {
 }
 
 World::~World() {
 }
 
-bool World::readRegions(const std::string& path) {
-	fs::path region_dir(path);
+bool World::readRegions(const fs::path& region_dir) {
 	if(!fs::exists(region_dir))
 		return false;
 	std::string ending = ".mca";
@@ -74,8 +70,7 @@ void World::setWorldCrop(const WorldCrop& worldcrop) {
 	this->worldcrop = worldcrop;
 }
 
-bool World::load(const std::string& dir, Dimension dimension) {
-	fs::path world_dir(dir);
+bool World::load() {
 	if(!fs::exists(world_dir)) {
 		std::cerr << "Error: World directory " << world_dir;
 		std::cerr << " does not exist!" << std::endl;
@@ -83,7 +78,6 @@ bool World::load(const std::string& dir, Dimension dimension) {
 	}
 
 	std::string world_name = BOOST_FS_FILENAME(world_dir);
-	fs::path region_dir;
 
 	// try to find the region directory
 	if (dimension == Dimension::OVERWORLD) {

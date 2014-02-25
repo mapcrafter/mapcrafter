@@ -382,11 +382,11 @@ bool RenderManager::run() {
 		auto rotations = confighelper.getUsedRotations(world_name);
 		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
 			// load the world
-			mc::World world;
+			mc::World world(world_it->second.getInputDir().string(),
+					world_it->second.getDimension());
 			world.setRotation(*rotation_it);
 			world.setWorldCrop(world_it->second.getWorldCrop());
-			if (!world.load(world_it->second.getInputDir().string(),
-					world_it->second.getDimension())) {
+			if (!world.load()) {
 				std::cerr << "Unable to load world " << world_name << "!" << std::endl;
 				return false;
 			}

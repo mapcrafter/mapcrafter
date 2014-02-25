@@ -28,6 +28,9 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace mc {
@@ -64,7 +67,12 @@ public:
 	typedef std::unordered_set<RegionPos, hash_function> RegionSet;
 	typedef std::unordered_map<RegionPos, std::string, hash_function> RegionMap;
 
-	World();
+	/**
+	 * Constructor. You should specify a world directory and you can specify a dimension
+	 * of the world (Nether, Overworld per default, End). Mapcrafter will automagically
+	 * try to find the right region directory.
+	 */
+	World(std::string world_dir = "", Dimension dimension = Dimension::OVERWORLD);
 	~World();
 
 	/**
@@ -78,17 +86,10 @@ public:
 	void setWorldCrop(const WorldCrop& worldcrop);
 
 	/**
-	 * Loads a world from a directory. Returns false if the world- or region directory
-	 * does not exist.
-	 *
-	 * You can specify a rotation for the world (must be an integer 0, 1, 2 or 3)
-	 * If you specify a rotation, everything of the world will be rotated internally,
-	 * you can use it like a normal world.
-	 *
-	 * You can also specify a dimension (Nether, Overworld, End) for the world.
-	 * It will automagically try to find the right region directory.
+	 * Loads a world from the specified directory. Returns false if the world- or region
+	 * directory does not exist.
 	 */
-	bool load(const std::string& dir, Dimension dimension = Dimension::OVERWORLD);
+	bool load();
 
 	/**
 	 * Returns the count of available region files.
@@ -112,6 +113,9 @@ public:
 	bool getRegion(const RegionPos& pos, RegionFile& region) const;
 
 private:
+	fs::path world_dir, region_dir;
+	Dimension dimension;
+
 	// rotation and possible boundaries of the world
 	int rotation;
 	WorldCrop worldcrop;
@@ -125,7 +129,7 @@ private:
 	 * Scans a directory for Anvil *.mca region files and adds them to the available
 	 * region files. Returns false if the directory does not exist.
 	 */
-	bool readRegions(const std::string& path);
+	bool readRegions(const fs::path& region_dir);
 };
 
 }
