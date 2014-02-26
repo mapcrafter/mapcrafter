@@ -31,6 +31,24 @@ namespace mc {
 
 World::World(std::string world_dir, Dimension dimension)
 	: world_dir(world_dir), dimension(dimension), rotation(0) {
+	std::string world_name = BOOST_FS_FILENAME(this->world_dir);
+
+	// try to find the region directory
+	if (dimension == Dimension::OVERWORLD) {
+		 region_dir = this->world_dir / "region";
+	} else if (dimension == Dimension::NETHER) {
+		// try the extra bukkit nether directory at first, then the normal directory
+		world_name += "_nether";
+		region_dir = this->world_dir.parent_path() / world_name / "DIM-1" / "region";
+		if (!fs::exists(region_dir))
+			region_dir = this->world_dir / "DIM-1" / "region";
+	} else if (dimension == Dimension::END) {
+		// same here
+		world_name += "_the_end";
+		region_dir = this->world_dir.parent_path() / world_name / "DIM1" / "region";
+		if (!fs::exists(region_dir))
+			region_dir = this->world_dir / "DIM1" / "region";
+	}
 }
 
 World::~World() {
@@ -96,23 +114,6 @@ bool World::load() {
 		std::cerr << "Error: World directory " << world_dir;
 		std::cerr << " does not exist!" << std::endl;
 		return false;
-	}
-
-	std::string world_name = BOOST_FS_FILENAME(world_dir);
-
-	// try to find the region directory
-	if (dimension == Dimension::OVERWORLD) {
-		 region_dir = world_dir / "region";
-	} else if (dimension == Dimension::NETHER) {
-		// try the extra bukkit nether directory at first, then the normal directory
-		region_dir = world_dir.parent_path() / (world_name + "_nether") / "DIM-1" / "region";
-		if (!fs::exists(region_dir))
-			region_dir = world_dir / "DIM-1" / "region";
-	} else if (dimension == Dimension::END) {
-		// same here
-		region_dir = world_dir.parent_path() / (world_name + "_the_end") / "DIM1" / "region";
-		if (!fs::exists(region_dir))
-			region_dir = world_dir / "DIM1" / "region";
 	}
 
 	if(!fs::exists(region_dir)) {
