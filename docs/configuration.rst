@@ -347,6 +347,14 @@ Map Options
     Top left means that north is on the top left side on the map (same thing
     for other directions).
 
+``lighting_intensity = <number>``
+
+    **Default:** ``1.0``
+    
+    This is the lighting intensity, i.e. the strength the renderer applies the
+    lighting to the rendered map. You can specify a value from 0.0 to 1.0, 
+    where 1.0 means full lighting and 0.0 means no lighting.
+
 ``render_unknown_blocks = true|false``
 
     **Default:** ``false``
