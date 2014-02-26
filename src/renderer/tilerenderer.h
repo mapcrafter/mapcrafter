@@ -24,6 +24,7 @@
 #include "image.h"
 #include "tileset.h"
 #include "../config/sections/map.h"
+#include "../config/sections/world.h"
 #include "../mc/pos.h"
 #include "../mc/worldcache.h"
 #include "../util.h"
@@ -128,7 +129,8 @@ public:
 	TileRenderer();
 	TileRenderer(std::shared_ptr<mc::WorldCache> world,
 			std::shared_ptr<BlockImages> images,
-			const config::MapSection& map);
+			const config::WorldSection& world_config,
+			const config::MapSection& map_config);
 	~TileRenderer();
 
 	void renderTile(const TilePos& tile_pos, const TilePos& tile_offset, Image& tile);

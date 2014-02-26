@@ -122,14 +122,12 @@ bool INIConfig::load(std::istream& in, ValidationMessage& msg) {
 	int linenumber = 0;
 	while (std::getline(in, line)) {
 		linenumber++;
-		if (line.empty())
-			continue;
 
 		// trim the line
 		line = util::trim(line);
 
-		// a line starting with a # is a comment
-		if (line[0] == '#')
+		// ignore empty/comment lines
+		if (line.empty() || line[0] == '#')
 			continue;
 
 		// a line with a new section

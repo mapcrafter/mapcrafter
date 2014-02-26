@@ -72,6 +72,13 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 
 		js += "\ttileOffsets: " + tile_offsets + ",\n";
 
+		if (!world.getDefaultView().empty())
+			js += "\tdefaultView: [" + world.getDefaultView() + "],\n";
+		if (world.getDefaultZoom() != 0)
+			js += "\tdefaultZoom: " + util::str(world.getDefaultZoom()) + ",\n";
+		if (world.getDefaultRotation() != -1)
+			js += "\tdefaultRotation: " + util::str(world.getDefaultRotation()) + ",\n";
+
 		js += "},";
 	}
 
@@ -113,7 +120,7 @@ void MapcrafterConfigHelper::setWorldTileOffset(const std::string& world,
 
 const renderer::TilePos& MapcrafterConfigHelper::getWorldTileOffset(
 		const std::string& world, int rotation) {
-	return world_tile_offsets.at(world).at(rotation);
+	return world_tile_offsets.at(world)[rotation];
 }
 
 int MapcrafterConfigHelper::getRenderBehavior(const std::string& map, int rotation) const {

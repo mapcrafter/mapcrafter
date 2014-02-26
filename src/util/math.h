@@ -21,6 +21,8 @@
 #ifndef MATH_H_
 #define MATH_H_
 
+#include <cmath>
+
 namespace mapcrafter {
 namespace util {
 
@@ -29,7 +31,7 @@ namespace util {
  * Example: 0b0010 >> 2 = 0b1000
  */
 template<typename T>
-T rotate_shift_r(T x, int m, int n) {
+T rotateShiftRight(T x, int m, int n) {
 	return (x >> m) | ((x & ((1 << m) - 1)) << (n - m));
 }
 
@@ -38,7 +40,7 @@ T rotate_shift_r(T x, int m, int n) {
  * Example: 0b0100 << 2 = 0b0001
  */
 template<typename T>
-T rotate_shift_l(T x, int m, int n) {
+T rotateShiftLeft(T x, int m, int n) {
 	return ((x << m) & ((1 << n) - 1)) | (x >> (n - m));
 }
 
@@ -50,6 +52,14 @@ T floordiv(T a, T b) {
 	if (a >= 0)
 		return a / b;
 	return (a - b + 1) / b;
+}
+
+/**
+ * Checks whether to floating point numbers are equal with a small deviation.
+ */
+template<typename T>
+bool floatingPointEquals(T a, T b, T epsilon = 0.0001) {
+	return std::abs(a - b) < epsilon;
 }
 
 } /* namespace util */

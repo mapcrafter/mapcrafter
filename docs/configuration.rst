@@ -21,6 +21,7 @@ Here is a simple example of a configuration file (let's call it
 
     [map:map_myworld]
     name = My World world
+    world = myworld
 
 As you can see the configuration files consist of different types of sections
 (e.g. ``[section]``) and containing assignments of configuration options to
@@ -173,23 +174,51 @@ World Options
     This is the directory of your Minecraft World. The directory should contain
     a directory ``region/`` with the .mca region files.
 
+``dimension = nether|overworld|end``
+
+    **Default**: ``overworld``
+    
+    You can specify with this option the dimension of the world mapcrafter should render.
+    If you choose The Nether or The End, mapcrafter will automagically detect the
+    corresponding region directory. It will try the Bukkit region directory
+    (for example ``myworld_nether/DIM-1/region``) first and then the directory of a normal
+    vanilla server/client (for example ``myworld/DIM-1/region``).
+
 .. note::
 
-    If you want to render the Nether or End of your world, just specify the path to the
-    Nether or End of your world as world path. This should be my_world/DIM-1 or
-    my_world_nether/DIM-1 for the Nether and my_world/DIM1 or my_world_the_end/DIM1
-    for the End.
-    
-    You can render the nether with the cave rendermode or you can remove the
-    top bedrock layers with the crop_max_y option.
+    If you want to render The Nether and want to see something, you should use the cave
+    rendermode or use the crop_max_y option to remove the top bedrock layers.
 
 ``world_name = <name>``
 
     **Default**: ``<name of the world section>``
     
-    This is another name of the world, usually the name of the world the server uses.
+    This is another name of the world, the name of the world the server uses.
     You don't usually need to specify this manually unless your server uses different
     world names and you want to use the mapcrafter-playermarkers script.
+
+``default_view = <x>,<z>,<y>``
+
+    **Default**: Center of the map
+    
+    You can specify the default center of the map with this option. Just specify a
+    position in your Minecraft world you want as center when you open the map.
+
+``default_zoom = <zoomlevel>``
+
+    **Default**: ``0``
+    
+    This is the default zoom level shown when you open the map. The default zoom level
+    is 0 (completely zoomed out) and the maximum zoom level (completely zoomed in) is the 
+    one mapcrafter shows when rendering your map.
+
+``default_rotation = top-left|top-right|bottom-right|bottom-left``
+
+    **Default**: First available rotation of the map
+    
+    This is the default rotation shown when you open the map. You can specify one of the 
+    four available rotations. If a map doesn't have this rotation, the first available
+    rotation will be shown. 
 
 By using the following options you can crop your world and render only 
 a specific part of it. With these two options you can skip blocks above or
@@ -317,6 +346,14 @@ Map Options
 	
     Top left means that north is on the top left side on the map (same thing
     for other directions).
+
+``lighting_intensity = <number>``
+
+    **Default:** ``1.0``
+    
+    This is the lighting intensity, i.e. the strength the renderer applies the
+    lighting to the rendered map. You can specify a value from 0.0 to 1.0, 
+    where 1.0 means full lighting and 0.0 means no lighting.
 
 ``render_unknown_blocks = true|false``
 

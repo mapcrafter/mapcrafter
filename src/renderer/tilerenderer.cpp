@@ -133,11 +133,13 @@ TileRenderer::TileRenderer()
 }
 
 TileRenderer::TileRenderer(std::shared_ptr<mc::WorldCache> world,
-		std::shared_ptr<BlockImages> images, const config::MapSection& map)
-		: state(world, images), render_biomes(map.renderBiomes()),
-		  water_preblit(map.getRendermode() != "daylight"
-				  && map.getRendermode() != "nightlight") {
-	createRendermode(map.getRendermode(), map, state, rendermodes);
+		std::shared_ptr<BlockImages> images,
+		const config::WorldSection& world_config,
+		const config::MapSection& map_config)
+		: state(world, images), render_biomes(map_config.renderBiomes()),
+		  water_preblit(map_config.getRendermode() != "daylight"
+				  && map_config.getRendermode() != "nightlight") {
+	createRendermode(world_config, map_config, state, rendermodes);
 }
 
 TileRenderer::~TileRenderer() {

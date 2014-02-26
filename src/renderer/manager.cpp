@@ -35,6 +35,7 @@ namespace renderer {
 
 MapSettings::MapSettings()
 	: texture_size(12), tile_size(0), max_zoom(0),
+	  lighting_intensity(1.0),
 	  render_unknown_blocks(0), render_leaves_transparent(0), render_biomes(false) {
 	for (int i = 0; i < 4; i++) {
 		rotations[i] = false;
@@ -57,6 +58,7 @@ bool MapSettings::read(const std::string& filename) {
 	tile_size = root.get<int>("tile_size");
 	max_zoom = root.get<int>("max_zoom");
 
+	lighting_intensity = root.get<double>("lighting_intensity", 1.0);
 	render_unknown_blocks = root.get<bool>("render_unknown_blocks");
 	render_leaves_transparent = root.get<bool>("render_leaves_transparent");
 	render_biomes = root.get<bool>("render_biomes");
@@ -87,6 +89,7 @@ bool MapSettings::write(const std::string& filename) const {
 	root.set("tile_size", util::str(tile_size));
 	root.set("max_zoom", util::str(max_zoom));
 
+	root.set("lighting_intensity", util::str(lighting_intensity));
 	root.set("render_unknown_blocks", util::str(render_unknown_blocks));
 	root.set("render_leaves_transparent", util::str(render_leaves_transparent));
 	root.set("render_biomes", util::str(render_biomes));
@@ -106,6 +109,7 @@ bool MapSettings::write(const std::string& filename) const {
 
 bool MapSettings::equalsMapConfig(const config::MapSection& map) const {
 	return texture_size == map.getTextureSize()
+			&& util::floatingPointEquals(lighting_intensity, map.getLightingIntensity())
 			&& render_unknown_blocks == map.renderUnknownBlocks()
 			&& render_leaves_transparent == map.renderLeavesTransparent()
 			&& render_biomes == map.renderBiomes();
@@ -329,7 +333,7 @@ bool RenderManager::run() {
 	auto config_maps = config.getMaps();
 	// maps for world- and tileset objects
 	std::map<std::string, std::array<mc::World, 4> > worlds;
-	std::map<std::string, std::array<std::shared_ptr<TileSet>, 4> > tilesets;
+	std::map<std::string, std::array<std::shared_ptr<TileSet>, 4> > tile_sets;
 
 	// go through all maps and:
 	// 1. - find out which rotations are needed for which world
@@ -378,37 +382,38 @@ bool RenderManager::run() {
 		auto rotations = confighelper.getUsedRotations(world_name);
 		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
 			// load the world
-			mc::World world;
+			mc::World world(world_it->second.getInputDir().string(),
+					world_it->second.getDimension());
 			world.setRotation(*rotation_it);
 			world.setWorldCrop(world_it->second.getWorldCrop());
-			if (!world.load(world_it->second.getInputDir().string())) {
+			if (!world.load()) {
 				std::cerr << "Unable to load world " << world_name << "!" << std::endl;
 				return false;
 			}
 			// create a tileset for this world
-			std::shared_ptr<TileSet> tileset(new TileSet);
+			std::shared_ptr<TileSet> tile_set(new TileSet);
 			// and scan for tiles of this world,
 			// we automatically center the tiles for cropped worlds, but only...
 			//  - the circular cropped ones and
 			//  - the ones with complete specified x- AND z-bounds
 			if (world_it->second.needsWorldCentering()) {
 				TilePos tile_offset;
-				tileset->scan(world, true, tile_offset);
+				tile_set->scan(world, true, tile_offset);
 				confighelper.setWorldTileOffset(world_name, *rotation_it, tile_offset);
 			} else {
-				tileset->scan(world);
+				tile_set->scan(world);
 			}
 			// update the highest max zoom level
-			zoomlevels_max = std::max(zoomlevels_max, tileset->getMinDepth());
+			zoomlevels_max = std::max(zoomlevels_max, tile_set->getMinDepth());
 
 			// set world- and tileset object in the map
 			worlds[world_name][*rotation_it] = world;
-			tilesets[world_name][*rotation_it] = tileset;
+			tile_sets[world_name][*rotation_it] = tile_set;
 		}
 
 		// now apply this highest max zoom level
 		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it)
-			tilesets[world_name][*rotation_it]->setDepth(zoomlevels_max);
+			tile_sets[world_name][*rotation_it]->setDepth(zoomlevels_max);
 		// also give this highest max zoom level to the config helper
 		confighelper.setWorldZoomlevel(world_name, zoomlevels_max);
 	}
@@ -458,14 +463,12 @@ bool RenderManager::run() {
 				continue;
 			}
 
-			// check if the config file was not changed when rendering incrementally
+			// check whether the config file was changed when rendering incrementally
 			if (!settings.equalsMapConfig(map)) {
-				std::cerr << "Error: The configuration does not equal the settings of"
-						"the already rendered map." << std::endl;
-				std::cerr << "Force-render the whole map ('" << map_name;
-				std::cerr << "') or reset the configuration of the map to the old settings.";
-				std::cerr << std::endl << std::endl;
-				continue;
+				std::cerr << "Warning: It seems that the configuration of the map '";
+				std::cerr << map_name << "' was changed." << std::endl;
+				std::cerr << "Force-render the whole map or reset the configuration ";
+				std::cerr << "of the map to the old settings." << std::endl << std::endl;
 			}
 
 			// for force-render rotations
@@ -546,42 +549,43 @@ bool RenderManager::run() {
 			std::string output_dir = config.getOutputPath(map_name + "/"
 					+ config::ROTATION_NAMES_SHORT[rotation]);
 			// if incremental render scan which tiles might have changed
-			std::shared_ptr<TileSet> tileset(new TileSet(*tilesets[world_name][rotation]));
+			std::shared_ptr<TileSet> tile_set(new TileSet(*tile_sets[world_name][rotation]));
 			if (confighelper.getRenderBehavior(map_name, rotation)
 					== config::MapcrafterConfigHelper::RENDER_AUTO) {
 				std::cout << "Scanning required tiles..." << std::endl;
 				// use the incremental check specified in the config
 				if (map.useImageModificationTimes())
-					tileset->scanRequiredByFiletimes(output_dir);
+					tile_set->scanRequiredByFiletimes(output_dir);
 				else
-					tileset->scanRequiredByTimestamp(settings.last_render[rotation]);
+					tile_set->scanRequiredByTimestamp(settings.last_render[rotation]);
 			}
 
 			int time_start = time(NULL);
 
 			// create block images
-			std::shared_ptr<BlockImages> blockimages(new BlockImages);
-			blockimages->setSettings(map.getTextureSize(), rotation, map.renderUnknownBlocks(),
+			std::shared_ptr<BlockImages> block_images(new BlockImages);
+			block_images->setSettings(map.getTextureSize(), rotation, map.renderUnknownBlocks(),
 					map.renderLeavesTransparent(), map.getRendermode());
 			// if textures do not work, it does not make much sense
 			// to try the other rotations with the same textures
-			if (!blockimages->loadAll(map.getTextureDir().string())) {
+			if (!block_images->loadAll(map.getTextureDir().string())) {
 				std::cerr << "Skipping remaining rotations." << std::endl << std::endl;
 				break;
 			}
 
 			// render the map
-			if (tileset->getRequiredRenderTilesCount() == 0) {
+			if (tile_set->getRequiredRenderTilesCount() == 0) {
 				std::cout << "No tiles need to get rendered." << std::endl;
 				continue;
 			}
 
 			RenderContext context;
 			context.output_dir = output_dir;
+			context.world_config = config.getWorld(map.getWorld());
 			context.map_config = map;
-			context.blockimages = blockimages;
+			context.block_images = block_images;
 			context.world = worlds[world_name][rotation];
-			context.tileset = tileset;
+			context.tile_set = tile_set;
 
 			std::shared_ptr<thread::Dispatcher> dispatcher;
 			if (opts.jobs == 1)

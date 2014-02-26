@@ -3,13 +3,25 @@
 	<head>
 		<title>Minecraft Map</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-		<link rel="stylesheet" type="text/css" href="style.css" />
-		<link rel="stylesheet" href="leaflet.css" />
+		<link rel="stylesheet" type="text/css" href="static/css/style.css" />
+		<link rel="stylesheet" href="static/leaflet/leaflet.css" />
 		<!--[if lte IE 8]>
-		<link rel="stylesheet" href="leaflet.ie.css" />
+		<link rel="stylesheet" href="static/leaflet/leaflet.ie.css" />
 		<![endif]-->
-		<script src="leaflet.js"></script>
-		<script type="text/javascript" src="map.js"></script>
+		<script src="static/leaflet/leaflet.js"></script>
+		
+		<script type="text/javascript" src="static/js/handler/base.js"></script>
+		<script type="text/javascript" src="static/js/handler/marker.js"></script>
+		<script type="text/javascript" src="static/js/handler/poshash.js"></script>
+		<script type="text/javascript" src="static/js/handler/rotationselect.js"></script>
+		<script type="text/javascript" src="static/js/control/base.js"></script>
+		<script type="text/javascript" src="static/js/control/html.js"></script>
+		<script type="text/javascript" src="static/js/control/mapselect.js"></script>
+		<script type="text/javascript" src="static/js/control/marker.js"></script>
+		<script type="text/javascript" src="static/js/control/mousepos.js"></script>
+		<script type="text/javascript" src="static/js/control/rotationselect.js"></script>
+		<script type="text/javascript" src="static/js/mapcrafterui.js"></script>
+
 		<script type="text/javascript">
 		var CONFIG = {
 {worlds}
@@ -23,11 +35,11 @@
 			Mapcrafter.init();
 			
 			Mapcrafter.addControl(new MapSelectControl(), "topright", 1);
-			//Mapcrafter.addControl(new MapMarkerControl(), "topright", 2);
+			//Mapcrafter.addControl(new MarkerControl(), "topright", 2);
 			Mapcrafter.addControl(new RotationSelectControl(), "topright", 3);
 			Mapcrafter.addControl(new MousePosControl(), "bottomleft", 1);
 			
-			Mapcrafter.addHandler(new MapMarkerHandler(MARKERS));
+			Mapcrafter.addHandler(new MarkerHandler(MARKERS));
 		}
 		</script>
 	</head>

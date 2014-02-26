@@ -19,6 +19,8 @@
 
 #include "base.h"
 
+#include "../../mc/world.h"
+
 namespace mapcrafter {
 namespace renderer {
 
@@ -42,17 +44,23 @@ bool Rendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 void Rendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 }
 
-bool createRendermode(const std::string& name, const config::MapSection& config,
+bool createRendermode(const config::WorldSection& world_config,
+		const config::MapSection& map_config,
 		const RenderState& state, std::vector<std::shared_ptr<Rendermode>>& modes) {
+	std::string name = map_config.getRendermode();
 	if (name.empty() || name == "normal")
 		return true;
 
 	if (name == "cave")
 		modes.push_back(std::shared_ptr<Rendermode>(new CaveRendermode(state)));
 	else if (name == "daylight")
-		modes.push_back(std::shared_ptr<Rendermode>(new LightingRendermode(state, true)));
+		modes.push_back(std::shared_ptr<Rendermode>(new LightingRendermode(
+				state, true, map_config.getLightingIntensity(),
+				world_config.getDimension() == mc::Dimension::END)));
 	else if (name == "nightlight")
-		modes.push_back(std::shared_ptr<Rendermode>(new LightingRendermode(state, false)));
+		modes.push_back(std::shared_ptr<Rendermode>(new LightingRendermode(
+				state, false, map_config.getLightingIntensity(),
+				world_config.getDimension() == mc::Dimension::END)));
 	else
 		return false;
 	return true;

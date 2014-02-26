@@ -57,6 +57,7 @@ public:
 	std::string getRendermode() const;
 	int getTextureSize() const;
 
+	double getLightingIntensity() const;
 	bool renderUnknownBlocks() const;
 	bool renderLeavesTransparent() const;
 	bool renderBiomes() const;
@@ -74,6 +75,7 @@ private:
 	Field<std::string> rendermode;
 	Field<int> texture_size;
 
+	Field<double> lighting_intensity;
 	Field<bool> render_unknown_blocks, render_leaves_transparent, render_biomes, use_image_mtimes;
 };
 

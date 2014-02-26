@@ -53,7 +53,8 @@ public:
 	virtual void draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 };
 
-bool createRendermode(const std::string& name, const config::MapSection& config,
+bool createRendermode(const config::WorldSection& world_config,
+		const config::MapSection& map_config,
 		const RenderState& state, std::vector<std::shared_ptr<Rendermode>>& modes);
 
 } /* namespace render */
