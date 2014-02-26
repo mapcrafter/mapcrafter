@@ -76,13 +76,31 @@ public:
 	~World();
 
 	/**
-	 * Sets the rotation of the world. You have to call this before loading a world.
+	 * Returns the directory of the world.
 	 */
+	fs::path getWorldDir() const;
+
+	/**
+	 * Returns the region directory of the world.
+	 */
+	fs::path getRegionDir() const;
+
+	/**
+	 * Returns the used dimension of the world.
+	 */
+	Dimension getDimension() const;
+
+	/**
+	 * Returns/Sets the rotation of the world. You set this before loading the world.
+	 */
+	int getRotation() const;
 	void setRotation(int rotation);
 
 	/**
-	 * Sets the boundaries of the world.
+	 * Returns/Sets the boundaries of the world. You also have to set this before
+	 * loading the world.
 	 */
+	WorldCrop getWorldCrop() const;
 	void setWorldCrop(const WorldCrop& worldcrop);
 
 	/**
@@ -113,7 +131,9 @@ public:
 	bool getRegion(const RegionPos& pos, RegionFile& region) const;
 
 private:
+	// world directory, region directory
 	fs::path world_dir, region_dir;
+	// used dimension of the world
 	Dimension dimension;
 
 	// rotation and possible boundaries of the world

@@ -62,8 +62,29 @@ bool World::readRegions(const fs::path& region_dir) {
 	return true;
 }
 
+fs::path World::getWorldDir() const {
+	return world_dir;
+}
+
+fs::path World::getRegionDir() const {
+	return region_dir;
+}
+
+Dimension World::getDimension() const {
+	return dimension;
+}
+
+int World::getRotation() const {
+	return rotation;
+}
+
+
 void World::setRotation(int rotation) {
 	this->rotation = rotation;
+}
+
+WorldCrop World::getWorldCrop() const {
+	return worldcrop;
 }
 
 void World::setWorldCrop(const WorldCrop& worldcrop) {
