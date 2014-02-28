@@ -25,7 +25,7 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 		});
 		if(location.icon) {
 			marker.setIcon(new L.Icon({
-				iconUrl: location.icon,
+				iconUrl: location.icon != "" ? "static/markers/" + location.icon : null,
 				iconSize: (location.iconsize ? location.iconsize : [24, 24]),
 			}));
 		}
