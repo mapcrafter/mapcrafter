@@ -22,6 +22,37 @@
 namespace mapcrafter {
 namespace mc {
 
+Sign::Sign() {
+}
+
+Sign::Sign(const mc::BlockPos& pos, const Lines& lines)
+	: pos(pos), lines(lines), text() {
+	// join the lines as sign text
+	for (int i = 0; i < 4; i++) {
+		std::string line = lines[i];
+		util::trim(line);
+		if (line.empty())
+			continue;
+		text += line + " ";
+	}
+	util::trim(text);
+}
+
+Sign::~Sign() {
+}
+
+const mc::BlockPos& Sign::getPos() const {
+	return pos;
+}
+
+const Sign::Lines& Sign::getLines() const {
+	return lines;
+}
+
+const std::string& Sign::getText() const {
+	return text;
+}
+
 WorldEntitiesCache::WorldEntitiesCache(const World& world)
 	: world(world), cache_file(world.getRegionDir() / "entities.nbt.gz") {
 }

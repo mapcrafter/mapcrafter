@@ -23,6 +23,7 @@
 #include "nbt.h"
 #include "pos.h"
 #include "world.h"
+#include "../util.h"
 
 #include <map>
 #include <vector>
@@ -32,6 +33,36 @@ namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace mc {
+
+class Sign {
+public:
+	typedef std::array<std::string, 4> Lines;
+
+	Sign();
+	Sign(const mc::BlockPos& pos, const Lines& lines);
+	~Sign();
+
+	/**
+	 * Returns the position of the sign.
+	 */
+	const mc::BlockPos& getPos() const;
+
+	/**
+	 * Returns the four lines of the sign.
+	 */
+	const Sign::Lines& getLines() const;
+
+	/**
+	 * Returns the text of the sign -- the not-empty lines joined with a separative space.
+	 */
+	const std::string& getText() const;
+
+private:
+	mc::BlockPos pos;
+
+	Lines lines;
+	std::string text;
+};
 
 class WorldEntitiesCache {
 public:

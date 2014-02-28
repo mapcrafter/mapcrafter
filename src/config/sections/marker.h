@@ -22,7 +22,7 @@
 
 #include "base.h"
 #include "../validation.h"
-#include "../../mc/worldhelper.h"
+#include "../../mc/worldentities.h"
 
 namespace mapcrafter {
 namespace config {
