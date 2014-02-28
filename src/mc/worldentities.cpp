@@ -130,6 +130,8 @@ void WorldEntitiesCache::update() {
 
 	auto regions = world.getAvailableRegions();
 	for (auto region_it = regions.begin(); region_it != regions.end(); ++region_it) {
+		if (fs::last_write_time(world.getRegionPath(*region_it)) < timestamp)
+			continue;
 		RegionFile region;
 		world.getRegion(*region_it, region);
 		region.read();

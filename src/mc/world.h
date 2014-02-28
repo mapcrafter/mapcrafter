@@ -125,6 +125,12 @@ public:
 	bool hasRegion(const RegionPos& pos) const;
 
 	/**
+	 * Returns the path of a region file. Returns an empty path if the region does
+	 * not exist.
+	 */
+	fs::path getRegionPath(const RegionPos& pos) const;
+
+	/**
 	 * Creates the Region-object for a specific region and assigns the supplied reference
 	 * 'region' to it. Returns false if the region does not exist.
 	 */

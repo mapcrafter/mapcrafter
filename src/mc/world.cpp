@@ -136,6 +136,12 @@ bool World::hasRegion(const RegionPos& pos) const {
 	return available_regions.count(pos) != 0;
 }
 
+fs::path World::getRegionPath(const RegionPos& pos) const {
+	if (!hasRegion(pos))
+		return fs::path();
+	return fs::path(region_files.at(pos));
+}
+
 bool World::getRegion(const RegionPos& pos, RegionFile& region) const {
 	RegionMap::const_iterator it = region_files.find(pos);
 	if (it == region_files.end())
