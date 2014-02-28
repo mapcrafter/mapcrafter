@@ -33,10 +33,10 @@ MarkerSection::~MarkerSection() {
 
 std::string MarkerSection::formatSign(std::string format, const mc::SignEntity& sign) const {
 	std::string textp = sign.getText();
-	std::string text;
+	std::string text = textp;
 
 	if (textp.size() > prefix.getValue().size())
-		text = util::trim(textp.substr(prefix.getValue().size()+1));
+		text = util::trim(textp.substr(prefix.getValue().size()));
 
 	format = util::replaceAll(format, "%text", text);
 	format = util::replaceAll(format, "%textp", textp);

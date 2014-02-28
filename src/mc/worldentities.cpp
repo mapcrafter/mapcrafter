@@ -29,13 +29,12 @@ SignEntity::SignEntity(const mc::BlockPos& pos, const Lines& lines)
 	: pos(pos), lines(lines), text() {
 	// join the lines as sign text
 	for (int i = 0; i < 4; i++) {
-		std::string line = lines[i];
-		util::trim(line);
+		std::string line = util::trim(lines[i]);
 		if (line.empty())
 			continue;
 		text += line + " ";
 	}
-	util::trim(text);
+	text = util::trim(text);
 }
 
 SignEntity::~SignEntity() {
