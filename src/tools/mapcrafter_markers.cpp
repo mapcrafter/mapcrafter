@@ -71,9 +71,7 @@ int main(int argc, char** argv) {
 		mc::WorldEntitiesCache entities(world);
 		entities.update();
 
-		continue;
-
-		std::vector<mc::SignEntity> signs;// = mc::findSignsInWorld(world);
+		std::vector<mc::SignEntity> signs = entities.getSigns();
 		for (auto sign_it = signs.begin(); sign_it != signs.end(); ++sign_it) {
 			// don't use signs not contained in the world boundaries
 			if (!worldcrop.isBlockContainedXZ(sign_it->getPos())

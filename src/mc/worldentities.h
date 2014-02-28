@@ -23,6 +23,7 @@
 #include "nbt.h"
 #include "pos.h"
 #include "world.h"
+#include "worldcrop.h"
 #include "../util.h"
 
 #include <map>
@@ -73,6 +74,8 @@ public:
 	 * Updates the entity cache.
 	 */
 	void update();
+
+	std::vector<SignEntity> getSigns(WorldCrop crop = WorldCrop()) const;
 private:
 	World world;
 	fs::path cache_file;
