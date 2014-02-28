@@ -45,15 +45,15 @@ public:
 	std::string getIcon() const;
 	std::string getIconSize() const;
 
-	bool matchesSign(const mc::Sign& sign) const;
-	std::string formatTitle(const mc::Sign& sign) const;
-	std::string formatText(const mc::Sign& sign) const;
+	bool matchesSign(const mc::SignEntity& sign) const;
+	std::string formatTitle(const mc::SignEntity& sign) const;
+	std::string formatText(const mc::SignEntity& sign) const;
 private:
 	Field<std::string> prefix;
 	Field<std::string> title_format, text_format;
 	Field<std::string> icon, icon_size;
 
-	std::string formatSign(std::string format, const mc::Sign& sign) const;
+	std::string formatSign(std::string format, const mc::SignEntity& sign) const;
 };
 
 } /* namespace config */

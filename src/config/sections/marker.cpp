@@ -31,7 +31,7 @@ MarkerSection::MarkerSection(bool global) {
 MarkerSection::~MarkerSection() {
 }
 
-std::string MarkerSection::formatSign(std::string format, const mc::Sign& sign) const {
+std::string MarkerSection::formatSign(std::string format, const mc::SignEntity& sign) const {
 	std::string textp = sign.getText();
 	std::string text;
 
@@ -94,15 +94,15 @@ std::string MarkerSection::getIconSize() const {
 	return icon_size.getValue();
 }
 
-bool MarkerSection::matchesSign(const mc::Sign& sign) const {
+bool MarkerSection::matchesSign(const mc::SignEntity& sign) const {
 	return util::startswith(sign.getText(), prefix.getValue());
 }
 
-std::string MarkerSection::formatTitle(const mc::Sign& sign) const {
+std::string MarkerSection::formatTitle(const mc::SignEntity& sign) const {
 	return formatSign(title_format.getValue(), sign);
 }
 
-std::string MarkerSection::formatText(const mc::Sign& sign) const {
+std::string MarkerSection::formatText(const mc::SignEntity& sign) const {
 	return formatSign(text_format.getValue(), sign);
 }
 

@@ -34,13 +34,13 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace mc {
 
-class Sign {
+class SignEntity {
 public:
 	typedef std::array<std::string, 4> Lines;
 
-	Sign();
-	Sign(const mc::BlockPos& pos, const Lines& lines);
-	~Sign();
+	SignEntity();
+	SignEntity(const mc::BlockPos& pos, const Lines& lines);
+	~SignEntity();
 
 	/**
 	 * Returns the position of the sign.
@@ -50,7 +50,7 @@ public:
 	/**
 	 * Returns the four lines of the sign.
 	 */
-	const Sign::Lines& getLines() const;
+	const SignEntity::Lines& getLines() const;
 
 	/**
 	 * Returns the text of the sign -- the not-empty lines joined with a separative space.

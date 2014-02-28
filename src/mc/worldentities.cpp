@@ -22,10 +22,10 @@
 namespace mapcrafter {
 namespace mc {
 
-Sign::Sign() {
+SignEntity::SignEntity() {
 }
 
-Sign::Sign(const mc::BlockPos& pos, const Lines& lines)
+SignEntity::SignEntity(const mc::BlockPos& pos, const Lines& lines)
 	: pos(pos), lines(lines), text() {
 	// join the lines as sign text
 	for (int i = 0; i < 4; i++) {
@@ -38,18 +38,18 @@ Sign::Sign(const mc::BlockPos& pos, const Lines& lines)
 	util::trim(text);
 }
 
-Sign::~Sign() {
+SignEntity::~SignEntity() {
 }
 
-const mc::BlockPos& Sign::getPos() const {
+const mc::BlockPos& SignEntity::getPos() const {
 	return pos;
 }
 
-const Sign::Lines& Sign::getLines() const {
+const SignEntity::Lines& SignEntity::getLines() const {
 	return lines;
 }
 
-const std::string& Sign::getText() const {
+const std::string& SignEntity::getText() const {
 	return text;
 }
 
