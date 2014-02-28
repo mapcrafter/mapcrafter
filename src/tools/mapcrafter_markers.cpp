@@ -64,7 +64,8 @@ int main(int argc, char** argv) {
 	auto markers = config.getMarkers();
 	for (auto world_it = worlds.begin(); world_it != worlds.end(); ++world_it) {
 		mc::WorldCrop worldcrop = world_it->second.getWorldCrop();
-		mc::World world(world_it->second.getInputDir().string());
+		mc::World world(world_it->second.getInputDir().string(),
+				world_it->second.getDimension());
 		world.setWorldCrop(worldcrop);
 		if (!world.load()) {
 			std::cerr << "Error: Unable to load world " << world_it->first << "!" << std::endl;
@@ -74,7 +75,7 @@ int main(int argc, char** argv) {
 		mc::WorldEntitiesCache entities(world);
 		entities.update();
 
-		std::vector<mc::SignEntity> signs = entities.getSigns();
+		std::vector<mc::SignEntity> signs = entities.getSigns(world.getWorldCrop());
 		for (auto sign_it = signs.begin(); sign_it != signs.end(); ++sign_it) {
 			// don't use signs not contained in the world boundaries
 			if (!worldcrop.isBlockContainedXZ(sign_it->getPos())
