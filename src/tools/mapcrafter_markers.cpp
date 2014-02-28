@@ -19,10 +19,13 @@ struct Marker {
 	std::string icon, icon_size;
 
 	std::string toJSON() {
+		std::string title_escaped = util::replaceAll(title, "\"", "\\\"");
+		std::string text_escaped = util::replaceAll(text, "\"", "\\\"");
+
 		std::string json = "{";
 		json += "\"pos\": [" + util::str(pos.x) + "," + util::str(pos.z) + "," + util::str(pos.y) + "], ";
-		json += "\"title\": \"" + title + "\", ";
-		json += "\"text\": \"" + text + "\", ";
+		json += "\"title\": \"" + title_escaped + "\", ";
+		json += "\"text\": \"" + text_escaped + "\", ";
 		if (!icon.empty()) {
 			json += "\"icon\": \"" + icon + "\", ";
 			if (!icon_size.empty())
