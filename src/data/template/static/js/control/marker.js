@@ -1,36 +1,43 @@
 MarkerControl.prototype = new BaseControl("MarkerControl");
 
-function MarkerControl() {
+function MarkerControl(markers) {
+	this.handler = new MarkerHandler(markers);
 }
 
-MarkerControl.prototype.create = function(wrapper) {
-	var checkbox = document.createElement("input");
-	checkbox.setAttribute("type", "checkbox");
-	checkbox.setAttribute("checked", 1);
-	checkbox.setAttribute("id", this.getName());
-	checkbox.style.verticalAlign = "middle";
-	var markerLayer = document.getElementsByClassName("leaflet-marker-pane")[0];
-	var hiddenClass = "hidden";
+MarkerControl.prototype.create = function(wrapper) {	
+	var checkboxes = document.createElement("div");
 	
-	if(markerLayer) {
-		checkbox.addEventListener("change", function() {
-			if(checkbox.checked) {
-				var classNames = markerLayer.className.split(" ");
-				var classIndex = classNames.indexOf(hiddenClass);
-				if(classIndex >= 0) {
-					classNames.splice(classIndex, 1);
-					markerLayer.className = classNames.join(" ");
-				}
-			} else {
-				markerLayer.className += " " + hiddenClass;
-			}
+	var groups = this.handler.getMarkerGroups();
+	for (var i = 0; i < groups.length; i++) {
+		var group = groups[i][0];
+		var groupLabel = groups[i][1];
+		
+		var container = document.createElement("div");
+		var checkbox = document.createElement("input");
+		checkbox.setAttribute("id", "cb_group_" + group);
+		checkbox.setAttribute("data-group", group);
+		checkbox.setAttribute("type", "checkbox");
+		checkbox.checked = true;
+		
+		var self = this;
+		checkbox.addEventListener("change", function(checkbox) {
+			var group = this.getAttribute("data-group");
+			self.handler.show(group, this.checked);
 		});
+		
+		var label = document.createElement("label");
+		label.setAttribute("for", "cb_group_" + group);
+		label.innerHTML = groupLabel;
+		
+		container.appendChild(checkbox);
+		container.appendChild(label);
+		checkboxes.appendChild(container);
 	}
+
+	var label = document.createElement("div");
+	label.innerHTML = "Show markers:";
+	wrapper.appendChild(label);
+	wrapper.appendChild(checkboxes);
 	
-	var text = document.createElement("label");
-	text.setAttribute("for", this.getName());
-	text.innerHTML = "Show markers: ";
-	
-	wrapper.appendChild(text);
-	wrapper.appendChild(checkbox);
+	this.ui.addHandler(this.handler);
 };

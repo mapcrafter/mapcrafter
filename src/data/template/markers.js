@@ -2,7 +2,9 @@
 
 var MARKERS = {
 	"homes" : {
+		"name" : "Homes",
 		"icon" : "bed.png",
+		"icon_size" : [32, 32],
 		"markers" : {
 			"world1.4" : [
 				{"pos" : [42, 73, 64], "title" : "My Home"},
@@ -11,10 +13,12 @@ var MARKERS = {
 		},
 	},
 	"spawn" : {
+		"name" : "Spawnpoint",
 		"icon" : "diamond.png",
+		"icon_size" : [32, 32],
 		"markers" : {
 			"world1.4" : [
-				{"pos" : [0, 0, 64], "title" : "Spawn"},
+				{"pos" : [35, -21, 64], "title" : "Spawn"},
 			],
 		},
 	},

@@ -44,6 +44,13 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 	//this.show("spawn", true);
 };
 
+MarkerHandler.prototype.getMarkerGroups = function() {
+	var groups = [];
+	for(var group in this.markers)
+		groups.push([group, this.markers[group]["name"]]);
+	return groups;
+};
+
 MarkerHandler.prototype.show = function(group, visible) {
 	this.layerGroups[group].eachLayer(function(layer) {
 		layer.setOpacity(visible ? 1 : 0);
