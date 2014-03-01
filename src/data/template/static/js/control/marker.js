@@ -17,6 +17,7 @@ MarkerControl.prototype.create = function(wrapper) {
 		checkbox.setAttribute("id", "cb_group_" + group);
 		checkbox.setAttribute("data-group", group);
 		checkbox.setAttribute("type", "checkbox");
+		checkbox.style.verticalAlign = "middle";
 		checkbox.checked = true;
 		
 		var self = this;
