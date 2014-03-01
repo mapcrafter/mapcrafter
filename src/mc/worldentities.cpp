@@ -140,6 +140,8 @@ void WorldEntitiesCache::update() {
 			if (region.getChunkTimestamp(*chunk_it) < timestamp)
 				continue;
 
+			this->entities[*region_it][*chunk_it].clear();
+
 			mc::nbt::NBTFile nbt;
 			const std::vector<uint8_t>& data = region.getChunkData(*chunk_it);
 			nbt.readNBT(reinterpret_cast<const char*>(&data[0]), data.size(),
