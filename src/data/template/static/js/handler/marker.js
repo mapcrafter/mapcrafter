@@ -52,7 +52,9 @@ MarkerHandler.prototype.getMarkerGroups = function() {
 };
 
 MarkerHandler.prototype.show = function(group, visible) {
-	this.layerGroups[group].eachLayer(function(layer) {
-		layer.setOpacity(visible ? 1 : 0);
-	});
+	var layer = this.layerGroups[group];
+	if(visible && !this.ui.lmap.hasLayer(layer))
+		layer.addTo(this.ui.lmap);
+	if(!visible && this.ui.lmap.hasLayer(layer))
+		this.ui.lmap.removeLayer(layer);
 };
