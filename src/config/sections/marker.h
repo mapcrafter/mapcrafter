@@ -39,6 +39,7 @@ public:
 	virtual void postParse(const INIConfigSection& section,
 			ValidationList& validation);
 
+	std::string getName() const;
 	std::string getPrefix() const;
 	std::string getTitleFormat() const;
 	std::string getTextFormat() const;
@@ -49,6 +50,7 @@ public:
 	std::string formatTitle(const mc::SignEntity& sign) const;
 	std::string formatText(const mc::SignEntity& sign) const;
 private:
+	Field<std::string> name;
 	Field<std::string> prefix;
 	Field<std::string> title_format, text_format;
 	Field<std::string> icon, icon_size;
