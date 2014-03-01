@@ -4,10 +4,11 @@ function MarkerControl(markers) {
 	this.handler = new MarkerHandler(markers);
 }
 
-MarkerControl.prototype.create = function(wrapper) {	
-	var checkboxes = document.createElement("div");
-	
+MarkerControl.prototype.create = function(wrapper) {
 	var groups = this.handler.getMarkerGroups();
+	var self = this;
+	
+	var checkboxes = document.createElement("div");
 	for (var i = 0; i < groups.length; i++) {
 		var group = groups[i][0];
 		var groupLabel = groups[i][1];
@@ -20,8 +21,7 @@ MarkerControl.prototype.create = function(wrapper) {
 		checkbox.style.verticalAlign = "middle";
 		checkbox.checked = true;
 		
-		var self = this;
-		checkbox.addEventListener("change", function(checkbox) {
+		checkbox.addEventListener("change", function() {
 			var group = this.getAttribute("data-group");
 			self.handler.show(group, this.checked);
 		});
@@ -37,8 +37,43 @@ MarkerControl.prototype.create = function(wrapper) {
 
 	var label = document.createElement("div");
 	label.innerHTML = "Show markers:";
+	
+	var showAll = document.createElement("a");
+	showAll.setAttribute("href", "#");
+	showAll.innerHTML = "Show all";
+	showAll.addEventListener("click", function(event) {
+		for (var i = 0; i < groups.length; i++) {
+			var checkbox = document.getElementById("cb_group_" + groups[i][0]);
+			checkbox.checked = true;
+			self.handler.show(groups[i][0], true);
+		}
+		event.preventDefault()
+	});
+	
+	var spacer = document.createElement("span");
+	spacer.innerHTML = " ";
+	
+	var hideAll = document.createElement("a");
+	hideAll.setAttribute("href", "#");
+	hideAll.innerHTML = "Hide all";
+	hideAll.addEventListener("click", function(event) {
+		for (var i = 0; i < groups.length; i++) {
+			var checkbox = document.getElementById("cb_group_" + groups[i][0]);
+			checkbox.checked = false;
+			self.handler.show(groups[i][0], false);
+		}
+		event.preventDefault()
+	});
+	
+	var container = document.createElement("div");
+	container.style.textAlign = "center";
+	container.appendChild(showAll);
+	container.appendChild(spacer);
+	container.appendChild(hideAll);
+	
 	wrapper.appendChild(label);
 	wrapper.appendChild(checkboxes);
+	wrapper.appendChild(container);
 	
 	this.ui.addHandler(this.handler);
 };
