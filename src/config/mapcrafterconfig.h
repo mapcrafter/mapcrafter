@@ -69,6 +69,7 @@ public:
 
 	bool hasMarker(const std::string marker) const;
 	const std::map<std::string, MarkerSection>& getMarkers() const;
+	const MarkerSection& getMarker(const std::string& marker) const;
 };
 
 } /* namespace config */

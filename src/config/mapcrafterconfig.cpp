@@ -291,5 +291,9 @@ const std::map<std::string, MarkerSection>& MapcrafterConfig::getMarkers() const
 	return markers;
 }
 
+const MarkerSection& MapcrafterConfig::getMarker(const std::string& marker) const {
+	return markers.at(marker);
+}
+
 } /* namespace config */
 } /* namespace mapcrafter */
