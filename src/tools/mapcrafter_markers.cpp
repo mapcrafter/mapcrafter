@@ -83,6 +83,7 @@ int main(int argc, char** argv) {
 				marker.title = marker_it->second.formatTitle(*sign_it);
 				marker.text = marker_it->second.formatText(*sign_it);
 				marker_groups[marker_it->first][world_it->second.getWorldName()].push_back(marker);
+				break;
 			}
 		}
 	}
