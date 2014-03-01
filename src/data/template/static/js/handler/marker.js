@@ -26,7 +26,7 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 		if(location.icon) {
 			marker.setIcon(new L.Icon({
 				iconUrl: location.icon != "" ? "static/markers/" + location.icon : null,
-				iconSize: (location.iconsize ? location.iconsize : [24, 24]),
+				iconSize: (location.icon_size ? location.icon_size : [24, 24]),
 			}));
 		}
 		marker.bindPopup(location.text ? location.text : location.title);
