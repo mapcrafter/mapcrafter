@@ -49,14 +49,14 @@ std::string MarkerSection::formatSign(std::string format, const mc::SignEntity& 
 
 void MarkerSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
-	name.setDefault(section_name);
+	name_long.setDefault(section_name);
 	title_format.setDefault("%text");
 }
 
 bool MarkerSection::parseField(const std::string key, const std::string value,
 		ValidationList& validation) {
 	if (key == "name")
-		name.load(key, value, validation);
+		name_long.load(key, value, validation);
 	else if (key == "prefix")
 		prefix.load(key, value, validation);
 	else if (key == "title_format")
@@ -77,8 +77,12 @@ void MarkerSection::postParse(const INIConfigSection& section,
 	text_format.setDefault(title_format.getValue());
 }
 
-std::string MarkerSection::getName() const {
-	return name.getValue();
+std::string MarkerSection::getShortName() const {
+	return section_name;
+}
+
+std::string MarkerSection::getLongName() const {
+	return name_long.getValue();
 }
 
 std::string MarkerSection::getPrefix() const {

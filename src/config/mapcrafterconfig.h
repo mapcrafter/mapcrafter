@@ -45,7 +45,7 @@ private:
 
 	std::map<std::string, WorldSection> worlds;
 	std::vector<MapSection> maps;
-	std::map<std::string, MarkerSection> markers;
+	std::vector<MarkerSection> markers;
 public:
 	MapcrafterConfig();
 	~MapcrafterConfig();
@@ -68,7 +68,7 @@ public:
 	const MapSection& getMap(const std::string& map) const;
 
 	bool hasMarker(const std::string marker) const;
-	const std::map<std::string, MarkerSection>& getMarkers() const;
+	const std::vector<MarkerSection>& getMarkers() const;
 	const MarkerSection& getMarker(const std::string& marker) const;
 };
 

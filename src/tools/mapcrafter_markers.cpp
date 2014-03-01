@@ -69,6 +69,7 @@ int main(int argc, char** argv) {
 		mc::WorldEntitiesCache entities(world);
 		entities.update();
 
+		std::string world_name = world_it->second.getWorldName();
 		std::vector<mc::SignEntity> signs = entities.getSigns(world.getWorldCrop());
 		for (auto sign_it = signs.begin(); sign_it != signs.end(); ++sign_it) {
 			// don't use signs not contained in the world boundaries
@@ -76,13 +77,13 @@ int main(int argc, char** argv) {
 					&& !worldcrop.isBlockContainedY(sign_it->getPos()))
 				continue;
 			for (auto marker_it = markers.begin(); marker_it != markers.end(); ++marker_it) {
-				if (!marker_it->second.matchesSign(*sign_it))
+				if (!marker_it->matchesSign(*sign_it))
 					continue;
 				Marker marker;
 				marker.pos = sign_it->getPos();
-				marker.title = marker_it->second.formatTitle(*sign_it);
-				marker.text = marker_it->second.formatText(*sign_it);
-				marker_groups[marker_it->first][world_it->second.getWorldName()].push_back(marker);
+				marker.title = marker_it->formatTitle(*sign_it);
+				marker.text = marker_it->formatText(*sign_it);
+				marker_groups[marker_it->getShortName()][world_name].push_back(marker);
 				break;
 			}
 		}
@@ -94,7 +95,7 @@ int main(int argc, char** argv) {
 		std::string group = group_it->first;
 		config::MarkerSection marker_config = config.getMarker(group);
 		std::cout << "  \"" << group << "\": {" << std::endl;
-		std::cout << "    \"name\" : \"" << marker_config.getName() << "\"," << std::endl;
+		std::cout << "    \"name\" : \"" << marker_config.getLongName() << "\"," << std::endl;
 		if (!marker_config.getIcon().empty()) {
 			std::cout << "    \"icon\" : \"" << marker_config.getIcon() << "\"," << std::endl;
 			if (!marker_config.getIconSize().empty())

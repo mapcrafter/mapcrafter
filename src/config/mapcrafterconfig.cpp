@@ -173,7 +173,7 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 			msgs.push_back(ValidationMessage::error("Marker name '" + it->getName() + "' already used!"));
 			ok = false;
 		} else
-			markers[it->getName()] = marker;
+			markers.push_back(marker);
 
 		if (!msgs.empty())
 			validation.push_back(std::make_pair("Marker section '" + it->getName() + "'", msgs));
@@ -284,15 +284,21 @@ const MapSection& MapcrafterConfig::getMap(const std::string& map) const {
 }
 
 bool MapcrafterConfig::hasMarker(const std::string marker) const {
-	return markers.count(marker);
+	for (auto it = markers.begin(); it != markers.end(); ++it)
+		if (it->getShortName() == marker)
+			return true;
+	return false;
 }
 
-const std::map<std::string, MarkerSection>& MapcrafterConfig::getMarkers() const {
+const std::vector<MarkerSection>& MapcrafterConfig::getMarkers() const {
 	return markers;
 }
 
 const MarkerSection& MapcrafterConfig::getMarker(const std::string& marker) const {
-	return markers.at(marker);
+	for (auto it = markers.begin(); it != markers.end(); ++it)
+		if (it->getShortName() == marker)
+			return *it;
+	throw std::out_of_range("Marker not found!");
 }
 
 } /* namespace config */
