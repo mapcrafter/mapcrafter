@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	std::map<std::string, std::map<std::string, std::vector<Marker> > > marker_groups;
+	std::map<std::string, std::map<std::string, std::vector<Marker> > > markers_found;
 
 	auto worlds = config.getWorlds();
 	auto markers = config.getMarkers();
@@ -83,17 +83,17 @@ int main(int argc, char** argv) {
 				marker.pos = sign_it->getPos();
 				marker.title = marker_it->formatTitle(*sign_it);
 				marker.text = marker_it->formatText(*sign_it);
-				marker_groups[marker_it->getShortName()][world_name].push_back(marker);
+				markers_found[marker_it->getShortName()][world_name].push_back(marker);
 				break;
 			}
 		}
 	}
 
 	std::cout << "MARKERS = [" << std::endl;
-	for (auto group_it = marker_groups.begin(); group_it != marker_groups.end();
-			++group_it) {
-		std::string group = group_it->first;
-		config::MarkerSection marker_config = config.getMarker(group);
+	for (auto marker_config_it = markers.begin(); marker_config_it != markers.end();
+			++marker_config_it) {
+		config::MarkerSection marker_config = *marker_config_it;
+		std::string group = marker_config.getShortName();
 		std::cout << "  {" << std::endl;
 		std::cout << "    \"id\" : \"" << group << "\"," << std::endl;
 		std::cout << "    \"name\" : \"" << marker_config.getLongName() << "\"," << std::endl;
@@ -104,8 +104,8 @@ int main(int argc, char** argv) {
 		}
 		std::cout << "    \"markers\" : {" << std::endl;
 
-		for (auto world_it = group_it->second.begin();
-				world_it != group_it->second.end(); ++world_it) {
+		for (auto world_it = markers_found[group].begin();
+				world_it != markers_found[group].end(); ++world_it) {
 			std::cout << "      \"" << world_it->first << "\" : [" << std::endl;
 			for (auto marker_it = world_it->second.begin();
 					marker_it != world_it->second.end(); ++marker_it) {
