@@ -89,12 +89,13 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	std::cout << "MARKERS = {" << std::endl;
+	std::cout << "MARKERS = [" << std::endl;
 	for (auto group_it = marker_groups.begin(); group_it != marker_groups.end();
 			++group_it) {
 		std::string group = group_it->first;
 		config::MarkerSection marker_config = config.getMarker(group);
-		std::cout << "  \"" << group << "\": {" << std::endl;
+		std::cout << "  {" << std::endl;
+		std::cout << "    \"id\" : \"" << group << "\"," << std::endl;
 		std::cout << "    \"name\" : \"" << marker_config.getLongName() << "\"," << std::endl;
 		if (!marker_config.getIcon().empty()) {
 			std::cout << "    \"icon\" : \"" << marker_config.getIcon() << "\"," << std::endl;
@@ -115,5 +116,5 @@ int main(int argc, char** argv) {
 		std::cout << "    }," << std::endl;
 		std::cout << "  }," << std::endl;
 	}
-	std::cout << "};" << std::endl;
+	std::cout << "];" << std::endl;
 }

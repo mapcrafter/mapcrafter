@@ -1,7 +1,19 @@
 // Here you can add your own markers.
 
-var MARKERS = {
-	"homes" : {
+var MARKERS = [
+	{
+		"id" : "spawn",
+		"name" : "Spawnpoint",
+		"icon" : "diamond.png",
+		"icon_size" : [32, 32],
+		"markers" : {
+			"world1.4" : [
+				{"pos" : [35, -21, 64], "title" : "Spawn"},
+			],
+		},
+	},
+	{
+		"id" : "homes",
 		"name" : "Homes",
 		"icon" : "bed.png",
 		"icon_size" : [32, 32],
@@ -12,14 +24,4 @@ var MARKERS = {
 			],
 		},
 	},
-	"spawn" : {
-		"name" : "Spawnpoint",
-		"icon" : "diamond.png",
-		"icon_size" : [32, 32],
-		"markers" : {
-			"world1.4" : [
-				{"pos" : [35, -21, 64], "title" : "Spawn"},
-			],
-		},
-	},
-};
+];

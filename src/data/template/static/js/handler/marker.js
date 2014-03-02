@@ -14,14 +14,15 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 	this.layerGroups = {};
 	
 	var world = this.ui.getCurrentMapConfig().worldName;
-	for(var group in this.markers) {
-		if (!(world in this.markers[group]["markers"]))
+	for(var i = 0; i < this.markers.length; i++) {
+		var groupInfo = this.markers[i];
+		if (!(world in groupInfo["markers"]))
 			continue;
-		var groupInfo = this.markers[group];
+		var group = groupInfo["id"];
 		var markers = groupInfo["markers"][world];
 		var layerGroup = L.layerGroup();
-		for (var i = 0; i < markers.length; i++) {
-			var poi = markers[i];
+		for (var j = 0; j < markers.length; j++) {
+			var poi = markers[j];
 			
 			var pos = poi.pos;
 			var marker = new L.Marker(this.ui.mcToLatLng(pos[0], pos[1], pos[2]), {
@@ -46,8 +47,8 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 
 MarkerHandler.prototype.getMarkerGroups = function() {
 	var groups = [];
-	for(var group in this.markers)
-		groups.push([group, this.markers[group]["name"]]);
+	for(var i = 0; i < this.markers.length; i++)
+		groups.push([this.markers[i]["id"], this.markers[i]["name"]]);
 	return groups;
 };
 
