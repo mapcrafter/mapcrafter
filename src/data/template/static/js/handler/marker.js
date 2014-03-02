@@ -6,6 +6,7 @@ MarkerHandler.prototype = new BaseHandler();
 function MarkerHandler(markers) {
 	this.layerGroups = {};
 	this.markers = markers;
+	this.visible = {};
 }
 
 MarkerHandler.prototype.onMapChange = function(name, rotation) {
@@ -37,9 +38,14 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 			marker.bindPopup(poi.text ? poi.text : poi.title);
 			marker.addTo(layerGroup);
 		}
-		layerGroup.addTo(this.ui.lmap);
+		//layerGroup.addTo(this.ui.lmap);
 		this.layerGroups[group] = layerGroup;
+		if(!(group in this.visible))
+			this.visible[group] = true;
 	}
+	
+	for(var group in this.visible)
+		this.show(group, this.visible[group]);
 	
 	//this.show("spawn", false);
 	//this.show("spawn", true);
@@ -58,4 +64,5 @@ MarkerHandler.prototype.show = function(group, visible) {
 		layer.addTo(this.ui.lmap);
 	if(!visible && this.ui.lmap.hasLayer(layer))
 		this.ui.lmap.removeLayer(layer);
+	this.visible[group] = visible;
 };
