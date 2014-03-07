@@ -17,7 +17,7 @@ Requirements
   * libboost-filesystem
   * libboost-program-options
   * (libboost-test if you want to use the tests)
-* For your Minecraft Worlds:
+* For your Minecraft worlds:
 
   * Anvil World Format
   * Minecraft 1.6 Resource Packs

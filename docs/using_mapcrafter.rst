@@ -2,8 +2,8 @@
 Using Mapcrafter
 ================
 
-First Render
-============
+First Rendered World
+====================
 
 At first you have to create a configuration file like this:
 

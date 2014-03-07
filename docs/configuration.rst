@@ -20,7 +20,6 @@ Here is a simple example of a configuration file (let's call it
     input_dir = worlds/myworld
 
     [map:map_myworld]
-    name = My World world
     world = myworld
 
 As you can see the configuration files consist of different types of sections
@@ -33,11 +32,11 @@ There are two types (actually three, but more about that later) of sections:
 * World sections (e.g. sections starting with ``world:``)
 * Map sections (e.g. sections starting with ``map:``)
 
-Every world section represents a Minecraft World you want to render and needs a
-directory where it can find the Minecraft World (``input_dir`` of the world
+Every world section represents a Minecraft world you want to render and needs a
+directory where it can find the Minecraft world (``input_dir`` of the world
 section ``myworld`` in the example above).
 
-Every map section represents a rendered Minecraft World. You can specifiy
+Every map section represents a rendered Minecraft world. You can specifiy
 things like rotation of the world, rendermode, texture pack and texture size
 for each map.
 
@@ -171,7 +170,7 @@ World Options
 
     **Required**
 
-    This is the directory of your Minecraft World. The directory should contain
+    This is the directory of your Minecraft world. The directory should contain
     a directory ``region/`` with the .mca region files.
 
 ``dimension = nether|overworld|end``
