@@ -314,7 +314,7 @@ Map Options
     **Default:** default texture directory (see :ref:`resources_textures`)
 
     This is the directory with the Minecraft Texture files.  The renderer works
-    with the Minecraft 1.6 Resource Pack file format. You need here: 
+    with the Minecraft 1.6 resource pack file format. You need here: 
 
     * directory ``chest/`` with normal.png, normal_double.png and ender.png 
     * directory ``colormap/`` with foliage.png and grass.png 

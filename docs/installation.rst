@@ -19,8 +19,8 @@ Requirements
   * (libboost-test if you want to use the tests)
 * For your Minecraft worlds:
 
-  * Anvil World Format
-  * Minecraft 1.6 Resource Packs
+  * Anvil world format
+  * Minecraft 1.6 resource packs
 
 Building from Source
 ====================
