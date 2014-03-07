@@ -1,5 +1,5 @@
 ================
-Using mapcrafter
+Using Mapcrafter
 ================
 
 First Render
@@ -56,11 +56,11 @@ Here is a list of available command line options:
 
 .. cmdoption:: -v, --version
 
-    Shows the version of mapcrafter.
+    Shows the version of Mapcrafter.
 
 .. cmdoption:: --find-resources
 
-    Shows the resource directories of mapcrafter. See also
+    Shows the resource directories of Mapcrafter. See also
     :ref:`resources_textures`.
 
 .. cmdoption:: -c <file>, --config <file>
