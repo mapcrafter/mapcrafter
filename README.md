@@ -1,13 +1,13 @@
-# mapcrafter #
+# Mapcrafter #
 
 by Moritz Hilscher
 
-mapcrafter is a high performance Minecraft map renderer written in C++. It renders
+Mapcrafter is a high performance Minecraft map renderer written in C++. It renders
 Minecraft worlds to a bunch of images which are viewable in any webbrowser
-using Leaflet.
+using Leaflet.js.
 
-mapcrafter is free software and available under the GPL license.  You can
-access the latest source code of mapcrafter on GitHub:
+Mapcrafter is free software and available under the GPL license.  You can
+access the latest source code of Mapcrafter on GitHub:
 http://github.com/m0r13/mapcrafter
 
 Thanks to pigmap and Minecraft Overviewer, whose documentations and source code
@@ -34,7 +34,7 @@ stuff of the template from Minecraft Overviewer.
 
 * A Linux-based or Unix-like operating system like Mac OS
 * A decent C++ compiler (gcc >= 4.4, clang), CMake and make if you want to build
-      mapcrafter from source
+      Mapcrafter from source
 * Some libraries:
   * libpng
   * libboost-iostreams
@@ -43,8 +43,8 @@ stuff of the template from Minecraft Overviewer.
   * libboost-program-options
   * (libboost-test if you want to use the tests)
 * For your Minecraft worlds:
-  * Anvil World Format
-  * Minecraft 1.6 Resource Packs
+  * Anvil world format
+  * Minecraft 1.6 resource packs
 
 ## Examples ##
 
@@ -59,7 +59,7 @@ with Sphinx. You can read a built version of the documentation
 [here](http://docs.mapcrafter.org) and you can also [download
 other builds](https://readthedocs.org/projects/mapcrafter/downloads/).
 
-If you find bugs or problems when using mapcrafter or if you have ideas for new
+If you find bugs or problems when using Mapcrafter or if you have ideas for new
 features, then please feel free to add an issue to the [GitHub issue
 tracker](https://github.com/m0r13/mapcrafter/issues).
 
