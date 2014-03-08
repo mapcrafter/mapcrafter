@@ -42,12 +42,12 @@ int main(int argc, char** argv) {
 
 	po::options_description all("Allowed options");
 	all.add_options()
-		("help,h", "shows a help message")
+		("help,h", "shows this help message")
 		("version,v", "shows the version of mapcrafter")
 		("find-resources", "shows available resource directories")
 
 		("config,c",po::value<std::string>(&config_file),
-			"the path of the world to render (required)")
+			"the path to the configuration file to use (required)")
 
 		("render-skip,s", po::value<std::vector<std::string>>(&render_skip)->multitoken(),
 			"skips rendering the specified map(s)")
