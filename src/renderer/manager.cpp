@@ -197,8 +197,10 @@ void RenderManager::writeTemplates() const {
 	for (fs::directory_iterator it(config.getTemplateDir()); it != end;
 			++it) {
 		std::string filename = BOOST_FS_FILENAME(it->path());
+		// do not overwrite the index.html, markers.js and markers-generated.js
 		if (filename == "index.html"
-				|| filename == "markers.js")
+				|| filename == "markers.js"
+				|| filename == "markers-generated.js")
 			continue;
 		if (fs::is_regular_file(*it)) {
 			if (!util::copyFile(*it, config.getOutputPath(filename)))

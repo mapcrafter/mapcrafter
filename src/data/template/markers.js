@@ -1,6 +1,6 @@
 // Add your own markers to this file.
 
-var MARKERS = [
+var MAPCRAFTER_MARKERS = [
 	/*
 	// just one example marker group
 	{
