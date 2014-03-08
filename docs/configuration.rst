@@ -27,10 +27,11 @@ As you can see the configuration files consist of different types of sections
 specific values (e.g. ``key = value``).  The sections have their names in
 square brackets, where the prefix with the colon shows the type of the section.
 
-There are two types (actually three, but more about that later) of sections:
+There are three types (actually four, but more about that later) of sections:
 
 * World sections (e.g. sections starting with ``world:``)
 * Map sections (e.g. sections starting with ``map:``)
+* Marker sections (e.g. sections starting with ``marker:``, also see :ref:`markers`)
 
 Every world section represents a Minecraft world you want to render and needs a
 directory where it can find the Minecraft world (``input_dir`` of the world
@@ -117,7 +118,7 @@ this map. In contrast to that the world and map names in the sections are used
 for internal representation and therefore should be unique and contain only
 alphanumeric chars and underscores.
 
-When you have now your configuration file you can render your worlds with: (see
+When you have now your configuration file you can render your worlds with (see
 :ref:`command_line_options` for more options and usage)::
 
     mapcrafter -c render.conf
@@ -164,7 +165,7 @@ World Options
     sections (the ones starting with world:) or you can specify them in the
     global:worlds section.  If you specify them in the global section, these
     options are default values and inherited into the world sections if you do
-    not overwrite them
+    not overwrite them.
 
 ``input_dir = <directory>``
 
@@ -280,7 +281,7 @@ Map Options
     (the ones starting with map:) or you can specify them in the global:maps
     section.  If you specify them in the global section, these options are
     default values and inherited into the map sections if you do not overwrite
-    them
+    them.
 
 ``name = <name>``
 
@@ -398,3 +399,85 @@ Map Options
         The renderer saves the time of the last rendering.  All tiles
         whoose chunk timestamps are newer than this last-render-time are
         required.
+
+Marker Options
+--------------
+
+.. note::
+
+    These options are for the marker groups. You can specify them in the marker
+    sections (the ones starting with marker:) or you can specify them in the 
+    global:markers section.  If you specify them in the global section, these
+    options are default values and inherited into the marker sections if you 
+    do not overwrite them.
+
+``name = <name>``
+
+    **Default:** *Name of the section*
+    
+    This is the name of the marker group. You can use a human-readable
+    name since this name is displayed in the webinterface.
+
+``prefix = <prefix>``
+
+    **Default:** *Empty*
+    
+    This is the prefix a sign must have to be recognized as marker
+    of this marker group. Example: If you choose ``[home]`` as prefix,
+    all signs whose text starts with ``[home]`` are displayed as markers
+    of this group.
+    
+``title_format = <format>``
+
+    **Default:** ``%text``
+    
+    You can change the title used for markers (the name shown when you 
+    hover a marker) by using different placeholders:
+    
+    ============= =======
+    Placeholder   Meaning
+    ============= =======
+    ``%text``     Complete text of the sign without the prefix.
+    ``%prefix``   Configured prefix of this marker group.
+    ``%textp``    Complete text of the sign with the prefix.
+    ``%line1``    First line of the sign.
+    ``%line2``    Second line of the sign.
+    ``%line3``    Third line of the sign.
+    ``%line4``    Fourth line of the sign.
+    ``%x``        X coordinate of the sign position.
+    ``%z``        Z coordinate of the sign position.
+    ``%y``        Y coordinate of the sign position.
+    ============= =======
+    
+    The title of markers defaults to the text (without the prefix) of 
+    the belonging sign, e.g. the placeholder ``%text``.
+    
+    You can use different placeholders and other text in this format
+    string as well, for example ``Marker at x=%x, y=%y, z=%z: %text``.
+
+``text_format = <format>``
+
+    **Default:** *Format of the title*
+    
+    You can change the text shown in the marker popup windows as well.
+    You can use the same placeholders you can use for the marker title.
+
+``icon = <icon>``
+
+    **Default:** *Default Leaflet marker icon*
+
+    This is the icon used for the markers of this marker group. You
+    do not necessarily need to specify a custom icon, you can also
+    use the default icon.
+    
+    You can put your own icons into the ``static/markers/`` directory
+    of your template directory. Then you only need to specify the
+    filename of the icon, the path ``static/markers/`` is automatically
+    prepended. You should also specify the size of your custom icon.
+
+``icon_size = <size>``
+
+    **Default:** ``[24, 24]``
+
+    This is the size of your icon. Specify it like ``[width, height]``.
+    The icon size defaults to 24x24 pixels.
