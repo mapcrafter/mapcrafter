@@ -400,6 +400,8 @@ Map Options
         whoose chunk timestamps are newer than this last-render-time are
         required.
 
+.. _config_marker_options:
+
 Marker Options
 --------------
 
@@ -432,7 +434,7 @@ Marker Options
     **Default:** ``%text``
     
     You can change the title used for markers (the name shown when you 
-    hover a marker) by using different placeholders:
+    hover over a marker) by using different placeholders:
     
     ============= =======
     Placeholder   Meaning
