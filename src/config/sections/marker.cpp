@@ -40,10 +40,10 @@ std::string MarkerSection::formatSign(std::string format, const mc::SignEntity& 
 
 	format = util::replaceAll(format, "%text", text);
 	format = util::replaceAll(format, "%textp", textp);
-	format = util::replaceAll(format, "%line0", sign.getLines()[0]);
-	format = util::replaceAll(format, "%line1", sign.getLines()[1]);
-	format = util::replaceAll(format, "%line2", sign.getLines()[2]);
-	format = util::replaceAll(format, "%line3", sign.getLines()[3]);
+	format = util::replaceAll(format, "%line1", sign.getLines()[0]);
+	format = util::replaceAll(format, "%line2", sign.getLines()[1]);
+	format = util::replaceAll(format, "%line3", sign.getLines()[2]);
+	format = util::replaceAll(format, "%line4", sign.getLines()[3]);
 	return format;
 }
 
