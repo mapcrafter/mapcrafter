@@ -14,7 +14,7 @@ Automatically Generated Markers
 Mapcrafter is able to automatically generate markers from specific signs
 in your Minecraft world.
 
-A special marker section type is used to configure automatically generate
+A special marker section type is used to configure automatically generated
 marker groups. Here is an example:
 
 .. code-block:: ini
@@ -36,7 +36,7 @@ program with your configuration file::
 
     mapcrafter_markers -c render.conf
 
-This program generates your defined marker groups to a 
+This program generates your defined marker groups and writes them to a
 ``markers-generated.js`` file in your output directory. You do not need
 to worry about manually specified markers being overwritten.
 
@@ -112,13 +112,14 @@ The file has a Javascript-Array called ``MAPCRAFTER_MARKERS`` which
 contains the different marker groups. The elements are associative 
 Javascript-Arrays and contain the options of the different marker groups.
 
-These options are similar to the marker configuration file options.
-Every marker group has a unique ID and a name displayed in the web interface.
+These options are similar to the marker section configuration options.
+Every marker group has an unique ID and a name displayed in the web interface.
 You can also use an icon with a specific size (optional).
 
 The actual markers are specified per world in an associative array with
 the name ``markers``. You have to use as world name your world section
-name or the value of the ``world_name`` attribute if you used that.
+name or the value of the ``world_name`` attribute if you specified another
+world name.
 
 The definition of markers is also done with associative arrays::
 
