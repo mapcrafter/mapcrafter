@@ -2,7 +2,7 @@
 Configuration File Format
 =========================
 
-To tell the mapcrafter which maps to render, simple INI-like configuration
+To tell the Mapcrafter which maps to render, simple INI-like configuration
 files are used. With configuration files it is possible to render multiple
 maps/rotations/rendermodes into one output file. 
 
@@ -20,7 +20,6 @@ Here is a simple example of a configuration file (let's call it
     input_dir = worlds/myworld
 
     [map:map_myworld]
-    name = My World world
     world = myworld
 
 As you can see the configuration files consist of different types of sections
@@ -33,11 +32,11 @@ There are two types (actually three, but more about that later) of sections:
 * World sections (e.g. sections starting with ``world:``)
 * Map sections (e.g. sections starting with ``map:``)
 
-Every world section represents a Minecraft World you want to render and needs a
-directory where it can find the Minecraft World (``input_dir`` of the world
+Every world section represents a Minecraft world you want to render and needs a
+directory where it can find the Minecraft world (``input_dir`` of the world
 section ``myworld`` in the example above).
 
-Every map section represents a rendered Minecraft World. You can specifiy
+Every map section represents a rendered Minecraft world. You can specifiy
 things like rotation of the world, rendermode, texture pack and texture size
 for each map.
 
@@ -138,7 +137,7 @@ General Options
 
     **Required**
 
-    This is the directory where mapcrafter saves the rendered map. Every time
+    This is the directory where Mapcrafter saves the rendered map. Every time
     you render your map the renderer copies the template files into this
     directory and overwrites them, if they already exist. The renderer creates
     an ``index.html`` file you can open with your webbrowser. If you want to
@@ -171,15 +170,15 @@ World Options
 
     **Required**
 
-    This is the directory of your Minecraft World. The directory should contain
+    This is the directory of your Minecraft world. The directory should contain
     a directory ``region/`` with the .mca region files.
 
 ``dimension = nether|overworld|end``
 
     **Default**: ``overworld``
     
-    You can specify with this option the dimension of the world mapcrafter should render.
-    If you choose The Nether or The End, mapcrafter will automagically detect the
+    You can specify with this option the dimension of the world Mapcrafter should render.
+    If you choose The Nether or The End, Mapcrafter will automagically detect the
     corresponding region directory. It will try the Bukkit region directory
     (for example ``myworld_nether/DIM-1/region``) first and then the directory of a normal
     vanilla server/client (for example ``myworld/DIM-1/region``).
@@ -210,7 +209,7 @@ World Options
     
     This is the default zoom level shown when you open the map. The default zoom level
     is 0 (completely zoomed out) and the maximum zoom level (completely zoomed in) is the 
-    one mapcrafter shows when rendering your map.
+    one Mapcrafter shows when rendering your map.
 
 ``default_rotation = top-left|top-right|bottom-right|bottom-left``
 
@@ -228,13 +227,13 @@ below a specific level:
 
     **Default:** -infinity
 
-    This is the minimum y-coordinate of blocks mapcrafter will render.
+    This is the minimum y-coordinate of blocks Mapcrafter will render.
 
 ``crop_max_y = <number>``
 
     **Default:** infinity
 
-    This is the maximum y-coordinate of blocks mapcrafter will render.
+    This is the maximum y-coordinate of blocks Mapcrafter will render.
 
 Furthermore there are two different types of world cropping:
 
@@ -315,7 +314,7 @@ Map Options
     **Default:** default texture directory (see :ref:`resources_textures`)
 
     This is the directory with the Minecraft Texture files.  The renderer works
-    with the Minecraft 1.6 Resource Pack file format. You need here: 
+    with the Minecraft 1.6 resource pack file format. You need here: 
 
     * directory ``chest/`` with normal.png, normal_double.png and ender.png 
     * directory ``colormap/`` with foliage.png and grass.png 

@@ -1,20 +1,20 @@
 ==========
-mapcrafter
+Mapcrafter
 ==========
 
 Welcome
 =======
 
-mapcrafter is a fast Minecraft Map Renderer written in C++. It renders
-Minecraft Worlds to a bunch of images which are viewable using Leaflet like a
-big map in any webbrowser.
+Mapcrafter is a high performance Minecraft map renderer written in C++. It renders
+Minecraft worlds to a bunch of images which are viewable like a Google Map
+in any webbrowser using Leaflet.js.
 
 It runs on Linux and other Unix-like operating systems like Mac OS.  The
-renderer works with the Anvil World format and the Minecraft 1.6 Resource
-Packs.
+renderer works with the Anvil world format and the Minecraft 1.6 resource
+packs.
 
-mapcrafter is free software and available under the GPL license. You can access
-the latest source code of mapcrafter on GitHub:
+Mapcrafter is free software and available under the GPL license. You can access
+the latest source code of Mapcrafter on GitHub:
 https://github.com/m0r13/mapcrafter
 
 There are a few example maps of the renderer on the `GitHub Wiki
@@ -29,7 +29,7 @@ add your own map to this list.
 Features
 ========
 
-* **Web output**: Render your Minecraft Worlds to maps with an isometric 
+* **Web output**: Render your Minecraft worlds to maps with an isometric 
   3D perspective viewable in any webbrowser!
 * **Different directions**: Choose from four different directions to 
   render your worlds!
@@ -47,7 +47,7 @@ Read :doc:`using_mapcrafter` to get a first insight how to use the renderer.
 You can find a detailed documentation about the render configuration file
 format in :doc:`configuration`.
 
-If you find bugs or problems when using mapcrafter or if you have ideas for new
+If you find bugs or problems when using Mapcrafter or if you have ideas for new
 features, then please feel free to add an issue to the `GitHub issue tracker
 <https://github.com/m0r13/mapcrafter/issues>`_.
 
@@ -72,6 +72,5 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 
