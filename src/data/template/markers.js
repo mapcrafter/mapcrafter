@@ -1,27 +1,27 @@
-// Here you can add your own markers.
+// Add your own markers to this file.
 
 var MARKERS = [
+	/*
+	// just one example marker group
 	{
-		"id" : "spawn",
-		"name" : "Spawnpoint",
-		"icon" : "diamond.png",
-		"icon_size" : [32, 32],
-		"markers" : {
-			"world1.4" : [
-				{"pos" : [35, -21, 64], "title" : "Spawn"},
+		"id" : "signs", // id of the marker group, without spaces/other special chars
+		"name" : "Signs", // name of the marker group, displayed in the webinterface
+		"icon" : "sign.png", // icon of the markers belonging to that group
+		"icon_size" : [32, 32], // size of that icon
+		"markers" : { // markers of this marker group...
+			"world" : [ // ...in the world "world"
+				// example for a marker, pretty format:
+				{
+					"pos" : [35, -21, 64], // position (x, z, y)
+					"title" : "Sign1", // title when you hover the marker
+					"text" : "Hello." // text in the marker popup window
+				},
+				// more markers:
+				{"pos" : [100, 100, 64], "title" : "Test1"},
+				{"pos" : [100, 200, 64], "title" : "Test2"},
+				{"pos" : [500, 30, 64], "title" : "Test2"},
 			],
 		},
 	},
-	{
-		"id" : "homes",
-		"name" : "Homes",
-		"icon" : "bed.png",
-		"icon_size" : [32, 32],
-		"markers" : {
-			"world1.4" : [
-				{"pos" : [42, 73, 64], "title" : "My Home"},
-				{"pos" : [100, 300, 64], "title" : "Steve's home", "text" : "This is Steve's home."},
-			],
-		},
-	},
+	*/
 ];
