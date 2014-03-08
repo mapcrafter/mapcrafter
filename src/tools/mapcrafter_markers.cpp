@@ -23,13 +23,10 @@ struct Marker {
 	std::string title, text;
 
 	std::string toJSON() {
-		std::string title_escaped = util::replaceAll(title, "\"", "\\\"");
-		std::string text_escaped = util::replaceAll(text, "\"", "\\\"");
-
 		std::string json = "{";
 		json += "\"pos\": [" + util::str(pos.x) + "," + util::str(pos.z) + "," + util::str(pos.y) + "], ";
-		json += "\"title\": \"" + title_escaped + "\", ";
-		json += "\"text\": \"" + text_escaped + "\", ";
+		json += "\"title\": \"" + util::escapeJSON(title) + "\", ";
+		json += "\"text\": \"" + util::escapeJSON(text) + "\", ";
 		return json + "}";
 	}
 };
@@ -37,7 +34,7 @@ struct Marker {
 int main(int argc, char** argv) {
 	std::string config_file;
 	std::string output_file;
-
+ 
 	po::options_description all("Allowed options");
 	all.add_options()
 		("help,h", "shows this help message")

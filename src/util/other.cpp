@@ -135,6 +135,28 @@ std::string trim(const std::string& str) {
 	return trimmed;
 }
 
+// http://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c
+
+std::string escapeJSON(const std::string& str) {
+	std::ostringstream ss;
+	for (auto it = str.cbegin(); it != str.cend(); ++it) {
+	//C++98/03:
+	//for (std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
+		switch (*it) {
+			case '\\': ss << "\\\\"; break;
+			case '"': ss << "\\\""; break;
+			case '/': ss << "\\/"; break;
+			case '\b': ss << "\\b"; break;
+			case '\f': ss << "\\f"; break;
+			case '\n': ss << "\\n"; break;
+			case '\r': ss << "\\r"; break;
+			case '\t': ss << "\\t"; break;
+			default: ss << *it; break;
+		}
+	}
+	return ss.str();
+}
+
 std::string replaceAll(const std::string& str, const std::string& from, const std::string& to) {
 	std::string replaced = str;
 	size_t start = 0;
