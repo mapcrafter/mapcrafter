@@ -20,7 +20,7 @@ var MAPCRAFTER_MARKERS = [
 				{
 					// position ([x, z, y])
 					"pos" : [35, -21, 64],
-					// title when you hover the marker
+					// title when you hover over the marker
 					"title" : "Sign1",
 					// text in the marker popup window
 					"text" : "Hello."
