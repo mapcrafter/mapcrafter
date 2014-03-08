@@ -35,6 +35,11 @@
 		function init() {
 			Mapcrafter.init();
 			
+			Mapcrafter.addControl(new MapSelectControl(), "topright", 1);
+			Mapcrafter.addControl(new RotationSelectControl(), "topright", 3);
+			Mapcrafter.addControl(new MousePosControl(), "bottomleft", 1);
+
+			// merge the two marker configurations
 			var markers = [];
 			if(typeof MAPCRAFTER_MARKERS !== "undefined")
 				for(var i = 0; i < MAPCRAFTER_MARKERS.length; i++)
@@ -42,11 +47,9 @@
 			if(typeof MAPCRAFTER_MARKERS_GENERATED !== "undefined")
 				for(var i = 0; i < MAPCRAFTER_MARKERS_GENERATED.length; i++)
 					markers.push(MAPCRAFTER_MARKERS_GENERATED[i]);
-			
-			Mapcrafter.addControl(new MapSelectControl(), "topright", 1);
-			Mapcrafter.addControl(new MarkerControl(markers), "topright", 2);
-			Mapcrafter.addControl(new RotationSelectControl(), "topright", 3);
-			Mapcrafter.addControl(new MousePosControl(), "bottomleft", 1);
+			// only create marker control if marker groups exist
+			if(markers.length > 0)
+				Mapcrafter.addControl(new MarkerControl(markers), "topright", 2);
 		}
 		</script>
 	</head>
