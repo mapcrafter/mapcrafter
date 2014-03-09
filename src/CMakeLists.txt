@@ -86,6 +86,7 @@ target_link_libraries(mapcrafter mapcraftercore)
 
 install(TARGETS mapcraftercore DESTINATION lib)
 install(TARGETS mapcrafter DESTINATION bin)
+install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/tools/mapcrafter_markers DESTINATION bin)
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/tools/mapcrafter_textures.py DESTINATION bin)
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/tools/mapcrafter_png-it.py DESTINATION bin)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/template DESTINATION share/mapcrafter)
