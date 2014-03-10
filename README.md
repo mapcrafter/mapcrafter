@@ -15,7 +15,7 @@ were very helpful. I also used the alpha blending code of pigmap and some maps
 stuff of the template from Minecraft Overviewer.
 
 <div align="center">
-    <img src="http://i.imgur.com/c5tC43X.png" />
+    <img src="http://i.imgur.com/WyKXrgO.png" />
 </div>
 
 ## Features ##
@@ -27,7 +27,7 @@ stuff of the template from Minecraft Overviewer.
      for your maps!
 * **Configuration files:** Control which worlds are rendered from which direction and with 
      which rendermodes!
-* **Markers:** Define your own markers for your maps!
+* **Markers:** Automatically generated markers from your Minecraft world data!
 * **Other stuff:** Biome colors, incremental rendering, multithreading
 
 ## Requirements ##
@@ -73,6 +73,13 @@ You can also ask questions in the [Minecraft Forum
 thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-map-renderer/).
 
 ## Version history ##
+
+**v.1.3**
+
+* Added ability to automatically generate markers from signs in the
+  Minecraft world
+  * **The format for specifying markers has changed, please have a look
+    at the documentation and update your markers.js file.**
 
 **v.1.2**
 
