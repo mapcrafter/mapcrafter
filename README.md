@@ -78,8 +78,8 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 * Added ability to automatically generate markers from signs in the
   Minecraft world
-  * **The format for specifying markers has changed, please have a look
-    at the documentation and update your markers.js file.**
+  * **The format to specify markers has changed, please have a look
+    at the documentation and update your ``markers.js`` file.**
 
 **v.1.2**
 

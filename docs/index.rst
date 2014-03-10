@@ -37,7 +37,7 @@ Features
   day, night and cave for your maps!
 * **Configuration files**: Control which worlds are rendered from which 
   direction and with which rendermodes!
-* **Markers**: Define your own markers for your maps!
+* **Markers**: Automatically generated markers from your Minecraft world data!
 * **Other stuff**: Biome colors, incremental rendering, multithreading
 
 Help
