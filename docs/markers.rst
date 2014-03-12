@@ -40,6 +40,11 @@ This program generates your defined marker groups and writes them to a
 ``markers-generated.js`` file in your output directory. You do not need
 to worry about manually specified markers being overwritten.
 
+If you have a very big world and want some progress information, use
+the verbose flag::
+
+    mapcrafter_markers -v -c render.conf
+
 Manually Specifying Markers
 ===========================
 
