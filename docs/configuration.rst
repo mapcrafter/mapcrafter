@@ -428,6 +428,16 @@ Marker Options
     of this marker group. Example: If you choose ``[home]`` as prefix,
     all signs whose text starts with ``[home]`` are displayed as markers
     of this group.
+
+``match_empty = <bool>``
+
+    **Default:** ``false``
+    
+    This option specifies whether empty signs can be matched as markers.
+    You have to set this to ``true`` if you set the prefix to an empty
+    string to show all remaining unmatched signs as markers and if you
+    want to show even empty signs as markers.
+
     
 ``title_format = <format>``
 
