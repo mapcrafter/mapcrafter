@@ -95,8 +95,11 @@ std::string createMarkersJSON(const config::MapcrafterConfig& config,
 		}
 		ss << "    \"markers\" : {" << std::endl;
 
-		if (!markers_found.count(group))
+		if (!markers_found.count(group)) {
+			ss << "    }," << std::endl;
+			ss << "  }," << std::endl;
 			continue;
+		}
 
 		for (auto world_it = markers_found.at(group).begin();
 				world_it != markers_found.at(group).end(); ++world_it) {
