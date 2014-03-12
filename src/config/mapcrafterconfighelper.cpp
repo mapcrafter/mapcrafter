@@ -54,6 +54,7 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 
 		js += "\"" + it->getShortName() + "\" : {\n";
 		js += "\tname: \"" + it->getLongName() + "\",\n";
+		js += "\tworld: \"" + it->getWorld() + "\",\n";
 		js += "\tworldName: \"" + world.getWorldName() + "\",\n";
 		js += "\ttextureSize: " + util::str(it->getTextureSize()) + ",\n";
 		js += "\ttileSize: " + util::str(32 * it->getTextureSize()) + ",\n";

@@ -152,6 +152,10 @@ void WorldSection::postParse(const INIConfigSection& section,
 	}
 }
 
+std::string WorldSection::getShortName() {
+	return section_name;
+}
+
 fs::path WorldSection::getInputDir() const {
 	return input_dir.getValue();
 }

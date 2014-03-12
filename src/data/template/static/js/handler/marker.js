@@ -14,7 +14,7 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 		this.ui.lmap.removeLayer(this.layerGroups[group]);
 	this.layerGroups = {};
 	
-	var world = this.ui.getCurrentMapConfig().worldName;
+	var world = this.ui.getCurrentMapConfig().world;
 	for(var i = 0; i < this.markers.length; i++) {
 		var groupInfo = this.markers[i];
 		if (!(world in groupInfo["markers"]))

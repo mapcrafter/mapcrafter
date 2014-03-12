@@ -53,7 +53,8 @@ void findMarkers(const config::MapcrafterConfig& config, Markers& markers_found,
 		mc::WorldEntitiesCache entities(world);
 		entities.update(verbose);
 
-		std::string world_name = world_it->second.getWorldName();
+		// use name of the world section as world name, not the world_name
+		std::string world_name = world_it->second.getShortName();
 		std::vector<mc::SignEntity> signs = entities.getSigns(world.getWorldCrop());
 		for (auto sign_it = signs.begin(); sign_it != signs.end(); ++sign_it) {
 			// don't use signs not contained in the world boundaries

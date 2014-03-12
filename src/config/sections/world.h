@@ -49,6 +49,8 @@ public:
 	virtual void postParse(const INIConfigSection& section,
 			ValidationList& validation);
 
+	std::string getShortName();
+
 	fs::path getInputDir() const;
 	mc::Dimension getDimension() const;
 	std::string getWorldName() const;
