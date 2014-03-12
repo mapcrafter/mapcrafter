@@ -53,6 +53,7 @@ public:
 private:
 	Field<std::string> name_long;
 	Field<std::string> prefix;
+	Field<bool> match_empty;
 	Field<std::string> title_format, text_format;
 	Field<std::string> icon, icon_size;
 

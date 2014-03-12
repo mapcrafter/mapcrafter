@@ -54,6 +54,7 @@ std::string MarkerSection::formatSign(std::string format, const mc::SignEntity& 
 void MarkerSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	name_long.setDefault(section_name);
+	match_empty.setDefault(false);
 	title_format.setDefault("%text");
 }
 
@@ -63,6 +64,8 @@ bool MarkerSection::parseField(const std::string key, const std::string value,
 		name_long.load(key, value, validation);
 	else if (key == "prefix")
 		prefix.load(key, value, validation);
+	else if (key == "match_empty")
+		match_empty.load(key, value, validation);
 	else if (key == "title_format")
 		title_format.load(key, value, validation);
 	else if (key == "text_format")
@@ -110,6 +113,8 @@ std::string MarkerSection::getIconSize() const {
 }
 
 bool MarkerSection::matchesSign(const mc::SignEntity& sign) const {
+	if (sign.getText().empty() && !match_empty.getValue())
+		return false;
 	return util::startswith(sign.getText(), prefix.getValue());
 }
 
