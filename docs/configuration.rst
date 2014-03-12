@@ -429,7 +429,7 @@ Marker Options
     all signs whose text starts with ``[home]`` are displayed as markers
     of this group.
 
-``match_empty = <bool>``
+``match_empty = true|false``
 
     **Default:** ``false``
     
