@@ -74,7 +74,7 @@ public:
 	/**
 	 * Updates the entity cache.
 	 */
-	void update();
+	void update(bool verbose = false);
 
 	std::vector<SignEntity> getSigns(WorldCrop crop = WorldCrop()) const;
 private:

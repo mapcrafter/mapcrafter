@@ -124,11 +124,21 @@ void WorldEntitiesCache::writeCacheFile() const {
 	nbt_file.writeNBT(cache_file.string().c_str(), nbt::Compression::GZIP);
 }
 
-void WorldEntitiesCache::update() {
+void WorldEntitiesCache::update(bool verbose) {
 	int timestamp = readCacheFile();
 
+	if (verbose)
+		std::cout << "World '" << world.getRegionDir().string() << "':" << std::endl;
+
 	auto regions = world.getAvailableRegions();
+	int i = 0;
 	for (auto region_it = regions.begin(); region_it != regions.end(); ++region_it) {
+		i++;
+		if (verbose) {
+			std::cout << "(" << i << "/" << regions.size() << ") ";
+			std::cout << "Region " << *region_it << std::endl;
+		}
+
 		if (fs::last_write_time(world.getRegionPath(*region_it)) < timestamp)
 			continue;
 		RegionFile region;

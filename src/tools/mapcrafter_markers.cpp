@@ -36,7 +36,8 @@ struct Marker {
 // map (marker group name -> map ( world name -> array of markers) )
 typedef std::map<std::string, std::map<std::string, std::vector<Marker> > > Markers;
 
-void findMarkers(const config::MapcrafterConfig& config, Markers& markers_found) {
+void findMarkers(const config::MapcrafterConfig& config, Markers& markers_found,
+		bool verbose = false) {
 	auto worlds = config.getWorlds();
 	auto markers = config.getMarkers();
 	for (auto world_it = worlds.begin(); world_it != worlds.end(); ++world_it) {
@@ -50,7 +51,7 @@ void findMarkers(const config::MapcrafterConfig& config, Markers& markers_found)
 		}
 
 		mc::WorldEntitiesCache entities(world);
-		entities.update();
+		entities.update(verbose);
 
 		std::string world_name = world_it->second.getWorldName();
 		std::vector<mc::SignEntity> signs = entities.getSigns(world.getWorldCrop());
@@ -125,6 +126,7 @@ int main(int argc, char** argv) {
 	po::options_description all("Allowed options");
 	all.add_options()
 		("help,h", "shows this help message")
+		("verbose,v", "verbose blah blah")
 
 		("config,c", po::value<std::string>(&config_file),
 			"the path to the configuration file (required)")
@@ -170,7 +172,7 @@ int main(int argc, char** argv) {
 	}
 
 	Markers markers_found;
-	findMarkers(config, markers_found);
+	findMarkers(config, markers_found, vm.count("verbose"));
 	std::string markers_json = createMarkersJSON(config, markers_found);
 
 	if (output_file == "-")
