@@ -123,8 +123,7 @@ You can also use an icon with a specific size (optional).
 
 The actual markers are specified per world in an associative array with
 the name ``markers``. You have to use as world name your world section
-name or the value of the ``world_name`` attribute if you specified another
-world name.
+name.
 
 The definition of markers is also done with associative arrays::
 
