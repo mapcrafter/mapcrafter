@@ -74,6 +74,14 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.1.3.1**
+
+* Added simple progress output to marker generation program (optional)
+* Added option to hide empty signs by default
+* Fixed a bug (#65) causing invalid Javascript being generated
+* Markers use the world section name to distinguish between the worlds,
+  not the ``world_name`` attribute
+
 **v.1.3**
 
 * Added ability to automatically generate markers from signs in the
