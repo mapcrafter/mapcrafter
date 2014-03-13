@@ -38,9 +38,9 @@ std::string MarkerSection::formatSign(std::string format, const mc::SignEntity& 
 	if (textp.size() > prefix.getValue().size())
 		text = util::trim(textp.substr(prefix.getValue().size()));
 
+	format = util::replaceAll(format, "%textp", textp);
 	format = util::replaceAll(format, "%text", text);
 	format = util::replaceAll(format, "%prefix", prefix.getValue());
-	format = util::replaceAll(format, "%textp", textp);
 	format = util::replaceAll(format, "%line1", sign.getLines()[0]);
 	format = util::replaceAll(format, "%line2", sign.getLines()[1]);
 	format = util::replaceAll(format, "%line3", sign.getLines()[2]);
