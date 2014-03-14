@@ -7,5 +7,3 @@ target_link_libraries(mapcrafter_markers mapcraftercore)
 target_link_libraries(nbtdump mapcraftercore)
 target_link_libraries(testconfig mapcraftercore)
 target_link_libraries(testtextures mapcraftercore)
-
-install(TARGETS mapcrafter_markers DESTINATION bin)
