@@ -28,9 +28,7 @@
 namespace mapcrafter {
 namespace renderer {
 
-// TODO: strict typing
 typedef uint32_t RGBAPixel;
-typedef uint32_t RGBPixel;
 
 RGBAPixel rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
 uint8_t rgba_red(RGBAPixel value);
@@ -100,15 +98,10 @@ public:
 
 	bool readPNG(const std::string& filename);
 	bool writePNG(const std::string& filename) const;
-};
-
-class RGBImage : public Image<RGBPixel> {
-public:
-	RGBImage(int width = 0, int height = 0);
-	~RGBImage();
 
 	bool readJPEG(const std::string& filename);
-	bool writeJPEG(const std::string& filename, int quality) const;
+	bool writeJPEG(const std::string& filename, int quality,
+			RGBAPixel background = rgba(255, 255, 255, 255)) const;
 };
 
 template<typename Pixel>

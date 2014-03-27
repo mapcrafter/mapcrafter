@@ -495,11 +495,13 @@ bool RGBAImage::writePNG(const std::string& filename) const {
 	return true;
 }
 
-RGBImage::RGBImage(int width, int height)
-	: Image<RGBAPixel>(width, height) {
+bool RGBAImage::readJPEG(const std::string& filename) {
+	return true;
 }
 
-RGBImage::~RGBImage() {
+bool RGBAImage::writeJPEG(const std::string& filename, int quality,
+		RGBAPixel background) const {
+	return true;
 }
 
 }
