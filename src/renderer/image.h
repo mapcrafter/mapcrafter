@@ -25,62 +25,64 @@
 #include <string>
 #include <vector>
 
-# ifndef UINT64_C
-#  if __WORDSIZE == 64
-#   define UINT64_C(c)	c ## UL
-#  else
-#   define UINT64_C(c)	c ## ULL
-#  endif
-# endif
-
 namespace mapcrafter {
 namespace renderer {
 
-uint32_t rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
-uint8_t rgba_red(uint32_t value);
-uint8_t rgba_green(uint32_t value);
-uint8_t rgba_blue(uint32_t value);
-uint8_t rgba_alpha(uint32_t value);
+// TODO: strict typing
+typedef uint32_t RGBAPixel;
+typedef uint32_t RGBPixel;
 
-uint32_t rgba_multiply(uint32_t value, double r, double g, double b, double a = 1);
-uint32_t rgba_multiply(uint32_t value, uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
+RGBAPixel rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
+uint8_t rgba_red(RGBAPixel value);
+uint8_t rgba_green(RGBAPixel value);
+uint8_t rgba_blue(RGBAPixel value);
+uint8_t rgba_alpha(RGBAPixel value);
 
-void blend(uint32_t& dest, const uint32_t& source);
+RGBAPixel rgba_multiply(RGBAPixel value, double r, double g, double b, double a = 1);
+RGBAPixel rgba_multiply(RGBAPixel value, uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
+
+void blend(RGBAPixel& dest, const RGBAPixel& source);
 
 void pngReadData(png_structp pngPtr, png_bytep data, png_size_t length);
 void pngWriteData(png_structp pngPtr, png_bytep data, png_size_t length);
+
+template<typename Pixel>
+class Image {
+public:
+	Image(int width = 0, int height = 0);
+	~Image();
+
+	int getWidth() const;
+	int getHeight() const;
+
+	Pixel getPixel(int x, int y) const;
+	void setPixel(int x, int y, Pixel pixel);
+
+	const Pixel& pixel(int x, int y) const;
+	Pixel& pixel(int x, int y);
+
+	void setSize(int width, int height);
+
+protected:
+	int width;
+	int height;
+
+	std::vector<Pixel> data;
+};
 
 const int ROTATE_90 = 1;
 const int ROTATE_180 = 2;
 const int ROTATE_270 = 3;
 
-class RGBAImage {
-private:
-	int width;
-	int height;
-
-	std::vector<uint32_t> data;
-
+class RGBAImage : public Image<RGBAPixel> {
 public:
-	RGBAImage();
-	RGBAImage(int width, int height);
+	RGBAImage(int width = 0, int height = 0);
 	~RGBAImage();
-
-	void setSize(int w, int h);
-
-	int getWidth() const;
-	int getHeight() const;
-
-	uint32_t getPixel(int x, int y) const;
-	void setPixel(int x, int y, uint32_t pixel);
-
-	const uint32_t& pixel(int x, int y) const;
-	uint32_t& pixel(int x, int y);
 
 	void simpleblit(const RGBAImage& image, int x, int y);
 	void alphablit(const RGBAImage& image, int x, int y);
-	void blendPixel(uint32_t color, int x, int y);
-	void fill(uint32_t color, int x1, int y1, int w, int h);
+	void blendPixel(RGBAPixel color, int x, int y);
+	void fill(RGBAPixel color, int x1, int y1, int w, int h);
 	void clear();
 
 	RGBAImage clip(int x, int y, int width, int height) const;
@@ -99,6 +101,66 @@ public:
 	bool readPNG(const std::string& filename);
 	bool writePNG(const std::string& filename) const;
 };
+
+class RGBImage : public Image<RGBPixel> {
+public:
+	RGBImage(int width = 0, int height = 0);
+	~RGBImage();
+
+	bool readJPEG(const std::string& filename);
+	bool writeJPEG(const std::string& filename, int quality) const;
+};
+
+template<typename Pixel>
+Image<Pixel>::Image(int width, int height)
+	:width(width), height(height) {
+	data.resize(width * height);
+}
+
+template<typename Pixel>
+Image<Pixel>::~Image() {
+}
+
+template<typename Pixel>
+int Image<Pixel>::getWidth() const {
+	return width;
+}
+
+template<typename Pixel>
+int Image<Pixel>::getHeight() const {
+	return height;
+}
+
+template<typename Pixel>
+Pixel Image<Pixel>::getPixel(int x, int y) const {
+	if (x >= width || x < 0 || y >= height || y < 0)
+		return 0;
+	return data[y * width + x];
+}
+
+template<typename Pixel>
+void Image<Pixel>::setPixel(int x, int y, Pixel pixel) {
+	if (x >= width || x < 0 || y >= height || y < 0)
+		return;
+	data[y * width + x] = pixel;
+}
+
+template<typename Pixel>
+const Pixel& Image<Pixel>::pixel(int x, int y) const {
+	return data[y * width + x];
+}
+
+template<typename Pixel>
+Pixel& Image<Pixel>::pixel(int x, int y) {
+	return data[y * width + x];
+}
+
+template<typename Pixel>
+void Image<Pixel>::setSize(int width, int height) {
+	this->width = width;
+	this->height = height;
+	data.resize(width * height);
+}
 
 }
 }

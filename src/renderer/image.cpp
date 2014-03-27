@@ -28,27 +28,27 @@
 namespace mapcrafter {
 namespace renderer {
 
-uint32_t rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+RGBAPixel rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 	return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
-uint8_t rgba_red(uint32_t value) {
+uint8_t rgba_red(RGBAPixel value) {
 	return value & 0xff;
 }
 
-uint8_t rgba_green(uint32_t value) {
+uint8_t rgba_green(RGBAPixel value) {
 	return (value & 0xff00) >> 8;
 }
 
-uint8_t rgba_blue(uint32_t value) {
+uint8_t rgba_blue(RGBAPixel value) {
 	return (value & 0xff0000) >> 16;
 }
 
-uint8_t rgba_alpha(uint32_t value) {
+uint8_t rgba_alpha(RGBAPixel value) {
 	return (value & 0xff000000) >> 24;
 }
 
-uint32_t rgba_multiply(uint32_t value, double r, double g, double b, double a) {
+RGBAPixel rgba_multiply(RGBAPixel value, double r, double g, double b, double a) {
 	uint8_t red = rgba_red(value);
 	uint8_t green = rgba_green(value);
 	uint8_t blue = rgba_blue(value);
@@ -56,7 +56,7 @@ uint32_t rgba_multiply(uint32_t value, double r, double g, double b, double a) {
 	return rgba(red * r, green * g, blue * b, alpha * a);
 }
 
-uint32_t rgba_multiply(uint32_t value, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+RGBAPixel rgba_multiply(RGBAPixel value, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 	int red = (rgba_red(value) * r) / 255;
 	int green = (rgba_green(value) * g) / 255;
 	int blue = (rgba_blue(value) * b) / 255;
@@ -64,13 +64,21 @@ uint32_t rgba_multiply(uint32_t value, uint8_t r, uint8_t g, uint8_t b, uint8_t 
 	return rgba(red, green, blue, alpha);
 }
 
+# ifndef UINT64_C
+#  if __WORDSIZE == 64
+#   define UINT64_C(c)	c ## UL
+#  else
+#   define UINT64_C(c)	c ## ULL
+#  endif
+# endif
+
 /**
  * This code is from pigmap.
  * Thanks to Michael J. Nelson (equalpants) for this fast alpha blending.
  *
  * https://github.com/equalpants/pigmap (rgba.cpp)
  */
-void blend(uint32_t& dest, const uint32_t& source) {
+void blend(RGBAPixel& dest, const RGBAPixel& source) {
 	// if source is transparent, there's nothing to do
 	if (source <= 0xffffff)
 		return;
@@ -132,53 +140,11 @@ void pngWriteData(png_structp pngPtr, png_bytep data, png_size_t length) {
 	((std::ostream*) a)->write((char*) data, length);
 }
 
-RGBAImage::RGBAImage()
-	: width(0), height(0), data() {
-	//setSize(width, height);
-}
-
 RGBAImage::RGBAImage(int width, int height)
-	: width(width), height(height) {
-	setSize(width, height);
-	clear();
+	: Image<RGBAPixel>(width, height) {
 }
 
 RGBAImage::~RGBAImage() {
-}
-
-void RGBAImage::setSize(int w, int h) {
-	width = w;
-	height = h;
-	data.resize(width * height);
-}
-
-int RGBAImage::getWidth() const {
-	return width;
-}
-
-int RGBAImage::getHeight() const {
-	return height;
-}
-
-uint32_t RGBAImage::getPixel(int x, int y) const {
-	if (x >= width || x < 0 || y >= height || y < 0)
-		return 0;
-	return data[y * width + x];
-}
-
-void RGBAImage::setPixel(int x, int y, uint32_t pixel) {
-	if (x >= width || x < 0 || y >= height || y < 0)
-		return;
-	data[y * width + x] = pixel;
-}
-
-// fast pixel access - but no validation
-const uint32_t& RGBAImage::pixel(int x, int y) const {
-	return data[y * width + x];
-}
-
-uint32_t& RGBAImage::pixel(int x, int y) {
-	return data[y * width + x];
 }
 
 void RGBAImage::simpleblit(const RGBAImage& image, int x, int y) {
@@ -239,12 +205,12 @@ void RGBAImage::alphablit(const RGBAImage& image, int x, int y) {
 	}
 }
 
-void RGBAImage::blendPixel(uint32_t color, int x, int y) {
+void RGBAImage::blendPixel(RGBAPixel color, int x, int y) {
 	if (x >= 0 && y >= 0 && x < width && y < height)
 		blend(data[y * width + x], color);
 }
 
-void RGBAImage::fill(uint32_t color, int x, int y, int w, int h) {
+void RGBAImage::fill(RGBAPixel color, int x, int y, int w, int h) {
 	if (x >= width || y >= height)
 		return;
 
@@ -299,7 +265,7 @@ RGBAImage RGBAImage::rotate(int rotation) const {
 	RGBAImage copy(newWidth, newHeight);
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
-			uint32_t pixel = 0;
+			RGBAPixel pixel = 0;
 			if (rotation == ROTATE_90)
 				pixel = getPixel(y, width - x - 1);
 			else if (rotation == ROTATE_180)
@@ -365,10 +331,10 @@ void RGBAImage::resizeInterpolated(int new_width, int new_height, RGBAImage& des
 			int sy = y_ratio * y;
 			double x_diff = (x_ratio * x) - sx;
 			double y_diff = (y_ratio * y) - sy;
-			uint32_t a = getPixel(sx, sy);
-			uint32_t b = getPixel(sx + 1, sy);
-			uint32_t c = getPixel(sx, sy + 1);
-			uint32_t d = getPixel(sx + 1, sy + 1);
+			RGBAPixel a = getPixel(sx, sy);
+			RGBAPixel b = getPixel(sx + 1, sy);
+			RGBAPixel c = getPixel(sx, sy + 1);
+			RGBAPixel d = getPixel(sx + 1, sy + 1);
 
 			uint8_t red = interpolate(rgba_red(a), rgba_red(b), rgba_red(c), rgba_red(d),
 					x_diff, y_diff);
@@ -415,10 +381,10 @@ void RGBAImage::resizeHalf(RGBAImage& dest) const {
 
 	for (int x = 0; x < width - 1; x += 2) {
 		for (int y = 0; y < height - 1; y += 2) {
-			uint32_t p1 = (data[y * width + x] >> 2) & 0x3f3f3f3f;
-			uint32_t p2 = (data[y * width + x + 1] >> 2) & 0x3f3f3f3f;
-			uint32_t p3 = (data[(y + 1) * width + x] >> 2) & 0x3f3f3f3f;
-			uint32_t p4 = (data[(y + 1) * width + x + 1] >> 2) & 0x3f3f3f3f;
+			RGBAPixel p1 = (data[y * width + x] >> 2) & 0x3f3f3f3f;
+			RGBAPixel p2 = (data[y * width + x + 1] >> 2) & 0x3f3f3f3f;
+			RGBAPixel p3 = (data[(y + 1) * width + x] >> 2) & 0x3f3f3f3f;
+			RGBAPixel p4 = (data[(y + 1) * width + x + 1] >> 2) & 0x3f3f3f3f;
 			dest.data[(y / 2) * dest.width + (x / 2)] = p1 + p2 + p3 + p4;
 		}
 	}
@@ -527,6 +493,13 @@ bool RGBAImage::writePNG(const std::string& filename) const {
 	delete[] rows;
 	png_destroy_write_struct(&png, &info);
 	return true;
+}
+
+RGBImage::RGBImage(int width, int height)
+	: Image<RGBAPixel>(width, height) {
+}
+
+RGBImage::~RGBImage() {
 }
 
 }
