@@ -38,7 +38,7 @@ TextureImage::~TextureImage() {
  * Loads a single block texture image.
  */
 bool TextureImage::load(const std::string& path, int size) {
-	Image tmp;
+	RGBAImage tmp;
 	if (!tmp.readPNG(path + "/" + name + ".png")) {
 		// make sure the texture image does not have zero dimension
 		// even if the texture does not exist

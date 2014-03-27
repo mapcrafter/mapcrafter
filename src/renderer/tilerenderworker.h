@@ -73,8 +73,8 @@ public:
 	void setProgressHandler(std::shared_ptr<util::IProgressHandler> progress,
 			std::shared_ptr<bool> finished = std::shared_ptr<bool>(new bool));
 
-	void saveTile(const TilePath& tile, const Image& image);
-	void renderRecursive(const TilePath& path, Image& image);
+	void saveTile(const TilePath& tile, const RGBAImage& image);
+	void renderRecursive(const TilePath& path, RGBAImage& image);
 
 	void operator()();
 

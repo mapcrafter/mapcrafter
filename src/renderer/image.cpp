@@ -132,56 +132,56 @@ void pngWriteData(png_structp pngPtr, png_bytep data, png_size_t length) {
 	((std::ostream*) a)->write((char*) data, length);
 }
 
-Image::Image()
-		: width(0), height(0), data() {
+RGBAImage::RGBAImage()
+	: width(0), height(0), data() {
 	//setSize(width, height);
 }
 
-Image::Image(int width, int height)
-		: width(width), height(height) {
+RGBAImage::RGBAImage(int width, int height)
+	: width(width), height(height) {
 	setSize(width, height);
 	clear();
 }
 
-Image::~Image() {
+RGBAImage::~RGBAImage() {
 }
 
-void Image::setSize(int w, int h) {
+void RGBAImage::setSize(int w, int h) {
 	width = w;
 	height = h;
 	data.resize(width * height);
 }
 
-int Image::getWidth() const {
+int RGBAImage::getWidth() const {
 	return width;
 }
 
-int Image::getHeight() const {
+int RGBAImage::getHeight() const {
 	return height;
 }
 
-uint32_t Image::getPixel(int x, int y) const {
+uint32_t RGBAImage::getPixel(int x, int y) const {
 	if (x >= width || x < 0 || y >= height || y < 0)
 		return 0;
 	return data[y * width + x];
 }
 
-void Image::setPixel(int x, int y, uint32_t pixel) {
+void RGBAImage::setPixel(int x, int y, uint32_t pixel) {
 	if (x >= width || x < 0 || y >= height || y < 0)
 		return;
 	data[y * width + x] = pixel;
 }
 
 // fast pixel access - but no validation
-const uint32_t& Image::pixel(int x, int y) const {
+const uint32_t& RGBAImage::pixel(int x, int y) const {
 	return data[y * width + x];
 }
 
-uint32_t& Image::pixel(int x, int y) {
+uint32_t& RGBAImage::pixel(int x, int y) {
 	return data[y * width + x];
 }
 
-void Image::simpleblit(const Image& image, int x, int y) {
+void RGBAImage::simpleblit(const RGBAImage& image, int x, int y) {
 	if (x >= width || y >= height)
 		return;
 
@@ -213,7 +213,7 @@ void Image::simpleblit(const Image& image, int x, int y) {
 	}
 }
 
-void Image::alphablit(const Image& image, int x, int y) {
+void RGBAImage::alphablit(const RGBAImage& image, int x, int y) {
 	if (x >= width || y >= height)
 		return;
 
@@ -239,12 +239,12 @@ void Image::alphablit(const Image& image, int x, int y) {
 	}
 }
 
-void Image::blendPixel(uint32_t color, int x, int y) {
+void RGBAImage::blendPixel(uint32_t color, int x, int y) {
 	if (x >= 0 && y >= 0 && x < width && y < height)
 		blend(data[y * width + x], color);
 }
 
-void Image::fill(uint32_t color, int x, int y, int w, int h) {
+void RGBAImage::fill(uint32_t color, int x, int y, int w, int h) {
 	if (x >= width || y >= height)
 		return;
 
@@ -259,12 +259,12 @@ void Image::fill(uint32_t color, int x, int y, int w, int h) {
 	}
 }
 
-void Image::clear() {
+void RGBAImage::clear() {
 	std::fill(data.begin(), data.end(), 0);
 }
 
-Image Image::clip(int x, int y, int width, int height) const {
-	Image image(width, height);
+RGBAImage RGBAImage::clip(int x, int y, int width, int height) const {
+	RGBAImage image(width, height);
 	for (int xx = 0; xx < width && xx + x < this->width; xx++) {
 		for (int yy = 0; yy < height && yy + y < this->height; yy++) {
 			image.setPixel(xx, yy, getPixel(x + xx, y + yy));
@@ -273,8 +273,8 @@ Image Image::clip(int x, int y, int width, int height) const {
 	return image;
 }
 
-Image Image::colorize(double r, double g, double b, double a) const {
-	Image img(width, height);
+RGBAImage RGBAImage::colorize(double r, double g, double b, double a) const {
+	RGBAImage img(width, height);
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			img.setPixel(x, y, rgba_multiply(getPixel(x, y), r, g, b, a));
@@ -283,8 +283,8 @@ Image Image::colorize(double r, double g, double b, double a) const {
 	return img;
 }
 
-Image Image::colorize(uint8_t r, uint8_t g, uint8_t b, uint8_t a) const {
-	Image img(width, height);
+RGBAImage RGBAImage::colorize(uint8_t r, uint8_t g, uint8_t b, uint8_t a) const {
+	RGBAImage img(width, height);
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			img.setPixel(x, y, rgba_multiply(getPixel(x, y), r, g, b, a));
@@ -293,10 +293,10 @@ Image Image::colorize(uint8_t r, uint8_t g, uint8_t b, uint8_t a) const {
 	return img;
 }
 
-Image Image::rotate(int rotation) const {
+RGBAImage RGBAImage::rotate(int rotation) const {
 	int newWidth = rotation == ROTATE_90 || rotation == ROTATE_270 ? height : width;
 	int newHeight = rotation == ROTATE_90 || rotation == ROTATE_270 ? width : height;
-	Image copy(newWidth, newHeight);
+	RGBAImage copy(newWidth, newHeight);
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
 			uint32_t pixel = 0;
@@ -312,8 +312,8 @@ Image Image::rotate(int rotation) const {
 	return copy;
 }
 
-Image Image::flip(bool flipX, bool flipY) const {
-	Image copy(width, height);
+RGBAImage RGBAImage::flip(bool flipX, bool flipY) const {
+	RGBAImage copy(width, height);
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
 			int xx = flipX ? width - x - 1 : x;
@@ -324,8 +324,8 @@ Image Image::flip(bool flipX, bool flipY) const {
 	return copy;
 }
 
-Image Image::move(int xOffset, int yOffset) const {
-	Image img(width, height);
+RGBAImage RGBAImage::move(int xOffset, int yOffset) const {
+	RGBAImage img(width, height);
 	for (int y = 0; y < height && y + yOffset < height; y++) {
 		for (int x = 0; x < width && x + xOffset < width; x++) {
 			img.setPixel(x + xOffset, y + yOffset, getPixel(x, y));
@@ -345,7 +345,7 @@ inline uint8_t interpolate(uint8_t a, uint8_t b, uint8_t c, uint8_t d, double w,
 	return result * 255.0;
 }
 
-void Image::resizeInterpolated(int new_width, int new_height, Image& dest) const {
+void RGBAImage::resizeInterpolated(int new_width, int new_height, RGBAImage& dest) const {
 	if (new_width == width && new_height == height) {
 		dest = *this;
 		return;
@@ -384,7 +384,7 @@ void Image::resizeInterpolated(int new_width, int new_height, Image& dest) const
 	}
 }
 
-void Image::resizeSimple(int new_width, int new_height, Image& dest) const {
+void RGBAImage::resizeSimple(int new_width, int new_height, RGBAImage& dest) const {
 	if (new_width == width && new_height == height) {
 		dest = *this;
 		return;
@@ -400,7 +400,7 @@ void Image::resizeSimple(int new_width, int new_height, Image& dest) const {
 	}
 }
 
-void Image::resizeAuto(int new_width, int new_height, Image& dest) const {
+void RGBAImage::resizeAuto(int new_width, int new_height, RGBAImage& dest) const {
 	// for increasing an image resolution the nearest neighbor interpolation is the best
 	// for Minecraft textures because it preserves the pixelated style of the textures
 	// and prevents the textures becoming blurry
@@ -410,7 +410,7 @@ void Image::resizeAuto(int new_width, int new_height, Image& dest) const {
 		resizeInterpolated(new_width, new_height, dest);
 }
 
-void Image::resizeHalf(Image& dest) const {
+void RGBAImage::resizeHalf(RGBAImage& dest) const {
 	dest.setSize(width / 2, height / 2);
 
 	for (int x = 0; x < width - 1; x += 2) {
@@ -424,7 +424,7 @@ void Image::resizeHalf(Image& dest) const {
 	}
 }
 
-bool Image::readPNG(const std::string& filename) {
+bool RGBAImage::readPNG(const std::string& filename) {
 	std::ifstream file(filename.c_str(), std::ios::binary);
 	if (!file) {
 		return false;
@@ -486,7 +486,7 @@ bool Image::readPNG(const std::string& filename) {
 	return true;
 }
 
-bool Image::writePNG(const std::string& filename) const {
+bool RGBAImage::writePNG(const std::string& filename) const {
 	std::ofstream file(filename.c_str(), std::ios::binary);
 	if (!file) {
 		return false;

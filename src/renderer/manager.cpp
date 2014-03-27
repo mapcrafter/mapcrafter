@@ -253,7 +253,7 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 	}
 
 	// now read the images, which belong to the new directories
-	Image img1, img2, img3, img4;
+	RGBAImage img1, img2, img3, img4;
 	img1.readPNG((dir / "1/4.png").string());
 	img2.readPNG((dir / "2/3.png").string());
 	img3.readPNG((dir / "3/2.png").string());
@@ -261,8 +261,8 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 
 	int s = img1.getWidth();
 	// create images for the new directories
-	Image new1(s, s), new2(s, s), new3(s, s), new4(s, s);
-	Image old1, old2, old3, old4;
+	RGBAImage new1(s, s), new2(s, s), new3(s, s), new4(s, s);
+	RGBAImage old1, old2, old3, old4;
 	// resize the old images...
 	img1.resizeHalf(old1);
 	img2.resizeHalf(old2);
@@ -282,7 +282,7 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 	new4.writePNG((dir / "4.png").string());
 
 	// don't forget the base.png
-	Image base_big(2*s, 2*s), base;
+	RGBAImage base_big(2*s, 2*s), base;
 	base_big.simpleblit(new1, 0, 0);
 	base_big.simpleblit(new2, s, 0);
 	base_big.simpleblit(new3, 0, s);

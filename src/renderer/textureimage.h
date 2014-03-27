@@ -28,12 +28,12 @@ namespace renderer {
 /**
  * A single Minecraft block texture image.
  */
-class TextureImage : public Image {
+class TextureImage : public RGBAImage {
 private:
 	std::string name;
 public:
 	// the original (not resized) texture image
-	Image original;
+	RGBAImage original;
 
 	TextureImage();
 	TextureImage(const std::string& name);

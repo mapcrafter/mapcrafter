@@ -76,7 +76,7 @@ uint8_t Biome::getID() const {
 /**
  * Calculates the color of the biome with a biome color image.
  */
-uint32_t Biome::getColor(const Image& colors, bool flip_xy) const {
+uint32_t Biome::getColor(const RGBAImage& colors, bool flip_xy) const {
 	// x is temperature
 	double tmp_temperature = temperature;
 	// y is temperature * rainfall

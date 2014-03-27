@@ -54,7 +54,7 @@ const int ROTATE_90 = 1;
 const int ROTATE_180 = 2;
 const int ROTATE_270 = 3;
 
-class Image {
+class RGBAImage {
 private:
 	int width;
 	int height;
@@ -62,9 +62,9 @@ private:
 	std::vector<uint32_t> data;
 
 public:
-	Image();
-	Image(int width, int height);
-	~Image();
+	RGBAImage();
+	RGBAImage(int width, int height);
+	~RGBAImage();
 
 	void setSize(int w, int h);
 
@@ -77,24 +77,24 @@ public:
 	const uint32_t& pixel(int x, int y) const;
 	uint32_t& pixel(int x, int y);
 
-	void simpleblit(const Image& image, int x, int y);
-	void alphablit(const Image& image, int x, int y);
+	void simpleblit(const RGBAImage& image, int x, int y);
+	void alphablit(const RGBAImage& image, int x, int y);
 	void blendPixel(uint32_t color, int x, int y);
 	void fill(uint32_t color, int x1, int y1, int w, int h);
 	void clear();
 
-	Image clip(int x, int y, int width, int height) const;
-	Image colorize(double r, double g, double b, double a = 1) const;
-	Image colorize(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) const;
-	Image rotate(int rotation) const;
-	Image flip(bool flip_x, bool flip_y) const;
-	Image move(int x_off, int y_off) const;
+	RGBAImage clip(int x, int y, int width, int height) const;
+	RGBAImage colorize(double r, double g, double b, double a = 1) const;
+	RGBAImage colorize(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) const;
+	RGBAImage rotate(int rotation) const;
+	RGBAImage flip(bool flip_x, bool flip_y) const;
+	RGBAImage move(int x_off, int y_off) const;
 
-	void resizeInterpolated(int new_width, int new_height, Image& dest) const;
-	void resizeSimple(int new_width, int new_height, Image& dest) const;
+	void resizeInterpolated(int new_width, int new_height, RGBAImage& dest) const;
+	void resizeSimple(int new_width, int new_height, RGBAImage& dest) const;
 	// automatically chooses an image resize interpolation
-	void resizeAuto(int new_width, int new_height, Image& dest) const;
-	void resizeHalf(Image& dest) const;
+	void resizeAuto(int new_width, int new_height, RGBAImage& dest) const;
+	void resizeHalf(RGBAImage& dest) const;
 
 	bool readPNG(const std::string& filename);
 	bool writePNG(const std::string& filename) const;

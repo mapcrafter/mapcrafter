@@ -208,12 +208,12 @@ public:
 	void next();
 };
 
-void blitFace(Image& image, int face, const Image& texture,
+void blitFace(RGBAImage& image, int face, const RGBAImage& texture,
 		int xoff = 0, int yoff = 0,
 		bool darken = true, double dleft = 0.6, double dright = 0.75);
-void blitItemStyleBlock(Image& image, const Image& north_south, const Image& east_west);
+void blitItemStyleBlock(RGBAImage& image, const RGBAImage& north_south, const RGBAImage& east_west);
 
-void rotateImages(Image& north, Image& south, Image& east, Image& west, int rotation);
+void rotateImages(RGBAImage& north, RGBAImage& south, RGBAImage& east, RGBAImage& west, int rotation);
 
 /**
  * A block with 6 face textures, used to create the block images and also rotate them.
@@ -221,20 +221,20 @@ void rotateImages(Image& north, Image& south, Image& east, Image& west, int rota
 class BlockImage {
 private:
 	int type;
-	Image faces[6];
+	RGBAImage faces[6];
 	int x_offsets[6], y_offsets[6];
-	Image empty_image;
+	RGBAImage empty_image;
 public:
 	BlockImage(int type = NORMAL);
 	~BlockImage();
 
-	BlockImage& setFace(int face, const Image& texture, int xoff = 0, int yoff = 0);
-	const Image& getFace(int face) const;
+	BlockImage& setFace(int face, const RGBAImage& texture, int xoff = 0, int yoff = 0);
+	const RGBAImage& getFace(int face) const;
 	int getXOffset(int face) const;
 	int getYOffset(int face) const;
 
 	BlockImage rotate(int count) const;
-	Image buildImage(double dleft, double dright) const;
+	RGBAImage buildImage(double dleft, double dright) const;
 
 	static const int NORMAL = 1;
 	static const int ITEM_STYLE = 2;
@@ -252,18 +252,18 @@ private:
 	bool render_leaves_transparent;
 
 	BlockTextures textures;
-	Image empty_texture;
-	Image endportal_texture;
+	RGBAImage empty_texture;
+	RGBAImage endportal_texture;
 
-	Image chest[3];
-	Image largechest[7];
-	Image enderchest[3];
+	RGBAImage chest[3];
+	RGBAImage largechest[7];
+	RGBAImage enderchest[3];
 
-	Image foliagecolors, grasscolors;
+	RGBAImage foliagecolors, grasscolors;
 
 	int max_water;
-	Image opaque_water[4];
-	Image shadow_edge_masks[4];
+	RGBAImage opaque_water[4];
+	RGBAImage shadow_edge_masks[4];
 
 	// factor to darken the side faces
 	// defaults to 0.75 and 0.6
@@ -271,23 +271,23 @@ private:
 
 	// map of block images
 	// key is a 32 bit integer, first two bytes id, second two bytes data
-	std::unordered_map<uint32_t, Image> block_images;
+	std::unordered_map<uint32_t, RGBAImage> block_images;
 
 	// map of biome block images, first four bytes id+data, next byte is the biome id
-	std::unordered_map<uint64_t, Image> biome_images;
+	std::unordered_map<uint64_t, RGBAImage> biome_images;
 
 	// set of id/data block combinations, which contain transparency
 	std::unordered_set<uint32_t> block_transparency;
-	Image unknown_block;
+	RGBAImage unknown_block;
 
 	uint16_t filterBlockData(uint16_t id, uint16_t data) const;
-	bool checkImageTransparency(const Image& block) const;
-	void addBlockShadowEdges(uint16_t id, uint16_t data, const Image& block);
+	bool checkImageTransparency(const RGBAImage& block) const;
+	void addBlockShadowEdges(uint16_t id, uint16_t data, const RGBAImage& block);
 
 	void setBlockImage(uint16_t id, uint16_t data, const BlockImage& block);
-	void setBlockImage(uint16_t id, uint16_t data, const Image& block);
+	void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
 
-	Image createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome_data) const;
+	RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome_data) const;
 	void createBiomeBlocks();
 
 	void testWaterTransparency();
@@ -295,86 +295,86 @@ private:
 	uint32_t darkenLeft(uint32_t pixel) const;
 	uint32_t darkenRight(uint32_t pixel) const;
 
-	Image buildImage(const BlockImage& image);
+	RGBAImage buildImage(const BlockImage& image);
 
-	BlockImage buildSmallerBlock(const Image& left_texture, const Image& right_texture,
-	        const Image& top_texture, int y1, int y2);
+	BlockImage buildSmallerBlock(const RGBAImage& left_texture, const RGBAImage& right_texture,
+	        const RGBAImage& top_texture, int y1, int y2);
 
-	Image buildStairsSouth(const Image& texture);
-	Image buildStairsNorth(const Image& texture);
-	Image buildStairsWest(const Image& texture);
-	Image buildStairsEast(const Image& texture);
-	Image buildUpsideDownStairsNorth(const Image& texture);
-	Image buildUpsideDownStairsSouth(const Image& texture);
-	Image buildUpsideDownStairsEast(const Image& texture);
-	Image buildUpsideDownStairsWest(const Image& texture);
+	RGBAImage buildStairsSouth(const RGBAImage& texture);
+	RGBAImage buildStairsNorth(const RGBAImage& texture);
+	RGBAImage buildStairsWest(const RGBAImage& texture);
+	RGBAImage buildStairsEast(const RGBAImage& texture);
+	RGBAImage buildUpsideDownStairsNorth(const RGBAImage& texture);
+	RGBAImage buildUpsideDownStairsSouth(const RGBAImage& texture);
+	RGBAImage buildUpsideDownStairsEast(const RGBAImage& texture);
+	RGBAImage buildUpsideDownStairsWest(const RGBAImage& texture);
 
 	void buildCustomTextures();
 
-	void createBlock(uint16_t id, uint16_t data, const Image& texture);
-	void createBlock(uint16_t id, uint16_t data, const Image& side_texture,
-	        const Image& top_texture);
-	void createBlock(uint16_t id, uint16_t data, const Image& left_texture,
-	        const Image& right_texture, const Image& top_texture);
+	void createBlock(uint16_t id, uint16_t data, const RGBAImage& texture);
+	void createBlock(uint16_t id, uint16_t data, const RGBAImage& side_texture,
+	        const RGBAImage& top_texture);
+	void createBlock(uint16_t id, uint16_t data, const RGBAImage& left_texture,
+	        const RGBAImage& right_texture, const RGBAImage& top_texture);
 
-	void createSmallerBlock(uint16_t id, uint16_t data, const Image& left_texture,
-	        const Image& right_texture, const Image& top_texture, int y1, int y2);
-	void createSmallerBlock(uint16_t id, uint16_t data, const Image& side_face,
-	        const Image& top_texture, int y1, int y2);
-	void createSmallerBlock(uint16_t id, uint16_t data, const Image& texture, int y1, int y2);
-	void createRotatedBlock(uint16_t id, uint16_t extra_data, const Image& front_texture,
-	        const Image& side_texture, const Image& top_texture);
-	void createRotatedBlock(uint16_t id, uint16_t extra_data, const Image& front_texture,
-	        const Image& back_texture, const Image& side_texture,
-	        const Image& top_texture);
-	void createItemStyleBlock(uint16_t id, uint16_t data, const Image& texture);
-	void createItemStyleBlock(uint16_t id, uint16_t data, const Image& north_south,
-	        const Image& east_west);
+	void createSmallerBlock(uint16_t id, uint16_t data, const RGBAImage& left_texture,
+	        const RGBAImage& right_texture, const RGBAImage& top_texture, int y1, int y2);
+	void createSmallerBlock(uint16_t id, uint16_t data, const RGBAImage& side_face,
+	        const RGBAImage& top_texture, int y1, int y2);
+	void createSmallerBlock(uint16_t id, uint16_t data, const RGBAImage& texture, int y1, int y2);
+	void createRotatedBlock(uint16_t id, uint16_t extra_data, const RGBAImage& front_texture,
+	        const RGBAImage& side_texture, const RGBAImage& top_texture);
+	void createRotatedBlock(uint16_t id, uint16_t extra_data, const RGBAImage& front_texture,
+	        const RGBAImage& back_texture, const RGBAImage& side_texture,
+	        const RGBAImage& top_texture);
+	void createItemStyleBlock(uint16_t id, uint16_t data, const RGBAImage& texture);
+	void createItemStyleBlock(uint16_t id, uint16_t data, const RGBAImage& north_south,
+	        const RGBAImage& east_west);
 	void createSingleFaceBlock(uint16_t id, uint16_t data, int face,
-	        const Image& texture);
+	        const RGBAImage& texture);
 
 	void createGrassBlock(); // id 2
 	void createWater(); // id 8, 9
 	void createLava(); // id 10, 11
-	void createWood(uint16_t id, uint16_t data, const Image& side_texture, const Image& top_texture); // id 17
+	void createWood(uint16_t id, uint16_t data, const RGBAImage& side_texture, const RGBAImage& top_texture); // id 17
 	void createLeaves(); // id 18
-	void createGlass(uint16_t id, uint16_t data, const Image& texture); // id 20, 95
-	void createDispenserDropper(uint16_t id, const Image& front); // id 23, 158
+	void createGlass(uint16_t id, uint16_t data, const RGBAImage& texture); // id 20, 95
+	void createDispenserDropper(uint16_t id, const RGBAImage& front); // id 23, 158
 	void createBed(); // id 26
-	void createStraightRails(uint16_t id, uint16_t extra_data, const Image& texture); // id 27, 28, 66
+	void createStraightRails(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 27, 28, 66
 	void createPiston(uint16_t id, bool sticky); // id 29, 33
 	void createSlabs(uint16_t id, bool stone_slabs, bool double_slabs); // id 43, 44, 125, 126
-	void createTorch(uint16_t, const Image& texture); // id 50, 75, 76
-	void createStairs(uint16_t id, const Image& texture); // id 53, 67, 108, 109, 114, 128, 134, 135, 136
-	void createChest(uint16_t id, Image* textures); // id 54, 95, 130
-	void createDoubleChest(uint16_t id, Image* textures); // id 54
+	void createTorch(uint16_t, const RGBAImage& texture); // id 50, 75, 76
+	void createStairs(uint16_t id, const RGBAImage& texture); // id 53, 67, 108, 109, 114, 128, 134, 135, 136
+	void createChest(uint16_t id, RGBAImage* textures); // id 54, 95, 130
+	void createDoubleChest(uint16_t id, RGBAImage* textures); // id 54
 	void createRedstoneWire(uint16_t id, uint16_t extra_data,
 			uint8_t r, uint8_t g, uint8_t b); // id 55
-	void createDoor(uint16_t id, const Image& bottom, const Image& top); // id 64, 71
+	void createDoor(uint16_t id, const RGBAImage& bottom, const RGBAImage& top); // id 64, 71
 	void createRails(); // id 66
-	void createButton(uint16_t id, const Image& tex); // id 77, 143
+	void createButton(uint16_t id, const RGBAImage& tex); // id 77, 143
 	void createSnow(); // id 78
 	void createIce(uint8_t id); // id 79
 	void createCactus(); // id 81
-	void createFence(uint16_t id, uint16_t extra_data, const Image& texture); // id 85, 113
-	void createPumkin(uint16_t id, const Image& front); // id 86, 91
+	void createFence(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 85, 113
+	void createPumkin(uint16_t id, const RGBAImage& front); // id 86, 91
 	void createCake(); // id 92
-	void createRedstoneRepeater(uint16_t id, const Image& texture); // id 93, 94
+	void createRedstoneRepeater(uint16_t id, const RGBAImage& texture); // id 93, 94
 	void createTrapdoor(); // id 96
-	void createHugeMushroom(uint16_t id, const Image& cap); // id 99, 100
-	void createBarsPane(uint16_t id, uint16_t extra_data, const Image& texture); // id 101, 102
+	void createHugeMushroom(uint16_t id, const RGBAImage& cap); // id 99, 100
+	void createBarsPane(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 101, 102
 	void createStem(uint16_t id); // id 104, 105
 	void createVines(); // id 106
 	void createFenceGate(); // id 107
 	void createBrewingStand(); // id 117
 	void createCauldron(); // id 118
 	void createDragonEgg(); // id 122
-	Image buildCocoa(int stage);
+	RGBAImage buildCocoa(int stage);
 	void createCocoas(); // id 127
 	void createTripwireHook(); // id 131
 	void createBeacon(); // id 138
 	void createFlowerPot(); // id 140
-	void createLargePlant(uint16_t data, const Image& texture, const Image& top_texture); // id 175
+	void createLargePlant(uint16_t data, const RGBAImage& texture, const RGBAImage& top_texture); // id 175
 
 	void loadBlocks();
 public:
@@ -394,11 +394,11 @@ public:
 
 	bool isBlockTransparent(uint16_t id, uint16_t data) const;
 	bool hasBlock(uint16_t id, uint16_t) const;
-	const Image& getBlock(uint16_t id, uint16_t data) const;
-	Image getBiomeDependBlock(uint16_t id, uint16_t data, const Biome& biome) const;
+	const RGBAImage& getBlock(uint16_t id, uint16_t data) const;
+	RGBAImage getBiomeDependBlock(uint16_t id, uint16_t data, const Biome& biome) const;
 
 	int getMaxWaterNeededOpaque() const;
-	const Image& getOpaqueWater(bool south, bool west) const;
+	const RGBAImage& getOpaqueWater(bool south, bool west) const;
 
 	int getBlockImageSize() const;
 	int getTextureSize() const;
