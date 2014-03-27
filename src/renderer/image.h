@@ -25,15 +25,6 @@
 #include <string>
 #include <vector>
 
-#define ROTATE_90 1
-#define ROTATE_180 2
-#define ROTATE_270 3
-
-#define ALPHA(value) (((value) & 0xff000000) >> 24)
-#define BLUE(value) (((value) & 0xff0000) >> 16)
-#define GREEN(value) (((value) & 0xff00) >> 8)
-#define RED(value) ((value) & 0xff)
-
 # ifndef UINT64_C
 #  if __WORDSIZE == 64
 #   define UINT64_C(c)	c ## UL
@@ -46,6 +37,11 @@ namespace mapcrafter {
 namespace renderer {
 
 uint32_t rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
+uint8_t rgba_red(uint32_t value);
+uint8_t rgba_green(uint32_t value);
+uint8_t rgba_blue(uint32_t value);
+uint8_t rgba_alpha(uint32_t value);
+
 uint32_t rgba_multiply(uint32_t value, double r, double g, double b, double a = 1);
 uint32_t rgba_multiply(uint32_t value, uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
 
@@ -53,6 +49,10 @@ void blend(uint32_t& dest, const uint32_t& source);
 
 void pngReadData(png_structp pngPtr, png_bytep data, png_size_t length);
 void pngWriteData(png_structp pngPtr, png_bytep data, png_size_t length);
+
+const int ROTATE_90 = 1;
+const int ROTATE_180 = 2;
+const int ROTATE_270 = 3;
 
 class Image {
 private:

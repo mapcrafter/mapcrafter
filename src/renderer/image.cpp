@@ -32,19 +32,35 @@ uint32_t rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 	return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
+uint8_t rgba_red(uint32_t value) {
+	return value & 0xff;
+}
+
+uint8_t rgba_green(uint32_t value) {
+	return (value & 0xff00) >> 8;
+}
+
+uint8_t rgba_blue(uint32_t value) {
+	return (value & 0xff0000) >> 16;
+}
+
+uint8_t rgba_alpha(uint32_t value) {
+	return (value & 0xff000000) >> 24;
+}
+
 uint32_t rgba_multiply(uint32_t value, double r, double g, double b, double a) {
-	uint8_t red = RED(value);
-	uint8_t green = GREEN(value);
-	uint8_t blue = BLUE(value);
-	uint8_t alpha = ALPHA(value);
+	uint8_t red = rgba_red(value);
+	uint8_t green = rgba_green(value);
+	uint8_t blue = rgba_blue(value);
+	uint8_t alpha = rgba_alpha(value);
 	return rgba(red * r, green * g, blue * b, alpha * a);
 }
 
 uint32_t rgba_multiply(uint32_t value, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-	int red = (RED(value) * r) / 255;
-	int green = (GREEN(value) * g) / 255;
-	int blue = (BLUE(value) * b) / 255;
-	int alpha = (ALPHA(value) * a) / 255;
+	int red = (rgba_red(value) * r) / 255;
+	int green = (rgba_green(value) * g) / 255;
+	int blue = (rgba_blue(value) * b) / 255;
+	int alpha = (rgba_alpha(value) * a) / 255;
 	return rgba(red, green, blue, alpha);
 }
 
@@ -66,7 +82,7 @@ void blend(uint32_t& dest, const uint32_t& source) {
 	else if (dest >= 0xff000000) {
 		// get sa and sainv in the range 1-256; this way, the possible results of blending 8-bit color channels sc and dc
 		//  (using sc*sa + dc*sainv) span the range 0x0000-0xffff, so we can just truncate and shift
-		int64_t sa = ALPHA(source) + 1;
+		int64_t sa = rgba_alpha(source) + 1;
 		int64_t sainv = 257 - sa;
 		// compute the new RGB channels
 		int64_t d = dest, s = source;
@@ -81,7 +97,7 @@ void blend(uint32_t& dest, const uint32_t& source) {
 	} else {
 		// get sa and sainv in the range 1-256; this way, the possible results of blending 8-bit color channels sc and dc
 		//  (using sc*sa + dc*sainv) span the range 0x0000-0xffff, so we can just truncate and shift
-		int64_t sa = ALPHA(source) + 1;
+		int64_t sa = rgba_alpha(source) + 1;
 		int64_t sainv = 257 - sa;
 		// compute the new RGB channels
 		int64_t d = dest, s = source;
@@ -89,7 +105,7 @@ void blend(uint32_t& dest, const uint32_t& source) {
 		s = ((s << 16) & UINT64_C(0xff00000000)) | ((s << 8) & 0xff0000) | (s & 0xff);
 		int64_t newrgb = s * sa + d * sainv;
 		// compute the new alpha channel
-		int64_t dainv = 256 - ALPHA(dest);
+		int64_t dainv = 256 - rgba_alpha(dest);
 		int64_t newa = sainv * dainv; // result is from 1-0x10000
 		newa = (newa - 1) >> 8; // result is from 0-0xff
 		newa = 255 - newa; // final result; if either input was 255, so is this, so opacity is preserved
@@ -190,7 +206,7 @@ void Image::simpleblit(const Image& image, int x, int y) {
 	for (; sx < image.width && sx+x < width; sx++) {
 		sy = std::max(0, -y);
 		for (; sy < image.height && sy+y < height; sy++) {
-			if (ALPHA(image.data[sy*image.width+sx]) != 0) {
+			if (rgba_alpha(image.data[sy*image.width+sx]) != 0) {
 				data[(sy+y) * width + (sx+x)] = image.data[sy * image.width + sx];
 			}
 		}
@@ -354,13 +370,14 @@ void Image::resizeInterpolated(int new_width, int new_height, Image& dest) const
 			uint32_t c = getPixel(sx, sy + 1);
 			uint32_t d = getPixel(sx + 1, sy + 1);
 
-			uint8_t red = interpolate(RED(a), RED(b), RED(c), RED(d), x_diff, y_diff);
-			uint8_t green = interpolate(GREEN(a), GREEN(b), GREEN(c), GREEN(d), x_diff,
-			        y_diff);
-			uint8_t blue = interpolate(BLUE(a), BLUE(b), BLUE(c), BLUE(d), x_diff,
-			        y_diff);
-			uint8_t alpha = interpolate(ALPHA(a), ALPHA(b), ALPHA(c), ALPHA(d), x_diff,
-			        y_diff);
+			uint8_t red = interpolate(rgba_red(a), rgba_red(b), rgba_red(c), rgba_red(d),
+					x_diff, y_diff);
+			uint8_t green = interpolate(rgba_green(a), rgba_green(b), rgba_green(c), rgba_green(d),
+					x_diff, y_diff);
+			uint8_t blue = interpolate(rgba_blue(a), rgba_blue(b), rgba_blue(c), rgba_blue(d),
+					x_diff, y_diff);
+			uint8_t alpha = interpolate(rgba_alpha(a), rgba_alpha(b), rgba_alpha(c), rgba_alpha(d),
+					x_diff, y_diff);
 
 			dest.setPixel(x, y, rgba(red, green, blue, alpha));
 		}

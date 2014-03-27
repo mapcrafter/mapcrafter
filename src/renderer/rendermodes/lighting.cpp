@@ -289,7 +289,7 @@ void LightingRendermode::lightLeft(Image& image, const CornerColors& colors) {
 	for (SideFaceIterator it(size, SideFaceIterator::LEFT); !it.end(); it.next()) {
 		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + size/2);
 		if (pixel != 0) {
-			uint8_t d = ALPHA(tex.pixel(it.src_x, it.src_y));
+			uint8_t d = rgba_alpha(tex.pixel(it.src_x, it.src_y));
 			pixel = rgba_multiply(pixel, d, d, d);
 		}
 	}
@@ -306,7 +306,7 @@ void LightingRendermode::lightLeft(Image& image, const CornerColors& colors,
 			continue;
 		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + size/2);
 		if (pixel != 0) {
-			uint8_t d = ALPHA(tex.pixel(it.src_x, it.src_y));
+			uint8_t d = rgba_alpha(tex.pixel(it.src_x, it.src_y));
 			pixel = rgba_multiply(pixel, d, d, d);
 		}
 	}
@@ -323,7 +323,7 @@ void LightingRendermode::lightRight(Image& image, const CornerColors& colors) {
 	for (SideFaceIterator it(size, SideFaceIterator::RIGHT); !it.end(); it.next()) {
 		uint32_t& pixel = image.pixel(it.dest_x + size, it.dest_y + size/2);
 		if (pixel != 0) {
-			uint8_t d = ALPHA(tex.pixel(it.src_x, it.src_y));
+			uint8_t d = rgba_alpha(tex.pixel(it.src_x, it.src_y));
 			pixel = rgba_multiply(pixel, d, d, d);
 		}
 	}
@@ -340,7 +340,7 @@ void LightingRendermode::lightRight(Image& image, const CornerColors& colors,
 			continue;
 		uint32_t& pixel = image.pixel(it.dest_x + size, it.dest_y + size/2);
 		if (pixel != 0) {
-			uint8_t d = ALPHA(tex.pixel(it.src_x, it.src_y));
+			uint8_t d = rgba_alpha(tex.pixel(it.src_x, it.src_y));
 			pixel = rgba_multiply(pixel, d, d, d);
 		}
 	}
@@ -359,7 +359,7 @@ void LightingRendermode::lightTop(Image& image, const CornerColors& colors, int 
 	for (TopFaceIterator it(size); !it.end(); it.next()) {
 		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + yoff);
 		if (pixel != 0) {
-			uint8_t d = ALPHA(tex.pixel(it.src_x, it.src_y));
+			uint8_t d = rgba_alpha(tex.pixel(it.src_x, it.src_y));
 			pixel = rgba_multiply(pixel, d, d, d);
 		}
 	}

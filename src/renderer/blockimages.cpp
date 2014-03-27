@@ -638,17 +638,17 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 bool BlockImages::checkImageTransparency(const Image& image) const {
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
-		if (ALPHA(image.getPixel(it.dest_x, it.dest_y + texture_size/2)) < 255)
+		if (rgba_alpha(image.getPixel(it.dest_x, it.dest_y + texture_size/2)) < 255)
 			return true;
 	}
 	for (SideFaceIterator it(texture_size, SideFaceIterator::RIGHT); !it.end();
 	        it.next()) {
-		if (ALPHA(image.getPixel(it.dest_x + texture_size, it.dest_y + texture_size / 2))
+		if (rgba_alpha(image.getPixel(it.dest_x + texture_size, it.dest_y + texture_size / 2))
 		        < 255)
 			return true;
 	}
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
-		if (ALPHA(image.getPixel(it.dest_x, it.dest_y)) < 255)
+		if (rgba_alpha(image.getPixel(it.dest_x, it.dest_y)) < 255)
 			return true;
 	}
 	return false;
@@ -714,9 +714,9 @@ Image BlockImages::createBiomeBlock(uint16_t id, uint16_t data,
 	else
 		color = biome_data.getColor(grasscolors, false);
 
-	double r = (double) RED(color) / 255;
-	double g = (double) GREEN(color) / 255;
-	double b = (double) BLUE(color) / 255;
+	double r = (double) rgba_red(color) / 255;
+	double g = (double) rgba_green(color) / 255;
+	double b = (double) rgba_blue(color) / 255;
 
 	// grass block needs something special
 	if (id == 2) {
@@ -791,7 +791,7 @@ void BlockImages::testWaterTransparency() {
 		// then check alpha
 		uint8_t min_alpha = 255;
 		for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
-			uint8_t alpha = ALPHA(tmp.getPixel(it.dest_x, it.dest_y));
+			uint8_t alpha = rgba_alpha(tmp.getPixel(it.dest_x, it.dest_y));
 			if (alpha < min_alpha)
 				min_alpha = alpha;
 		}
