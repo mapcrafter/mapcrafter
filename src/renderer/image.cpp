@@ -773,10 +773,13 @@ bool RGBAImage::writeJPEG(const std::string& filename, int quality,
 		 */
 		for (int x = 0; x < width; x++) {
 			RGBAPixel color = pixel(x, y);
-			// jpeg does not support transparency, add background color
-			// if this pixel has transparency
-			if (rgba_alpha(color) != 255)
-				blend(color, background);
+			// jpeg does not support transparency
+			// add background color if this pixel has transparency
+			// but ignore a bit transparency
+			if (rgba_alpha(color) < 250) {
+				color = background;
+				blend(color, pixel(x, y));
+			}
 
 			line_buffer[3 * x] = rgba_red(color);
 			line_buffer[3 * x + 1] = rgba_green(color);
