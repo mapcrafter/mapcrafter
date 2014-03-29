@@ -219,7 +219,8 @@ void RenderManager::writeTemplates() const {
  * This method increases the max zoom of a rendered map and makes the necessary changes
  * on the tile tree.
  */
-void RenderManager::increaseMaxZoom(const fs::path& dir) const {
+void RenderManager::increaseMaxZoom(const fs::path& dir,
+		std::string image_format, int jpeg_quality) const {
 	if (fs::exists(dir / "1")) {
 		// at first rename the directories 1 2 3 4 (zoom level 0) and make new directories
 		util::moveFile(dir / "1", dir / "1_");
@@ -227,7 +228,8 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 		// then move the old tile trees one zoom level deeper
 		util::moveFile(dir / "1_", dir / "1/4");
 		// also move the images of the directories
-		util::moveFile(dir / "1.png", dir / "1/4.png");
+		util::moveFile(dir / (std::string("1.") + image_format),
+				dir / (std::string("1/4.") + image_format));
 	}
 
 	// do the same for the other directories
@@ -235,29 +237,39 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 		util::moveFile(dir / "2", dir / "2_");
 		fs::create_directories(dir / "2");
 		util::moveFile(dir / "2_", dir / "2/3");
-		util::moveFile(dir / "2.png", dir / "2/3.png");
+		util::moveFile(dir / (std::string("2.") + image_format),
+				dir / (std::string("2/3.") + image_format));
 	}
 	
 	if (fs::exists(dir / "3")) {
 		util::moveFile(dir / "3", dir / "3_");
 		fs::create_directories(dir / "3");
 		util::moveFile(dir / "3_", dir / "3/2");
-		util::moveFile(dir / "3.png", dir / "3/2.png");
+		util::moveFile(dir / (std::string("3.") + image_format),
+				dir / (std::string("3/2.") + image_format));
 	}
 	
 	if (fs::exists(dir / "4")) {
 		util::moveFile(dir / "4", dir / "4_");
 		fs::create_directories(dir / "4");
 		util::moveFile(dir / "4_", dir / "4/1");
-		util::moveFile(dir / "4.png", dir / "4/1.png");
+		util::moveFile(dir / (std::string("4.") + image_format),
+				dir / (std::string("4/1.") + image_format));
 	}
 
 	// now read the images, which belong to the new directories
 	RGBAImage img1, img2, img3, img4;
-	img1.readPNG((dir / "1/4.png").string());
-	img2.readPNG((dir / "2/3.png").string());
-	img3.readPNG((dir / "3/2.png").string());
-	img4.readPNG((dir / "4/1.png").string());
+	if (image_format == "png") {
+		img1.readPNG((dir / "1/4.png").string());
+		img2.readPNG((dir / "2/3.png").string());
+		img3.readPNG((dir / "3/2.png").string());
+		img4.readPNG((dir / "4/1.png").string());
+	} else {
+		img1.readJPEG((dir / "1/4.jpg").string());
+		img2.readJPEG((dir / "2/3.jpg").string());
+		img3.readJPEG((dir / "3/2.jpg").string());
+		img4.readJPEG((dir / "4/1.jpg").string());
+	}
 
 	int s = img1.getWidth();
 	// create images for the new directories
@@ -276,10 +288,17 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 	new4.simpleblit(old4, 0, 0);
 
 	// now save the new images in the output directory
-	new1.writePNG((dir / "1.png").string());
-	new2.writePNG((dir / "2.png").string());
-	new3.writePNG((dir / "3.png").string());
-	new4.writePNG((dir / "4.png").string());
+	if (image_format == "png") {
+		new1.writePNG((dir / "1.png").string());
+		new2.writePNG((dir / "2.png").string());
+		new3.writePNG((dir / "3.png").string());
+		new4.writePNG((dir / "4.png").string());
+	} else {
+		new1.writeJPEG((dir / "1.jpg").string(), jpeg_quality);
+		new2.writeJPEG((dir / "2.jpg").string(), jpeg_quality);
+		new3.writeJPEG((dir / "3.jpg").string(), jpeg_quality);
+		new4.writeJPEG((dir / "4.jpg").string(), jpeg_quality);
+	}
 
 	// don't forget the base.png
 	RGBAImage base_big(2*s, 2*s), base;
@@ -288,7 +307,10 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 	base_big.simpleblit(new3, 0, s);
 	base_big.simpleblit(new4, s, s);
 	base_big.resizeHalf(base);
-	base.writePNG((dir / "base.png").string());
+	if (image_format == "png")
+		base.writePNG((dir / "base.png").string());
+	else
+		base.writeJPEG((dir / "base.jpg").string(), jpeg_quality);
 }
 
 /**
@@ -505,7 +527,7 @@ bool RenderManager::run() {
 				std::string output_dir = config.getOutputPath(map_name + "/"
 						+ config::ROTATION_NAMES_SHORT[*rotation_it]);
 				for (int i = settings.max_zoom; i < world_zoomlevels; i++)
-					increaseMaxZoom(output_dir);
+					increaseMaxZoom(output_dir, map.getImageFormatSuffix());
 			}
 		}
 

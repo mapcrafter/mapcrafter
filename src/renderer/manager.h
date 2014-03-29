@@ -91,7 +91,8 @@ private:
 	bool writeTemplateIndexHtml() const;
 	void writeTemplates() const;
 
-	void increaseMaxZoom(const fs::path& dir) const;
+	void increaseMaxZoom(const fs::path& dir, std::string image_format,
+			int jpeg_quality = 85) const;
 
 public:
 	RenderManager(const RenderOpts& opts);
