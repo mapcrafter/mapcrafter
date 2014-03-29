@@ -2,6 +2,8 @@ var MCTileLayer = L.TileLayer.extend({
 	initialize: function(url, options) {
 		this._url = url;
 		
+		this.imageFormat = options["imageFormat"];
+		
 		L.setOptions(this, options);
 	},
 	
@@ -19,7 +21,7 @@ var MCTileLayer = L.TileLayer.extend({
 				url += "/" + (x + 2 * y + 1);
 			}
 		}
-		url = url + ".png";
+		url = url + "." + this.imageFormat;
 		return url;
 	},
 });
@@ -184,6 +186,7 @@ MapcrafterUI.prototype.createTileLayer = function(name, config, rotation) {
 		maxZoom: config.maxZoom,
 		tileSize: config.tileSize,
 		noWrap: true,
+		imageFormat: config.imageFormat,
 	});
 	
 	return layer;
