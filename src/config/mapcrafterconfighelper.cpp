@@ -52,9 +52,6 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 	for (auto it = maps.begin(); it != maps.end(); ++it) {
 		auto world = config.getWorld(it->getWorld());
 
-		bool png = it->getImageFormat() == ImageFormat::PNG;
-		std::string image_format = png ? "png" : "jpg";
-
 		js += "\"" + it->getShortName() + "\" : {\n";
 		js += "\tname: \"" + it->getLongName() + "\",\n";
 		js += "\tworld: \"" + it->getWorld() + "\",\n";
@@ -62,7 +59,7 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 		js += "\ttextureSize: " + util::str(it->getTextureSize()) + ",\n";
 		js += "\ttileSize: " + util::str(32 * it->getTextureSize()) + ",\n";
 		js += "\tmaxZoom: " + util::str(getMapZoomlevel(it->getShortName())) + ",\n";
-		js += "\timageFormat: \"" + image_format + "\",\n";
+		js += "\timageFormat: \"" + it->getImageFormatSuffix() + "\",\n";
 
 		js += "\trotations: [";
 		auto rotations = it->getRotations();
