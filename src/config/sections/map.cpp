@@ -22,6 +22,21 @@
 #include "../iniconfig.h"
 
 namespace mapcrafter {
+namespace util {
+
+template<>
+config::ImageFormat as<config::ImageFormat>(const std::string& from) {
+	if (from == "png")
+		return config::ImageFormat::PNG;
+	else if (from == "jpeg")
+		return config::ImageFormat::JPEG;
+	throw std::invalid_argument("Must be 'png' or 'jpeg'!");
+}
+
+}
+}
+
+namespace mapcrafter {
 namespace config {
 
 MapSection::MapSection(bool global)
@@ -50,6 +65,8 @@ void MapSection::preParse(const INIConfigSection& section,
 	rotations.setDefault("top-left");
 	rendermode.setDefault("daylight");
 	texture_size.setDefault(12);
+	image_format.setDefault(ImageFormat::PNG);
+	jpeg_quality.setDefault(85);
 	lighting_intensity.setDefault(1.0);
 	render_unknown_blocks.setDefault(false);
 	render_leaves_transparent.setDefault(true);
@@ -85,6 +102,13 @@ bool MapSection::parseField(const std::string key, const std::string value,
 				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 32))
 				validation.push_back(ValidationMessage::error(
 						"'texture_size' must a number between 1 and 32!"));
+	} else if (key == "image_format") {
+		image_format.load(key, value, validation);
+	} else if (key == "jpeg_quality") {
+		if (jpeg_quality.load(key, value, validation)
+				&& (jpeg_quality.getValue() < 0 || jpeg_quality.getValue() > 100))
+			validation.push_back(ValidationMessage::error(
+					"'jpeg_quality' must be a number between 0 and 100!"));
 	} else if (key == "lighting_intensity") {
 		lighting_intensity.load(key, value, validation);
 	} else if (key == "render_unknown_blocks") {
@@ -149,6 +173,14 @@ std::string MapSection::getRendermode() const {
 
 int MapSection::getTextureSize() const {
 	return texture_size.getValue();
+}
+
+ImageFormat MapSection::getImageFormat() const {
+	return image_format.getValue();
+}
+
+int MapSection::getJPEGQuality() const {
+	return jpeg_quality.getValue();
 }
 
 double MapSection::getLightingIntensity() const {
