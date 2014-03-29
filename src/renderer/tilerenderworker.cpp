@@ -51,13 +51,16 @@ void TileRenderWorker::setProgressHandler(
 }
 
 void TileRenderWorker::saveTile(const TilePath& tile, const RGBAImage& image) {
-	std::string filename = tile.toString() + ".png";
+	bool png = render_context.map_config.getImageFormat() == config::ImageFormat::PNG;
+	std::string filename = tile.toString() + (png ? ".png" : ".jpg");
 	if (tile.getDepth() == 0)
-		filename = "base.png";
+		filename = std::string("base") + (png ? ".png" : ".jpg");
 	fs::path file = render_context.output_dir / filename;
 	if (!fs::exists(file.branch_path()))
 		fs::create_directories(file.branch_path());
-	if (!image.writePNG(file.string()))
+	if (png && !image.writePNG(file.string()))
+		std::cout << "Unable to write " << file.string() << std::endl;
+	else if (!image.writeJPEG(file.string(), render_context.map_config.getJPEGQuality()))
 		std::cout << "Unable to write " << file.string() << std::endl;
 }
 
@@ -65,8 +68,11 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 	// if this is tile is not required or we should skip it, try to load it from file
 	if (!render_context.tile_set->isTileRequired(tile)
 			|| render_work.tiles_skip.count(tile)) {
-		fs::path file = render_context.output_dir / (tile.toString() + ".png");
-		if (image.readPNG(file.string())) {
+		bool png = render_context.map_config.getImageFormat() == config::ImageFormat::PNG;
+		fs::path file = render_context.output_dir
+				/ (tile.toString() + (png ? ".png" : ".jpg"));
+		if ((png && image.readPNG(file.string()))
+				|| (!png && image.readJPEG(file.string()))) {
 			if (render_work.tiles_skip.count(tile))
 				progress->setValue(progress->getValue()
 						+ render_context.tile_set->getContainingRenderTiles(tile));
