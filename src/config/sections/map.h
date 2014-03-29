@@ -64,6 +64,7 @@ public:
 	int getTextureSize() const;
 
 	ImageFormat getImageFormat() const;
+	std::string getImageFormatSuffix() const;
 	int getJPEGQuality() const;
 
 	double getLightingIntensity() const;

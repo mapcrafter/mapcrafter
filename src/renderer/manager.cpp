@@ -559,7 +559,8 @@ bool RenderManager::run() {
 				std::cout << "Scanning required tiles..." << std::endl;
 				// use the incremental check specified in the config
 				if (map.useImageModificationTimes())
-					tile_set->scanRequiredByFiletimes(output_dir);
+					tile_set->scanRequiredByFiletimes(output_dir,
+							map.getImageFormatSuffix());
 				else
 					tile_set->scanRequiredByTimestamp(settings.last_render[rotation]);
 			}

@@ -179,6 +179,12 @@ ImageFormat MapSection::getImageFormat() const {
 	return image_format.getValue();
 }
 
+std::string MapSection::getImageFormatSuffix() const {
+	if (getImageFormat() == ImageFormat::PNG)
+		return "png";
+	return "jpg";
+}
+
 int MapSection::getJPEGQuality() const {
 	return jpeg_quality.getValue();
 }
