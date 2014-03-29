@@ -182,7 +182,8 @@ public:
 	 * Scans which tiles are required by using the modification times of the already
 	 * rendered image files.
 	 */
-	void scanRequiredByFiletimes(const fs::path& output_dir);
+	void scanRequiredByFiletimes(const fs::path& output_dir,
+			std::string image_format = "png");
 
 	/**
 	 * Returns the minimum maximum zoom level required to render all render tiles.

@@ -430,14 +430,14 @@ void TileSet::scanRequiredByTimestamp(int last_change) {
 	updateContainingRenderTiles();
 }
 
-void TileSet::scanRequiredByFiletimes(const fs::path& output_dir) {
+void TileSet::scanRequiredByFiletimes(const fs::path& output_dir,
+		std::string image_format) {
 	required_render_tiles.clear();
 
 	for (std::map<TilePos, int>::iterator it = tile_timestamps.begin();
 			it != tile_timestamps.end(); ++it) {
 		TilePath path = TilePath::byTilePos(it->first, depth);
-		fs::path file = output_dir / (path.toString() + ".png");
-		//std::cout << file.string() << " " << fs::exists(file) << std::endl ;
+		fs::path file = output_dir / (path.toString() + "." + image_format);
 		if (!fs::exists(file) || fs::last_write_time(file) <= it->second)
 			required_render_tiles.insert(it->first);
 	}
