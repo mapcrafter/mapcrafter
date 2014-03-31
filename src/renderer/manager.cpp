@@ -34,7 +34,7 @@ namespace mapcrafter {
 namespace renderer {
 
 MapSettings::MapSettings()
-	: texture_size(12), tile_size(0), max_zoom(0),
+	: texture_size(12), max_zoom(0),
 	  image_format("png"),
 	  lighting_intensity(1.0),
 	  render_unknown_blocks(0), render_leaves_transparent(0), render_biomes(false) {
@@ -56,7 +56,6 @@ bool MapSettings::read(const std::string& filename) {
 	config::INIConfigSection& root = config.getRootSection();
 
 	texture_size = root.get<int>("texture_size");
-	tile_size = root.get<int>("tile_size");
 	max_zoom = root.get<int>("max_zoom");
 
 	image_format = root.get<std::string>("image_format", "png");
