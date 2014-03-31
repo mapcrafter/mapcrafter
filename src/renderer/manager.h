@@ -54,8 +54,9 @@ struct RenderOpts {
  */
 struct MapSettings {
 	int texture_size;
-	int tile_size;
 	int max_zoom;
+
+	std::string image_format;
 
 	double lighting_intensity;
 	bool render_unknown_blocks;

@@ -35,6 +35,7 @@ namespace renderer {
 
 MapSettings::MapSettings()
 	: texture_size(12), tile_size(0), max_zoom(0),
+	  image_format("png"),
 	  lighting_intensity(1.0),
 	  render_unknown_blocks(0), render_leaves_transparent(0), render_biomes(false) {
 	for (int i = 0; i < 4; i++) {
@@ -57,6 +58,8 @@ bool MapSettings::read(const std::string& filename) {
 	texture_size = root.get<int>("texture_size");
 	tile_size = root.get<int>("tile_size");
 	max_zoom = root.get<int>("max_zoom");
+
+	image_format = root.get<std::string>("image_format", "png");
 
 	lighting_intensity = root.get<double>("lighting_intensity", 1.0);
 	render_unknown_blocks = root.get<bool>("render_unknown_blocks");
@@ -86,8 +89,9 @@ bool MapSettings::write(const std::string& filename) const {
 	config::INIConfigSection& root = config.getRootSection();
 
 	root.set("texture_size", util::str(texture_size));
-	root.set("tile_size", util::str(tile_size));
 	root.set("max_zoom", util::str(max_zoom));
+
+	root.set("image_format", image_format);
 
 	root.set("lighting_intensity", util::str(lighting_intensity));
 	root.set("render_unknown_blocks", util::str(render_unknown_blocks));
@@ -109,6 +113,7 @@ bool MapSettings::write(const std::string& filename) const {
 
 bool MapSettings::equalsMapConfig(const config::MapSection& map) const {
 	return texture_size == map.getTextureSize()
+			&& image_format == map.getImageFormatSuffix()
 			&& util::floatingPointEquals(lighting_intensity, map.getLightingIntensity())
 			&& render_unknown_blocks == map.renderUnknownBlocks()
 			&& render_leaves_transparent == map.renderLeavesTransparent()
@@ -119,8 +124,9 @@ MapSettings MapSettings::byMapConfig(const config::MapSection& map) {
 	MapSettings settings;
 
 	settings.texture_size = map.getTextureSize();
-	settings.tile_size = map.getTextureSize() * 32;
+	settings.image_format = map.getImageFormatSuffix();
 
+	settings.lighting_intensity = map.getLightingIntensity();
 	settings.render_unknown_blocks = map.renderUnknownBlocks();
 	settings.render_leaves_transparent = map.renderLeavesTransparent();
 	settings.render_biomes = map.renderBiomes();
