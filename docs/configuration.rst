@@ -429,16 +429,7 @@ Marker Options
     all signs whose text starts with ``[home]`` are displayed as markers
     of this group.
 
-``match_empty = true|false``
 
-    **Default:** ``false``
-    
-    This option specifies whether empty signs can be matched as markers.
-    You have to set this to ``true`` if you set the prefix to an empty
-    string to show all remaining unmatched signs as markers and if you
-    want to show even empty signs as markers.
-
-    
 ``title_format = <format>``
 
     **Default:** ``%text``
@@ -493,3 +484,19 @@ Marker Options
 
     This is the size of your icon. Specify it like ``[width, height]``.
     The icon size defaults to 24x24 pixels.
+
+``match_empty = true|false``
+
+    **Default:** ``false``
+    
+    This option specifies whether empty signs can be matched as markers.
+    You have to set this to ``true`` if you set the prefix to an empty
+    string to show all remaining unmatched signs as markers and if you
+    want to show even empty signs as markers.
+
+``show_default = true|false``
+
+    **Default:** ``true``
+    
+    With this option you can hide a marker group in the web interface by
+    default.

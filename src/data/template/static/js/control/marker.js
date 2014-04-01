@@ -74,6 +74,8 @@ MarkerControl.prototype.create = function(wrapper) {
 	wrapper.appendChild(label);
 	wrapper.appendChild(checkboxes);
 	wrapper.appendChild(container);
-	
-	this.ui.addHandler(this.handler);
+};
+
+MarkerControl.prototype.getHandler = function() {
+	return this.handler;
 };

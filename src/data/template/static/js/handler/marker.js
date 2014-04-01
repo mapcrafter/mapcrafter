@@ -14,41 +14,53 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 		this.ui.lmap.removeLayer(this.layerGroups[group]);
 	this.layerGroups = {};
 	
+	var createDefaultMarker = function(ui, groupInfo, markerInfo) {
+		var pos = markerInfo.pos;
+		var marker = new L.Marker(ui.mcToLatLng(pos[0], pos[1], pos[2]), {
+			title: markerInfo.title,
+		});
+		if(groupInfo.icon) {
+			marker.setIcon(new L.Icon({
+				iconUrl: groupInfo.icon != "" ? "static/markers/" + groupInfo.icon : null,
+				iconSize: (groupInfo.icon_size ? groupInfo.icon_size : [24, 24]),
+			}));
+		}
+		marker.bindPopup(markerInfo.text ? markerInfo.text : markerInfo.title);
+		return marker;
+	};
+	
 	var world = this.ui.getCurrentMapConfig().world;
 	for(var i = 0; i < this.markers.length; i++) {
 		var groupInfo = this.markers[i];
-		if (!(world in groupInfo["markers"]))
+		var group = groupInfo.id;
+		if(!(world in groupInfo.markers)) {
+			// create empty layer group
+			this.layerGroups[group] = L.layerGroup();
 			continue;
-		var group = groupInfo["id"];
-		var markers = groupInfo["markers"][world];
+		}
+		
+		if(!groupInfo.createMarker)
+			groupInfo.createMarker = createDefaultMarker;
+		
+		var markers = groupInfo.markers[world];
 		var layerGroup = L.layerGroup();
 		for (var j = 0; j < markers.length; j++) {
-			var poi = markers[j];
-			
-			var pos = poi.pos;
-			var marker = new L.Marker(this.ui.mcToLatLng(pos[0], pos[1], pos[2]), {
-				title: poi.title,
-			});
-			if(groupInfo.icon) {
-				marker.setIcon(new L.Icon({
-					iconUrl: groupInfo.icon != "" ? "static/markers/" + groupInfo.icon : null,
-					iconSize: (groupInfo.icon_size ? groupInfo.icon_size : [24, 24]),
-				}));
-			}
-			marker.bindPopup(poi.text ? poi.text : poi.title);
+			var markerInfo = markers[j];
+			var marker = groupInfo.createMarker(this.ui, groupInfo, markerInfo);
 			marker.addTo(layerGroup);
 		}
-		//layerGroup.addTo(this.ui.lmap);
+		
 		this.layerGroups[group] = layerGroup;
 		if(!(group in this.visible))
 			this.visible[group] = true;
+		if("show_default" in groupInfo && !groupInfo.show_default) {
+			document.getElementById("cb_group_" + group).checked = false;
+			this.visible[group] = false;
+		}
 	}
 	
 	for(var group in this.visible)
 		this.show(group, this.visible[group]);
-	
-	//this.show("spawn", false);
-	//this.show("spawn", true);
 };
 
 MarkerHandler.prototype.getMarkerGroups = function() {

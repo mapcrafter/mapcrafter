@@ -224,6 +224,9 @@ MapcrafterUI.prototype.addControl = function(control, pos, index) {
 		position: pos,
 	});
 	this.lmap.addControl(lcontrol);
+	
+	if(control.getHandler())
+		this.addHandler(control.getHandler());
 };
 
 MapcrafterUI.prototype.addHandler = function(handler) {
