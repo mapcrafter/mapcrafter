@@ -32,16 +32,53 @@ bool copyFile(const fs::path& from, const fs::path& to);
 bool copyDirectory(const fs::path& from, const fs::path& to);
 bool moveFile(const fs::path& from, const fs::path& to);
 
+/**
+ * Returns the home directory of the current user.
+ *
+ * Returns the value of the 'HOME' environment variable on every unix-like operating
+ * system, returns the value of the 'APPDATA' environment variable on W***.
+ */
 fs::path findHomeDir();
+
+/**
+ * Returns the path to the currently running program.
+ */
 fs::path findExecutablePath();
+
+/**
+ * Returns the directory which contains the Mapcrafter executable.
+ *
+ * Usually returns the directory of the program currently running, but returns the parent
+ * directory of the program directory if the program is another Mapcrafter tool such as
+ * testconfig or testtextures and the program directory is called tools/.
+ */
 fs::path findExecutableMapcrafterDir(fs::path executable = findExecutablePath());
 
 typedef std::vector<fs::path> PathList;
+
+/**
+ * Returns all possible Mapcrafter resource directories.
+ */
 PathList findResourceDirs(const fs::path& executable);
+
+/**
+ * Returns all possible Mapcrafter template directories.
+ */
 PathList findTemplateDirs(const fs::path& executable);
+
+/**
+ * Returns all possible Mapcrafter texture directories.
+ */
 PathList findTextureDirs(const fs::path& executable);
 
+/**
+ * Returns the first existing template directory.
+ */
 fs::path findTemplateDir();
+
+/**
+ * Returns the first existing texture directory.
+ */
 fs::path findTextureDir();
 
 } /* namespace util */
