@@ -1,20 +1,20 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "other.h"
@@ -120,25 +120,51 @@ bool as<bool>(const std::string& from) {
 	throw std::invalid_argument("Must be one of true/false or 0/1.");
 }
 
-void trim(std::string& str) {
+std::string trim(const std::string& str) {
 	// removes trailing and leading whitespaces
-	size_t end = str.find_last_not_of(" \t");
+	std::string trimmed = str;
+	size_t end = trimmed.find_last_not_of(" \t");
 	if (end != std::string::npos)
-		str = str.substr(0, end+1);
-	size_t start = str.find_first_not_of(" \t");
+		trimmed = trimmed.substr(0, end+1);
+	size_t start = trimmed.find_first_not_of(" \t");
 	if (start != std::string::npos)
-		str = str.substr(start);
-	else if (str.find_first_of(" \t") != std::string::npos)
+		trimmed = trimmed.substr(start);
+	else if (trimmed.find_first_of(" \t") != std::string::npos)
 		// special case if all characters are whitespaces
-		str = "";
+		trimmed = "";
+	return trimmed;
 }
 
-void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+// http://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c
+
+std::string escapeJSON(const std::string& str) {
+	std::ostringstream ss;
+	for (auto it = str.cbegin(); it != str.cend(); ++it) {
+	//C++98/03:
+	//for (std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
+		switch (*it) {
+			case '\\': ss << "\\\\"; break;
+			case '"': ss << "\\\""; break;
+			case '/': ss << "\\/"; break;
+			case '\b': ss << "\\b"; break;
+			case '\f': ss << "\\f"; break;
+			case '\n': ss << "\\n"; break;
+			case '\r': ss << "\\r"; break;
+			case '\t': ss << "\\t"; break;
+			default: ss << *it; break;
+		}
+	}
+	return ss.str();
+}
+
+std::string replaceAll(const std::string& str, const std::string& from, const std::string& to) {
+	std::string replaced = str;
 	size_t start = 0;
-	while ((start = str.find(from, start)) != std::string::npos) {
-		str.replace(start, from.length(), to);
+	while ((start = replaced.find(from, start)) != std::string::npos) {
+		replaced.replace(start, from.length(), to);
 		start += to.length();
 	}
+	return replaced;
 }
 
 bool startswith(const std::string& str, const std::string& start) {

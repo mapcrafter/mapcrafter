@@ -1,24 +1,24 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../config/extended_ini.h"
-#include "../config/mapcrafter_config.h"
+#include "../config/iniconfig.h"
+#include "../config/mapcrafterconfig.h"
 
 #include <iostream>
 #include <fstream>
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(config_test) {
 }
 
 BOOST_AUTO_TEST_CASE(config_testReadWrite) {
-	config::ConfigFile c;
+	config::INIConfig c;
 	if (!c.loadFile("data/config/test.conf"))
 		BOOST_ERROR("Unable to load test config file data/config/test.conf!");
 	std::ifstream in("data/config/test.conf");
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(config_testFieldValidation) {
 
 	// test the behavior of loading config entries from different sections
 	// into the field objects
-	config::ConfigSection section1, section2, section3, section4;
+	config::INIConfigSection section1, section2, section3, section4;
 	section2.set("test", "foobar");
 	section4.set("test", "42");
 

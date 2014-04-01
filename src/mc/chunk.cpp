@@ -1,26 +1,26 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "chunk.h"
 
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 namespace mapcrafter {
 namespace mc {
@@ -86,14 +86,10 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 				<< " (No biome data found)!" << std::endl;
 
 	// find sections list
-	// I already saw (empty) chunks from the end with TagByte instead of TagCompound
-	// in this list, ignore them, they are empty
-	if (!level.hasList<nbt::TagCompound>("Sections")
-			&& !level.hasList<nbt::TagByte>("Sections", 0)) {
-		std::cerr << "Warning: Corrupt chunk at " << chunkpos.x << ":" << chunkpos.z
-			<< " (No valid sections list found)!" << std::endl;
-		return false;
-	}
+	// ignore it if section list does not exist, can happen sometimes with the empty
+	// chunks of the end
+	if (!level.hasList<nbt::TagCompound>("Sections"))
+		return true;
 	
 	const nbt::TagList& sections_tag = level.findTag<nbt::TagList>("Sections");
 	if (sections_tag.tag_type != nbt::TagCompound::TAG_TYPE)

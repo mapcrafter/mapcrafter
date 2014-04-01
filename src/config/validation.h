@@ -1,26 +1,26 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef VALIDATION_H_
 #define VALIDATION_H_
 
-#include "extended_ini.h"
+#include "iniconfig.h"
 
 #include <map>
 #include <type_traits>
@@ -116,6 +116,6 @@ static std::string ROTATION_NAMES_SHORT[4] = {"tl", "tr", "br", "bl"};
 
 int stringToRotation(const std::string& rotation, std::string names[4] = ROTATION_NAMES);
 
-} /* namespace config2 */
+} /* namespace config */
 } /* namespace mapcrafter */
 #endif /* VALIDATION_H_ */

@@ -1,46 +1,60 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "world.h"
 
 #include "../util.h"
 
-#include <iostream>
-#include <fstream>
-#include <cstdio>
 #include <cmath>
-#include <boost/filesystem.hpp>
-
-namespace fs = boost::filesystem;
+#include <cstdio>
+#include <fstream>
+#include <iostream>
 
 namespace mapcrafter {
 namespace mc {
 
-World::World()
-	: rotation(0) {
+World::World(std::string world_dir, Dimension dimension)
+	: world_dir(world_dir), dimension(dimension), rotation(0) {
+	std::string world_name = BOOST_FS_FILENAME(this->world_dir);
+
+	// try to find the region directory
+	if (dimension == Dimension::OVERWORLD) {
+		 region_dir = this->world_dir / "region";
+	} else if (dimension == Dimension::NETHER) {
+		// try the extra bukkit nether directory at first, then the normal directory
+		world_name += "_nether";
+		region_dir = this->world_dir.parent_path() / world_name / "DIM-1" / "region";
+		if (!fs::exists(region_dir))
+			region_dir = this->world_dir / "DIM-1" / "region";
+	} else if (dimension == Dimension::END) {
+		// same here
+		world_name += "_the_end";
+		region_dir = this->world_dir.parent_path() / world_name / "DIM1" / "region";
+		if (!fs::exists(region_dir))
+			region_dir = this->world_dir / "DIM1" / "region";
+	}
 }
 
 World::~World() {
 }
 
-bool World::readRegions(const std::string& path) {
-	fs::path region_dir(path);
+bool World::readRegions(const fs::path& region_dir) {
 	if(!fs::exists(region_dir))
 		return false;
 	std::string ending = ".mca";
@@ -66,25 +80,48 @@ bool World::readRegions(const std::string& path) {
 	return true;
 }
 
+fs::path World::getWorldDir() const {
+	return world_dir;
+}
+
+fs::path World::getRegionDir() const {
+	return region_dir;
+}
+
+Dimension World::getDimension() const {
+	return dimension;
+}
+
+int World::getRotation() const {
+	return rotation;
+}
+
+
 void World::setRotation(int rotation) {
 	this->rotation = rotation;
+}
+
+WorldCrop World::getWorldCrop() const {
+	return worldcrop;
 }
 
 void World::setWorldCrop(const WorldCrop& worldcrop) {
 	this->worldcrop = worldcrop;
 }
 
-bool World::load(const std::string& dir) {
-	fs::path world_dir(dir);
-	fs::path region_dir = world_dir / "region";
+bool World::load() {
 	if(!fs::exists(world_dir)) {
-		std::cerr << "Error: World directory " << world_dir << " does not exist!" << std::endl;
-	} else if(!fs::exists(region_dir)) {
-		std::cerr << "Error: Region directory " << region_dir << " does not exist!" << std::endl;
-	} else {
-		return readRegions(region_dir.string());
+		std::cerr << "Error: World directory " << world_dir;
+		std::cerr << " does not exist!" << std::endl;
+		return false;
 	}
-	return false;
+
+	if(!fs::exists(region_dir)) {
+		std::cerr << "Error: Region directory " << region_dir << " does not exist!" << std::endl;
+		return false;
+	}
+
+	return readRegions(region_dir.string());
 }
 
 int World::getAvailableRegionCount() const {
@@ -97,6 +134,12 @@ const World::RegionSet& World::getAvailableRegions() const {
 
 bool World::hasRegion(const RegionPos& pos) const {
 	return available_regions.count(pos) != 0;
+}
+
+fs::path World::getRegionPath(const RegionPos& pos) const {
+	if (!hasRegion(pos))
+		return fs::path();
+	return fs::path(region_files.at(pos));
 }
 
 bool World::getRegion(const RegionPos& pos, RegionFile& region) const {

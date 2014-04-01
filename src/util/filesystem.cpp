@@ -1,20 +1,20 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "filesystem.h"
@@ -24,7 +24,9 @@
 #include <iostream>
 #include <fstream>
 
-#if defined(__WIN32__) || defined(__WIN64__)
+#if defined(__APPLE__)
+  #include <mach-o/dyld.h>
+#elif defined(__WIN32__) || defined(__WIN64__)
   #include <windows.h>
 #endif
 
@@ -40,7 +42,7 @@ bool copyFile(const fs::path& from, const fs::path& to) {
 		return false;
 
 	out << in.rdbuf();
-	if (!out)
+	if (out.bad())
 		return false;
 	in.close();
 	out.close();
@@ -89,7 +91,16 @@ fs::path findHomeDir() {
 // see also http://stackoverflow.com/questions/12468104/multi-os-get-executable-path
 fs::path findExecutablePath() {
 	char buf[1024];
-#if defined(unix) || defined(__unix) || defined(__unix__) || defined(__linux__) || defined(__APPLE__)
+#if defined(__APPLE__)
+	uint32_t size = sizeof(buf);
+	if (_NSGetExecutablePath(buf, &size) == 0) {
+		char real_path[1024];
+		if (realpath(buf, real_path)) {
+			size_t len = strlen(real_path);
+			return fs::path(std::string(real_path, len));
+		}
+	}
+#elif defined(unix) || defined(__unix) || defined(__unix__) || defined(__linux__)
 	int len;
 	if ((len = readlink("/proc/self/exe", buf, sizeof(buf))) != -1)
 		return fs::path(std::string(buf, len));
@@ -113,7 +124,7 @@ fs::path findExecutablePath() {
 fs::path findExecutableMapcrafterDir(fs::path executable) {
 	std::string filename = executable.filename().string();
 	fs::path directory = executable.parent_path();
-	if (filename == "testconfig" &&
+	if ((filename == "testconfig" || filename == "mapcrafter_markers") &&
 			executable.parent_path().filename().string() == "tools")
 		return directory.parent_path().parent_path();
 	return directory.parent_path();

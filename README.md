@@ -1,13 +1,13 @@
-# mapcrafter #
+# Mapcrafter #
 
 by Moritz Hilscher
 
-mapcrafter is a fast Minecraft World Renderer written in C++. It renders
-Minecraft Worlds to a bunch of images which are viewable in any webbrowser
-using Leaflet.
+Mapcrafter is a high performance Minecraft map renderer written in C++. It renders
+Minecraft worlds to a bunch of images which are viewable in any webbrowser
+using Leaflet.js.
 
-mapcrafter is free software and available under the GPL license.  You can
-access the latest source code of mapcrafter on GitHub:
+Mapcrafter is free software and available under the GPL license.  You can
+access the latest source code of Mapcrafter on GitHub:
 http://github.com/m0r13/mapcrafter
 
 Thanks to pigmap and Minecraft Overviewer, whose documentations and source code
@@ -15,26 +15,26 @@ were very helpful. I also used the alpha blending code of pigmap and some maps
 stuff of the template from Minecraft Overviewer.
 
 <div align="center">
-    <img src="http://i.imgur.com/c5tC43X.png" />
+    <img src="http://i.imgur.com/WyKXrgO.png" />
 </div>
 
 ## Features ##
 
-* **Web output:** Render your Minecraft Worlds to maps with an isometric 3D perspective 
+* **Web output:** Render your Minecraft worlds to maps with an isometric 3D perspective 
       viewable in any webbrowser!
 * **Different directions:** Choose from four different directions to render your worlds!
 * **Different rendermodes:** Choose between different rendermodes like day, night and cave 
      for your maps!
 * **Configuration files:** Control which worlds are rendered from which direction and with 
      which rendermodes!
-* **Markers:** Define your own markers for your maps!
+* **Markers:** Automatically generated markers from your Minecraft world data!
 * **Other stuff:** Biome colors, incremental rendering, multithreading
 
 ## Requirements ##
 
 * A Linux-based or Unix-like operating system like Mac OS
 * A decent C++ compiler (gcc >= 4.4, clang), CMake and make if you want to build
-      mapcrafter from source
+      Mapcrafter from source
 * Some libraries:
   * libpng
   * libboost-iostreams
@@ -42,9 +42,9 @@ stuff of the template from Minecraft Overviewer.
   * libboost-filesystem
   * libboost-program-options
   * (libboost-test if you want to use the tests)
-* For your Minecraft Worlds:
-  * Anvil World Format
-  * Minecraft 1.6 Resource Packs
+* For your Minecraft worlds:
+  * Anvil world format
+  * Minecraft 1.6 resource packs
 
 ## Examples ##
 
@@ -59,7 +59,7 @@ with Sphinx. You can read a built version of the documentation
 [here](http://docs.mapcrafter.org) and you can also [download
 other builds](https://readthedocs.org/projects/mapcrafter/downloads/).
 
-If you find bugs or problems when using mapcrafter or if you have ideas for new
+If you find bugs or problems when using Mapcrafter or if you have ideas for new
 features, then please feel free to add an issue to the [GitHub issue
 tracker](https://github.com/m0r13/mapcrafter/issues).
 
@@ -73,6 +73,50 @@ You can also ask questions in the [Minecraft Forum
 thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-map-renderer/).
 
 ## Version history ##
+
+**v.1.3.1**
+
+* Added simple progress output to marker generation program (optional)
+* Added option to hide empty signs by default
+* Fixed a bug (#65) causing invalid Javascript being generated
+* Markers use the world section name to distinguish between the worlds,
+  not the ``world_name`` attribute
+
+**v.1.3**
+
+* Added ability to automatically generate markers from signs in the
+  Minecraft world
+  * **The format to specify markers has changed, please have a look
+    at the documentation and update your ``markers.js`` file.**
+
+**v.1.2**
+
+* Started refactoring the web template
+  * **Since some files were split up and are now in a separate ``static/`` directory, 
+    you should manually delete the old *.js *.css files in your map directories and
+    update the maps with mapcrafter to prevent a mess with old files.**
+* Added new options to specify the default view of a map
+* Added new option to specify the dimension of a world
+* Fixed lighting of The End
+* Fixed a texture bug (#61) causing segfaults
+
+**v.1.1.3**
+
+* Fixed the batch mode showing an animated progress bar
+
+**v.1.1.2**
+
+* Fixed a bug (#58) with mapcrafter hanging when there are no tiles to render
+
+**v.1.1.1**
+
+* Refactored multi threading and some other things
+* Fixed some small block issues:
+  * Fixed downward spreading lava
+  * Fixed not rendered nether portal blocks
+  * Improved appearance of flat snow
+  * Added some special (not used in the game) slabs
+* Fixed a configuration bug
 
 **v.1.1**
 

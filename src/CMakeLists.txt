@@ -57,9 +57,12 @@ set(HEADERS
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/util")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/config")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/config/sections")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/mc")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/render")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/render/rendermodes")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/renderer")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/renderer/rendermodes")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thread")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thread/impl")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tools")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/test")
 
@@ -73,6 +76,7 @@ if(NOT OPT_SKIP_TESTS)
 endif()
 
 target_link_libraries(mapcraftercore ${PNG_LIBRARIES})
+target_link_libraries(mapcraftercore ${JPEG_LIBRARIES})
 target_link_libraries(mapcraftercore ${CMAKE_THREAD_LIBS_INIT})
 if(OPT_BOOST_STATIC)
 	target_link_libraries(mapcraftercore ${ZLIB_LIBRARIES})

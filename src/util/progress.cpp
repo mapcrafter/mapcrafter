@@ -1,20 +1,20 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "progress.h"
@@ -104,12 +104,8 @@ void ProgressBar::update(int value) {
 	if (last_update + 1 > now && !(last_percentage != max && value == max))
 		return;
 
-	// now calculate the current and average speed
-	double speed = (double) (value - last_value) / (now - last_update);
+	// now calculate the average speed
 	double average_speed = (double) value / (now - start);
-	if (value == max)
-		// use the average speed at the end
-		speed = average_speed;
 
 	// try to determine the width of the terminal
 	// use 80 columns as default if we can't determine a terminal size
@@ -123,13 +119,12 @@ void ProgressBar::update(int value) {
 
 	// create the progress stats: percentage, current/maximum value, speed, eta
 	std::string stats;
-	// show eta only when progress is not finished, and only when speed != 0
-	// (speed = 0 can sometimes happen at the begin of rendering)
-	if (value != max && speed != 0) {
+	// show eta only when we have an average speed
+	if (value != max && value != 0 && (now - start) != 0) {
 		int eta = (max - value) / average_speed;
-		stats = createProgressStats(percentage, value, max, speed, eta);
+		stats = createProgressStats(percentage, value, max, average_speed, eta);
 	} else {
-		stats = createProgressStats(percentage, value, max, speed);
+		stats = createProgressStats(percentage, value, max, average_speed);
 	}
 
 	// now create the progress bar
@@ -180,15 +175,14 @@ std::string ProgressBar::createProgressBar(int width, double percentage) const {
 }
 
 std::string ProgressBar::createProgressStats(double percentage, int value, int max,
-		double speed, int eta) const {
+		double speed_average, int eta) const {
 	std::string stats;
-	char fpercent[20];
-	char fspeed[20];
-	sprintf(&fpercent[0], "%.2f%%", percentage);
-	sprintf(&fspeed[0], "%.2f", speed);
-	stats += std::string(fpercent) + " ";
+	char formatted_percent[20], formatted_speed_average[20];
+	sprintf(&formatted_percent[0], "%.2f%%", percentage);
+	sprintf(&formatted_speed_average[0], "%.2f", speed_average);
+	stats += std::string(formatted_percent) + " ";
 	stats += util::str(value) + "/" + util::str(max) + " ";
-	stats += std::string(fspeed) + "/s ";
+	stats += std::string(formatted_speed_average) + "/s ";
 
 	if (eta != -1)
 		stats += "ETA " + format_eta(eta);

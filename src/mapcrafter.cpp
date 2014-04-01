@@ -1,23 +1,23 @@
 /*
- * Copyright 2012, 2013 Moritz Hilscher
+ * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "render/manager.h"
+#include "renderer/manager.h"
 
 #include "util.h"
 #include "version.h"
@@ -42,12 +42,12 @@ int main(int argc, char** argv) {
 
 	po::options_description all("Allowed options");
 	all.add_options()
-		("help,h", "shows a help message")
+		("help,h", "shows this help message")
 		("version,v", "shows the version of mapcrafter")
 		("find-resources", "shows available resource directories")
 
 		("config,c",po::value<std::string>(&config_file),
-			"the path of the world to render (required)")
+			"the path to the configuration file to use (required)")
 
 		("render-skip,s", po::value<std::vector<std::string>>(&render_skip)->multitoken(),
 			"skips rendering the specified map(s)")
@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	render::RenderOpts opts;
+	renderer::RenderOpts opts;
 	opts.config_file = config_file;
 	opts.render_skip = render_skip;
 	opts.skip_all = vm.count("render-reset");
@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
 		opts.jobs = 1;
 
 	opts.batch = vm.count("batch");
-	render::RenderManager manager(opts);
+	renderer::RenderManager manager(opts);
 	if (!manager.run())
 		return 1;
 	return 0;

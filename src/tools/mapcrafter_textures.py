@@ -46,8 +46,8 @@ if __name__ == "__main__":
 				continue
 			
 			fin = jar.open(info)
-			fout = open(filename, "w")
-			fout.write(str(fin.read()))
+			fout = open(filename, "wb")
+			fout.write(fin.read())
 			fin.close()
 			fout.close()
 			extracted += 1
@@ -67,8 +67,8 @@ if __name__ == "__main__":
 				print(" - Extracting %s ... skipped." % filename)
 			else:
 				fin = jar.open(info)
-				fout = open(filename, "w")
-				fout.write(str(fin.read()))
+				fout = open(filename, "wb")
+				fout.write(fin.read())
 				fin.close()
 				fout.close()
 				print(" - Extracting %s ... extracted." % filename)
