@@ -46,6 +46,7 @@ public:
 	std::string getTextFormat() const;
 	std::string getIcon() const;
 	std::string getIconSize() const;
+	bool isShownByDefault() const;
 
 	bool matchesSign(const mc::SignEntity& sign) const;
 	std::string formatTitle(const mc::SignEntity& sign) const;
@@ -53,9 +54,9 @@ public:
 private:
 	Field<std::string> name_long;
 	Field<std::string> prefix;
-	Field<bool> match_empty;
 	Field<std::string> title_format, text_format;
 	Field<std::string> icon, icon_size;
+	Field<bool> match_empty, show_default;
 
 	std::string formatSign(std::string format, const mc::SignEntity& sign) const;
 };
