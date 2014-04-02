@@ -67,10 +67,12 @@ Here is an example ``markers.js`` file:
             "id" : "signs",
             // name of the marker group, displayed in the webinterface
             "name" : "Signs",
-            // icon of the markers belonging to that group
+            // icon of the markers belonging to that group (optional)
             "icon" : "sign.png",
             // size of that icon
             "icon_size" : [32, 32],
+            // whether this marker group is shown by default (optional)
+            "show_default" : true,
             // markers of this marker group...
             "markers" : {
                 // ...in the world "world"
@@ -156,6 +158,57 @@ Here are the available options for the markers:
 
 	This is the text of the marker popup window. 
 	If you do not specifiy a text, the title of the marker is used as text.
+
+Furthermore you can customize your markers by specifying a functions which
+creates the actual Leaflet marker objects with the marker data. This function
+is called for every marker in the marker group and should return a marker-like
+object displayable by Leaflet. Please have a look at the
+`Leaflet API <http://leafletjs.com/reference.html>`_ to find out what you
+can do with Leaflet:
+
+Here is a simple example which shows two areas on the map:
+
+.. code-block:: javascript
+
+    {
+        "id" : "test",
+        "name" : "Test",
+        "createMarker" : function(ui, groupInfo, markerInfo) {
+            var latlngs = [];
+            // use the ui.mcToLatLng-function to convert Minecraft coords to LatLngs
+            latlngs.push(ui.mcToLatLng(markerInfo.p1[0], markerInfo.p1[1], 64));
+            latlngs.push(ui.mcToLatLng(markerInfo.p2[0], markerInfo.p2[1], 64));
+            latlngs.push(ui.mcToLatLng(markerInfo.p3[0], markerInfo.p3[1], 64));
+            latlngs.push(ui.mcToLatLng(markerInfo.p4[0], markerInfo.p4[1], 64));
+            latlngs.push(ui.mcToLatLng(markerInfo.p1[0], markerInfo.p1[1], 64));
+            
+            return L.polyline(latlngs, {"color" : markerInfo.color});
+        },
+        "markers" : {
+            "world" : [
+                {
+                    "p1" : [42, 0],
+                    "p2" : [0, 0],
+                    "p3" : [0, 42],
+                    "p4" : [42, 42],
+                    "color" : "red",
+                },
+                {
+                    "p1" : [73, -42],
+                    "p2" : [-42, -42],
+                    "p3" : [-42, 73],
+                    "p4" : [73, 73],
+                    "color" : "yellow",
+                },
+            ],
+        },
+    },
+
+As you can see you can use the ``ui.mcToLatLng`` method to convert Minecraft
+coordinates (x, z and then y) to Leaflet latitude/longitute coordinates.
+You can also use arbitrary data in the associative marker arrays and access
+them with the ``markerInfo`` parameter of your function (same with ``groupInfo``
+and the fields of the marker group).
 
 Minecraft Server
 ================

@@ -8,10 +8,12 @@ var MAPCRAFTER_MARKERS = [
 		"id" : "signs",
 		// name of the marker group, displayed in the webinterface
 		"name" : "Signs",
-		// icon of the markers belonging to that group
+		// icon of the markers belonging to that group (optional)
 		"icon" : "sign.png",
 		// size of that icon
 		"icon_size" : [32, 32],
+		// whether this marker group is shown by default (optional)
+		"show_default" : true,
 		// markers of this marker group...
 		"markers" : {
 			// ...in the world "world"
@@ -53,10 +55,10 @@ var MAPCRAFTER_MARKERS = [
 			"world" : [
 				{
 					"p1" : [42, 0],
-				 	"p2" : [0, 0],
-				 	"p3" : [0, 42],
-				 	"p4" : [42, 42],
-				 	"color" : "red",
+					"p2" : [0, 0],
+					"p3" : [0, 42],
+					"p4" : [42, 42],
+					"color" : "red",
 				},
 				{
 					"p1" : [73, -42],
