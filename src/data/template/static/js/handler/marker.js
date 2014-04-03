@@ -54,7 +54,7 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 		this.layerGroups[group] = layerGroup;
 		if(!(group in this.visible))
 			this.visible[group] = true;
-		if("show_default" in groupInfo && !groupInfo.show_default) {
+		if("showDefault" in groupInfo && !groupInfo.showDefault) {
 			document.getElementById("cb_group_" + group).checked = false;
 			this.visible[group] = false;
 		}
