@@ -76,8 +76,7 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 **v.1.3.2**
 
-* Added ``show_default`` option to be able to hide specific marker
-  groups by default
+* Added option to hide specific marker groups in the web interface by default
 * Added a way to add more user-defined markers using the Leaflet API (#71)
 * Changed ``markers.js`` file attribute ``icon_size`` to ``iconSize``
   * **You should update your ``markers.js`` file and re-run ``mapcrafter_markers``
