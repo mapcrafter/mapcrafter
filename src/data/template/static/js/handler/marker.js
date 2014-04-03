@@ -22,7 +22,7 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 		if(groupInfo.icon) {
 			marker.setIcon(new L.Icon({
 				iconUrl: groupInfo.icon != "" ? "static/markers/" + groupInfo.icon : null,
-				iconSize: (groupInfo.icon_size ? groupInfo.icon_size : [24, 24]),
+				iconSize: (groupInfo.iconSize ? groupInfo.iconSize : [24, 24]),
 			}));
 		}
 		marker.bindPopup(markerInfo.text ? markerInfo.text : markerInfo.title);
@@ -44,10 +44,11 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 		
 		var markers = groupInfo.markers[world];
 		var layerGroup = L.layerGroup();
-		for (var j = 0; j < markers.length; j++) {
+		for(var j = 0; j < markers.length; j++) {
 			var markerInfo = markers[j];
 			var marker = groupInfo.createMarker(this.ui, groupInfo, markerInfo);
-			marker.addTo(layerGroup);
+			if(marker != null)
+				marker.addTo(layerGroup);
 		}
 		
 		this.layerGroups[group] = layerGroup;

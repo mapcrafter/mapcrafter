@@ -74,6 +74,17 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.1.3.2**
+
+* Added ``show_default`` option to be able to hide specific marker
+  groups by default
+* Added a way to add more user-defined markers using the Leaflet API (#71)
+* Changed ``markers.js`` file attribute ``icon_size`` to ``iconSize``
+  * **You should update your ``markers.js`` file and re-run ``mapcrafter_markers``
+    if you use markers.** 
+* Fixed a bug causing Mapcrafter not to use the ``data/`` directory as
+  resource directory (#70)
+
 **v.1.3.1**
 
 * Added simple progress output to marker generation program (optional)

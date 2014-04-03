@@ -123,18 +123,17 @@ fs::path findExecutablePath() {
 
 fs::path findExecutableMapcrafterDir(fs::path executable) {
 	std::string filename = executable.filename().string();
-	fs::path directory = executable.parent_path();
 	if ((filename == "testconfig" || filename == "mapcrafter_markers") &&
 			executable.parent_path().filename().string() == "tools")
-		return directory.parent_path().parent_path();
-	return directory.parent_path();
+		return executable.parent_path().parent_path();
+	return executable.parent_path();
 }
 
 PathList findResourceDirs(const fs::path& executable) {
 	fs::path mapcrafter_dir = findExecutableMapcrafterDir(executable);
 	PathList resources = {
-		mapcrafter_dir / "share" / "mapcrafter",
-		mapcrafter_dir / "src" / "data",
+		mapcrafter_dir.parent_path() / "share" / "mapcrafter",
+		mapcrafter_dir / "data",
 	};
 	fs::path home = findHomeDir();
 	if (!home.empty())
