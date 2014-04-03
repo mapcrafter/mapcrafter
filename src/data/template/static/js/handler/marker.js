@@ -44,10 +44,11 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 		
 		var markers = groupInfo.markers[world];
 		var layerGroup = L.layerGroup();
-		for (var j = 0; j < markers.length; j++) {
+		for(var j = 0; j < markers.length; j++) {
 			var markerInfo = markers[j];
 			var marker = groupInfo.createMarker(this.ui, groupInfo, markerInfo);
-			marker.addTo(layerGroup);
+			if(marker != null)
+				marker.addTo(layerGroup);
 		}
 		
 		this.layerGroups[group] = layerGroup;
