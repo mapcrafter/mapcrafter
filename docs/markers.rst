@@ -70,9 +70,9 @@ Here is an example ``markers.js`` file:
             // icon of the markers belonging to that group (optional)
             "icon" : "sign.png",
             // size of that icon
-            "icon_size" : [32, 32],
+            "iconSize" : [32, 32],
             // whether this marker group is shown by default (optional)
-            "show_default" : true,
+            "showDefault" : true,
             // markers of this marker group...
             "markers" : {
                 // ...in the world "world"
@@ -99,7 +99,7 @@ Here is an example ``markers.js`` file:
             "id" : "homes",
             "name" : "Homes",
             "icon" : "home.png",
-            "icon_size" : [32, 32],
+            "iconSize" : [32, 32],
             "markers" : {
                 "world" : [
                     {"pos" : [42, 73, 64], "title" : "Steve's home"},    

@@ -11,9 +11,9 @@ var MAPCRAFTER_MARKERS = [
 		// icon of the markers belonging to that group (optional)
 		"icon" : "sign.png",
 		// size of that icon
-		"icon_size" : [32, 32],
+		"iconSize" : [32, 32],
 		// whether this marker group is shown by default (optional)
-		"show_default" : true,
+		"showDefault" : true,
 		// markers of this marker group...
 		"markers" : {
 			// ...in the world "world"
