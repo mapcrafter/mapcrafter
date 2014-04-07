@@ -72,7 +72,7 @@ you must install command line tools from Xcode and run the following command::
 
 On 10.9 Mavericks systems you will have to run the following command after you've installed Xcode::
 
-	xcode-selected --install
+	xcode-selecte --install
 
 and select install in the window that pops up, and accept the EULA.
 
