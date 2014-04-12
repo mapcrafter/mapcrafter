@@ -66,7 +66,7 @@ Prerequisites:
 
 Note:
 If you got MacPorts installed already, using Homebrew side by side is generally not `reccommended <http://superuser.com/questions/181337>`_ and the below guide will most likely not work.
-If you have issues and got MacPorts, please submit an issue with the output of the following in addition to the normal report(output of cmake, make etc.):
+If you have issues and got MacPorts, please submit an issue with the output of the following in addition to the normal report(output of cmake, make etc.)::
 
 	port installed
 	brew list
