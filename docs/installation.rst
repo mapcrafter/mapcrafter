@@ -7,12 +7,11 @@ Requirements
 
 * A Linux-based or Mac operating system would be good, 
   building the renderer on Windows is possible but not easy.
-* A C++ compiler (preferable gcc >= 4.4), CMake and make to build Mapcrafter.
+* A decent C++ compiler (preferable gcc >= 4.4, or clang), CMake and make to build Mapcrafter.
 * Some libraries:
 
   * libpng
-  * libpthread
-  * libboost-iostreams
+  * libboost-iostreams (>= 1.42)
   * libboost-system
   * libboost-filesystem
   * libboost-program-options
@@ -50,14 +49,17 @@ You can now install Mapcrafter system-wide for all users if you want::
 
     sudo make install
 
-If you get an error concerning ``libmapcraftercore.so`` not found you have to run 
+If you get an error concerning ``libmapcraftercore.so`` not found, you have to run 
 ``ldconfig`` (as root).
-Make sure that you still have to install the texture files needed for Mapcrafter.
+
+Don't forget that you still have to install the texture files needed for Mapcrafter.
+If you install the texture files to ``src/data/textures``, they will be copied
+to a path Mapcrafter will automatically detect when installing Mapcrafter with ``make install``.
 
 Mac OS X
 ========
 
-Currently there is no pre built packages available for Mac OS X but building it is relatively simple.
+Currently there are no pre built packages available for Mac OS X but building it is relatively simple.
 
 Prerequisites:
 
@@ -97,7 +99,7 @@ this will build Mapcrafter and put the ready to use binary in the ``src/`` direc
 Arch Linux
 ==========
 
-If you are running Arch Linux as operating system you can install Mapcrafter
+If you are running Arch Linux as operating system, you can install Mapcrafter
 from the `AUR <https://aur.archlinux.org/packages/mapcrafter-git/>`_. 
 
 Debian Packages
@@ -189,7 +191,7 @@ Mapcrafter source if you didn't install Mapcrafter on your system). Run the
 python script with the Minecraft Jar file and the texture directory as
 arguments::
 
-    mapcrafter_textures.py /path/to/my/minecraft.jar /my/texture/directory
+    mapcrafter_textures.py /path/to/my/minecraft/jar/1.7.2.jar /my/texture/directory
 
 You will probably find your Minecraft Jar file in
-``~/.minecraft/version/%version%/%version%.jar``.
+``~/.minecraft/versions/%version%/%version%.jar``.
