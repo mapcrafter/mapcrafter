@@ -66,6 +66,15 @@ Prerequisites:
 * `Xcode <https://itunes.apple.com/us/app/xcode/id497799835?ls=1&mt=12>`_ 
 * `Homebrew <http://brew.sh/>`_
 
+Note:
+If you got MacPorts installed already, using Homebrew side by side is generally not `reccommended <http://superuser.com/questions/181337>`_ and the below guide will most likely not work.
+If you have issues and got MacPorts, please submit an issue with the output of the following in addition to the normal report(output of cmake, make etc.)::
+
+	port installed
+	brew list
+	brew doctor
+	echo $PATH
+
 Depending on your version of OS X you may or may not have git installed. 
 Starting from 10.9 Mavericks git is installed with Xcode, if you got 10.8 Mountain Lion or older, 
 you must install command line tools from Xcode and run the following command::
