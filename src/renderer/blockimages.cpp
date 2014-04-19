@@ -490,16 +490,14 @@ struct block_comparator {
 
 bool BlockImages::saveBlocks(const std::string& filename) {
 	std::map<uint32_t, Image, block_comparator> blocks_sorted;
-	for (std::unordered_map<uint32_t, Image>::const_iterator it = block_images.begin();
-	        it != block_images.end(); ++it) {
+	for (auto it = block_images.begin(); it != block_images.end(); ++it) {
 		uint16_t data = (it->first & 0xffff0000) >> 16;
 		if ((data & (EDGE_NORTH | EDGE_EAST | EDGE_BOTTOM)) == 0)
 			blocks_sorted[it->first] = it->second;
 	}
 
 	std::vector<Image> blocks;
-	for (std::map<uint32_t, Image>::const_iterator it = blocks_sorted.begin();
-	        it != blocks_sorted.end(); ++it)
+	for (auto it = blocks_sorted.begin(); it != blocks_sorted.end(); ++it)
 		blocks.push_back(it->second);
 
 	blocks.push_back(opaque_water[0]);
@@ -1365,8 +1363,7 @@ void BlockImages::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) 
 		slab_textures[0x4] = textures.PLANKS_ACACIA;
 		slab_textures[0x5] = textures.PLANKS_BIG_OAK;
 	}
-	for (std::map<int, Image>::const_iterator it = slab_textures.begin();
-	        it != slab_textures.end(); ++it) {
+	for (auto it = slab_textures.begin(); it != slab_textures.end(); ++it) {
 		Image side = it->second;
 		Image top = it->second;
 		if (it->first == 0 && stone_slabs)
