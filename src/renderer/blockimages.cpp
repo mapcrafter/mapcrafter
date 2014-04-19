@@ -1726,24 +1726,23 @@ void BlockImages::createRedstoneRepeater(uint16_t id, const Image& texture) { //
 	createSingleFaceBlock(id, 3, FACE_BOTTOM, texture.rotate(ROTATE_180));
 }
 
-void BlockImages::createTrapdoor() { // id 96
-	Image texture = textures.TRAPDOOR;
+void BlockImages::createTrapdoor(uint16_t id, const Image& texture) { // id 96, 167
 	for (uint16_t i = 0; i < 16; i++) {
 		if (i & 4) {
 			int data = i & 0b00000011;
 			if (data == 0x0)
-				createSingleFaceBlock(96, i, FACE_SOUTH, texture);
+				createSingleFaceBlock(id, i, FACE_SOUTH, texture);
 			else if (data == 0x1)
-				createSingleFaceBlock(96, i, FACE_NORTH, texture);
+				createSingleFaceBlock(id, i, FACE_NORTH, texture);
 			else if (data == 0x2)
-				createSingleFaceBlock(96, i, FACE_EAST, texture);
+				createSingleFaceBlock(id, i, FACE_EAST, texture);
 			else if (data == 0x3)
-				createSingleFaceBlock(96, i, FACE_WEST, texture);
+				createSingleFaceBlock(id, i, FACE_WEST, texture);
 		} else {
 			if (i & 8)
-				createSingleFaceBlock(96, i, FACE_TOP, texture);
+				createSingleFaceBlock(id, i, FACE_TOP, texture);
 			else
-				createSingleFaceBlock(96, i, FACE_BOTTOM, texture);
+				createSingleFaceBlock(id, i, FACE_BOTTOM, texture);
 		}
 	}
 }
@@ -2308,7 +2307,7 @@ void BlockImages::loadBlocks() {
 	createGlass(95, 14, t.GLASS_RED);
 	createGlass(95, 15, t.GLASS_BLACK);
 	// --
-	createTrapdoor(); // id 96 // trapdoor
+	createTrapdoor(96, t.TRAPDOOR); // trapdoor
 	// -- monster egg
 	createBlock(97, 0, t.STONE); // stone
 	createBlock(97, 1, t.COBBLESTONE); // cobblestone
@@ -2458,6 +2457,8 @@ void BlockImages::loadBlocks() {
 	// --
 	createStairs(163, t.PLANKS_ACACIA); // acacia wood stairs
 	createStairs(164, t.PLANKS_BIG_OAK); // dark oak wood stairs
+
+	createTrapdoor(167, t.IRON_TRAPDOOR); // iron trapdoor
 
 	// hay block --
 	createBlock(170, 0, t.HAY_BLOCK_SIDE, t.HAY_BLOCK_TOP); // normal orientation
