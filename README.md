@@ -33,13 +33,13 @@ stuff of the template from Minecraft Overviewer.
 ## Requirements ##
 
 * A Linux-based or Unix-like operating system like Mac OS
-* A decent C++ compiler (gcc >= 4.4, clang), CMake and make if you want to build
+* A decent C++ compiler (preferable gcc >= 4.4, or clang), CMake and make if you want to build
       Mapcrafter from source
 * Some libraries:
   * libpng
   * libboost-iostreams
   * libboost-system
-  * libboost-filesystem
+  * libboost-filesystem (>= 1.42)
   * libboost-program-options
   * (libboost-test if you want to use the tests)
 * For your Minecraft worlds:
