@@ -2457,6 +2457,8 @@ void BlockImages::loadBlocks() {
 	// --
 	createStairs(163, t.PLANKS_ACACIA); // acacia wood stairs
 	createStairs(164, t.PLANKS_BIG_OAK); // dark oak wood stairs
+	createBlock(165, 0, t.SLIME); // slime block
+	createBlock(166, 0, empty_texture); // barrier
 
 	createTrapdoor(167, t.IRON_TRAPDOOR); // iron trapdoor
 
