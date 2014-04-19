@@ -7,6 +7,7 @@ set(SOURCE
 	${CMAKE_CURRENT_SOURCE_DIR}/world.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/worldcache.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/worldcrop.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/worldentities.cpp
 	PARENT_SCOPE
 )
 set(HEADERS
@@ -18,5 +19,6 @@ s	${CMAKE_CURRENT_SOURCE_DIR}/nbt.h
 	${CMAKE_CURRENT_SOURCE_DIR}/world.h
 	${CMAKE_CURRENT_SOURCE_DIR}/worldcache.h
 	${CMAKE_CURRENT_SOURCE_DIR}/worldcrop.h
+	${CMAKE_CURRENT_SOURCE_DIR}/worldentities.cpp
 	PARENT_SCOPE
 )

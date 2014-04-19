@@ -1,20 +1,20 @@
 /*
  * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "filesystem.h"
@@ -42,7 +42,7 @@ bool copyFile(const fs::path& from, const fs::path& to) {
 		return false;
 
 	out << in.rdbuf();
-	if (!out)
+	if (out.bad())
 		return false;
 	in.close();
 	out.close();
@@ -123,18 +123,17 @@ fs::path findExecutablePath() {
 
 fs::path findExecutableMapcrafterDir(fs::path executable) {
 	std::string filename = executable.filename().string();
-	fs::path directory = executable.parent_path();
-	if (filename == "testconfig" &&
+	if ((filename == "testconfig" || filename == "mapcrafter_markers") &&
 			executable.parent_path().filename().string() == "tools")
-		return directory.parent_path().parent_path();
-	return directory.parent_path();
+		return executable.parent_path().parent_path();
+	return executable.parent_path();
 }
 
 PathList findResourceDirs(const fs::path& executable) {
 	fs::path mapcrafter_dir = findExecutableMapcrafterDir(executable);
 	PathList resources = {
-		mapcrafter_dir / "share" / "mapcrafter",
-		mapcrafter_dir / "src" / "data",
+		mapcrafter_dir.parent_path() / "share" / "mapcrafter",
+		mapcrafter_dir / "data",
 	};
 	fs::path home = findHomeDir();
 	if (!home.empty())

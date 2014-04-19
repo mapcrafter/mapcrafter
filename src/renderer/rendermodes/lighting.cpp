@@ -1,20 +1,20 @@
 /*
  * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "lighting.h"
@@ -25,8 +25,6 @@
 
 namespace mapcrafter {
 namespace renderer {
-
-const double LIGHTNING_INTENSITY = 1.0;
 
 // corner definitions of the faces
 extern const FaceCorners CORNERS_LEFT = FaceCorners(CornerNeighbors(
@@ -129,8 +127,10 @@ void drawTopTriangle(Image& image, int size, double c1, double c2, double c3) {
 	}
 }
 
-LightingRendermode::LightingRendermode(const RenderState& state, bool day)
-		: Rendermode(state), day(day) {
+LightingRendermode::LightingRendermode(const RenderState& state, bool day,
+		double lighting_intensity, bool dimension_end)
+		: Rendermode(state), day(day), lighting_intensity(lighting_intensity),
+		  dimension_end(dimension_end) {
 }
 
 LightingRendermode::~LightingRendermode() {
@@ -224,10 +224,23 @@ void LightingRendermode::estimateBlockLight(mc::Block& block, const mc::BlockPos
  * estimated if this is a special transparent block.
  */
 LightingData LightingRendermode::getBlockLight(const mc::BlockPos& pos) {
-	mc::Block block = state.getBlock(pos, mc::GET_ID | mc::GET_LIGHT);
+	mc::Block block = state.getBlock(pos, mc::GET_ID | mc::GET_DATA | mc::GET_LIGHT);
 	if (isSpecialTransparent(block.id))
 		estimateBlockLight(block, pos);
-	return {block.block_light, block.sky_light};
+	
+	LightingData light;
+	light.block = block.block_light,
+	light.sky = block.sky_light;
+
+	// lighting fix for The End
+	// The End has no sun light set -> lighting looks ugly
+	// just emulate the sun light for transparent blocks
+	if (dimension_end) {
+		light.sky = 15;
+		if (block.id != 0 && !state.images->isBlockTransparent(block.id, block.data))
+			light.sky = 0;
+	}
+	return light;
 }
 
 /**
@@ -236,7 +249,7 @@ LightingData LightingRendermode::getBlockLight(const mc::BlockPos& pos) {
 LightingColor LightingRendermode::getLightingColor(const mc::BlockPos& pos) {
 	LightingData lighting = getBlockLight(pos);
 	LightingColor color = calculateLightingColor(lighting.block, lighting.sky);
-	return color + (1-color)*(1-LIGHTNING_INTENSITY);
+	return color + (1-color)*(1-lighting_intensity);
 }
 
 /**

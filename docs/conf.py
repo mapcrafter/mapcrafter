@@ -46,8 +46,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'mapcrafter'
-copyright = u'2013, Moritz Hilscher'
+project = u'Mapcrafter'
+copyright = u'2012-2014, Moritz Hilscher'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -196,7 +196,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'mapcrafter.tex', u'mapcrafter Documentation',
+  ('index', 'mapcrafter.tex', u'Mapcrafter Documentation',
    u'Moritz Hilscher', 'manual'),
 ]
 
@@ -226,7 +226,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'mapcrafter', u'mapcrafter Documentation',
+    ('index', 'Mapcrafter', u'Mapcrafter Documentation',
      [u'Moritz Hilscher'], 1)
 ]
 
@@ -240,8 +240,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'mapcrafter', u'mapcrafter Documentation',
-   u'Moritz Hilscher', 'mapcrafter', 'One line description of project.',
+  ('index', 'Mapcrafter', u'Mapcrafter Documentation',
+   u'Moritz Hilscher', 'Mapcrafter', 'One line description of project.',
    'Miscellaneous'),
 ]
 

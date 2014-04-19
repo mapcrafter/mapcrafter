@@ -1,20 +1,20 @@
 /*
  * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "world.h"
@@ -24,7 +24,8 @@
 namespace mapcrafter {
 namespace config {
 
-WorldSection::WorldSection(bool global) {
+WorldSection::WorldSection(bool global)
+	: dimension(mc::Dimension::OVERWORLD) {
 	setGlobal(global);
 }
 
@@ -37,7 +38,12 @@ void WorldSection::setConfigDir(const fs::path& config_dir) {
 
 void WorldSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
+	dimension_name.setDefault("overworld");
 	world_name.setDefault(section.getName());
+
+	default_view.setDefault("");
+	default_zoom.setDefault(0);
+	default_rotation.setDefault(-1);
 }
 
 bool WorldSection::parseField(const std::string key, const std::string value,
@@ -50,8 +56,22 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 						"'input_dir' must be an existing directory! '"
 						+ input_dir.getValue().string() + "' does not exist!"));
 		}
-	} else if (key == "world_name")
+	} else if (key == "dimension")
+		dimension_name.load(key, value, validation);
+	else if (key == "world_name")
 		world_name.load(key, value, validation);
+
+	else if (key == "default_view")
+		default_view.load(key, value, validation);
+	else if (key == "default_zoom")
+		default_zoom.load(key, value, validation);
+	else if (key == "default_rotation") {
+		int rotation = stringToRotation(value, ROTATION_NAMES);
+		if (rotation == -1)
+			validation.push_back(ValidationMessage::error(
+					"Invalid rotation '" + value + "'!"));
+		default_rotation.setValue(rotation);
+	}
 
 	else if (key == "crop_min_y") {
 		if (min_y.load(key, value, validation))
@@ -71,8 +91,9 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 	} else if (key == "crop_max_z") {
 		if (max_z.load(key, value, validation))
 			worldcrop.setMaxZ(max_z.getValue());
+	}
 
-	} else if (key == "crop_center_x")
+	else if (key == "crop_center_x")
 		center_x.load(key, value, validation);
 	else if (key == "crop_center_z")
 		center_z.load(key, value, validation);
@@ -85,6 +106,20 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 
 void WorldSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
+	if (dimension_name.getValue() == "nether")
+		dimension = mc::Dimension::NETHER;
+	else if (dimension_name.getValue() == "overworld")
+		dimension = mc::Dimension::OVERWORLD;
+	else if (dimension_name.getValue() == "end")
+		dimension = mc::Dimension::END;
+	else
+		validation.push_back(ValidationMessage::error(
+				"Unknown dimension '" + dimension_name.getValue() + "'!"));
+
+	if (default_zoom.isLoaded() && default_zoom.getValue() < 0)
+		validation.push_back(ValidationMessage::error(
+				"The default zoom level must be bigger or equal to 0 ('default_zoom')."));
+
 	// validate the world croppping
 	bool crop_rectangular = min_x.isLoaded() || max_x.isLoaded() || min_z.isLoaded() || max_z.isLoaded();
 	bool crop_circular = center_x.isLoaded() || center_z.isLoaded() || radius.isLoaded();
@@ -117,12 +152,32 @@ void WorldSection::postParse(const INIConfigSection& section,
 	}
 }
 
+std::string WorldSection::getShortName() {
+	return section_name;
+}
+
 fs::path WorldSection::getInputDir() const {
 	return input_dir.getValue();
 }
 
+mc::Dimension WorldSection::getDimension() const {
+	return dimension;
+}
+
 std::string WorldSection::getWorldName() const {
 	return world_name.getValue();
+}
+
+std::string WorldSection::getDefaultView() const {
+	return default_view.getValue();
+}
+
+int WorldSection::getDefaultZoom() const {
+	return default_zoom.getValue();
+}
+
+int WorldSection::getDefaultRotation() const {
+	return default_rotation.getValue();
 }
 
 const mc::WorldCrop WorldSection::getWorldCrop() const {

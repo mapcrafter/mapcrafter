@@ -1,20 +1,20 @@
 /*
  * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "mapcrafterconfig.h"
@@ -100,12 +100,22 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 			return false;
 	}
 
+	if (config.hasSection("global", "markers")) {
+		ValidationList msgs;
+		ok = marker_global.parse(config.getSection("global", "markers"), msgs) && ok;
+		if (!msgs.empty())
+			validation.push_back(std::make_pair("Global marker configuration", msgs));
+		if (!ok)
+			return false;
+	}
+
 	auto sections = config.getSections();
 
 	for (auto it = sections.begin(); it != sections.end(); ++it)
-		if (it->getType() != "world" && it->getType() != "map"
+		if (it->getType() != "world" && it->getType() != "map" && it->getType() != "marker"
 				&& it->getNameType() != "global:worlds"
-				&& it->getNameType() != "global:maps") {
+				&& it->getNameType() != "global:maps"
+				&& it->getNameType() != "global:markers") {
 			validation.push_back(std::make_pair("Section '" + it->getName() + "' with type '" + it->getType() + "'",
 					makeValidationList(ValidationMessage::warning("Unknown section type!"))));
 		}
@@ -149,6 +159,24 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 
 		if (!msgs.empty())
 			validation.push_back(std::make_pair("Map section '" + it->getName() + "'", msgs));
+	}
+
+	for (auto it = sections.begin(); it != sections.end(); ++it) {
+		if (it->getType() != "marker")
+			continue;
+		ValidationList msgs;
+		MarkerSection marker = marker_global;
+		marker.setGlobal(false);
+		ok = marker.parse(*it, msgs) && ok;
+
+		if (hasMarker(it->getName())) {
+			msgs.push_back(ValidationMessage::error("Marker name '" + it->getName() + "' already used!"));
+			ok = false;
+		} else
+			markers.push_back(marker);
+
+		if (!msgs.empty())
+			validation.push_back(std::make_pair("Marker section '" + it->getName() + "'", msgs));
 	}
 
 	return ok;
@@ -253,6 +281,24 @@ const MapSection& MapcrafterConfig::getMap(const std::string& map) const {
 		if (it->getShortName() == map)
 			return *it;
 	throw std::out_of_range("Map not found!");
+}
+
+bool MapcrafterConfig::hasMarker(const std::string marker) const {
+	for (auto it = markers.begin(); it != markers.end(); ++it)
+		if (it->getShortName() == marker)
+			return true;
+	return false;
+}
+
+const std::vector<MarkerSection>& MapcrafterConfig::getMarkers() const {
+	return markers;
+}
+
+const MarkerSection& MapcrafterConfig::getMarker(const std::string& marker) const {
+	for (auto it = markers.begin(); it != markers.end(); ++it)
+		if (it->getShortName() == marker)
+			return *it;
+	throw std::out_of_range("Marker not found!");
 }
 
 } /* namespace config */

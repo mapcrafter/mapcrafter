@@ -1,8 +1,20 @@
 /*
- * textureimage.cpp
+ * Copyright 2012-2014 Moritz Hilscher
  *
- *  Created on: 12.10.2013
- *      Author: moritz
+ * This file is part of Mapcrafter.
+ *
+ * Mapcrafter is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Mapcrafter is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "textureimage.h"
@@ -27,8 +39,13 @@ TextureImage::~TextureImage() {
  */
 bool TextureImage::load(const std::string& path, int size) {
 	Image tmp;
-	if (!tmp.readPNG(path + "/" + name + ".png"))
+	if (!tmp.readPNG(path + "/" + name + ".png")) {
+		// make sure the texture image does not have zero dimension
+		// even if the texture does not exist
+		this->setSize(size, size);
+		original = *this;
 		return false;
+	}
 
 	original = tmp;
 

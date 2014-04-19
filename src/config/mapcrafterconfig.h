@@ -1,20 +1,20 @@
 /*
  * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MAPCRAFTERCONFIG_H_
@@ -22,6 +22,7 @@
 
 #include "validation.h"
 #include "sections/map.h"
+#include "sections/marker.h"
 #include "sections/world.h"
 
 #include <map>
@@ -38,11 +39,13 @@ class MapcrafterConfig {
 private:
 	WorldSection world_global;
 	MapSection map_global;
+	MarkerSection marker_global;
 
 	Field<fs::path> output_dir, template_dir;
 
 	std::map<std::string, WorldSection> worlds;
 	std::vector<MapSection> maps;
+	std::vector<MarkerSection> markers;
 public:
 	MapcrafterConfig();
 	~MapcrafterConfig();
@@ -63,6 +66,10 @@ public:
 	bool hasMap(const std::string& map) const;
 	const std::vector<MapSection>& getMaps() const;
 	const MapSection& getMap(const std::string& map) const;
+
+	bool hasMarker(const std::string marker) const;
+	const std::vector<MarkerSection>& getMarkers() const;
+	const MarkerSection& getMarker(const std::string& marker) const;
 };
 
 } /* namespace config */

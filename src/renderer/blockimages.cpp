@@ -1,20 +1,20 @@
 /*
  * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "blockimages.h"
@@ -196,10 +196,10 @@ void blitItemStyleBlock(Image& image, const Image& north_south, const Image& eas
  */
 void rotateImages(Image& north, Image& south, Image& east, Image& west, int rotation) {
 	std::map<int, Image> images;
-	images[util::rotate_shift_r(FACE_NORTH, rotation, 4)] = north;
-	images[util::rotate_shift_r(FACE_SOUTH, rotation, 4)] = south;
-	images[util::rotate_shift_r(FACE_EAST, rotation, 4)] = east;
-	images[util::rotate_shift_r(FACE_WEST, rotation, 4)] = west;
+	images[util::rotateShiftRight(FACE_NORTH, rotation, 4)] = north;
+	images[util::rotateShiftRight(FACE_SOUTH, rotation, 4)] = south;
+	images[util::rotateShiftRight(FACE_EAST, rotation, 4)] = east;
+	images[util::rotateShiftRight(FACE_WEST, rotation, 4)] = west;
 
 	north = images[FACE_NORTH];
 	south = images[FACE_SOUTH];
@@ -267,7 +267,7 @@ BlockImage BlockImage::rotate(int count) const {
 	BlockImage rotated(type);
 	for (int i = 0; i < 4; i++) {
 		int face = 1 << i;
-		int new_face = util::rotate_shift_l(face, count, 4);
+		int new_face = util::rotateShiftLeft(face, count, 4);
 		rotated.setFace(new_face, getFace(face), getXOffset(face), getYOffset(face));
 	}
 
@@ -580,7 +580,7 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	else if (id == 54 || id == 130) { // chests
 		// at first get the direction of the chest and rotate if needed
 		uint16_t dir_rotate = (data >> 4) & 0xf;
-		uint16_t dir = util::rotate_shift_l(dir_rotate, rotation, 4) << 4;
+		uint16_t dir = util::rotateShiftLeft(dir_rotate, rotation, 4) << 4;
 		// then get the neighbor chests
 		uint16_t neighbors = (data >> 4) & 0xf0;
 

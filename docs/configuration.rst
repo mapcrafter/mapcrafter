@@ -2,7 +2,7 @@
 Configuration File Format
 =========================
 
-To tell the mapcrafter which maps to render, simple INI-like configuration
+To tell the Mapcrafter which maps to render, simple INI-like configuration
 files are used. With configuration files it is possible to render multiple
 maps/rotations/rendermodes into one output file. 
 
@@ -20,23 +20,24 @@ Here is a simple example of a configuration file (let's call it
     input_dir = worlds/myworld
 
     [map:map_myworld]
-    name = My World world
+    world = myworld
 
 As you can see the configuration files consist of different types of sections
 (e.g. ``[section]``) and containing assignments of configuration options to
 specific values (e.g. ``key = value``).  The sections have their names in
 square brackets, where the prefix with the colon shows the type of the section.
 
-There are two types (actually three, but more about that later) of sections:
+There are three types (actually four, but more about that later) of sections:
 
 * World sections (e.g. sections starting with ``world:``)
 * Map sections (e.g. sections starting with ``map:``)
+* Marker sections (e.g. sections starting with ``marker:``, also see :ref:`markers`)
 
-Every world section represents a Minecraft World you want to render and needs a
-directory where it can find the Minecraft World (``input_dir`` of the world
+Every world section represents a Minecraft world you want to render and needs a
+directory where it can find the Minecraft world (``input_dir`` of the world
 section ``myworld`` in the example above).
 
-Every map section represents a rendered Minecraft World. You can specifiy
+Every map section represents a rendered Minecraft world. You can specifiy
 things like rotation of the world, rendermode, texture pack and texture size
 for each map.
 
@@ -117,7 +118,7 @@ this map. In contrast to that the world and map names in the sections are used
 for internal representation and therefore should be unique and contain only
 alphanumeric chars and underscores.
 
-When you have now your configuration file you can render your worlds with: (see
+When you have now your configuration file you can render your worlds with (see
 :ref:`command_line_options` for more options and usage)::
 
     mapcrafter -c render.conf
@@ -137,7 +138,7 @@ General Options
 
     **Required**
 
-    This is the directory where mapcrafter saves the rendered map. Every time
+    This is the directory where Mapcrafter saves the rendered map. Every time
     you render your map the renderer copies the template files into this
     directory and overwrites them, if they already exist. The renderer creates
     an ``index.html`` file you can open with your webbrowser. If you want to
@@ -164,32 +165,60 @@ World Options
     sections (the ones starting with world:) or you can specify them in the
     global:worlds section.  If you specify them in the global section, these
     options are default values and inherited into the world sections if you do
-    not overwrite them
+    not overwrite them.
 
 ``input_dir = <directory>``
 
     **Required**
 
-    This is the directory of your Minecraft World. The directory should contain
+    This is the directory of your Minecraft world. The directory should contain
     a directory ``region/`` with the .mca region files.
+
+``dimension = nether|overworld|end``
+
+    **Default**: ``overworld``
+    
+    You can specify with this option the dimension of the world Mapcrafter should render.
+    If you choose The Nether or The End, Mapcrafter will automagically detect the
+    corresponding region directory. It will try the Bukkit region directory
+    (for example ``myworld_nether/DIM-1/region``) first and then the directory of a normal
+    vanilla server/client (for example ``myworld/DIM-1/region``).
 
 .. note::
 
-    If you want to render the Nether or End of your world, just specify the path to the
-    Nether or End of your world as world path. This should be my_world/DIM-1 or
-    my_world_nether/DIM-1 for the Nether and my_world/DIM1 or my_world_the_end/DIM1
-    for the End.
-    
-    You can render the nether with the cave rendermode or you can remove the
-    top bedrock layers with the crop_max_y option.
+    If you want to render The Nether and want to see something, you should use the cave
+    rendermode or use the crop_max_y option to remove the top bedrock layers.
 
 ``world_name = <name>``
 
     **Default**: ``<name of the world section>``
     
-    This is another name of the world, usually the name of the world the server uses.
+    This is another name of the world, the name of the world the server uses.
     You don't usually need to specify this manually unless your server uses different
     world names and you want to use the mapcrafter-playermarkers script.
+
+``default_view = <x>,<z>,<y>``
+
+    **Default**: Center of the map
+    
+    You can specify the default center of the map with this option. Just specify a
+    position in your Minecraft world you want as center when you open the map.
+
+``default_zoom = <zoomlevel>``
+
+    **Default**: ``0``
+    
+    This is the default zoom level shown when you open the map. The default zoom level
+    is 0 (completely zoomed out) and the maximum zoom level (completely zoomed in) is the 
+    one Mapcrafter shows when rendering your map.
+
+``default_rotation = top-left|top-right|bottom-right|bottom-left``
+
+    **Default**: First available rotation of the map
+    
+    This is the default rotation shown when you open the map. You can specify one of the 
+    four available rotations. If a map doesn't have this rotation, the first available
+    rotation will be shown. 
 
 By using the following options you can crop your world and render only 
 a specific part of it. With these two options you can skip blocks above or
@@ -199,13 +228,13 @@ below a specific level:
 
     **Default:** -infinity
 
-    This is the minimum y-coordinate of blocks mapcrafter will render.
+    This is the minimum y-coordinate of blocks Mapcrafter will render.
 
 ``crop_max_y = <number>``
 
     **Default:** infinity
 
-    This is the maximum y-coordinate of blocks mapcrafter will render.
+    This is the maximum y-coordinate of blocks Mapcrafter will render.
 
 Furthermore there are two different types of world cropping:
 
@@ -252,7 +281,7 @@ Map Options
     (the ones starting with map:) or you can specify them in the global:maps
     section.  If you specify them in the global section, these options are
     default values and inherited into the map sections if you do not overwrite
-    them
+    them.
 
 ``name = <name>``
 
@@ -286,7 +315,7 @@ Map Options
     **Default:** default texture directory (see :ref:`resources_textures`)
 
     This is the directory with the Minecraft Texture files.  The renderer works
-    with the Minecraft 1.6 Resource Pack file format. You need here: 
+    with the Minecraft 1.6 resource pack file format. You need here: 
 
     * directory ``chest/`` with normal.png, normal_double.png and ender.png 
     * directory ``colormap/`` with foliage.png and grass.png 
@@ -317,6 +346,14 @@ Map Options
 	
     Top left means that north is on the top left side on the map (same thing
     for other directions).
+
+``lighting_intensity = <number>``
+
+    **Default:** ``1.0``
+    
+    This is the lighting intensity, i.e. the strength the renderer applies the
+    lighting to the rendered map. You can specify a value from 0.0 to 1.0, 
+    where 1.0 means full lighting and 0.0 means no lighting.
 
 ``render_unknown_blocks = true|false``
 
@@ -362,3 +399,104 @@ Map Options
         The renderer saves the time of the last rendering.  All tiles
         whoose chunk timestamps are newer than this last-render-time are
         required.
+
+.. _config_marker_options:
+
+Marker Options
+--------------
+
+.. note::
+
+    These options are for the marker groups. You can specify them in the marker
+    sections (the ones starting with marker:) or you can specify them in the 
+    global:markers section.  If you specify them in the global section, these
+    options are default values and inherited into the marker sections if you 
+    do not overwrite them.
+
+``name = <name>``
+
+    **Default:** *Name of the section*
+    
+    This is the name of the marker group. You can use a human-readable
+    name since this name is displayed in the webinterface.
+
+``prefix = <prefix>``
+
+    **Default:** *Empty*
+    
+    This is the prefix a sign must have to be recognized as marker
+    of this marker group. Example: If you choose ``[home]`` as prefix,
+    all signs whose text starts with ``[home]`` are displayed as markers
+    of this group.
+
+
+``title_format = <format>``
+
+    **Default:** ``%text``
+    
+    You can change the title used for markers (the name shown when you 
+    hover over a marker) by using different placeholders:
+    
+    ============= =======
+    Placeholder   Meaning
+    ============= =======
+    ``%text``     Complete text of the sign without the prefix.
+    ``%prefix``   Configured prefix of this marker group.
+    ``%textp``    Complete text of the sign with the prefix.
+    ``%line1``    First line of the sign.
+    ``%line2``    Second line of the sign.
+    ``%line3``    Third line of the sign.
+    ``%line4``    Fourth line of the sign.
+    ``%x``        X coordinate of the sign position.
+    ``%z``        Z coordinate of the sign position.
+    ``%y``        Y coordinate of the sign position.
+    ============= =======
+    
+    The title of markers defaults to the text (without the prefix) of 
+    the belonging sign, e.g. the placeholder ``%text``.
+    
+    You can use different placeholders and other text in this format
+    string as well, for example ``Marker at x=%x, y=%y, z=%z: %text``.
+
+``text_format = <format>``
+
+    **Default:** *Format of the title*
+    
+    You can change the text shown in the marker popup windows as well.
+    You can use the same placeholders you can use for the marker title.
+
+``icon = <icon>``
+
+    **Default:** *Default Leaflet marker icon*
+
+    This is the icon used for the markers of this marker group. You
+    do not necessarily need to specify a custom icon, you can also
+    use the default icon.
+    
+    You can put your own icons into the ``static/markers/`` directory
+    of your template directory. Then you only need to specify the
+    filename of the icon, the path ``static/markers/`` is automatically
+    prepended. You should also specify the size of your custom icon.
+
+``icon_size = <size>``
+
+    **Default:** ``[24, 24]``
+
+    This is the size of your icon. Specify it like ``[width, height]``.
+    The icon size defaults to 24x24 pixels.
+
+``match_empty = true|false``
+
+    **Default:** ``false``
+    
+    This option specifies whether empty signs can be matched as markers.
+    You have to set this to ``true`` if you set the prefix to an empty
+    string to show all remaining unmatched signs as markers and if you
+    want to show even empty signs as markers.
+
+``show_default = true|false``
+
+    **Default:** ``true``
+    
+    With this option you can hide a marker group in the web interface by
+    default.

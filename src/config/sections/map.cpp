@@ -1,20 +1,20 @@
 /*
  * Copyright 2012-2014 Moritz Hilscher
  *
- * This file is part of mapcrafter.
+ * This file is part of Mapcrafter.
  *
- * mapcrafter is free software: you can redistribute it and/or modify
+ * Mapcrafter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * mapcrafter is distributed in the hope that it will be useful,
+ * Mapcrafter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "map.h"
@@ -50,6 +50,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	rotations.setDefault("top-left");
 	rendermode.setDefault("daylight");
 	texture_size.setDefault(12);
+	lighting_intensity.setDefault(1.0);
 	render_unknown_blocks.setDefault(false);
 	render_leaves_transparent.setDefault(true);
 	render_biomes.setDefault(true);
@@ -84,6 +85,8 @@ bool MapSection::parseField(const std::string key, const std::string value,
 				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 32))
 				validation.push_back(ValidationMessage::error(
 						"'texture_size' must a number between 1 and 32!"));
+	} else if (key == "lighting_intensity") {
+		lighting_intensity.load(key, value, validation);
 	} else if (key == "render_unknown_blocks") {
 		render_unknown_blocks.load(key, value, validation);
 	} else if (key == "render_leaves_transparent") {
@@ -146,6 +149,10 @@ std::string MapSection::getRendermode() const {
 
 int MapSection::getTextureSize() const {
 	return texture_size.getValue();
+}
+
+double MapSection::getLightingIntensity() const {
+	return lighting_intensity.getValue();
 }
 
 bool MapSection::renderUnknownBlocks() const {
