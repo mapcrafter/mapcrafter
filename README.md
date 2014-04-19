@@ -37,6 +37,7 @@ stuff of the template from Minecraft Overviewer.
       Mapcrafter from source
 * Some libraries:
   * libpng
+  * libjpeg (but you should use libjpeg-turbo as drop in replacement)
   * libboost-iostreams
   * libboost-system
   * libboost-filesystem

@@ -11,7 +11,7 @@ Requirements
 * Some libraries:
 
   * libpng
-  * libpthread
+  * libjpeg (but you should use libjpeg-turbo as drop in replacement)
   * libboost-iostreams
   * libboost-system
   * libboost-filesystem
