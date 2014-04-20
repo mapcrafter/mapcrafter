@@ -34,10 +34,9 @@ namespace mapcrafter {
 namespace renderer {
 
 MapSettings::MapSettings()
-	: texture_size(12), max_zoom(0),
-	  image_format("png"),
-	  lighting_intensity(1.0),
-	  render_unknown_blocks(0), render_leaves_transparent(0), render_biomes(false) {
+	: texture_size(12), image_format("png"), lighting_intensity(1.0),
+	  render_unknown_blocks(0), render_leaves_transparent(0), render_biomes(false),
+	  max_zoom(0) {
 	for (int i = 0; i < 4; i++) {
 		rotations[i] = false;
 		last_render[i] = 0;
@@ -55,15 +54,20 @@ bool MapSettings::read(const std::string& filename) {
 
 	config::INIConfigSection& root = config.getRootSection();
 
-	texture_size = root.get<int>("texture_size");
+	if (root.has("texture_size"))
+		texture_size.set(root.get<int>("texture_size"));
+	if (root.has("image_format"))
+		image_format.set(root.get<std::string>("image_format"));
+	if (root.has("lighting_intensity"))
+		lighting_intensity.set(root.get<double>("lighting_intensity"));
+	if (root.has("render_unknown_blocks"))
+		render_unknown_blocks.set(root.get<bool>("render_unknown_blocks"));
+	if (root.has("render_leaves_transparent"))
+		render_leaves_transparent.set(root.get<bool>("render_leaves_transparent"));
+	if (root.has("render_biomes"))
+		render_biomes.set(root.get<bool>("render_biomes"));
+
 	max_zoom = root.get<int>("max_zoom");
-
-	image_format = root.get<std::string>("image_format", "png");
-
-	lighting_intensity = root.get<double>("lighting_intensity", 1.0);
-	render_unknown_blocks = root.get<bool>("render_unknown_blocks");
-	render_leaves_transparent = root.get<bool>("render_leaves_transparent");
-	render_biomes = root.get<bool>("render_biomes");
 
 	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
 	for (int i = 0; i < 4; i++) {
@@ -87,15 +91,14 @@ bool MapSettings::write(const std::string& filename) const {
 	config::INIConfig config;
 	config::INIConfigSection& root = config.getRootSection();
 
-	root.set("texture_size", util::str(texture_size));
+	root.set("texture_size", util::str(texture_size.get()));
+	root.set("image_format", image_format.get());
+	root.set("lighting_intensity", util::str(lighting_intensity.get()));
+	root.set("render_unknown_blocks", util::str(render_unknown_blocks.get()));
+	root.set("render_leaves_transparent", util::str(render_leaves_transparent.get()));
+	root.set("render_biomes", util::str(render_biomes.get()));
+
 	root.set("max_zoom", util::str(max_zoom));
-
-	root.set("image_format", image_format);
-
-	root.set("lighting_intensity", util::str(lighting_intensity));
-	root.set("render_unknown_blocks", util::str(render_unknown_blocks));
-	root.set("render_leaves_transparent", util::str(render_leaves_transparent));
-	root.set("render_biomes", util::str(render_biomes));
 
 	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
 	for (int i = 0; i < 4; i++) {
@@ -110,25 +113,71 @@ bool MapSettings::write(const std::string& filename) const {
 	return config.writeFile(filename);
 }
 
-bool MapSettings::equalsMapConfig(const config::MapSection& map) const {
-	return texture_size == map.getTextureSize()
-			&& image_format == map.getImageFormatSuffix()
-			&& util::floatingPointEquals(lighting_intensity, map.getLightingIntensity())
-			&& render_unknown_blocks == map.renderUnknownBlocks()
-			&& render_leaves_transparent == map.renderLeavesTransparent()
-			&& render_biomes == map.renderBiomes();
+bool MapSettings::syncMapConfig(const config::MapSection& map) {
+	if (texture_size.isNull())
+		texture_size.set(map.getTextureSize());
+	if (image_format.isNull())
+		image_format.set(map.getImageFormatSuffix());
+	if (lighting_intensity.isNull())
+		lighting_intensity.set(map.getLightingIntensity());
+	if (render_unknown_blocks.isNull())
+		render_unknown_blocks.set(map.renderUnknownBlocks());
+	if (render_leaves_transparent.isNull())
+		render_leaves_transparent.set(map.renderLeavesTransparent());
+	if (render_biomes.isNull())
+		render_biomes.set(map.renderBiomes());
+
+	bool changed = true;
+	bool force_required = false;
+	if (texture_size.get() != map.getTextureSize()) {
+		std::cerr << std::endl;
+		std::cerr << "Warning: You changed the texture size from " << texture_size.get();
+		std::cerr << " to " << map.getTextureDir() << "." << std::endl;
+		force_required = true;
+	} else if (image_format.get() != map.getImageFormatSuffix()) {
+		std::cerr << std::endl;
+		std::cerr << "Warning: You changed the image format from " << image_format.get();
+		std::cerr << " to " << map.getImageFormatSuffix() << "." << std::endl;
+		force_required = true;
+	} else if (!util::floatingPointEquals(lighting_intensity.get(), map.getLightingIntensity())) {
+		std::cerr << std::endl;
+		std::cerr << "Warning: You changed the lighting intensity from ";
+		std::cerr << lighting_intensity.get() << " to " << map.getLightingIntensity();
+		std::cerr << "." << std::endl;
+	} else if (render_unknown_blocks.get() != map.renderUnknownBlocks()) {
+		std::cerr << std::endl;
+		std::cerr << "Warning: You changed the rendering of unknown blocks from ";
+		std::cerr << util::strBool(render_unknown_blocks.get()) << " to ";
+		std::cerr << util::strBool(map.renderUnknownBlocks()) << "." << std::endl;
+	} else if (render_leaves_transparent.get() != map.renderLeavesTransparent()) {
+		std::cerr << "Warning: You changed the rendering of transparent leaves from ";
+		std::cerr << util::strBool(render_leaves_transparent.get()) << " to ";
+		std::cerr << util::strBool(map.renderLeavesTransparent()) << "." << std::endl;
+	} else if (render_biomes.get() != map.renderBiomes()) {
+		std::cerr << "Warning: You changed the rendering of biomes from ";
+		std::cerr << util::strBool(render_biomes.get()) << " to ";
+		std::cerr << util::strBool(map.renderBiomes()) << "." << std::endl;
+	} else {
+		changed = false;
+	}
+
+	if (changed) {
+		std::cerr << "Force-render the whole map in order for the new" ;
+		std::cerr << "configuration to come into effect." << std::endl << std::endl;
+	}
+
+	return !(changed && force_required);
 }
 
 MapSettings MapSettings::byMapConfig(const config::MapSection& map) {
 	MapSettings settings;
 
-	settings.texture_size = map.getTextureSize();
-	settings.image_format = map.getImageFormatSuffix();
-
-	settings.lighting_intensity = map.getLightingIntensity();
-	settings.render_unknown_blocks = map.renderUnknownBlocks();
-	settings.render_leaves_transparent = map.renderLeavesTransparent();
-	settings.render_biomes = map.renderBiomes();
+	settings.texture_size.set(map.getTextureSize());
+	settings.image_format.set(map.getImageFormatSuffix());
+	settings.lighting_intensity.set(map.getLightingIntensity());
+	settings.render_unknown_blocks.set(map.renderUnknownBlocks());
+	settings.render_leaves_transparent.set(map.renderLeavesTransparent());
+	settings.render_biomes.set(map.renderBiomes());
 
 	auto rotations = map.getRotations();
 	for (auto it = rotations.begin(); it != rotations.end(); ++it)
@@ -489,17 +538,19 @@ bool RenderManager::run() {
 		if (old_settings) {
 			// try to read the map.settings filename
 			if (!settings.read(settings_filename)) {
-				std::cerr << "Error: Unable to load old map.settings file!";
-				std::cerr << std::endl << std::endl;
+				std::cerr << "Error: Unable to load old map.settings file!" << std::endl;
+				std::cerr << "You have to force-render the whole map." << std::endl;
+				std::cerr << std::endl;
 				continue;
 			}
 
 			// check whether the config file was changed when rendering incrementally
-			if (!settings.equalsMapConfig(map)) {
-				std::cerr << "Warning: It seems that the configuration of the map '";
-				std::cerr << map_name << "' was changed." << std::endl;
-				std::cerr << "Force-render the whole map or reset the configuration ";
-				std::cerr << "of the map to the old settings." << std::endl << std::endl;
+			if (!settings.syncMapConfig(map)) {
+				//std::cerr << "Warning: It seems that the configuration of the map '";
+				//std::cerr << map_name << "' was changed." << std::endl;
+				//std::cerr << "Force-render the whole map or reset the configuration ";
+				//std::cerr << "of the map to the old settings." << std::endl << std::endl;
+				continue;
 			}
 
 			// for force-render rotations
