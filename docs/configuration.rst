@@ -361,7 +361,8 @@ Map Options
     **Default:** ``85``
     
     This is the quality to use for the JPEGs. It should be a number
-    between 0 and 100, where 0 is the worst quality and 100 is the best quality.
+    between 0 and 100, where 0 is the worst quality which needs the least disk space
+    and 100 is the best quality which needs the most disk space.
 
 ``lighting_intensity = <number>``
 
