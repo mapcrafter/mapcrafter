@@ -12,9 +12,9 @@ Requirements
 
   * libpng
   * libjpeg (but you should use libjpeg-turbo as drop in replacement)
-  * libboost-iostreams (>= 1.42)
+  * libboost-iostreams
   * libboost-system
-  * libboost-filesystem
+  * libboost-filesystem (>= 1.42)
   * libboost-program-options
   * (libboost-test if you want to use the tests)
 * For your Minecraft worlds:
