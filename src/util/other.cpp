@@ -143,7 +143,7 @@ std::string trim(const std::string& str) {
 
 std::string escapeJSON(const std::string& str) {
 	std::ostringstream ss;
-	for (auto it = str.cbegin(); it != str.cend(); ++it) {
+	for (auto it = str.begin(); it != str.end(); ++it) {
 	//C++98/03:
 	//for (std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
 		switch (*it) {
