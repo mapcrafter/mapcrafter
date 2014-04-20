@@ -124,6 +124,7 @@ First step is to install prerequisites::
     make install clean; rehash
 
 Or if you got portmaster installed::
+
     portmaster devel/git devel/boost-all devel/cmake misc/compat8x graphics/png
 
 Once this is done compiling(takes a long time), you can go ahead with the normal steps::
