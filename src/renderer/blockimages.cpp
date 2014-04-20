@@ -498,8 +498,6 @@ bool BlockImages::saveBlocks(const std::string& filename) {
 
 		std::vector<RGBAImage> blocks;
 	for (auto it = blocks_sorted.begin(); it != blocks_sorted.end(); ++it)
-	for (std::map<uint32_t, RGBAImage>::const_iterator it = blocks_sorted.begin();
-	        it != blocks_sorted.end(); ++it)
 		blocks.push_back(it->second);
 
 	blocks.push_back(opaque_water[0]);
