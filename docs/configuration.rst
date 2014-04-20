@@ -156,6 +156,18 @@ General Options
     the file in the output directory you can open with your webbrowser after
     the rendering.
 
+``background_color = <hex color>``
+
+    **Default:** ``#DDDDDD``
+
+    This is the background color of your rendered map. You have to specify
+    it like an HTML hex color (``#rrggbb``).
+    
+    The background color of the map is set with a CSS option in the template.
+    Because the JPEG image format does not support transparency and some tiles
+    are not completely used, you have to re-render your maps which use JPEGs
+    if you change the background color.
+
 World Options
 -------------
 
