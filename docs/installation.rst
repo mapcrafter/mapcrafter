@@ -108,7 +108,7 @@ FreeBSD 10
 
 Mapcrafter builds fine on FreeBSD 10, 9 is not tested but could also build there.
 
-For this guide we will be using ports, but could work with packages from pkgng(untested).
+For this guide we will be using ports, but could work with packages from pkgng (untested).
 
 First step is to install prerequisites::
 
