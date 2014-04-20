@@ -41,6 +41,8 @@ std::string str(T value) {
 	return ss.str();
 }
 
+std::string strBool(bool value);
+
 /**
  * A lazy function to convert different datatypes.
  * Works by printing the value into a string stream and reading the new datatype from it.
@@ -70,6 +72,30 @@ std::string replaceAll(const std::string& str, const std::string& from, const st
 
 bool startswith(const std::string& str, const std::string& start);
 bool endswith(const std::string& str, const std::string& end);
+
+template<typename T>
+class Nullable {
+public:
+	Nullable() : null(true) {}
+	Nullable(const T& value) : null(false), value(value) {}
+	~Nullable() {}
+
+	T get() const { return value; }
+	void set(const T& value) { this->value = value; }
+
+	bool isNull() const { return null; }
+	void setNull() { null = true; }
+
+	bool operator==(const T& other) const {
+		if (null)
+			return false;
+		return value == other;
+	}
+
+private:
+	bool null;
+	T value;
+};
 
 } /* namespace util */
 } /* namespace mapcrafter */
