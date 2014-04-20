@@ -62,8 +62,10 @@ void TileRenderWorker::saveTile(const TilePath& tile, const RGBAImage& image) {
 
 	if (png && !image.writePNG(file.string()))
 		std::cout << "Unable to write " << file.string() << std::endl;
+
+	config::Color bg = render_context.background_color;
 	if (!png && !image.writeJPEG(file.string(),
-			render_context.map_config.getJPEGQuality(), rgba(0xDD, 0xDD, 0xDD, 255)))
+			render_context.map_config.getJPEGQuality(), rgba(bg.red, bg.green, bg.blue, 255)))
 		std::cout << "Unable to write " << file.string() << std::endl;
 }
 

@@ -230,6 +230,7 @@ bool RenderManager::copyTemplateFile(const std::string& filename) const {
 bool RenderManager::writeTemplateIndexHtml() const {
 	std::map<std::string, std::string> vars;
 	vars["worlds"] = confighelper.generateTemplateJavascript();
+	vars["backgroundColor"] = config.getBackgroundColor().hex;
 
 	return copyTemplateFile("index.html", vars);
 }
@@ -669,6 +670,7 @@ bool RenderManager::run() {
 
 			RenderContext context;
 			context.output_dir = output_dir;
+			context.background_color = config.getBackgroundColor();
 			context.world_config = config.getWorld(map.getWorld());
 			context.map_config = map;
 			context.block_images = block_images;
