@@ -59,10 +59,11 @@ void TileRenderWorker::saveTile(const TilePath& tile, const RGBAImage& image) {
 	fs::path file = render_context.output_dir / filename;
 	if (!fs::exists(file.branch_path()))
 		fs::create_directories(file.branch_path());
+
 	if (png && !image.writePNG(file.string()))
 		std::cout << "Unable to write " << file.string() << std::endl;
-	else if (!image.writeJPEG(file.string(), render_context.map_config.getJPEGQuality(),
-			rgba(0xDD, 0xDD, 0xDD, 255)))
+	if (!png && !image.writeJPEG(file.string(),
+			render_context.map_config.getJPEGQuality(), rgba(0xDD, 0xDD, 0xDD, 255)))
 		std::cout << "Unable to write " << file.string() << std::endl;
 }
 
