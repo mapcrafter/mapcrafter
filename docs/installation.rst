@@ -103,6 +103,35 @@ once you have run this, you should have a working build system for Mapcrafter::
 	
 this will build Mapcrafter and put the ready to use binary in the ``src/`` directory
 
+FreeBSD 10
+==========
+
+Mapcrafter builds fine on FreeBSD 10, 9 is not tested but could also build there.
+
+For this guide we will be using ports, but could work with packages from pkgng(untested).
+
+First step is to install prerequisites::
+
+    cd /usr/ports/devel/git
+    make install clean; rehash
+    cd /usr/ports/devel/boost-all
+    make install clean; rehash
+    cd /usr/ports/devel/cmake
+    make install clean; rehash
+    cd /usr/ports/misc/compat8x
+    make install clean; rehash
+    cd /usr/ports/graphics/png
+    make install clean; rehash
+
+Or if you got portmaster installed::
+    portmaster devel/git devel/boost-all devel/cmake misc/compat8x graphics/png
+
+Once this is done compiling(takes a long time), you can go ahead with the normal steps::
+
+    git clone https://github.com/m0r13/mapcrafter.git
+    cd mapcrafter
+    cmake .
+    make
 
 
 Arch Linux
