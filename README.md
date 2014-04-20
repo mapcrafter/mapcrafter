@@ -37,6 +37,7 @@ stuff of the template from Minecraft Overviewer.
       Mapcrafter from source
 * Some libraries:
   * libpng
+  * libjpeg (but you should use libjpeg-turbo as drop in replacement)
   * libboost-iostreams
   * libboost-system
   * libboost-filesystem (>= 1.42)
@@ -73,6 +74,11 @@ You can also ask questions in the [Minecraft Forum
 thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-map-renderer/).
 
 ## Version history ##
+
+**v.1.4**
+
+* Added option to use JPEGs as image output format
+* Added option to change the background color of the map
 
 **v.1.3.2**
 

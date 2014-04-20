@@ -101,7 +101,7 @@ struct RenderBlock {
 	// drawing position in pixels on the tile
 	int x, y;
 	bool transparent;
-	Image image;
+	RGBAImage image;
 	mc::BlockPos pos;
 	uint8_t id, data;
 
@@ -133,7 +133,7 @@ public:
 			const config::MapSection& map_config);
 	~TileRenderer();
 
-	void renderTile(const TilePos& tile_pos, const TilePos& tile_offset, Image& tile);
+	void renderTile(const TilePos& tile_pos, const TilePos& tile_offset, RGBAImage& tile);
 };
 
 }

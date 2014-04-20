@@ -11,6 +11,7 @@ Requirements
 * Some libraries:
 
   * libpng
+  * libjpeg (but you should use libjpeg-turbo as drop in replacement)
   * libboost-iostreams (>= 1.42)
   * libboost-system
   * libboost-filesystem
@@ -32,7 +33,7 @@ GitHub if you want the newest version::
 Make sure you have all requirements installed. If you are on a Debian-like
 Linux system, you can install these packages with apt::
 
-    sudo apt-get install libpng12-dev libboost-iostreams-dev \
+    sudo apt-get install libpng-dev libjpeg-dev libboost-iostreams-dev \
     libboost-system-dev libboost-filesystem-dev libboost-program-options-dev
 
 Then you can go into the directory with the Mapcrafter source (for example

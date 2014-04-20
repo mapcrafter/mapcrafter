@@ -50,7 +50,7 @@ public:
 	// is called to allow the rendermode to hide specific blocks
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 	// is called to allow the rendermode to change a block image
-	virtual void draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 };
 
 bool createRendermode(const config::WorldSection& world_config,

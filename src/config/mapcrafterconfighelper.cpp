@@ -59,6 +59,8 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 		js += "\ttextureSize: " + util::str(it->getTextureSize()) + ",\n";
 		js += "\ttileSize: " + util::str(32 * it->getTextureSize()) + ",\n";
 		js += "\tmaxZoom: " + util::str(getMapZoomlevel(it->getShortName())) + ",\n";
+		js += "\timageFormat: \"" + it->getImageFormatSuffix() + "\",\n";
+
 		js += "\trotations: [";
 		auto rotations = it->getRotations();
 		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2)

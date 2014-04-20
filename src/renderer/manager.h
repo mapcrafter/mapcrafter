@@ -53,15 +53,14 @@ struct RenderOpts {
  * This informations are stored with the rendered map and used for incremental rendering.
  */
 struct MapSettings {
-	int texture_size;
-	int tile_size;
+	util::Nullable<int> texture_size;
+	util::Nullable<std::string> image_format;
+	util::Nullable<double> lighting_intensity;
+	util::Nullable<bool> render_unknown_blocks;
+	util::Nullable<bool> render_leaves_transparent;
+	util::Nullable<bool> render_biomes;
+
 	int max_zoom;
-
-	double lighting_intensity;
-	bool render_unknown_blocks;
-	bool render_leaves_transparent;
-	bool render_biomes;
-
 	std::array<bool, 4> rotations;
 	std::array<int, 4> last_render;
 	std::array<TilePos, 4> tile_offsets;
@@ -71,7 +70,7 @@ struct MapSettings {
 	bool read(const std::string& filename);
 	bool write(const std::string& filename) const;
 
-	bool equalsMapConfig(const config::MapSection& map) const;
+	bool syncMapConfig(const config::MapSection& map);
 	static MapSettings byMapConfig(const config::MapSection& map);
 };
 
@@ -91,7 +90,8 @@ private:
 	bool writeTemplateIndexHtml() const;
 	void writeTemplates() const;
 
-	void increaseMaxZoom(const fs::path& dir) const;
+	void increaseMaxZoom(const fs::path& dir, std::string image_format,
+			int jpeg_quality = 85) const;
 
 public:
 	RenderManager(const RenderOpts& opts);

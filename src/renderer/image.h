@@ -25,80 +25,135 @@
 #include <string>
 #include <vector>
 
-#define ROTATE_90 1
-#define ROTATE_180 2
-#define ROTATE_270 3
-
-#define ALPHA(value) (((value) & 0xff000000) >> 24)
-#define BLUE(value) (((value) & 0xff0000) >> 16)
-#define GREEN(value) (((value) & 0xff00) >> 8)
-#define RED(value) ((value) & 0xff)
-
-# ifndef UINT64_C
-#  if __WORDSIZE == 64
-#   define UINT64_C(c)	c ## UL
-#  else
-#   define UINT64_C(c)	c ## ULL
-#  endif
-# endif
-
 namespace mapcrafter {
 namespace renderer {
 
-uint32_t rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
-uint32_t rgba_multiply(uint32_t value, double r, double g, double b, double a = 1);
-uint32_t rgba_multiply(uint32_t value, uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
+typedef uint32_t RGBAPixel;
 
-void blend(uint32_t& dest, const uint32_t& source);
+RGBAPixel rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
+uint8_t rgba_red(RGBAPixel value);
+uint8_t rgba_green(RGBAPixel value);
+uint8_t rgba_blue(RGBAPixel value);
+uint8_t rgba_alpha(RGBAPixel value);
+
+RGBAPixel rgba_multiply(RGBAPixel value, double r, double g, double b, double a = 1);
+RGBAPixel rgba_multiply(RGBAPixel value, uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
+
+void blend(RGBAPixel& dest, const RGBAPixel& source);
 
 void pngReadData(png_structp pngPtr, png_bytep data, png_size_t length);
 void pngWriteData(png_structp pngPtr, png_bytep data, png_size_t length);
 
+template<typename Pixel>
 class Image {
-private:
-	int width;
-	int height;
-
-	std::vector<uint32_t> data;
-
 public:
-	Image();
-	Image(int width, int height);
+	Image(int width = 0, int height = 0);
 	~Image();
-
-	void setSize(int w, int h);
 
 	int getWidth() const;
 	int getHeight() const;
 
-	uint32_t getPixel(int x, int y) const;
-	void setPixel(int x, int y, uint32_t pixel);
+	Pixel getPixel(int x, int y) const;
+	void setPixel(int x, int y, Pixel pixel);
 
-	const uint32_t& pixel(int x, int y) const;
-	uint32_t& pixel(int x, int y);
+	const Pixel& pixel(int x, int y) const;
+	Pixel& pixel(int x, int y);
 
-	void simpleblit(const Image& image, int x, int y);
-	void alphablit(const Image& image, int x, int y);
-	void blendPixel(uint32_t color, int x, int y);
-	void fill(uint32_t color, int x1, int y1, int w, int h);
+	void setSize(int width, int height);
+
+protected:
+	int width;
+	int height;
+
+	std::vector<Pixel> data;
+};
+
+const int ROTATE_90 = 1;
+const int ROTATE_180 = 2;
+const int ROTATE_270 = 3;
+
+class RGBAImage : public Image<RGBAPixel> {
+public:
+	RGBAImage(int width = 0, int height = 0);
+	~RGBAImage();
+
+	void simpleblit(const RGBAImage& image, int x, int y);
+	void alphablit(const RGBAImage& image, int x, int y);
+	void blendPixel(RGBAPixel color, int x, int y);
+	void fill(RGBAPixel color, int x1, int y1, int w, int h);
 	void clear();
 
-	Image clip(int x, int y, int width, int height) const;
-	Image colorize(double r, double g, double b, double a = 1) const;
-	Image colorize(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) const;
-	Image rotate(int rotation) const;
-	Image flip(bool flip_x, bool flip_y) const;
-	Image move(int x_off, int y_off) const;
+	RGBAImage clip(int x, int y, int width, int height) const;
+	RGBAImage colorize(double r, double g, double b, double a = 1) const;
+	RGBAImage colorize(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) const;
+	RGBAImage rotate(int rotation) const;
+	RGBAImage flip(bool flip_x, bool flip_y) const;
+	RGBAImage move(int x_off, int y_off) const;
 
-	void resizeInterpolated(int new_width, int new_height, Image& dest) const;
-	void resizeSimple(int new_width, int new_height, Image& dest) const;
+	void resizeInterpolated(int new_width, int new_height, RGBAImage& dest) const;
+	void resizeSimple(int new_width, int new_height, RGBAImage& dest) const;
 	// automatically chooses an image resize interpolation
-	void resizeAuto(int new_width, int new_height, Image& dest) const;
-	void resizeHalf(Image& dest) const;
+	void resizeAuto(int new_width, int new_height, RGBAImage& dest) const;
+	void resizeHalf(RGBAImage& dest) const;
 
 	bool readPNG(const std::string& filename);
 	bool writePNG(const std::string& filename) const;
+
+	bool readJPEG(const std::string& filename);
+	bool writeJPEG(const std::string& filename, int quality,
+			RGBAPixel background = rgba(255, 255, 255, 255)) const;
 };
+
+template<typename Pixel>
+Image<Pixel>::Image(int width, int height)
+	:width(width), height(height) {
+	data.resize(width * height);
+}
+
+template<typename Pixel>
+Image<Pixel>::~Image() {
+}
+
+template<typename Pixel>
+int Image<Pixel>::getWidth() const {
+	return width;
+}
+
+template<typename Pixel>
+int Image<Pixel>::getHeight() const {
+	return height;
+}
+
+template<typename Pixel>
+Pixel Image<Pixel>::getPixel(int x, int y) const {
+	if (x >= width || x < 0 || y >= height || y < 0)
+		return 0;
+	return data[y * width + x];
+}
+
+template<typename Pixel>
+void Image<Pixel>::setPixel(int x, int y, Pixel pixel) {
+	if (x >= width || x < 0 || y >= height || y < 0)
+		return;
+	data[y * width + x] = pixel;
+}
+
+template<typename Pixel>
+const Pixel& Image<Pixel>::pixel(int x, int y) const {
+	return data[y * width + x];
+}
+
+template<typename Pixel>
+Pixel& Image<Pixel>::pixel(int x, int y) {
+	return data[y * width + x];
+}
+
+template<typename Pixel>
+void Image<Pixel>::setSize(int width, int height) {
+	this->width = width;
+	this->height = height;
+	data.resize(width * height);
+}
 
 }
 }

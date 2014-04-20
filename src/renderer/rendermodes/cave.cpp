@@ -24,7 +24,7 @@ namespace renderer {
 
 
 CaveRendermode::CaveRendermode(const RenderState& state)
-		: Rendermode(state) {
+	: Rendermode(state) {
 }
 
 CaveRendermode::~CaveRendermode() {
@@ -54,7 +54,8 @@ bool CaveRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t dat
 	// we need to check if there is sunlight on the surface of the water
 	// if yes => no cave, hide block
 	// if no  => lake in a cave, show it
-	mc::Block top = state.getBlock(pos + mc::DIR_TOP, mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
+	mc::Block top = state.getBlock(pos + mc::DIR_TOP,
+			mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
 	if (id == 8 || id == 9 || top.id == 8 || top.id == 9) {
 		mc::BlockPos p = pos + mc::DIR_TOP;
 		mc::Block block(top.id, top.data, 0, 0, top.sky_light);
@@ -75,14 +76,17 @@ bool CaveRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t dat
 	// show all blocks, which don't touch sunlight
 	// and have a transparent block on the south, west or top side
 	// south, west and top, because with this you can look in the caves
-	if (isTransparentBlock(south) || isTransparentBlock(west) || isTransparentBlock(top)) {
+	if (isTransparentBlock(south)
+			|| isTransparentBlock(west)
+			|| isTransparentBlock(top)) {
 		return false;
 	}
 
 	return true;
 }
 
-void CaveRendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+void CaveRendermode::draw(RGBAImage& image, const mc::BlockPos& pos,
+		uint16_t id, uint16_t data) {
 	// a nice color gradient to see something
 	// (because the whole map is just full of cave stuff,
 	// one can't differentiate the single caves)

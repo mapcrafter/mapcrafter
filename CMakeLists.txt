@@ -38,5 +38,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(Threads REQUIRED)
 find_package(PNG REQUIRED)
+find_package(JPEG REQUIRED)
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")

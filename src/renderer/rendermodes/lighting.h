@@ -74,7 +74,8 @@ struct LightingData {
 
 typedef double LightingColor;
 
-// corner colors of a face - defined as array with corners topleft/topright/bottomleft/bottomright
+// corner colors of a face
+// - defined as array with corners top left / top right / bottom left / bottom right
 typedef std::array<LightingColor, 4> CornerColors;
 
 class LightingRendermode : public Rendermode {
@@ -83,33 +84,42 @@ private:
 	double lighting_intensity;
 	bool dimension_end;
 
-	void createShade(Image& image, const CornerColors& corners) const;
+	void createShade(RGBAImage& image, const CornerColors& corners) const;
 	
 	LightingColor calculateLightingColor(uint8_t block_light, uint8_t sky_light) const;
 	void estimateBlockLight(mc::Block& block, const mc::BlockPos& pos);
 	LightingData getBlockLight(const mc::BlockPos& pos);
 
 	LightingColor getLightingColor(const mc::BlockPos& pos);
-	LightingColor getCornerColor(const mc::BlockPos& pos, const CornerNeighbors& corner);
-	CornerColors getCornerColors(const mc::BlockPos& pos, const FaceCorners& corners);
+	LightingColor getCornerColor(const mc::BlockPos& pos,
+			const CornerNeighbors& corner);
+	CornerColors getCornerColors(const mc::BlockPos& pos,
+			const FaceCorners& corners);
 	
-	void lightLeft(Image& image, const CornerColors& colors);
-	void lightLeft(Image& image, const CornerColors& colors, int ystart, int yend);
-	void lightRight(Image& image, const CornerColors& colors);
-	void lightRight(Image& image, const CornerColors& colors, int ystart, int yend);
-	void lightTop(Image& image, const CornerColors& colors, int yoff = 0);
+	void lightLeft(RGBAImage& image, const CornerColors& colors);
+	void lightLeft(RGBAImage& image, const CornerColors& colors,
+			int ystart, int yend);
+	void lightRight(RGBAImage& image, const CornerColors& colors);
+	void lightRight(RGBAImage& image, const CornerColors& colors,
+			int ystart, int yend);
+	void lightTop(RGBAImage& image, const CornerColors& colors, int yoff = 0);
 	
-	void doSlabLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	void doSlabLight(RGBAImage& image, const mc::BlockPos& pos,
+			uint16_t id, uint16_t data);
 
-	void doSimpleLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
-	void doSmoothLight(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	void doSimpleLight(RGBAImage& image, const mc::BlockPos& pos,
+			uint16_t id, uint16_t data);
+	void doSmoothLight(RGBAImage& image, const mc::BlockPos& pos,
+			uint16_t id, uint16_t data);
 public:
-	LightingRendermode(const RenderState& state, bool day, double lighting_intensity,
-			bool dimension_end);
+	LightingRendermode(const RenderState& state, bool day,
+			double lighting_intensity, bool dimension_end);
 	virtual ~LightingRendermode();
 
-	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
-	virtual void draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	virtual bool isHidden(const mc::BlockPos& pos,
+			uint16_t id, uint16_t data);
+	virtual void draw(RGBAImage& image, const mc::BlockPos& pos,
+			uint16_t id, uint16_t data);
 };
 
 } /* namespace render */

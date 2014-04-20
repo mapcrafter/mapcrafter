@@ -41,7 +41,7 @@ bool Rendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	return false;
 }
 
-void Rendermode::draw(Image& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+void Rendermode::draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 }
 
 bool createRendermode(const config::WorldSection& world_config,

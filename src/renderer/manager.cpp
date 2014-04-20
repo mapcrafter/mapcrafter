@@ -34,9 +34,9 @@ namespace mapcrafter {
 namespace renderer {
 
 MapSettings::MapSettings()
-	: texture_size(12), tile_size(0), max_zoom(0),
-	  lighting_intensity(1.0),
-	  render_unknown_blocks(0), render_leaves_transparent(0), render_biomes(false) {
+	: texture_size(12), image_format("png"), lighting_intensity(1.0),
+	  render_unknown_blocks(0), render_leaves_transparent(0), render_biomes(false),
+	  max_zoom(0) {
 	for (int i = 0; i < 4; i++) {
 		rotations[i] = false;
 		last_render[i] = 0;
@@ -54,14 +54,20 @@ bool MapSettings::read(const std::string& filename) {
 
 	config::INIConfigSection& root = config.getRootSection();
 
-	texture_size = root.get<int>("texture_size");
-	tile_size = root.get<int>("tile_size");
-	max_zoom = root.get<int>("max_zoom");
+	if (root.has("texture_size"))
+		texture_size.set(root.get<int>("texture_size"));
+	if (root.has("image_format"))
+		image_format.set(root.get<std::string>("image_format"));
+	if (root.has("lighting_intensity"))
+		lighting_intensity.set(root.get<double>("lighting_intensity"));
+	if (root.has("render_unknown_blocks"))
+		render_unknown_blocks.set(root.get<bool>("render_unknown_blocks"));
+	if (root.has("render_leaves_transparent"))
+		render_leaves_transparent.set(root.get<bool>("render_leaves_transparent"));
+	if (root.has("render_biomes"))
+		render_biomes.set(root.get<bool>("render_biomes"));
 
-	lighting_intensity = root.get<double>("lighting_intensity", 1.0);
-	render_unknown_blocks = root.get<bool>("render_unknown_blocks");
-	render_leaves_transparent = root.get<bool>("render_leaves_transparent");
-	render_biomes = root.get<bool>("render_biomes");
+	max_zoom = root.get<int>("max_zoom");
 
 	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
 	for (int i = 0; i < 4; i++) {
@@ -85,14 +91,14 @@ bool MapSettings::write(const std::string& filename) const {
 	config::INIConfig config;
 	config::INIConfigSection& root = config.getRootSection();
 
-	root.set("texture_size", util::str(texture_size));
-	root.set("tile_size", util::str(tile_size));
-	root.set("max_zoom", util::str(max_zoom));
+	root.set("texture_size", util::str(texture_size.get()));
+	root.set("image_format", image_format.get());
+	root.set("lighting_intensity", util::str(lighting_intensity.get()));
+	root.set("render_unknown_blocks", util::str(render_unknown_blocks.get()));
+	root.set("render_leaves_transparent", util::str(render_leaves_transparent.get()));
+	root.set("render_biomes", util::str(render_biomes.get()));
 
-	root.set("lighting_intensity", util::str(lighting_intensity));
-	root.set("render_unknown_blocks", util::str(render_unknown_blocks));
-	root.set("render_leaves_transparent", util::str(render_leaves_transparent));
-	root.set("render_biomes", util::str(render_biomes));
+	root.set("max_zoom", util::str(max_zoom));
 
 	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
 	for (int i = 0; i < 4; i++) {
@@ -107,23 +113,76 @@ bool MapSettings::write(const std::string& filename) const {
 	return config.writeFile(filename);
 }
 
-bool MapSettings::equalsMapConfig(const config::MapSection& map) const {
-	return texture_size == map.getTextureSize()
-			&& util::floatingPointEquals(lighting_intensity, map.getLightingIntensity())
-			&& render_unknown_blocks == map.renderUnknownBlocks()
-			&& render_leaves_transparent == map.renderLeavesTransparent()
-			&& render_biomes == map.renderBiomes();
+bool MapSettings::syncMapConfig(const config::MapSection& map) {
+	if (texture_size.isNull())
+		texture_size.set(map.getTextureSize());
+	if (image_format.isNull())
+		image_format.set(map.getImageFormatSuffix());
+	if (lighting_intensity.isNull())
+		lighting_intensity.set(map.getLightingIntensity());
+	if (render_unknown_blocks.isNull())
+		render_unknown_blocks.set(map.renderUnknownBlocks());
+	if (render_leaves_transparent.isNull())
+		render_leaves_transparent.set(map.renderLeavesTransparent());
+	if (render_biomes.isNull())
+		render_biomes.set(map.renderBiomes());
+
+	bool changed = true;
+	bool force_required = false;
+	if (texture_size.get() != map.getTextureSize()) {
+		std::cerr << std::endl;
+		std::cerr << "Warning: You changed the texture size from " << texture_size.get();
+		std::cerr << " to " << map.getTextureDir() << "." << std::endl;
+		force_required = true;
+	} else if (image_format.get() != map.getImageFormatSuffix()) {
+		std::cerr << std::endl;
+		std::cerr << "Warning: You changed the image format from " << image_format.get();
+		std::cerr << " to " << map.getImageFormatSuffix() << "." << std::endl;
+		std::cerr << "Force-render the whole map in order for the new " ;
+		std::cerr << "configuration to come into effect" << std::endl;
+		std::cerr << "and delete the images generated with the other ";
+		std::cerr << "image format." << std::endl << std::endl;
+		force_required = true;
+		return false;
+	} else if (!util::floatingPointEquals(lighting_intensity.get(), map.getLightingIntensity())) {
+		std::cerr << std::endl;
+		std::cerr << "Warning: You changed the lighting intensity from ";
+		std::cerr << lighting_intensity.get() << " to " << map.getLightingIntensity();
+		std::cerr << "." << std::endl;
+	} else if (render_unknown_blocks.get() != map.renderUnknownBlocks()) {
+		std::cerr << std::endl;
+		std::cerr << "Warning: You changed the rendering of unknown blocks from ";
+		std::cerr << util::strBool(render_unknown_blocks.get()) << " to ";
+		std::cerr << util::strBool(map.renderUnknownBlocks()) << "." << std::endl;
+	} else if (render_leaves_transparent.get() != map.renderLeavesTransparent()) {
+		std::cerr << "Warning: You changed the rendering of transparent leaves from ";
+		std::cerr << util::strBool(render_leaves_transparent.get()) << " to ";
+		std::cerr << util::strBool(map.renderLeavesTransparent()) << "." << std::endl;
+	} else if (render_biomes.get() != map.renderBiomes()) {
+		std::cerr << "Warning: You changed the rendering of biomes from ";
+		std::cerr << util::strBool(render_biomes.get()) << " to ";
+		std::cerr << util::strBool(map.renderBiomes()) << "." << std::endl;
+	} else {
+		changed = false;
+	}
+
+	if (changed) {
+		std::cerr << "Force-render the whole map in order for the new " ;
+		std::cerr << "configuration to come into effect." << std::endl << std::endl;
+	}
+
+	return !(changed && force_required);
 }
 
 MapSettings MapSettings::byMapConfig(const config::MapSection& map) {
 	MapSettings settings;
 
-	settings.texture_size = map.getTextureSize();
-	settings.tile_size = map.getTextureSize() * 32;
-
-	settings.render_unknown_blocks = map.renderUnknownBlocks();
-	settings.render_leaves_transparent = map.renderLeavesTransparent();
-	settings.render_biomes = map.renderBiomes();
+	settings.texture_size.set(map.getTextureSize());
+	settings.image_format.set(map.getImageFormatSuffix());
+	settings.lighting_intensity.set(map.getLightingIntensity());
+	settings.render_unknown_blocks.set(map.renderUnknownBlocks());
+	settings.render_leaves_transparent.set(map.renderLeavesTransparent());
+	settings.render_biomes.set(map.renderBiomes());
 
 	auto rotations = map.getRotations();
 	for (auto it = rotations.begin(); it != rotations.end(); ++it)
@@ -171,6 +230,7 @@ bool RenderManager::copyTemplateFile(const std::string& filename) const {
 bool RenderManager::writeTemplateIndexHtml() const {
 	std::map<std::string, std::string> vars;
 	vars["worlds"] = confighelper.generateTemplateJavascript();
+	vars["backgroundColor"] = config.getBackgroundColor().hex;
 
 	return copyTemplateFile("index.html", vars);
 }
@@ -219,7 +279,8 @@ void RenderManager::writeTemplates() const {
  * This method increases the max zoom of a rendered map and makes the necessary changes
  * on the tile tree.
  */
-void RenderManager::increaseMaxZoom(const fs::path& dir) const {
+void RenderManager::increaseMaxZoom(const fs::path& dir,
+		std::string image_format, int jpeg_quality) const {
 	if (fs::exists(dir / "1")) {
 		// at first rename the directories 1 2 3 4 (zoom level 0) and make new directories
 		util::moveFile(dir / "1", dir / "1_");
@@ -227,7 +288,8 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 		// then move the old tile trees one zoom level deeper
 		util::moveFile(dir / "1_", dir / "1/4");
 		// also move the images of the directories
-		util::moveFile(dir / "1.png", dir / "1/4.png");
+		util::moveFile(dir / (std::string("1.") + image_format),
+				dir / (std::string("1/4.") + image_format));
 	}
 
 	// do the same for the other directories
@@ -235,34 +297,44 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 		util::moveFile(dir / "2", dir / "2_");
 		fs::create_directories(dir / "2");
 		util::moveFile(dir / "2_", dir / "2/3");
-		util::moveFile(dir / "2.png", dir / "2/3.png");
+		util::moveFile(dir / (std::string("2.") + image_format),
+				dir / (std::string("2/3.") + image_format));
 	}
 	
 	if (fs::exists(dir / "3")) {
 		util::moveFile(dir / "3", dir / "3_");
 		fs::create_directories(dir / "3");
 		util::moveFile(dir / "3_", dir / "3/2");
-		util::moveFile(dir / "3.png", dir / "3/2.png");
+		util::moveFile(dir / (std::string("3.") + image_format),
+				dir / (std::string("3/2.") + image_format));
 	}
 	
 	if (fs::exists(dir / "4")) {
 		util::moveFile(dir / "4", dir / "4_");
 		fs::create_directories(dir / "4");
 		util::moveFile(dir / "4_", dir / "4/1");
-		util::moveFile(dir / "4.png", dir / "4/1.png");
+		util::moveFile(dir / (std::string("4.") + image_format),
+				dir / (std::string("4/1.") + image_format));
 	}
 
 	// now read the images, which belong to the new directories
-	Image img1, img2, img3, img4;
-	img1.readPNG((dir / "1/4.png").string());
-	img2.readPNG((dir / "2/3.png").string());
-	img3.readPNG((dir / "3/2.png").string());
-	img4.readPNG((dir / "4/1.png").string());
+	RGBAImage img1, img2, img3, img4;
+	if (image_format == "png") {
+		img1.readPNG((dir / "1/4.png").string());
+		img2.readPNG((dir / "2/3.png").string());
+		img3.readPNG((dir / "3/2.png").string());
+		img4.readPNG((dir / "4/1.png").string());
+	} else {
+		img1.readJPEG((dir / "1/4.jpg").string());
+		img2.readJPEG((dir / "2/3.jpg").string());
+		img3.readJPEG((dir / "3/2.jpg").string());
+		img4.readJPEG((dir / "4/1.jpg").string());
+	}
 
 	int s = img1.getWidth();
 	// create images for the new directories
-	Image new1(s, s), new2(s, s), new3(s, s), new4(s, s);
-	Image old1, old2, old3, old4;
+	RGBAImage new1(s, s), new2(s, s), new3(s, s), new4(s, s);
+	RGBAImage old1, old2, old3, old4;
 	// resize the old images...
 	img1.resizeHalf(old1);
 	img2.resizeHalf(old2);
@@ -276,19 +348,29 @@ void RenderManager::increaseMaxZoom(const fs::path& dir) const {
 	new4.simpleblit(old4, 0, 0);
 
 	// now save the new images in the output directory
-	new1.writePNG((dir / "1.png").string());
-	new2.writePNG((dir / "2.png").string());
-	new3.writePNG((dir / "3.png").string());
-	new4.writePNG((dir / "4.png").string());
+	if (image_format == "png") {
+		new1.writePNG((dir / "1.png").string());
+		new2.writePNG((dir / "2.png").string());
+		new3.writePNG((dir / "3.png").string());
+		new4.writePNG((dir / "4.png").string());
+	} else {
+		new1.writeJPEG((dir / "1.jpg").string(), jpeg_quality);
+		new2.writeJPEG((dir / "2.jpg").string(), jpeg_quality);
+		new3.writeJPEG((dir / "3.jpg").string(), jpeg_quality);
+		new4.writeJPEG((dir / "4.jpg").string(), jpeg_quality);
+	}
 
 	// don't forget the base.png
-	Image base_big(2*s, 2*s), base;
+	RGBAImage base_big(2*s, 2*s), base;
 	base_big.simpleblit(new1, 0, 0);
 	base_big.simpleblit(new2, s, 0);
 	base_big.simpleblit(new3, 0, s);
 	base_big.simpleblit(new4, s, s);
 	base_big.resizeHalf(base);
-	base.writePNG((dir / "base.png").string());
+	if (image_format == "png")
+		base.writePNG((dir / "base.png").string());
+	else
+		base.writeJPEG((dir / "base.jpg").string(), jpeg_quality);
 }
 
 /**
@@ -462,17 +544,19 @@ bool RenderManager::run() {
 		if (old_settings) {
 			// try to read the map.settings filename
 			if (!settings.read(settings_filename)) {
-				std::cerr << "Error: Unable to load old map.settings file!";
-				std::cerr << std::endl << std::endl;
+				std::cerr << "Error: Unable to load old map.settings file!" << std::endl;
+				std::cerr << "You have to force-render the whole map." << std::endl;
+				std::cerr << std::endl;
 				continue;
 			}
 
 			// check whether the config file was changed when rendering incrementally
-			if (!settings.equalsMapConfig(map)) {
-				std::cerr << "Warning: It seems that the configuration of the map '";
-				std::cerr << map_name << "' was changed." << std::endl;
-				std::cerr << "Force-render the whole map or reset the configuration ";
-				std::cerr << "of the map to the old settings." << std::endl << std::endl;
+			if (!settings.syncMapConfig(map)) {
+				//std::cerr << "Warning: It seems that the configuration of the map '";
+				//std::cerr << map_name << "' was changed." << std::endl;
+				//std::cerr << "Force-render the whole map or reset the configuration ";
+				//std::cerr << "of the map to the old settings." << std::endl << std::endl;
+				continue;
 			}
 
 			// for force-render rotations
@@ -505,7 +589,7 @@ bool RenderManager::run() {
 				std::string output_dir = config.getOutputPath(map_name + "/"
 						+ config::ROTATION_NAMES_SHORT[*rotation_it]);
 				for (int i = settings.max_zoom; i < world_zoomlevels; i++)
-					increaseMaxZoom(output_dir);
+					increaseMaxZoom(output_dir, map.getImageFormatSuffix());
 			}
 		}
 
@@ -559,7 +643,8 @@ bool RenderManager::run() {
 				std::cout << "Scanning required tiles..." << std::endl;
 				// use the incremental check specified in the config
 				if (map.useImageModificationTimes())
-					tile_set->scanRequiredByFiletimes(output_dir);
+					tile_set->scanRequiredByFiletimes(output_dir,
+							map.getImageFormatSuffix());
 				else
 					tile_set->scanRequiredByTimestamp(settings.last_render[rotation]);
 			}
@@ -585,6 +670,7 @@ bool RenderManager::run() {
 
 			RenderContext context;
 			context.output_dir = output_dir;
+			context.background_color = config.getBackgroundColor();
 			context.world_config = config.getWorld(map.getWorld());
 			context.map_config = map;
 			context.block_images = block_images;

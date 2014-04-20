@@ -76,6 +76,7 @@ if(NOT OPT_SKIP_TESTS)
 endif()
 
 target_link_libraries(mapcraftercore ${PNG_LIBRARIES})
+target_link_libraries(mapcraftercore ${JPEG_LIBRARIES})
 target_link_libraries(mapcraftercore ${CMAKE_THREAD_LIBS_INIT})
 if(OPT_BOOST_STATIC)
 	target_link_libraries(mapcraftercore ${ZLIB_LIBRARIES})

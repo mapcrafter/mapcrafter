@@ -35,6 +35,11 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace config {
 
+struct Color {
+	std::string hex;
+	uint8_t red, green, blue;
+};
+
 class MapcrafterConfig {
 private:
 	WorldSection world_global;
@@ -42,6 +47,7 @@ private:
 	MarkerSection marker_global;
 
 	Field<fs::path> output_dir, template_dir;
+	Field<Color> background_color;
 
 	std::map<std::string, WorldSection> worlds;
 	std::vector<MapSection> maps;
@@ -55,6 +61,7 @@ public:
 
 	fs::path getOutputDir() const;
 	fs::path getTemplateDir() const;
+	Color getBackgroundColor() const;
 
 	std::string getOutputPath(const std::string& path) const;
 	std::string getTemplatePath(const std::string& path) const;

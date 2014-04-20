@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include "../validation.h"
+#include "../../util.h"
 
 #include <set>
 #include <string>
@@ -31,6 +32,11 @@ namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace config {
+
+enum class ImageFormat {
+	PNG,
+	JPEG
+};
 
 class INIConfigSection;
 
@@ -52,10 +58,14 @@ public:
 	std::string getLongName() const;
 	std::string getWorld() const;
 
-	fs::path getTextureDir() const;
-	std::set<int> getRotations() const;
 	std::string getRendermode() const;
+	std::set<int> getRotations() const;
+	fs::path getTextureDir() const;
 	int getTextureSize() const;
+
+	ImageFormat getImageFormat() const;
+	std::string getImageFormatSuffix() const;
+	int getJPEGQuality() const;
 
 	double getLightingIntensity() const;
 	bool renderUnknownBlocks() const;
@@ -69,11 +79,15 @@ private:
 	std::string name_short, name_long;
 	Field<std::string> world;
 
-	Field<fs::path> texture_dir;
+	Field<std::string> rendermode;
 	Field<std::string> rotations;
 	std::set<int> rotations_set;
-	Field<std::string> rendermode;
+
+	Field<fs::path> texture_dir;
 	Field<int> texture_size;
+
+	Field<ImageFormat> image_format;
+	Field<int> jpeg_quality;
 
 	Field<double> lighting_intensity;
 	Field<bool> render_unknown_blocks, render_leaves_transparent, render_biomes, use_image_mtimes;

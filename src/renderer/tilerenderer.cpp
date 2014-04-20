@@ -430,7 +430,7 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 }
 
 void TileRenderer::renderTile(const TilePos& tile_pos, const TilePos& tile_offset,
-		Image& tile) {
+		RGBAImage& tile) {
 	// some vars, set correct image size
 	int block_size = state.images->getBlockImageSize();
 	int tile_size = state.images->getTileSize();
@@ -586,7 +586,7 @@ void TileRenderer::renderTile(const TilePos& tile_pos, const TilePos& tile_offse
 			data = checkNeighbors(block.current, id, data);
 			//if (is_water && (data & DATA_WEST) && (data & DATA_SOUTH))
 			//	continue;
-			Image image;
+			RGBAImage image;
 			bool transparent = state.images->isBlockTransparent(id, data);
 
 			// check for biome data

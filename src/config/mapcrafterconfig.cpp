@@ -23,6 +23,29 @@
 #include "../util.h"
 
 namespace mapcrafter {
+namespace util {
+
+template<>
+mapcrafter::config::Color as<mapcrafter::config::Color>(const std::string& from) {
+	std::string error_message = "Hex color must be in the format '#rrggbb'.";
+	if (from.size() != 7)
+		throw std::invalid_argument(error_message);
+	for (size_t i = 1; i < 7; i++)
+		if (!isxdigit(from[i]))
+			throw std::invalid_argument(error_message);
+
+	mapcrafter::config::Color color;
+	color.hex = from;
+	color.red = std::stoi(std::string("0x") + from.substr(1, 2), nullptr, 16);
+	color.green = std::stoi(std::string("0x") + from.substr(3, 2), nullptr, 16);
+	color.blue = std::stoi(std::string("0x") + from.substr(5, 2), nullptr, 16);
+	return color;
+}
+
+}
+}
+
+namespace mapcrafter {
 namespace config {
 
 MapcrafterConfig::MapcrafterConfig()
@@ -49,6 +72,7 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 	bool has_default_template = !util::findTemplateDir().empty();
 	if (has_default_template)
 		template_dir.setDefault(util::findTemplateDir());
+	background_color.setDefault({"#DDDDDD", 0xDD, 0xDD, 0xDD});
 
 	auto entries = config.getRootSection().getEntries();
 	for (auto entry_it = entries.begin(); entry_it != entries.end(); ++entry_it) {
@@ -66,6 +90,8 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 							"'template_dir' must be an existing directory! '"
 							+ template_dir.getValue().string() + "' does not exist!"));
 			}
+		} else if (key == "background_color") {
+			background_color.load(key, value, general_msgs);
 		} else {
 			general_msgs.push_back(ValidationMessage::warning(
 					"Unknown configuration option '" + key + "'!"));
@@ -240,6 +266,10 @@ fs::path MapcrafterConfig::getOutputDir() const {
 
 fs::path MapcrafterConfig::getTemplateDir() const {
 	return template_dir.getValue();
+}
+
+Color MapcrafterConfig::getBackgroundColor() const {
+	return background_color.getValue();
 }
 
 std::string MapcrafterConfig::getOutputPath(
