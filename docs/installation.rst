@@ -127,7 +127,7 @@ Or if you got portmaster installed::
 
     portmaster devel/git devel/boost-all devel/cmake misc/compat8x graphics/png
 
-Once this is done compiling(takes a long time), you can go ahead with the normal steps::
+Once this is done compiling (takes a long time), you can go ahead with the normal steps::
 
     git clone https://github.com/m0r13/mapcrafter.git
     cd mapcrafter
