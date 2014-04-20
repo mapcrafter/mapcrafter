@@ -635,7 +635,6 @@ bool RGBAImage::readJPEG(const std::string& filename) {
 	/* Here we use the library's state variable cinfo.output_scanline as the
 	 * loop counter, so that we don't have to keep track ourselves.
 	 */
-	int y = 0;
 	while (cinfo.output_scanline < cinfo.output_height) {
 		/* jpeg_read_scanlines expects an array of pointers to scanlines.
 		 * Here the array is only one element long, but you could ask for
@@ -647,9 +646,10 @@ bool RGBAImage::readJPEG(const std::string& filename) {
 			uint8_t red = buffer[0][3 * x];
 			uint8_t green = buffer[0][3 * x + 1];
 			uint8_t blue = buffer[0][3 * x + 2];
-			pixel(x, y) = rgba(red, green, blue, 255);
+			// output_scanline is increased by the jpeg_read_scanlines method
+			// before we use it for the image, that's why the -1
+			pixel(x, cinfo.output_scanline - 1) = rgba(red, green, blue, 255);
 		}
-		y++;
 	}
 
 	/* Step 7: Finish decompression */
@@ -765,20 +765,19 @@ bool RGBAImage::writeJPEG(const std::string& filename, int quality,
 	std::vector<JSAMPLE> line_buffer(width * 3, 0);
 	JSAMPLE* scanlineData = &line_buffer[0];
 
-	int y = 0;
 	while (cinfo.next_scanline < cinfo.image_height) {
 		/* jpeg_write_scanlines expects an array of pointers to scanlines.
 		 * Here the array is only one element long, but you could pass
 		 * more than one scanline at a time if that's more convenient.
 		 */
 		for (int x = 0; x < width; x++) {
-			RGBAPixel color = pixel(x, y);
+			RGBAPixel color = pixel(x, cinfo.next_scanline);
 			// jpeg does not support transparency
 			// add background color if this pixel has transparency
 			// but ignore a bit transparency
 			if (rgba_alpha(color) < 250) {
 				color = background;
-				blend(color, pixel(x, y));
+				blend(color, pixel(x, cinfo.next_scanline));
 			}
 
 			line_buffer[3 * x] = rgba_red(color);
@@ -786,7 +785,6 @@ bool RGBAImage::writeJPEG(const std::string& filename, int quality,
 			line_buffer[3 * x + 2] = rgba_blue(color);
 		}
 		(void) jpeg_write_scanlines(&cinfo, &scanlineData, 1);
-		y++;
 	}
 
 	/* Step 6: Finish compression */
