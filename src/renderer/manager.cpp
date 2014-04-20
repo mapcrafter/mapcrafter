@@ -138,7 +138,12 @@ bool MapSettings::syncMapConfig(const config::MapSection& map) {
 		std::cerr << std::endl;
 		std::cerr << "Warning: You changed the image format from " << image_format.get();
 		std::cerr << " to " << map.getImageFormatSuffix() << "." << std::endl;
+		std::cerr << "Force-render the whole map in order for the new " ;
+		std::cerr << "configuration to come into effect" << std::endl;
+		std::cerr << "and delete the images generated with the other ";
+		std::cerr << "image format." << std::endl << std::endl;
 		force_required = true;
+		return false;
 	} else if (!util::floatingPointEquals(lighting_intensity.get(), map.getLightingIntensity())) {
 		std::cerr << std::endl;
 		std::cerr << "Warning: You changed the lighting intensity from ";
@@ -162,7 +167,7 @@ bool MapSettings::syncMapConfig(const config::MapSection& map) {
 	}
 
 	if (changed) {
-		std::cerr << "Force-render the whole map in order for the new" ;
+		std::cerr << "Force-render the whole map in order for the new " ;
 		std::cerr << "configuration to come into effect." << std::endl << std::endl;
 	}
 
