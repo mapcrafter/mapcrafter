@@ -58,15 +58,18 @@ void MapSection::preParse(const INIConfigSection& section,
 	name_long = name_short;
 
 	// set some default configuration values
+	rendermode.setDefault("daylight");
+	rotations.setDefault("top-left");
+
 	// check if we can find a default texture directory
 	fs::path texture_dir_found = util::findTextureDir();
 	if (!texture_dir_found.empty())
 		texture_dir.setDefault(texture_dir_found);
-	rotations.setDefault("top-left");
-	rendermode.setDefault("daylight");
 	texture_size.setDefault(12);
+
 	image_format.setDefault(ImageFormat::PNG);
 	jpeg_quality.setDefault(85);
+
 	lighting_intensity.setDefault(1.0);
 	render_unknown_blocks.setDefault(false);
 	render_leaves_transparent.setDefault(true);
@@ -80,6 +83,15 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		name_long = value;
 	} else if (key == "world") {
 		world.load(key, value, validation);
+	} else if (key == "rendermode") {
+		if (rendermode.load(key, value, validation)) {
+			std::string r = rendermode.getValue();
+			if (r != "normal" && r != "daylight" && r != "nightlight" && r != "cave")
+				validation.push_back(ValidationMessage::error(
+						"'rendermode' must be one of: 'normal', 'daylight', 'nightlight', 'cave'"));
+		}
+	} else if (key == "rotations") {
+		rotations.load(key, value ,validation);
 	} else if (key == "texture_dir") {
 		if (texture_dir.load(key, value, validation)) {
 			texture_dir.setValue(BOOST_FS_ABSOLUTE(texture_dir.getValue(), config_dir));
@@ -87,15 +99,6 @@ bool MapSection::parseField(const std::string key, const std::string value,
 				validation.push_back(ValidationMessage::error(
 						"'texture_dir' must be an existing directory! '"
 						+ texture_dir.getValue().string() + "' does not exist!"));
-		}
-	} else if (key == "rotations") {
-		rotations.load(key, value ,validation);
-	} else if (key == "rendermode") {
-		if (rendermode.load(key, value, validation)) {
-			std::string r = rendermode.getValue();
-			if (r != "normal" && r != "daylight" && r != "nightlight" && r != "cave")
-				validation.push_back(ValidationMessage::error(
-						"'rendermode' must be one of: 'normal', 'daylight', 'nightlight', 'cave'"));
 		}
 	} else if (key == "texture_size") {
 		if (texture_size.load(key, value, validation)
@@ -159,16 +162,16 @@ std::string MapSection::getWorld() const {
 	return world.getValue();
 }
 
-fs::path MapSection::getTextureDir() const {
-	return texture_dir.getValue();
+std::string MapSection::getRendermode() const {
+	return rendermode.getValue();
 }
 
 std::set<int> MapSection::getRotations() const {
 	return rotations_set;
 }
 
-std::string MapSection::getRendermode() const {
-	return rendermode.getValue();
+fs::path MapSection::getTextureDir() const {
+	return texture_dir.getValue();
 }
 
 int MapSection::getTextureSize() const {

@@ -58,9 +58,9 @@ public:
 	std::string getLongName() const;
 	std::string getWorld() const;
 
-	fs::path getTextureDir() const;
-	std::set<int> getRotations() const;
 	std::string getRendermode() const;
+	std::set<int> getRotations() const;
+	fs::path getTextureDir() const;
 	int getTextureSize() const;
 
 	ImageFormat getImageFormat() const;
@@ -79,10 +79,11 @@ private:
 	std::string name_short, name_long;
 	Field<std::string> world;
 
-	Field<fs::path> texture_dir;
+	Field<std::string> rendermode;
 	Field<std::string> rotations;
 	std::set<int> rotations_set;
-	Field<std::string> rendermode;
+
+	Field<fs::path> texture_dir;
 	Field<int> texture_size;
 
 	Field<ImageFormat> image_format;
