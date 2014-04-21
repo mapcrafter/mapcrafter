@@ -26,6 +26,8 @@
 
 #if defined(__APPLE__)
   #include <mach-o/dyld.h>
+#elif defined(__FreeBSD__)
+  #include <sys/sysctl.h>
 #elif defined(__WIN32__) || defined(__WIN64__)
   #include <windows.h>
 #endif
@@ -87,7 +89,6 @@ fs::path findHomeDir() {
 	return fs::path("");
 }
 
-// TODO check different OSes
 // see also http://stackoverflow.com/questions/12468104/multi-os-get-executable-path
 fs::path findExecutablePath() {
 	char buf[1024];
@@ -100,18 +101,19 @@ fs::path findExecutablePath() {
 			return fs::path(std::string(real_path, len));
 		}
 	}
-#elif defined(unix) || defined(__unix) || defined(__unix__) || defined(__linux__)
-	int len;
-	if ((len = readlink("/proc/self/exe", buf, sizeof(buf))) != -1)
-		return fs::path(std::string(buf, len));
 #elif defined(__FreeBSD__)
-	int mib[4]
+	int mib[4];
 	mib[0] = CTL_KERN;
 	mib[1] = KERN_PROC;
 	mib[2] = KERN_PROC_PATHNAME;
 	mib[3] = -1;
-	sysctl(mib, 4, buf, sizeof(buf), NULL, 0);
+	size_t size = sizeof(buf);
+	sysctl(mib, 4, buf, &size, NULL, 0);
 	return fs::path(std::string(buf));
+#elif defined(unix) || defined(__unix) || defined(__unix__) || defined(__linux__)
+	int len;
+	if ((len = readlink("/proc/self/exe", buf, sizeof(buf))) != -1)
+		return fs::path(std::string(buf, len));
 #elif defined(__WIN32__) || defined(__WIN64__)
 	GetModuleFileName(NULL, buf, 1024);
 	return fs::path(std::string(buf));
