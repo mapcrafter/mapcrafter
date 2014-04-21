@@ -23,9 +23,11 @@
 #include "../thread/impl/singlethread.h"
 #include "../thread/impl/multithreading.h"
 #include "../thread/dispatcher.h"
+#include "../version.h"
 
-#include <array>
 #include <ctime>
+#include <cstring>
+#include <array>
 #include <fstream>
 #include <memory>
 #include <thread>
@@ -229,6 +231,9 @@ bool RenderManager::copyTemplateFile(const std::string& filename) const {
 
 bool RenderManager::writeTemplateIndexHtml() const {
 	std::map<std::string, std::string> vars;
+	vars["version"] = MAPCRAFTER_VERSION;
+	if (strlen(MAPCRAFTER_GITVERSION))
+		vars["version"] += std::string(" (") + MAPCRAFTER_GITVERSION + ")";
 	vars["worlds"] = confighelper.generateTemplateJavascript();
 	vars["backgroundColor"] = config.getBackgroundColor().hex;
 
