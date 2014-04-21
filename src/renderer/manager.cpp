@@ -132,7 +132,7 @@ bool MapSettings::syncMapConfig(const config::MapSection& map) {
 	if (texture_size.get() != map.getTextureSize()) {
 		std::cerr << std::endl;
 		std::cerr << "Warning: You changed the texture size from " << texture_size.get();
-		std::cerr << " to " << map.getTextureDir() << "." << std::endl;
+		std::cerr << " to " << map.getTextureSize() << "." << std::endl;
 		force_required = true;
 	} else if (image_format.get() != map.getImageFormatSuffix()) {
 		std::cerr << std::endl;
