@@ -551,13 +551,8 @@ bool RenderManager::run() {
 			}
 
 			// check whether the config file was changed when rendering incrementally
-			if (!settings.syncMapConfig(map)) {
-				//std::cerr << "Warning: It seems that the configuration of the map '";
-				//std::cerr << map_name << "' was changed." << std::endl;
-				//std::cerr << "Force-render the whole map or reset the configuration ";
-				//std::cerr << "of the map to the old settings." << std::endl << std::endl;
+			if (!settings.syncMapConfig(map))
 				continue;
-			}
 
 			// for force-render rotations
 			// -> set the last render time to 0 -> to render all tiles
