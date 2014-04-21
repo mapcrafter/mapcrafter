@@ -234,6 +234,12 @@ bool RenderManager::writeTemplateIndexHtml() const {
 	vars["version"] = MAPCRAFTER_VERSION;
 	if (strlen(MAPCRAFTER_GITVERSION))
 		vars["version"] += std::string(" (") + MAPCRAFTER_GITVERSION + ")";
+
+	time_t t = time(nullptr);
+	char buffer[100];
+	strftime(buffer, 100, "%d.%m.%Y, %H:%M:%S", localtime(&t));
+	vars["lastUpdate"] = buffer;
+
 	vars["worlds"] = confighelper.generateTemplateJavascript();
 	vars["backgroundColor"] = config.getBackgroundColor().hex;
 
