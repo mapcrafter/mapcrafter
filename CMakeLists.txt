@@ -24,6 +24,7 @@ if(OPT_BOOST_STATIC)
 	set(Boost_USE_STATIC_LIBS ON)
 	# we need zlib to link boost iostreams statically
 	find_package(ZLIB REQUIRED)
+	include_directories(${ZLIB_INCLUDE_DIRS})
 endif()
 
 find_package(Boost COMPONENTS iostreams system filesystem program_options REQUIRED)
@@ -36,8 +37,11 @@ if(NOT OPT_SKIP_TESTS)
 endif()
 include_directories(${Boost_INCLUDE_DIRS})
 
-find_package(Threads REQUIRED)
 find_package(PNG REQUIRED)
+include_directories(${PNG_INCLUDE_DIRS})
+
 find_package(JPEG REQUIRED)
+# ${JPEG_INCLUDE_DIRS} somehow doesn't work
+include_directories(${JPEG_INCLUDE_DIR})
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")
