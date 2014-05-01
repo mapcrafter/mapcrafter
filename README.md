@@ -75,6 +75,11 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.1.4.1**
+
+* Fixed ``mapcrafter_markers`` not being installed
+* Fixed debian package dependency issues with libjpeg-turbo
+
 **v.1.4**
 
 * Added option to use JPEGs as image output format
