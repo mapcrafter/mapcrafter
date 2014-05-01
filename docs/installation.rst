@@ -65,16 +65,7 @@ Currently there are no pre built packages available for Mac OS X but building it
 Prerequisites:
 
 * `Xcode <https://itunes.apple.com/us/app/xcode/id497799835?ls=1&mt=12>`_ 
-* `Homebrew <http://brew.sh/>`_
-
-Note:
-If you got MacPorts installed already, using Homebrew side by side is generally not `reccommended <http://superuser.com/questions/181337>`_ and the below guide will most likely not work.
-If you have issues and got MacPorts, please submit an issue with the output of the following in addition to the normal report(output of cmake, make etc.)::
-
-	port installed
-	brew list
-	brew doctor
-	echo $PATH
+* `Homebrew <http://brew.sh/>`_ or `Macports <http://www.macports.org/>`_
 
 Depending on your version of OS X you may or may not have git installed. 
 Starting from 10.9 Mavericks git is installed with Xcode, if you got 10.8 Mountain Lion or older, 
@@ -94,7 +85,11 @@ First you will have to clone the latest Mapcrafter source by running::
 
 After this, install the dependencies using brew::
 
-	brew install boost libpng cmake
+	brew install boost libpng cmake libjpeg-turbo
+
+Or install the dependencies using port::
+    
+    port install boost libpng cmake libjpeg-turbo
 	
 once you have run this, you should have a working build system for Mapcrafter::
 
@@ -102,6 +97,10 @@ once you have run this, you should have a working build system for Mapcrafter::
 	cmake .
 	make
 	
+Note: with homebrew you will have to run the following cmake command::
+
+    cmake . -DJPEG_INCLUDE_DIR=/usr/local/opt/jpeg-turbo/include/ -DJPEG_LIBRARY=/usr/local/opt/jpeg-turbo/lib/libjpeg.dylib
+
 this will build Mapcrafter and put the ready to use binary in the ``src/`` directory
 
 FreeBSD 10
