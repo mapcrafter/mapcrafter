@@ -79,6 +79,7 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 * Fixed ``mapcrafter_markers`` not being installed
 * Fixed debian package dependency issues with libjpeg-turbo
+* Fixed issue with CMake not finding libjpeg outside the default search path
 
 **v.1.4**
 
