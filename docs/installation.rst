@@ -25,6 +25,9 @@ Requirements
 Building from Source
 ====================
 
+General Instructions
+--------------------
+
 At first you have to get the source code of Mapcrafter.  Clone it directly from
 GitHub if you want the newest version::
 
@@ -57,54 +60,8 @@ Don't forget that you still have to install the texture files needed for Mapcraf
 If you install the texture files to ``src/data/textures``, they will be copied
 to a path Mapcrafter will automatically detect when installing Mapcrafter with ``make install``.
 
-Mac OS X
-========
-
-Currently there are no pre built packages available for Mac OS X but building it is relatively simple.
-
-Prerequisites:
-
-* `Xcode <https://itunes.apple.com/us/app/xcode/id497799835?ls=1&mt=12>`_ 
-* `Homebrew <http://brew.sh/>`_ or `Macports <http://www.macports.org/>`_
-
-Depending on your version of OS X you may or may not have git installed. 
-Starting from 10.9 Mavericks git is installed with Xcode, if you got 10.8 Mountain Lion or older, 
-you must install command line tools from Xcode and run the following command::
-	
-	brew install git
-
-On 10.9 Mavericks systems you will have to run the following command after you've installed Xcode::
-
-	xcode-select --install
-
-and select install in the window that pops up, and accept the EULA.
-
-First you will have to clone the latest Mapcrafter source by running::
-
-	git clone https://github.com/m0r13/mapcrafter.git
-
-After this, install the dependencies using brew::
-
-	brew install boost libpng cmake libjpeg-turbo
-
-Or install the dependencies using port::
-    
-    port install boost libpng cmake libjpeg-turbo
-	
-once you have run this, you should have a working build system for Mapcrafter::
-
-	cd mapcrafter
-	cmake .
-	make
-	
-Note: with homebrew you will have to run the following cmake command::
-
-    cmake . -DJPEG_INCLUDE_DIR=/usr/local/opt/jpeg-turbo/include/ -DJPEG_LIBRARY=/usr/local/opt/jpeg-turbo/lib/libjpeg.dylib
-
-this will build Mapcrafter and put the ready to use binary in the ``src/`` directory
-
 FreeBSD 10
-==========
+----------
 
 Mapcrafter builds fine on FreeBSD 10, 9 is not tested but could also build there.
 
@@ -133,6 +90,52 @@ Once this is done compiling (takes a long time), you can go ahead with the norma
     cd mapcrafter
     cmake .
     make
+
+Mac OS X
+--------
+
+Currently there are no pre built packages available for Mac OS X but building it is relatively simple.
+
+Prerequisites:
+
+* `Xcode <https://itunes.apple.com/us/app/xcode/id497799835?ls=1&mt=12>`_ 
+* `Homebrew <http://brew.sh/>`_ or `Macports <http://www.macports.org/>`_
+
+Depending on your version of OS X you may or may not have git installed. 
+Starting from 10.9 Mavericks git is installed with Xcode, if you got 10.8 Mountain Lion or older, 
+you must install command line tools from Xcode and run the following command::
+
+    brew install git
+
+On 10.9 Mavericks systems you will have to run the following command after you've installed Xcode::
+
+    xcode-select --install
+
+and select install in the window that pops up, and accept the EULA.
+
+First you will have to clone the latest Mapcrafter source by running::
+
+    git clone https://github.com/m0r13/mapcrafter.git
+
+After this, install the dependencies using brew::
+
+    brew install boost libpng cmake libjpeg-turbo
+
+Or install the dependencies using port::
+
+    port install boost libpng cmake libjpeg-turbo
+
+Once you have run this, you should have a working build system for Mapcrafter::
+
+    cd mapcrafter
+    cmake .
+    make
+
+This will build Mapcrafter and put the ready to use binary in the ``src/`` directory.
+
+**Note**: With homebrew you will have to run the following CMake command::
+
+	cmake . -DJPEG_INCLUDE_DIR=/usr/local/opt/jpeg-turbo/include/ -DJPEG_LIBRARY=/usr/local/opt/jpeg-turbo/lib/libjpeg.dylib
 
 
 Arch Linux
