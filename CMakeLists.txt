@@ -37,6 +37,9 @@ if(NOT OPT_SKIP_TESTS)
 endif()
 include_directories(${Boost_INCLUDE_DIRS})
 
+find_package(Threads REQUIRED)
+include_directories(${Threads_INCLUDE_DIRS})
+
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIRS})
 
