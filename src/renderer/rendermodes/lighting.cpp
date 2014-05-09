@@ -26,26 +26,29 @@
 namespace mapcrafter {
 namespace renderer {
 
+// TODO
+// Find out why the mc::DIR_* constants are all set to (0, 0, 0) !
+
 // corner definitions of the faces
 extern const FaceCorners CORNERS_LEFT = FaceCorners(CornerNeighbors(
-		mc::DIR_WEST + mc::DIR_NORTH + mc::DIR_TOP,
-		mc::DIR_SOUTH,
-		mc::DIR_BOTTOM));
+		/*mc::DIR_WEST + mc::DIR_NORTH + mc::DIR_TOP*/ mc::BlockPos(-1, -1, 1),
+		/*mc::DIR_SOUTH*/ mc::BlockPos(0, 1, 0),
+		/*mc::DIR_BOTTOM*/ mc::BlockPos(0, 0, -1)));
 
 extern const FaceCorners CORNERS_RIGHT = FaceCorners(CornerNeighbors(
-		mc::DIR_SOUTH + mc::DIR_WEST + mc::DIR_TOP,
-		mc::DIR_EAST,
-		mc::DIR_BOTTOM));
+		/*mc::DIR_SOUTH + mc::DIR_WEST + mc::DIR_TOP*/ mc::BlockPos(-1, 1, 1),
+		/*mc::DIR_EAST*/ mc::BlockPos(1, 0, 0),
+		/*mc::DIR_BOTTOM*/ mc::BlockPos(0, 0, -1)));
 
 extern const FaceCorners CORNERS_TOP = FaceCorners(CornerNeighbors(
-		mc::DIR_TOP + mc::DIR_NORTH + mc::DIR_WEST,
-		mc::DIR_EAST,
-		mc::DIR_SOUTH));
+		/*mc::DIR_TOP + mc::DIR_NORTH + mc::DIR_WEST*/ mc::BlockPos(-1, -1, 1),
+		/*mc::DIR_EAST*/ mc::BlockPos(1, 0, 0),
+		/*mc::DIR_SOUTH*/ mc::BlockPos(0, 1, 0)));
 
 extern const FaceCorners CORNERS_BOTTOM = FaceCorners(CornerNeighbors(
-		mc::DIR_NORTH + mc::DIR_WEST,
-		mc::DIR_EAST,
-		mc::DIR_SOUTH));
+		/*mc::DIR_NORTH + mc::DIR_WEST*/ mc::BlockPos(-1, -1, 0),
+		/*mc::DIR_EAST*/ mc::BlockPos(1, 0, 0),
+		/*mc::DIR_SOUTH*/ mc::BlockPos(0, 1, 0)));
 
 CornerNeighbors::CornerNeighbors() {
 }
