@@ -36,10 +36,10 @@ namespace mapcrafter {
 namespace util {
 
 bool copyFile(const fs::path& from, const fs::path& to) {
-	std::ifstream in(from.string().c_str());
+	std::ifstream in(from.string().c_str(), std::ios::binary);
 	if (!in)
 		return false;
-	std::ofstream out(to.string().c_str());
+	std::ofstream out(to.string().c_str(), std::ios::binary);
 	if (!out)
 		return false;
 
