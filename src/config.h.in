@@ -21,3 +21,6 @@
 
 #cmakedefine HAVE_ENDIAN_H
 #cmakedefine ENDIAN_H_FREEBSD
+
+#cmakedefine HAVE_SYS_IOCTL_H
+#cmakedefine HAVE_UNISTD_H
