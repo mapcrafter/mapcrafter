@@ -634,19 +634,18 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
  * Checks, if a block images has transparent pixels.
  */
 bool BlockImages::checkImageTransparency(const RGBAImage& image) const {
-	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
-	        it.next()) {
-		if (rgba_alpha(image.getPixel(it.dest_x, it.dest_y + texture_size/2)) < 255)
+	// TODO
+	// Find out why blocks on Windows contain slightly transparency (>250)
+	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end(); it.next()) {
+		if (rgba_alpha(image.getPixel(it.dest_x, it.dest_y + texture_size/2)) < 250)
 			return true;
 	}
-	for (SideFaceIterator it(texture_size, SideFaceIterator::RIGHT); !it.end();
-	        it.next()) {
-		if (rgba_alpha(image.getPixel(it.dest_x + texture_size, it.dest_y + texture_size / 2))
-		        < 255)
+	for (SideFaceIterator it(texture_size, SideFaceIterator::RIGHT); !it.end(); it.next()) {
+		if (rgba_alpha(image.getPixel(it.dest_x + texture_size, it.dest_y + texture_size / 2)) < 250)
 			return true;
 	}
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
-		if (rgba_alpha(image.getPixel(it.dest_x, it.dest_y)) < 255)
+		if (rgba_alpha(image.getPixel(it.dest_x, it.dest_y)) < 250)
 			return true;
 	}
 	return false;
