@@ -18,13 +18,11 @@
  */
 
 #include "biomes.h"
+#include "../util.h"
 
 #include <cmath>
 #include <iostream>
 
-#if defined(_WIN32) || defined(_WIN64)
-#include "../util/vscompat.h"
-#endif
 
 namespace mapcrafter {
 namespace renderer {
@@ -119,11 +117,8 @@ bool Biome::isBiomeBlock(uint16_t id, uint16_t data) {
 		|| id == 31 // grass
 		|| id == 106 // vines
 		|| id == 111 // lily pad
-#if defined(_WIN32) || defined(_WIN64)
-		|| (id == 175 && ((data & binary<11>::value) == 2 || (data & binary<11>::value) == 3));
-#else
-			|| (id == 175 && ((data & 0b11) == 2 || (data & 0b11) == 3)); // large flowers (tallgrass, fern)
-#endif
+		|| (id == 175 && ((data & util::binary<11>::value) == 2 || (data & util::binary<11>::value) == 3));
+
 	return false;
 }
 

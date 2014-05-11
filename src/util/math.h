@@ -55,12 +55,28 @@ T floordiv(T a, T b) {
 }
 
 /**
- * Checks whether to floating point numbers are equal with a small deviation.
+ * Checks whether two floating point numbers are equal with a small deviation.
  */
 template<typename T>
 bool floatingPointEquals(T a, T b, T epsilon = 0.0001) {
 	return std::abs(a - b) < epsilon;
 }
+
+/**
+ * Binary constants helper
+ */
+template <unsigned long N>
+struct binary
+{
+   static unsigned const value
+     = binary<N/10>::value << 1   // prepend higher bits
+       | N%10;                    // to lowest bit
+};
+template <>                           // specialization
+struct binary<0>                      // terminates recursion
+{
+static unsigned const value = 0;
+};
 
 } /* namespace util */
 } /* namespace mapcrafter */

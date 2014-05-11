@@ -28,10 +28,6 @@
 #include <map>
 #include <boost/filesystem.hpp>
 
-#if defined(_WIN32) || defined(_WIN64)
-#include "../util/vscompat.h"
-#endif
-
 namespace fs = boost::filesystem;
 
 namespace mapcrafter {
@@ -566,10 +562,9 @@ bool BlockImages::saveBlocks(const std::string& filename) {
  */
 uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	if (id == 6)
-#if defined(_WIN32) || defined(_WIN64)
-		return data & (0xff00 | binary<00000011>::value);
+		return data & (0xff00 | util::binary<00000011>::value);
 	else if (id == 8 || id == 9) // water
-		return data & (0xff00 | binary<11110111>::value);
+		return data & (0xff00 | util::binary<11110111>::value);
 	else if (id == 10 || id == 11) { // lava
 		// 0x8 bit means that this is a lava block spreading downwards
 		// -> return data 0 (full block)
@@ -577,24 +572,9 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 			return 0;
 		return data;
 	} else if (id == 18 || id == 161) // leaves
-		return data & (0xff00 | binary<00000011>::value);
+		return data & (0xff00 | util::binary<00000011>::value);
 	else if (id == 26) // bed
-		return data & (0xff00 | binary<00001011>::value);
-#else
-		return data & (0xff00 | 0b00000011);
-	else if (id == 8 || id == 9) // water
-		return data & (0xff00 | 0b11110111);
-	else if (id == 10 || id == 11) { // lava
-		// 0x8 bit means that this is a lava block spreading downwards
-		// -> return data 0 (full block)
-		if (data & 0x8)
-			return 0;
-		return data;
-	} else if (id == 18 || id == 161) // leaves
-		return data & (0xff00 | 0b00000011);
-	else if (id == 26) // bed
-		return data & (0xff00 | 0b00001011);
-#endif
+		return data & (0xff00 | util::binary<00001011>::value);
 	else if (id == 54 || id == 130) { // chests
 		// at first get the direction of the chest and rotate if needed
 		uint16_t dir_rotate = (data >> 4) & 0xf;
@@ -619,14 +599,13 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return new_data;
 	} else if (id == 55) { // redstone wire, tripwire
 		// check if powered
-#if defined(_WIN32) || defined(_WIN64)
-		if ((data & binary<1111>::value) != 0)
-			return (data & ~(binary<1111>::value)) | REDSTONE_POWERED;
-		return data & ~(binary<1111>::value);
+		if ((data & util::binary<1111>::value) != 0)
+			return (data & ~(util::binary<1111>::value)) | REDSTONE_POWERED;
+		return data & ~(util::binary<1111>::value);
 	} else if (id == 60) // farmland
 		return data & 0xff00;
 	else if (id == 64 || id == 71) // doors
-		return data & binary<1111110000>::value;
+		return data & util::binary<1111110000>::value;
 	else if (id == 81 || id == 83 || id == 92) // cactus, sugar cane, cake
 		return data & 0xff00;
 	else if (id == 84) // jukebox
@@ -634,50 +613,20 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	else if (id == 90) // nether portal
 		return 0;
 	else if (id == 93 || id == 94) // redstone repeater
-		return data & (0xff00 | binary<00000011>::value);
+		return data & (0xff00 | util::binary<00000011>::value);
 	else if (id == 117) // brewing stand
 		return data & 0xff00;
 	else if (id == 119 || id == 120) // end portal, end portal frame
 		return data & 0xff00;
 	else if (id == 127)
-		return data & binary<1100>::value;
+		return data & util::binary<1100>::value;
 	else if (id == 131) // trip wire hook
-		return data & binary<11>::value;
+		return data & util::binary<11>::value;
 	else if (id == 132) // trip wire
 		return data & ~0xf;
 	// the light sensor shouldn't have any data, but I had problems with it...
 	else if (id == 151)
 		return 0;
-#else
-		if ((data & 0b1111) != 0)
-			return (data & ~(0b1111)) | REDSTONE_POWERED;
-		return data & ~(0b1111);
-	} else if (id == 60) // farmland
-		return data & 0xff00;
-	else if (id == 64 || id == 71) // doors
-		return data & 0b1111110000;
-	else if (id == 81 || id == 83 || id == 92) // cactus, sugar cane, cake
-		return data & 0xff00;
-	else if (id == 84) // jukebox
-		return 0;
-	else if (id == 90) // nether portal
-		return 0;
-	else if (id == 93 || id == 94) // redstone repeater
-		return data & (0xff00 | 0b00000011);
-	else if (id == 117) // brewing stand
-		return data & 0xff00;
-	else if (id == 119 || id == 120) // end portal, end portal frame
-		return data & 0xff00;
-	else if (id == 127)
-		return data & 0b1100;
-	else if (id == 131) // trip wire hook
-		return data & 0b11;
-	else if (id == 132) // trip wire
-		return data & ~0xf;
-	// the light sensor shouldn't have any data, but I had problems with it...
-	else if (id == 151)
-		return 0;
-#endif
 	return data;
 }
 
@@ -758,11 +707,7 @@ RGBAImage BlockImages::createBiomeBlock(uint16_t id, uint16_t data,
 	// leaves have the foliage colors
 	// for birches, the color x/y coordinate is flipped
 	if (id == 18)
-#if defined(_WIN32) || defined(_WIN64)
-		color = biome_data.getColor(foliagecolors, (data & binary<11>::value) == 2);
-#else
-		color = biome_data.getColor(foliagecolors, (data & 0b11) == 2);
-#endif
+		color = biome_data.getColor(foliagecolors, (data & util::binary<11>::value) == 2);
 	else
 		color = biome_data.getColor(grasscolors, false);
 
@@ -1203,17 +1148,11 @@ void BlockImages::createWater() { // id 8, 9
 		setBlockImage(8, data, block);
 		setBlockImage(9, data, block);
 	}
-#if defined(_WIN32) || defined(_WIN64)
-	for (int i = 0; i <= binary<111>::value; i++) {
-		bool west = i & binary<100>::value;
-		bool south = i & binary<010>::value;
-		bool top = i & binary<001>::value;
-#else
-	for (int i = 0; i <= 0b111; i++) {
-		bool west = i & 0b100;
-		bool south = i & 0b010;
-		bool top = i & 0b001;
-#endif
+	for (int i = 0; i <= util::binary<111>::value; i++) {
+		bool west = i & util::binary<100>::value;
+		bool south = i & util::binary<010>::value;
+		bool top = i & util::binary<001>::value;
+		
 		RGBAImage block(getBlockImageSize(), getBlockImageSize());
 		uint16_t extra_data = 0;
 
@@ -1786,11 +1725,8 @@ void BlockImages::createTrapdoor() { // id 96
 	RGBAImage texture = textures.TRAPDOOR;
 	for (uint16_t i = 0; i < 16; i++) {
 		if (i & 4) {
-#if defined(_WIN32) || defined(_WIN64)
-			int data = i & binary<00000011>::value;
-#else
-			int data = i & 0b00000011;
-#endif
+			int data = i & util::binary<00000011>::value;
+
 			if (data == 0x0)
 				createSingleFaceBlock(96, i, FACE_SOUTH, texture);
 			else if (data == 0x1)
@@ -1836,15 +1772,9 @@ void BlockImages::createHugeMushroom(uint16_t id, const RGBAImage& cap) { // id 
 	setBlockImage(id, 7, buildHugeMushroom(pores, cap, FACE_TOP | FACE_SOUTH | FACE_WEST));
 	setBlockImage(id, 8, buildHugeMushroom(pores, cap, FACE_TOP | FACE_SOUTH));
 	setBlockImage(id, 9, buildHugeMushroom(pores, cap, FACE_TOP | FACE_EAST | FACE_SOUTH));
-#if defined(_WIN32) || defined(_WIN64)
-	setBlockImage(id, 10, buildHugeMushroom(pores, cap, 0, stem, binary<1111>::value));
-	setBlockImage(id, 14, buildHugeMushroom(pores, cap, binary<111111>::value));
-	setBlockImage(id, 15, buildHugeMushroom(pores, cap, 0, stem, binary<111111>::value));
-#else
-	setBlockImage(id, 10, buildHugeMushroom(pores, cap, 0, stem, 0b1111));
-	setBlockImage(id, 14, buildHugeMushroom(pores, cap, 0b111111));
-	setBlockImage(id, 15, buildHugeMushroom(pores, cap, 0, stem, 0b111111));
-#endif
+	setBlockImage(id, 10, buildHugeMushroom(pores, cap, 0, stem, util::binary<1111>::value));
+	setBlockImage(id, 14, buildHugeMushroom(pores, cap, util::binary<111111>::value));
+	setBlockImage(id, 15, buildHugeMushroom(pores, cap, 0, stem, util::binary<111111>::value));
 }
 
 void BlockImages::createBarsPane(uint16_t id, uint16_t extra_data,
@@ -2075,11 +2005,7 @@ void BlockImages::createCocoas() { // id 127
 		int yoff = (block.getHeight() - cocoa.getHeight()) / 2;
 		block.simpleblit(cocoa, xoff, yoff);
 
-#if defined(_WIN32) || defined(_WIN64)
-		uint16_t data = i == 0 ? 0 : (i == 1 ? binary<0100>::value : binary<1000>::value);
-#else
-		uint16_t data = i == 0 ? 0 : (i == 1 ? 0b0100 : 0b1000);
-#endif
+		uint16_t data = i == 0 ? 0 : (i == 1 ? util::binary<0100>::value : util::binary<1000>::value);
 		setBlockImage(127, data, block);
 	}
 }
@@ -2185,11 +2111,7 @@ void BlockImages::createLargePlant(uint16_t data, const RGBAImage& texture, cons
 
 void BlockImages::loadBlocks() {
 	buildCustomTextures();
-#if defined(_WIN32) || defined(_WIN64)
-	unknown_block = buildImage(BlockImage().setFace(binary<11111>::value, unknown_block));
-#else
-	unknown_block = buildImage(BlockImage().setFace(0b11111, unknown_block));
-#endif
+	unknown_block = buildImage(BlockImage().setFace(util::binary<11111>::value, unknown_block));
 
 	BlockTextures& t = textures;
 
