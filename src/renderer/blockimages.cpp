@@ -562,7 +562,7 @@ bool BlockImages::saveBlocks(const std::string& filename) {
  */
 uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	if (id == 6)
-		return data & (0xff00 | util::binary<00000011>::value);
+		return data & (0xff00 | util::binary<11>::value);
 	else if (id == 8 || id == 9) // water
 		return data & (0xff00 | util::binary<11110111>::value);
 	else if (id == 10 || id == 11) { // lava
@@ -572,9 +572,9 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 			return 0;
 		return data;
 	} else if (id == 18 || id == 161) // leaves
-		return data & (0xff00 | util::binary<00000011>::value);
+		return data & (0xff00 | util::binary<11>::value);
 	else if (id == 26) // bed
-		return data & (0xff00 | util::binary<00001011>::value);
+		return data & (0xff00 | util::binary<1011>::value);
 	else if (id == 54 || id == 130) { // chests
 		// at first get the direction of the chest and rotate if needed
 		uint16_t dir_rotate = (data >> 4) & 0xf;
@@ -613,7 +613,7 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	else if (id == 90) // nether portal
 		return 0;
 	else if (id == 93 || id == 94) // redstone repeater
-		return data & (0xff00 | util::binary<00000011>::value);
+		return data & (0xff00 | util::binary<11>::value);
 	else if (id == 117) // brewing stand
 		return data & 0xff00;
 	else if (id == 119 || id == 120) // end portal, end portal frame
@@ -1150,8 +1150,8 @@ void BlockImages::createWater() { // id 8, 9
 	}
 	for (size_t i = 0; i <= util::binary<111>::value; i++) {
 		bool west = i & util::binary<100>::value;
-		bool south = i & util::binary<010>::value;
-		bool top = i & util::binary<001>::value;
+		bool south = i & util::binary<10>::value;
+		bool top = i & util::binary<1>::value;
 		
 		RGBAImage block(getBlockImageSize(), getBlockImageSize());
 		uint16_t extra_data = 0;
@@ -1725,7 +1725,7 @@ void BlockImages::createTrapdoor() { // id 96
 	RGBAImage texture = textures.TRAPDOOR;
 	for (uint16_t i = 0; i < 16; i++) {
 		if (i & 4) {
-			int data = i & util::binary<00000011>::value;
+			int data = i & util::binary<11>::value;
 
 			if (data == 0x0)
 				createSingleFaceBlock(96, i, FACE_SOUTH, texture);
@@ -2005,7 +2005,7 @@ void BlockImages::createCocoas() { // id 127
 		int yoff = (block.getHeight() - cocoa.getHeight()) / 2;
 		block.simpleblit(cocoa, xoff, yoff);
 
-		uint16_t data = i == 0 ? 0 : (i == 1 ? util::binary<0100>::value : util::binary<1000>::value);
+		uint16_t data = i == 0 ? 0 : (i == 1 ? util::binary<100>::value : util::binary<1000>::value);
 		setBlockImage(127, data, block);
 	}
 }
