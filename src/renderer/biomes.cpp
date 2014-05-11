@@ -22,6 +22,10 @@
 #include <cmath>
 #include <iostream>
 
+#if defined(_WIN32) || defined(_WIN64)
+#include "../util/vscompat.h"
+#endif
+
 namespace mapcrafter {
 namespace renderer {
 
@@ -111,11 +115,15 @@ uint32_t Biome::getColor(const RGBAImage& colors, bool flip_xy) const {
 
 bool Biome::isBiomeBlock(uint16_t id, uint16_t data) {
 	return id == 2 // grass block
-			|| id == 18 || id == 161 // leaves
-			|| id == 31 // grass
-			|| id == 106 // vines
-			|| id == 111 // lily pad
+		|| id == 18 || id == 161 // leaves
+		|| id == 31 // grass
+		|| id == 106 // vines
+		|| id == 111 // lily pad
+#if defined(_WIN32) || defined(_WIN64)
+		|| (id == 175 && ((data & binary<11>::value) == 2 || (data & binary<11>::value) == 3));
+#else
 			|| (id == 175 && ((data & 0b11) == 2 || (data & 0b11) == 3)); // large flowers (tallgrass, fern)
+#endif
 	return false;
 }
 

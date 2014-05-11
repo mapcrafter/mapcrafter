@@ -23,6 +23,10 @@
 
 #include <cmath>
 
+#if defined(_WIN32) || defined(_WIN64)
+#include "../../util/vscompat.h"
+#endif
+
 namespace mapcrafter {
 namespace renderer {
 
@@ -436,7 +440,11 @@ void LightingRendermode::doSmoothLight(RGBAImage& image, const mc::BlockPos& pos
 	// check if lighting faces are visible
 	bool light_left = true, light_right = true, light_top = true;
 
+#if defined(_WIN32) || defined(_WIN64)
+	bool water = (id == 8 || id == 9) && (data & binary<1111>::value) == 0;
+#else
 	bool water = (id == 8 || id == 9) && (data & 0b1111) == 0;
+#endif
 	if (water || id == 79) {
 		if (data & DATA_WEST)
 			light_left = false;
@@ -479,12 +487,23 @@ bool LightingRendermode::isHidden(const mc::BlockPos& pos,
 void LightingRendermode::draw(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
 	bool transparent = state.images->isBlockTransparent(id, data);
+#if defined(_WIN32) || defined(_WIN64)
+	bool water = (id == 8 || id == 9) && (data & binary<1111>::value) == 0;
+#else
 	bool water = (id == 8 || id == 9) && (data & 0b1111) == 0;
-
+#endif
 	int texture_size = image.getHeight() / 2;
+#if defined(_WIN32) || defined(_WIN64)
+	if (id == 78 && (data & binary<1111>::value) == 0) {
+#else
 	if(id == 78 && (data & 0b1111) == 0) {
+#endif
 		// flat snow gets also smooth lighting
+#if defined(_WIN32) || defined(_WIN64)
+		int height = ((data & binary<1111>::value) + 1) / 8.0 * texture_size;
+#else
 		int height = ((data & 0b1111)+1) / 8.0 * texture_size;
+#endif
 		lightTop(image, getCornerColors(pos, CORNERS_BOTTOM),
 				texture_size - height);
 		lightLeft(image, getCornerColors(pos, CORNERS_LEFT),

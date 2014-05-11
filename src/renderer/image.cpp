@@ -17,6 +17,10 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if defined(_WIN32) || defined(_WIN64)
+#define NOMINMAX
+#endif
+
 #include "image.h"
 
 #include "../util.h"
