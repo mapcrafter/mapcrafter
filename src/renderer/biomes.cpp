@@ -18,9 +18,11 @@
  */
 
 #include "biomes.h"
+#include "../util.h"
 
 #include <cmath>
 #include <iostream>
+
 
 namespace mapcrafter {
 namespace renderer {
@@ -111,11 +113,12 @@ uint32_t Biome::getColor(const RGBAImage& colors, bool flip_xy) const {
 
 bool Biome::isBiomeBlock(uint16_t id, uint16_t data) {
 	return id == 2 // grass block
-			|| id == 18 || id == 161 // leaves
-			|| id == 31 // grass
-			|| id == 106 // vines
-			|| id == 111 // lily pad
-			|| (id == 175 && ((data & 0b11) == 2 || (data & 0b11) == 3)); // large flowers (tallgrass, fern)
+		|| id == 18 || id == 161 // leaves
+		|| id == 31 // grass
+		|| id == 106 // vines
+		|| id == 111 // lily pad
+		|| (id == 175 && ((data & util::binary<11>::value) == 2 || (data & util::binary<11>::value) == 3));
+
 	return false;
 }
 

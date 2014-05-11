@@ -20,6 +20,7 @@
 #include "lighting.h"
 
 #include "../blockimages.h"
+#include "../../util.h"
 
 #include <cmath>
 
@@ -436,7 +437,9 @@ void LightingRendermode::doSmoothLight(RGBAImage& image, const mc::BlockPos& pos
 	// check if lighting faces are visible
 	bool light_left = true, light_right = true, light_top = true;
 
-	bool water = (id == 8 || id == 9) && (data & 0b1111) == 0;
+
+	bool water = (id == 8 || id == 9) && (data & util::binary<1111>::value) == 0;
+	
 	if (water || id == 79) {
 		if (data & DATA_WEST)
 			light_left = false;
@@ -479,12 +482,13 @@ bool LightingRendermode::isHidden(const mc::BlockPos& pos,
 void LightingRendermode::draw(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
 	bool transparent = state.images->isBlockTransparent(id, data);
-	bool water = (id == 8 || id == 9) && (data & 0b1111) == 0;
 
+	bool water = (id == 8 || id == 9) && (data & util::binary<1111>::value) == 0;
 	int texture_size = image.getHeight() / 2;
-	if(id == 78 && (data & 0b1111) == 0) {
+
+	if (id == 78 && (data & util::binary<1111>::value) == 0) {
 		// flat snow gets also smooth lighting
-		int height = ((data & 0b1111)+1) / 8.0 * texture_size;
+		int height = ((data & util::binary<1111>::value) + 1) / 8.0 * texture_size;
 		lightTop(image, getCornerColors(pos, CORNERS_BOTTOM),
 				texture_size - height);
 		lightLeft(image, getCornerColors(pos, CORNERS_LEFT),
