@@ -63,19 +63,23 @@ bool floatingPointEquals(T a, T b, T epsilon = 0.0001) {
 }
 
 /**
- * Binary constants helper
+ * Binary constants helper.
  */
 template <unsigned long N>
-struct binary
-{
-   static unsigned const value
-     = binary<N/10>::value << 1   // prepend higher bits
-       | N%10;                    // to lowest bit
+struct binary {
+	// prepend higher bits to lowest bit
+	static const unsigned long value = binary<N/10>::value << 1 | N % 10;
 };
-template <>                           // specialization
-struct binary<0>                      // terminates recursion
-{
-static unsigned const value = 0;
+
+template <unsigned long N>
+const unsigned long binary<N>::value;
+
+/**
+ * Specialization, teminates recursion
+ */
+template <>
+struct binary<0> {
+	static const unsigned long value = 0;
 };
 
 } /* namespace util */
