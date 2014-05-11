@@ -68,14 +68,14 @@ bool floatingPointEquals(T a, T b, T epsilon = 0.0001) {
 template <unsigned long N>
 struct binary {
 	// prepend higher bits to lowest bit
-	static const unsigned long value = binary<N/10>::value << 1 | N % 10;
+	static const unsigned long value = binary<N / 10>::value << 1 | N % 10;
 };
 
 template <unsigned long N>
 const unsigned long binary<N>::value;
 
 /**
- * Specialization, teminates recursion
+ * Specialization, terminates recursion.
  */
 template <>
 struct binary<0> {
