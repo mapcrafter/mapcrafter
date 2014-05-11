@@ -167,6 +167,19 @@ Now you can run ``sudo apt-get install mapcrafter`` to install Mapcrafter.
 During this process it will automatically download a temporary Minecraft Jar
 file and unpack required texture files.
 
+.. _installation_windows:
+
+Windows
+=======
+
+There is an experimental build for Windows. For now, it's only a 64-bit build.
+Because it's experimental you should only use it if you know what you are doing.
+Please report any problems you find when using it.
+
+You can download it from mapcrafter.org:
+
+`http://mapcrafter.org/windows/mapcrafterdist.zip <http://mapcrafter.org/windows/mapcrafterdist.zip>`_
+
 .. _resources_textures:
 
 Resources and Textures
