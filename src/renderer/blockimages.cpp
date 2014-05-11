@@ -1148,7 +1148,7 @@ void BlockImages::createWater() { // id 8, 9
 		setBlockImage(8, data, block);
 		setBlockImage(9, data, block);
 	}
-	for (int i = 0; i <= util::binary<111>::value; i++) {
+	for (size_t i = 0; i <= util::binary<111>::value; i++) {
 		bool west = i & util::binary<100>::value;
 		bool south = i & util::binary<010>::value;
 		bool top = i & util::binary<001>::value;
