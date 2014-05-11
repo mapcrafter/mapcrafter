@@ -20,7 +20,6 @@
 #include "lighting.h"
 
 #include "../blockimages.h"
-//#include "../../util.h"
 
 #include <cmath>
 
