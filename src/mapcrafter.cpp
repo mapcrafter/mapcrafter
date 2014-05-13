@@ -17,10 +17,9 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "renderer/manager.h"
-
-#include "util.h"
-#include "version.h"
+#include "mapcrafter/renderer/manager.h"
+#include "mapcrafter/util.h"
+#include "mapcrafter/version.h"
 
 #include <iostream>
 #include <string>
