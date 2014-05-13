@@ -71,11 +71,7 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tools")
 add_library(mapcraftercore SHARED ${SOURCE})
 add_dependencies(mapcraftercore version.cpp)
 
-target_link_libraries(mapcraftercore ${Boost_IOSTREAMS_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
-
-if(NOT OPT_SKIP_TESTS)
-	target_link_libraries(mapcraftercore ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-endif()
+target_link_libraries(mapcraftercore ${Boost_IOSTREAMS_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
 target_link_libraries(mapcraftercore ${PNG_LIBRARIES})
 target_link_libraries(mapcraftercore ${JPEG_LIBRARIES})
