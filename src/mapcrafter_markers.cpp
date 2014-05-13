@@ -1,9 +1,9 @@
 #include <vector>
 
-#include "../util.h"
-#include "../config/mapcrafterconfig.h"
-#include "../mc/world.h"
-#include "../mc/worldentities.h"
+#include "mapcraftercore/util.h"
+#include "mapcraftercore/config/mapcrafterconfig.h"
+#include "mapcraftercore/mc/world.h"
+#include "mapcraftercore/mc/worldentities.h"
 
 #include <fstream>
 #include <sstream>

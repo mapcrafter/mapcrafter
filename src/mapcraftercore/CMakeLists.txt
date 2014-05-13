@@ -39,16 +39,6 @@ if(NOT "${CMAKE_CURRENT_SOURCE_DIR}/version.cpp")
     )
 endif()
 
-add_custom_target(runtests
-    ./test_all --log_level=test_suite
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test VERBATIM
-)
-
-add_custom_target(gen_texture_code
-    sh tools/gen_texture_code.sh
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
 set(SOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/version.cpp
 )
@@ -66,7 +56,6 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/renderer")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/renderer/rendermodes")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thread")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thread/impl")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tools")
 
 add_library(mapcraftercore SHARED ${SOURCE})
 add_dependencies(mapcraftercore version.cpp)
