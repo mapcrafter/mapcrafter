@@ -6,6 +6,7 @@ option(OPT_OPTIMIZE "Sets optimize compiler flags" ON)
 option(OPT_PROFILE "Sets profile compiler flags" OFF)
 option(OPT_SKIP_TESTS "Skip compiling the boost unittests" OFF)
 option(OPT_BOOST_STATIC "Links boost statically" OFF)
+option(OPT_INSTALL_HEADERS "Installs libmapcraftercore header files" ON)
 
 if(OPT_DEBUG)
     add_definitions(-g)
