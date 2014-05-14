@@ -66,4 +66,6 @@ private:
 #include "util/math.h"
 #include "util/other.h"
 
+#include "util/easylogging++.h"
+
 #endif /* UTIL_H_ */
