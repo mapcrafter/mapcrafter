@@ -17,7 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../renderer/image.h"
+#include "../mapcraftercore/renderer/image.h"
 
 #include <cstdlib>
 #include <boost/test/unit_test.hpp>

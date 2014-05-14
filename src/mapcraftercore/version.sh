@@ -1,8 +1,8 @@
 #!/bin/sh
 
-version=$(cat ../VERSION | sed 's/\n//')
+version=$(cat ../../VERSION | sed 's/\n//')
 gitversion=""
-if [ -d "../.git" ]; then
+if [ -d "../../.git" ]; then
     gitversion=$(git describe)
 fi
 

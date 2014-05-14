@@ -17,7 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../renderer/blockimages.h"
+#include "../mapcraftercore/renderer/blockimages.h"
 
 #include <iostream>
 #include <string>
