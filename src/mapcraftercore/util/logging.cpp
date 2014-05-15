@@ -10,12 +10,48 @@
 namespace mapcrafter {
 namespace util {
 
-LoggingStream::LoggingStream(Logger* logger)
-	: logger(logger), ss(new std::stringstream) {
+LogLevel LogLevelHelper::levelFromString(const std::string& str) {
+	if (str == "EMERGENCY")
+		return LogLevel::EMERGENCY;
+	if (str == "ALERT")
+		return LogLevel::ALERT;
+	if (str == "ERROR")
+		return LogLevel::ERROR;
+	if (str == "WARNING")
+		return LogLevel::WARNING;
+	if (str == "NOTICE")
+		return LogLevel::NOTICE;
+	if (str == "INFO")
+		return LogLevel::INFO;
+	if (str == "DEBUG")
+		return LogLevel::DEBUG;
+	return LogLevel::UNKNOWN;
+}
+
+std::string LogLevelHelper::levelToString(LogLevel level) {
+	if (level == LogLevel::EMERGENCY)
+		return "EMERGENCY";
+	if (level == LogLevel::ALERT)
+		return "ALERT";
+	if (level == LogLevel::ERROR)
+		return "ERROR";
+	if (level == LogLevel::WARNING)
+		return "WARNING";
+	if (level == LogLevel::NOTICE)
+		return "NOTICE";
+	if (level == LogLevel::INFO)
+		return "INFO";
+	if (level == LogLevel::DEBUG)
+		return "DEBUG";
+	return "UNKNOWN";
+}
+
+LoggingStream::LoggingStream(Logger* logger, LogLevel level)
+	: logger(logger), level(level), ss(new std::stringstream) {
 }
 
 LoggingStream::~LoggingStream() {
-	std::cout << "log: " << ss->str() << std::endl;
+	std::cout << "[" << LogLevelHelper::levelToString(level) << "] " << ss->str() << std::endl;
 }
 
 std::map<std::string, Logger*> Logger::loggers;
@@ -26,8 +62,8 @@ Logger::Logger(const std::string& name) {
 Logger::~Logger() {
 }
 
-LoggingStream Logger::log() {
-	return LoggingStream(this);
+LoggingStream Logger::log(LogLevel level) {
+	return LoggingStream(this, level);
 }
 
 Logger* Logger::getLogger(const std::string& name) {
