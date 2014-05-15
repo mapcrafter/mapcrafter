@@ -118,9 +118,9 @@ FormattedLogSink::~FormattedLogSink() {
 std::string FormattedLogSink::formatLogEntry(const LogEntry& entry) {
 	std::string formatted = format;
 
-	time_t t = time(nullptr);
+	std::time_t t = std::time(nullptr);
 	char buffer[256];
-	strftime(buffer, sizeof(buffer), date_format.c_str(), localtime(&t));
+	strftime(buffer, sizeof(buffer), date_format.c_str(), std::localtime(&t));
 	formatted = util::replaceAll(formatted, "%(date)", std::string(buffer));
 
 	formatted = util::replaceAll(formatted, "%(level)", LogLevelHelper::levelToString(entry.level));

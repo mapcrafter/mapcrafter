@@ -26,8 +26,8 @@
 #include "../util.h"
 #include "../version.h"
 
-#include <ctime>
 #include <cstring>
+#include <ctime>
 #include <array>
 #include <fstream>
 #include <memory>
@@ -235,9 +235,9 @@ bool RenderManager::writeTemplateIndexHtml() const {
 	if (strlen(MAPCRAFTER_GITVERSION))
 		vars["version"] += std::string(" (") + MAPCRAFTER_GITVERSION + ")";
 
-	time_t t = time(nullptr);
-	char buffer[100];
-	strftime(buffer, 100, "%d.%m.%Y, %H:%M:%S", localtime(&t));
+	time_t t = std::time(nullptr);
+	char buffer[256];
+	std::strftime(buffer, sizeof(buffer), "%d.%m.%Y, %H:%M:%S", std::localtime(&t));
 	vars["lastUpdate"] = buffer;
 
 	vars["worlds"] = confighelper.generateTemplateJavascript();
@@ -522,7 +522,7 @@ bool RenderManager::run() {
 
 	// some progress and timing stuff
 	int progress_maps_all = config_maps.size();
-	int time_start_all = time(NULL);
+	int time_start_all = std::time(nullptr);
 
 	// go through all maps
 	for (size_t i = 0; i < config_maps.size(); i++) {
@@ -574,7 +574,7 @@ bool RenderManager::run() {
 			settings = MapSettings::byMapConfig(map);
 		}
 
-		int start_scanning = time(NULL);
+		std::time_t start_scanning = std::time(nullptr);
 
 		auto rotations = map.getRotations();
 		// get the max zoom level calculated with the current tile set
@@ -630,9 +630,9 @@ bool RenderManager::run() {
 
 			// output a small notice if we render this map incrementally
 			if (settings.last_render[rotation] != 0) {
-				time_t t = settings.last_render[rotation];
-				char buffer[100];
-				strftime(buffer, 100, "%d %b %Y, %H:%M:%S", localtime(&t));
+				std::time_t t = settings.last_render[rotation];
+				char buffer[256];
+				std::strftime(buffer, sizeof(buffer), "%d %b %Y, %H:%M:%S", std::localtime(&t));
 				LOG(INFO) << "Last rendering was on " << buffer << ".";
 			}
 
@@ -651,7 +651,7 @@ bool RenderManager::run() {
 					tile_set->scanRequiredByTimestamp(settings.last_render[rotation]);
 			}
 
-			int time_start = time(NULL);
+			std::time_t time_start = std::time(nullptr);
 
 			// create block images
 			std::shared_ptr<BlockImages> block_images(new BlockImages);
@@ -696,7 +696,7 @@ bool RenderManager::run() {
 			settings.last_render[rotation] = start_scanning;
 			settings.write(settings_filename);
 
-			int took = time(NULL) - time_start;
+			std::time_t took = std::time(nullptr) - time_start;
 			LOG(INFO) << "[" << progress_maps << "." << progress_rotations << "/"
 					<< progress_maps << "." << progress_rotations_all << "] "
 					<< "Rendering rotation " << config::ROTATION_NAMES[*rotation_it]
@@ -705,7 +705,7 @@ bool RenderManager::run() {
 		}
 	}
 
-	int took_all = time(NULL) - time_start_all;
+	std::time_t took_all = std::time(nullptr) - time_start_all;
 	LOG(INFO) << "Rendering all worlds took " << took_all << " seconds.";
 	LOG(INFO) << "Finished.....aaand it's gone!";
 	return true;
