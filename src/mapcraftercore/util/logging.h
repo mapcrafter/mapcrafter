@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 #include <sstream>
 
@@ -34,7 +35,7 @@ public:
 private:
 	Logger* logger;
 
-	std::stringstream *ss;
+	std::shared_ptr<std::stringstream> ss;
 };
 
 class Logger {
