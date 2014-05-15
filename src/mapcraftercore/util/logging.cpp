@@ -58,12 +58,17 @@ std::string LogLevelHelper::levelToString(LogLevel level) {
 	return "UNKNOWN";
 }
 
-LogStream::LogStream(LogLevel level, const std::string& logger)
-	: level(level), logger(logger), ss(new std::stringstream) {
+LogStream::LogStream(LogLevel level, const std::string& logger,
+		const std::string& file, int line)
+	: level(level), logger(logger), file(file), line(line), ss(new std::stringstream) {
 }
 
 LogStream::~LogStream() {
-	std::cout << "[" << logger << "] [" << LogLevelHelper::levelToString(level) << "] " << ss->str() << std::endl;
+	std::string filename = file;
+	if (filename.find_last_of('/') != std::string::npos)
+		filename = filename.substr(filename.find_last_of('/') + 1);
+	std::cout << "[" << logger << ":" << filename << ":" << line << "]";
+	std::cout << " [" << LogLevelHelper::levelToString(level) << "] " << ss->str() << std::endl;
 }
 
 std::map<std::string, Logger*> Logger::loggers;
@@ -75,8 +80,8 @@ Logger::Logger(const std::string& name)
 Logger::~Logger() {
 }
 
-LogStream Logger::log(LogLevel level) {
-	return LogStream(level, name);
+LogStream Logger::log(LogLevel level, const std::string& file, int line) {
+	return LogStream(level, name, file, line);
 }
 
 Logger* Logger::getLogger(const std::string& name) {

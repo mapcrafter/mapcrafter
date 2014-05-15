@@ -26,8 +26,8 @@
 #include <string>
 #include <sstream>
 
-#define LOG(level) mapcrafter::util::Logger::getLogger("default")->log(mapcrafter::util::LogLevel::level)
-#define LOGN(level, logger) mapcrafter::util::Logger::getLogger(logger)->log(mapcrafter::util::LogLevel::level)
+#define LOG(level) mapcrafter::util::Logger::getLogger("default")->log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
+#define LOGN(level, logger) mapcrafter::util::Logger::getLogger(logger)->log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
 
 namespace mapcrafter {
 namespace util {
@@ -66,7 +66,7 @@ class Logger;
 
 class LogStream {
 public:
-	LogStream(LogLevel level, const std::string& logger);
+	LogStream(LogLevel level, const std::string& logger, const std::string& file, int line);
 	~LogStream();
 
 	template<typename T>
@@ -78,6 +78,8 @@ public:
 private:
 	LogLevel level;
 	std::string logger;
+	std::string file;
+	int line;
 
 	std::shared_ptr<std::stringstream> ss;
 };
@@ -86,7 +88,7 @@ class Logger {
 public:
 	~Logger();
 
-	LogStream log(LogLevel level);
+	LogStream log(LogLevel level, const std::string& file, int line);
 
 	static Logger* getLogger(const std::string& name);
 
