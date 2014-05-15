@@ -151,6 +151,10 @@ class LogManager {
 public:
 	~LogManager();
 
+	void setGlobalVerbosity(LogLevel level);
+	void setSinkVerbosity(const std::string& sink, LogLevel level);
+	LogLevel getSinkVerbosity(const std::string& sink) const;
+
 	void addSink(const std::string& name, LogSink* sink);
 
 	void handleLogEntry(const LogEntry& entry);
@@ -160,7 +164,9 @@ public:
 protected:
 	LogManager();
 
+	LogLevel global_verbosity;
 	std::map<std::string, std::shared_ptr<LogSink> > sinks;
+	std::map<std::string, LogLevel> sink_verbosity;
 
 	static LogManager* instance;
 };

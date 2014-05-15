@@ -152,11 +152,26 @@ void LogOutputSink::sinkFormatted(const LogEntry& entry,
 
 LogManager* LogManager::instance = nullptr;
 
-LogManager::LogManager() {
+LogManager::LogManager()
+	: global_verbosity(LogLevel::INFO) {
 	addSink("output", new LogOutputSink("[%(level)] [%(logger)] %(message)"));
 }
 
 LogManager::~LogManager() {
+}
+
+void LogManager::setGlobalVerbosity(LogLevel level) {
+	global_verbosity = level;
+}
+
+void LogManager::setSinkVerbosity(const std::string& sink, LogLevel level) {
+	sink_verbosity[sink] = level;
+}
+
+LogLevel LogManager::getSinkVerbosity(const std::string& sink) const {
+	if (sink_verbosity.count(sink))
+		return sink_verbosity.at(sink);
+	return global_verbosity;
 }
 
 void LogManager::addSink(const std::string& name, LogSink* sink) {
@@ -164,8 +179,10 @@ void LogManager::addSink(const std::string& name, LogSink* sink) {
 }
 
 void LogManager::handleLogEntry(const LogEntry& entry) {
-	for (auto it = sinks.begin(); it != sinks.end(); ++it)
-		(*it->second).sink(entry);
+	for (auto it = sinks.begin(); it != sinks.end(); ++it) {
+		if (entry.level <= getSinkVerbosity(it->first))
+			(*it->second).sink(entry);
+	}
 }
 
 LogManager* LogManager::getInstance() {
