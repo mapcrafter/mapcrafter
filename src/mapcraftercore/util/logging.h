@@ -51,13 +51,13 @@ public:
 
 class Logger;
 
-class LoggingStream {
+class LogStream {
 public:
-	LoggingStream(Logger* logger, LogLevel level);
-	~LoggingStream();
+	LogStream(Logger* logger, LogLevel level);
+	~LogStream();
 
 	template<typename T>
-	LoggingStream& operator<<(const T& t) {
+	LogStream& operator<<(const T& t) {
 		(*ss) << t;
 		return *this;
 	}
@@ -73,7 +73,7 @@ class Logger {
 public:
 	~Logger();
 
-	LoggingStream log(LogLevel level);
+	LogStream log(LogLevel level);
 
 	static Logger* getLogger(const std::string& name);
 
