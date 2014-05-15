@@ -131,6 +131,22 @@ protected:
 	std::string formatLogEntry(const LogEntry& entry);
 };
 
+class LogOutputSink : public FormattedLogSink {
+public:
+	LogOutputSink(std::string format = "");
+	virtual ~LogOutputSink();
+
+	virtual void sinkFormatted(const LogEntry& entry, const std::string& formatted);
+};
+
+// TODO
+class LogFileSink : public FormattedLogSink {
+};
+
+// TODO
+class LogSyslogSink : public LogSink {
+};
+
 class LogManager {
 public:
 	~LogManager();

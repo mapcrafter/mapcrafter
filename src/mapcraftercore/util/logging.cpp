@@ -137,10 +137,25 @@ void FormattedLogSink::sinkFormatted(const LogEntry& entry,
 	std::cout << formatted << std::endl;
 }
 
+LogOutputSink::LogOutputSink(std::string format)
+	: FormattedLogSink(format) {
+}
+
+LogOutputSink::~LogOutputSink() {
+}
+
+void LogOutputSink::sinkFormatted(const LogEntry& entry,
+		const std::string& formatted) {
+	if (entry.level < LogLevel::NOTICE || entry.level == LogLevel::UNKNOWN)
+		std::cerr << formatted << std::endl;
+	else
+		std::cout << formatted << std::endl;
+}
+
 LogManager* LogManager::instance = nullptr;
 
 LogManager::LogManager() {
-	addSink(new FormattedLogSink("[%(level)] [%(logger)] %(message)"));
+	addSink(new LogOutputSink("[%(level)] [%(logger)] %(message)"));
 }
 
 LogManager::~LogManager() {
