@@ -153,19 +153,19 @@ void LogOutputSink::sinkFormatted(const LogEntry& entry,
 LogManager* LogManager::instance = nullptr;
 
 LogManager::LogManager() {
-	addSink(new LogOutputSink("[%(level)] [%(logger)] %(message)"));
+	addSink("output", new LogOutputSink("[%(level)] [%(logger)] %(message)"));
 }
 
 LogManager::~LogManager() {
 }
 
-void LogManager::addSink(LogSink* sink) {
-	sinks.push_back(std::shared_ptr<LogSink>(sink));
+void LogManager::addSink(const std::string& name, LogSink* sink) {
+	sinks[name] = std::shared_ptr<LogSink>(sink);
 }
 
 void LogManager::handleLogEntry(const LogEntry& entry) {
 	for (auto it = sinks.begin(); it != sinks.end(); ++it)
-		(*it)->sink(entry);
+		(*it->second).sink(entry);
 }
 
 LogManager* LogManager::getInstance() {

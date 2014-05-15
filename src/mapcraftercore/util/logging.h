@@ -151,7 +151,7 @@ class LogManager {
 public:
 	~LogManager();
 
-	void addSink(LogSink* sink);
+	void addSink(const std::string& name, LogSink* sink);
 
 	void handleLogEntry(const LogEntry& entry);
 
@@ -160,7 +160,7 @@ public:
 protected:
 	LogManager();
 
-	std::vector<std::shared_ptr<LogSink> > sinks;
+	std::map<std::string, std::shared_ptr<LogSink> > sinks;
 
 	static LogManager* instance;
 };
