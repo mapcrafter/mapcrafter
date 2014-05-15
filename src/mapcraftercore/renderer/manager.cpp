@@ -33,7 +33,9 @@
 #include <memory>
 #include <thread>
 
+#ifdef USE_EASYLOGGING
 _INITIALIZE_EASYLOGGINGPP
+#endif
 
 namespace mapcrafter {
 namespace renderer {
