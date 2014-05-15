@@ -21,6 +21,8 @@
 
 #include "../util.h"
 
+#include <ctime>
+
 namespace mapcrafter {
 namespace util {
 
@@ -106,8 +108,8 @@ LogSink::~LogSink() {
 void LogSink::sink(const LogEntry& entry) {
 }
 
-FormattedLogSink::FormattedLogSink(std::string format)
-	: format(format) {
+FormattedLogSink::FormattedLogSink(std::string format, std::string date_format)
+	: format(format), date_format(date_format) {
 }
 
 FormattedLogSink::~FormattedLogSink() {
@@ -115,6 +117,12 @@ FormattedLogSink::~FormattedLogSink() {
 
 std::string FormattedLogSink::formatLogEntry(const LogEntry& entry) {
 	std::string formatted = format;
+
+	time_t t = time(nullptr);
+	char buffer[256];
+	strftime(buffer, sizeof(buffer), date_format.c_str(), localtime(&t));
+	formatted = util::replaceAll(formatted, "%(date)", std::string(buffer));
+
 	formatted = util::replaceAll(formatted, "%(level)", LogLevelHelper::levelToString(entry.level));
 	formatted = util::replaceAll(formatted, "%(logger)", entry.logger);
 	formatted = util::replaceAll(formatted, "%(file)", entry.file);
@@ -135,8 +143,8 @@ void FormattedLogSink::sinkFormatted(const LogEntry& entry,
 		const std::string& formatted) {
 }
 
-LogOutputSink::LogOutputSink(std::string format)
-	: FormattedLogSink(format) {
+LogOutputSink::LogOutputSink(std::string format, std::string date_format)
+	: FormattedLogSink(format, date_format) {
 }
 
 LogOutputSink::~LogOutputSink() {
@@ -154,7 +162,7 @@ LogManager* LogManager::instance = nullptr;
 
 LogManager::LogManager()
 	: global_verbosity(LogLevel::INFO) {
-	addSink("output", new LogOutputSink("[%(level)] [%(logger)] %(message)"));
+	addSink("output", new LogOutputSink("%(date) [%(level)] [%(logger)] %(message)", "%F %T"));
 }
 
 LogManager::~LogManager() {

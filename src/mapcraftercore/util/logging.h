@@ -117,23 +117,24 @@ public:
 
 class FormattedLogSink : public LogSink {
 public:
-	FormattedLogSink(std::string format = "");
+	FormattedLogSink(std::string format = "", std::string date_format = "");
 	virtual ~FormattedLogSink();
 
 	void setFormat(const std::string& format);
+	void setDateFormat(const std::string& date_format);
 
 	virtual void sink(const LogEntry& entry);
 	virtual void sinkFormatted(const LogEntry& entry, const std::string& formatted);
 
 protected:
-	std::string format;
+	std::string format, date_format;
 
 	std::string formatLogEntry(const LogEntry& entry);
 };
 
 class LogOutputSink : public FormattedLogSink {
 public:
-	LogOutputSink(std::string format = "");
+	LogOutputSink(std::string format = "", std::string date_format = "");
 	virtual ~LogOutputSink();
 
 	virtual void sinkFormatted(const LogEntry& entry, const std::string& formatted);
