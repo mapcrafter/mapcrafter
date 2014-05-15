@@ -19,6 +19,8 @@
 
 #include "logging.h"
 
+#include "../util.h"
+
 namespace mapcrafter {
 namespace util {
 
@@ -60,15 +62,20 @@ std::string LogLevelHelper::levelToString(LogLevel level) {
 
 LogStream::LogStream(LogLevel level, const std::string& logger,
 		const std::string& file, int line)
-	: level(level), logger(logger), file(file), line(line), ss(new std::stringstream) {
+	: entry({level, logger, file, line, ""}), ss(new std::stringstream) {
 }
 
 LogStream::~LogStream() {
+	/*
 	std::string filename = file;
 	if (filename.find_last_of('/') != std::string::npos)
 		filename = filename.substr(filename.find_last_of('/') + 1);
 	std::cout << "[" << logger << ":" << filename << ":" << line << "]";
 	std::cout << " [" << LogLevelHelper::levelToString(level) << "] " << ss->str() << std::endl;
+	*/
+
+	entry.message = ss->str();
+	LogManager::getInstance()->handleLogEntry(entry);
 }
 
 std::map<std::string, Logger*> Logger::loggers;
@@ -88,6 +95,70 @@ Logger* Logger::getLogger(const std::string& name) {
 	if (!loggers.count(name))
 		loggers[name] = new Logger(name);
 	return loggers.at(name);
+}
+
+LogSink::LogSink() {
+}
+
+LogSink::~LogSink() {
+}
+
+void LogSink::sink(const LogEntry& entry) {
+	std::cout << entry.message << std::endl;
+}
+
+FormattedLogSink::FormattedLogSink(std::string format)
+	: format(format) {
+}
+
+FormattedLogSink::~FormattedLogSink() {
+}
+
+std::string FormattedLogSink::formatLogEntry(const LogEntry& entry) {
+	std::string formatted = format;
+	format = util::replaceAll(format, "%(level)", LogLevelHelper::levelToString(entry.level));
+	format = util::replaceAll(format, "%(logger)", entry.logger);
+	format = util::replaceAll(format, "%(file)", util::str(entry.file));
+	format = util::replaceAll(format, "%(line)", util::str(entry.line));
+	format = util::replaceAll(format, "%(message)", entry.message);
+	return format;
+}
+
+void FormattedLogSink::setFormat(const std::string& format) {
+	this->format = format;
+}
+
+void FormattedLogSink::sink(const LogEntry& entry) {
+	sinkFormatted(entry, formatLogEntry(entry));
+}
+
+void FormattedLogSink::sinkFormatted(const LogEntry& entry,
+		const std::string& formatted) {
+	std::cout << formatted << std::endl;
+}
+
+LogManager* LogManager::instance = nullptr;
+
+LogManager::LogManager() {
+	addSink(new FormattedLogSink("[%(level)] [%(logger)] %(message)"));
+}
+
+LogManager::~LogManager() {
+}
+
+void LogManager::addSink(LogSink* sink) {
+	sinks.push_back(std::shared_ptr<LogSink>(sink));
+}
+
+void LogManager::handleLogEntry(const LogEntry& entry) {
+	for (auto it = sinks.begin(); it != sinks.end(); ++it)
+		(*it)->sink(entry);
+}
+
+LogManager* LogManager::getInstance() {
+	if (instance == nullptr)
+		instance = new LogManager();
+	return instance;
 }
 
 } /* namespace util */

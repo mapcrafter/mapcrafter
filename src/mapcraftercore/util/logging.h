@@ -25,6 +25,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <vector>
 
 #define LOG(level) mapcrafter::util::Logger::getLogger("default")->log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
 #define LOGN(level, logger) mapcrafter::util::Logger::getLogger(logger)->log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
@@ -64,6 +65,15 @@ public:
 
 class Logger;
 
+struct LogEntry {
+	LogLevel level;
+	std::string logger;
+	std::string file;
+	int line;
+
+	std::string message;
+};
+
 class LogStream {
 public:
 	LogStream(LogLevel level, const std::string& logger, const std::string& file, int line);
@@ -76,10 +86,7 @@ public:
 	}
 
 private:
-	LogLevel level;
-	std::string logger;
-	std::string file;
-	int line;
+	LogEntry entry;
 
 	std::shared_ptr<std::stringstream> ss;
 };
@@ -98,6 +105,48 @@ protected:
 	std::string name;
 
 	static std::map<std::string, Logger*> loggers;
+};
+
+class LogSink {
+public:
+	LogSink();
+	virtual ~LogSink();
+
+	virtual void sink(const LogEntry& entry);
+};
+
+class FormattedLogSink : public LogSink {
+public:
+	FormattedLogSink(std::string format = "");
+	virtual ~FormattedLogSink();
+
+	void setFormat(const std::string& format);
+
+	virtual void sink(const LogEntry& entry);
+	virtual void sinkFormatted(const LogEntry& entry, const std::string& formatted);
+
+protected:
+	std::string format;
+
+	std::string formatLogEntry(const LogEntry& entry);
+};
+
+class LogManager {
+public:
+	~LogManager();
+
+	void addSink(LogSink* sink);
+
+	void handleLogEntry(const LogEntry& entry);
+
+	static LogManager* getInstance();
+
+protected:
+	LogManager();
+
+	std::vector<std::shared_ptr<LogSink> > sinks;
+
+	static LogManager* instance;
 };
 
 } /* namespace util */
