@@ -104,7 +104,6 @@ LogSink::~LogSink() {
 }
 
 void LogSink::sink(const LogEntry& entry) {
-	std::cout << entry.message << std::endl;
 }
 
 FormattedLogSink::FormattedLogSink(std::string format)
@@ -116,12 +115,12 @@ FormattedLogSink::~FormattedLogSink() {
 
 std::string FormattedLogSink::formatLogEntry(const LogEntry& entry) {
 	std::string formatted = format;
-	format = util::replaceAll(format, "%(level)", LogLevelHelper::levelToString(entry.level));
-	format = util::replaceAll(format, "%(logger)", entry.logger);
-	format = util::replaceAll(format, "%(file)", util::str(entry.file));
-	format = util::replaceAll(format, "%(line)", util::str(entry.line));
-	format = util::replaceAll(format, "%(message)", entry.message);
-	return format;
+	formatted = util::replaceAll(formatted, "%(level)", LogLevelHelper::levelToString(entry.level));
+	formatted = util::replaceAll(formatted, "%(logger)", entry.logger);
+	formatted = util::replaceAll(formatted, "%(file)", util::str(entry.file));
+	formatted = util::replaceAll(formatted, "%(line)", util::str(entry.line));
+	formatted = util::replaceAll(formatted, "%(message)", entry.message);
+	return formatted;
 }
 
 void FormattedLogSink::setFormat(const std::string& format) {
@@ -134,7 +133,6 @@ void FormattedLogSink::sink(const LogEntry& entry) {
 
 void FormattedLogSink::sinkFormatted(const LogEntry& entry,
 		const std::string& formatted) {
-	std::cout << formatted << std::endl;
 }
 
 LogOutputSink::LogOutputSink(std::string format)
