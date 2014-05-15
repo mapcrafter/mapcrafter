@@ -137,45 +137,40 @@ bool MapSettings::syncMapConfig(const config::MapSection& map) {
 	bool changed = true;
 	bool force_required = false;
 	if (texture_size.get() != map.getTextureSize()) {
-		std::cerr << std::endl;
-		std::cerr << "Warning: You changed the texture size from " << texture_size.get();
-		std::cerr << " to " << map.getTextureSize() << "." << std::endl;
+		LOG(ERROR) << "You changed the texture size from " << texture_size.get()
+				<< " to " << map.getTextureSize() << ".";
 		force_required = true;
 	} else if (image_format.get() != map.getImageFormatSuffix()) {
-		std::cerr << std::endl;
-		std::cerr << "Warning: You changed the image format from " << image_format.get();
-		std::cerr << " to " << map.getImageFormatSuffix() << "." << std::endl;
-		std::cerr << "Force-render the whole map in order for the new " ;
-		std::cerr << "configuration to come into effect" << std::endl;
-		std::cerr << "and delete the images generated with the other ";
-		std::cerr << "image format." << std::endl << std::endl;
+		LOG(ERROR) << "You changed the image format from " << image_format.get()
+				<< " to " << map.getImageFormatSuffix() << ".";
+		LOG(ERROR) << "Force-render the whole map in order for the new "
+				<< "configuration to come into effect and delete the images "
+				<< "generated with the other image format.";
 		force_required = true;
 		return false;
 	} else if (!util::floatingPointEquals(lighting_intensity.get(), map.getLightingIntensity())) {
-		std::cerr << std::endl;
-		std::cerr << "Warning: You changed the lighting intensity from ";
-		std::cerr << lighting_intensity.get() << " to " << map.getLightingIntensity();
-		std::cerr << "." << std::endl;
+		LOG(WARNING) << "You changed the lighting intensity from "
+				<< lighting_intensity.get() << " to " << map.getLightingIntensity() << ".";
 	} else if (render_unknown_blocks.get() != map.renderUnknownBlocks()) {
-		std::cerr << std::endl;
-		std::cerr << "Warning: You changed the rendering of unknown blocks from ";
-		std::cerr << util::strBool(render_unknown_blocks.get()) << " to ";
-		std::cerr << util::strBool(map.renderUnknownBlocks()) << "." << std::endl;
+		LOG(WARNING) << "You changed the rendering of unknown blocks from "
+				<< util::strBool(render_unknown_blocks.get()) << " to "
+				<< util::strBool(map.renderUnknownBlocks()) << ".";
 	} else if (render_leaves_transparent.get() != map.renderLeavesTransparent()) {
-		std::cerr << "Warning: You changed the rendering of transparent leaves from ";
-		std::cerr << util::strBool(render_leaves_transparent.get()) << " to ";
-		std::cerr << util::strBool(map.renderLeavesTransparent()) << "." << std::endl;
+		LOG(WARNING) << "You changed the rendering of transparent leaves from "
+				<< util::strBool(render_leaves_transparent.get()) << " to "
+				<< util::strBool(map.renderLeavesTransparent()) << ".";
 	} else if (render_biomes.get() != map.renderBiomes()) {
-		std::cerr << "Warning: You changed the rendering of biomes from ";
-		std::cerr << util::strBool(render_biomes.get()) << " to ";
-		std::cerr << util::strBool(map.renderBiomes()) << "." << std::endl;
+		LOG(WARNING) << "You changed the rendering of biomes from "
+				<< util::strBool(render_biomes.get()) << " to "
+				<< util::strBool(map.renderBiomes()) << ".";
 	} else {
 		changed = false;
 	}
 
 	if (changed) {
-		std::cerr << "Force-render the whole map in order for the new " ;
-		std::cerr << "configuration to come into effect." << std::endl << std::endl;
+		(force_required ? LOG(ERROR) : LOG(WARNING))
+				<< "Force-render the whole map in order for the new "
+				<< "configuration to come into effect.";
 	}
 
 	return !(changed && force_required);
