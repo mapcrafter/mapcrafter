@@ -46,24 +46,25 @@ std::string LogLevelHelper::levelToString(LogLevel level) {
 	return "UNKNOWN";
 }
 
-LogStream::LogStream(Logger* logger, LogLevel level)
-	: logger(logger), level(level), ss(new std::stringstream) {
+LogStream::LogStream(LogLevel level, const std::string& logger)
+	: level(level), logger(logger), ss(new std::stringstream) {
 }
 
 LogStream::~LogStream() {
-	std::cout << "[" << LogLevelHelper::levelToString(level) << "] " << ss->str() << std::endl;
+	std::cout << "[" << logger << "] [" << LogLevelHelper::levelToString(level) << "] " << ss->str() << std::endl;
 }
 
 std::map<std::string, Logger*> Logger::loggers;
 
-Logger::Logger(const std::string& name) {
+Logger::Logger(const std::string& name)
+	: name(name) {
 }
 
 Logger::~Logger() {
 }
 
 LogStream Logger::log(LogLevel level) {
-	return LogStream(this, level);
+	return LogStream(level, name);
 }
 
 Logger* Logger::getLogger(const std::string& name) {
