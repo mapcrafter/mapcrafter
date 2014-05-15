@@ -117,7 +117,7 @@ std::string FormattedLogSink::formatLogEntry(const LogEntry& entry) {
 	std::string formatted = format;
 	formatted = util::replaceAll(formatted, "%(level)", LogLevelHelper::levelToString(entry.level));
 	formatted = util::replaceAll(formatted, "%(logger)", entry.logger);
-	formatted = util::replaceAll(formatted, "%(file)", util::str(entry.file));
+	formatted = util::replaceAll(formatted, "%(file)", entry.file);
 	formatted = util::replaceAll(formatted, "%(line)", util::str(entry.line));
 	formatted = util::replaceAll(formatted, "%(message)", entry.message);
 	return formatted;
