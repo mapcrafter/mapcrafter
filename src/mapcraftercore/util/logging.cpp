@@ -161,8 +161,9 @@ void LogOutputSink::sinkFormatted(const LogEntry& entry,
 LogManager* LogManager::instance = nullptr;
 
 LogManager::LogManager()
-	: global_verbosity(LogLevel::INFO) {
+	: global_verbosity(LogLevel::INFO), maximum_verbosity(global_verbosity) {
 	addSink("output", new LogOutputSink("%(date) [%(level)] [%(logger)] %(message)", "%F %T"));
+	setSinkVerbosity("output", LogLevel::INFO);
 }
 
 LogManager::~LogManager() {
@@ -170,10 +171,12 @@ LogManager::~LogManager() {
 
 void LogManager::setGlobalVerbosity(LogLevel level) {
 	global_verbosity = level;
+	updateMaximumVerbosity();
 }
 
 void LogManager::setSinkVerbosity(const std::string& sink, LogLevel level) {
 	sink_verbosity[sink] = level;
+	updateMaximumVerbosity();
 }
 
 LogLevel LogManager::getSinkVerbosity(const std::string& sink) const {
@@ -182,11 +185,20 @@ LogLevel LogManager::getSinkVerbosity(const std::string& sink) const {
 	return global_verbosity;
 }
 
+void LogManager::updateMaximumVerbosity() {
+	LogLevel maximum = LogLevel::EMERGENCY;
+	for (auto it = sinks.begin(); it != sinks.end(); ++it)
+		maximum = std::max(maximum, getSinkVerbosity(it->first));
+	maximum_verbosity = maximum;
+}
+
 void LogManager::addSink(const std::string& name, LogSink* sink) {
 	sinks[name] = std::shared_ptr<LogSink>(sink);
 }
 
 void LogManager::handleLogEntry(const LogEntry& entry) {
+	if (entry.level > maximum_verbosity)
+		return;
 	for (auto it = sinks.begin(); it != sinks.end(); ++it) {
 		if (entry.level <= getSinkVerbosity(it->first))
 			(*it->second).sink(entry);

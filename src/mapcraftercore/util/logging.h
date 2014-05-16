@@ -165,7 +165,9 @@ public:
 protected:
 	LogManager();
 
-	LogLevel global_verbosity;
+	void updateMaximumVerbosity();
+
+	LogLevel global_verbosity, maximum_verbosity;
 	std::map<std::string, std::shared_ptr<LogSink> > sinks;
 	std::map<std::string, LogLevel> sink_verbosity;
 
