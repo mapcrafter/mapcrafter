@@ -75,6 +75,11 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.1.4.3**
+
+* Fixed a lighting bug on FreeBSD and Windows
+* Improved build support on Windows for MinGW and Visual C++
+
 **v.1.4.2**
 
 * Fixed a small problem with the multi threading
