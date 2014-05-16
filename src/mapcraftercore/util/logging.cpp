@@ -65,17 +65,11 @@ std::string LogLevelHelper::levelToString(LogLevel level) {
 LogStream::LogStream(LogLevel level, const std::string& logger,
 		const std::string& file, int line)
 	: entry({level, logger, file, line, ""}), ss(new std::stringstream) {
+	if (entry.file.find('/') != std::string::npos)
+		entry.file = entry.file.substr(entry.file.find_last_of('/') + 1);
 }
 
 LogStream::~LogStream() {
-	/*
-	std::string filename = file;
-	if (filename.find_last_of('/') != std::string::npos)
-		filename = filename.substr(filename.find_last_of('/') + 1);
-	std::cout << "[" << logger << ":" << filename << ":" << line << "]";
-	std::cout << " [" << LogLevelHelper::levelToString(level) << "] " << ss->str() << std::endl;
-	*/
-
 	entry.message = ss->str();
 	LogManager::getInstance()->handleLogEntry(entry);
 }
