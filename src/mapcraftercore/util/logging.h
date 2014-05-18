@@ -27,11 +27,14 @@
 #include <sstream>
 #include <vector>
 
-#define LOG(level) mapcrafter::util::Logger::getLogger("default")->log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
-#define LOGN(level, logger) mapcrafter::util::Logger::getLogger(logger)->log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
+#define LOG(level) mapcrafter::util::Logging::getLogger("default")->log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
+#define LOGN(level, logger) mapcrafter::util::Logging::getLogger(logger)->log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
 
 namespace mapcrafter {
 namespace util {
+
+class Logger;
+class Logging;
 
 /**
  * Log levels according to syslog.
@@ -62,8 +65,6 @@ public:
 	static LogLevel levelFromString(const std::string& str);
 	static std::string levelToString(LogLevel level);
 };
-
-class Logger;
 
 struct LogEntry {
 	LogLevel level;
@@ -97,14 +98,12 @@ public:
 
 	LogStream log(LogLevel level, const std::string& file, int line);
 
-	static Logger* getLogger(const std::string& name);
-
 protected:
 	Logger(const std::string& name);
 
 	std::string name;
 
-	static std::map<std::string, Logger*> loggers;
+	friend class Logging;
 };
 
 class LogSink {
@@ -148,9 +147,11 @@ class LogFileSink : public FormattedLogSink {
 class LogSyslogSink : public LogSink {
 };
 
-class LogManager {
+class Logging {
 public:
-	~LogManager();
+	~Logging();
+
+	static Logger* getLogger(const std::string& name);
 
 	void setGlobalVerbosity(LogLevel level);
 	void setSinkVerbosity(const std::string& sink, LogLevel level);
@@ -160,18 +161,19 @@ public:
 
 	void handleLogEntry(const LogEntry& entry);
 
-	static LogManager* getInstance();
+	static Logging* getInstance();
 
 protected:
-	LogManager();
+	Logging();
 
 	void updateMaximumVerbosity();
 
 	LogLevel global_verbosity, maximum_verbosity;
+	std::map<std::string, Logger*> loggers;
 	std::map<std::string, std::shared_ptr<LogSink> > sinks;
 	std::map<std::string, LogLevel> sink_verbosity;
 
-	static LogManager* instance;
+	static Logging* instance;
 };
 
 } /* namespace util */

@@ -71,10 +71,8 @@ LogStream::LogStream(LogLevel level, const std::string& logger,
 
 LogStream::~LogStream() {
 	entry.message = ss->str();
-	LogManager::getInstance()->handleLogEntry(entry);
+	Logging::getInstance()->handleLogEntry(entry);
 }
-
-std::map<std::string, Logger*> Logger::loggers;
 
 Logger::Logger(const std::string& name)
 	: name(name) {
@@ -85,12 +83,6 @@ Logger::~Logger() {
 
 LogStream Logger::log(LogLevel level, const std::string& file, int line) {
 	return LogStream(level, name, file, line);
-}
-
-Logger* Logger::getLogger(const std::string& name) {
-	if (!loggers.count(name))
-		loggers[name] = new Logger(name);
-	return loggers.at(name);
 }
 
 LogSink::LogSink() {
@@ -152,45 +144,52 @@ void LogOutputSink::sinkFormatted(const LogEntry& entry,
 		std::cout << formatted << std::endl;
 }
 
-LogManager* LogManager::instance = nullptr;
+Logging* Logging::instance = nullptr;
 
-LogManager::LogManager()
+Logging::Logging()
 	: global_verbosity(LogLevel::INFO), maximum_verbosity(global_verbosity) {
 	addSink("output", new LogOutputSink("%(date) [%(level)] [%(logger)] %(message)", "%F %T"));
 	setSinkVerbosity("output", LogLevel::INFO);
 }
 
-LogManager::~LogManager() {
+Logging::~Logging() {
 }
 
-void LogManager::setGlobalVerbosity(LogLevel level) {
+Logger* Logging::getLogger(const std::string& name) {
+	Logging* instance = getInstance();
+	if (!instance->loggers.count(name))
+		instance->loggers[name] = new Logger(name);
+	return instance->loggers.at(name);
+}
+
+void Logging::setGlobalVerbosity(LogLevel level) {
 	global_verbosity = level;
 	updateMaximumVerbosity();
 }
 
-void LogManager::setSinkVerbosity(const std::string& sink, LogLevel level) {
+void Logging::setSinkVerbosity(const std::string& sink, LogLevel level) {
 	sink_verbosity[sink] = level;
 	updateMaximumVerbosity();
 }
 
-LogLevel LogManager::getSinkVerbosity(const std::string& sink) const {
+LogLevel Logging::getSinkVerbosity(const std::string& sink) const {
 	if (sink_verbosity.count(sink))
 		return sink_verbosity.at(sink);
 	return global_verbosity;
 }
 
-void LogManager::updateMaximumVerbosity() {
+void Logging::updateMaximumVerbosity() {
 	LogLevel maximum = LogLevel::EMERGENCY;
 	for (auto it = sinks.begin(); it != sinks.end(); ++it)
 		maximum = std::max(maximum, getSinkVerbosity(it->first));
 	maximum_verbosity = maximum;
 }
 
-void LogManager::addSink(const std::string& name, LogSink* sink) {
+void Logging::addSink(const std::string& name, LogSink* sink) {
 	sinks[name] = std::shared_ptr<LogSink>(sink);
 }
 
-void LogManager::handleLogEntry(const LogEntry& entry) {
+void Logging::handleLogEntry(const LogEntry& entry) {
 	if (entry.level > maximum_verbosity)
 		return;
 	for (auto it = sinks.begin(); it != sinks.end(); ++it) {
@@ -199,9 +198,9 @@ void LogManager::handleLogEntry(const LogEntry& entry) {
 	}
 }
 
-LogManager* LogManager::getInstance() {
+Logging* Logging::getInstance() {
 	if (instance == nullptr)
-		instance = new LogManager();
+		instance = new Logging();
 	return instance;
 }
 
