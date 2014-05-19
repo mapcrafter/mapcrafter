@@ -149,8 +149,7 @@ Logging* Logging::instance = nullptr;
 
 Logging::Logging()
 	: global_verbosity(LogLevel::INFO), maximum_verbosity(global_verbosity) {
-	addSink("output", new LogOutputSink("%(date) [%(level)] [%(logger)] %(message)", "%F %T"));
-	setSinkVerbosity("output", LogLevel::INFO);
+	reset();
 }
 
 Logging::~Logging() {
@@ -169,14 +168,33 @@ void Logging::setGlobalVerbosity(LogLevel level) {
 }
 
 void Logging::setSinkVerbosity(const std::string& sink, LogLevel level) {
-	sink_verbosity[sink] = level;
+	sinks_verbosity[sink] = level;
 	updateMaximumVerbosity();
 }
 
 LogLevel Logging::getSinkVerbosity(const std::string& sink) const {
-	if (sink_verbosity.count(sink))
-		return sink_verbosity.at(sink);
+	if (sinks_verbosity.count(sink))
+		return sinks_verbosity.at(sink);
 	return global_verbosity;
+}
+
+void Logging::addSink(const std::string& name, LogSink* sink) {
+	sinks[name] = std::unique_ptr<LogSink>(sink);
+}
+
+void Logging::reset() {
+	global_verbosity = maximum_verbosity = LogLevel::INFO;
+	loggers.clear();
+	sinks.clear();
+	sinks_verbosity.clear();
+
+	addSink("output", new LogOutputSink("%(date) [%(level)] [%(logger)] %(message)", "%F %T"));
+}
+
+Logging* Logging::getInstance() {
+	if (instance == nullptr)
+		instance = new Logging();
+	return instance;
 }
 
 void Logging::updateMaximumVerbosity() {
@@ -186,10 +204,6 @@ void Logging::updateMaximumVerbosity() {
 	maximum_verbosity = maximum;
 }
 
-void Logging::addSink(const std::string& name, LogSink* sink) {
-	sinks[name] = std::unique_ptr<LogSink>(sink);
-}
-
 void Logging::handleLogEntry(const LogEntry& entry) {
 	if (entry.level > maximum_verbosity)
 		return;
@@ -197,12 +211,6 @@ void Logging::handleLogEntry(const LogEntry& entry) {
 		if (entry.level <= getSinkVerbosity(it->first))
 			(*it->second).sink(entry);
 	}
-}
-
-Logging* Logging::getInstance() {
-	if (instance == nullptr)
-		instance = new Logging();
-	return instance;
 }
 
 } /* namespace util */

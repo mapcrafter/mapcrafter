@@ -158,8 +158,7 @@ public:
 	LogLevel getSinkVerbosity(const std::string& sink) const;
 
 	void addSink(const std::string& name, LogSink* sink);
-
-	void handleLogEntry(const LogEntry& entry);
+	void reset();
 
 	static Logging* getInstance();
 
@@ -167,13 +166,16 @@ protected:
 	Logging();
 
 	void updateMaximumVerbosity();
+	void handleLogEntry(const LogEntry& entry);
 
 	LogLevel global_verbosity, maximum_verbosity;
 	std::map<std::string, std::unique_ptr<Logger> > loggers;
 	std::map<std::string, std::unique_ptr<LogSink> > sinks;
-	std::map<std::string, LogLevel> sink_verbosity;
+	std::map<std::string, LogLevel> sinks_verbosity;
 
 	static Logging* instance;
+
+	friend class LogStream;
 };
 
 } /* namespace util */
