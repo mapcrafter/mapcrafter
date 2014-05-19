@@ -122,6 +122,10 @@ void FormattedLogSink::setFormat(const std::string& format) {
 	this->format = format;
 }
 
+void FormattedLogSink::setDateFormat(const std::string& date_format) {
+	this->date_format = date_format;
+}
+
 void FormattedLogSink::sink(const LogEntry& entry) {
 	sinkFormatted(entry, formatLogEntry(entry));
 }

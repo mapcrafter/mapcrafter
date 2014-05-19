@@ -60,21 +60,45 @@ enum class LogLevel {
 	UNKNOWN = 8,
 };
 
+/**
+ * Helper to convert the log level enum types from/to string.
+ */
 class LogLevelHelper {
 public:
+	/**
+	 * std::string to LogLevel.
+	 */
 	static LogLevel levelFromString(const std::string& str);
+
+	/**
+	 * LogLevel to std::string
+	 */
 	static std::string levelToString(LogLevel level);
 };
 
+/**
+ * Represents a single log entry.
+ */
 struct LogEntry {
+	// log level of this entry
 	LogLevel level;
+	// the logger that emitted the message
 	std::string logger;
+	// source code filename/line where this was logged
 	std::string file;
 	int line;
 
+	// actual logged message
 	std::string message;
 };
 
+/**
+ * This is a small helper to log messages with the << operator.
+ *
+ * It implements the operator<< to write the message parts into an internal string stream.
+ * The content of the string stream (the log message) is sent to the Logging object when
+ * the LogStream's destructor is called.
+ */
 class LogStream {
 public:
 	LogStream(LogLevel level, const std::string& logger, const std::string& file, int line);
@@ -92,45 +116,92 @@ private:
 	std::shared_ptr<std::stringstream> ss;
 };
 
+/**
+ * This class represents a logger.
+ *
+ * You can use the log method to log messages.
+ *
+ * The constructor is protected, the instances of the logger objects are managed by the
+ * Logging class.
+ */
 class Logger {
 public:
 	~Logger();
 
+	/**
+	 * Returns a LogStream to log a message, you have to specify a log level for the
+	 * message and a file and line where this was logged.
+	 *
+	 * You should not call this method directory, use the LOG and LOGN macros instead.
+	 */
 	LogStream log(LogLevel level, const std::string& file, int line);
 
 protected:
 	Logger(const std::string& name);
 
+	// name of this logger
 	std::string name;
 
 	friend class Logging;
 };
 
+/**
+ * This abstract represents a sink for log messages.
+ *
+ * You should implement the sink method to handle log messages.
+ */
 class LogSink {
 public:
 	LogSink();
 	virtual ~LogSink();
 
+	/**
+	 * This abstract method is called for every message that is logged.
+	 */
 	virtual void sink(const LogEntry& entry);
 };
 
+/**
+ * This is a log sink that automatically formats log messages with a specific format.
+ */
 class FormattedLogSink : public LogSink {
 public:
 	FormattedLogSink(std::string format = "", std::string date_format = "");
 	virtual ~FormattedLogSink();
 
+	/**
+	 * Sets the log message format.
+	 */
 	void setFormat(const std::string& format);
+
+	/**
+	 * Sets the date format for the message formatting.
+	 */
 	void setDateFormat(const std::string& date_format);
 
+	/**
+	 * This method formats the received log messages and calls the sinkFormatted
+	 * method which you should implement.
+	 */
 	virtual void sink(const LogEntry& entry);
+
+	/**
+	 * This abstract method is called for every formatted log message.
+	 */
 	virtual void sinkFormatted(const LogEntry& entry, const std::string& formatted);
 
 protected:
 	std::string format, date_format;
 
+	/**
+	 * Formats a log message with the set message/date format.
+	 */
 	std::string formatLogEntry(const LogEntry& entry);
 };
 
+/**
+ * This sink logs all message to stdout/stderr (depending on log level).
+ */
 class LogOutputSink : public FormattedLogSink {
 public:
 	LogOutputSink(std::string format = "", std::string date_format = "");
@@ -140,10 +211,16 @@ public:
 };
 
 // TODO
+/**
+ * This sink logs all messages to a log file.
+ */
 class LogFileSink : public FormattedLogSink {
 };
 
 // TODO
+/**
+ * This sink logs all message to the local syslog daemon.
+ */
 class LogSyslogSink : public LogSink {
 };
 
