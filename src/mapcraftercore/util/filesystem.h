@@ -72,6 +72,11 @@ PathList findTemplateDirs(const fs::path& executable);
 PathList findTextureDirs(const fs::path& executable);
 
 /**
+ * Returns all possible logging configuration files.
+ */
+PathList findLoggingConfigFiles(const fs::path& executable);
+
+/**
  * Returns the first existing template directory.
  */
 fs::path findTemplateDir();
@@ -80,6 +85,11 @@ fs::path findTemplateDir();
  * Returns the first existing texture directory.
  */
 fs::path findTextureDir();
+
+/**
+ * Returns the first existing logging configuration file.
+ */
+fs::path findLoggingConfigFile();
 
 } /* namespace util */
 } /* namespace mapcrafter */
