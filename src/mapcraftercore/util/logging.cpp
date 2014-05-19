@@ -179,7 +179,7 @@ LogLevel Logging::getSinkVerbosity(const std::string& sink) const {
 }
 
 void Logging::addSink(const std::string& name, LogSink* sink) {
-	sinks[name] = std::unique_ptr<LogSink>(sink);
+	sinks[name] = std::shared_ptr<LogSink>(sink);
 }
 
 void Logging::reset() {
