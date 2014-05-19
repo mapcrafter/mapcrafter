@@ -22,6 +22,7 @@
 #include "../util.h"
 
 #include <ctime>
+#include <syslog.h>
 
 namespace mapcrafter {
 namespace util {
@@ -158,8 +159,8 @@ Logging::~Logging() {
 Logger* Logging::getLogger(const std::string& name) {
 	Logging* instance = getInstance();
 	if (!instance->loggers.count(name))
-		instance->loggers[name] = new Logger(name);
-	return instance->loggers.at(name);
+		instance->loggers[name] = std::unique_ptr<Logger>(new Logger(name));
+	return instance->loggers.at(name).get();
 }
 
 void Logging::setGlobalVerbosity(LogLevel level) {
@@ -186,7 +187,7 @@ void Logging::updateMaximumVerbosity() {
 }
 
 void Logging::addSink(const std::string& name, LogSink* sink) {
-	sinks[name] = std::shared_ptr<LogSink>(sink);
+	sinks[name] = std::unique_ptr<LogSink>(sink);
 }
 
 void Logging::handleLogEntry(const LogEntry& entry) {

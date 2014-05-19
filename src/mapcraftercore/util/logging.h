@@ -169,8 +169,8 @@ protected:
 	void updateMaximumVerbosity();
 
 	LogLevel global_verbosity, maximum_verbosity;
-	std::map<std::string, Logger*> loggers;
-	std::map<std::string, std::shared_ptr<LogSink> > sinks;
+	std::map<std::string, std::unique_ptr<Logger> > loggers;
+	std::map<std::string, std::unique_ptr<LogSink> > sinks;
 	std::map<std::string, LogLevel> sink_verbosity;
 
 	static Logging* instance;
