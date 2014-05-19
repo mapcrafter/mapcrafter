@@ -89,14 +89,14 @@ int LogLevelHelper::levelToSyslog(LogLevel level) {
 
 LogStream::LogStream(LogLevel level, const std::string& logger,
 		const std::string& file, int line)
-	: entry({level, logger, file, line, ""}), ss(new std::stringstream) {
-	if (entry.file.find('/') != std::string::npos)
-		entry.file = entry.file.substr(entry.file.find_last_of('/') + 1);
+	: message({level, logger, file, line, ""}), ss(new std::stringstream) {
+	if (message.file.find('/') != std::string::npos)
+		message.file = message.file.substr(message.file.find_last_of('/') + 1);
 }
 
 LogStream::~LogStream() {
-	entry.message = ss->str();
-	Logging::getInstance()->handleLogEntry(entry);
+	message.message = ss->str();
+	Logging::getInstance()->handleLogMessage(message);
 }
 
 Logger::Logger(const std::string& name)
@@ -116,7 +116,7 @@ LogSink::LogSink() {
 LogSink::~LogSink() {
 }
 
-void LogSink::sink(const LogEntry& entry) {
+void LogSink::sink(const LogMessage& message) {
 }
 
 FormattedLogSink::FormattedLogSink(std::string format, std::string date_format)
@@ -126,7 +126,7 @@ FormattedLogSink::FormattedLogSink(std::string format, std::string date_format)
 FormattedLogSink::~FormattedLogSink() {
 }
 
-std::string FormattedLogSink::formatLogEntry(const LogEntry& entry) {
+std::string FormattedLogSink::formatLogEntry(const LogMessage& message) {
 	std::string formatted = format;
 
 	std::time_t t = std::time(nullptr);
@@ -134,11 +134,11 @@ std::string FormattedLogSink::formatLogEntry(const LogEntry& entry) {
 	strftime(buffer, sizeof(buffer), date_format.c_str(), std::localtime(&t));
 	formatted = util::replaceAll(formatted, "%(date)", std::string(buffer));
 
-	formatted = util::replaceAll(formatted, "%(level)", LogLevelHelper::levelToString(entry.level));
-	formatted = util::replaceAll(formatted, "%(logger)", entry.logger);
-	formatted = util::replaceAll(formatted, "%(file)", entry.file);
-	formatted = util::replaceAll(formatted, "%(line)", util::str(entry.line));
-	formatted = util::replaceAll(formatted, "%(message)", entry.message);
+	formatted = util::replaceAll(formatted, "%(level)", LogLevelHelper::levelToString(message.level));
+	formatted = util::replaceAll(formatted, "%(logger)", message.logger);
+	formatted = util::replaceAll(formatted, "%(file)", message.file);
+	formatted = util::replaceAll(formatted, "%(line)", util::str(message.line));
+	formatted = util::replaceAll(formatted, "%(message)", message.message);
 	return formatted;
 }
 
@@ -150,11 +150,11 @@ void FormattedLogSink::setDateFormat(const std::string& date_format) {
 	this->date_format = date_format;
 }
 
-void FormattedLogSink::sink(const LogEntry& entry) {
-	sinkFormatted(entry, formatLogEntry(entry));
+void FormattedLogSink::sink(const LogMessage& message) {
+	sinkFormatted(message, formatLogEntry(message));
 }
 
-void FormattedLogSink::sinkFormatted(const LogEntry& entry,
+void FormattedLogSink::sinkFormatted(const LogMessage& message,
 		const std::string& formatted) {
 }
 
@@ -165,9 +165,9 @@ LogOutputSink::LogOutputSink(std::string format, std::string date_format)
 LogOutputSink::~LogOutputSink() {
 }
 
-void LogOutputSink::sinkFormatted(const LogEntry& entry,
+void LogOutputSink::sinkFormatted(const LogMessage& message,
 		const std::string& formatted) {
-	if (entry.level < LogLevel::NOTICE || entry.level == LogLevel::UNKNOWN)
+	if (message.level < LogLevel::NOTICE || message.level == LogLevel::UNKNOWN)
 		std::cerr << formatted << std::endl;
 	else
 		std::cout << formatted << std::endl;
@@ -183,8 +183,8 @@ LogSyslogSink::~LogSyslogSink() {
 	closelog();
 }
 
-void LogSyslogSink::sink(const LogEntry& entry) {
-	syslog(LogLevelHelper::levelToSyslog(entry.level), entry.message.c_str());
+void LogSyslogSink::sink(const LogMessage& message) {
+	syslog(LogLevelHelper::levelToSyslog(message.level), message.message.c_str());
 }
 
 #endif
@@ -249,12 +249,12 @@ void Logging::updateMaximumVerbosity() {
 	maximum_verbosity = maximum;
 }
 
-void Logging::handleLogEntry(const LogEntry& entry) {
-	if (entry.level > maximum_verbosity)
+void Logging::handleLogMessage(const LogMessage& message) {
+	if (message.level > maximum_verbosity)
 		return;
 	for (auto it = sinks.begin(); it != sinks.end(); ++it) {
-		if (entry.level <= getSinkVerbosity(it->first))
-			(*it->second).sink(entry);
+		if (message.level <= getSinkVerbosity(it->first))
+			(*it->second).sink(message);
 	}
 }
 
