@@ -24,3 +24,4 @@
 
 #cmakedefine HAVE_SYS_IOCTL_H
 #cmakedefine HAVE_UNISTD_H
+#cmakedefine HAVE_SYSLOG_H

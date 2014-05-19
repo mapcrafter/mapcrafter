@@ -22,7 +22,9 @@
 #include "../util.h"
 
 #include <ctime>
-#include <syslog.h>
+#ifdef HAVE_SYSLOG_H
+#  include <syslog.h>
+#endif
 
 namespace mapcrafter {
 namespace util {
@@ -62,6 +64,28 @@ std::string LogLevelHelper::levelToString(LogLevel level) {
 		return "DEBUG";
 	return "UNKNOWN";
 }
+
+#ifdef HAVE_SYSLOG_H
+
+int LogLevelHelper::levelToSyslog(LogLevel level) {
+	if (level == LogLevel::EMERGENCY)
+		return LOG_EMERG;
+	if (level == LogLevel::ALERT)
+		return LOG_ALERT;
+	if (level == LogLevel::ERROR)
+		return LOG_ERR;
+	if (level == LogLevel::WARNING)
+		return LOG_WARNING;
+	if (level == LogLevel::NOTICE)
+		return LOG_NOTICE;
+	if (level == LogLevel::INFO)
+		return LOG_INFO;
+	if (level == LogLevel::DEBUG)
+		return LOG_DEBUG;
+	return LOG_INFO;
+}
+
+#endif
 
 LogStream::LogStream(LogLevel level, const std::string& logger,
 		const std::string& file, int line)
@@ -149,6 +173,22 @@ void LogOutputSink::sinkFormatted(const LogEntry& entry,
 		std::cout << formatted << std::endl;
 }
 
+#ifdef HAVE_SYSLOG_H
+
+LogSyslogSink::LogSyslogSink() {
+	openlog("mapcrafter", 0, LOG_USER);
+}
+
+LogSyslogSink::~LogSyslogSink() {
+	closelog();
+}
+
+void LogSyslogSink::sink(const LogEntry& entry) {
+	syslog(LogLevelHelper::levelToSyslog(entry.level), entry.message.c_str());
+}
+
+#endif
+
 Logging* Logging::instance = nullptr;
 
 Logging::Logging()
@@ -193,6 +233,7 @@ void Logging::reset() {
 	sinks_verbosity.clear();
 
 	addSink("output", new LogOutputSink("%(date) [%(level)] [%(logger)] %(message)", "%F %T"));
+	//addSink("syslog", new LogSyslogSink());
 }
 
 Logging* Logging::getInstance() {

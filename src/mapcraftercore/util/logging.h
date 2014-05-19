@@ -20,6 +20,8 @@
 #ifndef LOGGING_H_
 #define LOGGING_H_
 
+#include "../util.h"
+
 #include <iostream>
 #include <map>
 #include <memory>
@@ -74,6 +76,15 @@ public:
 	 * LogLevel to std::string
 	 */
 	static std::string levelToString(LogLevel level);
+
+#ifdef HAVE_SYSLOG_H
+
+	/**
+	 * LogLevel to syslog level.
+	 */
+	static int levelToSyslog(LogLevel level);
+
+#endif
 };
 
 /**
@@ -217,12 +228,20 @@ public:
 class LogFileSink : public FormattedLogSink {
 };
 
-// TODO
+#ifdef HAVE_SYSLOG_H
+
 /**
  * This sink logs all message to the local syslog daemon.
  */
 class LogSyslogSink : public LogSink {
+public:
+	LogSyslogSink();
+	virtual ~LogSyslogSink();
+
+	virtual void sink(const LogEntry& entry);
 };
+
+#endif
 
 class Logging {
 public:
