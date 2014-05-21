@@ -189,6 +189,7 @@ void LogSyslogSink::sink(const LogMessage& message) {
 
 #endif
 
+std::mutex Logging::instance_mutex;
 Logging* Logging::instance = nullptr;
 
 Logging::Logging()
@@ -197,13 +198,6 @@ Logging::Logging()
 }
 
 Logging::~Logging() {
-}
-
-Logger* Logging::getLogger(const std::string& name) {
-	Logging* instance = getInstance();
-	if (!instance->loggers.count(name))
-		instance->loggers[name] = std::unique_ptr<Logger>(new Logger(name));
-	return instance->loggers.at(name).get();
 }
 
 void Logging::setGlobalVerbosity(LogLevel level) {
@@ -236,7 +230,15 @@ void Logging::reset() {
 	//addSink("syslog", new LogSyslogSink());
 }
 
+Logger* Logging::getLogger(const std::string& name) {
+	std::unique_lock<std::mutex> lock(loggers_mutex);
+	if (!loggers.count(name))
+		loggers[name] = std::unique_ptr<Logger>(new Logger(name));
+	return loggers.at(name).get();
+}
+
 Logging* Logging::getInstance() {
+	std::unique_lock<std::mutex> lock(instance_mutex);
 	if (instance == nullptr)
 		instance = new Logging();
 	return instance;
@@ -250,6 +252,7 @@ void Logging::updateMaximumVerbosity() {
 }
 
 void Logging::handleLogMessage(const LogMessage& message) {
+	std::unique_lock<std::mutex> lock(handle_message_mutex);
 	if (message.level > maximum_verbosity)
 		return;
 	for (auto it = sinks.begin(); it != sinks.end(); ++it) {

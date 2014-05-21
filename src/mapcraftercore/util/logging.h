@@ -25,12 +25,13 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <sstream>
 #include <vector>
 
-#define LOG(level) mapcrafter::util::Logging::getLogger("default")->log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
-#define LOGN(level, logger) mapcrafter::util::Logging::getLogger(logger)->log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
+#define LOG(level) mapcrafter::util::Logging::getInstance()->getLogger("default")->log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
+#define LOGN(level, logger) mapcrafter::util::Logging::getInstance()->getLogger(logger)->log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
 
 namespace mapcrafter {
 namespace util {
@@ -168,6 +169,9 @@ public:
 
 	/**
 	 * This abstract method is called for every message that is logged.
+	 *
+	 * You MAY NOT use the LOG(level) functionality in here, otherwise the program
+	 * will end up in a deadlock.
 	 */
 	virtual void sink(const LogMessage& message);
 };
@@ -247,14 +251,14 @@ class Logging {
 public:
 	~Logging();
 
-	static Logger* getLogger(const std::string& name);
-
 	void setGlobalVerbosity(LogLevel level);
 	void setSinkVerbosity(const std::string& sink, LogLevel level);
 	LogLevel getSinkVerbosity(const std::string& sink) const;
 
 	void addSink(const std::string& name, LogSink* sink);
 	void reset();
+
+	Logger* getLogger(const std::string& name);
 
 	static Logging* getInstance();
 
@@ -269,6 +273,9 @@ protected:
 	std::map<std::string, std::shared_ptr<LogSink> > sinks;
 	std::map<std::string, LogLevel> sinks_verbosity;
 
+	std::mutex loggers_mutex, handle_message_mutex;
+
+	static std::mutex instance_mutex;
 	static Logging* instance;
 
 	friend class LogStream;
