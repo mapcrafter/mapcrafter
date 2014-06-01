@@ -21,9 +21,11 @@
 #define MAPCRAFTERCONFIG_H_
 
 #include "validation.h"
+#include "sections/base.h"
 #include "sections/map.h"
 #include "sections/marker.h"
 #include "sections/world.h"
+#include "../util.h"
 
 #include <map>
 #include <string>
@@ -40,15 +42,38 @@ struct Color {
 	uint8_t red, green, blue;
 };
 
+class MapcrafterConfigRootSection : public ConfigSectionBase {
+public:
+	MapcrafterConfigRootSection();
+	~MapcrafterConfigRootSection();
+
+	void setConfigDir(const fs::path& config_dir);
+
+	virtual void preParse(const INIConfigSection& section,
+				ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+	virtual void postParse(const INIConfigSection& section,
+			ValidationList& validation);
+
+	fs::path getOutputDir() const;
+	fs::path getTemplateDir() const;
+	Color getBackgroundColor() const;
+
+private:
+	fs::path config_dir;
+
+	Field<fs::path> output_dir, template_dir;
+	Field<Color> background_color;
+};
+
 class MapcrafterConfig {
 private:
 	WorldSection world_global;
 	MapSection map_global;
 	MarkerSection marker_global;
 
-	Field<fs::path> output_dir, template_dir;
-	Field<Color> background_color;
-
+	MapcrafterConfigRootSection root_section;
 	std::map<std::string, WorldSection> worlds;
 	std::vector<MapSection> maps;
 	std::vector<MarkerSection> markers;

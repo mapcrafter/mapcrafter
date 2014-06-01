@@ -48,6 +48,62 @@ mapcrafter::config::Color as<mapcrafter::config::Color>(const std::string& from)
 namespace mapcrafter {
 namespace config {
 
+MapcrafterConfigRootSection::MapcrafterConfigRootSection() {
+}
+
+MapcrafterConfigRootSection::~MapcrafterConfigRootSection() {
+}
+
+void MapcrafterConfigRootSection::setConfigDir(const fs::path& config_dir) {
+	this->config_dir = config_dir;
+}
+
+void MapcrafterConfigRootSection::preParse(const INIConfigSection& section,
+		ValidationList& validation) {
+	fs::path default_template_dir = util::findTemplateDir();
+	if (!default_template_dir.empty())
+		template_dir.setDefault(default_template_dir);
+	background_color.setDefault({"#DDDDDD", 0xDD, 0xDD, 0xDD});
+}
+
+bool MapcrafterConfigRootSection::parseField(const std::string key,
+		const std::string value, ValidationList& validation) {
+	if (key == "output_dir") {
+		if (output_dir.load(key, value, validation))
+			output_dir.setValue(BOOST_FS_ABSOLUTE(output_dir.getValue(), config_dir));
+	} else if (key == "template_dir") {
+		if (template_dir.load(key, value, validation)) {
+			template_dir.setValue(BOOST_FS_ABSOLUTE(template_dir.getValue(), config_dir));
+			if (!fs::is_directory(template_dir.getValue()))
+				validation.push_back(ValidationMessage::error(
+						"'template_dir' must be an existing directory! '"
+						+ template_dir.getValue().string() + "' does not exist!"));
+		}
+	} else if (key == "background_color") {
+		background_color.load(key, value, validation);
+	} else
+		return false;
+	return true;
+}
+
+void MapcrafterConfigRootSection::postParse(const INIConfigSection& section,
+		ValidationList& validation) {
+	output_dir.require(validation, "You have to specify an output directory ('output_dir')!");
+	template_dir.require(validation, "You have to specify a template directory ('template_dir')!");
+}
+
+fs::path MapcrafterConfigRootSection::getOutputDir() const {
+	return output_dir.getValue();
+}
+
+fs::path MapcrafterConfigRootSection::getTemplateDir() const {
+	return template_dir.getValue();
+}
+
+Color MapcrafterConfigRootSection::getBackgroundColor() const {
+	return background_color.getValue();
+}
+
 MapcrafterConfig::MapcrafterConfig()
 	: world_global(true), map_global(true) {
 }
@@ -63,48 +119,16 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 		return false;
 	}
 
-	fs::path config_dir = fs::path(filename).parent_path();
-
 	bool ok = true;
 
-	ValidationList general_msgs;
+	fs::path config_dir = fs::path(filename).parent_path();
+	root_section.setConfigDir(config_dir);
 
-	bool has_default_template = !util::findTemplateDir().empty();
-	if (has_default_template)
-		template_dir.setDefault(util::findTemplateDir());
-	background_color.setDefault({"#DDDDDD", 0xDD, 0xDD, 0xDD});
-
-	auto entries = config.getRootSection().getEntries();
-	for (auto entry_it = entries.begin(); entry_it != entries.end(); ++entry_it) {
-		std::string key = entry_it->first;
-		std::string value = entry_it->second;
-
-		if (key == "output_dir") {
-			if (output_dir.load(key, value, general_msgs))
-				output_dir.setValue(BOOST_FS_ABSOLUTE(output_dir.getValue(), config_dir));
-		} else if (key == "template_dir") {
-			if (template_dir.load(key, value, general_msgs)) {
-				template_dir.setValue(BOOST_FS_ABSOLUTE(template_dir.getValue(), config_dir));
-				if (!fs::is_directory(template_dir.getValue()))
-					general_msgs.push_back(ValidationMessage::error(
-							"'template_dir' must be an existing directory! '"
-							+ template_dir.getValue().string() + "' does not exist!"));
-			}
-		} else if (key == "background_color") {
-			background_color.load(key, value, general_msgs);
-		} else {
-			general_msgs.push_back(ValidationMessage::warning(
-					"Unknown configuration option '" + key + "'!"));
-		}
-	}
-
-	if (!output_dir.require(general_msgs, "You have to specify an output directory ('output_dir')!"))
+	ValidationList root_validation;
+	if (!root_section.parse(config.getRootSection(), root_validation))
 		ok = false;
-	if (!has_default_template)
-		template_dir.require(general_msgs, "You have to specify a template directory ('template_dir')!");
-
-	if (!general_msgs.empty())
-		validation.push_back(std::make_pair("Configuration file", general_msgs));
+	if (!root_validation.empty())
+		validation.push_back(std::make_pair("Configuration root section", root_validation));
 
 	if (config.hasSection("global", "worlds")) {
 		ValidationList msgs;
@@ -235,8 +259,8 @@ void dumpMapSection(std::ostream& out, const MapSection& section) {
 
 void MapcrafterConfig::dump(std::ostream& out) const {
 	out << "General:" << std::endl;
-	out << "  output_dir = " << output_dir.getValue().string() << std::endl;
-	out << "  template_dir = " << template_dir.getValue().string() << std::endl;
+	out << "  output_dir = " << getOutputDir().string() << std::endl;
+	out << "  template_dir = " << getTemplateDir().string() << std::endl;
 	out << std::endl;
 
 	out << "Global world configuration:" << std::endl;
@@ -261,25 +285,25 @@ void MapcrafterConfig::dump(std::ostream& out) const {
 }
 
 fs::path MapcrafterConfig::getOutputDir() const {
-	return output_dir.getValue();
+	return root_section.getOutputDir();
 }
 
 fs::path MapcrafterConfig::getTemplateDir() const {
-	return template_dir.getValue();
+	return root_section.getTemplateDir();
 }
 
 Color MapcrafterConfig::getBackgroundColor() const {
-	return background_color.getValue();
+	return root_section.getBackgroundColor();
 }
 
 std::string MapcrafterConfig::getOutputPath(
 		const std::string& path) const {
-	return (output_dir.getValue() / path).string();
+	return (getOutputDir() / path).string();
 }
 
 std::string MapcrafterConfig::getTemplatePath(
 		const std::string& path) const {
-	return (template_dir.getValue() / path).string();
+	return (getTemplateDir() / path).string();
 }
 
 bool MapcrafterConfig::hasWorld(const std::string& world) const {
