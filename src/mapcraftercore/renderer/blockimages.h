@@ -359,10 +359,10 @@ private:
 	void createFence(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 85, 113
 	void createPumkin(uint16_t id, const RGBAImage& front); // id 86, 91
 	void createCake(); // id 92
-	void createRedstoneRepeater(uint16_t id, const Image& texture); // id 93, 94
-	void createTrapdoor(uint16_t id, const Image& texture); // id 96, 167
-	void createHugeMushroom(uint16_t id, const Image& cap); // id 99, 100
-	void createBarsPane(uint16_t id, uint16_t extra_data, const Image& texture); // id 101, 102
+	void createRedstoneRepeater(uint16_t id, const RGBAImage& texture); // id 93, 94
+	void createTrapdoor(uint16_t id, const RGBAImage& texture); // id 96, 167
+	void createHugeMushroom(uint16_t id, const RGBAImage& cap); // id 99, 100
+	void createBarsPane(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 101, 102
 	void createStem(uint16_t id); // id 104, 105
 	void createVines(); // id 106
 	void createFenceGate(); // id 107

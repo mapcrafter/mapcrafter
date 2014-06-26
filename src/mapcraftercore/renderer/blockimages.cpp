@@ -1721,8 +1721,7 @@ void BlockImages::createRedstoneRepeater(uint16_t id, const RGBAImage& texture) 
 	createSingleFaceBlock(id, 3, FACE_BOTTOM, texture.rotate(ROTATE_180));
 }
 
-void BlockImages::createTrapdoor(uint16_t id, const Image& texture) { // id 96, 167
-	RGBAImage texture = textures.TRAPDOOR;
+void BlockImages::createTrapdoor(uint16_t id, const RGBAImage& texture) { // id 96, 167
 	for (uint16_t i = 0; i < 16; i++) {
 		if (i & 4) {
 			int data = i & util::binary<11>::value;
