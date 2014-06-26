@@ -17,7 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../mc/worldcrop.h"
+#include "../mapcraftercore/mc/worldcrop.h"
 
 #include <set>
 #include <boost/test/unit_test.hpp>

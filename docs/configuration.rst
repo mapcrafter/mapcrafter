@@ -156,6 +156,18 @@ General Options
     the file in the output directory you can open with your webbrowser after
     the rendering.
 
+``background_color = <hex color>``
+
+    **Default:** ``#DDDDDD``
+
+    This is the background color of your rendered map. You have to specify
+    it like an HTML hex color (``#rrggbb``).
+    
+    The background color of the map is set with a CSS option in the template.
+    Because the JPEG image format does not support transparency and some tiles
+    are not completely used, you have to re-render your maps which use JPEGs
+    if you change the background color.
+
 World Options
 -------------
 
@@ -310,6 +322,18 @@ Map Options
         Renders only caves and colors blocks depending on their height 
         to make them easier to recognize.
 
+``rotations = [top-left] [top-right] [bottom-right] [bottom-left]``
+
+    **Default:** ``top-left``
+
+    This is a list of directions to render the world from. You can rotate the
+    world by n*90 degrees. Later in the output file you can interactively
+    rotate your world. Possible values for this space-separated list are:
+    ``top-left``, ``top-right``, ``bottom-right``, ``bottom-left``. 
+
+    Top left means that north is on the top left side on the map (same thing
+    for other directions).
+
 ``texture_dir = <directory>``
 
     **Default:** default texture directory (see :ref:`resources_textures`)
@@ -335,17 +359,22 @@ Map Options
     detail, use texture size 16, but texture size 12 looks still good and is
     faster to render.
 
-``rotations = [top-left] [top-right] [bottom-right] [bottom-left]``
+``image_format = png|jpeg``
 
-    **Default:** ``top-left``
+    **Default:** ``png``
+    
+    This is the image format the renderer uses for the tile images.
+    You can render your maps to PNGs or to JPEGs. PNGs are losless, 
+    JPEGs are faster to write and need less disk space. Also consider
+    the ``jpeg_quality`` option when using JPEGs.
 
-    This is a list of directions to render the world from. You can rotate the
-    world by n*90 degrees. Later in the output file you can interactively
-    rotate your world. Possible values for this space-separated list are:
-    ``top-left``, ``top-right``, ``bottom-right``, ``bottom-left``. 
-	
-    Top left means that north is on the top left side on the map (same thing
-    for other directions).
+``jpeg_quality = <number between 0 and 100>``
+
+    **Default:** ``85``
+    
+    This is the quality to use for the JPEGs. It should be a number
+    between 0 and 100, where 0 is the worst quality which needs the least disk space
+    and 100 is the best quality which needs the most disk space.
 
 ``lighting_intensity = <number>``
 

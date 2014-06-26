@@ -6,6 +6,7 @@ option(OPT_OPTIMIZE "Sets optimize compiler flags" ON)
 option(OPT_PROFILE "Sets profile compiler flags" OFF)
 option(OPT_SKIP_TESTS "Skip compiling the boost unittests" OFF)
 option(OPT_BOOST_STATIC "Links boost statically" OFF)
+option(OPT_INSTALL_HEADERS "Installs libmapcraftercore header files" ON)
 
 if(OPT_DEBUG)
     add_definitions(-g)
@@ -24,6 +25,7 @@ if(OPT_BOOST_STATIC)
 	set(Boost_USE_STATIC_LIBS ON)
 	# we need zlib to link boost iostreams statically
 	find_package(ZLIB REQUIRED)
+	include_directories(${ZLIB_INCLUDE_DIRS})
 endif()
 
 find_package(Boost COMPONENTS iostreams system filesystem program_options REQUIRED)
@@ -37,6 +39,13 @@ endif()
 include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(Threads REQUIRED)
+include_directories(${Threads_INCLUDE_DIRS})
+
 find_package(PNG REQUIRED)
+include_directories(${PNG_INCLUDE_DIRS})
+
+find_package(JPEG REQUIRED)
+# ${JPEG_INCLUDE_DIRS} somehow doesn't work
+include_directories(${JPEG_INCLUDE_DIR})
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")

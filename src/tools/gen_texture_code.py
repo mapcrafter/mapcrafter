@@ -82,7 +82,7 @@ def lowercase(name):
 
 if __name__ == "__main__":
 	if len(sys.argv) < 3 or sys.argv[1] not in ("--header", "--source"):
-		print "Usage: %s [--header|--source] [directory]" % sys.argv[0]
+		print("Usage: %s [--header|--source] [directory]" % sys.argv[0])
 		sys.exit(1)
 	
 	files = []
@@ -97,11 +97,11 @@ if __name__ == "__main__":
 	
 	if sys.argv[1] == "--header":
 		texture_objects = ",\n\t\t".join(map(lambda name: "%s" % name[1], files))
-		print HEADER_TEMPLATE.replace("%(texture_objects)", texture_objects)
+		print(HEADER_TEMPLATE.replace("%(texture_objects)", texture_objects))
 	if sys.argv[1] == "--source":
 		texture_objects = "\n\t  ".join(map(lambda name: "%s(\"%s\")," % (name[1], name[0]), files))
 		texture_object_references = "\n\t             ".join(map(lambda name: "&%s," % name[1], files))
-		print SOURCE_TEMPLATE.replace("%(texture_objects)", texture_objects).replace("%(texture_object_references)", texture_object_references)
+		print(SOURCE_TEMPLATE.replace("%(texture_objects)", texture_objects).replace("%(texture_object_references)", texture_object_references))
 
 	# code for textures.h
 	

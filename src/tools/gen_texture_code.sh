@@ -1,4 +1,4 @@
 #!/bin/sh
 
-python2 tools/gen_texture_code.py --header data/textures/blocks > renderer/blocktextures.h
-python2 tools/gen_texture_code.py --source data/textures/blocks > renderer/blocktextures.cpp
+python tools/gen_texture_code.py --header data/textures/blocks > mapcraftercore/renderer/blocktextures.h
+python tools/gen_texture_code.py --source data/textures/blocks > mapcraftercore/renderer/blocktextures.cpp

@@ -17,7 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../config/mapcrafterconfig.h"
+#include "../mapcraftercore/config/mapcrafterconfig.h"
 
 #include <iostream>
 #include <string>

@@ -17,7 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../renderer/tileset.h"
+#include "../mapcraftercore/renderer/tileset.h"
 
 #include <map>
 #include <boost/test/unit_test.hpp>

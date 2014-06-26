@@ -11,9 +11,10 @@ Requirements
 * Some libraries:
 
   * libpng
-  * libboost-iostreams (>= 1.42)
+  * libjpeg (but you should use libjpeg-turbo as drop in replacement)
+  * libboost-iostreams
   * libboost-system
-  * libboost-filesystem
+  * libboost-filesystem (>= 1.42)
   * libboost-program-options
   * (libboost-test if you want to use the tests)
 * For your Minecraft worlds:
@@ -24,6 +25,9 @@ Requirements
 Building from Source
 ====================
 
+General Instructions
+--------------------
+
 At first you have to get the source code of Mapcrafter.  Clone it directly from
 GitHub if you want the newest version::
 
@@ -32,7 +36,7 @@ GitHub if you want the newest version::
 Make sure you have all requirements installed. If you are on a Debian-like
 Linux system, you can install these packages with apt::
 
-    sudo apt-get install libpng12-dev libboost-iostreams-dev \
+    sudo apt-get install libpng-dev libjpeg-dev libboost-iostreams-dev \
     libboost-system-dev libboost-filesystem-dev libboost-program-options-dev
 
 Then you can go into the directory with the Mapcrafter source (for example
@@ -56,53 +60,82 @@ Don't forget that you still have to install the texture files needed for Mapcraf
 If you install the texture files to ``src/data/textures``, they will be copied
 to a path Mapcrafter will automatically detect when installing Mapcrafter with ``make install``.
 
+FreeBSD 10
+----------
+
+Mapcrafter builds fine on FreeBSD 10, 9 is not tested but could also build there.
+
+For this guide we will be using ports, but could work with packages from pkgng (untested).
+
+First step is to install prerequisites::
+
+    cd /usr/ports/devel/git
+    make install clean; rehash
+    cd /usr/ports/devel/boost-all
+    make install clean; rehash
+    cd /usr/ports/devel/cmake
+    make install clean; rehash
+    cd /usr/ports/misc/compat8x
+    make install clean; rehash
+    cd /usr/ports/graphics/png
+    make install clean; rehash
+
+Or if you got portmaster installed::
+
+    portmaster devel/git devel/boost-all devel/cmake misc/compat8x graphics/png
+
+Once this is done compiling (takes a long time), you can go ahead with the normal steps::
+
+    git clone https://github.com/m0r13/mapcrafter.git
+    cd mapcrafter
+    cmake .
+    make
+
 Mac OS X
-========
+--------
 
 Currently there are no pre built packages available for Mac OS X but building it is relatively simple.
 
 Prerequisites:
 
 * `Xcode <https://itunes.apple.com/us/app/xcode/id497799835?ls=1&mt=12>`_ 
-* `Homebrew <http://brew.sh/>`_
-
-Note:
-If you got MacPorts installed already, using Homebrew side by side is generally not `reccommended <http://superuser.com/questions/181337>`_ and the below guide will most likely not work.
-If you have issues and got MacPorts, please submit an issue with the output of the following in addition to the normal report(output of cmake, make etc.)::
-
-	port installed
-	brew list
-	brew doctor
-	echo $PATH
+* `Homebrew <http://brew.sh/>`_ or `Macports <http://www.macports.org/>`_
 
 Depending on your version of OS X you may or may not have git installed. 
 Starting from 10.9 Mavericks git is installed with Xcode, if you got 10.8 Mountain Lion or older, 
 you must install command line tools from Xcode and run the following command::
-	
-	brew install git
+
+    brew install git
 
 On 10.9 Mavericks systems you will have to run the following command after you've installed Xcode::
 
-	xcode-select --install
+    xcode-select --install
 
 and select install in the window that pops up, and accept the EULA.
 
 First you will have to clone the latest Mapcrafter source by running::
 
-	git clone https://github.com/m0r13/mapcrafter.git
+    git clone https://github.com/m0r13/mapcrafter.git
 
 After this, install the dependencies using brew::
 
-	brew install boost libpng cmake
-	
-once you have run this, you should have a working build system for Mapcrafter::
+    brew install boost libpng cmake libjpeg-turbo
 
-	cd mapcrafter
-	cmake .
-	make
-	
-this will build Mapcrafter and put the ready to use binary in the ``src/`` directory
+Or install the dependencies using port::
 
+    port install boost libpng cmake libjpeg-turbo
+
+Once you have run this, you should have a working build system for Mapcrafter::
+
+    cd mapcrafter
+    cmake .
+    make
+
+This will build Mapcrafter and put the ready to use binary in the ``src/`` directory.
+
+**Note**: With homebrew you will have to run the following CMake command::
+
+	cmake . -DJPEG_INCLUDE_DIR=/usr/local/opt/jpeg-turbo/include/ -DJPEG_LIBRARY=/usr/local/opt/jpeg-turbo/lib/libjpeg.dylib
 
 
 Arch Linux
@@ -133,6 +166,19 @@ manually::
 Now you can run ``sudo apt-get install mapcrafter`` to install Mapcrafter.
 During this process it will automatically download a temporary Minecraft Jar
 file and unpack required texture files.
+
+.. _installation_windows:
+
+Windows
+=======
+
+There is an experimental build for Windows. For now, it's only a 64-bit build.
+Because it's experimental you should only use it if you know what you are doing.
+Please report any problems you find when using it.
+
+You can download it from mapcrafter.org:
+
+`http://mapcrafter.org/windows/mapcrafterdist.zip <http://mapcrafter.org/windows/mapcrafterdist.zip>`_
 
 .. _resources_textures:
 

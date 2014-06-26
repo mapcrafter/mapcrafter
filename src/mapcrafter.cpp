@@ -17,10 +17,9 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "renderer/manager.h"
-
-#include "util.h"
-#include "version.h"
+#include "mapcraftercore/renderer/manager.h"
+#include "mapcraftercore/util.h"
+#include "mapcraftercore/version.h"
 
 #include <iostream>
 #include <string>
@@ -79,7 +78,7 @@ int main(int argc, char** argv) {
 	}
 
 	if (vm.count("version")) {
-		std::cout << "mapcrafter version: " << MAPCRAFTER_VERSION;
+		std::cout << "Mapcrafter version: " << MAPCRAFTER_VERSION;
 		if (strlen(MAPCRAFTER_GITVERSION))
 			std::cout << " (" << MAPCRAFTER_GITVERSION << ")";
 		std::cout << std::endl;
@@ -89,7 +88,7 @@ int main(int argc, char** argv) {
 	if (vm.count("find-resources")) {
 		fs::path mapcrafter_bin = util::findExecutablePath();
 		std::cout << "Your home directory: " << util::findHomeDir().string() << std::endl;
-		std::cout << "mapcrafter binary: " << mapcrafter_bin.string() << std::endl;
+		std::cout << "Mapcrafter binary: " << mapcrafter_bin.string() << std::endl;
 		
 		util::PathList resources = util::findResourceDirs(mapcrafter_bin);
 		std::cout << "Resource directories:" << std::endl;

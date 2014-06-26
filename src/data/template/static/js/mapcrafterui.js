@@ -2,6 +2,8 @@ var MCTileLayer = L.TileLayer.extend({
 	initialize: function(url, options) {
 		this._url = url;
 		
+		this.imageFormat = options["imageFormat"];
+		
 		L.setOptions(this, options);
 	},
 	
@@ -19,7 +21,7 @@ var MCTileLayer = L.TileLayer.extend({
 				url += "/" + (x + 2 * y + 1);
 			}
 		}
-		url = url + ".png";
+		url = url + "." + this.imageFormat;
 		return url;
 	},
 });
@@ -48,6 +50,7 @@ MapcrafterUI.prototype.init = function() {
 	this.lmap = L.map("mcmap", {
 		crs: L.CRS.Simple
 	}).setView([0, 0], 0);
+	this.lmap.attributionControl.addAttribution("Map rendered with <a href='http://mapcrafter.org'>Mapcrafter</a>");
 	
 	var firstMap = null;
 	for(var type in this.config) {
@@ -184,6 +187,8 @@ MapcrafterUI.prototype.createTileLayer = function(name, config, rotation) {
 		maxZoom: config.maxZoom,
 		tileSize: config.tileSize,
 		noWrap: true,
+		continuousWorld: true,
+		imageFormat: config.imageFormat,
 	});
 	
 	return layer;

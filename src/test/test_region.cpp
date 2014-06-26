@@ -17,9 +17,9 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../util.h"
-#include "../mc/chunk.h"
-#include "../mc/region.h"
+#include "../mapcraftercore/mc/chunk.h"
+#include "../mapcraftercore/mc/region.h"
+#include "../mapcraftercore/util.h"
 
 #include <iostream>
 #include <fstream>

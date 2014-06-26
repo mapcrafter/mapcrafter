@@ -33,13 +33,14 @@ stuff of the template from Minecraft Overviewer.
 ## Requirements ##
 
 * A Linux-based or Unix-like operating system like Mac OS
-* A decent C++ compiler (gcc >= 4.4, clang), CMake and make if you want to build
+* A decent C++ compiler (preferable gcc >= 4.4, or clang), CMake and make if you want to build
       Mapcrafter from source
 * Some libraries:
   * libpng
+  * libjpeg (but you should use libjpeg-turbo as drop in replacement)
   * libboost-iostreams
   * libboost-system
-  * libboost-filesystem
+  * libboost-filesystem (>= 1.42)
   * libboost-program-options
   * (libboost-test if you want to use the tests)
 * For your Minecraft worlds:
@@ -73,6 +74,26 @@ You can also ask questions in the [Minecraft Forum
 thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-map-renderer/).
 
 ## Version history ##
+
+**v.1.4.3**
+
+* Fixed a lighting bug on FreeBSD and Windows
+* Improved build support on Windows for MinGW and Visual C++
+
+**v.1.4.2**
+
+* Fixed a small problem with the multi threading
+
+**v.1.4.1**
+
+* Fixed ``mapcrafter_markers`` not being installed
+* Fixed debian package dependency issues with libjpeg-turbo
+* Fixed issue with CMake not finding libjpeg outside the default search path
+
+**v.1.4**
+
+* Added option to use JPEGs as image output format
+* Added option to change the background color of the map
 
 **v.1.3.2**
 
