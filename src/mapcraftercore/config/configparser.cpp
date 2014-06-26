@@ -28,7 +28,10 @@ ConfigParser::ConfigParser() {
 ConfigParser::~ConfigParser() {
 }
 
-const ValidationMap& ConfigParser::validate() {
+void ConfigParser::validate() {
+}
+
+const ValidationMap& ConfigParser::getValidation() const {
 	return validation;
 }
 

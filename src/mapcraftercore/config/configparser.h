@@ -22,6 +22,7 @@
 
 #include "validation.h"
 
+#include <string>
 #include <vector>
 
 namespace mapcrafter {
@@ -54,13 +55,21 @@ public:
 	}
 
 	/**
+	 * Does the remaining validation work after parsing the sections, for example add
+	 * warnings for unknown section types.
+	 */
+	void validate();
+
+	/**
 	 * Returns the validation of the parsed sections. Also adds warnings for unknown
 	 * section types.
 	 */
-	const ValidationMap& validate();
+	const ValidationMap& getValidation() const;
 
 private:
 	ValidationMap validation;
+
+	std::vector<std::string> parsed_section_types;
 };
 
 } /* namespace config */
