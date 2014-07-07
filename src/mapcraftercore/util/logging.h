@@ -63,6 +63,21 @@ enum class LogLevel {
 	UNKNOWN = 8,
 };
 
+#ifndef HAVE_ENUM_CLASS_COMPARISON
+
+// Implement enum class comparison methods manually if not supported by compiler (gcc 4.4)
+
+bool operator==(LogLevel level1, LogLevel level2);
+bool operator!=(LogLevel level1, LogLevel level2);
+
+bool operator<(LogLevel level1, LogLevel level2);
+bool operator<=(LogLevel level1, LogLevel level2);
+
+bool operator>(LogLevel level1, LogLevel level2);
+bool operator>=(LogLevel level1, LogLevel level2);
+
+#endif
+
 /**
  * Helper to convert the log level enum types from/to string.
  */
