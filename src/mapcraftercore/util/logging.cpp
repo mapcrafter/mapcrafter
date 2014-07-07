@@ -102,7 +102,7 @@ LogStream::LogStream(LogLevel level, const std::string& logger,
 
 LogStream::~LogStream() {
 	message.message = ss->str();
-	Logging::getInstance()->handleLogMessage(message);
+	Logging::getInstance().handleLogMessage(message);
 }
 
 Logger::Logger(const std::string& name)
@@ -196,7 +196,7 @@ void LogSyslogSink::sink(const LogMessage& message) {
 #endif
 
 std::mutex Logging::instance_mutex;
-Logging* Logging::instance = nullptr;
+std::shared_ptr<Logging> Logging::instance;
 
 Logging::Logging()
 	: global_verbosity(LogLevel::INFO), maximum_verbosity(global_verbosity) {
@@ -233,21 +233,20 @@ void Logging::reset() {
 	sinks_verbosity.clear();
 
 	addSink("output", new LogOutputSink("%(date) [%(level)] [%(logger)] %(message)", "%F %T"));
-	//addSink("syslog", new LogSyslogSink());
 }
 
-Logger* Logging::getLogger(const std::string& name) {
+Logger& Logging::getLogger(const std::string& name) {
 	std::unique_lock<std::mutex> lock(loggers_mutex);
 	if (!loggers.count(name))
 		loggers[name] = std::unique_ptr<Logger>(new Logger(name));
-	return loggers.at(name).get();
+	return *loggers.at(name);
 }
 
-Logging* Logging::getInstance() {
+Logging& Logging::getInstance() {
 	std::unique_lock<std::mutex> lock(instance_mutex);
-	if (instance == nullptr)
-		instance = new Logging();
-	return instance;
+	if (!instance)
+		instance.reset(new Logging);
+	return *instance;
 }
 
 void Logging::updateMaximumVerbosity() {

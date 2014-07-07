@@ -30,8 +30,8 @@
 #include <sstream>
 #include <vector>
 
-#define LOG(level) mapcrafter::util::Logging::getInstance()->getLogger("default")->log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
-#define LOGN(level, logger) mapcrafter::util::Logging::getInstance()->getLogger(logger)->log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
+#define LOG(level) mapcrafter::util::Logging::getInstance().getLogger("default").log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
+#define LOGN(level, logger) mapcrafter::util::Logging::getInstance().getLogger(logger).log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
 
 namespace mapcrafter {
 namespace util {
@@ -258,9 +258,8 @@ public:
 	void addSink(const std::string& name, LogSink* sink);
 	void reset();
 
-	Logger* getLogger(const std::string& name);
-
-	static Logging* getInstance();
+	Logger& getLogger(const std::string& name);
+	static Logging& getInstance();
 
 protected:
 	Logging();
@@ -276,10 +275,11 @@ protected:
 	std::mutex loggers_mutex, handle_message_mutex;
 
 	static std::mutex instance_mutex;
-	static Logging* instance;
+	static std::shared_ptr<Logging> instance;
 
 	friend class LogStream;
 };
+
 
 } /* namespace util */
 } /* namespace mapcrafter */
