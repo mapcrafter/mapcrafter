@@ -238,7 +238,7 @@ void Logging::reset() {
 Logger& Logging::getLogger(const std::string& name) {
 	std::unique_lock<std::mutex> lock(loggers_mutex);
 	if (!loggers.count(name))
-		loggers[name] = std::unique_ptr<Logger>(new Logger(name));
+		loggers[name].reset(new Logger(name));
 	return *loggers.at(name);
 }
 
