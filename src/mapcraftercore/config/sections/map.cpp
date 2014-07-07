@@ -86,9 +86,9 @@ bool MapSection::parseField(const std::string key, const std::string value,
 	} else if (key == "rendermode") {
 		if (rendermode.load(key, value, validation)) {
 			std::string r = rendermode.getValue();
-			if (r != "normal" && r != "daylight" && r != "nightlight" && r != "cave")
+			if (r != "plain" && r != "daylight" && r != "nightlight" && r != "cave")
 				validation.push_back(ValidationMessage::error(
-						"'rendermode' must be one of: 'normal', 'daylight', 'nightlight', 'cave'"));
+						"'rendermode' must be one of: 'plain', 'daylight', 'nightlight', 'cave'"));
 		}
 	} else if (key == "rotations") {
 		rotations.load(key, value ,validation);

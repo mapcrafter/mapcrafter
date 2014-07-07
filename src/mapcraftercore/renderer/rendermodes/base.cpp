@@ -48,7 +48,7 @@ bool createRendermode(const config::WorldSection& world_config,
 		const config::MapSection& map_config,
 		const RenderState& state, std::vector<std::shared_ptr<Rendermode>>& modes) {
 	std::string name = map_config.getRendermode();
-	if (name.empty() || name == "normal")
+	if (name.empty() || name == "plain")
 		return true;
 
 	if (name == "cave")
