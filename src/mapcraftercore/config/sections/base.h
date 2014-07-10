@@ -40,6 +40,11 @@ public:
 	void setGlobal(bool global);
 
 	/**
+	 * Returns the name of the section.
+	 */
+	std::string getName() const;
+
+	/**
 	 * Parses the given configurations section and adds infos/warnings/errors to the
 	 * validation list object.
 	 *

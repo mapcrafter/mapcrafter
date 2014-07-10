@@ -35,6 +35,10 @@ void ConfigSectionBase::setGlobal(bool global) {
 	this->global = global;
 }
 
+std::string ConfigSectionBase::getName() const {
+	return section_name;
+}
+
 bool ConfigSectionBase::parse(const INIConfigSection& section,
 		ValidationList& validation) {
 	section_name = section.getName();
