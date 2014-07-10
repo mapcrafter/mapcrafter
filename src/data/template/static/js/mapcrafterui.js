@@ -187,6 +187,7 @@ MapcrafterUI.prototype.createTileLayer = function(name, config, rotation) {
 		maxZoom: config.maxZoom,
 		tileSize: config.tileSize,
 		noWrap: true,
+		continuousWorld: true,
 		imageFormat: config.imageFormat,
 	});
 	

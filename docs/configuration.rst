@@ -305,15 +305,15 @@ Map Options
     Since the name of the section is used for internal representation, the name
     of the section should be unique and you should only use alphanumeric chars.
 
-``rendermode = normal|cave|daylight|nightlight``
+``rendermode = plain|daylight|nightlight|cave``
 	
     **Default:** ``daylight``
 
     This is the rendermode to use when rendering the world. Possible
     rendermodes are:
 
-    ``normal``
-        The default rendermode.  
+    ``plain``
+        Plain rendermode without lighting or other special magic.
     ``daylight``
         Renders the world with lighting.
     ``nightlight``
