@@ -21,7 +21,9 @@
 #define CONFIGPARSER_H_
 
 #include "validation.h"
+#include "../util.h"
 
+#include <set>
 #include <string>
 #include <vector>
 
@@ -33,25 +35,64 @@ namespace config {
  */
 class ConfigParser {
 public:
-	ConfigParser();
+	ConfigParser(const INIConfig& config);
 	~ConfigParser();
 
 	/**
 	 * Parses the root section of the configuration with the supplied section type object.
 	 */
 	template<typename T>
-	void parseRootSection(T& section, const INIConfigSection& config_section) {
-		section.parse(config, validation);
+	void parseRootSection(T& section) {
+		section.parse(config.getRootSection(), validation);
 	}
 
 	/**
 	 * Parses all sections with a specific type and puts the parsed section type objects
-	 * into the supplied vector<T>. It also parses the global section ([global:<name>s],
+	 * into the supplied vector<T>. It also parses the global section ([global:<type>],
 	 * if it exists) and uses it as default for the sections.
 	 */
 	template<typename T>
-	void parseSections(std::vector<T>& sections, const std::string& name,
-			const INIConfig& config) {
+	void parseSections(std::vector<T>& sections, const std::string& type) {
+		T section_global;
+		if (config.hasSection("global", type)) {
+			ValidationList msgs;
+			//section_global.setConfigDir(config_dir);
+			ok = section_global.parse(config.getSection("global", type), msgs) && ok;
+			if (!msgs.empty())
+				validation.push_back(std::make_pair("Global " + type + " configuration", msgs));
+			parsed_sections.insert(std::string("global:") + type);
+			if (!ok)
+				return;
+		}
+
+		std::set<std::string> parsed_sections_names;
+
+		auto config_sections = config.getSections();
+		for (auto config_section_it = config_sections.begin();
+				config_section_it != config_sections.end(); ++config_section_it) {
+			if (config_section_it->getType() != type)
+				continue;
+
+			ValidationList msgs;
+			T section = section_global;
+			section.setGlobal(false);
+			//section.setConfigDir(config_dir);
+			ok = section.parse(*config_section_it, msgs) && ok;
+
+			if (parsed_sections_names.count(config_section_it->getName())) {
+				msgs.push_back(ValidationMessage::error(util::capitalize(type) + " name '"
+						+ config_section_it->getName() + "' already used!"));
+				ok = false;
+			} else
+				sections.push_back(section);
+
+			if (!msgs.empty())
+				validation.push_back(std::make_pair(util::capitalize(type) + " section '"
+						+ config_section_it->getName() + "'", msgs));
+
+			parsed_sections_names.insert(config_section_it->getName());
+			parsed_sections.insert(config_section_it->getNameType());
+		}
 	}
 
 	/**
@@ -61,15 +102,17 @@ public:
 	void validate();
 
 	/**
-	 * Returns the validation of the parsed sections. Also adds warnings for unknown
-	 * section types.
+	 * Returns the validation of the parsed sections.
 	 */
 	const ValidationMap& getValidation() const;
 
 private:
+	INIConfig config;
+
+	bool ok;
 	ValidationMap validation;
 
-	std::vector<std::string> parsed_section_types;
+	std::set<std::string> parsed_sections;
 };
 
 } /* namespace config */

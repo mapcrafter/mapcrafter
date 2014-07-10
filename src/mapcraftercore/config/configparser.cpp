@@ -22,13 +22,25 @@
 namespace mapcrafter {
 namespace config {
 
-ConfigParser::ConfigParser() {
+ConfigParser::ConfigParser(const INIConfig& config)
+	: config(config), ok(true) {
 }
 
 ConfigParser::~ConfigParser() {
 }
 
 void ConfigParser::validate() {
+	auto config_sections = config.getSections();
+	for (auto config_section_it = config_sections.begin();
+			config_section_it != config_sections.end(); ++config_section_it) {
+		if (parsed_sections.count(config_section_it->getNameType()))
+			continue;
+		std::string type = config_section_it->getType();
+		std::string name = config_section_it->getName();
+		validation.push_back(std::make_pair("Section '" + name + "' with type '" + type + "'",
+				makeValidationList(ValidationMessage::warning("Unknown section type!"))));
+	}
+
 }
 
 const ValidationMap& ConfigParser::getValidation() const {
