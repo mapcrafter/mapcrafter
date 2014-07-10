@@ -23,6 +23,7 @@
 #include "validation.h"
 #include "../util.h"
 
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -43,13 +44,19 @@ public:
 	 */
 	template<typename T>
 	void parseRootSection(T& section) {
-		section.parse(config.getRootSection(), validation);
+		ValidationList root_validation;
+		if (!section.parse(config.getRootSection(), root_validation))
+			ok = false;
+		if (!root_validation.empty())
+			validation.push_back(std::make_pair("Configuration root section", root_validation));
 	}
 
 	/**
 	 * Parses all sections with a specific type and puts the parsed section type objects
-	 * into the supplied vector<T>. It also parses the global section ([global:<type>],
-	 * if it exists) and uses it as default for the sections.
+	 * into the supplied std::vector<T>.
+	 *
+	 * It also parses the global section ([global:<type>], if it exists) and uses it as
+	 * default for the sections.
 	 */
 	template<typename T>
 	void parseSections(std::vector<T>& sections, const std::string& type) {
@@ -96,10 +103,22 @@ public:
 	}
 
 	/**
+	 * Same as parseSections(std::vector<T>& sections... but puts the parsed sections
+	 * into a map with section name -> section object.
+	 */
+	template<typename T>
+	void parseSections(std::map<std::string, T>& sections, const std::string& type) {
+		std::vector<T> sections_list;
+		parseSections(sections_list, type);
+		for (auto it = sections_list.begin(); it != sections_list.end(); ++it)
+			sections[it->getName()] = *it;
+	}
+
+	/**
 	 * Does the remaining validation work after parsing the sections, for example add
 	 * warnings for unknown section types.
 	 */
-	void validate();
+	bool validate();
 
 	/**
 	 * Returns the validation of the parsed sections.

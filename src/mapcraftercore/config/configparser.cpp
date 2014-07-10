@@ -29,7 +29,7 @@ ConfigParser::ConfigParser(const INIConfig& config)
 ConfigParser::~ConfigParser() {
 }
 
-void ConfigParser::validate() {
+bool ConfigParser::validate() {
 	auto config_sections = config.getSections();
 	for (auto config_section_it = config_sections.begin();
 			config_section_it != config_sections.end(); ++config_section_it) {
@@ -41,6 +41,7 @@ void ConfigParser::validate() {
 				makeValidationList(ValidationMessage::warning("Unknown section type!"))));
 	}
 
+	return ok;
 }
 
 const ValidationMap& ConfigParser::getValidation() const {
