@@ -111,7 +111,7 @@ public:
 		std::vector<T> sections_list;
 		parseSections(sections_list, type);
 		for (auto it = sections_list.begin(); it != sections_list.end(); ++it)
-			sections[it->getName()] = *it;
+			sections[it->getSectionName()] = *it;
 	}
 
 	/**

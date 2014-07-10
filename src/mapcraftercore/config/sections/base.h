@@ -42,7 +42,7 @@ public:
 	/**
 	 * Returns the name of the section.
 	 */
-	std::string getName() const;
+	std::string getSectionName() const;
 
 	/**
 	 * Parses the given configurations section and adds infos/warnings/errors to the

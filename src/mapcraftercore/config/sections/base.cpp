@@ -35,7 +35,7 @@ void ConfigSectionBase::setGlobal(bool global) {
 	this->global = global;
 }
 
-std::string ConfigSectionBase::getName() const {
+std::string ConfigSectionBase::getSectionName() const {
 	return section_name;
 }
 
