@@ -19,6 +19,7 @@
 
 #include "mapcrafterconfig.h"
 
+#include "configparser.h"
 #include "iniconfig.h"
 #include "../util.h"
 
@@ -119,11 +120,22 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 		return false;
 	}
 
-	bool ok = true;
+	// Using new config parser here
+	// TODO section objects must know the config_dir
+	// TODO how to validate that map sections have an existing world specified?
 
 	fs::path config_dir = fs::path(filename).parent_path();
 	root_section.setConfigDir(config_dir);
 
+	ConfigParser parser(config);
+	parser.parseRootSection(root_section);
+	parser.parseSections(worlds, "world");
+	parser.parseSections(maps, "map");
+	parser.parseSections(markers, "marker");
+	bool ok = parser.validate();
+	validation = parser.getValidation();
+
+	/*
 	ValidationList root_validation;
 	if (!root_section.parse(config.getRootSection(), root_validation))
 		ok = false;
@@ -228,6 +240,7 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 		if (!msgs.empty())
 			validation.push_back(std::make_pair("Marker section '" + it->getName() + "'", msgs));
 	}
+	*/
 
 	return ok;
 }
