@@ -575,7 +575,7 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & (0xff00 | util::binary<11>::value);
 	else if (id == 26) // bed
 		return data & (0xff00 | util::binary<1011>::value);
-	else if (id == 54 || id == 130) { // chests
+	else if (id == 54 || id == 130 || id == 146) { // chests
 		// at first get the direction of the chest and rotate if needed
 		uint16_t dir_rotate = (data >> 4) & 0xf;
 		uint16_t dir = util::rotateShiftLeft(dir_rotate, rotation, 4) << 4;

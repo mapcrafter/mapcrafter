@@ -391,15 +391,17 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 				|| !state.images->isBlockTransparent(west.id, west.data)))
 			data |= DATA_WEST;
 
-		// check fences, they can also connect with fence gates
-		if (id == 85 && north.id == 107)
-			data |= DATA_NORTH;
-		if (id == 85 && south.id == 107)
-			data |= DATA_SOUTH;
-		if (id == 85 && east.id == 107)
-			data |= DATA_EAST;
-		if (id == 85 && west.id == 107)
-			data |= DATA_WEST;
+		// check fences and cobblestone walls, they can also connect with fence gates
+		if (id == 85 || id == 139) {
+			if (north.id == 107)
+				data |= DATA_NORTH;
+			if (south.id == 107)
+				data |= DATA_SOUTH;
+			if (east.id == 107)
+				data |= DATA_EAST;
+			if (west.id == 107)
+				data |= DATA_WEST;
+		}
 	} else if (id == 175) {
 		// large plants
 		if (data >= 8) {
