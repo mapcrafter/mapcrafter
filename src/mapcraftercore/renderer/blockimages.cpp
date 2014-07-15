@@ -1206,13 +1206,15 @@ void BlockImages::createLeaves() { // id 18
 		createBlock(161, 0, textures.LEAVES_ACACIA); // acacia
 		createBlock(161, 1, textures.LEAVES_BIG_OAK); // dark oak
 	} else {
-		createBlock(18, 0, textures.LEAVES_OAK_OPAQUE); // oak
-		createBlock(18, 1, textures.LEAVES_SPRUCE_OPAQUE); // pine/spruce
-		createBlock(18, 2, textures.LEAVES_OAK_OPAQUE); // birch
-		createBlock(18, 3, textures.LEAVES_JUNGLE_OPAQUE); // jungle
+		// TODO there are no opaque leaf textures anymore, generate on my own
+		// I dare you lazy m0r13, if you don't fix that before merging into master...
+		createBlock(18, 0, textures.LEAVES_OAK); // oak
+		createBlock(18, 1, textures.LEAVES_SPRUCE); // pine/spruce
+		createBlock(18, 2, textures.LEAVES_OAK); // birch
+		createBlock(18, 3, textures.LEAVES_JUNGLE); // jungle
 
-		createBlock(161, 0, textures.LEAVES_ACACIA_OPAQUE); // acacia
-		createBlock(161, 1, textures.LEAVES_BIG_OAK_OPAQUE); // dark oak
+		createBlock(161, 0, textures.LEAVES_ACACIA); // acacia
+		createBlock(161, 1, textures.LEAVES_BIG_OAK); // dark oak
 	}
 }
 
