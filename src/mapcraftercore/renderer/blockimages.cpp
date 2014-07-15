@@ -1208,6 +1208,7 @@ void BlockImages::createLeaves() { // id 18
 	} else {
 		// TODO there are no opaque leaf textures anymore, generate on my own
 		// I dare you lazy m0r13, if you don't fix that before merging into master...
+		// ... sleepy, angry giantess Neringa is going to beat you up
 		createBlock(18, 0, textures.LEAVES_OAK); // oak
 		createBlock(18, 1, textures.LEAVES_SPRUCE); // pine/spruce
 		createBlock(18, 2, textures.LEAVES_OAK); // birch
