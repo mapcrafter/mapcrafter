@@ -28,32 +28,32 @@ TextureImage::TextureImage() {
 }
 
 TextureImage::TextureImage(const std::string& name)
-		: name(name) {
+	: name(name) {
 }
 
 TextureImage::~TextureImage() {
 }
 
-/**
- * Loads a single block texture image.
- */
 bool TextureImage::load(const std::string& path, int size) {
-	RGBAImage tmp;
-	if (!tmp.readPNG(path + "/" + name + ".png")) {
+	// at first try to load the texture file
+	if (!original.readPNG(path + "/" + name + ".png")) {
 		// make sure the texture image does not have zero dimension
-		// even if the texture does not exist
+		// even if the texture does not exist / is broken
 		this->setSize(size, size);
-		original = *this;
+		original = original_resized = *this;
 		return false;
 	}
 
-	original = tmp;
+	// check if this is an animated texture, calculate how many frames it has
+	// also make sure there are exactly n frames, so height mod width = 0
+	if ((original.getHeight() % original.getWidth()) != 0) {
+		// TODO use logging
+		std::cerr << "Warning: Texture " << name << " has odd size: ";
+		std::cerr << original.getWidth() << "x" << original.getHeight() << std::endl;
+	}
+	int frames = original.getHeight() / original.getWidth();
 
-	// check if this is an animated texture
-	// -> use only the first frame
-	if (tmp.getWidth() < tmp.getHeight())
-		tmp = tmp.clip(0, 0, tmp.getWidth(), tmp.getWidth());
-
+	// now resize the texture image
 	// resize some textures with the nearest neighbor interpolation:
 	// - transparent leaves
 	// - redstone
@@ -63,14 +63,38 @@ bool TextureImage::load(const std::string& path, int size) {
 	// style of the textures and prevents fuzziness when resizing
 	if ((util::startswith(name, "leaves") && !util::endswith(name, "opaque"))
 		|| util::startswith(name, "redstone_dust"))
-		tmp.resizeSimple(size, size, *this);
+		original.resizeSimple(size, size * frames, original_resized);
 	else
-		tmp.resizeAuto(size, size, *this);
+		original.resizeAuto(size, size * frames, original_resized);
+
+	// assign actual texture to parent RGBAImage object
+	// uses first frame if this is an animated texture
+	this->setSize(size, size);
+	this->simpleblit(getFrame(0), 0, 0);
 	return true;
 }
 
 const std::string& TextureImage::getName() const {
 	return name;
+}
+
+const RGBAImage& TextureImage::getOriginal() const {
+	return original;
+}
+
+bool TextureImage::isAnimated() const {
+	return original.getWidth() < original.getHeight();
+}
+
+RGBAImage TextureImage::getFrame(int frame) const {
+	int width = original_resized.getWidth();
+	// check if texture has this frame, return empty texture if not
+	if ((frame+1) * width > original_resized.getHeight()) {
+		// TODO use logging
+		std::cerr << "Warning: Texture " << name << " does not have frame " << frame << "." << std::endl;
+		return RGBAImage(width, width);
+	}
+	return original_resized.clip(0, width * frame, width, width);
 }
 
 } /* namespace render */

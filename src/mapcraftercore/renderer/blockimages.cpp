@@ -1961,11 +1961,11 @@ void BlockImages::createDragonEgg() { // id 122
 RGBAImage BlockImages::buildCocoa(int stage) {
 	RGBAImage texture;
 	if (stage == 0)
-		texture = textures.COCOA_STAGE_0.original;
+		texture = textures.COCOA_STAGE_0.getOriginal();
 	else if (stage == 1)
-		texture = textures.COCOA_STAGE_1.original;
+		texture = textures.COCOA_STAGE_1.getOriginal();
 	else if (stage == 2)
-		texture = textures.COCOA_STAGE_2.original;
+		texture = textures.COCOA_STAGE_2.getOriginal();
 
 	// at first use the original size of the provided texture image
 	int original_size = texture.getWidth();
@@ -2057,8 +2057,8 @@ void BlockImages::createBeacon() { // id 138
 }
 
 void BlockImages::createFlowerPot() { // id 140
-	double s = (double) textures.FLOWER_POT.original.getWidth() / 16;
-	RGBAImage tmptex = textures.FLOWER_POT.original.clip(s*5, s*10, s*6, s*6);
+	double s = (double) textures.FLOWER_POT.getOriginal().getWidth() / 16;
+	RGBAImage tmptex = textures.FLOWER_POT.getOriginal().clip(s*5, s*10, s*6, s*6);
 	RGBAImage pot_texture;
 	
 	s = (double) texture_size / 16;

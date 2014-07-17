@@ -29,19 +29,42 @@ namespace renderer {
  * A single Minecraft block texture image.
  */
 class TextureImage : public RGBAImage {
-private:
-	std::string name;
 public:
-	// the original (not resized) texture image
-	RGBAImage original;
-
 	TextureImage();
 	TextureImage(const std::string& name);
 	~TextureImage();
 
+	/**
+	 * Tries to load the texture from the given path.
+	 */
 	bool load(const std::string& path, int size);
 
+	/**
+	 * Returns the name of the texture.
+	 */
 	const std::string& getName() const;
+
+	/**
+	 * Returns the original texture image.
+	 */
+	const RGBAImage& getOriginal() const;
+
+	/**
+	 * Returns whether the texture is animated.
+	 */
+	bool isAnimated() const;
+
+	/**
+	 * If the texture is animated, returns a (resized to texture size) frame of it.
+	 */
+	RGBAImage getFrame(int frame) const;
+
+private:
+	std::string name;
+
+	// the original texture image
+	// also original resized texture image (used for animated textures)
+	RGBAImage original, original_resized;
 };
 
 } /* namespace render */
