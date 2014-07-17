@@ -2460,9 +2460,9 @@ void BlockImages::loadBlocks() {
 	createStairs(164, t.PLANKS_BIG_OAK); // dark oak wood stairs
 	createBlock(165, 0, t.SLIME); // slime block
 	createBlock(166, 0, empty_texture); // barrier
-
 	createTrapdoor(167, t.IRON_TRAPDOOR); // iron trapdoor
-
+	// id 168 prismarine
+	// id 169 sea lantern
 	// hay block --
 	createBlock(170, 0, t.HAY_BLOCK_SIDE, t.HAY_BLOCK_TOP); // normal orientation
 	createBlock(170, 4, t.HAY_BLOCK_TOP, t.HAY_BLOCK_SIDE.rotate(1), t.HAY_BLOCK_SIDE); // east-west
@@ -2489,7 +2489,6 @@ void BlockImages::loadBlocks() {
 	createBlock(172, 0, t.HARDENED_CLAY); // hardened clay
 	createBlock(173, 0, t.COAL_BLOCK); // block of coal
 	createBlock(174, 0, t.ICE_PACKED); // packed ice
-	
 	// large plants, id 175 --
 	// the top texture of the sunflower is a bit modified
 	RGBAImage sunflower_top = t.DOUBLE_PLANT_SUNFLOWER_TOP;
