@@ -22,6 +22,8 @@
 #include "iniconfig.h"
 #include "../util.h"
 
+#include <sstream>
+
 namespace mapcrafter {
 namespace util {
 
@@ -36,9 +38,9 @@ mapcrafter::config::Color as<mapcrafter::config::Color>(const std::string& from)
 
 	mapcrafter::config::Color color;
 	color.hex = from;
-	color.red = std::stoi(std::string("0x") + from.substr(1, 2), nullptr, 16);
-	color.green = std::stoi(std::string("0x") + from.substr(3, 2), nullptr, 16);
-	color.blue = std::stoi(std::string("0x") + from.substr(5, 2), nullptr, 16);
+	color.red = util::parseHexNumber(from.substr(1, 2));
+	color.green = util::parseHexNumber(from.substr(3, 2));
+	color.blue = util::parseHexNumber(from.substr(5, 2));
 	return color;
 }
 
