@@ -1342,9 +1342,9 @@ void BlockImages::createPiston(uint16_t id, bool sticky) { //  id 29, 33
 	createBlock(id, 1, side, front);
 
 	setBlockImage(id, 2, buildPiston(FACE_NORTH, front, back, side.rotate(3), side.rotate(3)));
-	setBlockImage(id, 3, buildPiston(FACE_EAST, front, back, side.rotate(1), side));
+	setBlockImage(id, 3, buildPiston(FACE_SOUTH, front, back, side.rotate(1), side.rotate(1)));
 	setBlockImage(id, 4, buildPiston(FACE_WEST, front, back, side.rotate(3), side.rotate(2)));
-	setBlockImage(id, 5, buildPiston(FACE_SOUTH, front, back, side.rotate(1), side.rotate(1)));
+	setBlockImage(id, 5, buildPiston(FACE_EAST, front, back, side.rotate(1), side));
 }
 
 void BlockImages::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) { // id 43, 44, 125, 126
