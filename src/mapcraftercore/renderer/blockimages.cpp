@@ -2461,8 +2461,12 @@ void BlockImages::loadBlocks() {
 	createBlock(165, 0, t.SLIME); // slime block
 	createBlock(166, 0, empty_texture); // barrier
 	createTrapdoor(167, t.IRON_TRAPDOOR); // iron trapdoor
-	// id 168 prismarine
-	// id 169 sea lantern
+	// prismarine --
+	createBlock(168, 0, t.PRISMARINE_ROUGH);
+	createBlock(168, 1, t.PRISMARINE_DARK);
+	createBlock(168, 2, t.PRISMARINE_BRICKS);
+	// --
+	createBlock(169, 0, t.SEA_LANTERN); // sea lantern
 	// hay block --
 	createBlock(170, 0, t.HAY_BLOCK_SIDE, t.HAY_BLOCK_TOP); // normal orientation
 	createBlock(170, 4, t.HAY_BLOCK_TOP, t.HAY_BLOCK_SIDE.rotate(1), t.HAY_BLOCK_SIDE); // east-west
