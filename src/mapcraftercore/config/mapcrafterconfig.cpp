@@ -134,6 +134,15 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 	bool ok = parser.validate();
 	validation = parser.getValidation();
 
+	// check if all worlds specified for maps exist
+	// 'map_it->getWorld() != ""' because that's already handled by map section class
+	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it)
+		if (map_it->getWorld() != "" && !hasWorld(map_it->getWorld())) {
+			validation.section(util::capitalize(map_it->getPrettyName())).error(
+					"World '" + map_it->getWorld() + "' does not exist!");
+			ok = false;
+		}
+
 	/*
 	ValidationList root_validation;
 	if (!root_section.parse(config.getRootSection(), root_validation))
