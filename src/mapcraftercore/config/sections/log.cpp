@@ -54,6 +54,36 @@ LogSection::LogSection(bool global) {
 LogSection::~LogSection() {
 }
 
+std::string LogSection::getPrettyName() const {
+	if (isGlobal())
+		return "global log section " + getSectionName();
+	return "log section '" + getSectionName() + "'";
+}
+
+LogSinkType LogSection::getType() const {
+	return type.getValue();
+}
+
+util::LogLevel LogSection::getVerbosity() const {
+	return verbosity.getValue();
+}
+
+bool LogSection::getLogProgress() const {
+	return log_progress.getValue();
+}
+
+std::string LogSection::getFormat() const {
+	return format.getValue();
+}
+
+std::string LogSection::getDateFormat() const {
+	return date_format.getValue();
+}
+
+fs::path LogSection::getFile() const {
+	return file.getValue();
+}
+
 void LogSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	verbosity.setDefault(util::LogLevel::INFO);
@@ -84,30 +114,6 @@ void LogSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	log_progress.setDefault(type.getValue() == LogSinkType::FILE
 			|| type.getValue() == LogSinkType::SYSLOG);
-}
-
-LogSinkType LogSection::getType() const {
-	return type.getValue();
-}
-
-util::LogLevel LogSection::getVerbosity() const {
-	return verbosity.getValue();
-}
-
-bool LogSection::getLogProgress() const {
-	return log_progress.getValue();
-}
-
-std::string LogSection::getFormat() const {
-	return format.getValue();
-}
-
-std::string LogSection::getDateFormat() const {
-	return date_format.getValue();
-}
-
-fs::path LogSection::getFile() const {
-	return file.getValue();
 }
 
 } /* namespace config */

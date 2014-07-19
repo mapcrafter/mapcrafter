@@ -32,6 +32,8 @@ public:
 	MarkerSection(bool global = false);
 	~MarkerSection();
 
+	virtual std::string getPrettyName() const;
+
 	std::string getShortName() const;
 	std::string getLongName() const;
 	std::string getPrefix() const;

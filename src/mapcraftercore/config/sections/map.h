@@ -45,6 +45,8 @@ public:
 	MapSection(bool global = false);
 	~MapSection();
 
+	virtual std::string getPrettyName() const;
+
 	void setConfigDir(const fs::path& config_dir);
 
 	std::string getShortName() const;

@@ -60,7 +60,8 @@ public:
 	void parseSections(std::vector<T>& sections, const std::string& type) {
 		T section_global;
 		if (config.hasSection("global", type)) {
-			ValidationList& validation_section = validation.section("Global " + type + " configuration");
+			ValidationList& validation_section = validation.section(
+					util::capitalize(section_global.getPrettyName()));
 			//section_global.setConfigDir(config_dir);
 			ok = section_global.parse(config.getSection("global", type), validation_section) && ok;
 			parsed_sections.insert(std::string("global:") + type);
@@ -76,12 +77,11 @@ public:
 			if (config_section_it->getType() != type)
 				continue;
 
-			std::string validation_name = util::capitalize(type) + " section '"
-					+ config_section_it->getName() + "'";
-			ValidationList& validation_section = validation.section(validation_name);
 			T section = section_global;
 			section.setGlobal(false);
 			//section.setConfigDir(config_dir);
+			ValidationList& validation_section = validation.section(
+					util::capitalize(section_global.getPrettyName()));
 			ok = section.parse(*config_section_it, validation_section) && ok;
 
 			if (parsed_sections_names.count(config_section_it->getName())) {

@@ -40,6 +40,8 @@ public:
 	WorldSection(bool global = false);
 	~WorldSection();
 
+	virtual std::string getPrettyName() const;
+
 	void setConfigDir(const fs::path& config_dir);
 
 	std::string getShortName();

@@ -46,6 +46,12 @@ public:
 	std::string getSectionName() const;
 
 	/**
+	 * Returns the pretty name of the section.
+	 * For example "map section my_map" or "global world section".
+	 */
+	virtual std::string getPrettyName() const;
+
+	/**
 	 * Parses the given configurations section and adds infos/warnings/errors to the
 	 * validation list object.
 	 *

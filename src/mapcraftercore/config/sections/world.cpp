@@ -32,6 +32,54 @@ WorldSection::WorldSection(bool global)
 WorldSection::~WorldSection() {
 }
 
+std::string WorldSection::getPrettyName() const {
+	if (isGlobal())
+		return "global world section";
+	return "world section '" + getSectionName() + "'";
+}
+
+void WorldSection::setConfigDir(const fs::path& config_dir) {
+	this->config_dir = config_dir;
+}
+
+std::string WorldSection::getShortName() {
+	return getSectionName();
+}
+
+fs::path WorldSection::getInputDir() const {
+	return input_dir.getValue();
+}
+
+mc::Dimension WorldSection::getDimension() const {
+	return dimension;
+}
+
+std::string WorldSection::getWorldName() const {
+	return world_name.getValue();
+}
+
+std::string WorldSection::getDefaultView() const {
+	return default_view.getValue();
+}
+
+int WorldSection::getDefaultZoom() const {
+	return default_zoom.getValue();
+}
+
+int WorldSection::getDefaultRotation() const {
+	return default_rotation.getValue();
+}
+
+const mc::WorldCrop WorldSection::getWorldCrop() const {
+	return worldcrop;
+}
+
+bool WorldSection::needsWorldCentering() const {
+	// circular cropped worlds and cropped worlds with complete x- and z-bounds
+	return (min_x.isLoaded() && max_x.isLoaded() && min_z.isLoaded() && max_z.isLoaded())
+			|| center_x.isLoaded() || center_z.isLoaded() || radius.isLoaded();
+}
+
 void WorldSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	dimension_name.setDefault("overworld");
@@ -141,48 +189,6 @@ void WorldSection::postParse(const INIConfigSection& section,
 	if (!isGlobal()) {
 		input_dir.require(validation, "You have to specify an input directory ('input_dir')!");
 	}
-}
-
-void WorldSection::setConfigDir(const fs::path& config_dir) {
-	this->config_dir = config_dir;
-}
-
-std::string WorldSection::getShortName() {
-	return getSectionName();
-}
-
-fs::path WorldSection::getInputDir() const {
-	return input_dir.getValue();
-}
-
-mc::Dimension WorldSection::getDimension() const {
-	return dimension;
-}
-
-std::string WorldSection::getWorldName() const {
-	return world_name.getValue();
-}
-
-std::string WorldSection::getDefaultView() const {
-	return default_view.getValue();
-}
-
-int WorldSection::getDefaultZoom() const {
-	return default_zoom.getValue();
-}
-
-int WorldSection::getDefaultRotation() const {
-	return default_rotation.getValue();
-}
-
-const mc::WorldCrop WorldSection::getWorldCrop() const {
-	return worldcrop;
-}
-
-bool WorldSection::needsWorldCentering() const {
-	// circular cropped worlds and cropped worlds with complete x- and z-bounds
-	return (min_x.isLoaded() && max_x.isLoaded() && min_z.isLoaded() && max_z.isLoaded())
-			|| center_x.isLoaded() || center_z.isLoaded() || radius.isLoaded();
 }
 
 } /* namespace config */

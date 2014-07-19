@@ -40,6 +40,8 @@ public:
 	LogSection(bool global = false);
 	~LogSection();
 
+	virtual std::string getPrettyName() const;
+
 	LogSinkType getType() const;
 	util::LogLevel getVerbosity() const;
 	bool getLogProgress() const;

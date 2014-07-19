@@ -43,6 +43,10 @@ std::string ConfigSectionBase::getSectionName() const {
 	return section_name;
 }
 
+std::string ConfigSectionBase::getPrettyName() const {
+	return "unknown section";
+}
+
 bool ConfigSectionBase::parse(const INIConfigSection& section,
 		ValidationList& validation) {
 	section_name = section.getName();

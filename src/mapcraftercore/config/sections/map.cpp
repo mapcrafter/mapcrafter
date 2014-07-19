@@ -48,6 +48,78 @@ MapSection::MapSection(bool global)
 MapSection::~MapSection() {
 }
 
+std::string MapSection::getPrettyName() const {
+	if (isGlobal())
+		return "global map section";
+	return "map section '" + getSectionName() + "'";
+}
+
+void MapSection::setConfigDir(const fs::path& config_dir) {
+	this->config_dir = config_dir;
+}
+
+std::string MapSection::getShortName() const {
+	return name_short;
+}
+
+std::string MapSection::getLongName() const {
+	return name_long;
+}
+
+std::string MapSection::getWorld() const {
+	return world.getValue();
+}
+
+std::string MapSection::getRendermode() const {
+	return rendermode.getValue();
+}
+
+std::set<int> MapSection::getRotations() const {
+	return rotations_set;
+}
+
+fs::path MapSection::getTextureDir() const {
+	return texture_dir.getValue();
+}
+
+int MapSection::getTextureSize() const {
+	return texture_size.getValue();
+}
+
+ImageFormat MapSection::getImageFormat() const {
+	return image_format.getValue();
+}
+
+std::string MapSection::getImageFormatSuffix() const {
+	if (getImageFormat() == ImageFormat::PNG)
+		return "png";
+	return "jpg";
+}
+
+int MapSection::getJPEGQuality() const {
+	return jpeg_quality.getValue();
+}
+
+double MapSection::getLightingIntensity() const {
+	return lighting_intensity.getValue();
+}
+
+bool MapSection::renderUnknownBlocks() const {
+	return render_unknown_blocks.getValue();
+}
+
+bool MapSection::renderLeavesTransparent() const {
+	return render_leaves_transparent.getValue();
+}
+
+bool MapSection::renderBiomes() const {
+	return render_biomes.getValue();
+}
+
+bool MapSection::useImageModificationTimes() const {
+	return use_image_mtimes.getValue();
+}
+
 void MapSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	name_short = getSectionName();
@@ -140,72 +212,6 @@ void MapSection::postParse(const INIConfigSection& section,
 		world.require(validation, "You have to specify a world ('world')!");
 		texture_dir.require(validation, "You have to specify a texture directory ('texture_dir')!");
 	}
-}
-
-void MapSection::setConfigDir(const fs::path& config_dir) {
-	this->config_dir = config_dir;
-}
-
-std::string MapSection::getShortName() const {
-	return name_short;
-}
-
-std::string MapSection::getLongName() const {
-	return name_long;
-}
-
-std::string MapSection::getWorld() const {
-	return world.getValue();
-}
-
-std::string MapSection::getRendermode() const {
-	return rendermode.getValue();
-}
-
-std::set<int> MapSection::getRotations() const {
-	return rotations_set;
-}
-
-fs::path MapSection::getTextureDir() const {
-	return texture_dir.getValue();
-}
-
-int MapSection::getTextureSize() const {
-	return texture_size.getValue();
-}
-
-ImageFormat MapSection::getImageFormat() const {
-	return image_format.getValue();
-}
-
-std::string MapSection::getImageFormatSuffix() const {
-	if (getImageFormat() == ImageFormat::PNG)
-		return "png";
-	return "jpg";
-}
-
-int MapSection::getJPEGQuality() const {
-	return jpeg_quality.getValue();
-}
-
-double MapSection::getLightingIntensity() const {
-	return lighting_intensity.getValue();
-}
-
-bool MapSection::renderUnknownBlocks() const {
-	return render_unknown_blocks.getValue();
-}
-
-bool MapSection::renderLeavesTransparent() const {
-	return render_leaves_transparent.getValue();
-}
-
-bool MapSection::renderBiomes() const {
-	return render_biomes.getValue();
-}
-
-bool MapSection::useImageModificationTimes() const {
-	return use_image_mtimes.getValue();
 }
 
 } /* namespace config */
