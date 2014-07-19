@@ -77,6 +77,13 @@ bool ValidationList::empty() const {
 	return messages.size() == 0;
 }
 
+bool ValidationList::isCritical() const {
+	for (auto message_it = messages.begin(); message_it != messages.end(); ++message_it)
+		if (message_it->getType() == ValidationMessage::ERROR)
+			return true;
+	return false;
+}
+
 const std::vector<ValidationMessage> ValidationList::getMessages() const {
 	return messages;
 }
@@ -100,6 +107,13 @@ bool ValidationMap::empty() const {
 		if (!section_it->second.empty())
 			return false;
 	return true;
+}
+
+bool ValidationMap::isCritical() const {
+	for (auto section_it = sections.begin(); section_it != sections.end(); ++section_it)
+		if (section_it->second.isCritical())
+			return true;
+	return false;
 }
 
 void ValidationMap::log(std::string logger) const {
@@ -132,8 +146,8 @@ ValidationList makeValidationList(const ValidationMessage& msg) {
 
 bool isValidationValid(const ValidationList& validation) {
 	auto messages = validation.getMessages();
-	for (auto it = messages.begin(); it != messages.end(); ++it)
-		if (it->getType() == ValidationMessage::ERROR)
+	for (auto message_it = messages.begin(); message_it != messages.end(); ++message_it)
+		if (message_it->getType() == ValidationMessage::ERROR)
 			return false;
 	return true;
 }

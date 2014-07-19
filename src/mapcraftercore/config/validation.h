@@ -64,6 +64,8 @@ public:
 	void error(const std::string& message);
 
 	bool empty() const;
+	bool isCritical() const;
+
 	const std::vector<ValidationMessage> getMessages() const;
 
 private:
@@ -78,6 +80,8 @@ public:
 	ValidationList& section(const std::string& section);
 
 	bool empty() const;
+	bool isCritical() const;
+
 	void log(std::string logger = "default") const;
 
 private:
@@ -86,9 +90,6 @@ private:
 };
 
 //typedef std::vector<std::pair<std::string, ValidationList > > ValidationMap;
-
-ValidationList makeValidationList(const ValidationMessage& msg);
-bool isValidationValid(const ValidationList& validation);
 
 template <typename T>
 class Field {

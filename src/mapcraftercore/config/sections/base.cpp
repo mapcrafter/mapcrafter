@@ -56,7 +56,7 @@ bool ConfigSectionBase::parse(const INIConfigSection& section,
 
 	postParse(section, validation);
 
-	return isValidationValid(validation);
+	return !validation.isCritical();
 }
 
 void ConfigSectionBase::preParse(const INIConfigSection& section,
