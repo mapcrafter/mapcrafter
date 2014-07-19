@@ -61,6 +61,9 @@ add_library(mapcraftercore SHARED ${SOURCE})
 add_dependencies(mapcraftercore version.cpp)
 
 target_link_libraries(mapcraftercore ${Boost_IOSTREAMS_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+if(OPT_USE_BOOST_THREAD)
+    target_link_libraries(mapcraftercore ${Boost_THREAD_LIBRARY})
+endif()
 
 target_link_libraries(mapcraftercore ${PNG_LIBRARIES})
 target_link_libraries(mapcraftercore ${JPEG_LIBRARIES})

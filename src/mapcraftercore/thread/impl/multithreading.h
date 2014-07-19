@@ -24,12 +24,20 @@
 #include "../dispatcher.h"
 #include "../workermanager.h"
 #include "../../renderer/tilerenderworker.h"
+#include "../../util.h"
 
-#include <condition_variable>
-#include <mutex>
 #include <set>
 #include <thread>
 #include <vector>
+
+#ifdef OPT_USE_BOOST_THREAD
+#  include <boost/thread.hpp>
+#  define THREAD_NS boost
+#else
+#  include <condition_variable>
+#  include <mutex>
+#  define THREAD_NS std
+#endif
 
 namespace mapcrafter {
 namespace thread {
@@ -52,8 +60,8 @@ private:
 	ConcurrentQueue<renderer::RenderWorkResult> result_queue;
 
 	bool finished;
-	std::mutex mutex;
-	std::condition_variable condition_wait_jobs, condition_wait_results;
+	THREAD_NS::mutex mutex;
+	THREAD_NS::condition_variable condition_wait_jobs, condition_wait_results;
 };
 
 class ThreadWorker {
@@ -81,7 +89,7 @@ private:
 	int thread_count;
 
 	ThreadManager manager;
-	std::vector<std::thread> threads;
+	std::vector<THREAD_NS::thread> threads;
 
 	std::set<renderer::TilePath> rendered_tiles;
 };

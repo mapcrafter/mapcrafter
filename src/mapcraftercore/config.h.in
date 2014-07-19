@@ -24,3 +24,5 @@
 
 #cmakedefine HAVE_SYS_IOCTL_H
 #cmakedefine HAVE_UNISTD_H
+
+#cmakedefine OPT_USE_BOOST_THREAD

@@ -20,9 +20,18 @@
 #ifndef CONCURRENTQUEUE_H_
 #define CONCURRENTQUEUE_H_
 
-#include <condition_variable>
-#include <mutex>
+#include "../../util.h"
+
 #include <queue>
+
+#ifdef OPT_USE_BOOST_THREAD
+#  include <boost/thread.hpp>
+#  define THREAD_NS boost
+#else
+#  include <condition_variable>
+#  include <mutex>
+#  define THREAD_NS std
+#endif
 
 namespace mapcrafter {
 namespace thread {
@@ -39,8 +48,8 @@ public:
 
 private:
 	std::queue<T> queue;
-	std::mutex mutex;
-	std::condition_variable condition_variable;
+	THREAD_NS::mutex mutex;
+	THREAD_NS::condition_variable condition_variable;
 };
 
 template<typename T>
@@ -53,13 +62,13 @@ ConcurrentQueue<T>::~ConcurrentQueue() {
 
 template<typename T>
 bool ConcurrentQueue<T>::empty() {
-	std::unique_lock<std::mutex> lock(mutex);
+	THREAD_NS::unique_lock<THREAD_NS::mutex> lock(mutex);
 	return queue.empty();
 }
 
 template<typename T>
 void ConcurrentQueue<T>::push(T item) {
-	std::unique_lock<std::mutex> lock(mutex);
+	THREAD_NS::unique_lock<THREAD_NS::mutex> lock(mutex);
 	if (queue.empty()) {
 		queue.push(item);
 		condition_variable.notify_one();
@@ -70,7 +79,7 @@ void ConcurrentQueue<T>::push(T item) {
 
 template<typename T>
 T ConcurrentQueue<T>::pop() {
-	std::unique_lock<std::mutex> lock(mutex);
+	THREAD_NS::unique_lock<THREAD_NS::mutex> lock(mutex);
 	while (queue.empty())
 		condition_variable.wait(lock);
 	T item = queue.front();
