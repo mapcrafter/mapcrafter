@@ -32,10 +32,6 @@ WorldSection::WorldSection(bool global)
 WorldSection::~WorldSection() {
 }
 
-void WorldSection::setConfigDir(const fs::path& config_dir) {
-	this->config_dir = config_dir;
-}
-
 void WorldSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	dimension_name.setDefault("overworld");
@@ -142,13 +138,17 @@ void WorldSection::postParse(const INIConfigSection& section,
 		validation.error("min_y must be smaller than or equal to max_y!");
 
 	// check if required options were specified
-	if (!global) {
+	if (!isGlobal()) {
 		input_dir.require(validation, "You have to specify an input directory ('input_dir')!");
 	}
 }
 
+void WorldSection::setConfigDir(const fs::path& config_dir) {
+	this->config_dir = config_dir;
+}
+
 std::string WorldSection::getShortName() {
-	return section_name;
+	return getSectionName();
 }
 
 fs::path WorldSection::getInputDir() const {

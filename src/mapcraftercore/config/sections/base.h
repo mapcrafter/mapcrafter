@@ -35,8 +35,9 @@ public:
 	virtual ~ConfigSectionBase();
 
 	/**
-	 * Specifies whether this is a global section.
+	 * Gets/sets whether this is a global section.
 	 */
+	bool isGlobal() const;
 	void setGlobal(bool global);
 
 	/**
@@ -52,6 +53,7 @@ public:
 	 */
 	bool parse(const INIConfigSection& section, ValidationList& validation);
 
+protected:
 	/**
 	 * This method is called before parsing the section entries. The method can output
 	 * infos/warnings/errors via the validation list object.
@@ -78,7 +80,7 @@ public:
 	virtual void postParse(const INIConfigSection& section,
 			ValidationList& validation);
 
-protected:
+private:
 	// whether this is a global section ([global:sections])
 	// might change with future versions, [section:my_glob_*] seems to be a good idea, too
 	bool global;

@@ -31,6 +31,10 @@ ConfigSectionBase::ConfigSectionBase()
 ConfigSectionBase::~ConfigSectionBase() {
 }
 
+bool ConfigSectionBase::isGlobal() const {
+	return global;
+}
+
 void ConfigSectionBase::setGlobal(bool global) {
 	this->global = global;
 }

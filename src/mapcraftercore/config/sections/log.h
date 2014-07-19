@@ -40,13 +40,6 @@ public:
 	LogSection(bool global = false);
 	~LogSection();
 
-	virtual void preParse(const INIConfigSection& section,
-				ValidationList& validation);
-	virtual bool parseField(const std::string key, const std::string value,
-			ValidationList& validation);
-	virtual void postParse(const INIConfigSection& section,
-			ValidationList& validation);
-
 	LogSinkType getType() const;
 	util::LogLevel getVerbosity() const;
 	bool getLogProgress() const;
@@ -57,6 +50,14 @@ public:
 
 	// only for file log
 	fs::path getFile() const;
+
+protected:
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+	virtual void postParse(const INIConfigSection& section,
+			ValidationList& validation);
 
 private:
 	Field<LogSinkType> type;

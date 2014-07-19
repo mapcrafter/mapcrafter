@@ -48,13 +48,9 @@ MapSection::MapSection(bool global)
 MapSection::~MapSection() {
 }
 
-void MapSection::setConfigDir(const fs::path& config_dir) {
-	this->config_dir = config_dir;
-}
-
 void MapSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
-	name_short = section_name;
+	name_short = getSectionName();
 	name_long = name_short;
 
 	// set some default configuration values
@@ -140,10 +136,14 @@ void MapSection::postParse(const INIConfigSection& section,
 	}
 
 	// check if required options were specified
-	if (!global) {
+	if (!isGlobal()) {
 		world.require(validation, "You have to specify a world ('world')!");
 		texture_dir.require(validation, "You have to specify a texture directory ('texture_dir')!");
 	}
+}
+
+void MapSection::setConfigDir(const fs::path& config_dir) {
+	this->config_dir = config_dir;
 }
 
 std::string MapSection::getShortName() const {

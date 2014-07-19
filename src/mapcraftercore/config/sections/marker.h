@@ -32,13 +32,6 @@ public:
 	MarkerSection(bool global = false);
 	~MarkerSection();
 
-	virtual void preParse(const INIConfigSection& section,
-				ValidationList& validation);
-	virtual bool parseField(const std::string key, const std::string value,
-			ValidationList& validation);
-	virtual void postParse(const INIConfigSection& section,
-			ValidationList& validation);
-
 	std::string getShortName() const;
 	std::string getLongName() const;
 	std::string getPrefix() const;
@@ -51,6 +44,15 @@ public:
 	bool matchesSign(const mc::SignEntity& sign) const;
 	std::string formatTitle(const mc::SignEntity& sign) const;
 	std::string formatText(const mc::SignEntity& sign) const;
+
+protected:
+	virtual void preParse(const INIConfigSection& section,
+				ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+	virtual void postParse(const INIConfigSection& section,
+			ValidationList& validation);
+
 private:
 	Field<std::string> name_long;
 	Field<std::string> prefix;
