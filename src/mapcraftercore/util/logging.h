@@ -22,6 +22,7 @@
 
 #include "../util.h"
 
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -240,11 +241,19 @@ public:
 	virtual void sinkFormatted(const LogMessage& message, const std::string& formatted);
 };
 
-// TODO
 /**
  * This sink logs all messages to a log file.
  */
 class LogFileSink : public FormattedLogSink {
+public:
+	LogFileSink(const std::string& filename, std::string format = "",
+			std::string date_format = "");
+	virtual ~LogFileSink();
+
+	virtual void sinkFormatted(const LogMessage& message, const std::string& formatted);
+
+private:
+	std::ofstream out;
 };
 
 #ifdef HAVE_SYSLOG_H

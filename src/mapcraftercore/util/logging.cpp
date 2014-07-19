@@ -207,6 +207,26 @@ void LogOutputSink::sinkFormatted(const LogMessage& message,
 		std::cout << formatted << std::endl;
 }
 
+LogFileSink::LogFileSink(const std::string& filename, std::string format,
+		std::string date_format)
+	: FormattedLogSink(format, date_format) {
+	out.open(filename, std::fstream::out | std::fstream::app);
+	/*
+	if (!out) {
+		// TODO handle error
+	}
+	*/
+}
+
+LogFileSink::~LogFileSink() {
+	out.close();
+}
+
+void LogFileSink::sinkFormatted(const LogMessage& message,
+		const std::string& formatted) {
+	out << formatted << std::endl;
+}
+
 #ifdef HAVE_SYSLOG_H
 
 LogSyslogSink::LogSyslogSink() {
