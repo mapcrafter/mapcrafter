@@ -40,7 +40,8 @@ int main(int argc, char **argv) {
 		std::cout << (ok ? "Some notes on your configuration file:" : "Your configuration file is invalid!") << std::endl;
 		for (auto it = validation.begin(); it != validation.end(); ++it) {
 			std::cout << it->first << ":" << std::endl;
-			for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+			auto messages = it->second.getMessages();
+			for (auto it2 = messages.begin(); it2 != messages.end(); ++it2) {
 				std::cout << " - " << *it2 << std::endl;
 			}
 		}

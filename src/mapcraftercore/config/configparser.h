@@ -47,7 +47,7 @@ public:
 		ValidationList root_validation;
 		if (!section.parse(config.getRootSection(), root_validation))
 			ok = false;
-		if (!root_validation.empty())
+		if (!root_validation.getMessages().empty())
 			validation.push_back(std::make_pair("Configuration root section", root_validation));
 	}
 
@@ -65,7 +65,7 @@ public:
 			ValidationList msgs;
 			//section_global.setConfigDir(config_dir);
 			ok = section_global.parse(config.getSection("global", type), msgs) && ok;
-			if (!msgs.empty())
+			if (!msgs.getMessages().empty())
 				validation.push_back(std::make_pair("Global " + type + " configuration", msgs));
 			parsed_sections.insert(std::string("global:") + type);
 			if (!ok)
@@ -87,13 +87,13 @@ public:
 			ok = section.parse(*config_section_it, msgs) && ok;
 
 			if (parsed_sections_names.count(config_section_it->getName())) {
-				msgs.push_back(ValidationMessage::error(util::capitalize(type) + " name '"
-						+ config_section_it->getName() + "' already used!"));
+				msgs.error(util::capitalize(type) + " name '"
+						+ config_section_it->getName() + "' already used!");
 				ok = false;
 			} else
 				sections.push_back(section);
 
-			if (!msgs.empty())
+			if (!msgs.getMessages().empty())
 				validation.push_back(std::make_pair(util::capitalize(type) + " section '"
 						+ config_section_it->getName() + "'", msgs));
 

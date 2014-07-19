@@ -51,8 +51,7 @@ bool ConfigSectionBase::parse(const INIConfigSection& section,
 		std::string value = entry_it->second;
 
 		if (!parseField(key, value, validation))
-			validation.push_back(ValidationMessage::warning(
-					"Unknown configuration option '" + key + "'!"));
+			validation.warning("Unknown configuration option '" + key + "'!");
 	}
 
 	postParse(section, validation);

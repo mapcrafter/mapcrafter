@@ -87,8 +87,7 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		if (rendermode.load(key, value, validation)) {
 			std::string r = rendermode.getValue();
 			if (r != "plain" && r != "daylight" && r != "nightlight" && r != "cave")
-				validation.push_back(ValidationMessage::error(
-						"'rendermode' must be one of: 'plain', 'daylight', 'nightlight', 'cave'"));
+				validation.error("'rendermode' must be one of: 'plain', 'daylight', 'nightlight', 'cave'");
 		}
 	} else if (key == "rotations") {
 		rotations.load(key, value ,validation);
@@ -96,22 +95,19 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		if (texture_dir.load(key, value, validation)) {
 			texture_dir.setValue(BOOST_FS_ABSOLUTE(texture_dir.getValue(), config_dir));
 			if (!fs::is_directory(texture_dir.getValue()))
-				validation.push_back(ValidationMessage::error(
-						"'texture_dir' must be an existing directory! '"
-						+ texture_dir.getValue().string() + "' does not exist!"));
+				validation.error("'texture_dir' must be an existing directory! '"
+						+ texture_dir.getValue().string() + "' does not exist!");
 		}
 	} else if (key == "texture_size") {
 		if (texture_size.load(key, value, validation)
 				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 32))
-				validation.push_back(ValidationMessage::error(
-						"'texture_size' must a number between 1 and 32!"));
+				validation.error("'texture_size' must a number between 1 and 32!");
 	} else if (key == "image_format") {
 		image_format.load(key, value, validation);
 	} else if (key == "jpeg_quality") {
 		if (jpeg_quality.load(key, value, validation)
 				&& (jpeg_quality.getValue() < 0 || jpeg_quality.getValue() > 100))
-			validation.push_back(ValidationMessage::error(
-					"'jpeg_quality' must be a number between 0 and 100!"));
+			validation.error("'jpeg_quality' must be a number between 0 and 100!");
 	} else if (key == "lighting_intensity") {
 		lighting_intensity.load(key, value, validation);
 	} else if (key == "render_unknown_blocks") {
@@ -140,7 +136,7 @@ void MapSection::postParse(const INIConfigSection& section,
 		if (r != -1)
 			rotations_set.insert(r);
 		else
-			validation.push_back(ValidationMessage::error("Invalid rotation '" + elem + "'!"));
+			validation.error("Invalid rotation '" + elem + "'!");
 	}
 
 	// check if required options were specified

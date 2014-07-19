@@ -49,6 +49,42 @@ ValidationMessage ValidationMessage::error(const std::string& message) {
 	return ValidationMessage(ERROR, message);
 }
 
+ValidationList::ValidationList() {
+
+}
+
+ValidationList::~ValidationList() {
+
+}
+
+void ValidationList::message(const ValidationMessage& message) {
+	messages.push_back(message);
+}
+
+void ValidationList::info(const std::string& message) {
+	messages.push_back(ValidationMessage(ValidationMessage::INFO, message));
+}
+
+void ValidationList::warning(const std::string& message) {
+	messages.push_back(ValidationMessage(ValidationMessage::WARNING, message));
+}
+
+void ValidationList::error(const std::string& message) {
+	messages.push_back(ValidationMessage(ValidationMessage::ERROR, message));
+}
+
+const std::vector<ValidationMessage> ValidationList::getMessages() const {
+	return messages;
+}
+
+ValidationMap::ValidationMap() {
+
+}
+
+ValidationMap::~ValidationMap() {
+
+}
+
 std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg) {
 	switch (msg.getType()) {
 		case (ValidationMessage::INFO): out << "Info: "; break;
@@ -62,12 +98,13 @@ std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg) {
 
 ValidationList makeValidationList(const ValidationMessage& msg) {
 	ValidationList validation;
-	validation.push_back(msg);
+	validation.message(msg);
 	return validation;
 }
 
 bool isValidationValid(const ValidationList& validation) {
-	for (auto it = validation.begin(); it != validation.end(); ++it)
+	auto messages = validation.getMessages();
+	for (auto it = messages.begin(); it != messages.end(); ++it)
 		if (it->getType() == ValidationMessage::ERROR)
 			return false;
 	return true;

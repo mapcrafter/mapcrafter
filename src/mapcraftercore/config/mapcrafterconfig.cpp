@@ -76,9 +76,8 @@ bool MapcrafterConfigRootSection::parseField(const std::string key,
 		if (template_dir.load(key, value, validation)) {
 			template_dir.setValue(BOOST_FS_ABSOLUTE(template_dir.getValue(), config_dir));
 			if (!fs::is_directory(template_dir.getValue()))
-				validation.push_back(ValidationMessage::error(
-						"'template_dir' must be an existing directory! '"
-						+ template_dir.getValue().string() + "' does not exist!"));
+				validation.error("'template_dir' must be an existing directory! '"
+						+ template_dir.getValue().string() + "' does not exist!");
 		}
 	} else if (key == "background_color") {
 		background_color.load(key, value, validation);

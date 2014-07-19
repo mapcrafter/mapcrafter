@@ -50,8 +50,31 @@ public:
 
 std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg);
 
-typedef std::vector<ValidationMessage> ValidationList;
-typedef std::vector<std::pair<std::string, ValidationList > > ValidationMap;
+//typedef std::vector<ValidationMessage> ValidationList;
+
+class ValidationList {
+public:
+	ValidationList();
+	~ValidationList();
+
+	void message(const ValidationMessage& message);
+	void info(const std::string& message);
+	void warning(const std::string& message);
+	void error(const std::string& message);
+
+	const std::vector<ValidationMessage> getMessages() const;
+
+private:
+	std::vector<ValidationMessage> messages;
+};
+
+class ValidationMap : public std::vector<std::pair<std::string, ValidationList > > {
+public:
+	ValidationMap();
+	~ValidationMap();
+};
+
+//typedef std::vector<std::pair<std::string, ValidationList > > ValidationMap;
 
 ValidationList makeValidationList(const ValidationMessage& msg);
 bool isValidationValid(const ValidationList& validation);
@@ -88,7 +111,7 @@ public:
 			loaded = true;
 			return true;
 		} catch (std::invalid_argument& e) {
-			validation.push_back(ValidationMessage::error("Invalid value for '" + key + "': " + e.what()));
+			validation.error("Invalid value for '" + key + "': " + e.what());
 		}
 		return false;
 	}
@@ -99,7 +122,7 @@ public:
 	 */
 	bool require(ValidationList& validation, std::string message) const {
 		if (!loaded) {
-			validation.push_back(ValidationMessage::error(message));
+			validation.error(message);
 			return false;
 		}
 		return true;

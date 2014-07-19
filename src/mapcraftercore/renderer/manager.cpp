@@ -401,10 +401,11 @@ bool RenderManager::run() {
 		else
 			LOG(FATAL) << "Your configuration file is invalid!";
 		for (auto section_it = validation.begin(); section_it != validation.end(); ++section_it) {
-			if (section_it->second.empty())
+			auto messages = section_it->second.getMessages();
+			if (messages.empty())
 				continue;
 			LOG(WARNING) << section_it->first << ":";
-			for (auto message_it = section_it->second.begin(); message_it != section_it->second.end(); ++message_it)
+			for (auto message_it = messages.begin(); message_it != messages.end(); ++message_it)
 				LOG(WARNING) << " - " << *message_it;
 		}
 		LOG(WARNING) << "Please read the documentation about the new configuration file format.";
