@@ -163,16 +163,13 @@ int main(int argc, char** argv) {
 	config::ValidationMap validation;
 	bool ok = config.parse(config_file, validation);
 
-	if (validation.size() > 0) {
-		std::cerr << (ok ? "Some notes on your configuration file:"
-				: "Your configuration file is invalid!") << std::endl;
-		for (auto it = validation.begin(); it != validation.end(); ++it) {
-			std::cerr << it->first << ":" << std::endl;
-			auto messages = it->second.getMessages();
-			for (auto it2 = messages.begin(); it2 != messages.end(); ++it2) {
-				std::cerr << " - " << *it2 << std::endl;
-			}
-		}
+	if (!validation.empty()) {
+		if (ok)
+			LOG(WARNING) << "Some notes on your configuration file:";
+		else
+			LOG(FATAL) << "Your configuration file is invalid!";
+		validation.log();
+		LOG(WARNING) << "Please read the documentation about the new configuration file format.";
 	}
 
 	Markers markers_found;

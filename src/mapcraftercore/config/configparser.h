@@ -44,11 +44,9 @@ public:
 	 */
 	template<typename T>
 	void parseRootSection(T& section) {
-		ValidationList root_validation;
+		ValidationList& root_validation = validation.section("Configuration root section");
 		if (!section.parse(config.getRootSection(), root_validation))
 			ok = false;
-		if (!root_validation.getMessages().empty())
-			validation.push_back(std::make_pair("Configuration root section", root_validation));
 	}
 
 	/**
@@ -62,11 +60,9 @@ public:
 	void parseSections(std::vector<T>& sections, const std::string& type) {
 		T section_global;
 		if (config.hasSection("global", type)) {
-			ValidationList msgs;
+			ValidationList& validation_section = validation.section("Global " + type + " configuration");
 			//section_global.setConfigDir(config_dir);
-			ok = section_global.parse(config.getSection("global", type), msgs) && ok;
-			if (!msgs.getMessages().empty())
-				validation.push_back(std::make_pair("Global " + type + " configuration", msgs));
+			ok = section_global.parse(config.getSection("global", type), validation_section) && ok;
 			parsed_sections.insert(std::string("global:") + type);
 			if (!ok)
 				return;
@@ -80,22 +76,20 @@ public:
 			if (config_section_it->getType() != type)
 				continue;
 
-			ValidationList msgs;
+			std::string validation_name = util::capitalize(type) + " section '"
+					+ config_section_it->getName() + "'";
+			ValidationList& validation_section = validation.section(validation_name);
 			T section = section_global;
 			section.setGlobal(false);
 			//section.setConfigDir(config_dir);
-			ok = section.parse(*config_section_it, msgs) && ok;
+			ok = section.parse(*config_section_it, validation_section) && ok;
 
 			if (parsed_sections_names.count(config_section_it->getName())) {
-				msgs.error(util::capitalize(type) + " name '"
+				validation_section.error(util::capitalize(type) + " name '"
 						+ config_section_it->getName() + "' already used!");
 				ok = false;
 			} else
 				sections.push_back(section);
-
-			if (!msgs.getMessages().empty())
-				validation.push_back(std::make_pair(util::capitalize(type) + " section '"
-						+ config_section_it->getName() + "'", msgs));
 
 			parsed_sections_names.insert(config_section_it->getName());
 			parsed_sections.insert(config_section_it->getNameType());

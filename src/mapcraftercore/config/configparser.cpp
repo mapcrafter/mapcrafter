@@ -37,8 +37,8 @@ bool ConfigParser::validate() {
 			continue;
 		std::string type = config_section_it->getType();
 		std::string name = config_section_it->getName();
-		validation.push_back(std::make_pair("Section '" + name + "' with type '" + type + "'",
-				makeValidationList(ValidationMessage::warning("Unknown section type!"))));
+		validation.section("Section '" + name + "' with type '" + type + "'")
+				.warning("Unknown section type!");
 	}
 
 	return ok;

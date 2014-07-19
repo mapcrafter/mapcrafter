@@ -73,6 +73,10 @@ void ValidationList::error(const std::string& message) {
 	messages.push_back(ValidationMessage(ValidationMessage::ERROR, message));
 }
 
+bool ValidationList::empty() const {
+	return messages.size() == 0;
+}
+
 const std::vector<ValidationMessage> ValidationList::getMessages() const {
 	return messages;
 }
@@ -83,6 +87,30 @@ ValidationMap::ValidationMap() {
 
 ValidationMap::~ValidationMap() {
 
+}
+
+ValidationList& ValidationMap::section(const std::string& section) {
+	if (!sections.count(section))
+		sections_order.push_back(section);
+	return sections[section];
+}
+
+bool ValidationMap::empty() const {
+	for (auto section_it = sections.begin(); section_it != sections.end(); ++section_it)
+		if (!section_it->second.empty())
+			return false;
+	return true;
+}
+
+void ValidationMap::log(std::string logger) const {
+	for (auto section_it = sections_order.begin(); section_it != sections_order.end(); ++section_it) {
+		auto messages = sections.at(*section_it).getMessages();
+		if (messages.empty())
+			continue;
+		LOGN(WARNING, logger) << *section_it << ":";
+		for (auto message_it = messages.begin(); message_it != messages.end(); ++message_it)
+			LOGN(WARNING, logger) << " - " << *message_it;
+	}
 }
 
 std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg) {

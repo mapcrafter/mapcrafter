@@ -115,7 +115,7 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 	INIConfig config;
 	ValidationMessage msg;
 	if (!config.loadFile(filename, msg)) {
-		validation.push_back(std::make_pair("Configuration file", makeValidationList(msg)));
+		validation.section("Configuration file").message(msg);
 		return false;
 	}
 

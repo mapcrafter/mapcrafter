@@ -24,6 +24,7 @@
 
 #include <map>
 #include <type_traits>
+#include <vector>
 
 namespace mapcrafter {
 namespace config {
@@ -62,16 +63,26 @@ public:
 	void warning(const std::string& message);
 	void error(const std::string& message);
 
+	bool empty() const;
 	const std::vector<ValidationMessage> getMessages() const;
 
 private:
 	std::vector<ValidationMessage> messages;
 };
 
-class ValidationMap : public std::vector<std::pair<std::string, ValidationList > > {
+class ValidationMap {
 public:
 	ValidationMap();
 	~ValidationMap();
+
+	ValidationList& section(const std::string& section);
+
+	bool empty() const;
+	void log(std::string logger = "default") const;
+
+private:
+	std::vector<std::string> sections_order;
+	std::map<std::string, ValidationList> sections;
 };
 
 //typedef std::vector<std::pair<std::string, ValidationList > > ValidationMap;

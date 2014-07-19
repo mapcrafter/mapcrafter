@@ -395,19 +395,12 @@ bool RenderManager::run() {
 	bool ok = config.parse(opts.config_file, validation);
 
 	// show infos/warnings/errors if configuration file has something
-	if (validation.size() > 0) {
+	if (!validation.empty()) {
 		if (ok)
 			LOG(WARNING) << "Some notes on your configuration file:";
 		else
 			LOG(FATAL) << "Your configuration file is invalid!";
-		for (auto section_it = validation.begin(); section_it != validation.end(); ++section_it) {
-			auto messages = section_it->second.getMessages();
-			if (messages.empty())
-				continue;
-			LOG(WARNING) << section_it->first << ":";
-			for (auto message_it = messages.begin(); message_it != messages.end(); ++message_it)
-				LOG(WARNING) << " - " << *message_it;
-		}
+		validation.log();
 		LOG(WARNING) << "Please read the documentation about the new configuration file format.";
 	}
 	if (!ok)

@@ -36,17 +36,15 @@ int main(int argc, char **argv) {
 	config::ValidationMap validation;
 	bool ok = parser.parse(configfile, validation);
 
-	if (validation.size() > 0) {
-		std::cout << (ok ? "Some notes on your configuration file:" : "Your configuration file is invalid!") << std::endl;
-		for (auto it = validation.begin(); it != validation.end(); ++it) {
-			std::cout << it->first << ":" << std::endl;
-			auto messages = it->second.getMessages();
-			for (auto it2 = messages.begin(); it2 != messages.end(); ++it2) {
-				std::cout << " - " << *it2 << std::endl;
-			}
-		}
+	if (!validation.empty()) {
+		if (ok)
+			LOG(WARNING) << "Some notes on your configuration file:";
+		else
+			LOG(FATAL) << "Your configuration file is invalid!";
+		validation.log();
+		LOG(WARNING) << "Please read the documentation about the new configuration file format.";
 	} else {
-		std::cout << "Everything ok." << std::endl;
+		LOG(INFO) << "Everything ok.";
 	}
 
 	std::cout << std::endl << "The parsed configuration file:" << std::endl;
