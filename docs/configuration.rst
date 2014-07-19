@@ -37,7 +37,7 @@ Every world section represents a Minecraft world you want to render and needs a
 directory where it can find the Minecraft world (``input_dir`` of the world
 section ``myworld`` in the example above).
 
-Every map section represents a rendered Minecraft world. You can specifiy
+Every map section represents a rendered Minecraft world. You can specify
 things like rotation of the world, rendermode, texture pack and texture size
 for each map.
 
