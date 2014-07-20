@@ -20,13 +20,13 @@
 #ifndef LOGGING_H_
 #define LOGGING_H_
 
+#include "../compat/thread.h"
 #include "../util.h"
 
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <memory>
-#include <mutex>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -296,9 +296,9 @@ protected:
 	std::map<std::string, std::shared_ptr<LogSink> > sinks;
 	std::map<std::string, LogLevel> sinks_verbosity;
 
-	std::mutex loggers_mutex, handle_message_mutex;
+	thread_ns::mutex loggers_mutex, handle_message_mutex;
 
-	static std::mutex instance_mutex;
+	static thread_ns::mutex instance_mutex;
 	static std::shared_ptr<Logging> instance;
 
 	friend class LogStream;

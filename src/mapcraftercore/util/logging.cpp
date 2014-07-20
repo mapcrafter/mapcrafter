@@ -243,7 +243,7 @@ void LogSyslogSink::sink(const LogMessage& message) {
 
 #endif
 
-std::mutex Logging::instance_mutex;
+thread_ns::mutex Logging::instance_mutex;
 std::shared_ptr<Logging> Logging::instance;
 
 Logging::Logging()
@@ -284,14 +284,14 @@ void Logging::reset() {
 }
 
 Logger& Logging::getLogger(const std::string& name) {
-	std::unique_lock<std::mutex> lock(loggers_mutex);
+	thread_ns::unique_lock<thread_ns::mutex> lock(loggers_mutex);
 	if (!loggers.count(name))
 		loggers[name].reset(new Logger(name));
 	return *loggers.at(name);
 }
 
 Logging& Logging::getInstance() {
-	std::unique_lock<std::mutex> lock(instance_mutex);
+	thread_ns::unique_lock<thread_ns::mutex> lock(instance_mutex);
 	if (!instance)
 		instance.reset(new Logging);
 	return *instance;
@@ -305,7 +305,7 @@ void Logging::updateMaximumVerbosity() {
 }
 
 void Logging::handleLogMessage(const LogMessage& message) {
-	std::unique_lock<std::mutex> lock(handle_message_mutex);
+	thread_ns::unique_lock<thread_ns::mutex> lock(handle_message_mutex);
 	if (message.level > maximum_verbosity)
 		return;
 	for (auto it = sinks.begin(); it != sinks.end(); ++it) {

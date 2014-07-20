@@ -20,7 +20,7 @@
 #ifndef COMPAT_THREAD_H_
 #define COMPAT_THREAD_H_
 
-#include "../util.h"
+#include "../config.h"
 
 #ifdef OPT_USE_BOOST_THREAD
 #  include <boost/thread.hpp>
