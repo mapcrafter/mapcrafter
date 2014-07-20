@@ -48,12 +48,13 @@ set(HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/version.h
 )
 
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/util")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/compat")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/config")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/config/sections")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/mc")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/renderer")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/renderer/rendermodes")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/util")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thread")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thread/impl")
 

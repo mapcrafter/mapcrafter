@@ -41,25 +41,8 @@ private:
 } nullptr = {};              // and whose name is nullptr
 #endif
 
-#include <boost/filesystem.hpp>
-
-#if BOOST_FILESYSTEM_VERSION == 2
-# define OLD_BOOST_FILESYSTEM 42
-#endif
-
-#ifndef BOOST_FILESYSTEM_VERSION
-# define OLD_BOOST_FILESYSTEM 42
-#endif
-
-#ifdef OLD_BOOST_FILESYSTEM
-# define BOOST_FS_FILENAME(p) (p).filename()
-# define BOOST_FS_ABSOLUTE(p, b) fs::complete((p), (b))
-# define BOOST_FS_ABSOLUTE1(p) fs::complete((p))
-#else
-# define BOOST_FS_FILENAME(p) (p).filename().string()
-# define BOOST_FS_ABSOLUTE(p, b) fs::absolute((p), (b))
-# define BOOST_FS_ABSOLUTE1(p) fs::absolute((p))
-#endif
+// include compat/*.h here if all files need it
+#include "compat/boost.h"
 
 #include "util/filesystem.h"
 #include "util/progress.h"

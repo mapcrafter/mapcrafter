@@ -20,18 +20,10 @@
 #ifndef CONCURRENTQUEUE_H_
 #define CONCURRENTQUEUE_H_
 
+#include "../../compat/thread.h"
 #include "../../util.h"
 
 #include <queue>
-
-#ifdef OPT_USE_BOOST_THREAD
-#  include <boost/thread.hpp>
-#  define THREAD_NS boost
-#else
-#  include <condition_variable>
-#  include <mutex>
-#  define THREAD_NS std
-#endif
 
 namespace mapcrafter {
 namespace thread {

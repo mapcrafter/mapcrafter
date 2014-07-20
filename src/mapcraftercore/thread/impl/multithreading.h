@@ -23,21 +23,13 @@
 #include "concurrentqueue.h"
 #include "../dispatcher.h"
 #include "../workermanager.h"
+#include "../../compat/thread.h"
 #include "../../renderer/tilerenderworker.h"
 #include "../../util.h"
 
 #include <set>
 #include <thread>
 #include <vector>
-
-#ifdef OPT_USE_BOOST_THREAD
-#  include <boost/thread.hpp>
-#  define THREAD_NS boost
-#else
-#  include <condition_variable>
-#  include <mutex>
-#  define THREAD_NS std
-#endif
 
 namespace mapcrafter {
 namespace thread {
