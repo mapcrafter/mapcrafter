@@ -158,7 +158,7 @@ void rotateBlockPos(int& x, int& z, int rotation) {
 	}
 }
 
-uint16_t Chunk::getBlockID(const LocalBlockPos& pos) const {
+uint16_t Chunk::getBlockID(const LocalBlockPos& pos, bool force) const {
 	// at first find out the section and check if it's valid and contained
 	int section = pos.y / 16;
 	if (section >= CHUNK_HEIGHT || section_offsets[section] == -1)
@@ -186,7 +186,13 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos) const {
 		add = sections[section_offsets[section]].add[offset / 2] & 0xf;
 	else
 		add = (sections[section_offsets[section]].add[offset / 2] >> 4) & 0x0f;
-	return sections[section_offsets[section]].blocks[offset] + (add << 8);
+	uint16_t id = sections[section_offsets[section]].blocks[offset] + (add << 8);
+	if (!force && worldcrop.hasBlockMask()) {
+		const BlockMask& mask = worldcrop.getBlockMask();
+		if (mask.isHidden(id, getBlockData(pos)))
+			return 0;
+	}
+	return id;
 }
 
 bool Chunk::checkBlockWorldCrop(int x, int z, int y) const {
@@ -218,12 +224,19 @@ uint8_t Chunk::getData(const LocalBlockPos& pos, int array) const {
 	if (!checkBlockWorldCrop(x, z, pos.y))
 		return array == 2 ? 15 : 0;
 
+	uint8_t data = 0;
 	// calculate the offset and get the block data
 	int offset = ((pos.y % 16) * 16 + z) * 16 + x;
 	// handle bottom/top nibble
 	if ((offset % 2) == 0)
-		return sections[section_offsets[section]].getArray(array)[offset / 2] & 0xf;
-	return (sections[section_offsets[section]].getArray(array)[offset / 2] >> 4) & 0x0f;
+		data = sections[section_offsets[section]].getArray(array)[offset / 2] & 0xf;
+	data = (sections[section_offsets[section]].getArray(array)[offset / 2] >> 4) & 0x0f;
+	if (worldcrop.hasBlockMask()) {
+		const BlockMask& mask = worldcrop.getBlockMask();
+		if (mask.isHidden(getBlockID(pos, true), data))
+			return array == 2 ? 15 : 0;
+	}
+	return data;
 }
 
 uint8_t Chunk::getBlockData(const LocalBlockPos& pos) const {

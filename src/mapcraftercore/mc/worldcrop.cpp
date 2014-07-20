@@ -36,7 +36,7 @@ BlockMask::~BlockMask() {
 
 void BlockMask::set(uint16_t id, bool shown) {
 	for (size_t i = 0; i < 16; i++)
-		block_mask[16 * id + i] = true;
+		block_mask[16 * id + i] = shown;
 }
 
 void BlockMask::set(uint16_t id, uint16_t data, bool shown) {
@@ -45,22 +45,25 @@ void BlockMask::set(uint16_t id, uint16_t data, bool shown) {
 }
 
 void BlockMask::setRange(uint16_t id1, uint16_t id2, bool shown) {
-	for (int16_t id = id1; id <= id2; id++)
+	for (size_t id = id1; id <= id2; id++)
 		set(id, shown);
 }
 
 void BlockMask::setAll(bool shown) {
-	setRange(0, 65535, shown);
+	if (shown)
+		block_mask.set();
+	else
+		block_mask.reset();
 }
 
 bool BlockMask::isHidden(uint16_t id, uint8_t data) const {
 	if (data >= 16)
 		return false;
-	return block_mask[16 * id + data];
+	return !block_mask[16 * id + data];
 }
 
 WorldCrop::WorldCrop()
-	: type(RECTANGULAR), radius(0), has_block_mask(true) {
+	: type(RECTANGULAR), radius(0), has_block_mask(false) {
 }
 
 WorldCrop::~WorldCrop() {

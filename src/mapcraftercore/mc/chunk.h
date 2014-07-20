@@ -90,7 +90,7 @@ public:
 	/**
 	 * Returns the block ID at a specific position (local coordinates).
 	 */
-	uint16_t getBlockID(const LocalBlockPos& pos) const;
+	uint16_t getBlockID(const LocalBlockPos& pos, bool force = false) const;
 
 	/**
 	 * Returns the block data value at a specific position (local coordinates).
