@@ -17,16 +17,16 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BOOST_THREAD_H_
-#define BOOST_THREAD_H_
+#ifndef COMPAT_THREAD_H_
+#define COMPAT_THREAD_H_
 
 #ifdef OPT_USE_BOOST_THREAD
 #  include <boost/thread.hpp>
-#  define THREAD_NS boost
+namespace thread_ns = boost;
 #else
 #  include <condition_variable>
 #  include <mutex>
-#  define THREAD_NS std
+namespace thread_ns = std;
 #endif
 
-#endif /* BOOST_THREAD_H_ */
+#endif /* COMPAT_THREAD_H_ */

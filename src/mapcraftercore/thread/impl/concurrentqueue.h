@@ -40,8 +40,8 @@ public:
 
 private:
 	std::queue<T> queue;
-	THREAD_NS::mutex mutex;
-	THREAD_NS::condition_variable condition_variable;
+	thread_ns::mutex mutex;
+	thread_ns::condition_variable condition_variable;
 };
 
 template<typename T>
@@ -54,13 +54,13 @@ ConcurrentQueue<T>::~ConcurrentQueue() {
 
 template<typename T>
 bool ConcurrentQueue<T>::empty() {
-	THREAD_NS::unique_lock<THREAD_NS::mutex> lock(mutex);
+	thread_ns::unique_lock<thread_ns::mutex> lock(mutex);
 	return queue.empty();
 }
 
 template<typename T>
 void ConcurrentQueue<T>::push(T item) {
-	THREAD_NS::unique_lock<THREAD_NS::mutex> lock(mutex);
+	thread_ns::unique_lock<thread_ns::mutex> lock(mutex);
 	if (queue.empty()) {
 		queue.push(item);
 		condition_variable.notify_one();
@@ -71,7 +71,7 @@ void ConcurrentQueue<T>::push(T item) {
 
 template<typename T>
 T ConcurrentQueue<T>::pop() {
-	THREAD_NS::unique_lock<THREAD_NS::mutex> lock(mutex);
+	thread_ns::unique_lock<thread_ns::mutex> lock(mutex);
 	while (queue.empty())
 		condition_variable.wait(lock);
 	T item = queue.front();

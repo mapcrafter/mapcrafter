@@ -52,8 +52,8 @@ private:
 	ConcurrentQueue<renderer::RenderWorkResult> result_queue;
 
 	bool finished;
-	THREAD_NS::mutex mutex;
-	THREAD_NS::condition_variable condition_wait_jobs, condition_wait_results;
+	thread_ns::mutex mutex;
+	thread_ns::condition_variable condition_wait_jobs, condition_wait_results;
 };
 
 class ThreadWorker {
@@ -81,7 +81,7 @@ private:
 	int thread_count;
 
 	ThreadManager manager;
-	std::vector<THREAD_NS::thread> threads;
+	std::vector<thread_ns::thread> threads;
 
 	std::set<renderer::TilePath> rendered_tiles;
 };
