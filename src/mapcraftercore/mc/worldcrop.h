@@ -22,6 +22,8 @@
 
 #include "pos.h"
 
+#include <bitset>
+
 namespace mapcrafter {
 namespace mc {
 
@@ -57,6 +59,29 @@ private:
 	T min, max;
 	// whether minimum, maximum is set to infinity (or -infinity for minimum)
 	bool min_set, max_set;
+};
+
+/**
+ * Data structure to hold information about which blocks should be hide/shown.
+ */
+class BlockMask {
+public:
+	BlockMask();
+	~BlockMask();
+
+	void set(uint16_t id, bool shown);
+	void set(uint16_t id, uint16_t data, bool shown);
+	void setRange(uint16_t id1, uint16_t id2, bool shown);
+	void setAll(bool shown);
+
+	//bool isHidden(uint16_t id) const;
+	bool isHidden(uint16_t id, uint8_t data) const;
+
+private:
+	// the actual block mask
+	// 65536 entries for the 16 bit long block id
+	// * 16 entries for the 4 bit block data
+	std::bitset<65536 * 16> block_mask;
 };
 
 /**
@@ -124,6 +149,9 @@ public:
 	 */
 	bool isBlockContainedY(const mc::BlockPos& block) const;
 
+	bool hasBlockMask() const;
+	const BlockMask& getBlockMask() const;
+
 private:
 	// type of world boundaries -- either RECTANGULAR or CIRCULAR
 	int type;
@@ -142,6 +170,10 @@ private:
 	// circular limits
 	BlockPos center;
 	int radius;
+
+	// block mask
+	bool has_block_mask;
+	BlockMask block_mask;
 };
 
 template <typename T>

@@ -26,8 +26,41 @@
 namespace mapcrafter {
 namespace mc {
 
+BlockMask::BlockMask() {
+
+}
+
+BlockMask::~BlockMask() {
+
+}
+
+void BlockMask::set(uint16_t id, bool shown) {
+	for (size_t i = 0; i < 16; i++)
+		block_mask[16 * id + i] = true;
+}
+
+void BlockMask::set(uint16_t id, uint16_t data, bool shown) {
+	if (data < 16)
+		block_mask[16 * id + data] = shown;
+}
+
+void BlockMask::setRange(uint16_t id1, uint16_t id2, bool shown) {
+	for (int16_t id = id1; id <= id2; id++)
+		set(id, shown);
+}
+
+void BlockMask::setAll(bool shown) {
+	setRange(0, 65535, shown);
+}
+
+bool BlockMask::isHidden(uint16_t id, uint8_t data) const {
+	if (data >= 16)
+		return false;
+	return block_mask[16 * id + data];
+}
+
 WorldCrop::WorldCrop()
-	: type(RECTANGULAR), radius(0) {
+	: type(RECTANGULAR), radius(0), has_block_mask(true) {
 }
 
 WorldCrop::~WorldCrop() {
@@ -145,6 +178,14 @@ bool WorldCrop::isBlockContainedXZ(const mc::BlockPos& block) const {
 
 bool WorldCrop::isBlockContainedY(const mc::BlockPos& block) const {
 	return bounds_y.contains(block.y);
+}
+
+bool WorldCrop::hasBlockMask() const {
+	return has_block_mask;
+}
+
+const BlockMask& WorldCrop::getBlockMask() const {
+	return block_mask;
 }
 
 }
