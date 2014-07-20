@@ -50,12 +50,13 @@ set(HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/version.h
 )
 
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/util")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/compat")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/config")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/config/sections")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/mc")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/renderer")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/renderer/rendermodes")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/util")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thread")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thread/impl")
 
@@ -63,6 +64,9 @@ add_library(mapcraftercore SHARED ${SOURCE})
 add_dependencies(mapcraftercore version.cpp)
 
 target_link_libraries(mapcraftercore ${Boost_IOSTREAMS_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+if(OPT_USE_BOOST_THREAD)
+    target_link_libraries(mapcraftercore ${Boost_THREAD_LIBRARY})
+endif()
 
 target_link_libraries(mapcraftercore ${PNG_LIBRARIES})
 target_link_libraries(mapcraftercore ${JPEG_LIBRARIES})

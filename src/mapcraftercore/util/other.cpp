@@ -126,6 +126,15 @@ bool as<bool>(const std::string& from) {
 	throw std::invalid_argument("Must be one of true/false or 0/1.");
 }
 
+unsigned int parseHexNumber(const std::string& hex) {
+	std::stringstream ss;
+	ss << std::hex << hex;
+
+	unsigned int x;
+	ss >> x;
+	return x;
+}
+
 std::string trim(const std::string& str) {
 	// removes trailing and leading whitespaces
 	std::string trimmed = str;

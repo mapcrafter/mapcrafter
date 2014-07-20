@@ -17,14 +17,16 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#cmakedefine HAVE_NULLPTR
-#cmakedefine HAVE_ENUM_CLASS_COMPARISON
+#ifndef COMPAT_THREAD_H_
+#define COMPAT_THREAD_H_
 
-#cmakedefine HAVE_ENDIAN_H
-#cmakedefine ENDIAN_H_FREEBSD
+#ifdef OPT_USE_BOOST_THREAD
+#  include <boost/thread.hpp>
+namespace thread_ns = boost;
+#else
+#  include <condition_variable>
+#  include <mutex>
+namespace thread_ns = std;
+#endif
 
-#cmakedefine HAVE_SYS_IOCTL_H
-#cmakedefine HAVE_UNISTD_H
-#cmakedefine HAVE_SYSLOG_H
-
-#cmakedefine OPT_USE_BOOST_THREAD
+#endif /* COMPAT_THREAD_H_ */

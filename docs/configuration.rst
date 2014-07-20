@@ -77,7 +77,7 @@ A More Advanced Example
     [map:map_world_night]
     name = Normal World - Night
     world = world
-    rendermode = night
+    rendermode = nightlight
     
     [map:map_world_cave]
     name = Normal World - Cave

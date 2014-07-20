@@ -65,6 +65,8 @@ fs::path as(const std::string& from);
 template<>
 bool as<bool>(const std::string& from);
 
+unsigned int parseHexNumber(const std::string& hex);
+
 std::string trim(const std::string& str);
 std::string escapeJSON(const std::string& str);
 std::string capitalize(const std::string& str);
