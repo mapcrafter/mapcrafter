@@ -230,7 +230,8 @@ uint8_t Chunk::getData(const LocalBlockPos& pos, int array) const {
 	// handle bottom/top nibble
 	if ((offset % 2) == 0)
 		data = sections[section_offsets[section]].getArray(array)[offset / 2] & 0xf;
-	data = (sections[section_offsets[section]].getArray(array)[offset / 2] >> 4) & 0x0f;
+	else
+		data = (sections[section_offsets[section]].getArray(array)[offset / 2] >> 4) & 0x0f;
 	if (worldcrop.hasBlockMask()) {
 		const BlockMask& mask = worldcrop.getBlockMask();
 		if (mask.isHidden(getBlockID(pos, true), data))
