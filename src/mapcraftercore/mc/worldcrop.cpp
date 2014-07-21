@@ -188,7 +188,7 @@ bool WorldCrop::hasBlockMask() const {
 }
 
 const BlockMask& WorldCrop::getBlockMask() const {
-	return block_mask;
+	return *block_mask;
 }
 
 }

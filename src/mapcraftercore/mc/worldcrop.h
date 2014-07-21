@@ -23,6 +23,7 @@
 #include "pos.h"
 
 #include <bitset>
+#include <memory>
 
 namespace mapcrafter {
 namespace mc {
@@ -173,7 +174,7 @@ private:
 
 	// block mask
 	bool has_block_mask;
-	BlockMask block_mask;
+	std::shared_ptr<BlockMask> block_mask;
 };
 
 template <typename T>
