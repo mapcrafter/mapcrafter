@@ -95,7 +95,7 @@ public:
 	/**
 	 * Returns the block data value at a specific position (local coordinates).
 	 */
-	uint8_t getBlockData(const LocalBlockPos& pos) const;
+	uint8_t getBlockData(const LocalBlockPos& pos, bool force = false) const;
 
 	/**
 	 * Returns the block light at a specific position (local coordinates).
@@ -149,7 +149,7 @@ private:
 	 *   1: block light,
 	 *   2: sky light
 	 */
-	uint8_t getData(const LocalBlockPos& pos, int array) const;
+	uint8_t getData(const LocalBlockPos& pos, int array, bool force = false) const;
 };
 
 }
