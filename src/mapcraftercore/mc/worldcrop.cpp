@@ -22,6 +22,7 @@
 #include "../util.h"
 
 #include <cmath>
+#include <sstream>
 
 namespace mapcrafter {
 namespace mc {
@@ -35,23 +36,36 @@ BlockMask::~BlockMask() {
 }
 
 void BlockMask::set(uint16_t id, bool shown) {
+	std::cout << "set(" << (int) id << " " << shown << ")" << std::endl;
 	for (size_t i = 0; i < 16; i++)
 		block_mask[16 * id + i] = shown;
 	updateBlockState(id);
 }
 
-void BlockMask::set(uint16_t id, uint16_t data, bool shown) {
+void BlockMask::set(uint16_t id, uint8_t data, bool shown) {
+	std::cout << "set(" << (int) id << ", " << (int) data << ", " << shown << ")" << std::endl;
 	if (data < 16)
 		block_mask[16 * id + data] = shown;
 	updateBlockState(id);
 }
 
+void BlockMask::set(uint16_t id, uint8_t data, uint8_t bitmask, bool shown) {
+	for (uint8_t i = 0; i < 16; i++)
+		if ((i & bitmask) == data) {
+			block_mask[16 * id + i] = shown;
+			std::cout << (int) id << " " << (int) i << std::endl;
+		}
+	updateBlockState(id);
+}
+
 void BlockMask::setRange(uint16_t id1, uint16_t id2, bool shown) {
+	std::cout << "setRange(" << (int) id1 << ", " << (int) id2 << ", " << shown << ")" << std::endl;
 	for (size_t id = id1; id <= id2; id++)
 		set(id, shown);
 }
 
 void BlockMask::setAll(bool shown) {
+	std::cout << "setAll(" << shown << ")" << std::endl;
 	if (shown) {
 		block_mask.set();
 		std::fill(block_states.begin(), block_states.end(), BlockState::COMPLETLY_SHOWN);
@@ -59,6 +73,32 @@ void BlockMask::setAll(bool shown) {
 		block_mask.reset();
 		std::fill(block_states.begin(), block_states.end(), BlockState::COMPLETLY_HIDDEN);
 	}
+}
+
+bool BlockMask::loadFromString(const std::string& str) {
+	std::stringstream ss(util::trim(str));
+	std::string part;
+	while (ss >> part) {
+		bool shown = part[0] != '!';
+		if (!shown)
+			part = part.substr(1);
+		std::cout << part << " " << shown << std::endl;
+		if (part.find('-') != std::string::npos) {
+			std::string part1 = part.substr(0, part.find('-'));
+			std::string part2 = part.substr(part.find('-') + 1);
+			setRange(util::as<uint16_t>(part1), util::as<uint16_t>(part2), shown);
+		} else if (part.find(':') != std::string::npos) {
+			std::string part1 = part.substr(0, part.find(':'));
+			std::string part2 = part.substr(part.find(':') + 1);
+			set(util::as<uint16_t>(part1), util::as<uint16_t>(part2), shown);
+		} else {
+			if (part == "*")
+				setAll(shown);
+			else
+				set(util::as<uint16_t>(part), shown);
+		}
+	}
+	return true;
 }
 
 const BlockMask::BlockState BlockMask::getBlockState(uint16_t id) const {
@@ -216,8 +256,9 @@ const BlockMask& WorldCrop::getBlockMask() const {
 }
 
 void WorldCrop::initBlockMask() {
-	has_block_mask = false;
+	has_block_mask = true;
 	block_mask.reset(new BlockMask);
+	block_mask->setAll(true);
 	/*
 	block_mask->setAll(true);
 	block_mask->setRange(1, 3, false); // stone, dirt, grass
@@ -228,19 +269,43 @@ void WorldCrop::initBlockMask() {
 	*/
 
 	/*
-	block_mask->setAll(true);
-	block_mask->set(17, 3, false); // jungle wood
-	block_mask->set(17, 3 | 4, false); // jungle wood
-	block_mask->set(17, 3 | 8, false); // jungle wood
-	block_mask->set(17, 3 | 4 | 8, false); // jungle wood
+	block_mask->set(17, 0, false); // jungle wood
+	block_mask->set(17, 4, false); // jungle wood
+	block_mask->set(17, 8, false); // jungle wood
+	block_mask->set(17, 4 | 8, false); // jungle wood
+	*/
 
-	block_mask->set(18, 3, false); // jungle leaves
-	block_mask->set(18, 3 | 4, false); // jungle leaves
-	block_mask->set(18, 3 | 8, false); // jungle leaves
-	block_mask->set(18, 3 | 4 | 8, false); // jungle leaves
+	/*
+	//block_mask->set(17, 3, false); // jungle wood
+	//block_mask->set(17, 3 | 4, false); // jungle wood
+	//block_mask->set(17, 3 | 8, false); // jungle wood
+	//block_mask->set(17, 3 | 4 | 8, false); // jungle wood
+	//block_mask->set(18, 3, false); // jungle leaves
+	//block_mask->set(18, 3 | 4, false); // jungle leaves
+	//block_mask->set(18, 3 | 8, false); // jungle leaves
+	//block_mask->set(18, 3 | 4 | 8, false); // jungle leaves
+
+	block_mask->set(17, 3, util::binary<11>::value, false);
+	block_mask->set(18, 3, util::binary<11>::value, false);
 
 	block_mask->set(106, false); // vines
 	*/
+
+	/*
+	block_mask->setRange(2, 3, false);
+	block_mask->setRange(8, 9, false);
+	block_mask->setRange(12, 13, false);
+	block_mask->setRange(17, 18, false);
+	block_mask->set(24, false);
+	block_mask->set(31, false);
+	block_mask->setRange(78, 79, false);
+	block_mask->set(82, false);
+	block_mask->set(106, false);
+	block_mask->set(161, false);
+	*/
+
+	block_mask->loadFromString("* !17:2 !17:6 !17:10 !17:14 !18:2 !18:6 !18:10 !18:14");
+	//block_mask->loadFromString("* !2-3  !8-9 !12-13  !17-18 !24 !31   !78-79 !82 !106 !161");
 }
 
 }
