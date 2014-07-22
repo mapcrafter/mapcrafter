@@ -146,6 +146,8 @@ void WorldSection::postParse(const INIConfigSection& section,
 	if (min_y.isLoaded() && max_y.isLoaded() && min_y.getValue() > max_y.getValue())
 		validation.push_back(ValidationMessage::error("min_y must be smaller than or equal to max_y!"));
 
+	worldcrop.initBlockMask();
+
 	// check if required options were specified
 	if (!global) {
 		input_dir.require(validation, "You have to specify an input directory ('input_dir')!");

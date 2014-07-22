@@ -27,7 +27,7 @@ namespace mapcrafter {
 namespace mc {
 
 BlockMask::BlockMask() {
-
+	block_states.resize(65536);
 }
 
 BlockMask::~BlockMask() {
@@ -37,11 +37,13 @@ BlockMask::~BlockMask() {
 void BlockMask::set(uint16_t id, bool shown) {
 	for (size_t i = 0; i < 16; i++)
 		block_mask[16 * id + i] = shown;
+	updateBlockState(id);
 }
 
 void BlockMask::set(uint16_t id, uint16_t data, bool shown) {
 	if (data < 16)
 		block_mask[16 * id + data] = shown;
+	updateBlockState(id);
 }
 
 void BlockMask::setRange(uint16_t id1, uint16_t id2, bool shown) {
@@ -50,16 +52,38 @@ void BlockMask::setRange(uint16_t id1, uint16_t id2, bool shown) {
 }
 
 void BlockMask::setAll(bool shown) {
-	if (shown)
+	if (shown) {
 		block_mask.set();
-	else
+		std::fill(block_states.begin(), block_states.end(), BlockState::COMPLETLY_SHOWN);
+	} else {
 		block_mask.reset();
+		std::fill(block_states.begin(), block_states.end(), BlockState::COMPLETLY_HIDDEN);
+	}
+}
+
+const BlockMask::BlockState BlockMask::getBlockState(uint16_t id) const {
+	return block_states[id];
 }
 
 bool BlockMask::isHidden(uint16_t id, uint8_t data) const {
-	if (data >= 16)
+	if (data >= 16) {
+		std::cout << "invalid data" << std::endl;
 		return false;
+	}
 	return !block_mask[16 * id + data];
+}
+
+void BlockMask::updateBlockState(uint16_t id) {
+	std::bitset<16> block;
+	for (size_t i = 0; i < 16; i++)
+		block[i] = block_mask[16 * id + i];
+
+	if (block.all())
+		block_states[id] = BlockState::COMPLETLY_SHOWN;
+	else if (block.none())
+		block_states[id] = BlockState::COMPLETLY_HIDDEN;
+	else
+		block_states[id] = BlockState::PARTIALLY_HIDDEN_SHOWN;
 }
 
 WorldCrop::WorldCrop()
@@ -189,6 +213,34 @@ bool WorldCrop::hasBlockMask() const {
 
 const BlockMask& WorldCrop::getBlockMask() const {
 	return *block_mask;
+}
+
+void WorldCrop::initBlockMask() {
+	has_block_mask = false;
+	block_mask.reset(new BlockMask);
+	/*
+	block_mask->setAll(true);
+	block_mask->setRange(1, 3, false); // stone, dirt, grass
+	block_mask->setRange(7, 9, false); // bedrock, water
+	block_mask->setRange(12, 13, false); // sand, gravel
+	block_mask->setRange(15, 16, false); // iron, coal
+	block_mask->set(24, false); // sandstone
+	*/
+
+	/*
+	block_mask->setAll(true);
+	block_mask->set(17, 3, false); // jungle wood
+	block_mask->set(17, 3 | 4, false); // jungle wood
+	block_mask->set(17, 3 | 8, false); // jungle wood
+	block_mask->set(17, 3 | 4 | 8, false); // jungle wood
+
+	block_mask->set(18, 3, false); // jungle leaves
+	block_mask->set(18, 3 | 4, false); // jungle leaves
+	block_mask->set(18, 3 | 8, false); // jungle leaves
+	block_mask->set(18, 3 | 4 | 8, false); // jungle leaves
+
+	block_mask->set(106, false); // vines
+	*/
 }
 
 }

@@ -24,6 +24,7 @@
 
 #include <bitset>
 #include <memory>
+#include <vector>
 
 namespace mapcrafter {
 namespace mc {
@@ -67,6 +68,12 @@ private:
  */
 class BlockMask {
 public:
+	enum BlockState {
+		COMPLETLY_HIDDEN,
+		COMPLETLY_SHOWN,
+		PARTIALLY_HIDDEN_SHOWN
+	};
+
 	BlockMask();
 	~BlockMask();
 
@@ -75,14 +82,18 @@ public:
 	void setRange(uint16_t id1, uint16_t id2, bool shown);
 	void setAll(bool shown);
 
-	//bool isHidden(uint16_t id) const;
+	const BlockMask::BlockState getBlockState(uint16_t id) const;
 	bool isHidden(uint16_t id, uint8_t data) const;
 
 private:
+	std::vector<BlockMask::BlockState> block_states;
+
 	// the actual block mask
 	// 65536 entries for the 16 bit long block id
 	// * 16 entries for the 4 bit block data
 	std::bitset<65536 * 16> block_mask;
+
+	void updateBlockState(uint16_t id);
 };
 
 /**
@@ -152,6 +163,7 @@ public:
 
 	bool hasBlockMask() const;
 	const BlockMask& getBlockMask() const;
+	void initBlockMask();
 
 private:
 	// type of world boundaries -- either RECTANGULAR or CIRCULAR

@@ -189,7 +189,12 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos, bool force) const {
 	uint16_t id = sections[section_offsets[section]].blocks[offset] + (add << 8);
 	if (!force && worldcrop.hasBlockMask()) {
 		const BlockMask& mask = worldcrop.getBlockMask();
-		if (mask.isHidden(id, getBlockData(pos)))
+		BlockMask::BlockState block_state = mask.getBlockState(id);
+		if (block_state == BlockMask::BlockState::COMPLETLY_HIDDEN)
+			return 0;
+		else if (block_state == BlockMask::BlockState::COMPLETLY_SHOWN)
+			return id;
+		else if (mask.isHidden(id, getBlockData(pos)))
 			return 0;
 	}
 	return id;

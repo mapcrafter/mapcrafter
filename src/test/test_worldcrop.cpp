@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(worldcrop_bounds) {
 	BOOST_CHECK(!bounds.contains(89));
 }
 
-BOOST_AUTO_TEST_CASE(worlcrop_crop_rectangular) {
+BOOST_AUTO_TEST_CASE(worldcrop_crop_rectangular) {
 	mc::WorldCrop crop;
 
 	BOOST_CHECK(crop.isRegionContained(mc::RegionPos(0, 0)));
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(worlcrop_crop_rectangular) {
 	BOOST_CHECK(crop.isChunkContained(mc::ChunkPos(-1, -4)));
 }
 
-BOOST_AUTO_TEST_CASE(worlcrop_crop_circular) {
+BOOST_AUTO_TEST_CASE(worldcrop_crop_circular) {
 	mc::WorldCrop crop;
 	mc::BlockPos center(14, 14, 0);
 	int radius = 20;
@@ -123,4 +123,30 @@ BOOST_AUTO_TEST_CASE(worlcrop_crop_circular) {
 	for (auto it = chunks.begin(); it != chunks.end(); ++it)
 		if (!crop.isChunkContained(*it))
 			std::cout << "Chunk " << *it << std::endl;
+}
+
+BOOST_AUTO_TEST_CASE(worldcrop_block_mask) {
+	mc::BlockMask mask;
+	mask.setAll(true);
+	mask.setRange(0, 2, false);
+	mask.set(3, 1, false);
+	mask.set(4, 2, false);
+	mask.set(4, 2, true);
+
+	BOOST_CHECK_EQUAL(mask.getBlockState(0), mc::BlockMask::BlockState::COMPLETLY_HIDDEN);
+	BOOST_CHECK_EQUAL(mask.getBlockState(1), mc::BlockMask::BlockState::COMPLETLY_HIDDEN);
+	BOOST_CHECK_EQUAL(mask.getBlockState(2), mc::BlockMask::BlockState::COMPLETLY_HIDDEN);
+	BOOST_CHECK(mask.isHidden(0, 3));
+	BOOST_CHECK(mask.isHidden(1, 2));
+	BOOST_CHECK(mask.isHidden(2, 5));
+
+	BOOST_CHECK_EQUAL(mask.getBlockState(3), mc::BlockMask::BlockState::PARTIALLY_HIDDEN_SHOWN);
+	BOOST_CHECK(mask.isHidden(3, 1));
+	BOOST_CHECK(!mask.isHidden(3, 3));
+
+	BOOST_CHECK_EQUAL(mask.getBlockState(4), mc::BlockMask::BlockState::COMPLETLY_SHOWN);
+	BOOST_CHECK(!mask.isHidden(4, 2));
+
+	BOOST_CHECK_EQUAL(mask.getBlockState(42), mc::BlockMask::BlockState::COMPLETLY_SHOWN);
+	BOOST_CHECK(!mask.isHidden(42, 0));
 }
