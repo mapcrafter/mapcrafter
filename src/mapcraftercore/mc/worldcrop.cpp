@@ -36,36 +36,38 @@ BlockMask::~BlockMask() {
 }
 
 void BlockMask::set(uint16_t id, bool shown) {
-	std::cout << "set(" << (int) id << " " << shown << ")" << std::endl;
+	//std::cout << "set(" << (int) id << " " << shown << ")" << std::endl;
 	for (size_t i = 0; i < 16; i++)
 		block_mask[16 * id + i] = shown;
 	updateBlockState(id);
 }
 
 void BlockMask::set(uint16_t id, uint8_t data, bool shown) {
-	std::cout << "set(" << (int) id << ", " << (int) data << ", " << shown << ")" << std::endl;
-	if (data < 16)
-		block_mask[16 * id + data] = shown;
+	//std::cout << "set(" << (int) id << ", " << (int) data << ", " << shown << ")" << std::endl;
+	if (data >= 16)
+		return;
+	block_mask[16 * id + data] = shown;
 	updateBlockState(id);
 }
 
 void BlockMask::set(uint16_t id, uint8_t data, uint8_t bitmask, bool shown) {
+	// iterate through every possible block data values and check if (i % bitmask) == data
 	for (uint8_t i = 0; i < 16; i++)
 		if ((i & bitmask) == data) {
 			block_mask[16 * id + i] = shown;
-			std::cout << (int) id << " " << (int) i << std::endl;
+			//std::cout << (int) id << " " << (int) i << std::endl;
 		}
 	updateBlockState(id);
 }
 
 void BlockMask::setRange(uint16_t id1, uint16_t id2, bool shown) {
-	std::cout << "setRange(" << (int) id1 << ", " << (int) id2 << ", " << shown << ")" << std::endl;
+	//std::cout << "setRange(" << (int) id1 << ", " << (int) id2 << ", " << shown << ")" << std::endl;
 	for (size_t id = id1; id <= id2; id++)
 		set(id, shown);
 }
 
 void BlockMask::setAll(bool shown) {
-	std::cout << "setAll(" << shown << ")" << std::endl;
+	//std::cout << "setAll(" << shown << ")" << std::endl;
 	if (shown) {
 		block_mask.set();
 		std::fill(block_states.begin(), block_states.end(), BlockState::COMPLETLY_SHOWN);
@@ -106,14 +108,13 @@ const BlockMask::BlockState BlockMask::getBlockState(uint16_t id) const {
 }
 
 bool BlockMask::isHidden(uint16_t id, uint8_t data) const {
-	if (data >= 16) {
-		std::cout << "invalid data" << std::endl;
+	if (data >= 16)
 		return false;
-	}
 	return !block_mask[16 * id + data];
 }
 
 void BlockMask::updateBlockState(uint16_t id) {
+	// copy state of blocks to separate bitset to make checking them all easier
 	std::bitset<16> block;
 	for (size_t i = 0; i < 16; i++)
 		block[i] = block_mask[16 * id + i];
@@ -256,7 +257,7 @@ const BlockMask& WorldCrop::getBlockMask() const {
 }
 
 void WorldCrop::initBlockMask() {
-	has_block_mask = true;
+	has_block_mask = false;
 	block_mask.reset(new BlockMask);
 	block_mask->setAll(true);
 	/*
@@ -304,7 +305,7 @@ void WorldCrop::initBlockMask() {
 	block_mask->set(161, false);
 	*/
 
-	block_mask->loadFromString("* !17:2 !17:6 !17:10 !17:14 !18:2 !18:6 !18:10 !18:14");
+	//block_mask->loadFromString("* !17:2 !17:6 !17:10 !17:14 !18:2 !18:6 !18:10 !18:14");
 	//block_mask->loadFromString("* !2-3  !8-9 !12-13  !17-18 !24 !31   !78-79 !82 !106 !161");
 }
 

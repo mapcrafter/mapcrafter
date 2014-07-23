@@ -83,14 +83,48 @@ public:
 	BlockMask();
 	~BlockMask();
 
+	/**
+	 * Sets all blocks with a specific id to be hidden/shown;
+	 */
 	void set(uint16_t id, bool shown);
+
+	/**
+	 * Sets a block with a specific id/data to be hidden/shown;
+	 */
 	void set(uint16_t id, uint8_t data, bool shown);
+
+	/**
+	 * Sets all blocks with specific id and data values to be hidden/shown.
+	 * Using a bitmask all blocks with data values (block data value & bitmask) == data
+	 * are set to be shown/hidden.
+	 */
 	void set(uint16_t id, uint8_t data, uint8_t bitmask, bool shown);
+
+	/**
+	 * Sets all blocks from id1 to id2 to be hidden/shown.
+	 */
 	void setRange(uint16_t id1, uint16_t id2, bool shown);
+
+	/**
+	 * Sets all blocks to be hidden or shown.
+	 */
 	void setAll(bool shown);
+
+	/**
+	 * Loads the block mask from a string definition.
+	 *
+	 * TODO: describe format
+	 */
 	bool loadFromString(const std::string& str);
 
+	/**
+	 * Returns whether all, none, or some blocks with a specific id are hidden/shown.
+	 */
 	const BlockMask::BlockState getBlockState(uint16_t id) const;
+
+	/**
+	 * Returns whether a block
+	 */
 	bool isHidden(uint16_t id, uint8_t data) const;
 
 private:
@@ -101,6 +135,9 @@ private:
 	// * 16 entries for the 4 bit block data
 	std::bitset<65536 * 16> block_mask;
 
+	/**
+	 * Updates whether all, none, or some blocks with a specific id are shown/hidden.
+	 */
 	void updateBlockState(uint16_t id);
 };
 
