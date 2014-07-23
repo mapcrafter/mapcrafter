@@ -102,8 +102,6 @@ bool BlockMask::loadFromString(const std::string& str, std::string& error) {
 				set(util::as<uint16_t>(part), shown);
 		}
 	}
-	error = "test!";
-	return false;
 	return true;
 }
 
