@@ -251,17 +251,20 @@ bool WorldCrop::isBlockContainedY(const mc::BlockPos& block) const {
 }
 
 bool WorldCrop::hasBlockMask() const {
-	return has_block_mask;
+	return block_mask.operator bool();
 }
 
-const BlockMask& WorldCrop::getBlockMask() const {
-	return *block_mask;
+const BlockMask* WorldCrop::getBlockMask() const {
+	return block_mask.get();
 }
 
 bool WorldCrop::loadBlockMask(const std::string& str, std::string& error) {
 	block_mask.reset(new BlockMask);
-	has_block_mask = block_mask->loadFromString(str, error);
-	return has_block_mask;
+	if (!block_mask->loadFromString(str, error)) {
+		block_mask.reset();
+		return false;
+	}
+	return true;
 }
 
 //void WorldCrop::initBlockMask() {

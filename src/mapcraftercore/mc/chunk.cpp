@@ -188,13 +188,13 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos, bool force) const {
 		add = (sections[section_offsets[section]].add[offset / 2] >> 4) & 0x0f;
 	uint16_t id = sections[section_offsets[section]].blocks[offset] + (add << 8);
 	if (!force && worldcrop.hasBlockMask()) {
-		const BlockMask& mask = worldcrop.getBlockMask();
-		BlockMask::BlockState block_state = mask.getBlockState(id);
+		const BlockMask* mask = worldcrop.getBlockMask();
+		BlockMask::BlockState block_state = mask->getBlockState(id);
 		if (block_state == BlockMask::BlockState::COMPLETLY_HIDDEN)
 			return 0;
 		else if (block_state == BlockMask::BlockState::COMPLETLY_SHOWN)
 			return id;
-		if (mask.isHidden(id, getBlockData(pos, true)))
+		if (mask->isHidden(id, getBlockData(pos, true)))
 			return 0;
 	}
 	return id;
@@ -238,8 +238,8 @@ uint8_t Chunk::getData(const LocalBlockPos& pos, int array, bool force) const {
 	else
 		data = (sections[section_offsets[section]].getArray(array)[offset / 2] >> 4) & 0x0f;
 	if (!force && worldcrop.hasBlockMask()) {
-		const BlockMask& mask = worldcrop.getBlockMask();
-		if (mask.isHidden(getBlockID(pos, true), data))
+		const BlockMask* mask = worldcrop.getBlockMask();
+		if (mask->isHidden(getBlockID(pos, true), data))
 			return array == 2 ? 15 : 0;
 	}
 	return data;

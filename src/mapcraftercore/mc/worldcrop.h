@@ -214,9 +214,9 @@ public:
 	bool hasBlockMask() const;
 
 	/**
-	 * Returns the block mask of this world.
+	 * Returns the block mask of this world. Returns a nullptr if !hasBlockMask().
 	 */
-	const BlockMask& getBlockMask() const;
+	const BlockMask* getBlockMask() const;
 
 	/**
 	 * Loads the block mask from a string. See BlockMask::loadFromString.
