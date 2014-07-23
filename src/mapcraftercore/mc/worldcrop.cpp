@@ -79,14 +79,14 @@ void BlockMask::setAll(bool shown) {
 	}
 }
 
-bool BlockMask::loadFromString(const std::string& str) {
+bool BlockMask::loadFromString(const std::string& str, std::string& error) {
 	std::stringstream ss(util::trim(str));
 	std::string part;
 	while (ss >> part) {
 		bool shown = part[0] != '!';
 		if (!shown)
 			part = part.substr(1);
-		std::cout << part << " " << shown << std::endl;
+		//std::cout << part << " " << shown << std::endl;
 		if (part.find('-') != std::string::npos) {
 			std::string part1 = part.substr(0, part.find('-'));
 			std::string part2 = part.substr(part.find('-') + 1);
@@ -102,6 +102,8 @@ bool BlockMask::loadFromString(const std::string& str) {
 				set(util::as<uint16_t>(part), shown);
 		}
 	}
+	error = "test!";
+	return false;
 	return true;
 }
 
@@ -258,10 +260,16 @@ const BlockMask& WorldCrop::getBlockMask() const {
 	return *block_mask;
 }
 
-void WorldCrop::initBlockMask() {
-	has_block_mask = false;
+bool WorldCrop::loadBlockMask(const std::string& str, std::string& error) {
 	block_mask.reset(new BlockMask);
-	block_mask->setAll(true);
+	has_block_mask = block_mask->loadFromString(str, error);
+	return has_block_mask;
+}
+
+//void WorldCrop::initBlockMask() {
+//	has_block_mask = false;
+//	block_mask.reset(new BlockMask);
+//	block_mask->setAll(true);
 	/*
 	block_mask->setAll(true);
 	block_mask->setRange(1, 3, false); // stone, dirt, grass
@@ -309,7 +317,7 @@ void WorldCrop::initBlockMask() {
 
 	//block_mask->loadFromString("* !17:2 !17:6 !17:10 !17:14 !18:2 !18:6 !18:10 !18:14");
 	//block_mask->loadFromString("* !2-3  !8-9 !12-13  !17-18 !24 !31   !78-79 !82 !106 !161");
-}
+//}
 
 }
 }

@@ -24,6 +24,7 @@
 
 #include <bitset>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace mapcrafter {
@@ -111,11 +112,12 @@ public:
 	void setAll(bool shown);
 
 	/**
-	 * Loads the block mask from a string definition.
+	 * Loads the block mask from a string definition. Returns false if the string
+	 * is invalid and puts the error message into the supplied string reference.
 	 *
 	 * TODO: describe format
 	 */
-	bool loadFromString(const std::string& str);
+	bool loadFromString(const std::string& str, std::string& error);
 
 	/**
 	 * Returns whether all, none, or some blocks with a specific id are hidden/shown.
@@ -206,9 +208,20 @@ public:
 	 */
 	bool isBlockContainedY(const mc::BlockPos& block) const;
 
+	/**
+	 * Returns whether this world has a block mask.
+	 */
 	bool hasBlockMask() const;
+
+	/**
+	 * Returns the block mask of this world.
+	 */
 	const BlockMask& getBlockMask() const;
-	void initBlockMask();
+
+	/**
+	 * Loads the block mask from a string. See BlockMask::loadFromString.
+	 */
+	bool loadBlockMask(const std::string& str, std::string& error);
 
 private:
 	// type of world boundaries -- either RECTANGULAR or CIRCULAR

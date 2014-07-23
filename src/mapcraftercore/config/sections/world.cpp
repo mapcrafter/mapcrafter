@@ -99,6 +99,8 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 		center_z.load(key, value, validation);
 	else if (key == "crop_radius")
 		radius.load(key, value, validation);
+	else if (key == "block_mask")
+		block_mask.load(key, value, validation);
 	else
 		return false;
 	return true;
@@ -146,7 +148,12 @@ void WorldSection::postParse(const INIConfigSection& section,
 	if (min_y.isLoaded() && max_y.isLoaded() && min_y.getValue() > max_y.getValue())
 		validation.push_back(ValidationMessage::error("min_y must be smaller than or equal to max_y!"));
 
-	worldcrop.initBlockMask();
+	if (block_mask.isLoaded()) {
+		std::string error;
+		if (!worldcrop.loadBlockMask(block_mask.getValue(), error))
+			validation.push_back(ValidationMessage::error(
+					"There is a problem parsing the block mask: " + error));
+	}
 
 	// check if required options were specified
 	if (!global) {

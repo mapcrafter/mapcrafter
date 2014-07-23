@@ -75,6 +75,7 @@ private:
 	Field<int> min_y, max_y;
 	Field<int> min_x, max_x, min_z, max_z;
 	Field<int> center_x, center_z, radius;
+	Field<std::string> block_mask;
 	mc::WorldCrop worldcrop;
 };
 
