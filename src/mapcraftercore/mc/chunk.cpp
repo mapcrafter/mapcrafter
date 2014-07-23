@@ -35,7 +35,7 @@ const uint8_t* ChunkSection::getArray(int i) const {
 }
 
 Chunk::Chunk()
-	: chunkpos(42, 42), rotation(0) {
+	: chunkpos(42, 42), rotation(0), terrain_populated(false) {
 	clear();
 }
 
@@ -77,6 +77,12 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 	// now we have the original chunk position:
 	// check whether this chunk is completely contained within the cropped world
 	chunk_completely_contained = worldcrop.isChunkCompletelyContained(chunkpos_original);
+
+	if (level.hasTag<nbt::TagByte>("TerrainPopulated"))
+		terrain_populated = level.findTag<nbt::TagByte>("TerrainPopulated").payload;
+	else
+		std::cerr << "Warning: Corrupt chunk at " << chunkpos.x << ":" << chunkpos.z
+		<< " (No terrain populated tag found)!" << std::endl;
 
 	if (level.hasArray<nbt::TagByteArray>("Biomes", 256)) {
 		const nbt::TagByteArray& biomes_tag = level.findTag<nbt::TagByteArray>("Biomes");
@@ -201,7 +207,11 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos, bool force) const {
 }
 
 bool Chunk::checkBlockWorldCrop(int x, int z, int y) const {
-	// at first get the global position of the block, with the original world rotation
+	// first of all check if we should crop unpopulated chunks
+	if (!terrain_populated && worldcrop.hasCropUnpopulatedChunks())
+		return false;
+	// now about the actual world cropping:
+	// get the global position of the block, with the original world rotation
 	BlockPos global_pos = LocalBlockPos(x, z, y).toGlobalPos(chunkpos_original);
 	// check whether the block is contained in the y-bounds.
 	if (!worldcrop.isBlockContainedY(global_pos))

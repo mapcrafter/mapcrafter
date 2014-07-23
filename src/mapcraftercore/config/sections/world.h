@@ -59,6 +59,9 @@ public:
 	int getDefaultZoom() const;
 	int getDefaultRotation() const;
 
+	bool hasCropUnpopulatedChunks() const;
+	std::string getBlockMask() const;
+
 	const mc::WorldCrop getWorldCrop() const;
 	bool needsWorldCentering() const;
 
@@ -75,7 +78,10 @@ private:
 	Field<int> min_y, max_y;
 	Field<int> min_x, max_x, min_z, max_z;
 	Field<int> center_x, center_z, radius;
+
+	Field<bool> crop_unpopulated_chunks;
 	Field<std::string> block_mask;
+
 	mc::WorldCrop worldcrop;
 };
 

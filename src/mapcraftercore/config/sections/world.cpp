@@ -44,6 +44,8 @@ void WorldSection::preParse(const INIConfigSection& section,
 	default_view.setDefault("");
 	default_zoom.setDefault(0);
 	default_rotation.setDefault(-1);
+
+	crop_unpopulated_chunks.setDefault(false);
 }
 
 bool WorldSection::parseField(const std::string key, const std::string value,
@@ -99,8 +101,11 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 		center_z.load(key, value, validation);
 	else if (key == "crop_radius")
 		radius.load(key, value, validation);
+
 	else if (key == "block_mask")
 		block_mask.load(key, value, validation);
+	else if (key == "crop_unpopulated_chunks")
+		crop_unpopulated_chunks.load(key, value, validation);
 	else
 		return false;
 	return true;
@@ -148,6 +153,7 @@ void WorldSection::postParse(const INIConfigSection& section,
 	if (min_y.isLoaded() && max_y.isLoaded() && min_y.getValue() > max_y.getValue())
 		validation.push_back(ValidationMessage::error("min_y must be smaller than or equal to max_y!"));
 
+	worldcrop.setCropUnpopulatedChunks(crop_unpopulated_chunks.getValue());
 	if (block_mask.isLoaded()) {
 		std::string error;
 		if (!worldcrop.loadBlockMask(block_mask.getValue(), error))
@@ -187,6 +193,14 @@ int WorldSection::getDefaultZoom() const {
 
 int WorldSection::getDefaultRotation() const {
 	return default_rotation.getValue();
+}
+
+bool WorldSection::hasCropUnpopulatedChunks() const {
+	return crop_unpopulated_chunks.getValue();
+}
+
+std::string WorldSection::getBlockMask() const {
+	return block_mask.getValue();
 }
 
 const mc::WorldCrop WorldSection::getWorldCrop() const {

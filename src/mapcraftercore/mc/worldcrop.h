@@ -209,6 +209,12 @@ public:
 	bool isBlockContainedY(const mc::BlockPos& block) const;
 
 	/**
+	 * Returns/sets whether unpopulated chunks should be cropped.
+	 */
+	bool hasCropUnpopulatedChunks() const;
+	void setCropUnpopulatedChunks(bool crop);
+
+	/**
 	 * Returns whether this world has a block mask.
 	 */
 	bool hasBlockMask() const;
@@ -242,8 +248,11 @@ private:
 	BlockPos center;
 	int radius;
 
+	// whether ores, trees, other special structures are already populated in this chunk
+	// read from the chunk nbt format (Level["TerrainPopulated"])
+	bool crop_unpopulated_chunks;
+
 	// block mask
-	bool has_block_mask;
 	std::shared_ptr<BlockMask> block_mask;
 };
 

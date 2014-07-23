@@ -130,7 +130,7 @@ void BlockMask::updateBlockState(uint16_t id) {
 }
 
 WorldCrop::WorldCrop()
-	: type(RECTANGULAR), radius(0), has_block_mask(false) {
+	: type(RECTANGULAR), radius(0), crop_unpopulated_chunks(true) {
 }
 
 WorldCrop::~WorldCrop() {
@@ -248,6 +248,14 @@ bool WorldCrop::isBlockContainedXZ(const mc::BlockPos& block) const {
 
 bool WorldCrop::isBlockContainedY(const mc::BlockPos& block) const {
 	return bounds_y.contains(block.y);
+}
+
+bool WorldCrop::hasCropUnpopulatedChunks() const {
+	return crop_unpopulated_chunks;
+}
+
+void WorldCrop::setCropUnpopulatedChunks(bool crop_unpopulated_chunks) {
+	this->crop_unpopulated_chunks = crop_unpopulated_chunks;
 }
 
 bool WorldCrop::hasBlockMask() const {

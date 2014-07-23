@@ -128,6 +128,8 @@ private:
 	// whether the chunk is completely contained (according x- and z-coordinates, not y)
 	bool chunk_completely_contained;
 
+	bool terrain_populated;
+
 	// the index of the chunk sections in the sections array
 	// or -1 if section does not exist
 	int section_offsets[CHUNK_HEIGHT];
