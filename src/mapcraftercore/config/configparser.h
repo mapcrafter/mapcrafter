@@ -44,9 +44,10 @@ public:
 	 */
 	template<typename T>
 	void parseRootSection(T& section) {
-		ValidationList& root_validation = validation.section("Configuration root section");
-		if (!section.parse(config.getRootSection(), root_validation))
+		if (!section.parse(config.getRootSection()))
 			ok = false;
+		if (!section.getValidation().empty())
+			validation.section("Configuration root section") = section.getValidation();
 	}
 
 	/**
@@ -58,13 +59,16 @@ public:
 	 */
 	template<typename T>
 	void parseSections(std::vector<T>& sections, const std::string& type) {
+		parsed_section_types.insert(type);
 		T section_global;
+		section_global.setGlobal(true);
 		if (config.hasSection("global", type)) {
-			ValidationList& validation_section = validation.section(
-					util::capitalize(section_global.getPrettyName()));
 			//section_global.setConfigDir(config_dir);
-			ok = section_global.parse(config.getSection("global", type), validation_section) && ok;
-			parsed_sections.insert(std::string("global:") + type);
+			ok = section_global.parse(config.getSection("global", type)) && ok;
+			if (!section_global.getValidation().empty()) {
+				std::string pretty_name = util::capitalize(section_global.getPrettyName());
+				validation.section(pretty_name) = section_global.getValidation();
+			}
 			if (!ok)
 				return;
 		}
@@ -80,9 +84,8 @@ public:
 			T section = section_global;
 			section.setGlobal(false);
 			//section.setConfigDir(config_dir);
-			ValidationList& validation_section = validation.section(
-					util::capitalize(section_global.getPrettyName()));
-			ok = section.parse(*config_section_it, validation_section) && ok;
+			ok = section.parse(*config_section_it) && ok;
+			ValidationList validation_section = section.getValidation();
 
 			if (parsed_sections_names.count(config_section_it->getName())) {
 				validation_section.error(util::capitalize(type) + " name '"
@@ -91,8 +94,12 @@ public:
 			} else
 				sections.push_back(section);
 
+			if (!validation.empty()) {
+				std::string pretty_name = util::capitalize(section.getPrettyName());
+				validation.section(pretty_name) = validation_section;
+			}
+
 			parsed_sections_names.insert(config_section_it->getName());
-			parsed_sections.insert(config_section_it->getNameType());
 		}
 	}
 
@@ -125,7 +132,7 @@ private:
 	bool ok;
 	ValidationMap validation;
 
-	std::set<std::string> parsed_sections;
+	std::set<std::string> parsed_section_types;
 };
 
 } /* namespace config */

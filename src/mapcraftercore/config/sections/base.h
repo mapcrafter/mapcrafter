@@ -52,12 +52,12 @@ public:
 	virtual std::string getPrettyName() const;
 
 	/**
-	 * Parses the given configurations section and adds infos/warnings/errors to the
-	 * validation list object.
-	 *
-	 * Returns false if there was an parsing error.
+	 * Parses the given configurations section and returns false if there was a critical
+	 * parsing/validation error.
 	 */
-	bool parse(const INIConfigSection& section, ValidationList& validation);
+	bool parse(const INIConfigSection& section);
+
+	const ValidationList& getValidation() const;
 
 protected:
 	/**
@@ -93,6 +93,8 @@ private:
 
 	// name of this section
 	std::string section_name;
+
+	ValidationList validation;
 };
 
 }

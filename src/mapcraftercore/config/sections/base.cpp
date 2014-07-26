@@ -47,8 +47,7 @@ std::string ConfigSectionBase::getPrettyName() const {
 	return "unknown section";
 }
 
-bool ConfigSectionBase::parse(const INIConfigSection& section,
-		ValidationList& validation) {
+bool ConfigSectionBase::parse(const INIConfigSection& section) {
 	section_name = section.getName();
 
 	preParse(section, validation);
@@ -65,6 +64,10 @@ bool ConfigSectionBase::parse(const INIConfigSection& section,
 	postParse(section, validation);
 
 	return !validation.isCritical();
+}
+
+const ValidationList& ConfigSectionBase::getValidation() const {
+	return validation;
 }
 
 void ConfigSectionBase::preParse(const INIConfigSection& section,

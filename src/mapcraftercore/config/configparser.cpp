@@ -33,10 +33,11 @@ bool ConfigParser::validate() {
 	auto config_sections = config.getSections();
 	for (auto config_section_it = config_sections.begin();
 			config_section_it != config_sections.end(); ++config_section_it) {
-		if (parsed_sections.count(config_section_it->getNameType()))
-			continue;
 		std::string type = config_section_it->getType();
 		std::string name = config_section_it->getName();
+		if ((type == "global" && parsed_section_types.count(name))
+				|| (type != "global" && parsed_section_types.count(type)))
+			continue;
 		validation.section("Section '" + name + "' with type '" + type + "'")
 				.warning("Unknown section type!");
 	}
