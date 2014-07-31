@@ -73,7 +73,7 @@ void ValidationList::error(const std::string& message) {
 	messages.push_back(ValidationMessage(ValidationMessage::ERROR, message));
 }
 
-bool ValidationList::empty() const {
+bool ValidationList::isEmpty() const {
 	return messages.size() == 0;
 }
 
@@ -97,14 +97,20 @@ ValidationMap::~ValidationMap() {
 }
 
 ValidationList& ValidationMap::section(const std::string& section) {
-	if (!sections.count(section))
-		sections_order.push_back(section);
-	return sections[section];
+	if (!sections_order.count(section)) {
+		sections_order[section] = sections.size();
+		sections.push_back(std::make_pair(section, ValidationList()));
+	}
+	return sections[sections_order[section]].second;
 }
 
-bool ValidationMap::empty() const {
+const std::vector<std::pair<std::string, ValidationList>>& ValidationMap::getSections() const {
+	return sections;
+}
+
+bool ValidationMap::isEmpty() const {
 	for (auto section_it = sections.begin(); section_it != sections.end(); ++section_it)
-		if (!section_it->second.empty())
+		if (!section_it->second.isEmpty())
 			return false;
 	return true;
 }
@@ -117,11 +123,11 @@ bool ValidationMap::isCritical() const {
 }
 
 void ValidationMap::log(std::string logger) const {
-	for (auto section_it = sections_order.begin(); section_it != sections_order.end(); ++section_it) {
-		auto messages = sections.at(*section_it).getMessages();
+	for (auto section_it = sections.begin(); section_it != sections.end(); ++section_it) {
+		auto messages = section_it->second.getMessages();
 		if (messages.empty())
 			continue;
-		LOGN(WARNING, logger) << *section_it << ":";
+		LOGN(WARNING, logger) << section_it->first << ":";
 		for (auto message_it = messages.begin(); message_it != messages.end(); ++message_it)
 			LOGN(WARNING, logger) << " - " << *message_it;
 	}

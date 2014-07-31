@@ -63,7 +63,7 @@ public:
 	void warning(const std::string& message);
 	void error(const std::string& message);
 
-	bool empty() const;
+	bool isEmpty() const;
 	bool isCritical() const;
 
 	const std::vector<ValidationMessage> getMessages() const;
@@ -78,15 +78,16 @@ public:
 	~ValidationMap();
 
 	ValidationList& section(const std::string& section);
+	const std::vector<std::pair<std::string, ValidationList>>& getSections() const;
 
-	bool empty() const;
+	bool isEmpty() const;
 	bool isCritical() const;
 
 	void log(std::string logger = "default") const;
 
 private:
-	std::vector<std::string> sections_order;
-	std::map<std::string, ValidationList> sections;
+	std::map<std::string, int> sections_order;
+	std::vector<std::pair<std::string, ValidationList>> sections;
 };
 
 //typedef std::vector<std::pair<std::string, ValidationList > > ValidationMap;

@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 	config::ValidationMap validation;
 	bool ok = parser.parse(configfile, validation);
 
-	if (!validation.empty()) {
+	if (!validation.isEmpty()) {
 		if (ok)
 			LOG(WARNING) << "Some notes on your configuration file:";
 		else

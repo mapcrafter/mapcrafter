@@ -46,7 +46,7 @@ public:
 	void parseRootSection(T& section) {
 		if (!section.parse(config.getRootSection()))
 			ok = false;
-		if (!section.getValidation().empty())
+		if (!section.getValidation().isEmpty())
 			validation.section("Configuration root section") = section.getValidation();
 	}
 
@@ -65,7 +65,7 @@ public:
 		if (config.hasSection("global", type)) {
 			//section_global.setConfigDir(config_dir);
 			ok = section_global.parse(config.getSection("global", type)) && ok;
-			if (!section_global.getValidation().empty()) {
+			if (!section_global.getValidation().isEmpty()) {
 				std::string pretty_name = util::capitalize(section_global.getPrettyName());
 				validation.section(pretty_name) = section_global.getValidation();
 			}
@@ -94,7 +94,7 @@ public:
 			} else
 				sections.push_back(section);
 
-			if (!validation.empty()) {
+			if (!validation.isEmpty()) {
 				std::string pretty_name = util::capitalize(section.getPrettyName());
 				validation.section(pretty_name) = validation_section;
 			}

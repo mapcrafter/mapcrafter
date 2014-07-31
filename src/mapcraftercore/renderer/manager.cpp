@@ -395,7 +395,7 @@ bool RenderManager::run() {
 	bool ok = config.parse(opts.config_file, validation);
 
 	// show infos/warnings/errors if configuration file has something
-	if (!validation.empty()) {
+	if (!validation.isEmpty()) {
 		if (ok)
 			LOG(WARNING) << "Some notes on your configuration file:";
 		else

@@ -90,9 +90,9 @@ std::string createMarkersJSON(const config::MapcrafterConfig& config,
 		ss << "  {" << std::endl;
 		ss << "    \"id\" : \"" << group << "\"," << std::endl;
 		ss << "    \"name\" : \"" << marker_config.getLongName() << "\"," << std::endl;
-		if (!marker_config.getIcon().empty()) {
+		if (!marker_config.getIcon().isEmpty()) {
 			ss << "    \"icon\" : \"" << marker_config.getIcon() << "\"," << std::endl;
-			if (!marker_config.getIconSize().empty())
+			if (!marker_config.getIconSize().isEmpty())
 				ss << "    \"iconSize\" : " << marker_config.getIconSize() << "," << std::endl;
 		}
 		ss << "    \"showDefault\" : ";
@@ -163,7 +163,7 @@ int main(int argc, char** argv) {
 	config::ValidationMap validation;
 	bool ok = config.parse(config_file, validation);
 
-	if (!validation.empty()) {
+	if (!validation.isEmpty()) {
 		if (ok)
 			LOG(WARNING) << "Some notes on your configuration file:";
 		else
