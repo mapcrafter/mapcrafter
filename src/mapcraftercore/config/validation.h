@@ -51,8 +51,6 @@ public:
 
 std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg);
 
-//typedef std::vector<ValidationMessage> ValidationList;
-
 class ValidationList {
 public:
 	ValidationList();
@@ -90,8 +88,6 @@ private:
 	std::vector<std::pair<std::string, ValidationList>> sections;
 };
 
-//typedef std::vector<std::pair<std::string, ValidationList > > ValidationMap;
-
 template <typename T>
 class Field {
 private:
@@ -104,13 +100,7 @@ public:
 	/**
 	 * Sets the default value of a configuration option.
 	 */
-	void setDefault(T value) {
-		// do not overwrite an already loaded value with a default value
-		if (!loaded) {
-			this->value = value;
-			loaded = true;
-		}
-	}
+	void setDefault(T value);
 
 	/**
 	 * Tries to load/parse the value of a configuration option.
@@ -118,39 +108,77 @@ public:
 	 * Returns false if this function threw an std::invalid_argument exception
 	 * and adds an error message to the validation list.
 	 */
-	bool load(const std::string& key, const std::string& value, ValidationList& validation) {
-		try {
-			this->value = util::as<T>(value);
-			loaded = true;
-			return true;
-		} catch (std::invalid_argument& e) {
-			validation.error("Invalid value for '" + key + "': " + e.what());
-		}
-		return false;
-	}
+	bool load(const std::string& key, const std::string& value,
+			ValidationList& validation);
 
 	/**
 	 * Checks if the configuration option was specified and adds an error to the
 	 * validation list if not.
 	 */
-	bool require(ValidationList& validation, std::string message) const {
-		if (!loaded) {
-			validation.error(message);
-			return false;
-		}
-		return true;
-	}
+	bool require(ValidationList& validation, std::string message) const;
 
-	T getValue() const { return value; }
-	void setValue(T value) { this->value = value; }
+	/**
+	 * Gets/sets the value of the field.
+	 */
+	T getValue() const;
+	void setValue(T value);
 
-	bool isLoaded() const { return loaded; }
+	/**
+	 * Returns whether a value is set.
+	 */
+	bool isLoaded() const;
 };
 
 static std::string ROTATION_NAMES[4] = {"top-left", "top-right", "bottom-right", "bottom-left"};
 static std::string ROTATION_NAMES_SHORT[4] = {"tl", "tr", "br", "bl"};
 
 int stringToRotation(const std::string& rotation, std::string names[4] = ROTATION_NAMES);
+
+template <typename T>
+void Field<T>::setDefault(T value) {
+	// do not overwrite an already loaded value with a default value
+	if (!loaded) {
+		this->value = value;
+		loaded = true;
+	}
+}
+
+template <typename T>
+bool Field<T>::load(const std::string& key, const std::string& value,
+		ValidationList& validation) {
+	try {
+		this->value = util::as<T>(value);
+		loaded = true;
+		return true;
+	} catch (std::invalid_argument& e) {
+		validation.error("Invalid value for '" + key + "': " + e.what());
+	}
+	return false;
+}
+
+template <typename T>
+bool Field<T>::require(ValidationList& validation, std::string message) const {
+	if (!loaded) {
+		validation.error(message);
+		return false;
+	}
+	return true;
+}
+
+template <typename T>
+T Field<T>::getValue() const {
+	return value;
+}
+
+template <typename T>
+void Field<T>::setValue(T value) {
+	this->value = value;
+}
+
+template <typename T>
+bool Field<T>::isLoaded() const {
+	return loaded;
+}
 
 } /* namespace config */
 } /* namespace mapcrafter */

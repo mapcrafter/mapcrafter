@@ -43,11 +43,7 @@ public:
 	 * Parses the root section of the configuration with the supplied section type object.
 	 */
 	template<typename T>
-	void parseRootSection(T& section) {
-		ValidationList root_validation = section.parse(config.getRootSection());
-		if (!root_validation.isEmpty())
-			validation.section("Configuration root section") = root_validation;
-	}
+	void parseRootSection(T& section);
 
 	/**
 	 * Parses all sections with a specific type and puts the parsed section type objects
@@ -57,60 +53,14 @@ public:
 	 * default for the sections.
 	 */
 	template<typename T>
-	void parseSections(std::vector<T>& sections, const std::string& type) {
-		parsed_section_types.insert(type);
-		T section_global;
-		section_global.setGlobal(true);
-		if (config.hasSection("global", type)) {
-			//section_global.setConfigDir(config_dir);
-			ValidationList global_validation = section_global.parse(config.getSection("global", type));
-			if (!global_validation.isEmpty()) {
-				std::string pretty_name = util::capitalize(section_global.getPrettyName());
-				validation.section(pretty_name) = global_validation;
-			}
-			if (global_validation.isCritical())
-				return;
-		}
-
-		std::set<std::string> parsed_sections_names;
-
-		auto config_sections = config.getSections();
-		for (auto config_section_it = config_sections.begin();
-				config_section_it != config_sections.end(); ++config_section_it) {
-			if (config_section_it->getType() != type)
-				continue;
-
-			T section = section_global;
-			section.setGlobal(false);
-			//section.setConfigDir(config_dir);
-			ValidationList section_validation = section.parse(*config_section_it);
-
-			if (parsed_sections_names.count(config_section_it->getName())) {
-				section_validation.error(util::capitalize(type) + " name '"
-						+ config_section_it->getName() + "' already used!");
-			} else
-				sections.push_back(section);
-
-			if (!section_validation.isEmpty()) {
-				std::string pretty_name = util::capitalize(section.getPrettyName());
-				validation.section(pretty_name) = section_validation;
-			}
-
-			parsed_sections_names.insert(config_section_it->getName());
-		}
-	}
+	void parseSections(std::vector<T>& sections, const std::string& type);
 
 	/**
 	 * Same as parseSections(std::vector<T>& sections... but puts the parsed sections
 	 * into a map with section name -> section object.
 	 */
 	template<typename T>
-	void parseSections(std::map<std::string, T>& sections, const std::string& type) {
-		std::vector<T> sections_list;
-		parseSections(sections_list, type);
-		for (auto it = sections_list.begin(); it != sections_list.end(); ++it)
-			sections[it->getSectionName()] = *it;
-	}
+	void parseSections(std::map<std::string, T>& sections, const std::string& type);
 
 	/**
 	 * Does the remaining validation work after parsing the sections, for example add
@@ -130,6 +80,66 @@ private:
 
 	std::set<std::string> parsed_section_types;
 };
+
+template <typename T>
+void ConfigParser::parseRootSection(T& section) {
+	ValidationList root_validation = section.parse(config.getRootSection());
+	if (!root_validation.isEmpty())
+		validation.section("Configuration root section") = root_validation;
+}
+
+template <typename T>
+void ConfigParser::parseSections(std::vector<T>& sections, const std::string& type) {
+	parsed_section_types.insert(type);
+	T section_global;
+	section_global.setGlobal(true);
+	if (config.hasSection("global", type)) {
+		//section_global.setConfigDir(config_dir);
+		ValidationList global_validation = section_global.parse(config.getSection("global", type));
+		if (!global_validation.isEmpty()) {
+			std::string pretty_name = util::capitalize(section_global.getPrettyName());
+			validation.section(pretty_name) = global_validation;
+		}
+		if (global_validation.isCritical())
+			return;
+	}
+
+	std::set<std::string> parsed_sections_names;
+
+	auto config_sections = config.getSections();
+	for (auto config_section_it = config_sections.begin();
+			config_section_it != config_sections.end(); ++config_section_it) {
+		if (config_section_it->getType() != type)
+			continue;
+
+		T section = section_global;
+		section.setGlobal(false);
+		//section.setConfigDir(config_dir);
+		ValidationList section_validation = section.parse(*config_section_it);
+
+		if (parsed_sections_names.count(config_section_it->getName())) {
+			section_validation.error(util::capitalize(type) + " name '"
+					+ config_section_it->getName() + "' already used!");
+		} else
+			sections.push_back(section);
+
+		if (!section_validation.isEmpty()) {
+			std::string pretty_name = util::capitalize(section.getPrettyName());
+			validation.section(pretty_name) = section_validation;
+		}
+
+		parsed_sections_names.insert(config_section_it->getName());
+	}
+}
+
+template <typename T>
+void ConfigParser::parseSections(std::map<std::string, T>& sections,
+		const std::string& type) {
+	std::vector<T> sections_list;
+	parseSections(sections_list, type);
+	for (auto it = sections_list.begin(); it != sections_list.end(); ++it)
+		sections[it->getSectionName()] = *it;
+}
 
 } /* namespace config */
 } /* namespace mapcrafter */
