@@ -23,7 +23,7 @@ namespace mapcrafter {
 namespace config {
 
 ConfigParser::ConfigParser(const INIConfig& config)
-	: config(config), ok(true) {
+	: config(config) {
 }
 
 ConfigParser::~ConfigParser() {
@@ -42,7 +42,7 @@ bool ConfigParser::validate() {
 				.warning("Unknown section type!");
 	}
 
-	return ok;
+	return !validation.isCritical();
 }
 
 const ValidationMap& ConfigParser::getValidation() const {

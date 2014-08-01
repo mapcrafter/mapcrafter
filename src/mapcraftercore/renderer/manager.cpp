@@ -391,19 +391,18 @@ bool RenderManager::run() {
 	// ### First big step: Load/parse/validate the configuration file
 	// ###
 
-	config::ValidationMap validation;
-	bool ok = config.parse(opts.config_file, validation);
+	config::ValidationMap validation = config.parse(opts.config_file);
 
 	// show infos/warnings/errors if configuration file has something
 	if (!validation.isEmpty()) {
-		if (ok)
-			LOG(WARNING) << "Some notes on your configuration file:";
-		else
+		if (validation.isCritical())
 			LOG(FATAL) << "Your configuration file is invalid!";
+		else
+			LOG(WARNING) << "Some notes on your configuration file:";
 		validation.log();
 		LOG(WARNING) << "Please read the documentation about the new configuration file format.";
 	}
-	if (!ok)
+	if (validation.isCritical())
 		return false;
 
 	// an output directory would be nice -- create one if it does not exist

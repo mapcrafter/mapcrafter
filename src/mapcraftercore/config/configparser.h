@@ -44,10 +44,9 @@ public:
 	 */
 	template<typename T>
 	void parseRootSection(T& section) {
-		if (!section.parse(config.getRootSection()))
-			ok = false;
-		if (!section.getValidation().isEmpty())
-			validation.section("Configuration root section") = section.getValidation();
+		ValidationList root_validation = section.parse(config.getRootSection());
+		if (!root_validation.isEmpty())
+			validation.section("Configuration root section") = root_validation;
 	}
 
 	/**
@@ -64,12 +63,12 @@ public:
 		section_global.setGlobal(true);
 		if (config.hasSection("global", type)) {
 			//section_global.setConfigDir(config_dir);
-			ok = section_global.parse(config.getSection("global", type)) && ok;
-			if (!section_global.getValidation().isEmpty()) {
+			ValidationList global_validation = section_global.parse(config.getSection("global", type));
+			if (!global_validation.isEmpty()) {
 				std::string pretty_name = util::capitalize(section_global.getPrettyName());
-				validation.section(pretty_name) = section_global.getValidation();
+				validation.section(pretty_name) = global_validation;
 			}
-			if (!ok)
+			if (global_validation.isCritical())
 				return;
 		}
 
@@ -84,19 +83,17 @@ public:
 			T section = section_global;
 			section.setGlobal(false);
 			//section.setConfigDir(config_dir);
-			ok = section.parse(*config_section_it) && ok;
-			ValidationList validation_section = section.getValidation();
+			ValidationList section_validation = section.parse(*config_section_it);
 
 			if (parsed_sections_names.count(config_section_it->getName())) {
-				validation_section.error(util::capitalize(type) + " name '"
+				section_validation.error(util::capitalize(type) + " name '"
 						+ config_section_it->getName() + "' already used!");
-				ok = false;
 			} else
 				sections.push_back(section);
 
-			if (!validation.isEmpty()) {
+			if (!section_validation.isEmpty()) {
 				std::string pretty_name = util::capitalize(section.getPrettyName());
-				validation.section(pretty_name) = validation_section;
+				validation.section(pretty_name) = section_validation;
 			}
 
 			parsed_sections_names.insert(config_section_it->getName());
@@ -129,7 +126,6 @@ public:
 private:
 	INIConfig config;
 
-	bool ok;
 	ValidationMap validation;
 
 	std::set<std::string> parsed_section_types;

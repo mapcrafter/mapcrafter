@@ -113,12 +113,14 @@ MapcrafterConfig::MapcrafterConfig()
 MapcrafterConfig::~MapcrafterConfig() {
 }
 
-bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validation) {
+ValidationMap MapcrafterConfig::parse(const std::string& filename) {
+	ValidationMap validation;
+
 	INIConfig config;
 	ValidationMessage msg;
 	if (!config.loadFile(filename, msg)) {
 		validation.section("Configuration file").message(msg);
-		return false;
+		return validation;
 	}
 
 	// Using new config parser here
@@ -133,7 +135,7 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 	parser.parseSections(worlds, "world");
 	parser.parseSections(maps, "map");
 	parser.parseSections(markers, "marker");
-	bool ok = parser.validate();
+	parser.validate();
 	validation = parser.getValidation();
 
 	// check if all worlds specified for maps exist
@@ -142,8 +144,9 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 		if (map_it->getWorld() != "" && !hasWorld(map_it->getWorld())) {
 			validation.section(util::capitalize(map_it->getPrettyName())).error(
 					"World '" + map_it->getWorld() + "' does not exist!");
-			ok = false;
 		}
+
+	return validation;
 
 	/*
 	ValidationList root_validation;
@@ -251,8 +254,6 @@ bool MapcrafterConfig::parse(const std::string& filename, ValidationMap& validat
 			validation.push_back(std::make_pair("Marker section '" + it->getName() + "'", msgs));
 	}
 	*/
-
-	return ok;
 }
 
 std::string rotationsToString(std::set<int> rotations) {

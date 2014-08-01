@@ -55,9 +55,7 @@ public:
 	 * Parses the given configurations section and returns false if there was a critical
 	 * parsing/validation error.
 	 */
-	bool parse(const INIConfigSection& section);
-
-	const ValidationList& getValidation() const;
+	ValidationList parse(const INIConfigSection& section);
 
 protected:
 	/**

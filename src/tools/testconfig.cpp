@@ -33,14 +33,13 @@ int main(int argc, char **argv) {
 	std::string configfile = argv[1];
 
 	config::MapcrafterConfig parser;
-	config::ValidationMap validation;
-	bool ok = parser.parse(configfile, validation);
+	config::ValidationMap validation = parser.parse(configfile);
 
 	if (!validation.isEmpty()) {
-		if (ok)
-			LOG(WARNING) << "Some notes on your configuration file:";
-		else
+		if (validation.isCritical())
 			LOG(FATAL) << "Your configuration file is invalid!";
+		else
+			LOG(WARNING) << "Some notes on your configuration file:";
 		validation.log();
 		LOG(WARNING) << "Please read the documentation about the new configuration file format.";
 	} else {

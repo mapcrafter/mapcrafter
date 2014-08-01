@@ -81,7 +81,7 @@ public:
 	MapcrafterConfig();
 	~MapcrafterConfig();
 
-	bool parse(const std::string& filename, ValidationMap& validation);
+	ValidationMap parse(const std::string& filename);
 	void dump(std::ostream& out) const;
 
 	fs::path getOutputDir() const;
