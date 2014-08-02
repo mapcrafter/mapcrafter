@@ -81,7 +81,7 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
   or other programs using Mapcrafter's functionality
 * Added own logging facility, further configuration with different log sinks
   will follow soon™
-* Changed global sections from ``[global:sections]`` to ``[global:section]` to
+* Changed global sections from ``[global:sections]`` to ``[global:section]`` to
   simplify internal parsing procedures
 * Added option to specify a block mask and render only specific blocks
 * Added option to hide chunks that are not populated yet
