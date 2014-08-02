@@ -123,17 +123,13 @@ ValidationMap MapcrafterConfig::parse(const std::string& filename) {
 		return validation;
 	}
 
-	// Using new config parser here
-	// TODO section objects must know the config_dir
-	// TODO how to validate that map sections have an existing world specified?
-
 	fs::path config_dir = fs::path(filename).parent_path();
 	root_section.setConfigDir(config_dir);
 
 	ConfigParser parser(config);
 	parser.parseRootSection(root_section);
-	parser.parseSections(worlds, "world");
-	parser.parseSections(maps, "map");
+	parser.parseSections(worlds, "world", MapcrafterConfigSectionFactory<WorldSection>(config_dir));
+	parser.parseSections(maps, "map", MapcrafterConfigSectionFactory<MapSection>(config_dir));
 	parser.parseSections(markers, "marker");
 	parser.validate();
 	validation = parser.getValidation();

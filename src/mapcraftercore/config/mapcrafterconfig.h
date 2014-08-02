@@ -42,6 +42,21 @@ struct Color {
 	uint8_t red, green, blue;
 };
 
+/**
+ * Customized section factory that passes the config directory to the section objects.
+ */
+template <typename T>
+class MapcrafterConfigSectionFactory {
+public:
+	MapcrafterConfigSectionFactory(fs::path config_dir = "");
+	~MapcrafterConfigSectionFactory();
+
+	T operator()() const;
+
+private:
+	fs::path config_dir;
+};
+
 class MapcrafterConfigRootSection : public ConfigSectionBase {
 public:
 	MapcrafterConfigRootSection();
@@ -103,6 +118,22 @@ public:
 	const std::vector<MarkerSection>& getMarkers() const;
 	const MarkerSection& getMarker(const std::string& marker) const;
 };
+
+template <typename T>
+MapcrafterConfigSectionFactory<T>::MapcrafterConfigSectionFactory(fs::path config_dir)
+	: config_dir(config_dir) {
+}
+
+template <typename T>
+MapcrafterConfigSectionFactory<T>::~MapcrafterConfigSectionFactory() {
+}
+
+template <typename T>
+T MapcrafterConfigSectionFactory<T>::operator()() const {
+	T section;
+	section.setConfigDir(config_dir);
+	return section;
+}
 
 } /* namespace config */
 } /* namespace mapcrafter */
