@@ -40,14 +40,9 @@ public:
 	WorldSection(bool global = false);
 	~WorldSection();
 
-	void setConfigDir(const fs::path& config_dir);
+	virtual std::string getPrettyName() const;
 
-	virtual void preParse(const INIConfigSection& section,
-			ValidationList& validation);
-	virtual bool parseField(const std::string key, const std::string value,
-			ValidationList& validation);
-	virtual void postParse(const INIConfigSection& section,
-			ValidationList& validation);
+	void setConfigDir(const fs::path& config_dir);
 
 	std::string getShortName();
 
@@ -64,6 +59,14 @@ public:
 
 	const mc::WorldCrop getWorldCrop() const;
 	bool needsWorldCentering() const;
+
+protected:
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+	virtual void postParse(const INIConfigSection& section,
+			ValidationList& validation);
 
 private:
 	fs::path config_dir;

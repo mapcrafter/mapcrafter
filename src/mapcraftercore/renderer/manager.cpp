@@ -23,14 +23,19 @@
 #include "../thread/impl/singlethread.h"
 #include "../thread/impl/multithreading.h"
 #include "../thread/dispatcher.h"
+#include "../util.h"
 #include "../version.h"
 
-#include <ctime>
 #include <cstring>
+#include <ctime>
 #include <array>
 #include <fstream>
 #include <memory>
 #include <thread>
+
+#ifdef USE_EASYLOGGING
+_INITIALIZE_EASYLOGGINGPP
+#endif
 
 namespace mapcrafter {
 namespace renderer {
@@ -132,45 +137,40 @@ bool MapSettings::syncMapConfig(const config::MapSection& map) {
 	bool changed = true;
 	bool force_required = false;
 	if (texture_size.get() != map.getTextureSize()) {
-		std::cerr << std::endl;
-		std::cerr << "Warning: You changed the texture size from " << texture_size.get();
-		std::cerr << " to " << map.getTextureSize() << "." << std::endl;
+		LOG(ERROR) << "You changed the texture size from " << texture_size.get()
+				<< " to " << map.getTextureSize() << ".";
 		force_required = true;
 	} else if (image_format.get() != map.getImageFormatSuffix()) {
-		std::cerr << std::endl;
-		std::cerr << "Warning: You changed the image format from " << image_format.get();
-		std::cerr << " to " << map.getImageFormatSuffix() << "." << std::endl;
-		std::cerr << "Force-render the whole map in order for the new " ;
-		std::cerr << "configuration to come into effect" << std::endl;
-		std::cerr << "and delete the images generated with the other ";
-		std::cerr << "image format." << std::endl << std::endl;
+		LOG(ERROR) << "You changed the image format from " << image_format.get()
+				<< " to " << map.getImageFormatSuffix() << ".";
+		LOG(ERROR) << "Force-render the whole map in order for the new "
+				<< "configuration to come into effect and delete the images "
+				<< "generated with the other image format.";
 		force_required = true;
 		return false;
 	} else if (!util::floatingPointEquals(lighting_intensity.get(), map.getLightingIntensity())) {
-		std::cerr << std::endl;
-		std::cerr << "Warning: You changed the lighting intensity from ";
-		std::cerr << lighting_intensity.get() << " to " << map.getLightingIntensity();
-		std::cerr << "." << std::endl;
+		LOG(WARNING) << "You changed the lighting intensity from "
+				<< lighting_intensity.get() << " to " << map.getLightingIntensity() << ".";
 	} else if (render_unknown_blocks.get() != map.renderUnknownBlocks()) {
-		std::cerr << std::endl;
-		std::cerr << "Warning: You changed the rendering of unknown blocks from ";
-		std::cerr << util::strBool(render_unknown_blocks.get()) << " to ";
-		std::cerr << util::strBool(map.renderUnknownBlocks()) << "." << std::endl;
+		LOG(WARNING) << "You changed the rendering of unknown blocks from "
+				<< util::strBool(render_unknown_blocks.get()) << " to "
+				<< util::strBool(map.renderUnknownBlocks()) << ".";
 	} else if (render_leaves_transparent.get() != map.renderLeavesTransparent()) {
-		std::cerr << "Warning: You changed the rendering of transparent leaves from ";
-		std::cerr << util::strBool(render_leaves_transparent.get()) << " to ";
-		std::cerr << util::strBool(map.renderLeavesTransparent()) << "." << std::endl;
+		LOG(WARNING) << "You changed the rendering of transparent leaves from "
+				<< util::strBool(render_leaves_transparent.get()) << " to "
+				<< util::strBool(map.renderLeavesTransparent()) << ".";
 	} else if (render_biomes.get() != map.renderBiomes()) {
-		std::cerr << "Warning: You changed the rendering of biomes from ";
-		std::cerr << util::strBool(render_biomes.get()) << " to ";
-		std::cerr << util::strBool(map.renderBiomes()) << "." << std::endl;
+		LOG(WARNING) << "You changed the rendering of biomes from "
+				<< util::strBool(render_biomes.get()) << " to "
+				<< util::strBool(map.renderBiomes()) << ".";
 	} else {
 		changed = false;
 	}
 
 	if (changed) {
-		std::cerr << "Force-render the whole map in order for the new " ;
-		std::cerr << "configuration to come into effect." << std::endl << std::endl;
+		(force_required ? LOG(ERROR) : LOG(WARNING))
+				<< "Force-render the whole map in order for the new "
+				<< "configuration to come into effect.";
 	}
 
 	return !(changed && force_required);
@@ -235,9 +235,9 @@ bool RenderManager::writeTemplateIndexHtml() const {
 	if (strlen(MAPCRAFTER_GITVERSION))
 		vars["version"] += std::string(" (") + MAPCRAFTER_GITVERSION + ")";
 
-	time_t t = time(nullptr);
-	char buffer[100];
-	strftime(buffer, 100, "%d.%m.%Y, %H:%M:%S", localtime(&t));
+	time_t t = std::time(nullptr);
+	char buffer[256];
+	std::strftime(buffer, sizeof(buffer), "%d.%m.%Y, %H:%M:%S", std::localtime(&t));
 	vars["lastUpdate"] = buffer;
 
 	vars["worlds"] = confighelper.generateTemplateJavascript();
@@ -251,17 +251,16 @@ bool RenderManager::writeTemplateIndexHtml() const {
  */
 void RenderManager::writeTemplates() const {
 	if (!fs::is_directory(config.getTemplateDir())) {
-		std::cout << "Warning: The template directory does not exist! Can't copy templates!"
-				<< std::endl;
+		LOG(WARNING) << "The template directory does not exist! Can't copy templates!";
 		return;
 	}
 
 	if (!writeTemplateIndexHtml())
-		std::cout << "Warning: Unable to copy template file index.html!" << std::endl;
+		LOG(WARNING) << "Warning: Unable to copy template file index.html!";
 
 	if (!fs::exists(config.getOutputPath("markers.js"))
 			&& !util::copyFile(config.getTemplatePath("markers.js"), config.getOutputPath("markers.js")))
-		std::cout << "Warning: Unable to copy template file markers.js!" << std::endl;
+		LOG(WARNING) << "Unable to copy template file markers.js!";
 
 	// copy all other files and directories
 	fs::directory_iterator end;
@@ -277,11 +276,10 @@ void RenderManager::writeTemplates() const {
 			continue;
 		if (fs::is_regular_file(*it)) {
 			if (!util::copyFile(*it, config.getOutputPath(filename)))
-				std::cout << "Warning: Unable to copy template file " << filename << std::endl;
+				LOG(WARNING) << "Unable to copy template file " << filename;
 		} else if (fs::is_directory(*it)) {
 			if (!util::copyDirectory(*it, config.getOutputPath(filename)))
-				std::cout << "Warning: Unable to copy template directory " << filename
-						<< std::endl;
+				LOG(WARNING) << "Unable to copy template directory " << filename;
 		}
 	}
 }
@@ -393,30 +391,23 @@ bool RenderManager::run() {
 	// ### First big step: Load/parse/validate the configuration file
 	// ###
 
-	config::ValidationMap validation;
-	bool ok = config.parse(opts.config_file, validation);
+	config::ValidationMap validation = config.parse(opts.config_file);
 
 	// show infos/warnings/errors if configuration file has something
-	if (validation.size() > 0) {
-		if (ok)
-			std::cerr << "Some notes on your configuration file:" << std::endl;
+	if (!validation.isEmpty()) {
+		if (validation.isCritical())
+			LOG(FATAL) << "Your configuration file is invalid!";
 		else
-			std::cerr << "Your configuration file is invalid!" << std::endl;
-		for (auto section_it = validation.begin(); section_it != validation.end(); ++section_it) {
-			if (section_it->second.empty())
-				continue;
-			std::cerr << section_it->first << ":" << std::endl;
-			for (auto message_it = section_it->second.begin(); message_it != section_it->second.end(); ++message_it)
-				std::cerr << " - " << *message_it << std::endl;
-		}
-		std::cerr << "Please read the documentation about the new configuration file format." << std::endl;
+			LOG(WARNING) << "Some notes on your configuration file:";
+		validation.log();
+		LOG(WARNING) << "Please read the documentation about the new configuration file format.";
 	}
-	if (!ok)
+	if (validation.isCritical())
 		return false;
 
 	// an output directory would be nice -- create one if it does not exist
 	if (!fs::is_directory(config.getOutputDir()) && !fs::create_directories(config.getOutputDir())) {
-		std::cerr << "Error: Unable to create output directory!" << std::endl;
+		LOG(FATAL) << "Error: Unable to create output directory!";
 		return false;
 	}
 
@@ -451,7 +442,7 @@ bool RenderManager::run() {
 	// ### Second big step: Scan the worlds
 	// ###
 
-	std::cout << "Scanning worlds..." << std::endl;
+	LOG(INFO) << "Scanning worlds...";
 	for (auto world_it = config_worlds.begin(); world_it != config_worlds.end(); ++world_it) {
 		std::string world_name = world_it->first;
 
@@ -484,7 +475,7 @@ bool RenderManager::run() {
 			world.setRotation(*rotation_it);
 			world.setWorldCrop(world_it->second.getWorldCrop());
 			if (!world.load()) {
-				std::cerr << "Unable to load world " << world_name << "!" << std::endl;
+				LOG(FATAL) << "Unable to load world " << world_name << "!";
 				return false;
 			}
 			// create a tileset for this world
@@ -524,7 +515,7 @@ bool RenderManager::run() {
 
 	// some progress and timing stuff
 	int progress_maps_all = config_maps.size();
-	int time_start_all = time(NULL);
+	int time_start_all = std::time(nullptr);
 
 	// go through all maps
 	for (size_t i = 0; i < config_maps.size(); i++) {
@@ -538,9 +529,9 @@ bool RenderManager::run() {
 			continue;
 
 		int progress_maps = i+1;
-		std::cout << "(" << progress_maps << "/" << progress_maps_all << ") ";
-		std::cout << "Rendering map " << map.getShortName();
-		std::cout << " (\"" << map.getLongName() << "\"):" << std::endl;
+		LOG(INFO) << "[" << progress_maps << "/" << progress_maps_all << "] "
+				<< "Rendering map " << map.getShortName() << " (\""
+				<< map.getLongName() << "\"):";
 
 		// check again if the output directory for the tiles of this map exists
 		if (!fs::is_directory(config.getOutputDir() / map_name))
@@ -555,9 +546,8 @@ bool RenderManager::run() {
 		if (old_settings) {
 			// try to read the map.settings filename
 			if (!settings.read(settings_filename)) {
-				std::cerr << "Error: Unable to load old map.settings file!" << std::endl;
-				std::cerr << "You have to force-render the whole map." << std::endl;
-				std::cerr << std::endl;
+				LOG(ERROR) << "Unable to load old map.settings file!"
+						<< "You have to force-render the whole map.";
 				continue;
 			}
 
@@ -577,7 +567,7 @@ bool RenderManager::run() {
 			settings = MapSettings::byMapConfig(map);
 		}
 
-		int start_scanning = time(NULL);
+		std::time_t start_scanning = std::time(nullptr);
 
 		auto rotations = map.getRotations();
 		// get the max zoom level calculated with the current tile set
@@ -585,9 +575,9 @@ bool RenderManager::run() {
 		// check if the zoom level of the world has increased
 		// since the map was rendered last time (if it was already rendered)
 		if (old_settings && settings.max_zoom < world_zoomlevels) {
-			std::cout << "The max zoom level was increased from " << settings.max_zoom;
-			std::cout << " to " << world_zoomlevels << "." << std::endl;
-			std::cout << "I will move some files around..." << std::endl;
+			LOG(INFO) << "The max zoom level was increased from " << settings.max_zoom
+					<< " to " << world_zoomlevels << ".";
+			LOG(INFO) << "I will move some files around...";
 
 			// if zoom level has increased, increase zoom levels of tile sets
 			for (auto rotation_it = rotations.begin(); rotation_it != rotations.end();
@@ -627,17 +617,16 @@ bool RenderManager::run() {
 					== config::MapcrafterConfigHelper::RENDER_SKIP)
 				continue;
 
-			std::cout << "(" << progress_maps << "." << progress_rotations << "/";
-			std::cout << progress_maps << "." << progress_rotations_all << ") ";
-			std::cout << "Rendering rotation " << config::ROTATION_NAMES[rotation];
-			std::cout << ":" << std::endl;
+			LOG(INFO) << "[" << progress_maps << "." << progress_rotations << "/"
+					<< progress_maps << "." << progress_rotations_all << "] "
+					<< "Rendering rotation " << config::ROTATION_NAMES[rotation] << ":";
 
 			// output a small notice if we render this map incrementally
 			if (settings.last_render[rotation] != 0) {
-				time_t t = settings.last_render[rotation];
-				char buffer[100];
-				strftime(buffer, 100, "%d %b %Y, %H:%M:%S", localtime(&t));
-				std::cout << "Last rendering was on " << buffer << "." << std::endl;
+				std::time_t t = settings.last_render[rotation];
+				char buffer[256];
+				std::strftime(buffer, sizeof(buffer), "%d %b %Y, %H:%M:%S", std::localtime(&t));
+				LOG(INFO) << "Last rendering was on " << buffer << ".";
 			}
 
 			std::string output_dir = config.getOutputPath(map_name + "/"
@@ -646,7 +635,7 @@ bool RenderManager::run() {
 			std::shared_ptr<TileSet> tile_set(new TileSet(*tile_sets[world_name][rotation]));
 			if (confighelper.getRenderBehavior(map_name, rotation)
 					== config::MapcrafterConfigHelper::RENDER_AUTO) {
-				std::cout << "Scanning required tiles..." << std::endl;
+				LOG(INFO) << "Scanning required tiles...";
 				// use the incremental check specified in the config
 				if (map.useImageModificationTimes())
 					tile_set->scanRequiredByFiletimes(output_dir,
@@ -655,7 +644,7 @@ bool RenderManager::run() {
 					tile_set->scanRequiredByTimestamp(settings.last_render[rotation]);
 			}
 
-			int time_start = time(NULL);
+			std::time_t time_start = std::time(nullptr);
 
 			// create block images
 			std::shared_ptr<BlockImages> block_images(new BlockImages);
@@ -664,13 +653,13 @@ bool RenderManager::run() {
 			// if textures do not work, it does not make much sense
 			// to try the other rotations with the same textures
 			if (!block_images->loadAll(map.getTextureDir().string())) {
-				std::cerr << "Skipping remaining rotations." << std::endl << std::endl;
+				LOG(ERROR) << "Skipping remaining rotations.";
 				break;
 			}
 
 			// render the map
 			if (tile_set->getRequiredRenderTilesCount() == 0) {
-				std::cout << "No tiles need to get rendered." << std::endl;
+				LOG(INFO) << "No tiles need to get rendered.";
 				continue;
 			}
 
@@ -700,19 +689,18 @@ bool RenderManager::run() {
 			settings.last_render[rotation] = start_scanning;
 			settings.write(settings_filename);
 
-			int took = time(NULL) - time_start;
-			std::cout << "(" << progress_maps << "." << progress_rotations << "/";
-			std::cout << progress_maps << "." << progress_rotations_all << ") ";
-			std::cout << "Rendering rotation " << config::ROTATION_NAMES[*rotation_it];
-			std::cout << " took " << took << " seconds." << std::endl << std::endl;
+			std::time_t took = std::time(nullptr) - time_start;
+			LOG(INFO) << "[" << progress_maps << "." << progress_rotations << "/"
+					<< progress_maps << "." << progress_rotations_all << "] "
+					<< "Rendering rotation " << config::ROTATION_NAMES[*rotation_it]
+					<< " took " << took << " seconds.";
 
 		}
 	}
 
-	int took_all = time(NULL) - time_start_all;
-	std::cout << "Rendering all worlds took " << took_all << " seconds." << std::endl;
-
-	std::cout << std::endl << "Finished.....aaand it's gone!" << std::endl;
+	std::time_t took_all = std::time(nullptr) - time_start_all;
+	LOG(INFO) << "Rendering all worlds took " << took_all << " seconds.";
+	LOG(INFO) << "Finished.....aaand it's gone!";
 	return true;
 }
 

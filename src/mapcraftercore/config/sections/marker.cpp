@@ -31,64 +31,14 @@ MarkerSection::MarkerSection(bool global) {
 MarkerSection::~MarkerSection() {
 }
 
-std::string MarkerSection::formatSign(std::string format, const mc::SignEntity& sign) const {
-	std::string textp = sign.getText();
-	std::string text = textp;
-
-	if (textp.size() > prefix.getValue().size())
-		text = util::trim(textp.substr(prefix.getValue().size()));
-
-	format = util::replaceAll(format, "%textp", textp);
-	format = util::replaceAll(format, "%text", text);
-	format = util::replaceAll(format, "%prefix", prefix.getValue());
-	format = util::replaceAll(format, "%line1", sign.getLines()[0]);
-	format = util::replaceAll(format, "%line2", sign.getLines()[1]);
-	format = util::replaceAll(format, "%line3", sign.getLines()[2]);
-	format = util::replaceAll(format, "%line4", sign.getLines()[3]);
-	format = util::replaceAll(format, "%x", util::str(sign.getPos().x));
-	format = util::replaceAll(format, "%z", util::str(sign.getPos().z));
-	format = util::replaceAll(format, "%y", util::str(sign.getPos().y));
-	return format;
-}
-
-void MarkerSection::preParse(const INIConfigSection& section,
-		ValidationList& validation) {
-	name_long.setDefault(section_name);
-	title_format.setDefault("%text");
-	match_empty.setDefault(false);
-	show_default.setDefault(true);
-}
-
-bool MarkerSection::parseField(const std::string key, const std::string value,
-		ValidationList& validation) {
-	if (key == "name")
-		name_long.load(key, value, validation);
-	else if (key == "prefix")
-		prefix.load(key, value, validation);
-	else if (key == "title_format")
-		title_format.load(key, value, validation);
-	else if (key == "text_format")
-		text_format.load(key, value, validation);
-	else if (key == "icon")
-		icon.load(key, value, validation);
-	else if (key == "icon_size")
-		icon_size.load(key, value, validation);
-	else if (key == "match_empty")
-		match_empty.load(key, value, validation);
-	else if (key == "show_default")
-		show_default.load(key, value, validation);
-	else
-		return false;
-	return true;
-}
-
-void MarkerSection::postParse(const INIConfigSection& section,
-		ValidationList& validation) {
-	text_format.setDefault(title_format.getValue());
+std::string MarkerSection::getPrettyName() const {
+	if (isGlobal())
+		return "global marker section";
+	return "marker section '" + getSectionName() + "'";
 }
 
 std::string MarkerSection::getShortName() const {
-	return section_name;
+	return getSectionName();
 }
 
 std::string MarkerSection::getLongName() const {
@@ -131,6 +81,62 @@ std::string MarkerSection::formatTitle(const mc::SignEntity& sign) const {
 
 std::string MarkerSection::formatText(const mc::SignEntity& sign) const {
 	return formatSign(text_format.getValue(), sign);
+}
+
+void MarkerSection::preParse(const INIConfigSection& section,
+		ValidationList& validation) {
+	name_long.setDefault(getSectionName());
+	title_format.setDefault("%text");
+	match_empty.setDefault(false);
+	show_default.setDefault(true);
+}
+
+bool MarkerSection::parseField(const std::string key, const std::string value,
+		ValidationList& validation) {
+	if (key == "name")
+		name_long.load(key, value, validation);
+	else if (key == "prefix")
+		prefix.load(key, value, validation);
+	else if (key == "title_format")
+		title_format.load(key, value, validation);
+	else if (key == "text_format")
+		text_format.load(key, value, validation);
+	else if (key == "icon")
+		icon.load(key, value, validation);
+	else if (key == "icon_size")
+		icon_size.load(key, value, validation);
+	else if (key == "match_empty")
+		match_empty.load(key, value, validation);
+	else if (key == "show_default")
+		show_default.load(key, value, validation);
+	else
+		return false;
+	return true;
+}
+
+void MarkerSection::postParse(const INIConfigSection& section,
+		ValidationList& validation) {
+	text_format.setDefault(title_format.getValue());
+}
+
+std::string MarkerSection::formatSign(std::string format, const mc::SignEntity& sign) const {
+	std::string textp = sign.getText();
+	std::string text = textp;
+
+	if (textp.size() > prefix.getValue().size())
+		text = util::trim(textp.substr(prefix.getValue().size()));
+
+	format = util::replaceAll(format, "%textp", textp);
+	format = util::replaceAll(format, "%text", text);
+	format = util::replaceAll(format, "%prefix", prefix.getValue());
+	format = util::replaceAll(format, "%line1", sign.getLines()[0]);
+	format = util::replaceAll(format, "%line2", sign.getLines()[1]);
+	format = util::replaceAll(format, "%line3", sign.getLines()[2]);
+	format = util::replaceAll(format, "%line4", sign.getLines()[3]);
+	format = util::replaceAll(format, "%x", util::str(sign.getPos().x));
+	format = util::replaceAll(format, "%z", util::str(sign.getPos().z));
+	format = util::replaceAll(format, "%y", util::str(sign.getPos().y));
+	return format;
 }
 
 } /* namespace config */

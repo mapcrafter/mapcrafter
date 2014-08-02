@@ -48,106 +48,14 @@ MapSection::MapSection(bool global)
 MapSection::~MapSection() {
 }
 
+std::string MapSection::getPrettyName() const {
+	if (isGlobal())
+		return "global map section";
+	return "map section '" + getSectionName() + "'";
+}
+
 void MapSection::setConfigDir(const fs::path& config_dir) {
 	this->config_dir = config_dir;
-}
-
-void MapSection::preParse(const INIConfigSection& section,
-		ValidationList& validation) {
-	name_short = section_name;
-	name_long = name_short;
-
-	// set some default configuration values
-	rendermode.setDefault("daylight");
-	rotations.setDefault("top-left");
-
-	// check if we can find a default texture directory
-	fs::path texture_dir_found = util::findTextureDir();
-	if (!texture_dir_found.empty())
-		texture_dir.setDefault(texture_dir_found);
-	texture_size.setDefault(12);
-
-	image_format.setDefault(ImageFormat::PNG);
-	jpeg_quality.setDefault(85);
-
-	lighting_intensity.setDefault(1.0);
-	render_unknown_blocks.setDefault(false);
-	render_leaves_transparent.setDefault(true);
-	render_biomes.setDefault(true);
-	use_image_mtimes.setDefault(true);
-}
-
-bool MapSection::parseField(const std::string key, const std::string value,
-		ValidationList& validation) {
-	if (key == "name") {
-		name_long = value;
-	} else if (key == "world") {
-		world.load(key, value, validation);
-	} else if (key == "rendermode") {
-		if (rendermode.load(key, value, validation)) {
-			std::string r = rendermode.getValue();
-			if (r != "plain" && r != "daylight" && r != "nightlight" && r != "cave")
-				validation.push_back(ValidationMessage::error(
-						"'rendermode' must be one of: 'plain', 'daylight', 'nightlight', 'cave'"));
-		}
-	} else if (key == "rotations") {
-		rotations.load(key, value ,validation);
-	} else if (key == "texture_dir") {
-		if (texture_dir.load(key, value, validation)) {
-			texture_dir.setValue(BOOST_FS_ABSOLUTE(texture_dir.getValue(), config_dir));
-			if (!fs::is_directory(texture_dir.getValue()))
-				validation.push_back(ValidationMessage::error(
-						"'texture_dir' must be an existing directory! '"
-						+ texture_dir.getValue().string() + "' does not exist!"));
-		}
-	} else if (key == "texture_size") {
-		if (texture_size.load(key, value, validation)
-				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 32))
-				validation.push_back(ValidationMessage::error(
-						"'texture_size' must a number between 1 and 32!"));
-	} else if (key == "image_format") {
-		image_format.load(key, value, validation);
-	} else if (key == "jpeg_quality") {
-		if (jpeg_quality.load(key, value, validation)
-				&& (jpeg_quality.getValue() < 0 || jpeg_quality.getValue() > 100))
-			validation.push_back(ValidationMessage::error(
-					"'jpeg_quality' must be a number between 0 and 100!"));
-	} else if (key == "lighting_intensity") {
-		lighting_intensity.load(key, value, validation);
-	} else if (key == "render_unknown_blocks") {
-		render_unknown_blocks.load(key, value, validation);
-	} else if (key == "render_leaves_transparent") {
-		render_leaves_transparent.load(key, value, validation);
-	} else if (key == "render_biomes") {
-		render_biomes.load(key, value, validation);
-	} else if (key == "use_image_mtimes") {
-		use_image_mtimes.load(key, value, validation);
-	} else
-		return false;
-	return true;
-}
-
-void MapSection::postParse(const INIConfigSection& section,
-		ValidationList& validation) {
-	// parse rotations
-	rotations_set.clear();
-	std::string str = rotations.getValue();
-	std::stringstream ss;
-	ss << str;
-	std::string elem;
-	while (ss >> elem) {
-		int r = stringToRotation(elem);
-		if (r != -1)
-			rotations_set.insert(r);
-		else
-			validation.push_back(ValidationMessage::error("Invalid rotation '" + elem + "'!"));
-	}
-
-	// check if required options were specified
-	if (!global) {
-		world.require(validation, "You have to specify a world ('world')!");
-		texture_dir.require(validation, "You have to specify a texture directory ('texture_dir')!");
-	}
 }
 
 std::string MapSection::getShortName() const {
@@ -210,6 +118,100 @@ bool MapSection::renderBiomes() const {
 
 bool MapSection::useImageModificationTimes() const {
 	return use_image_mtimes.getValue();
+}
+
+void MapSection::preParse(const INIConfigSection& section,
+		ValidationList& validation) {
+	name_short = getSectionName();
+	name_long = name_short;
+
+	// set some default configuration values
+	rendermode.setDefault("daylight");
+	rotations.setDefault("top-left");
+
+	// check if we can find a default texture directory
+	fs::path texture_dir_found = util::findTextureDir();
+	if (!texture_dir_found.empty())
+		texture_dir.setDefault(texture_dir_found);
+	texture_size.setDefault(12);
+
+	image_format.setDefault(ImageFormat::PNG);
+	jpeg_quality.setDefault(85);
+
+	lighting_intensity.setDefault(1.0);
+	render_unknown_blocks.setDefault(false);
+	render_leaves_transparent.setDefault(true);
+	render_biomes.setDefault(true);
+	use_image_mtimes.setDefault(true);
+}
+
+bool MapSection::parseField(const std::string key, const std::string value,
+		ValidationList& validation) {
+	if (key == "name") {
+		name_long = value;
+	} else if (key == "world") {
+		world.load(key, value, validation);
+	} else if (key == "rendermode") {
+		if (rendermode.load(key, value, validation)) {
+			std::string r = rendermode.getValue();
+			if (r != "plain" && r != "daylight" && r != "nightlight" && r != "cave")
+				validation.error("'rendermode' must be one of: 'plain', 'daylight', 'nightlight', 'cave'");
+		}
+	} else if (key == "rotations") {
+		rotations.load(key, value ,validation);
+	} else if (key == "texture_dir") {
+		if (texture_dir.load(key, value, validation)) {
+			texture_dir.setValue(BOOST_FS_ABSOLUTE(texture_dir.getValue(), config_dir));
+			if (!fs::is_directory(texture_dir.getValue()))
+				validation.error("'texture_dir' must be an existing directory! '"
+						+ texture_dir.getValue().string() + "' does not exist!");
+		}
+	} else if (key == "texture_size") {
+		if (texture_size.load(key, value, validation)
+				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 32))
+				validation.error("'texture_size' must a number between 1 and 32!");
+	} else if (key == "image_format") {
+		image_format.load(key, value, validation);
+	} else if (key == "jpeg_quality") {
+		if (jpeg_quality.load(key, value, validation)
+				&& (jpeg_quality.getValue() < 0 || jpeg_quality.getValue() > 100))
+			validation.error("'jpeg_quality' must be a number between 0 and 100!");
+	} else if (key == "lighting_intensity") {
+		lighting_intensity.load(key, value, validation);
+	} else if (key == "render_unknown_blocks") {
+		render_unknown_blocks.load(key, value, validation);
+	} else if (key == "render_leaves_transparent") {
+		render_leaves_transparent.load(key, value, validation);
+	} else if (key == "render_biomes") {
+		render_biomes.load(key, value, validation);
+	} else if (key == "use_image_mtimes") {
+		use_image_mtimes.load(key, value, validation);
+	} else
+		return false;
+	return true;
+}
+
+void MapSection::postParse(const INIConfigSection& section,
+		ValidationList& validation) {
+	// parse rotations
+	rotations_set.clear();
+	std::string str = rotations.getValue();
+	std::stringstream ss;
+	ss << str;
+	std::string elem;
+	while (ss >> elem) {
+		int r = stringToRotation(elem);
+		if (r != -1)
+			rotations_set.insert(r);
+		else
+			validation.error("Invalid rotation '" + elem + "'!");
+	}
+
+	// check if required options were specified
+	if (!isGlobal()) {
+		world.require(validation, "You have to specify a world ('world')!");
+		texture_dir.require(validation, "You have to specify a texture directory ('texture_dir')!");
+	}
 }
 
 } /* namespace config */

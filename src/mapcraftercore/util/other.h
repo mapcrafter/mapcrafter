@@ -69,6 +69,7 @@ unsigned int parseHexNumber(const std::string& hex);
 
 std::string trim(const std::string& str);
 std::string escapeJSON(const std::string& str);
+std::string capitalize(const std::string& str);
 
 std::string replaceAll(const std::string& str, const std::string& from, const std::string& to);
 

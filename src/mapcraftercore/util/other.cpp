@@ -21,6 +21,8 @@
 
 #include "../config.h"
 
+#include <cctype>
+
 #ifdef HAVE_ENDIAN_H
 # ifdef ENDIAN_H_FREEBSD
 #  include <sys/endian.h>
@@ -168,6 +170,14 @@ std::string escapeJSON(const std::string& str) {
 		}
 	}
 	return ss.str();
+}
+
+std::string capitalize(const std::string& str) {
+	if (str.empty())
+		return "";
+	std::string capitalized = str.substr(1);
+	capitalized.insert(capitalized.begin(), toupper(str[0]));
+	return capitalized;
 }
 
 std::string replaceAll(const std::string& str, const std::string& from, const std::string& to) {

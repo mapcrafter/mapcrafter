@@ -49,4 +49,12 @@ private:
 #include "util/math.h"
 #include "util/other.h"
 
+//#define USE_EASYLOGGING
+
+#ifndef USE_EASYLOGGING
+#  include "util/logging.h"
+#else
+#  include "util/easylogging++.h"
+#endif
+
 #endif /* UTIL_H_ */

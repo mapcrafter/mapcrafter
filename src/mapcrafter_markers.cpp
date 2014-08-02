@@ -160,18 +160,15 @@ int main(int argc, char** argv) {
 	}
 
 	config::MapcrafterConfig config;
-	config::ValidationMap validation;
-	bool ok = config.parse(config_file, validation);
+	config::ValidationMap validation = config.parse(config_file);
 
-	if (validation.size() > 0) {
-		std::cerr << (ok ? "Some notes on your configuration file:"
-				: "Your configuration file is invalid!") << std::endl;
-		for (auto it = validation.begin(); it != validation.end(); ++it) {
-			std::cerr << it->first << ":" << std::endl;
-			for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
-				std::cerr << " - " << *it2 << std::endl;
-			}
-		}
+	if (!validation.isEmpty()) {
+		if (validation.isCritical())
+			LOG(FATAL) << "Your configuration file is invalid!";
+		else
+			LOG(WARNING) << "Some notes on your configuration file:";
+		validation.log();
+		LOG(WARNING) << "Please read the documentation about the new configuration file format.";
 	}
 
 	Markers markers_found;

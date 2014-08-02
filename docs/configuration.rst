@@ -37,7 +37,7 @@ Every world section represents a Minecraft world you want to render and needs a
 directory where it can find the Minecraft world (``input_dir`` of the world
 section ``myworld`` in the example above).
 
-Every map section represents a rendered Minecraft world. You can specifiy
+Every map section represents a rendered Minecraft world. You can specify
 things like rotation of the world, rendermode, texture pack and texture size
 for each map.
 
@@ -60,7 +60,7 @@ A More Advanced Example
 
     output_dir = output
     
-    [global:maps]
+    [global:map]
     rendermode = daylight
     rotations = top-left bottom-right
     
@@ -104,11 +104,11 @@ is rendered with the day, night and cave rendermode and we have a "creative"
 world which is rendered super fancy with a special texture pack, higher texture
 size and all available world rotations with the day and night rendermode.
 
-As you can see there is a new section ``global:maps``. This section is used to
+As you can see there is a new section ``global:map``. This section is used to
 set default values for all map sections. Because of this in this example every
 map has the daylight rendermode and the world rotations top-left and top-right
 as default. Of course you can overwrite these settings in every map section.
-There is also a global section ``global:worlds`` for worlds, but at the moment
+There is also a global section ``global:world`` for worlds, but at the moment
 there is only one configuration option for worlds (``input_dir``), so it
 doesn't make much sense setting a default value here.
 
@@ -175,7 +175,7 @@ World Options
 
     These options are for the worlds. You can specify them in the world
     sections (the ones starting with world:) or you can specify them in the
-    global:worlds section.  If you specify them in the global section, these
+    global:world section.  If you specify them in the global section, these
     options are default values and inherited into the world sections if you do
     not overwrite them.
 
@@ -290,7 +290,7 @@ Map Options
 .. note::
 
     These options are for the maps. You can specify them in the map sections
-    (the ones starting with map:) or you can specify them in the global:maps
+    (the ones starting with map:) or you can specify them in the global:map
     section.  If you specify them in the global section, these options are
     default values and inherited into the map sections if you do not overwrite
     them.
@@ -438,7 +438,7 @@ Marker Options
 
     These options are for the marker groups. You can specify them in the marker
     sections (the ones starting with marker:) or you can specify them in the 
-    global:markers section.  If you specify them in the global section, these
+    global:marker section.  If you specify them in the global section, these
     options are default values and inherited into the marker sections if you 
     do not overwrite them.
 

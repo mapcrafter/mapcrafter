@@ -45,14 +45,9 @@ public:
 	MapSection(bool global = false);
 	~MapSection();
 
-	void setConfigDir(const fs::path& config_dir);
+	virtual std::string getPrettyName() const;
 
-	virtual void preParse(const INIConfigSection& section,
-			ValidationList& validation);
-	virtual bool parseField(const std::string key, const std::string value,
-			ValidationList& validation);
-	virtual void postParse(const INIConfigSection& section,
-			ValidationList& validation);
+	void setConfigDir(const fs::path& config_dir);
 
 	std::string getShortName() const;
 	std::string getLongName() const;
@@ -72,6 +67,14 @@ public:
 	bool renderLeavesTransparent() const;
 	bool renderBiomes() const;
 	bool useImageModificationTimes() const;
+
+protected:
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+	virtual void postParse(const INIConfigSection& section,
+			ValidationList& validation);
 
 private:
 	fs::path config_dir;

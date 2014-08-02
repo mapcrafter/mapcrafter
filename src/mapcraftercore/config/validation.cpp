@@ -49,6 +49,90 @@ ValidationMessage ValidationMessage::error(const std::string& message) {
 	return ValidationMessage(ERROR, message);
 }
 
+ValidationList::ValidationList() {
+
+}
+
+ValidationList::~ValidationList() {
+
+}
+
+void ValidationList::message(const ValidationMessage& message) {
+	messages.push_back(message);
+}
+
+void ValidationList::info(const std::string& message) {
+	messages.push_back(ValidationMessage(ValidationMessage::INFO, message));
+}
+
+void ValidationList::warning(const std::string& message) {
+	messages.push_back(ValidationMessage(ValidationMessage::WARNING, message));
+}
+
+void ValidationList::error(const std::string& message) {
+	messages.push_back(ValidationMessage(ValidationMessage::ERROR, message));
+}
+
+bool ValidationList::isEmpty() const {
+	return messages.size() == 0;
+}
+
+bool ValidationList::isCritical() const {
+	for (auto message_it = messages.begin(); message_it != messages.end(); ++message_it)
+		if (message_it->getType() == ValidationMessage::ERROR)
+			return true;
+	return false;
+}
+
+const std::vector<ValidationMessage> ValidationList::getMessages() const {
+	return messages;
+}
+
+ValidationMap::ValidationMap() {
+
+}
+
+ValidationMap::~ValidationMap() {
+
+}
+
+ValidationList& ValidationMap::section(const std::string& section) {
+	if (!sections_order.count(section)) {
+		sections_order[section] = sections.size();
+		sections.push_back(std::make_pair(section, ValidationList()));
+	}
+	return sections[sections_order[section]].second;
+}
+
+const std::vector<std::pair<std::string, ValidationList>>& ValidationMap::getSections() const {
+	return sections;
+}
+
+bool ValidationMap::isEmpty() const {
+	for (auto section_it = sections.begin(); section_it != sections.end(); ++section_it)
+		if (!section_it->second.isEmpty())
+			return false;
+	return true;
+}
+
+bool ValidationMap::isCritical() const {
+	for (auto section_it = sections.begin(); section_it != sections.end(); ++section_it)
+		if (section_it->second.isCritical())
+			return true;
+	return false;
+}
+
+void ValidationMap::log(std::string logger) const {
+	for (auto section_it = sections.begin(); section_it != sections.end(); ++section_it) {
+		auto messages = section_it->second.getMessages();
+		if (messages.empty())
+			continue;
+		LOGN(WARNING, logger) << section_it->first << ":";
+		for (auto message_it = messages.begin(); message_it != messages.end(); ++message_it)
+			LOGN(WARNING, logger) << " - " << *message_it;
+	}
+}
+
 std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg) {
 	switch (msg.getType()) {
 		case (ValidationMessage::INFO): out << "Info: "; break;
@@ -62,13 +146,14 @@ std::ostream& operator<<(std::ostream& out, const ValidationMessage& msg) {
 
 ValidationList makeValidationList(const ValidationMessage& msg) {
 	ValidationList validation;
-	validation.push_back(msg);
+	validation.message(msg);
 	return validation;
 }
 
 bool isValidationValid(const ValidationList& validation) {
-	for (auto it = validation.begin(); it != validation.end(); ++it)
-		if (it->getType() == ValidationMessage::ERROR)
+	auto messages = validation.getMessages();
+	for (auto message_it = messages.begin(); message_it != messages.end(); ++message_it)
+		if (message_it->getType() == ValidationMessage::ERROR)
 			return false;
 	return true;
 }

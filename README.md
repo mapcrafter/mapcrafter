@@ -75,6 +75,17 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.1.5 (in progress)**
+
+* Started internal refactoring to improve integration with possible Mapcrafter GUI
+  or other programs using Mapcrafter's functionality
+* Added own logging facility, further configuration with different log sinks
+  will follow soon™
+* Changed global sections from ``[global:sections]`` to ``[global:section]`` to
+  simplify internal parsing procedures
+* Added option to specify a block mask and render only specific blocks
+* Added option to hide chunks that are not populated yet
+
 **v.1.4.3**
 
 * Fixed a lighting bug on FreeBSD and Windows

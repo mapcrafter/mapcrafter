@@ -17,55 +17,63 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SECTIONS_MARKER_H
-#define SECTIONS_MARKER_H
+#ifndef LOG_H_
+#define LOG_H_
 
 #include "base.h"
 #include "../validation.h"
-#include "../../mc/worldentities.h"
+#include "../../util.h"
+
+#include <string>
 
 namespace mapcrafter {
 namespace config {
 
-class MarkerSection : public ConfigSectionBase {
+enum class LogSinkType {
+	OUTPUT,
+	FILE,
+	SYSLOG
+};
+
+class LogSection : public ConfigSectionBase {
 public:
-	MarkerSection(bool global = false);
-	~MarkerSection();
+	LogSection(bool global = false);
+	~LogSection();
 
 	virtual std::string getPrettyName() const;
 
-	std::string getShortName() const;
-	std::string getLongName() const;
-	std::string getPrefix() const;
-	std::string getTitleFormat() const;
-	std::string getTextFormat() const;
-	std::string getIcon() const;
-	std::string getIconSize() const;
-	bool isShownByDefault() const;
+	LogSinkType getType() const;
+	util::LogLevel getVerbosity() const;
+	bool getLogProgress() const;
 
-	bool matchesSign(const mc::SignEntity& sign) const;
-	std::string formatTitle(const mc::SignEntity& sign) const;
-	std::string formatText(const mc::SignEntity& sign) const;
+	// only for output, file log
+	std::string getFormat() const;
+	std::string getDateFormat() const;
+
+	// only for file log
+	fs::path getFile() const;
 
 protected:
 	virtual void preParse(const INIConfigSection& section,
-				ValidationList& validation);
+			ValidationList& validation);
 	virtual bool parseField(const std::string key, const std::string value,
 			ValidationList& validation);
 	virtual void postParse(const INIConfigSection& section,
 			ValidationList& validation);
 
 private:
-	Field<std::string> name_long;
-	Field<std::string> prefix;
-	Field<std::string> title_format, text_format;
-	Field<std::string> icon, icon_size;
-	Field<bool> match_empty, show_default;
+	Field<LogSinkType> type;
+	Field<util::LogLevel> verbosity;
+	Field<bool> log_progress;
 
-	std::string formatSign(std::string format, const mc::SignEntity& sign) const;
+	// only for output, file log
+	Field<std::string> format, date_format;
+
+	// only for file log
+	Field<fs::path> file;
 };
 
-} /* namespace config */
-} /* namespace mapcrafter */
+}
+}
 
-#endif /* SECTIONS_MARKER_H */
+#endif /* LOG_H_ */

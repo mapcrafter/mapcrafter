@@ -33,6 +33,10 @@ namespace fs = boost::filesystem;
 // evil, I know
 using namespace mapcrafter;
 
+#ifdef USE_EASYLOGGING
+_INITIALIZE_EASYLOGGINGPP
+#endif
+
 int main(int argc, char** argv) {
 	std::string config_file;
 	std::string output_dir;
@@ -109,6 +113,13 @@ int main(int argc, char** argv) {
 		for (size_t i = 0; i < textures.size(); i++)
 			std::cout << "  " << i+1 << ". " << BOOST_FS_ABSOLUTE1(textures[i]).string() << std::endl;
 		if (textures.size() == 0)
+			std::cout << "  Nothing found." << std::endl;
+
+		util::PathList configs = util::findLoggingConfigFiles(mapcrafter_bin);
+		std::cout << "Logging configuration file:" << std::endl;
+		for (size_t i = 0; i < configs.size(); i++)
+			std::cout << "  " << i+1 << ". " << BOOST_FS_ABSOLUTE1(configs[i]).string() << std::endl;
+		if (configs.size() == 0)
 			std::cout << "  Nothing found." << std::endl;
 		return 0;
 	}
