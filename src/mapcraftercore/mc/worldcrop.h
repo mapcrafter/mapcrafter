@@ -112,10 +112,26 @@ public:
 	void setAll(bool shown);
 
 	/**
-	 * Loads the block mask from a string definition. Returns false if the string
-	 * is invalid and puts the error message into the supplied string reference.
+	 * Loads the block mask from a string definition. Throws a std::invalid_argument
+	 * exception if the supplied block mask definition is invalid.
 	 *
-	 * TODO: describe format
+	 * The block mask definition is a space separated list of block groups you want to
+	 * hide/show. If a '!' precedes a block group, all blocks of this block group are
+	 * hidden, otherwise they are shown. Per default, all blocks are shown.
+	 *
+	 * Possible block groups are:
+	 * - All blocks:
+	 *     *
+	 * - A single block (independent of block data):
+	 *     '[blockid]'
+	 * - A single block with specific block data:
+	 *     '[blockid]:[blockdata]'
+	 * - A range of blocks:
+	 *     '[blockid1]-[blockid2]'
+	 * - All block with a specific id specific block data:
+	 *     '[blockid]:[blockdata]b[bitmask]'
+	 *
+	 * TL;DR (except the space at the end): (!?(\*|\d+(:\d+(b\d+)?)?|\d+-\d+) )+
 	 */
 	bool loadFromString(const std::string& str, std::string& error);
 
