@@ -44,8 +44,13 @@ std::string str(T value) {
 std::string strBool(bool value);
 
 /**
- * A lazy function to convert different datatypes.
- * Works by printing the value into a string stream and reading the new datatype from it.
+ * A lazy function to convert different datatypes. It works by printing the value into a
+ * string stream and reading the new datatype from it.
+ *
+ * The function throws a std::invalid_argument exception in case the string stream is in
+ * an error state after the conversion. However, the behavior of the string stream here
+ * is a bit strange. Because converting '42ff' would just result in '42', it is also
+ * checked whether the whole string was processed (eof bit of string stream set).
  */
 template<typename T>
 T as(const std::string& from) {
@@ -53,6 +58,8 @@ T as(const std::string& from) {
 	std::stringstream ss(from);
 	ss << from;
 	ss >> to;
+	if (!ss || !ss.eof())
+		throw std::invalid_argument("Unable to convert '" + from + "'!");
 	return to;
 }
 
