@@ -123,7 +123,7 @@ ValidationMap MapcrafterConfig::parse(const std::string& filename) {
 		return validation;
 	}
 
-	fs::path config_dir = fs::path(filename).parent_path();
+	fs::path config_dir = BOOST_FS_ABSOLUTE1(fs::path(filename)).parent_path();
 	root_section.setConfigDir(config_dir);
 
 	ConfigParser parser(config);
