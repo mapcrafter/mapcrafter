@@ -1198,6 +1198,17 @@ void BlockImages::createWood(uint16_t id, uint16_t data, const RGBAImage& side, 
 	createBlock(id, data | 4 | 8, side, side, top);
 }
 
+/**
+ * Makes the transparent leaf textures opaque. It seems the opaque leaf textures are just
+ * the transparent ones with all transparent pixels replaced by a specific gray.
+ */
+RGBAImage makeLeavesOpaque(const RGBAImage& texture, uint8_t color) {
+	RGBAImage opaque = texture;
+	opaque.fill(rgba(color, color, color), 0, 0, opaque.getWidth(), opaque.getHeight());
+	opaque.simpleblit(texture, 0, 0);
+	return opaque;
+}
+
 void BlockImages::createLeaves() { // id 18
 	if (render_leaves_transparent) {
 		createBlock(18, 0, textures.LEAVES_OAK); // oak
@@ -1208,16 +1219,14 @@ void BlockImages::createLeaves() { // id 18
 		createBlock(161, 0, textures.LEAVES_ACACIA); // acacia
 		createBlock(161, 1, textures.LEAVES_BIG_OAK); // dark oak
 	} else {
-		// TODO there are no opaque leaf textures anymore, generate on my own
-		// I dare you lazy m0r13, if you don't fix that before merging into master...
-		// ... sleepy, angry giantess Neringa is going to beat you up
-		createBlock(18, 0, textures.LEAVES_OAK); // oak
-		createBlock(18, 1, textures.LEAVES_SPRUCE); // pine/spruce
-		createBlock(18, 2, textures.LEAVES_OAK); // birch
-		createBlock(18, 3, textures.LEAVES_JUNGLE); // jungle
+		// have to create the opaque leaf textures on our own...
+		createBlock(18, 0, makeLeavesOpaque(textures.LEAVES_OAK, 0x2c)); // oak
+		createBlock(18, 1, makeLeavesOpaque(textures.LEAVES_SPRUCE, 0x31)); // pine/spruce
+		createBlock(18, 2, makeLeavesOpaque(textures.LEAVES_OAK, 0x2c)); // birch
+		createBlock(18, 3, makeLeavesOpaque(textures.LEAVES_JUNGLE, 0x4b)); // jungle
 
-		createBlock(161, 0, textures.LEAVES_ACACIA); // acacia
-		createBlock(161, 1, textures.LEAVES_BIG_OAK); // dark oak
+		createBlock(161, 0, makeLeavesOpaque(textures.LEAVES_ACACIA, 0x2c)); // acacia
+		createBlock(161, 1, makeLeavesOpaque(textures.LEAVES_BIG_OAK, 0x2c)); // dark oak
 	}
 }
 
