@@ -38,8 +38,12 @@ bool ConfigParser::validate() {
 		if ((type == "global" && parsed_section_types.count(name))
 				|| (type != "global" && parsed_section_types.count(type)))
 			continue;
-		validation.section("Section '" + name + "' with type '" + type + "'")
-				.warning("Unknown section type!");
+		std::string section_name = "Section '" + name + "' with type '" + type + "'";
+		validation.section(section_name).warning("Unknown section type!");
+		// small hint about global section names
+		if (type == "global" && *name.rbegin() == 's')
+			validation.section(section_name).info("Global sections do not use the plural "
+					"section name anymore, i.e. it is '[global:section]' instead of '[global:sections]'.");
 	}
 
 	return !validation.isCritical();
