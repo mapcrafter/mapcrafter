@@ -56,8 +56,8 @@ to add your own map to this list.
 ## Documentation and Help ##
 
 The documentation is in the `docs/` directory and you can build it yourself
-with Sphinx. You can read a built version of the documentation
-[here](http://docs.mapcrafter.org) and you can also [download
+with Sphinx. You can read a built version of the documentation on
+[docs.mapcrafter.org](http://docs.mapcrafter.org) and you can also [download
 other builds](https://readthedocs.org/projects/mapcrafter/downloads/).
 
 If you find bugs or problems when using Mapcrafter or if you have ideas for new
