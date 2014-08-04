@@ -33,10 +33,6 @@ namespace fs = boost::filesystem;
 // evil, I know
 using namespace mapcrafter;
 
-#ifdef USE_EASYLOGGING
-_INITIALIZE_EASYLOGGINGPP
-#endif
-
 int main(int argc, char** argv) {
 	std::string config_file;
 	std::string output_dir;
