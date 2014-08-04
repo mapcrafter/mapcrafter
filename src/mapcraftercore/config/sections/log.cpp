@@ -22,7 +22,7 @@
 namespace mapcrafter {
 namespace util {
 
-template<>
+template <>
 config::LogSinkType as<config::LogSinkType>(const std::string& from) {
 	if (from == "output")
 		return config::LogSinkType::OUTPUT;
@@ -33,7 +33,7 @@ config::LogSinkType as<config::LogSinkType>(const std::string& from) {
 	throw std::invalid_argument("Must be 'output', 'file' or 'syslog'!");
 }
 
-template<>
+template <>
 util::LogLevel as<util::LogLevel>(const std::string& from) {
 	util::LogLevel level = util::LogLevelHelper::levelFromString(from);
 	if (level != util::LogLevel::UNKNOWN)

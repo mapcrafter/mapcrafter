@@ -28,7 +28,7 @@
 namespace mapcrafter {
 namespace util {
 
-template<>
+template <>
 mapcrafter::config::Color as<mapcrafter::config::Color>(const std::string& from) {
 	std::string error_message = "Hex color must be in the format '#rrggbb'.";
 	if (from.size() != 7)

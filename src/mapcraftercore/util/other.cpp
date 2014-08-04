@@ -104,7 +104,7 @@ std::string strBool(bool value) {
  * Overwrites the string stream solution for string -> string conversion.
  * Why? Converting the string 'This is a test.' would just result in 'This'
  */
-template<>
+template <>
 std::string as<std::string>(const std::string& from) {
 	return from;
 }
@@ -112,12 +112,12 @@ std::string as<std::string>(const std::string& from) {
 /**
  * Same thing with path -> string conversion.
  */
-template<>
+template <>
 fs::path as<fs::path>(const std::string& from) {
 	return fs::path(from);
 }
 
-template<>
+template <>
 bool as<bool>(const std::string& from) {
 	if (from == "true" || from == "1")
 		return true;

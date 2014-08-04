@@ -132,7 +132,7 @@ public:
 	LogStream(LogLevel level, const std::string& logger, const std::string& file, int line);
 	~LogStream();
 
-	template<typename T>
+	template <typename T>
 	LogStream& operator<<(const T& t) {
 		(*ss) << t;
 		return *this;

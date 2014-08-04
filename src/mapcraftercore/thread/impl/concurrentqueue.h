@@ -28,7 +28,7 @@
 namespace mapcrafter {
 namespace thread {
 
-template<typename T>
+template <typename T>
 class ConcurrentQueue {
 public:
 	ConcurrentQueue();
@@ -44,21 +44,21 @@ private:
 	thread_ns::condition_variable condition_variable;
 };
 
-template<typename T>
+template <typename T>
 ConcurrentQueue<T>::ConcurrentQueue() {
 }
 
-template<typename T>
+template <typename T>
 ConcurrentQueue<T>::~ConcurrentQueue() {
 }
 
-template<typename T>
+template <typename T>
 bool ConcurrentQueue<T>::empty() {
 	thread_ns::unique_lock<thread_ns::mutex> lock(mutex);
 	return queue.empty();
 }
 
-template<typename T>
+template <typename T>
 void ConcurrentQueue<T>::push(T item) {
 	thread_ns::unique_lock<thread_ns::mutex> lock(mutex);
 	if (queue.empty()) {
@@ -69,7 +69,7 @@ void ConcurrentQueue<T>::push(T item) {
 	}
 }
 
-template<typename T>
+template <typename T>
 T ConcurrentQueue<T>::pop() {
 	thread_ns::unique_lock<thread_ns::mutex> lock(mutex);
 	while (queue.empty())

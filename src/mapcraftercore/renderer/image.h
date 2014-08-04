@@ -44,7 +44,7 @@ void blend(RGBAPixel& dest, const RGBAPixel& source);
 void pngReadData(png_structp pngPtr, png_bytep data, png_size_t length);
 void pngWriteData(png_structp pngPtr, png_bytep data, png_size_t length);
 
-template<typename Pixel>
+template <typename Pixel>
 class Image {
 public:
 	Image(int width = 0, int height = 0);
@@ -104,51 +104,51 @@ public:
 			RGBAPixel background = rgba(255, 255, 255, 255)) const;
 };
 
-template<typename Pixel>
+template <typename Pixel>
 Image<Pixel>::Image(int width, int height)
 	:width(width), height(height) {
 	data.resize(width * height);
 }
 
-template<typename Pixel>
+template <typename Pixel>
 Image<Pixel>::~Image() {
 }
 
-template<typename Pixel>
+template <typename Pixel>
 int Image<Pixel>::getWidth() const {
 	return width;
 }
 
-template<typename Pixel>
+template <typename Pixel>
 int Image<Pixel>::getHeight() const {
 	return height;
 }
 
-template<typename Pixel>
+template <typename Pixel>
 Pixel Image<Pixel>::getPixel(int x, int y) const {
 	if (x >= width || x < 0 || y >= height || y < 0)
 		return 0;
 	return data[y * width + x];
 }
 
-template<typename Pixel>
+template <typename Pixel>
 void Image<Pixel>::setPixel(int x, int y, Pixel pixel) {
 	if (x >= width || x < 0 || y >= height || y < 0)
 		return;
 	data[y * width + x] = pixel;
 }
 
-template<typename Pixel>
+template <typename Pixel>
 const Pixel& Image<Pixel>::pixel(int x, int y) const {
 	return data[y * width + x];
 }
 
-template<typename Pixel>
+template <typename Pixel>
 Pixel& Image<Pixel>::pixel(int x, int y) {
 	return data[y * width + x];
 }
 
-template<typename Pixel>
+template <typename Pixel>
 void Image<Pixel>::setSize(int width, int height) {
 	this->width = width;
 	this->height = height;

@@ -55,7 +55,7 @@ public:
 	/**
 	 * Parses the root section of the configuration with the supplied section type object.
 	 */
-	template<typename T>
+	template <typename T>
 	void parseRootSection(T& section);
 
 	/**
@@ -70,7 +70,7 @@ public:
 	 * but you can overwrite this to pass additional options (for example the config
 	 * directory for relative paths) to the section objects.
 	 */
-	template<typename Section, typename SectionFactory = GenericSectionFactory<Section>>
+	template <typename Section, typename SectionFactory = GenericSectionFactory<Section>>
 	void parseSections(std::vector<Section>& sections, const std::string& type,
 			SectionFactory section_factory = GenericSectionFactory<Section>());
 
@@ -78,7 +78,7 @@ public:
 	 * Same as parseSections(std::vector<Section>& sections... but puts the parsed
 	 * sections into a map with section name -> section object.
 	 */
-	template<typename Section, typename SectionFactory = GenericSectionFactory<Section>>
+	template <typename Section, typename SectionFactory = GenericSectionFactory<Section>>
 	void parseSections(std::map<std::string, Section>& sections,
 			const std::string& type,
 			SectionFactory section_factory = GenericSectionFactory<Section>());

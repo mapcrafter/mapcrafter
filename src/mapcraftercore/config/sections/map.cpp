@@ -24,7 +24,7 @@
 namespace mapcrafter {
 namespace util {
 
-template<>
+template <>
 config::ImageFormat as<config::ImageFormat>(const std::string& from) {
 	if (from == "png")
 		return config::ImageFormat::PNG;
