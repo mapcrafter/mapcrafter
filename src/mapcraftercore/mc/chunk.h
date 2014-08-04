@@ -68,7 +68,7 @@ public:
 	/**
 	 * Sets the boundaries of the world.
 	 */
-	void setWorldCrop(const WorldCrop& worldcrop);
+	void setWorldCrop(const WorldCrop& world_crop);
 
 	/**
 	 * Reads the NBT data of the chunk from a buffer. You need to specify a compression
@@ -124,7 +124,7 @@ private:
 
 	// rotation and cropping of the world
 	int rotation;
-	WorldCrop worldcrop;
+	WorldCrop world_crop;
 	// whether the chunk is completely contained (according x- and z-coordinates, not y)
 	bool chunk_completely_contained;
 

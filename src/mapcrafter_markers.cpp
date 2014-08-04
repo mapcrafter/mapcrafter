@@ -41,10 +41,10 @@ void findMarkers(const config::MapcrafterConfig& config, Markers& markers_found,
 	auto worlds = config.getWorlds();
 	auto markers = config.getMarkers();
 	for (auto world_it = worlds.begin(); world_it != worlds.end(); ++world_it) {
-		mc::WorldCrop worldcrop = world_it->second.getWorldCrop();
+		mc::WorldCrop world_crop = world_it->second.getWorldCrop();
 		mc::World world(world_it->second.getInputDir().string(),
 				world_it->second.getDimension());
-		world.setWorldCrop(worldcrop);
+		world.setWorldCrop(world_crop);
 		if (!world.load()) {
 			std::cerr << "Error: Unable to load world " << world_it->first << "!" << std::endl;
 			continue;
@@ -58,8 +58,8 @@ void findMarkers(const config::MapcrafterConfig& config, Markers& markers_found,
 		std::vector<mc::SignEntity> signs = entities.getSigns(world.getWorldCrop());
 		for (auto sign_it = signs.begin(); sign_it != signs.end(); ++sign_it) {
 			// don't use signs not contained in the world boundaries
-			if (!worldcrop.isBlockContainedXZ(sign_it->getPos())
-					&& !worldcrop.isBlockContainedY(sign_it->getPos()))
+			if (!world_crop.isBlockContainedXZ(sign_it->getPos())
+					&& !world_crop.isBlockContainedY(sign_it->getPos()))
 				continue;
 			for (auto marker_it = markers.begin(); marker_it != markers.end(); ++marker_it) {
 				if (!marker_it->matchesSign(*sign_it))

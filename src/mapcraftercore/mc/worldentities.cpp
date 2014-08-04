@@ -170,15 +170,15 @@ void WorldEntitiesCache::update(bool verbose) {
 	writeCacheFile();
 }
 
-std::vector<SignEntity> WorldEntitiesCache::getSigns(WorldCrop worldcrop) const {
+std::vector<SignEntity> WorldEntitiesCache::getSigns(WorldCrop world_crop) const {
 	std::vector<SignEntity> signs;
 
 	for (auto region_it = entities.begin(); region_it != entities.end(); ++region_it) {
-		if (!worldcrop.isRegionContained(region_it->first))
+		if (!world_crop.isRegionContained(region_it->first))
 			continue;
 		for (auto chunk_it = region_it->second.begin();
 				chunk_it != region_it->second.end(); ++chunk_it) {
-			if (!worldcrop.isChunkContained(chunk_it->first))
+			if (!world_crop.isChunkContained(chunk_it->first))
 				continue;
 			for (auto entity_it = chunk_it->second.begin();
 					entity_it != chunk_it->second.end(); ++entity_it) {
@@ -193,8 +193,8 @@ std::vector<SignEntity> WorldEntitiesCache::getSigns(WorldCrop worldcrop) const 
 					entity.findTag<nbt::TagInt>("y").payload
 				);
 
-				if (!worldcrop.isBlockContainedXZ(pos)
-						|| !worldcrop.isBlockContainedY(pos))
+				if (!world_crop.isBlockContainedXZ(pos)
+						|| !world_crop.isBlockContainedY(pos))
 					continue;
 
 				mc::SignEntity::Lines lines = {{

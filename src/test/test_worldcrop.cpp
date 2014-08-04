@@ -26,7 +26,7 @@
 namespace mc = mapcrafter::mc;
 namespace util = mapcrafter::util;
 
-BOOST_AUTO_TEST_CASE(worldcrop_bounds) {
+BOOST_AUTO_TEST_CASE(world_crop_bounds) {
 	mc::Bounds<int> bounds;
 
 	// case 1: no borders
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(worldcrop_bounds) {
 	BOOST_CHECK(!bounds.contains(89));
 }
 
-BOOST_AUTO_TEST_CASE(worldcrop_crop_rectangular) {
+BOOST_AUTO_TEST_CASE(world_crop_crop_rectangular) {
 	mc::WorldCrop crop;
 
 	BOOST_CHECK(crop.isRegionContained(mc::RegionPos(0, 0)));
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(worldcrop_crop_rectangular) {
 	BOOST_CHECK(crop.isChunkContained(mc::ChunkPos(-1, -4)));
 }
 
-BOOST_AUTO_TEST_CASE(worldcrop_crop_circular) {
+BOOST_AUTO_TEST_CASE(world_crop_crop_circular) {
 	mc::WorldCrop crop;
 	mc::BlockPos center(14, 14, 0);
 	int radius = 20;
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(worldcrop_crop_circular) {
 			std::cout << "Chunk " << *it << std::endl;
 }
 
-BOOST_AUTO_TEST_CASE(worldcrop_block_mask) {
+BOOST_AUTO_TEST_CASE(world_crop_block_mask) {
 	mc::BlockMask mask;
 	mask.setAll(true);
 	mask.setRange(0, 2, false);

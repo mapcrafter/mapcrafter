@@ -46,8 +46,8 @@ void Chunk::setRotation(int rotation) {
 	this->rotation = rotation;
 }
 
-void Chunk::setWorldCrop(const WorldCrop& worldcrop) {
-	this->worldcrop = worldcrop;
+void Chunk::setWorldCrop(const WorldCrop& world_crop) {
+	this->world_crop = world_crop;
 }
 
 bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) {
@@ -76,7 +76,7 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 
 	// now we have the original chunk position:
 	// check whether this chunk is completely contained within the cropped world
-	chunk_completely_contained = worldcrop.isChunkCompletelyContained(chunkpos_original);
+	chunk_completely_contained = world_crop.isChunkCompletelyContained(chunkpos_original);
 
 	if (level.hasTag<nbt::TagByte>("TerrainPopulated"))
 		terrain_populated = level.findTag<nbt::TagByte>("TerrainPopulated").payload;
@@ -193,8 +193,8 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos, bool force) const {
 	else
 		add = (sections[section_offsets[section]].add[offset / 2] >> 4) & 0x0f;
 	uint16_t id = sections[section_offsets[section]].blocks[offset] + (add << 8);
-	if (!force && worldcrop.hasBlockMask()) {
-		const BlockMask* mask = worldcrop.getBlockMask();
+	if (!force && world_crop.hasBlockMask()) {
+		const BlockMask* mask = world_crop.getBlockMask();
 		BlockMask::BlockState block_state = mask->getBlockState(id);
 		if (block_state == BlockMask::BlockState::COMPLETELY_HIDDEN)
 			return 0;
@@ -208,16 +208,16 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos, bool force) const {
 
 bool Chunk::checkBlockWorldCrop(int x, int z, int y) const {
 	// first of all check if we should crop unpopulated chunks
-	if (!terrain_populated && worldcrop.hasCropUnpopulatedChunks())
+	if (!terrain_populated && world_crop.hasCropUnpopulatedChunks())
 		return false;
 	// now about the actual world cropping:
 	// get the global position of the block, with the original world rotation
 	BlockPos global_pos = LocalBlockPos(x, z, y).toGlobalPos(chunkpos_original);
 	// check whether the block is contained in the y-bounds.
-	if (!worldcrop.isBlockContainedY(global_pos))
+	if (!world_crop.isBlockContainedY(global_pos))
 		return false;
 	// only check x/z-bounds if the chunk is not completely contained
-	if (!chunk_completely_contained && !worldcrop.isBlockContainedXZ(global_pos))
+	if (!chunk_completely_contained && !world_crop.isBlockContainedXZ(global_pos))
 		return false;
 	return true;
 }
@@ -247,8 +247,8 @@ uint8_t Chunk::getData(const LocalBlockPos& pos, int array, bool force) const {
 		data = sections[section_offsets[section]].getArray(array)[offset / 2] & 0xf;
 	else
 		data = (sections[section_offsets[section]].getArray(array)[offset / 2] >> 4) & 0x0f;
-	if (!force && worldcrop.hasBlockMask()) {
-		const BlockMask* mask = worldcrop.getBlockMask();
+	if (!force && world_crop.hasBlockMask()) {
+		const BlockMask* mask = world_crop.getBlockMask();
 		if (mask->isHidden(getBlockID(pos, true), data))
 			return array == 2 ? 15 : 0;
 	}

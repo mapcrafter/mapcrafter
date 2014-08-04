@@ -70,7 +70,7 @@ bool World::readRegions(const fs::path& region_dir) {
 			continue;
 		RegionPos pos(x, z);
 		// check if we should not crop this region
-		if (!worldcrop.isRegionContained(pos))
+		if (!world_crop.isRegionContained(pos))
 			continue;
 		if (rotation)
 			pos.rotate(rotation);
@@ -102,11 +102,11 @@ void World::setRotation(int rotation) {
 }
 
 WorldCrop World::getWorldCrop() const {
-	return worldcrop;
+	return world_crop;
 }
 
-void World::setWorldCrop(const WorldCrop& worldcrop) {
-	this->worldcrop = worldcrop;
+void World::setWorldCrop(const WorldCrop& world_crop) {
+	this->world_crop = world_crop;
 }
 
 bool World::load() {
@@ -148,7 +148,7 @@ bool World::getRegion(const RegionPos& pos, RegionFile& region) const {
 		return false;
 	region = RegionFile(it->second);
 	region.setRotation(rotation);
-	region.setWorldCrop(worldcrop);
+	region.setWorldCrop(world_crop);
 	return true;
 }
 
