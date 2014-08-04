@@ -16,10 +16,10 @@ resource packs.
 
 Mapcrafter is free software and available under the GPL license. You can access
 the latest source code of Mapcrafter on GitHub:
-https://github.com/m0r13/mapcrafter
+https://github.com/mapcrafter/mapcrafter
 
 There are a few example maps of the renderer on the `GitHub Wiki
-<https://github.com/m0r13/mapcrafter/wiki/Example-maps>`_.  Please feel free to
+<https://github.com/mapcrafter/mapcrafter/wiki/Example-maps>`_.  Please feel free to
 add your own map to this list.
 
 .. image:: mapcrafter.png
@@ -50,7 +50,7 @@ format in :doc:`configuration`.
 
 If you find bugs or problems when using Mapcrafter or if you have ideas for new
 features, then please feel free to add an issue to the `GitHub issue tracker
-<https://github.com/m0r13/mapcrafter/issues>`_.
+<https://github.com/mapcrafter/mapcrafter/issues>`_.
 
 You can contact me in IRC (#mapcrafter on Freenode). Use the `webclient
 <http://webchat.freenode.net/?channels=mapcrafter>`_ if you are new to IRC. I

@@ -31,7 +31,7 @@ General Instructions
 At first you have to get the source code of Mapcrafter.  Clone it directly from
 GitHub if you want the newest version::
 
-    git clone https://github.com/m0r13/mapcrafter.git
+    git clone https://github.com/mapcrafter/mapcrafter.git
 
 Make sure you have all requirements installed. If you are on a Debian-like
 Linux system, you can install these packages with apt::
@@ -86,7 +86,7 @@ Or if you got portmaster installed::
 
 Once this is done compiling (takes a long time), you can go ahead with the normal steps::
 
-    git clone https://github.com/m0r13/mapcrafter.git
+    git clone https://github.com/mapcrafter/mapcrafter.git
     cd mapcrafter
     cmake .
     make
@@ -115,7 +115,7 @@ and select install in the window that pops up, and accept the EULA.
 
 First you will have to clone the latest Mapcrafter source by running::
 
-    git clone https://github.com/m0r13/mapcrafter.git
+    git clone https://github.com/mapcrafter/mapcrafter.git
 
 After this, install the dependencies using brew::
 

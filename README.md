@@ -8,7 +8,7 @@ using Leaflet.js.
 
 Mapcrafter is free software and available under the GPL license.  You can
 access the latest source code of Mapcrafter on GitHub:
-http://github.com/m0r13/mapcrafter
+http://github.com/mapcrafter/mapcrafter
 
 Thanks to pigmap and Minecraft Overviewer, whose documentations and source code
 were very helpful. I also used the alpha blending code of pigmap and some maps
@@ -50,7 +50,7 @@ stuff of the template from Minecraft Overviewer.
 ## Examples ##
 
 There are a few example maps of the renderer on the [GitHub
-Wiki](https://github.com/m0r13/mapcrafter/wiki/Example-maps).  Please feel free
+Wiki](https://github.com/mapcrafter/mapcrafter/wiki/Example-maps).  Please feel free
 to add your own map to this list.
 
 ## Documentation and Help ##
@@ -62,7 +62,7 @@ other builds](https://readthedocs.org/projects/mapcrafter/downloads/).
 
 If you find bugs or problems when using Mapcrafter or if you have ideas for new
 features, then please feel free to add an issue to the [GitHub issue
-tracker](https://github.com/m0r13/mapcrafter/issues).
+tracker](https://github.com/mapcrafter/mapcrafter/issues).
 
 You can contact me in IRC (#mapcrafter on Freenode). Use the 
 [webclient](http://webchat.freenode.net/?channels=mapcrafter>) if you
