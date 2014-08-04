@@ -29,7 +29,7 @@ namespace mc {
 
 BlockMask::BlockMask() {
 	// set all blocks to be shown by default
-	block_states.resize(65536, BlockState::COMPLETLY_SHOWN);
+	block_states.resize(65536, BlockState::COMPLETELY_SHOWN);
 	block_mask.set();
 }
 
@@ -38,14 +38,12 @@ BlockMask::~BlockMask() {
 }
 
 void BlockMask::set(uint16_t id, bool shown) {
-	//std::cout << "set(" << (int) id << " " << shown << ")" << std::endl;
 	for (size_t i = 0; i < 16; i++)
 		block_mask[16 * id + i] = shown;
 	updateBlockState(id);
 }
 
 void BlockMask::set(uint16_t id, uint8_t data, bool shown) {
-	//std::cout << "set(" << (int) id << ", " << (int) data << ", " << shown << ")" << std::endl;
 	if (data >= 16)
 		return;
 	block_mask[16 * id + data] = shown;
@@ -55,54 +53,81 @@ void BlockMask::set(uint16_t id, uint8_t data, bool shown) {
 void BlockMask::set(uint16_t id, uint8_t data, uint8_t bitmask, bool shown) {
 	// iterate through every possible block data values and check if (i % bitmask) == data
 	for (uint8_t i = 0; i < 16; i++)
-		if ((i & bitmask) == data) {
+		if ((i & bitmask) == data)
 			block_mask[16 * id + i] = shown;
-			//std::cout << (int) id << " " << (int) i << std::endl;
-		}
 	updateBlockState(id);
 }
 
 void BlockMask::setRange(uint16_t id1, uint16_t id2, bool shown) {
-	//std::cout << "setRange(" << (int) id1 << ", " << (int) id2 << ", " << shown << ")" << std::endl;
 	for (size_t id = id1; id <= id2; id++)
 		set(id, shown);
 }
 
 void BlockMask::setAll(bool shown) {
-	//std::cout << "setAll(" << shown << ")" << std::endl;
 	if (shown) {
 		block_mask.set();
-		std::fill(block_states.begin(), block_states.end(), BlockState::COMPLETLY_SHOWN);
+		std::fill(block_states.begin(), block_states.end(), BlockState::COMPLETELY_SHOWN);
 	} else {
 		block_mask.reset();
-		std::fill(block_states.begin(), block_states.end(), BlockState::COMPLETLY_HIDDEN);
+		std::fill(block_states.begin(), block_states.end(), BlockState::COMPLETELY_HIDDEN);
 	}
 }
 
-bool BlockMask::loadFromString(const std::string& str, std::string& error) {
+void BlockMask::loadFromString(const std::string& str) {
+	// TL;DR: Parsing this in C++ is annoying
 	std::stringstream ss(util::trim(str));
-	std::string part;
-	while (ss >> part) {
-		bool shown = part[0] != '!';
+	std::string group;
+	// go through the specified block groups and try to parse them...
+	while (ss >> group) {
+		// whether this group is to be shown/hidden
+		bool shown = group[0] != '!';
 		if (!shown)
-			part = part.substr(1);
-		//std::cout << part << " " << shown << std::endl;
-		if (part.find('-') != std::string::npos) {
-			std::string part1 = part.substr(0, part.find('-'));
-			std::string part2 = part.substr(part.find('-') + 1);
-			setRange(util::as<uint16_t>(part1), util::as<uint16_t>(part2), shown);
-		} else if (part.find(':') != std::string::npos) {
-			std::string part1 = part.substr(0, part.find(':'));
-			std::string part2 = part.substr(part.find(':') + 1);
-			set(util::as<uint16_t>(part1), util::as<uint16_t>(part2), shown);
-		} else {
-			if (part == "*")
-				setAll(shown);
-			else
-				set(util::as<uint16_t>(part), shown);
+			group = group.substr(1);
+		// just try to convert parts of this block group
+		// throw another exception with an error message in case anything is invalid
+		try {
+			if (group.find('-') != std::string::npos) {
+				uint16_t id1 = util::as<uint16_t>(group.substr(0, group.find('-')));
+				uint16_t id2 = util::as<uint16_t>(group.substr(group.find('-') + 1));
+				setRange(id1, id2, shown);
+			} else if (group.find(':') != std::string::npos) {
+				std::string id_part = group.substr(0, group.find(':'));
+				std::string data_part = group.substr(group.find(':') + 1);
+				// bitmask defaults to 15 if not specified
+				// means that exactly that id:data is selected
+				std::string bitmask_part = "15";
+
+				if (data_part.find('b') != std::string::npos) {
+					bitmask_part = data_part.substr(data_part.find('b') + 1);
+					data_part = data_part.substr(0, data_part.find('b'));
+				}
+
+				uint16_t id = util::as<uint16_t>(id_part);
+
+				uint16_t data;
+				data = util::as<uint16_t>(data_part);
+				if (data >= 16)
+					throw std::invalid_argument("Invalid data value '" + data_part
+							+ "', data value is limited to four bits");
+
+				uint16_t bitmask;
+				bitmask = util::as<uint16_t>(bitmask_part);
+				if (bitmask >= 16)
+					throw std::invalid_argument("Invalid bitmask '" + bitmask_part
+							+ "', bitmask is limited to four bits");
+
+				set(id, data, bitmask, shown);
+			} else {
+				if (group == "*")
+					setAll(shown);
+				else
+					set(util::as<uint16_t>(group), shown);
+			}
+		} catch (std::invalid_argument& exception) {
+			throw std::invalid_argument("Invalid block group '" + group
+					+ "' (" + exception.what() + ")");
 		}
 	}
-	return true;
 }
 
 const BlockMask::BlockState BlockMask::getBlockState(uint16_t id) const {
@@ -122,9 +147,9 @@ void BlockMask::updateBlockState(uint16_t id) {
 		block[i] = block_mask[16 * id + i];
 
 	if (block.all())
-		block_states[id] = BlockState::COMPLETLY_SHOWN;
+		block_states[id] = BlockState::COMPLETELY_SHOWN;
 	else if (block.none())
-		block_states[id] = BlockState::COMPLETLY_HIDDEN;
+		block_states[id] = BlockState::COMPLETELY_HIDDEN;
 	else
 		block_states[id] = BlockState::PARTIALLY_HIDDEN_SHOWN;
 }
@@ -268,67 +293,15 @@ const BlockMask* WorldCrop::getBlockMask() const {
 	return block_mask.get();
 }
 
-bool WorldCrop::loadBlockMask(const std::string& str, std::string& error) {
+void WorldCrop::loadBlockMask(const std::string& str) {
 	block_mask.reset(new BlockMask);
-	if (!block_mask->loadFromString(str, error)) {
+	try {
+		block_mask->loadFromString(str);
+	} catch (std::invalid_argument& exception) {
 		block_mask.reset();
-		return false;
+		throw exception;
 	}
-	return true;
 }
-
-//void WorldCrop::initBlockMask() {
-//	has_block_mask = false;
-//	block_mask.reset(new BlockMask);
-//	block_mask->setAll(true);
-	/*
-	block_mask->setAll(true);
-	block_mask->setRange(1, 3, false); // stone, dirt, grass
-	block_mask->setRange(7, 9, false); // bedrock, water
-	block_mask->setRange(12, 13, false); // sand, gravel
-	block_mask->setRange(15, 16, false); // iron, coal
-	block_mask->set(24, false); // sandstone
-	*/
-
-	/*
-	block_mask->set(17, 0, false); // jungle wood
-	block_mask->set(17, 4, false); // jungle wood
-	block_mask->set(17, 8, false); // jungle wood
-	block_mask->set(17, 4 | 8, false); // jungle wood
-	*/
-
-	/*
-	//block_mask->set(17, 3, false); // jungle wood
-	//block_mask->set(17, 3 | 4, false); // jungle wood
-	//block_mask->set(17, 3 | 8, false); // jungle wood
-	//block_mask->set(17, 3 | 4 | 8, false); // jungle wood
-	//block_mask->set(18, 3, false); // jungle leaves
-	//block_mask->set(18, 3 | 4, false); // jungle leaves
-	//block_mask->set(18, 3 | 8, false); // jungle leaves
-	//block_mask->set(18, 3 | 4 | 8, false); // jungle leaves
-
-	block_mask->set(17, 3, util::binary<11>::value, false);
-	block_mask->set(18, 3, util::binary<11>::value, false);
-
-	block_mask->set(106, false); // vines
-	*/
-
-	/*
-	block_mask->setRange(2, 3, false);
-	block_mask->setRange(8, 9, false);
-	block_mask->setRange(12, 13, false);
-	block_mask->setRange(17, 18, false);
-	block_mask->set(24, false);
-	block_mask->set(31, false);
-	block_mask->setRange(78, 79, false);
-	block_mask->set(82, false);
-	block_mask->set(106, false);
-	block_mask->set(161, false);
-	*/
-
-	//block_mask->loadFromString("* !17:2 !17:6 !17:10 !17:14 !18:2 !18:6 !18:10 !18:14");
-	//block_mask->loadFromString("* !2-3  !8-9 !12-13  !17-18 !24 !31   !78-79 !82 !106 !161");
-//}
 
 }
 }

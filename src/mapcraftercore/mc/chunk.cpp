@@ -196,9 +196,9 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos, bool force) const {
 	if (!force && worldcrop.hasBlockMask()) {
 		const BlockMask* mask = worldcrop.getBlockMask();
 		BlockMask::BlockState block_state = mask->getBlockState(id);
-		if (block_state == BlockMask::BlockState::COMPLETLY_HIDDEN)
+		if (block_state == BlockMask::BlockState::COMPLETELY_HIDDEN)
 			return 0;
-		else if (block_state == BlockMask::BlockState::COMPLETLY_SHOWN)
+		else if (block_state == BlockMask::BlockState::COMPLETELY_SHOWN)
 			return id;
 		if (mask->isHidden(id, getBlockData(pos, true)))
 			return 0;

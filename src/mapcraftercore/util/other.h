@@ -59,7 +59,7 @@ T as(const std::string& from) {
 	ss << from;
 	ss >> to;
 	if (!ss || !ss.eof())
-		throw std::invalid_argument("Unable to convert '" + from + "'!");
+		throw std::invalid_argument("Unable to parse '" + from + "'");
 	return to;
 }
 

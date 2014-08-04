@@ -128,6 +128,8 @@ private:
 	// whether the chunk is completely contained (according x- and z-coordinates, not y)
 	bool chunk_completely_contained;
 
+	// whether ores, trees, other special structures are already populated in this chunk
+	// read from the chunk nbt format (Level["TerrainPopulated"])
 	bool terrain_populated;
 
 	// the index of the chunk sections in the sections array

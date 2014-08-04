@@ -110,7 +110,7 @@ std::string as<std::string>(const std::string& from) {
 }
 
 /**
- * Same thing with string -> string conversion.
+ * Same thing with path -> string conversion.
  */
 template<>
 fs::path as<fs::path>(const std::string& from) {
@@ -123,7 +123,7 @@ bool as<bool>(const std::string& from) {
 		return true;
 	if (from == "false" || from == "0")
 		return false;
-	throw std::invalid_argument("Must be one of true/false or 0/1.");
+	throw std::invalid_argument("Must be one of true/false or 0/1");
 }
 
 unsigned int parseHexNumber(const std::string& hex) {

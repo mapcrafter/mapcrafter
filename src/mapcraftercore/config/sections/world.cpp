@@ -194,9 +194,12 @@ void WorldSection::postParse(const INIConfigSection& section,
 
 	worldcrop.setCropUnpopulatedChunks(crop_unpopulated_chunks.getValue());
 	if (block_mask.isLoaded()) {
-		std::string error;
-		if (!worldcrop.loadBlockMask(block_mask.getValue(), error))
-			validation.error("There is a problem parsing the block mask: " + error);
+		try {
+			worldcrop.loadBlockMask(block_mask.getValue());
+		} catch (std::invalid_argument& exception) {
+			validation.error(std::string("There is a problem parsing the block mask: ")
+				+ exception.what());
+		}
 	}
 
 	// check if required options were specified
