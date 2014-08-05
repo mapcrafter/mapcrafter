@@ -284,12 +284,23 @@ Furthermore there are two different types of world cropping:
     a cropped world. This also means that you should delete the already 
     rendered map (delete <output_dir>/<map_name>).
 
-With the following option it is also possible to hide or show only specific blocks.
+The provided options for world cropping are very versatile as you can see
+with the next two options:
+
+``crop_unpopulated_chunks = true|false``
+
+    **Default:** ``false``
+    
+    If you are bored of the chunks with unpopulated terrain at the edges of
+    your world, e.g. no trees, ores and other structures, you can skip rendering
+    them with this option. If you are afraid someone might use this to find
+    rare ores such as Diamond or Emerald, you should not enable this option.
 
 ``block_mask = <block mask>``
 
     **Default:** *show all blocks*
     
+    With the block mask option it is possible to hide or shown only specific blocks.
     The block mask is a space separated list of block groups you want to 
     hide/show. If a ``!`` precedes a block group, all blocks of this block group are
     hidden, otherwise they are shown. Per default, all blocks are shown.
