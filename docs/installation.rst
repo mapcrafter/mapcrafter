@@ -177,7 +177,7 @@ packages on mapcrafter.org:
 
 `http://mapcrafter.org/windows <http://mapcrafter.org/windows>`_
 
-If you are as crazy as experimental Mapcrafter is on Windows, you build Mapcrafter
+If you are as crazy as experimental Mapcrafter is on Windows, you can build Mapcrafter
 on Windows on your own. There is a build package for Windows with instructions 
 on GitHub in the mapcrafter-buildfiles repository:
 
