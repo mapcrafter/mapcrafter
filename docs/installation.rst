@@ -172,13 +172,16 @@ file and unpack required texture files.
 Windows
 =======
 
-There is an experimental build for Windows. For now, it's only a 64-bit build.
-Because it's experimental you should only use it if you know what you are doing.
-Please report any problems you find when using it.
+Mapcrafter on Windows is still a bit experimental, but there are pre-built
+packages on mapcrafter.org:
 
-You can download it from mapcrafter.org:
+`http://mapcrafter.org/windows <http://mapcrafter.org/windows>`_
 
-`http://mapcrafter.org/windows/mapcrafterdist.zip <http://mapcrafter.org/windows/mapcrafterdist.zip>`_
+If you are as crazy as experimental Mapcrafter is on Windows, you build Mapcrafter
+on Windows on your own. There is a build package for Windows with instructions 
+on GitHub in the mapcrafter-buildfiles repository:
+
+`https://github.com/mapcrafter/mapcrafter-buildfiles/tree/master/windows <https://github.com/mapcrafter/mapcrafter-buildfiles/tree/master/windows>`_
 
 .. _resources_textures:
 

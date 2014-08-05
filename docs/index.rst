@@ -9,8 +9,8 @@ Mapcrafter is a high performance Minecraft map renderer written in C++. It rende
 Minecraft worlds to a bunch of images which are viewable like a Google Map
 in any webbrowser using Leaflet.js.
 
-It runs on Linux and other Unix-like operating systems like Mac OS. 
-There is also an experimental build for Windows (see :ref:`installation_windows`).
+It runs on Linux and other Unix-like operating systems like Mac OS and
+has also an experimental support for Windows (see :ref:`installation_windows`).
 The renderer works with the Anvil world format and the Minecraft 1.6
 resource packs.
 
