@@ -134,19 +134,19 @@ public:
 	 * For example:
 	 * - Hide all blocks except blocks with id 1,7,8,9 or id 3 / data 2:
 	 *     '!* 1 3:2 7-9'
-	 * - Show all blocks except jungle wood and leaves:
-	 *     '!17:3b3 !18:3b3' (Jungle wood and leaves have id 17 and 18,
-	 *                        also use data value 3 for first two bits (bitmask 3),
+	 * - Show all blocks except jungle wood and jungle leaves:
+	 *     '!17:3b3 !18:3b3' (Jungle wood and jungle leaves have id 17 and 18
+	 *                        and use data value 3 for first two bits (bitmask 3 = 0b11),
 	 *                        other bits are used otherwise -> ignoring all those bits)
 	 *
 	 * TL;DR (except the space at the end): (!?(\*|\d+(:\d+(b\d+)?)?|\d+-\d+) )+
 	 */
-	void loadFromString(const std::string& str);
+	void loadFromStringDefinition(const std::string& definition);
 
 	/**
 	 * Returns whether all, none, or some blocks with a specific id are hidden/shown.
 	 */
-	const BlockMask::BlockState getBlockState(uint16_t id) const;
+	const BlockMask::BlockState& getBlockState(uint16_t id) const;
 
 	/**
 	 * Returns whether a block
@@ -249,9 +249,9 @@ public:
 	const BlockMask* getBlockMask() const;
 
 	/**
-	 * Loads the block mask from a string. See BlockMask::loadFromString.
+	 * Loads the block mask from a string definition. See BlockMask::loadFromString.
 	 */
-	void loadBlockMask(const std::string& str);
+	void loadBlockMask(const std::string& definition);
 
 private:
 	// type of world boundaries -- either RECTANGULAR or CIRCULAR

@@ -164,16 +164,16 @@ BOOST_AUTO_TEST_CASE(world_crop_block_mask) {
 	BOOST_CHECK_EQUAL(mask.getBlockState(42), mc::BlockMask::BlockState::COMPLETELY_SHOWN);
 	BOOST_CHECK(!mask.isHidden(42, 0));
 
-	BOOST_CHECK_NO_THROW(mask.loadFromString("!* 1 3:2 7-9"));
-	BOOST_CHECK_NO_THROW(mask.loadFromString("!17:3b3 !18:3b3"));
-	BOOST_CHECK_THROW(mask.loadFromString("1f"), std::invalid_argument);
-	BOOST_CHECK_THROW(mask.loadFromString("9999999999"), std::invalid_argument);
-	BOOST_CHECK_THROW(mask.loadFromString("3-f42"), std::invalid_argument);
-	BOOST_CHECK_THROW(mask.loadFromString("8:6f"), std::invalid_argument);
-	BOOST_CHECK_THROW(mask.loadFromString("5::3"), std::invalid_argument);
-	BOOST_CHECK_THROW(mask.loadFromString("2:"), std::invalid_argument);
-	BOOST_CHECK_THROW(mask.loadFromString("2:16"), std::invalid_argument);
-	BOOST_CHECK_THROW(mask.loadFromString("2:-2"), std::invalid_argument);
-	BOOST_CHECK_THROW(mask.loadFromString("3:15b"), std::invalid_argument);
-	BOOST_CHECK_THROW(mask.loadFromString("3:15b18"), std::invalid_argument);
+	BOOST_CHECK_NO_THROW(mask.loadFromStringDefinition("!* 1 3:2 7-9"));
+	BOOST_CHECK_NO_THROW(mask.loadFromStringDefinition("!17:3b3 !18:3b3"));
+	BOOST_CHECK_THROW(mask.loadFromStringDefinition("1f"), std::invalid_argument);
+	BOOST_CHECK_THROW(mask.loadFromStringDefinition("9999999999"), std::invalid_argument);
+	BOOST_CHECK_THROW(mask.loadFromStringDefinition("3-f42"), std::invalid_argument);
+	BOOST_CHECK_THROW(mask.loadFromStringDefinition("8:6f"), std::invalid_argument);
+	BOOST_CHECK_THROW(mask.loadFromStringDefinition("5::3"), std::invalid_argument);
+	BOOST_CHECK_THROW(mask.loadFromStringDefinition("2:"), std::invalid_argument);
+	BOOST_CHECK_THROW(mask.loadFromStringDefinition("2:16"), std::invalid_argument);
+	BOOST_CHECK_THROW(mask.loadFromStringDefinition("2:-2"), std::invalid_argument);
+	BOOST_CHECK_THROW(mask.loadFromStringDefinition("3:15b"), std::invalid_argument);
+	BOOST_CHECK_THROW(mask.loadFromStringDefinition("3:15b18"), std::invalid_argument);
 }
