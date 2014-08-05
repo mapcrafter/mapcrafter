@@ -282,7 +282,51 @@ Furthermore there are two different types of world cropping:
     therefore not supported by the renderer. Due to that you should 
     completely rerender the map when you want to change the boundaries of 
     a cropped world. This also means that you should delete the already 
-    rendered map (delete <output_dir>/<map_name>). 
+    rendered map (delete <output_dir>/<map_name>).
+
+With the following option it is also possible to hide or show only specific blocks.
+
+``block_mask = <block mask>``
+
+    **Default:** *show all blocks*
+    
+    The block mask is a space separated list of block groups you want to 
+    hide/show. If a ``!`` precedes a block group, all blocks of this block group are
+    hidden, otherwise they are shown. Per default, all blocks are shown.
+    Possible block groups are:
+    
+    * All blocks:
+      
+      * ``*``
+    
+    * A single block (independent of block data):
+      
+      * ``[blockid]``
+    
+    * A single block with specific block data:
+      
+      * ``[blockid]:[blockdata]``
+    
+    * A range of blocks:
+      
+      * ``[blockid1]-[blockid2]``
+    
+    * All block with a specific id and ``(block data & bitmask) == specified data``:
+      
+      * ``[blockid]:[blockdata]b[bitmask]``
+    
+    For example:
+    
+    * Hide all blocks except blocks with id 1,7,8,9 or id 3 / data 2:
+    
+      * ``!* 1 3:2 7-9``
+    
+    * Show all blocks except jungle wood and jungle leaves:
+    
+      * ``!17:3b3 !18:3b3``
+      * Jungle wood and jungle leaves have id 17 and 18 and use data value 3 for first two bits (bitmask 3 = 0b11)
+      * other bits are used otherwise -> ignore all those bits
+
 
 Map Options
 -----------
