@@ -61,7 +61,7 @@ If you install the texture files to ``src/data/textures``, they will be copied
 to a path Mapcrafter will automatically detect when installing Mapcrafter with ``make install``.
 
 FreeBSD 10
-----------
+==========
 
 Mapcrafter builds fine on FreeBSD 10, 9 is not tested but could also build there.
 
@@ -92,7 +92,7 @@ Once this is done compiling (takes a long time), you can go ahead with the norma
     make
 
 Mac OS X
---------
+========
 
 Currently there are no pre built packages available for Mac OS X but building it is relatively simple.
 
