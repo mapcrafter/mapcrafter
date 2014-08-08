@@ -30,7 +30,11 @@
 namespace mapcrafter {
 namespace config {
 
-class ValidationMessage;
+class INIConfigError : public std::runtime_error {
+public:
+	INIConfigError(const std::string& what)
+		: std::runtime_error(what) {}
+};
 
 typedef std::pair<std::string, std::string> INIConfigEntry;
 
@@ -74,13 +78,12 @@ public:
 	INIConfig();
 	~INIConfig();
 
-	bool load(std::istream& in, ValidationMessage& msg);
-	bool load(std::istream& in);
-	bool loadFile(const std::string& filename, ValidationMessage& msg);
-	bool loadFile(const std::string& filename);
+	void load(std::istream& in);
+	void loadFile(const std::string& filename);
+	void loadString(const std::string& str);
 
-	bool write(std::ostream& out) const;
-	bool writeFile(const std::string& filename) const;
+	void write(std::ostream& out) const;
+	void writeFile(const std::string& filename) const;
 
 	bool hasSection(const std::string& type, const std::string& name) const;
 

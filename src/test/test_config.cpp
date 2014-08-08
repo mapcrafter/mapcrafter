@@ -56,8 +56,7 @@ BOOST_AUTO_TEST_CASE(config_test) {
 
 BOOST_AUTO_TEST_CASE(config_testReadWrite) {
 	config::INIConfig c;
-	if (!c.loadFile("data/config/test.conf"))
-		BOOST_ERROR("Unable to load test config file data/config/test.conf!");
+	c.loadFile("data/config/test.conf");
 	std::ifstream in("data/config/test.conf");
 	std::string in_data((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
 

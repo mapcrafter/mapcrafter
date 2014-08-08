@@ -19,9 +19,8 @@
 
 #include "iniconfig.h"
 
-#include "validation.h"
-
 #include <fstream>
+#include <sstream>
 
 namespace mapcrafter {
 namespace config {
@@ -113,7 +112,7 @@ INIConfig::INIConfig() {
 INIConfig::~INIConfig() {
 }
 
-bool INIConfig::load(std::istream& in, ValidationMessage& msg) {
+void INIConfig::load(std::istream& in) {
 	int section = -1;
 	std::string line;
 	size_t line_number = 0;
@@ -130,9 +129,9 @@ bool INIConfig::load(std::istream& in, ValidationMessage& msg) {
 		// a line with a new section
 		else if (line[0] == '[') {
 			if (line[line.size() - 1] != ']') {
-				msg = ValidationMessage::error("Expecting ']' at end of line "
+				throw INIConfigError("Expecting ']' at end of line "
 						+ util::str(line_number) + ".");
-				return false;
+				return;
 			}
 
 			std::string type, name;
@@ -146,9 +145,9 @@ bool INIConfig::load(std::istream& in, ValidationMessage& msg) {
 			}
 
 			if (name.empty()) {
-				msg = ValidationMessage::error("Invalid section name on line "
+				throw INIConfigError("Invalid section name on line "
 						+ util::str(line_number) + ".");
-				return false;
+				return;
 			}
 
 			section++;
@@ -163,9 +162,9 @@ bool INIConfig::load(std::istream& in, ValidationMessage& msg) {
 					break;
 				}
 				if (i == line.size() - 1) {
-					msg = ValidationMessage::error("No '=' found on line "
+					throw INIConfigError("No '=' found on line "
 							+ util::str(line_number) + ".");
-					return false;
+					return;
 				}
 			}
 
@@ -178,43 +177,35 @@ bool INIConfig::load(std::istream& in, ValidationMessage& msg) {
 				sections[section].set(key, value);
 		}
 	}
-
-	return true;
 }
 
-bool INIConfig::load(std::istream& in) {
-	ValidationMessage msg;
-	return load(in, msg);
-}
-
-bool INIConfig::loadFile(const std::string& filename, ValidationMessage& msg) {
+void INIConfig::loadFile(const std::string& filename) {
 	std::ifstream in(filename);
-	if (!in) {
-		msg = ValidationMessage::error("Unable to read file '" + filename + "'!");
-		return false;
-	}
-	return load(in, msg);
+	if (!in)
+		throw INIConfigError("Unable to read file '" + filename + "'!");
+	else
+		load(in);
 }
 
-bool INIConfig::loadFile(const std::string& filename) {
-	ValidationMessage msg;
-	return loadFile(filename, msg);
+void INIConfig::loadString(const std::string& str) {
+	std::stringstream ss(str);
+	load(ss);
 }
 
-bool INIConfig::write(std::ostream& out) const {
+void INIConfig::write(std::ostream& out) const {
 	if (!root.isEmpty())
 		out << root << std::endl;
 	for (size_t i = 0; i < sections.size(); i++)
 		if (sections[i].isNamed())
 			out << sections[i] << std::endl;
-	return true;
 }
 
-bool INIConfig::writeFile(const std::string& filename) const {
+void INIConfig::writeFile(const std::string& filename) const {
 	std::ofstream out(filename);
 	if (!out)
-		return false;
-	return write(out);
+		throw INIConfigError("Unable to write file '" + filename + "'!");
+	else
+		write(out);
 }
 
 bool INIConfig::hasSection(const std::string& type, const std::string& name) const {

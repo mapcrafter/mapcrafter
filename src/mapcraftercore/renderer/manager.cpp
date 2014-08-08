@@ -52,8 +52,13 @@ MapSettings::MapSettings()
  */
 bool MapSettings::read(const std::string& filename) {
 	config::INIConfig config;
-	if (!config.loadFile(filename))
+	try {
+		config.loadFile(filename);
+	} catch (config::INIConfigError& exception) {
+		LOG(WARNING) << "Unable to read map.settings file '" << filename << "': "
+				<< exception.what();
 		return false;
+	}
 
 	config::INIConfigSection& root = config.getRootSection();
 
@@ -113,7 +118,14 @@ bool MapSettings::write(const std::string& filename) const {
 		}
 	}
 
-	return config.writeFile(filename);
+	try {
+		config.writeFile(filename);
+	} catch (config::INIConfigError& exception) {
+		LOG(WARNING) << "Unable to write map.settings file '" << filename << "': "
+				<< exception.what();
+		return false;
+	}
+	return true;
 }
 
 bool MapSettings::syncMapConfig(const config::MapSection& map) {
