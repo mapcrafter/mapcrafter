@@ -75,7 +75,7 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
-**v.1.5 (in progress)**
+**v.1.5**
 
 * Started internal refactoring to improve integration with possible Mapcrafter GUI
   or other programs using Mapcrafter's functionality
