@@ -280,7 +280,8 @@ void Logging::reset() {
 	sinks.clear();
 	sinks_verbosity.clear();
 
-	addSink("output", new LogOutputSink("%(date) [%(level)] [%(logger)] %(message)", "%F %T"));
+	// short form for "%Y-%m-%d %H:%M:%S" is "%F %T", but that doesn't work with MinGW
+	addSink("output", new LogOutputSink("%(date) [%(level)] [%(logger)] %(message)", "%Y-%m-%d %H:%M:%S"));
 }
 
 Logger& Logging::getLogger(const std::string& name) {
