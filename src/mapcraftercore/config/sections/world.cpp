@@ -42,8 +42,7 @@ mc::Dimension as<mc::Dimension>(const std::string& from) {
 namespace mapcrafter {
 namespace config {
 
-WorldSection::WorldSection()
-	: dimension(mc::Dimension::OVERWORLD) {
+WorldSection::WorldSection() {
 }
 
 WorldSection::~WorldSection() {
@@ -51,8 +50,8 @@ WorldSection::~WorldSection() {
 
 std::string WorldSection::getPrettyName() const {
 	if (isGlobal())
-		return "global world section";
-	return "world section '" + getSectionName() + "'";
+		return "Global world section";
+	return "World section '" + getSectionName() + "'";
 }
 
 void WorldSection::setConfigDir(const fs::path& config_dir) {

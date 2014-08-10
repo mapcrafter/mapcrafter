@@ -140,7 +140,7 @@ ValidationMap MapcrafterConfig::parse(const std::string& filename) {
 	// 'map_it->getWorld() != ""' because that's already handled by map section class
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it)
 		if (map_it->getWorld() != "" && !hasWorld(map_it->getWorld())) {
-			validation.section(util::capitalize(map_it->getPrettyName())).error(
+			validation.section(map_it->getPrettyName()).error(
 					"World '" + map_it->getWorld() + "' does not exist!");
 		}
 

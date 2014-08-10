@@ -49,8 +49,8 @@ MapSection::~MapSection() {
 
 std::string MapSection::getPrettyName() const {
 	if (isGlobal())
-		return "global map section";
-	return "map section '" + getSectionName() + "'";
+		return "Global map section";
+	return "Map section '" + getSectionName() + "'";
 }
 
 void MapSection::setConfigDir(const fs::path& config_dir) {

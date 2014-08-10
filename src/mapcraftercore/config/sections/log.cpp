@@ -55,8 +55,8 @@ LogSection::~LogSection() {
 
 std::string LogSection::getPrettyName() const {
 	if (isGlobal())
-		return "global log section " + getSectionName();
-	return "log section '" + getSectionName() + "'";
+		return "Global log section " + getSectionName();
+	return "Log section '" + getSectionName() + "'";
 }
 
 LogSinkType LogSection::getType() const {
