@@ -50,12 +50,12 @@ MapSettings::MapSettings()
 /**
  * This method reads the map settings from a file.
  */
-bool MapSettings::read(const std::string& filename) {
+bool MapSettings::read(const fs::path& filename) {
 	config::INIConfig config;
 	try {
-		config.loadFile(filename);
+		config.loadFile(filename.string());
 	} catch (config::INIConfigError& exception) {
-		LOG(WARNING) << "Unable to read map.settings file '" << filename << "': "
+		LOG(WARNING) << "Unable to read map.settings file '" << filename.string() << "': "
 				<< exception.what();
 		return false;
 	}
@@ -95,7 +95,7 @@ bool MapSettings::read(const std::string& filename) {
 /**
  * This method writes the map settings to a file.
  */
-bool MapSettings::write(const std::string& filename) const {
+bool MapSettings::write(const fs::path& filename) const {
 	config::INIConfig config;
 	config::INIConfigSection& root = config.getRootSection();
 
@@ -119,9 +119,9 @@ bool MapSettings::write(const std::string& filename) const {
 	}
 
 	try {
-		config.writeFile(filename);
+		config.writeFile(filename.string());
 	} catch (config::INIConfigError& exception) {
-		LOG(WARNING) << "Unable to write map.settings file '" << filename << "': "
+		LOG(WARNING) << "Unable to write map.settings file '" << filename.string() << "': "
 				<< exception.what();
 		return false;
 	}
@@ -438,8 +438,11 @@ bool RenderManager::run() {
 	//    -> so the user can still view his already rendered maps while new ones are rendering
 	for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
 		confighelper.setUsedRotations(map_it->getWorld(), map_it->getRotations());
+		fs::path settings_file = config.getOutputPath(map_it->getShortName() + "/map.settings");
+		if (!fs::exists(settings_file))
+			continue;
 		MapSettings settings;
-		if (settings.read(config.getOutputPath(map_it->getShortName() + "/map.settings"))) {
+		if (settings.read(settings_file)) {
 			confighelper.setMapZoomlevel(map_it->getShortName(), settings.max_zoom);
 			for (int i = 0; i < 4; i++)
 				confighelper.setWorldTileOffset(map_it->getWorld(), i, settings.tile_offsets[i]);
@@ -548,12 +551,12 @@ bool RenderManager::run() {
 		// check if we have already an old settings file,
 		// but ignore the settings file if the whole map is force-rendered
 		MapSettings settings;
-		std::string settings_filename = config.getOutputPath(map_name + "/map.settings");
+		fs::path settings_file = config.getOutputPath(map_name + "/map.settings");
 		bool old_settings = !confighelper.isCompleteRenderForce(map_name)
-				&& fs::exists(settings_filename);
+				&& fs::exists(settings_file);
 		if (old_settings) {
 			// try to read the map.settings filename
-			if (!settings.read(settings_filename)) {
+			if (!settings.read(settings_file)) {
 				LOG(ERROR) << "Unable to load old map.settings file!"
 						<< "You have to force-render the whole map.";
 				continue;
@@ -590,7 +593,7 @@ bool RenderManager::run() {
 			// if zoom level has increased, increase zoom levels of tile sets
 			for (auto rotation_it = rotations.begin(); rotation_it != rotations.end();
 					++rotation_it) {
-				std::string output_dir = config.getOutputPath(map_name + "/"
+				fs::path output_dir = config.getOutputPath(map_name + "/"
 						+ config::ROTATION_NAMES_SHORT[*rotation_it]);
 				for (int i = settings.max_zoom; i < world_zoomlevels; i++)
 					increaseMaxZoom(output_dir, map.getImageFormatSuffix());
@@ -604,7 +607,7 @@ bool RenderManager::run() {
 
 		// now write the (possibly new) max zoom level to the settings file
 		settings.max_zoom = world_zoomlevels;
-		settings.write(settings_filename);
+		settings.write(settings_file);
 		// and also update the template with the max zoom level
 		confighelper.setMapZoomlevel(map_name, settings.max_zoom);
 		writeTemplateIndexHtml();
@@ -637,7 +640,7 @@ bool RenderManager::run() {
 				LOG(INFO) << "Last rendering was on " << buffer << ".";
 			}
 
-			std::string output_dir = config.getOutputPath(map_name + "/"
+			fs::path output_dir = config.getOutputPath(map_name + "/"
 					+ config::ROTATION_NAMES_SHORT[rotation]);
 			// if incremental render scan which tiles might have changed
 			std::shared_ptr<TileSet> tile_set(new TileSet(*tile_sets[world_name][rotation]));
@@ -695,7 +698,7 @@ bool RenderManager::run() {
 			// update the settings file with last render time
 			settings.rotations[rotation] = true;
 			settings.last_render[rotation] = start_scanning;
-			settings.write(settings_filename);
+			settings.write(settings_file);
 
 			std::time_t took = std::time(nullptr) - time_start;
 			LOG(INFO) << "[" << progress_maps << "." << progress_rotations << "/"

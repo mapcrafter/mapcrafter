@@ -67,8 +67,8 @@ struct MapSettings {
 
 	MapSettings();
 
-	bool read(const std::string& filename);
-	bool write(const std::string& filename) const;
+	bool read(const fs::path& filename);
+	bool write(const fs::path& filename) const;
 
 	bool syncMapConfig(const config::MapSection& map);
 	static MapSettings byMapConfig(const config::MapSection& map);

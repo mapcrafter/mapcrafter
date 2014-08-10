@@ -207,18 +207,16 @@ fs::path MapcrafterConfig::getTemplateDir() const {
 	return root_section.getTemplateDir();
 }
 
+fs::path MapcrafterConfig::getOutputPath(const std::string& path) const {
+	return getOutputDir() / path;
+}
+
+fs::path MapcrafterConfig::getTemplatePath(const std::string& path) const {
+	return getTemplateDir() / path;
+}
+
 Color MapcrafterConfig::getBackgroundColor() const {
 	return root_section.getBackgroundColor();
-}
-
-std::string MapcrafterConfig::getOutputPath(
-		const std::string& path) const {
-	return (getOutputDir() / path).string();
-}
-
-std::string MapcrafterConfig::getTemplatePath(
-		const std::string& path) const {
-	return (getTemplateDir() / path).string();
 }
 
 bool MapcrafterConfig::hasWorld(const std::string& world) const {
