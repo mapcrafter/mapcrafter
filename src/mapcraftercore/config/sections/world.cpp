@@ -22,6 +22,24 @@
 #include "../iniconfig.h"
 
 namespace mapcrafter {
+namespace util {
+
+template <>
+mc::Dimension as<mc::Dimension>(const std::string& from) {
+	if (from == "nether")
+		return mc::Dimension::NETHER;
+	else if (from == "overworld")
+		return mc::Dimension::OVERWORLD;
+	else if (from == "end")
+		return mc::Dimension::END;
+	else
+		throw std::invalid_argument("Dimension must be one of 'nether', 'overworld' or 'end'!");
+}
+
+}
+}
+
+namespace mapcrafter {
 namespace config {
 
 WorldSection::WorldSection()
@@ -50,7 +68,7 @@ fs::path WorldSection::getInputDir() const {
 }
 
 mc::Dimension WorldSection::getDimension() const {
-	return dimension;
+	return dimension.getValue();
 }
 
 std::string WorldSection::getWorldName() const {
@@ -81,7 +99,7 @@ bool WorldSection::needsWorldCentering() const {
 
 void WorldSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
-	dimension_name.setDefault("overworld");
+	dimension.setDefault(mc::Dimension::OVERWORLD);
 	world_name.setDefault(section.getName());
 
 	default_view.setDefault("");
@@ -101,7 +119,7 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 						+ input_dir.getValue().string() + "' does not exist!");
 		}
 	} else if (key == "dimension")
-		dimension_name.load(key, value, validation);
+		dimension.load(key, value, validation);
 	else if (key == "world_name")
 		world_name.load(key, value, validation);
 
@@ -154,15 +172,6 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 
 void WorldSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
-	if (dimension_name.getValue() == "nether")
-		dimension = mc::Dimension::NETHER;
-	else if (dimension_name.getValue() == "overworld")
-		dimension = mc::Dimension::OVERWORLD;
-	else if (dimension_name.getValue() == "end")
-		dimension = mc::Dimension::END;
-	else
-		validation.error("Unknown dimension '" + dimension_name.getValue() + "'!");
-
 	if (default_zoom.isLoaded() && default_zoom.getValue() < 0)
 		validation.error("The default zoom level must be bigger or equal to 0 ('default_zoom').");
 

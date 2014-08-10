@@ -72,8 +72,8 @@ private:
 	fs::path config_dir;
 
 	Field<fs::path> input_dir;
-	Field<std::string> dimension_name, world_name;
-	mc::Dimension dimension;
+	Field<mc::Dimension> dimension;
+	Field<std::string> world_name;
 
 	Field<std::string> default_view;
 	Field<int> default_zoom, default_rotation;
