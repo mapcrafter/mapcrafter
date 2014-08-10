@@ -24,9 +24,8 @@
 namespace mapcrafter {
 namespace config {
 
-WorldSection::WorldSection(bool global)
+WorldSection::WorldSection()
 	: dimension(mc::Dimension::OVERWORLD) {
-	setGlobal(global);
 }
 
 WorldSection::~WorldSection() {

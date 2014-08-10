@@ -39,10 +39,9 @@ config::ImageFormat as<config::ImageFormat>(const std::string& from) {
 namespace mapcrafter {
 namespace config {
 
-MapSection::MapSection(bool global)
+MapSection::MapSection()
 	: texture_size(12), render_unknown_blocks(false),
 	  render_leaves_transparent(false), render_biomes(false) {
-	setGlobal(global);
 }
 
 MapSection::~MapSection() {

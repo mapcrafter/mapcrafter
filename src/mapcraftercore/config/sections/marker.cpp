@@ -24,8 +24,7 @@
 namespace mapcrafter {
 namespace config {
 
-MarkerSection::MarkerSection(bool global) {
-	setGlobal(global);
+MarkerSection::MarkerSection() {
 }
 
 MarkerSection::~MarkerSection() {

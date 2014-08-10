@@ -29,7 +29,7 @@ namespace config {
 
 class MarkerSection : public ConfigSectionBase {
 public:
-	MarkerSection(bool global = false);
+	MarkerSection();
 	~MarkerSection();
 
 	virtual std::string getPrettyName() const;

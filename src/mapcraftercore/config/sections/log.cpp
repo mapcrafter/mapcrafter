@@ -47,8 +47,7 @@ util::LogLevel as<util::LogLevel>(const std::string& from) {
 namespace mapcrafter {
 namespace config {
 
-LogSection::LogSection(bool global) {
-	setGlobal(global);
+LogSection::LogSection() {
 }
 
 LogSection::~LogSection() {

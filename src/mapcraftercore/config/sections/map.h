@@ -42,7 +42,7 @@ class INIConfigSection;
 
 class MapSection : public ConfigSectionBase {
 public:
-	MapSection(bool global = false);
+	MapSection();
 	~MapSection();
 
 	virtual std::string getPrettyName() const;

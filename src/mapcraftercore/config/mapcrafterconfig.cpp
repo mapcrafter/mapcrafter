@@ -106,8 +106,9 @@ Color MapcrafterConfigRootSection::getBackgroundColor() const {
 	return background_color.getValue();
 }
 
-MapcrafterConfig::MapcrafterConfig()
-	: world_global(true), map_global(true) {
+MapcrafterConfig::MapcrafterConfig() {
+	world_global.setGlobal(true);
+	map_global.setGlobal(true);
 }
 
 MapcrafterConfig::~MapcrafterConfig() {

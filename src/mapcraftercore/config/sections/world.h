@@ -37,7 +37,7 @@ class INIConfigSection;
 
 class WorldSection : public ConfigSectionBase {
 public:
-	WorldSection(bool global = false);
+	WorldSection();
 	~WorldSection();
 
 	virtual std::string getPrettyName() const;

@@ -37,7 +37,7 @@ enum class LogSinkType {
 
 class LogSection : public ConfigSectionBase {
 public:
-	LogSection(bool global = false);
+	LogSection();
 	~LogSection();
 
 	virtual std::string getPrettyName() const;
