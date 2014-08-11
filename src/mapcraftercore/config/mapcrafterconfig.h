@@ -62,6 +62,9 @@ public:
 	MapcrafterConfigRootSection();
 	~MapcrafterConfigRootSection();
 
+	virtual std::string getPrettyName() const;
+	virtual void dump(std::ostream& out) const;
+
 	void setConfigDir(const fs::path& config_dir);
 
 	virtual void preParse(const INIConfigSection& section,
@@ -83,15 +86,6 @@ private:
 };
 
 class MapcrafterConfig {
-private:
-	WorldSection world_global;
-	MapSection map_global;
-	MarkerSection marker_global;
-
-	MapcrafterConfigRootSection root_section;
-	std::map<std::string, WorldSection> worlds;
-	std::vector<MapSection> maps;
-	std::vector<MarkerSection> markers;
 public:
 	MapcrafterConfig();
 	~MapcrafterConfig();
@@ -117,6 +111,16 @@ public:
 	bool hasMarker(const std::string marker) const;
 	const std::vector<MarkerSection>& getMarkers() const;
 	const MarkerSection& getMarker(const std::string& marker) const;
+
+private:
+	WorldSection world_global;
+	MapSection map_global;
+	MarkerSection marker_global;
+
+	MapcrafterConfigRootSection root_section;
+	std::map<std::string, WorldSection> worlds;
+	std::vector<MapSection> maps;
+	std::vector<MarkerSection> markers;
 };
 
 template <typename T>

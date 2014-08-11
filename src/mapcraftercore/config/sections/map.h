@@ -24,6 +24,7 @@
 #include "../validation.h"
 #include "../../util.h"
 
+#include <iostream>
 #include <set>
 #include <string>
 #include <boost/filesystem.hpp>
@@ -38,6 +39,8 @@ enum class ImageFormat {
 	JPEG
 };
 
+std::ostream& operator<<(std::ostream& out, ImageFormat image_format);
+
 class INIConfigSection;
 
 class MapSection : public ConfigSectionBase {
@@ -46,6 +49,7 @@ public:
 	~MapSection();
 
 	virtual std::string getPrettyName() const;
+	virtual void dump(std::ostream& out) const;
 
 	void setConfigDir(const fs::path& config_dir);
 

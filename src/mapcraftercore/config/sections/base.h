@@ -57,6 +57,11 @@ public:
 	 */
 	virtual std::string getPrettyName() const;
 
+	/**
+	 * Prints information about the parsed section to a
+	 */
+	virtual void dump(std::ostream& out) const;
+
 protected:
 	/**
 	 * This method is called before parsing the section entries. The method can output
@@ -94,6 +99,8 @@ private:
 
 	ValidationList validation;
 };
+
+std::ostream& operator<<(std::ostream& out, const ConfigSectionBase& section);
 
 }
 }

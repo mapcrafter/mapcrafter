@@ -54,6 +54,27 @@ std::string WorldSection::getPrettyName() const {
 	return "World section '" + getSectionName() + "'";
 }
 
+void WorldSection::dump(std::ostream& out) const {
+	out << getPrettyName() << ":" << std::endl;
+	out << "  input_dir = " << getInputDir() << std::endl;
+	out << "  dimension = " << getDimension() << std::endl;
+	out << "  world_name = " << getWorldName() << std::endl;
+	out << "  default_view = " << getDefaultView() << std::endl;
+	out << "  default_zoom = " << getDefaultZoom() << std::endl;
+	out << "  default_rotation = " << getDefaultRotation() << std::endl;
+	out << "  min_y = " << min_y.getValue() << std::endl;
+	out << "  max_y = " << max_y.getValue() << std::endl;
+	out << "  min_x = " << min_x.getValue() << std::endl;
+	out << "  max_x = " << max_x.getValue() << std::endl;
+	out << "  min_z = " << min_z.getValue() << std::endl;
+	out << "  max_z = " << max_z.getValue() << std::endl;
+	out << "  center_x = " << center_x.getValue() << std::endl;
+	out << "  center_z = " << center_z.getValue() << std::endl;
+	out << "  radius = " << radius.getValue() << std::endl;
+	out << "  crop_unpopulated_chunks = " << util::strBool(hasCropUnpopulatedChunks()) << std::endl;
+	out << "  block_mask = " << getBlockMask() << std::endl;
+}
+
 void WorldSection::setConfigDir(const fs::path& config_dir) {
 	this->config_dir = config_dir;
 }
@@ -84,6 +105,14 @@ int WorldSection::getDefaultZoom() const {
 
 int WorldSection::getDefaultRotation() const {
 	return default_rotation.getValue();
+}
+
+bool WorldSection::hasCropUnpopulatedChunks() const {
+	return crop_unpopulated_chunks.getValue();
+}
+
+std::string WorldSection::getBlockMask() const {
+	return block_mask.getValue();
 }
 
 const mc::WorldCrop WorldSection::getWorldCrop() const {

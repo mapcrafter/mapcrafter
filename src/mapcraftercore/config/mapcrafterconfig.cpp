@@ -57,6 +57,17 @@ MapcrafterConfigRootSection::MapcrafterConfigRootSection() {
 MapcrafterConfigRootSection::~MapcrafterConfigRootSection() {
 }
 
+std::string MapcrafterConfigRootSection::getPrettyName() const {
+	return "Mapcrafter config root section";
+}
+
+void MapcrafterConfigRootSection::dump(std::ostream& out) const {
+	out << getPrettyName() << ":" << std::endl;
+	out << "  output_dir = " << getOutputDir() << std::endl;
+	out << "  template_dir = " << getTemplateDir() << std::endl;
+	out << "  color = " << background_color.getValue().hex << std::endl;
+}
+
 void MapcrafterConfigRootSection::setConfigDir(const fs::path& config_dir) {
 	this->config_dir = config_dir;
 }
@@ -109,6 +120,7 @@ Color MapcrafterConfigRootSection::getBackgroundColor() const {
 MapcrafterConfig::MapcrafterConfig() {
 	world_global.setGlobal(true);
 	map_global.setGlobal(true);
+	marker_global.setGlobal(true);
 }
 
 MapcrafterConfig::~MapcrafterConfig() {
@@ -147,56 +159,18 @@ ValidationMap MapcrafterConfig::parse(const std::string& filename) {
 	return validation;
 }
 
-std::string rotationsToString(std::set<int> rotations) {
-	std::string str;
-	for (auto it = rotations.begin(); it != rotations.end(); ++it)
-		if (*it >= 0 && *it < 4)
-			str += " " + ROTATION_NAMES[*it];
-	return util::trim(str);
-}
-
-void dumpWorldSection(std::ostream& out, const WorldSection& section) {
-	out << "  input_dir = " << section.getInputDir().string() << std::endl;
-}
-
-void dumpMapSection(std::ostream& out, const MapSection& section) {
-	out << "  name = " << section.getLongName() << std::endl;
-	out << "  world = " << section.getWorld() << std::endl;
-	out << "  texture_dir = " << section.getTextureDir() << std::endl;
-	out << "  rotations = " << rotationsToString(section.getRotations()) << std::endl;
-	out << "  rendermode = " << section.getRendermode() << std::endl;
-	out << "  texture_size = " << section.getTextureSize() << std::endl;
-	out << "  render_unknown_blocks = " << section.renderUnknownBlocks() << std::endl;
-	out << "  render_leaves_transparent = " << section.renderLeavesTransparent() << std::endl;
-	out << "  render_biomes = " << section.renderBiomes() << std::endl;
-	out << "  use_image_timestamps = " << section.useImageModificationTimes() << std::endl;
-}
-
 void MapcrafterConfig::dump(std::ostream& out) const {
-	out << "General:" << std::endl;
-	out << "  output_dir = " << getOutputDir().string() << std::endl;
-	out << "  template_dir = " << getTemplateDir().string() << std::endl;
-	out << std::endl;
+	out << root_section << std::endl;
+	out << world_global << std::endl;
+	out << map_global << std::endl;
+	out << marker_global << std::endl;
 
-	out << "Global world configuration:" << std::endl;
-	dumpWorldSection(out, world_global);
-	out << std::endl;
-
-	out << "Global map configuration:" << std::endl;
-	dumpMapSection(out, map_global);
-	out << std::endl;
-
-	for (auto it = worlds.begin(); it != worlds.end(); ++it) {
-		out << "World '" << it->first << "':" << std::endl;
-		dumpWorldSection(out, it->second);
-		out << std::endl;
-	}
-
-	for (auto it = maps.begin(); it != maps.end(); ++it) {
-		out << "Map '" << it->getShortName() << "':" << std::endl;
-		dumpMapSection(out, *it);
-		out << std::endl;
-	}
+	for (auto it = worlds.begin(); it != worlds.end(); ++it)
+		out << it->second << std::endl;
+	for (auto it = maps.begin(); it != maps.end(); ++it)
+		out << *it << std::endl;
+	for (auto it = markers.begin(); it != markers.end(); ++it)
+		out << *it << std::endl;
 }
 
 fs::path MapcrafterConfig::getOutputDir() const {

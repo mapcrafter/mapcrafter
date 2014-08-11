@@ -36,6 +36,18 @@ std::string MarkerSection::getPrettyName() const {
 	return "Marker section '" + getSectionName() + "'";
 }
 
+void MarkerSection::dump(std::ostream& out) const {
+	out << getPrettyName() << ":" << std::endl;
+	out << "  name = " << getLongName() << std::endl;
+	out << "  prefix = " << getPrefix() << std::endl;
+	out << "  title_format = " << getTitleFormat() << std::endl;
+	out << "  text_format = " << getTextFormat() << std::endl;
+	out << "  icon = " << getIcon() << std::endl;
+	out << "  icon_size = " << getIconSize() << std::endl;
+	out << "  match_empty = " << util::strBool(isMatchedEmpty()) << std::endl;
+	out << "  show_default = " << util::strBool(isShownByDefault()) << std::endl;
+}
+
 std::string MarkerSection::getShortName() const {
 	return getSectionName();
 }
@@ -62,6 +74,10 @@ std::string MarkerSection::getIcon() const {
 
 std::string MarkerSection::getIconSize() const {
 	return icon_size.getValue();
+}
+
+bool MarkerSection::isMatchedEmpty() const {
+	return match_empty.getValue();
 }
 
 bool MarkerSection::isShownByDefault() const {

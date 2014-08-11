@@ -30,10 +30,8 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	std::string configfile = argv[1];
-
 	config::MapcrafterConfig parser;
-	config::ValidationMap validation = parser.parse(configfile);
+	config::ValidationMap validation = parser.parse(argv[1]);
 
 	if (!validation.isEmpty()) {
 		if (validation.isCritical())
@@ -42,11 +40,11 @@ int main(int argc, char **argv) {
 			LOG(WARNING) << "Some notes on your configuration file:";
 		validation.log();
 		LOG(WARNING) << "Please read the documentation about the new configuration file format.";
-	} else {
-		LOG(INFO) << "Everything ok.";
 	}
 
-	std::cout << std::endl << "The parsed configuration file:" << std::endl;
+	if (validation.isCritical())
+		return 1;
+
 	parser.dump(std::cout);
 
 	return 0;
