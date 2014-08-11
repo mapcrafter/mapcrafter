@@ -39,6 +39,10 @@ Linux system, you can install these packages with apt::
     sudo apt-get install libpng-dev libjpeg-dev libboost-iostreams-dev \
     libboost-system-dev libboost-filesystem-dev libboost-program-options-dev
 
+If you are on an RPM based system such as Fedora, you can install these packages with yum::
+
+    sudo yum install boost-devel gcc-c++ libjpeg-devel cmake
+
 Then you can go into the directory with the Mapcrafter source (for example
 ``mapcrafter/``, not ``mapcrafter/src/``) and build it with the following
 commands::
