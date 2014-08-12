@@ -24,6 +24,7 @@
 #include "../validation.h"
 #include "../../util.h"
 
+#include <iostream>
 #include <string>
 
 namespace mapcrafter {
@@ -35,12 +36,15 @@ enum class LogSinkType {
 	SYSLOG
 };
 
+std::ostream& operator<<(std::ostream& out, LogSinkType sink_type);
+
 class LogSection : public ConfigSectionBase {
 public:
 	LogSection();
 	~LogSection();
 
 	virtual std::string getPrettyName() const;
+	virtual void dump(std::ostream& out) const;
 
 	LogSinkType getType() const;
 	util::LogLevel getVerbosity() const;
@@ -52,6 +56,9 @@ public:
 
 	// only for file log
 	fs::path getFile() const;
+
+	// only for syslog
+	bool isEnabled() const;
 
 protected:
 	virtual void preParse(const INIConfigSection& section,

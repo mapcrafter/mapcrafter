@@ -22,6 +22,7 @@
 
 #include "validation.h"
 #include "sections/base.h"
+#include "sections/log.h"
 #include "sections/map.h"
 #include "sections/marker.h"
 #include "sections/world.h"
@@ -121,6 +122,7 @@ private:
 	std::map<std::string, WorldSection> worlds;
 	std::vector<MapSection> maps;
 	std::vector<MarkerSection> markers;
+	std::vector<LogSection> log_sinks;
 };
 
 template <typename T>

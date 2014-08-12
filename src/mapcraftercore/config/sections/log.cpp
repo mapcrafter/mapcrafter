@@ -47,6 +47,16 @@ util::LogLevel as<util::LogLevel>(const std::string& from) {
 namespace mapcrafter {
 namespace config {
 
+std::ostream& operator<<(std::ostream& out, LogSinkType sink_type) {
+	if (sink_type == LogSinkType::OUTPUT)
+		out << "output";
+	else if (sink_type == LogSinkType::FILE)
+		out << "file";
+	else if (sink_type == LogSinkType::SYSLOG)
+		out << "syslog";
+	return out;
+}
+
 LogSection::LogSection() {
 }
 
@@ -57,6 +67,20 @@ std::string LogSection::getPrettyName() const {
 	if (isGlobal())
 		return "Global log section " + getSectionName();
 	return "Log section '" + getSectionName() + "'";
+}
+
+void LogSection::dump(std::ostream& out) const {
+	out << getPrettyName() << ":" << std::endl;
+	out << "  type = " << getType() << std::endl;
+	out << "  verbosity = " << getVerbosity() << std::endl;
+	out << "  log_progress = " << util::strBool(getLogProgress()) << std::endl;
+
+	if (getType() == LogSinkType::OUTPUT || getType() == LogSinkType::FILE) {
+		out << "  format = " << getFormat() << std::endl;
+		out << "  date_format = " << getDateFormat() << std::endl;
+	}
+	if (getType() == LogSinkType::FILE)
+		out << "  file = " << getFile() << std::endl;
 }
 
 LogSinkType LogSection::getType() const {
@@ -87,7 +111,7 @@ void LogSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	verbosity.setDefault(util::LogLevel::INFO);
 	format.setDefault("%(date) [%(level)] [%(logger)] %(message)");
-	date_format.setDefault("%F %T");
+	date_format.setDefault("%Y-%m-%d %H:%M:%S");
 }
 
 bool LogSection::parseField(const std::string key, const std::string value,

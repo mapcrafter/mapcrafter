@@ -121,6 +121,11 @@ int LogLevelHelper::levelToSyslog(LogLevel level) {
 
 #endif
 
+std::ostream& operator<<(std::ostream& out, LogLevel level) {
+	out << LogLevelHelper::levelToString(level);
+	return out;
+}
+
 LogStream::LogStream(LogLevel level, const std::string& logger,
 		const std::string& file, int line)
 	: message({level, logger, file, line, ""}), ss(new std::stringstream) {
