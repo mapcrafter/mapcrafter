@@ -177,18 +177,13 @@ void LogOutputProgressHandler::update(double percentage, double average_speed,
 }
 
 ProgressBar::ProgressBar()
-	: animated(true), last_output_len(0) {
+	: last_output_len(0) {
 }
 
 ProgressBar::~ProgressBar() {
 }
 
 void ProgressBar::update(double percentage, double average_speed, int eta) {
-	// check when not animated if we are at 100% and this is this the first time we are at 100%
-	// so we show the progress bar only one time at the end
-	if (!animated && (value != max || (value == max && last_value == max)))
-		return;
-
 	// try to determine the width of the terminal
 	// use 80 columns as default if we can't determine a terminal size
 	int terminal_width = 80;
@@ -210,16 +205,12 @@ void ProgressBar::update(double percentage, double average_speed, int eta) {
 	std::string progressbar = createProgressBar(progressbar_width, percentage);
 
 	// go to the begin of the line and clear it
-	if (animated)
-		std::cout << "\r" << std::string(last_output_len, ' ') << "\r";
+	std::cout << "\r" << std::string(last_output_len, ' ') << "\r";
 
 	// now show everything
-	std::cout << progressbar << " " << stats;
-	if (animated) {
-		std::cout << "\r";
-		std::cout.flush();
-	} else
-		std::cout << std::endl;
+	// also go back to beginning of line after it, in case there is other output
+	std::cout << progressbar << " " << stats << "\r";
+	std::cout.flush();
 
 	// set this as last shown
 	last_output_len = progressbar.size() + 1 + stats.size();
@@ -262,18 +253,9 @@ std::string ProgressBar::createProgressStats(double percentage, int value, int m
 	return stats + std::string(padding, ' ');
 }
 
-void ProgressBar::setAnimated(bool animated) {
-	this->animated = animated;
-}
-
-bool ProgressBar::isAnimated() const {
-	return animated;
-}
-
 void ProgressBar::finish() {
 	setValue(max);
-	if (animated)
-		std::cout << std::endl;
+	std::cout << std::endl;
 }
 
 } /* namespace util */

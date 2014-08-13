@@ -123,15 +123,8 @@ public:
 
 	virtual void update(double percentage, double average_speed, int eta);
 
-	void setAnimated(bool animated);
-	bool isAnimated() const;
-
 	void finish();
 private:
-	// animated? if yes, it updates the progress bar and makes it "animated"
-	// but not good if you pipe the output in a file, so you can disable it
-	bool animated;
-
 	// length of last output needed to clear the line
 	int last_output_len;
 

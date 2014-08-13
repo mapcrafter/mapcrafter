@@ -691,15 +691,18 @@ bool RenderManager::run() {
 
 			std::shared_ptr<util::MultiplexingProgressHandler> progress(new util::MultiplexingProgressHandler);
 
-			util::ProgressBar* progress_bar = new util::ProgressBar;
-			progress_bar->setAnimated(!opts.batch);
-			progress->addHandler(progress_bar);
+			util::ProgressBar* progress_bar;
+			if (!opts.batch) {
+				progress_bar = new util::ProgressBar;
+				progress->addHandler(progress_bar);
+			}
 
 			//util::LogOutputProgressHandler* log_output = new util::LogOutputProgressHandler;
 			//progress->addHandler(log_output);
 
 			dispatcher->dispatch(context, progress);
-			progress_bar->finish();
+			if (!opts.batch)
+				progress_bar->finish();
 
 			// update the settings file with last render time
 			settings.rotations[rotation] = true;
