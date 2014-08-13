@@ -63,6 +63,37 @@ std::string format_eta(int eta) {
 	return str_seconds;
 }
 
+MultiplexingProgressHandler::MultiplexingProgressHandler()
+	: max(0), value(0) {
+}
+
+MultiplexingProgressHandler::~MultiplexingProgressHandler() {
+}
+
+void MultiplexingProgressHandler::addHandler(IProgressHandler* handler) {
+	handlers.push_back(std::shared_ptr<IProgressHandler>(handler));
+}
+
+int MultiplexingProgressHandler::getMax() const {
+	return max;
+}
+
+void MultiplexingProgressHandler::setMax(int max) {
+	this->max = max;
+	for (auto handler_it = handlers.begin(); handler_it != handlers.end(); ++handler_it)
+		(*handler_it)->setMax(max);
+}
+
+int MultiplexingProgressHandler::getValue() const {
+	return value;
+}
+
+void MultiplexingProgressHandler::setValue(int value) {
+	this->value = value;
+	for (auto handler_it = handlers.begin(); handler_it != handlers.end(); ++handler_it)
+		(*handler_it)->setValue(value);
+}
+
 DummyProgressHandler::DummyProgressHandler()
 	: max(0), value(0) {
 }

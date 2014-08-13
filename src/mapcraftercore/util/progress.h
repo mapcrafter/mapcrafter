@@ -20,7 +20,9 @@
 #ifndef PROGRESS_H_
 #define PROGRESS_H_
 
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace mapcrafter {
 namespace util {
@@ -39,6 +41,25 @@ public:
 
 	virtual int getValue() const = 0;
 	virtual void setValue(int value) = 0;
+};
+
+class MultiplexingProgressHandler : public IProgressHandler {
+public:
+	MultiplexingProgressHandler();
+	virtual ~MultiplexingProgressHandler();
+
+	void addHandler(IProgressHandler* handler);
+
+	virtual int getMax() const;
+	virtual void setMax(int max);
+
+	virtual int getValue() const;
+	virtual void setValue(int value);
+
+protected:
+	int max, value;
+
+	std::vector<std::shared_ptr<IProgressHandler>> handlers;
 };
 
 /**

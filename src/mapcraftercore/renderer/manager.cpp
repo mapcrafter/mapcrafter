@@ -689,11 +689,17 @@ bool RenderManager::run() {
 			else
 				dispatcher = std::make_shared<thread::MultiThreadingDispatcher>(opts.jobs);
 
-			util::ProgressBar* progress_ptr = new util::ProgressBar;
-			progress_ptr->setAnimated(!opts.batch);
-			std::shared_ptr<util::ProgressBar> progress(progress_ptr);
+			std::shared_ptr<util::MultiplexingProgressHandler> progress(new util::MultiplexingProgressHandler);
+
+			util::ProgressBar* progress_bar = new util::ProgressBar;
+			progress_bar->setAnimated(!opts.batch);
+			progress->addHandler(progress_bar);
+
+			//util::LogOutputProgressHandler* log_output = new util::LogOutputProgressHandler;
+			//progress->addHandler(log_output);
+
 			dispatcher->dispatch(context, progress);
-			progress->finish();
+			progress_bar->finish();
 
 			// update the settings file with last render time
 			settings.rotations[rotation] = true;
