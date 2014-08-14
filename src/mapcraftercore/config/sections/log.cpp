@@ -83,6 +83,43 @@ void LogSection::dump(std::ostream& out) const {
 		out << "  file = " << getFile() << std::endl;
 }
 
+void LogSection::configureLogging() const {
+	std::string sink_name = "__" + util::str(getType()) + "__";
+	if (getType() == LogSinkType::FILE)
+		sink_name = getSectionName();
+
+	util::Logging& logging = util::Logging::getInstance();
+	if (verbosity.isLoaded())
+		logging.setSinkVerbosity(sink_name, verbosity.getValue());
+	if (log_progress.isLoaded())
+		logging.setSinkLogProgress(sink_name, log_progress.getValue());
+
+	if (getType() == LogSinkType::FILE) {
+		if (logging.getSink(sink_name) != nullptr)
+			LOG(WARNING) << "Unable to configure file log '" << file.getValue()
+					<< "'. Sink name '" << sink_name << "' is already in use!";
+		else
+			logging.addSink(sink_name, new util::LogFileSink(file.getValue().string()));
+	}
+
+	if (getType() == LogSinkType::OUTPUT || getType() == LogSinkType::FILE) {
+		util::LogSink* sink_ptr = logging.getSink(sink_name);
+		util::FormattedLogSink* sink = dynamic_cast<util::FormattedLogSink*>(sink_ptr);
+		if (sink != nullptr) {
+			if (format.isLoaded())
+				sink->setFormat(format.getValue());
+			if (date_format.isLoaded())
+				sink->setDateFormat(date_format.getValue());
+		} else
+			LOG(WARNING) << "Unable to configure log sink '" << sink_name << "'!";
+	}
+
+#ifdef HAVE_SYSLOG_H
+	if (getType() == LogSinkType::SYSLOG && logging.getSink(sink_name) == nullptr)
+		logging.addSink(sink_name, new util::LogSyslogSink);
+#endif
+}
+
 LogSinkType LogSection::getType() const {
 	return type.getValue();
 }
@@ -135,8 +172,19 @@ bool LogSection::parseField(const std::string key, const std::string value,
 
 void LogSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
-	log_progress.setDefault(type.getValue() == LogSinkType::FILE
-			|| type.getValue() == LogSinkType::SYSLOG);
+	std::string section_name = getSectionName();
+	if (!section_name.empty() && section_name[0] == '_')
+		validation.error("Invalid section name '" + section_name + "'! "
+				"Log section names must not start with an underscore!");
+#ifndef HAVE_SYSLOG_H
+	if (getType() == LogSinkType::SYSLOG)
+		validation.error("You have set the log type to syslog, but syslog is not "
+				"available on your platform!");
+#endif
+	log_progress.setDefault(getType() == LogSinkType::FILE
+			|| getType() == LogSinkType::SYSLOG);
+	if (getType() == LogSinkType::FILE)
+		file.require(validation, "You have to specify a log file ('file')!");
 }
 
 } /* namespace config */

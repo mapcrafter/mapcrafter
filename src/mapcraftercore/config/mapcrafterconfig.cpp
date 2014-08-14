@@ -157,6 +157,9 @@ ValidationMap MapcrafterConfig::parse(const std::string& filename) {
 					"World '" + map_it->getWorld() + "' does not exist!");
 		}
 
+	for (auto log_it = log_sinks.begin(); log_it != log_sinks.end(); ++log_it)
+		log_it->configureLogging();
+
 	return validation;
 }
 

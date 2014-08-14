@@ -46,6 +46,8 @@ public:
 	virtual std::string getPrettyName() const;
 	virtual void dump(std::ostream& out) const;
 
+	void configureLogging() const;
+
 	LogSinkType getType() const;
 	util::LogLevel getVerbosity() const;
 	bool getLogProgress() const;

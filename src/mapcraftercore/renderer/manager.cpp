@@ -691,17 +691,19 @@ bool RenderManager::run() {
 
 			std::shared_ptr<util::MultiplexingProgressHandler> progress(new util::MultiplexingProgressHandler);
 
-			util::ProgressBar* progress_bar;
-			if (!opts.batch) {
+			util::ProgressBar* progress_bar = nullptr;
+			if (opts.batch) {
+				util::Logging::getInstance().setSinkLogProgress("__output__", true);
+			} else {
 				progress_bar = new util::ProgressBar;
 				progress->addHandler(progress_bar);
 			}
 
-			//util::LogOutputProgressHandler* log_output = new util::LogOutputProgressHandler;
-			//progress->addHandler(log_output);
+			util::LogOutputProgressHandler* log_output = new util::LogOutputProgressHandler;
+			progress->addHandler(log_output);
 
 			dispatcher->dispatch(context, progress);
-			if (!opts.batch)
+			if (progress_bar != nullptr)
 				progress_bar->finish();
 
 			// update the settings file with last render time

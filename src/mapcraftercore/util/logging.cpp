@@ -216,11 +216,8 @@ LogFileSink::LogFileSink(const std::string& filename, std::string format,
 		std::string date_format)
 	: FormattedLogSink(format, date_format) {
 	out.open(filename, std::fstream::out | std::fstream::app);
-	/*
-	if (!out) {
-		// TODO handle error
-	}
-	*/
+	if (!out)
+		std::cerr << "Internal logging error: Unable to open log file '" << filename << "'!" << std::endl;
 }
 
 LogFileSink::~LogFileSink() {
@@ -275,6 +272,23 @@ LogLevel Logging::getSinkVerbosity(const std::string& sink) const {
 	return global_verbosity;
 }
 
+void Logging::setSinkLogProgress(const std::string& sink, bool log_progress) {
+	if (log_progress)
+		sinks_log_progress.insert(sink);
+	else
+		sinks_log_progress.erase(sink);
+}
+
+bool Logging::getSinkLogProgress(const std::string& sink) const {
+	return sinks_log_progress.count(sink);
+}
+
+LogSink* Logging::getSink(const std::string& name) {
+	if (sinks.count(name))
+		return sinks[name].get();
+	return nullptr;
+}
+
 void Logging::addSink(const std::string& name, LogSink* sink) {
 	sinks[name] = std::shared_ptr<LogSink>(sink);
 }
@@ -284,9 +298,10 @@ void Logging::reset() {
 	loggers.clear();
 	sinks.clear();
 	sinks_verbosity.clear();
+	sinks_log_progress.clear();
 
 	// short form for "%Y-%m-%d %H:%M:%S" is "%F %T", but that doesn't work with MinGW
-	addSink("output", new LogOutputSink("%(date) [%(level)] [%(logger)] %(message)", "%Y-%m-%d %H:%M:%S"));
+	addSink("__output__", new LogOutputSink("%(date) [%(level)] [%(logger)] %(message)", "%Y-%m-%d %H:%M:%S"));
 }
 
 Logger& Logging::getLogger(const std::string& name) {
@@ -315,6 +330,8 @@ void Logging::handleLogMessage(const LogMessage& message) {
 	if (message.level > maximum_verbosity)
 		return;
 	for (auto it = sinks.begin(); it != sinks.end(); ++it) {
+		if (message.logger == "progress" && !getSinkLogProgress(it->first))
+			continue;
 		if (message.level <= getSinkVerbosity(it->first))
 			(*it->second).sink(message);
 	}
