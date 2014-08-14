@@ -27,7 +27,6 @@
 #include <iostream>
 #include <map>
 #include <memory>
-#include <set>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -200,7 +199,7 @@ public:
  */
 class FormattedLogSink : public LogSink {
 public:
-	FormattedLogSink(std::string format = "", std::string date_format = "");
+	FormattedLogSink();
 	virtual ~FormattedLogSink();
 
 	/**
@@ -238,7 +237,7 @@ protected:
  */
 class LogOutputSink : public FormattedLogSink {
 public:
-	LogOutputSink(std::string format = "", std::string date_format = "");
+	LogOutputSink();
 	virtual ~LogOutputSink();
 
 	virtual void sinkFormatted(const LogMessage& message, const std::string& formatted);
@@ -249,8 +248,7 @@ public:
  */
 class LogFileSink : public FormattedLogSink {
 public:
-	LogFileSink(const std::string& filename, std::string format = "",
-			std::string date_format = "");
+	LogFileSink(const std::string& filename);
 	virtual ~LogFileSink();
 
 	virtual void sinkFormatted(const LogMessage& message, const std::string& formatted);
@@ -282,11 +280,11 @@ public:
 	void setSinkVerbosity(const std::string& sink, LogLevel level);
 	LogLevel getSinkVerbosity(const std::string& sink) const;
 
-	void setSinkLogProgress(const std::string& sink, bool log_progress);
 	bool getSinkLogProgress(const std::string& sink) const;
+	void setSinkLogProgress(const std::string& sink, bool log_progress);
 
 	LogSink* getSink(const std::string& name);
-	void addSink(const std::string& name, LogSink* sink);
+	void setSink(const std::string& name, LogSink* sink);
 	void reset();
 
 	Logger& getLogger(const std::string& name);
@@ -302,7 +300,7 @@ protected:
 	std::map<std::string, std::shared_ptr<Logger> > loggers;
 	std::map<std::string, std::shared_ptr<LogSink> > sinks;
 	std::map<std::string, LogLevel> sinks_verbosity;
-	std::set<std::string> sinks_log_progress;
+	std::map<std::string, bool> sinks_log_progress;
 
 	thread_ns::mutex loggers_mutex, handle_message_mutex;
 

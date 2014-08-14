@@ -99,7 +99,7 @@ void LogSection::configureLogging() const {
 			LOG(WARNING) << "Unable to configure file log '" << file.getValue()
 					<< "'. Sink name '" << sink_name << "' is already in use!";
 		else
-			logging.addSink(sink_name, new util::LogFileSink(file.getValue().string()));
+			logging.setSink(sink_name, new util::LogFileSink(file.getValue().string()));
 	}
 
 	if (getType() == LogSinkType::OUTPUT || getType() == LogSinkType::FILE) {
@@ -116,7 +116,7 @@ void LogSection::configureLogging() const {
 
 #ifdef HAVE_SYSLOG_H
 	if (getType() == LogSinkType::SYSLOG && logging.getSink(sink_name) == nullptr)
-		logging.addSink(sink_name, new util::LogSyslogSink);
+		logging.setSink(sink_name, new util::LogSyslogSink);
 #endif
 }
 
@@ -146,9 +146,9 @@ fs::path LogSection::getFile() const {
 
 void LogSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
-	verbosity.setDefault(util::LogLevel::INFO);
-	format.setDefault("%(date) [%(level)] [%(logger)] %(message)");
-	date_format.setDefault("%Y-%m-%d %H:%M:%S");
+	// don't set defaults here, they are set by the logging class
+	// if something is set in the logging config file,
+	// it is overwritten in the logging class then
 }
 
 bool LogSection::parseField(const std::string key, const std::string value,
@@ -176,13 +176,13 @@ void LogSection::postParse(const INIConfigSection& section,
 	if (!section_name.empty() && section_name[0] == '_')
 		validation.error("Invalid section name '" + section_name + "'! "
 				"Log section names must not start with an underscore!");
+	if (!type.require(validation, "You have to specify a log sink type ('type')!"))
+		return;
 #ifndef HAVE_SYSLOG_H
 	if (getType() == LogSinkType::SYSLOG)
 		validation.error("You have set the log type to syslog, but syslog is not "
 				"available on your platform!");
 #endif
-	log_progress.setDefault(getType() == LogSinkType::FILE
-			|| getType() == LogSinkType::SYSLOG);
 	if (getType() == LogSinkType::FILE)
 		file.require(validation, "You have to specify a log file ('file')!");
 }
