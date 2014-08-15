@@ -21,6 +21,7 @@
 
 #include "../util.h"
 
+#include <iomanip>
 #include <iostream>
 #include <cstdio>
 #include <ctime>
@@ -171,9 +172,11 @@ void LogOutputProgressHandler::update(double percentage, double average_speed,
 	last_step = percentage;
 
 	auto log = LOGN(INFO, "progress");
-	log << percentage << "% " << value << "/" << max << " " << average_speed << "/s";
+	log << std::floor(percentage) << "% complete. ";
+	log << "Rendered " << value << "/" << max << " tiles ";
+	log << "with average " << std::setprecision(1) << std::fixed << average_speed << "t/s.";
 	if (eta != -1)
-		log << " ETA " << util::format_eta(eta);
+		log << " ETA " << util::format_eta(eta) << ".";
 }
 
 ProgressBar::ProgressBar()
