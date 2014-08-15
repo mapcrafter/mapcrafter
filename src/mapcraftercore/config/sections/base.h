@@ -27,6 +27,34 @@
 namespace mapcrafter {
 namespace config {
 
+/**
+ * Generic section object factory. Just creates an instance of the specified type
+ * without any special options.
+ *
+ * All section factories must have a constant operator() that returns a new instance of
+ * the section type.
+ */
+template <typename T>
+class GenericSectionFactory {
+public:
+	T operator()() const;
+};
+
+/**
+ * Customized section factory that passes the config directory to the section objects.
+ */
+template <typename T>
+class ConfigDirSectionFactory {
+public:
+	ConfigDirSectionFactory(fs::path config_dir = "");
+	~ConfigDirSectionFactory();
+
+	T operator()() const;
+
+private:
+	fs::path config_dir;
+};
+
 class INIConfigSection;
 
 class ConfigSectionBase {
@@ -101,6 +129,27 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& out, const ConfigSectionBase& section);
+
+template <typename T>
+T GenericSectionFactory<T>::operator()() const {
+	return T();
+}
+
+template <typename T>
+ConfigDirSectionFactory<T>::ConfigDirSectionFactory(fs::path config_dir)
+	: config_dir(config_dir) {
+}
+
+template <typename T>
+ConfigDirSectionFactory<T>::~ConfigDirSectionFactory() {
+}
+
+template <typename T>
+T ConfigDirSectionFactory<T>::operator()() const {
+	T section;
+	section.setConfigDir(config_dir);
+	return section;
+}
 
 }
 }

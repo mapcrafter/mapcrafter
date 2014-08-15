@@ -147,10 +147,10 @@ ValidationMap MapcrafterConfig::parse(const std::string& filename) {
 
 	ConfigParser parser(config);
 	parser.parseRootSection(root_section);
-	parser.parseSections(worlds, "world", MapcrafterConfigSectionFactory<WorldSection>(config_dir));
-	parser.parseSections(maps, "map", MapcrafterConfigSectionFactory<MapSection>(config_dir));
+	parser.parseSections(worlds, "world", ConfigDirSectionFactory<WorldSection>(config_dir));
+	parser.parseSections(maps, "map", ConfigDirSectionFactory<MapSection>(config_dir));
 	parser.parseSections(markers, "marker");
-	parser.parseSections(log_sinks, "log");
+	parser.parseSections(log_sinks, "log", ConfigDirSectionFactory<LogSection>(config_dir));
 	parser.validate();
 	validation = parser.getValidation();
 

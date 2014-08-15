@@ -83,6 +83,10 @@ void LogSection::dump(std::ostream& out) const {
 		out << "  file = " << file << std::endl;
 }
 
+void LogSection::setConfigDir(const fs::path& config_dir) {
+	this->config_dir = config_dir;
+}
+
 void LogSection::configureLogging() const {
 	std::string sink_name = "__" + util::str(getType()) + "__";
 	if (getType() == LogSinkType::FILE)
@@ -163,9 +167,10 @@ bool LogSection::parseField(const std::string key, const std::string value,
 		format.load(key, value, validation);
 	else if (key == "date_format")
 		date_format.load(key, value, validation);
-	else if (key == "file")
-		file.load(key, value, validation);
-	else
+	else if (key == "file") {
+		if (file.load(key, value, validation))
+			file.setValue(BOOST_FS_ABSOLUTE(file.getValue(), config_dir));
+	} else
 		return false;
 	return true;
 }

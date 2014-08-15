@@ -46,6 +46,7 @@ public:
 	virtual std::string getPrettyName() const;
 	virtual void dump(std::ostream& out) const;
 
+	void setConfigDir(const fs::path& config_dir);
 	void configureLogging() const;
 
 	LogSinkType getType() const;
@@ -71,6 +72,8 @@ protected:
 			ValidationList& validation);
 
 private:
+	fs::path config_dir;
+
 	Field<LogSinkType> type;
 	Field<util::LogLevel> verbosity;
 	Field<bool> log_progress;
