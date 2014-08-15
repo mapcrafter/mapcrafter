@@ -39,13 +39,13 @@ std::string MarkerSection::getPrettyName() const {
 void MarkerSection::dump(std::ostream& out) const {
 	out << getPrettyName() << ":" << std::endl;
 	out << "  name = " << getLongName() << std::endl;
-	out << "  prefix = " << getPrefix() << std::endl;
-	out << "  title_format = " << getTitleFormat() << std::endl;
-	out << "  text_format = " << getTextFormat() << std::endl;
-	out << "  icon = " << getIcon() << std::endl;
-	out << "  icon_size = " << getIconSize() << std::endl;
-	out << "  match_empty = " << util::strBool(isMatchedEmpty()) << std::endl;
-	out << "  show_default = " << util::strBool(isShownByDefault()) << std::endl;
+	out << "  prefix = " << prefix << std::endl;
+	out << "  title_format = " << title_format << std::endl;
+	out << "  text_format = " << text_format << std::endl;
+	out << "  icon = " << icon << std::endl;
+	out << "  icon_size = " << icon_size << std::endl;
+	out << "  match_empty = " << match_empty << std::endl;
+	out << "  show_default = " << show_default << std::endl;
 }
 
 std::string MarkerSection::getShortName() const {

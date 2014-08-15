@@ -56,23 +56,23 @@ std::string WorldSection::getPrettyName() const {
 
 void WorldSection::dump(std::ostream& out) const {
 	out << getPrettyName() << ":" << std::endl;
-	out << "  input_dir = " << getInputDir() << std::endl;
-	out << "  dimension = " << getDimension() << std::endl;
-	out << "  world_name = " << getWorldName() << std::endl;
-	out << "  default_view = " << getDefaultView() << std::endl;
-	out << "  default_zoom = " << getDefaultZoom() << std::endl;
-	out << "  default_rotation = " << getDefaultRotation() << std::endl;
-	out << "  min_y = " << min_y.getValue() << std::endl;
-	out << "  max_y = " << max_y.getValue() << std::endl;
-	out << "  min_x = " << min_x.getValue() << std::endl;
-	out << "  max_x = " << max_x.getValue() << std::endl;
-	out << "  min_z = " << min_z.getValue() << std::endl;
-	out << "  max_z = " << max_z.getValue() << std::endl;
-	out << "  center_x = " << center_x.getValue() << std::endl;
-	out << "  center_z = " << center_z.getValue() << std::endl;
-	out << "  radius = " << radius.getValue() << std::endl;
-	out << "  crop_unpopulated_chunks = " << util::strBool(hasCropUnpopulatedChunks()) << std::endl;
-	out << "  block_mask = " << getBlockMask() << std::endl;
+	out << "  input_dir = " << input_dir << std::endl;
+	out << "  dimension = " << dimension << std::endl;
+	out << "  world_name = " << world_name << std::endl;
+	out << "  default_view = " << default_view << std::endl;
+	out << "  default_zoom = " << default_zoom << std::endl;
+	out << "  default_rotation = " << default_rotation << std::endl;
+	out << "  min_y = " << min_y << std::endl;
+	out << "  max_y = " << max_y << std::endl;
+	out << "  min_x = " << min_x << std::endl;
+	out << "  max_x = " << max_x << std::endl;
+	out << "  min_z = " << min_z << std::endl;
+	out << "  max_z = " << max_z << std::endl;
+	out << "  center_x = " << center_x << std::endl;
+	out << "  center_z = " << center_z << std::endl;
+	out << "  radius = " << radius << std::endl;
+	out << "  crop_unpopulated_chunks = " << crop_unpopulated_chunks << std::endl;
+	out << "  block_mask = " << block_mask << std::endl;
 }
 
 void WorldSection::setConfigDir(const fs::path& config_dir) {

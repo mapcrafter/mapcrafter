@@ -64,18 +64,18 @@ std::string MapSection::getPrettyName() const {
 void MapSection::dump(std::ostream& out) const {
 	out << getPrettyName() << ":" << std::endl;
 	out << "  name = " << getLongName() << std::endl;
-	out << "  world = " << getWorld() << std::endl;
-	out << "  rendermode = " << getRendermode() << std::endl;
-	out << "  rotations = " << rotations.getValue() << std::endl;
-	out << "  texture_dir = " << getTextureDir() << std::endl;
-	out << "  texture_size = " << getTextureSize() << std::endl;
-	out << "  image_format = " << getImageFormat() << std::endl;
-	out << "  jpeg_quality = " << getJPEGQuality() << std::endl;
-	out << "  lighting_intensity = " << getLightingIntensity() << std::endl;
-	out << "  render_unknown_blocks = " << util::strBool(renderUnknownBlocks()) << std::endl;
-	out << "  render_leaves_transparent = " << util::strBool(renderLeavesTransparent()) << std::endl;
-	out << "  render_biomes = " << util::strBool(renderBiomes()) << std::endl;
-	out << "  use_image_timestamps = " << util::strBool(useImageModificationTimes()) << std::endl;
+	out << "  world = " << world << std::endl;
+	out << "  rendermode = " << rendermode << std::endl;
+	out << "  rotations = " << rotations << std::endl;
+	out << "  texture_dir = " << texture_dir << std::endl;
+	out << "  texture_size = " << texture_size << std::endl;
+	out << "  image_format = " << image_format << std::endl;
+	out << "  jpeg_quality = " << jpeg_quality << std::endl;
+	out << "  lighting_intensity = " << lighting_intensity << std::endl;
+	out << "  render_unknown_blocks = " << render_unknown_blocks << std::endl;
+	out << "  render_leaves_transparent = " << render_leaves_transparent << std::endl;
+	out << "  render_biomes = " << render_biomes << std::endl;
+	out << "  use_image_timestamps = " << use_image_mtimes << std::endl;
 }
 
 void MapSection::setConfigDir(const fs::path& config_dir) {

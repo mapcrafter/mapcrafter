@@ -41,8 +41,6 @@ std::string str(T value) {
 	return ss.str();
 }
 
-std::string strBool(bool value);
-
 /**
  * A lazy function to convert different datatypes. It works by printing the value into a
  * string stream and reading the new datatype from it.

@@ -161,16 +161,16 @@ bool MapSettings::syncMapConfig(const config::MapSection& map) {
 				<< lighting_intensity.get() << " to " << map.getLightingIntensity() << ".";
 	} else if (render_unknown_blocks.get() != map.renderUnknownBlocks()) {
 		LOG(WARNING) << "You changed the rendering of unknown blocks from "
-				<< util::strBool(render_unknown_blocks.get()) << " to "
-				<< util::strBool(map.renderUnknownBlocks()) << ".";
+				<< util::str(render_unknown_blocks.get()) << " to "
+				<< util::str(map.renderUnknownBlocks()) << ".";
 	} else if (render_leaves_transparent.get() != map.renderLeavesTransparent()) {
 		LOG(WARNING) << "You changed the rendering of transparent leaves from "
-				<< util::strBool(render_leaves_transparent.get()) << " to "
-				<< util::strBool(map.renderLeavesTransparent()) << ".";
+				<< util::str(render_leaves_transparent.get()) << " to "
+				<< util::str(map.renderLeavesTransparent()) << ".";
 	} else if (render_biomes.get() != map.renderBiomes()) {
 		LOG(WARNING) << "You changed the rendering of biomes from "
-				<< util::strBool(render_biomes.get()) << " to "
-				<< util::strBool(map.renderBiomes()) << ".";
+				<< util::str(render_biomes.get()) << " to "
+				<< util::str(map.renderBiomes()) << ".";
 	} else {
 		changed = false;
 	}

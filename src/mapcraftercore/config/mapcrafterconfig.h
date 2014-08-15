@@ -28,6 +28,7 @@
 #include "sections/world.h"
 #include "../util.h"
 
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -42,6 +43,8 @@ struct Color {
 	std::string hex;
 	uint8_t red, green, blue;
 };
+
+std::ostream& operator<<(std::ostream& out, const Color& color);
 
 /**
  * Customized section factory that passes the config directory to the section objects.

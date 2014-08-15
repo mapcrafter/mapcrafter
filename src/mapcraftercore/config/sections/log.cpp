@@ -71,16 +71,16 @@ std::string LogSection::getPrettyName() const {
 
 void LogSection::dump(std::ostream& out) const {
 	out << getPrettyName() << ":" << std::endl;
-	out << "  type = " << getType() << std::endl;
-	out << "  verbosity = " << getVerbosity() << std::endl;
-	out << "  log_progress = " << util::strBool(getLogProgress()) << std::endl;
+	out << "  type = " << type << std::endl;
+	out << "  verbosity = " << verbosity << std::endl;
+	out << "  log_progress = " << log_progress << std::endl;
 
 	if (getType() == LogSinkType::OUTPUT || getType() == LogSinkType::FILE) {
-		out << "  format = " << getFormat() << std::endl;
-		out << "  date_format = " << getDateFormat() << std::endl;
+		out << "  format = " << format << std::endl;
+		out << "  date_format = " << date_format << std::endl;
 	}
 	if (getType() == LogSinkType::FILE)
-		out << "  file = " << getFile() << std::endl;
+		out << "  file = " << file << std::endl;
 }
 
 void LogSection::configureLogging() const {
