@@ -20,6 +20,7 @@
 #include "manager.h"
 
 #include "tilerenderworker.h"
+#include "../config/loggingconfig.h"
 #include "../thread/impl/singlethread.h"
 #include "../thread/impl/multithreading.h"
 #include "../thread/dispatcher.h"
@@ -408,12 +409,16 @@ bool RenderManager::run() {
 		else
 			LOG(WARNING) << "Some notes on your configuration file:";
 		validation.log();
-		LOG(WARNING) << "Please read the documentation about the new configuration file format.";
+		LOG(WARNING) << "Please read the documentation about the configuration file format.";
 	}
 	if (validation.isCritical())
 		return false;
 
+	// parse global logging configuration file and configure logging
+	config::LoggingConfig::configureLogging();
+
 	// TODO decide whether one can configure logging even if config is invalid
+	// configure logging from this configuration file
 	config.configureLogging();
 
 	// an output directory would be nice -- create one if it does not exist

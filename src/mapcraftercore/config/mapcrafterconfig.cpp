@@ -21,7 +21,6 @@
 
 #include "configparser.h"
 #include "iniconfig.h"
-#include "../util.h"
 
 #include <sstream>
 
@@ -150,7 +149,7 @@ ValidationMap MapcrafterConfig::parse(const std::string& filename) {
 	parser.parseSections(worlds, "world", ConfigDirSectionFactory<WorldSection>(config_dir));
 	parser.parseSections(maps, "map", ConfigDirSectionFactory<MapSection>(config_dir));
 	parser.parseSections(markers, "marker");
-	parser.parseSections(log_sinks, "log", ConfigDirSectionFactory<LogSection>(config_dir));
+	parser.parseSections(log_sections, "log", ConfigDirSectionFactory<LogSection>(config_dir));
 	parser.validate();
 	validation = parser.getValidation();
 
@@ -177,12 +176,12 @@ void MapcrafterConfig::dump(std::ostream& out) const {
 		out << *it << std::endl;
 	for (auto it = markers.begin(); it != markers.end(); ++it)
 		out << *it << std::endl;
-	for (auto it = log_sinks.begin(); it != log_sinks.end(); ++it)
+	for (auto it = log_sections.begin(); it != log_sections.end(); ++it)
 		out << *it << std::endl;
 }
 
 void MapcrafterConfig::configureLogging() const {
-	for (auto sink_it = log_sinks.begin(); sink_it != log_sinks.end(); ++sink_it)
+	for (auto sink_it = log_sections.begin(); sink_it != log_sections.end(); ++sink_it)
 		sink_it->configureLogging();
 }
 

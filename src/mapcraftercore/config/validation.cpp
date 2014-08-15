@@ -127,9 +127,16 @@ void ValidationMap::log(std::string logger) const {
 		auto messages = section_it->second.getMessages();
 		if (messages.empty())
 			continue;
-		LOGN(WARNING, logger) << section_it->first << ":";
-		for (auto message_it = messages.begin(); message_it != messages.end(); ++message_it)
-			LOGN(WARNING, logger) << " - " << *message_it;
+
+		if (isCritical()) {
+			LOGN(ERROR, logger) << section_it->first << ":";
+			for (auto it = messages.begin(); it != messages.end(); ++it)
+				LOGN(ERROR, logger) << " - " << *it;
+		} else {
+			LOGN(WARNING, logger) << section_it->first << ":";
+			for (auto it = messages.begin(); it != messages.end(); ++it)
+				LOGN(WARNING, logger) << " - " << *it;
+		}
 	}
 }
 

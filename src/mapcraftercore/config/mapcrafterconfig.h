@@ -113,7 +113,7 @@ private:
 	std::map<std::string, WorldSection> worlds;
 	std::vector<MapSection> maps;
 	std::vector<MarkerSection> markers;
-	std::vector<LogSection> log_sinks;
+	std::vector<LogSection> log_sections;
 };
 
 } /* namespace config */
