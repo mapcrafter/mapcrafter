@@ -254,5 +254,9 @@ const MarkerSection& MapcrafterConfig::getMarker(const std::string& marker) cons
 	throw std::out_of_range("Marker not found!");
 }
 
+const std::vector<LogSection>& MapcrafterConfig::getLogSections() const {
+	return log_sections;
+}
+
 } /* namespace config */
 } /* namespace mapcrafter */

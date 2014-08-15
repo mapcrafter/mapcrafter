@@ -42,17 +42,17 @@ ValidationMap LoggingConfig::parse(const std::string& filename) {
 		return validation;
 	}
 
-	fs::path config_dir = BOOST_FS_ABSOLUTE1(fs::path(filename)).parent_path();
-	//root_section.setConfigDir(config_dir);
-
-	ConfigSectionBase root_section;
-
 	ConfigParser parser(config);
+
+	// use an empty root section to also get warnings for unknown entries here
+	ConfigSectionBase root_section;
 	parser.parseRootSection(root_section);
+
+	fs::path config_dir = BOOST_FS_ABSOLUTE1(fs::path(filename)).parent_path();
 	parser.parseSections(log_sections, "log", ConfigDirSectionFactory<LogSection>(config_dir));
+
 	parser.validate();
-	validation = parser.getValidation();
-	return validation;
+	return parser.getValidation();
 }
 
 const std::vector<LogSection>& LoggingConfig::getLogSections() {
@@ -69,13 +69,14 @@ void LoggingConfig::configureLogging() {
 	LoggingConfig config;
 	ValidationMap validation = config.parse(logging_conf.string());
 	if (!validation.isEmpty()) {
-		LOG(WARNING) << "There is a problem parsing the global logging configuration file.";
+		LOG(WARNING) << "There is a problem parsing the global logging configuration file:";
 		validation.log();
 	}
 	if (validation.isCritical())
 		return;
 
-	for (auto it = config.log_sections.begin(); it != config.log_sections.end(); ++it)
+	auto log_sections = config.getLogSections();
+	for (auto it = log_sections.begin(); it != log_sections.end(); ++it)
 		it->configureLogging();
 }
 

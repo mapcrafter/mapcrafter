@@ -417,7 +417,6 @@ bool RenderManager::run() {
 	// parse global logging configuration file and configure logging
 	config::LoggingConfig::configureLogging();
 
-	// TODO decide whether one can configure logging even if config is invalid
 	// configure logging from this configuration file
 	config.configureLogging();
 
