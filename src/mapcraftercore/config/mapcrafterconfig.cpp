@@ -72,6 +72,18 @@ void MapcrafterConfigRootSection::setConfigDir(const fs::path& config_dir) {
 	this->config_dir = config_dir;
 }
 
+fs::path MapcrafterConfigRootSection::getOutputDir() const {
+	return output_dir.getValue();
+}
+
+fs::path MapcrafterConfigRootSection::getTemplateDir() const {
+	return template_dir.getValue();
+}
+
+Color MapcrafterConfigRootSection::getBackgroundColor() const {
+	return background_color.getValue();
+}
+
 void MapcrafterConfigRootSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	fs::path default_template_dir = util::findTemplateDir();
@@ -103,18 +115,6 @@ void MapcrafterConfigRootSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	output_dir.require(validation, "You have to specify an output directory ('output_dir')!");
 	template_dir.require(validation, "You have to specify a template directory ('template_dir')!");
-}
-
-fs::path MapcrafterConfigRootSection::getOutputDir() const {
-	return output_dir.getValue();
-}
-
-fs::path MapcrafterConfigRootSection::getTemplateDir() const {
-	return template_dir.getValue();
-}
-
-Color MapcrafterConfigRootSection::getBackgroundColor() const {
-	return background_color.getValue();
 }
 
 MapcrafterConfig::MapcrafterConfig() {
@@ -157,9 +157,6 @@ ValidationMap MapcrafterConfig::parse(const std::string& filename) {
 					"World '" + map_it->getWorld() + "' does not exist!");
 		}
 
-	for (auto log_it = log_sinks.begin(); log_it != log_sinks.end(); ++log_it)
-		log_it->configureLogging();
-
 	return validation;
 }
 
@@ -177,6 +174,11 @@ void MapcrafterConfig::dump(std::ostream& out) const {
 		out << *it << std::endl;
 	for (auto it = log_sinks.begin(); it != log_sinks.end(); ++it)
 		out << *it << std::endl;
+}
+
+void MapcrafterConfig::configureLogging() const {
+	for (auto sink_it = log_sinks.begin(); sink_it != log_sinks.end(); ++sink_it)
+		sink_it->configureLogging();
 }
 
 fs::path MapcrafterConfig::getOutputDir() const {

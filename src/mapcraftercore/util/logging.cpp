@@ -270,14 +270,14 @@ LogLevel Logging::getSinkVerbosity(const std::string& sink) const {
 	return global_verbosity;
 }
 
+void Logging::setSinkLogProgress(const std::string& sink, bool log_progress) {
+	sinks_log_progress[sink] = log_progress;
+}
+
 bool Logging::getSinkLogProgress(const std::string& sink) const {
 	if (sinks_log_progress.count(sink))
 		return sinks_log_progress.at(sink);
 	return true;
-}
-
-void Logging::setSinkLogProgress(const std::string& sink, bool log_progress) {
-	sinks_log_progress[sink] = log_progress;
 }
 
 LogSink* Logging::getSink(const std::string& name) {
