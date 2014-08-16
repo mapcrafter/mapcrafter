@@ -35,6 +35,11 @@ the ``type`` options.
 Available options
 =================
 
+General options
+---------------
+
+The following options are relevant for all log sink types.
+
 ``type = <type>``
 
     **Required**
@@ -43,7 +48,7 @@ Available options
     
     ``output``
       This is the default log output Mapcrafter shows when you run it. It is always
-      enabled by default
+      enabled by default.
     ``file``
       This sink writes all log output into a log file.
     ``syslog``
@@ -53,8 +58,8 @@ Available options
 
     **Default:** ``INFO``
     
-    This is the verbosity of the log sink, i.e. the minimum log level of messages the log
-    sink outputs messages. Available log levels are (according to syslog):
+    This is the verbosity of the log sink, i.e. the minimum log level a message must
+    have to be handled by the log sink. Available log levels are (according to syslog):
     
     * ``DEBUG``, ``INFO``, ``NOTICE``, ``WARNING``, ``ERROR``, ``FATAL``, ``ALERT``,
       ``EMERGENCY``
@@ -68,9 +73,17 @@ Available options
     animated progress bar. If you enable the ``--batch`` mode, this is also enabled for
     the output log and the animated progress bar is not shown.
 
+Output and file log sink options
+--------------------------------
+
+The following options are only relevant for the output and file log sinks.
+
 ``format = <format>``
 
     **Default:** ``%(date) [%(level)] [%(logger)] %(message)``
+    
+    This is the format log messages are formatted with. You can use the following
+    placeholders to specify the format of the log messages:
     
     =============== =======
     Placeholder     Meaning
@@ -87,7 +100,20 @@ Available options
 ``date_format = <dateformat>``
 
     **Default:** ``%Y-%m-%d %H:%M:%S``
+    
+    This is the format the ``%(date)`` field is formatted with. Internally the
+    std::strftime function is used to format the date field, so have a look at its
+    `documentation <http://en.cppreference.com/w/cpp/chrono/c/strftime>`_ for the
+    available placeholders.
+
+File log options
+----------------
+
+The following option is only relevant for the file log sink.
 
 ``file = <file>``
 
-    **Required if file log**
+    **Required**
+    
+    This option specifies the file the file log sink should output the log messages
+    to.
