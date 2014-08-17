@@ -398,7 +398,8 @@ Map Options
 
     * directory ``chest/`` with normal.png, normal_double.png and ender.png 
     * directory ``colormap/`` with foliage.png and grass.png 
-    * directory ``blocks/`` from your texture pack * endportal.png
+    * directory ``blocks/`` from your texture pack
+    * endportal.png
 
     See also :ref:`resources_textures` to see how to get these files.
 
