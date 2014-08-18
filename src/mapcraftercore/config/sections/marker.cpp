@@ -21,6 +21,8 @@
 
 #include "../../util.h"
 
+#include <vector>
+
 namespace mapcrafter {
 namespace config {
 
@@ -101,7 +103,7 @@ std::string MarkerSection::formatText(const mc::SignEntity& sign) const {
 void MarkerSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	name_long.setDefault(getSectionName());
-	title_format.setDefault("%text");
+	title_format.setDefault("%(text)");
 	match_empty.setDefault(false);
 	show_default.setDefault(true);
 }
@@ -132,25 +134,55 @@ bool MarkerSection::parseField(const std::string key, const std::string value,
 void MarkerSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	text_format.setDefault(title_format.getValue());
+
+	// check if the old placeholders are used, just search for %placeholder
+	// they are still supported, but show a warning
+	std::vector<std::string> placeholders = {
+		"text", "textp", "prefix", "line1", "line2", "line3", "line4", "x", "y", "z"
+	};
+	for (auto it = placeholders.begin(); it != placeholders.end(); ++it) {
+		std::string placeholder = "%" + *it;
+		if (title_format.getValue().find(placeholder) != std::string::npos
+				|| text_format.getValue().find(placeholder) != std::string::npos) {
+			validation.warning("It seems you are using the old placeholder format "
+					"for 'title_format' or 'text_format'. Please use '%(placeholder)' "
+					"instead of '%placeholder'.");
+			return;
+		}
+	}
+}
+
+/**
+ * Replaces the placeholder in the supplied format string. Specifically replaces %(key)
+ * (and also the older, but deprecated version %key) with value.
+ */
+template <typename T>
+void replacePlaceholder(std::string& str, const std::string& key, T value) {
+	str = util::replaceAll(str, "%" + key, util::str(value));
+	str = util::replaceAll(str, "%(" + key + ")", util::str(value));
 }
 
 std::string MarkerSection::formatSign(std::string format, const mc::SignEntity& sign) const {
+	// sign text with prefix
 	std::string textp = sign.getText();
+	// sign text without prefix
 	std::string text = textp;
-
+	// remove prefix from sign text
+	// but make sure there is also other text except the prefix, otherwise don't remove prefix
 	if (textp.size() > prefix.getValue().size())
 		text = util::trim(textp.substr(prefix.getValue().size()));
 
-	format = util::replaceAll(format, "%textp", textp);
-	format = util::replaceAll(format, "%text", text);
-	format = util::replaceAll(format, "%prefix", prefix.getValue());
-	format = util::replaceAll(format, "%line1", sign.getLines()[0]);
-	format = util::replaceAll(format, "%line2", sign.getLines()[1]);
-	format = util::replaceAll(format, "%line3", sign.getLines()[2]);
-	format = util::replaceAll(format, "%line4", sign.getLines()[3]);
-	format = util::replaceAll(format, "%x", util::str(sign.getPos().x));
-	format = util::replaceAll(format, "%z", util::str(sign.getPos().z));
-	format = util::replaceAll(format, "%y", util::str(sign.getPos().y));
+	// replace the placeholders with the sign data
+	replacePlaceholder(format, "textp", textp);
+	replacePlaceholder(format, "text", text);
+	replacePlaceholder(format, "prefix", prefix.getValue());
+	replacePlaceholder(format, "line1", sign.getLines()[0]);
+	replacePlaceholder(format, "line2", sign.getLines()[1]);
+	replacePlaceholder(format, "line3", sign.getLines()[2]);
+	replacePlaceholder(format, "line4", sign.getLines()[3]);
+	replacePlaceholder(format, "x", sign.getPos().x);
+	replacePlaceholder(format, "y", sign.getPos().y);
+	replacePlaceholder(format, "z", sign.getPos().z);
 	return format;
 }
 
