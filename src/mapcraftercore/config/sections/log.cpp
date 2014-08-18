@@ -185,7 +185,6 @@ bool LogSection::parseField(const std::string key, const std::string value,
 
 void LogSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
-	validation.warning("Test");
 	std::string section_name = getSectionName();
 	// "__<name>__" as name is reserved for special builtin sinks
 	if (!section_name.empty() && section_name[0] == '_')
