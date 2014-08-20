@@ -49,5 +49,6 @@ private:
 #include "util/progress.h"
 #include "util/math.h"
 #include "util/other.h"
+#include "util/terminal.h"
 
 #endif /* UTIL_H_ */
