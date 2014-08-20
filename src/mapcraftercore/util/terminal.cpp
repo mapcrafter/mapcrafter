@@ -47,10 +47,6 @@ setcolor::setcolor(int type, int color)
 	: type(type), color(color) {
 }
 
-#define FOREGROUND_RED 1
-#define FOREGROUND_GREEN 2
-#define FOREGROUND_BLUE 4
-
 std::ostream& setcolor::operator()(std::ostream& out) const {
 	if (!isAvailable())
 		return out;
