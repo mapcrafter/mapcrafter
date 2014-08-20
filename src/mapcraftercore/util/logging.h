@@ -276,7 +276,7 @@ class Logging {
 public:
 	~Logging();
 
-	void setGlobalVerbosity(LogLevel level);
+	void setDefaultVerbosity(LogLevel level);
 	void setSinkVerbosity(const std::string& sink, LogLevel level);
 	LogLevel getSinkVerbosity(const std::string& sink) const;
 
@@ -296,7 +296,7 @@ protected:
 	void updateMaximumVerbosity();
 	void handleLogMessage(const LogMessage& message);
 
-	LogLevel global_verbosity, maximum_verbosity;
+	LogLevel default_verbosity, maximum_verbosity;
 	std::map<std::string, std::shared_ptr<Logger> > loggers;
 	std::map<std::string, std::shared_ptr<LogSink> > sinks;
 	std::map<std::string, LogLevel> sinks_verbosity;

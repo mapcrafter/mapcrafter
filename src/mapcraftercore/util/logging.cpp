@@ -206,8 +206,13 @@ LogOutputSink::~LogOutputSink() {
 
 void LogOutputSink::sinkFormatted(const LogMessage& message,
 		const std::string& formatted) {
+	int color = 0;
+	if (message.level == LogLevel::WARNING)
+		color = setcolor::yellow;
+	if (message.level < LogLevel::WARNING)
+		color = setcolor::red;
 	if (message.level < LogLevel::NOTICE || message.level == LogLevel::UNKNOWN)
-		std::cerr << formatted << std::endl;
+		std::cerr << setfgcolor(color) << formatted << setcolor::reset << std::endl;
 	else
 		std::cout << formatted << std::endl;
 }
@@ -248,15 +253,15 @@ thread_ns::mutex Logging::instance_mutex;
 std::shared_ptr<Logging> Logging::instance;
 
 Logging::Logging()
-	: global_verbosity(LogLevel::INFO), maximum_verbosity(global_verbosity) {
+	: default_verbosity(LogLevel::INFO), maximum_verbosity(default_verbosity) {
 	reset();
 }
 
 Logging::~Logging() {
 }
 
-void Logging::setGlobalVerbosity(LogLevel level) {
-	global_verbosity = level;
+void Logging::setDefaultVerbosity(LogLevel level) {
+	default_verbosity = level;
 	updateMaximumVerbosity();
 }
 
@@ -268,7 +273,7 @@ void Logging::setSinkVerbosity(const std::string& sink, LogLevel level) {
 LogLevel Logging::getSinkVerbosity(const std::string& sink) const {
 	if (sinks_verbosity.count(sink))
 		return sinks_verbosity.at(sink);
-	return global_verbosity;
+	return default_verbosity;
 }
 
 void Logging::setSinkLogProgress(const std::string& sink, bool log_progress) {
@@ -292,7 +297,7 @@ void Logging::setSink(const std::string& name, LogSink* sink) {
 }
 
 void Logging::reset() {
-	global_verbosity = maximum_verbosity = LogLevel::INFO;
+	default_verbosity = maximum_verbosity = LogLevel::INFO;
 	loggers.clear();
 	sinks.clear();
 	sinks_verbosity.clear();
