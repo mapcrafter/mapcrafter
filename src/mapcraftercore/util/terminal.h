@@ -26,6 +26,13 @@ namespace mapcrafter {
 namespace util {
 
 /**
+ * Returns whether stdout is connected to a terminal.
+ *
+ * Internally calls isatty(...) on Linux/Unix and _isatty(...) on Windows.
+ */
+bool isOutTTY();
+
+/**
  * std::ostream manipulator to change the terminal color.
  *
  * Use it like: out << setcolor(setcolor::foreground, setcolor::red) << "Red text";
@@ -56,6 +63,13 @@ public:
 private:
 	// type (set foreground/background) and the color code
 	int type, color;
+
+	/**
+	 * Returns whether colored terminal output is supported.
+	 * For example not available when the output is redirected to a file.
+	 */
+	static bool isAvailable();
+	static bool available_initialized, available;
 };
 
 class setfgcolor : public setcolor {
