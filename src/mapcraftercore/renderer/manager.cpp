@@ -212,7 +212,7 @@ RenderManager::RenderManager(const RenderOpts& opts)
  */
 bool RenderManager::copyTemplateFile(const std::string& filename,
 		const std::map<std::string, std::string>& vars) const {
-	std::ifstream file(config.getTemplatePath(filename).c_str());
+	std::ifstream file(config.getTemplatePath(filename).string().c_str());
 	if (!file)
 		return false;
 	std::stringstream ss;
@@ -225,7 +225,7 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
 		data = util::replaceAll(data, "{" + it->first + "}", it->second);
 	}
 
-	std::ofstream out(config.getOutputPath(filename).c_str());
+	std::ofstream out(config.getOutputPath(filename).string().c_str());
 	if (!out)
 		return false;
 	out << data;
