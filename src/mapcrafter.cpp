@@ -33,32 +33,50 @@ namespace fs = boost::filesystem;
 // evil, I know
 using namespace mapcrafter;
 
+template<class T>
+po::typed_value<T>* value(T* v, const char* value_typename) {
+    po::typed_value<T>* r = po::value<T>(v);
+    r->value_name(value_typename);
+    return r;
+}
+
 int main(int argc, char** argv) {
-	std::string config_file;
-	std::string output_dir;
+	fs::path logging_config;
+	std::string color;
+	fs::path config_file;
 	std::vector<std::string> render_skip, render_auto, render_force;
 	int jobs;
 
-	po::options_description all("Allowed options");
-	all.add_options()
+	po::options_description general("General options");
+	general.add_options()
 		("help,h", "shows this help message")
-		("version,v", "shows the version of mapcrafter")
+		("version,v", "shows the version of Mapcrafter");
+
+	po::options_description logging("Logging/output options");
+	logging.add_options()
+		("logging-config", value<fs::path>(&logging_config, "path"),
+			"global logging configuration file (automatically determined of not specified)")
+		("color", value<std::string>(&color, "colored")->default_value("auto"),
+			"whether logging output is colored (true, false or auto)")
+		("batch,b", "deactivates the animated progress bar and enables the progress logger instead");
+
+	po::options_description renderer("Renderer options");
+	renderer.add_options()
 		("find-resources", "shows available resource directories")
-
-		("config,c",po::value<std::string>(&config_file),
+		("config,c", value<fs::path>(&config_file, "path"),
 			"the path to the configuration file to use (required)")
-
-		("render-skip,s", po::value<std::vector<std::string>>(&render_skip)->multitoken(),
+		("render-skip,s", value<std::vector<std::string>>(&render_skip, "maps")->multitoken(),
 			"skips rendering the specified map(s)")
 		("render-reset,r", "skips rendering all maps")
-		("render-auto,a", po::value<std::vector<std::string>>(&render_auto)->multitoken(),
+		("render-auto,a", value<std::vector<std::string>>(&render_auto, "maps")->multitoken(),
 			"renders the specified map(s)")
-		("render-force,f", po::value<std::vector<std::string>>(&render_force)->multitoken(),
+		("render-force,f", value<std::vector<std::string>>(&render_force, "maps")->multitoken(),
 			"renders the specified map(s) completely")
+		("jobs,j", value<int>(&jobs, "number")->default_value(1),
+			"the count of jobs to render the map");
 
-		("jobs,j", po::value<int>(&jobs),
-			"the count of jobs to render the map")
-		("batch,b", "deactivates the animated progress bar");
+	po::options_description all("Allowed options");
+	all.add(general).add(logging).add(renderer);
 
 	po::variables_map vm;
 	try {
@@ -127,15 +145,12 @@ int main(int argc, char** argv) {
 	}
 
 	renderer::RenderOpts opts;
-	opts.config_file = config_file;
+	opts.config_file = config_file.string();
 	opts.render_skip = render_skip;
 	opts.skip_all = vm.count("render-reset");
 	opts.render_auto = render_auto;
 	opts.render_force = render_force;
 	opts.jobs = jobs;
-	if (!vm.count("jobs"))
-		opts.jobs = 1;
-
 	opts.batch = vm.count("batch");
 	renderer::RenderManager manager(opts);
 	if (!manager.run())
