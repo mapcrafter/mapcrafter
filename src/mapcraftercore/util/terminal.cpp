@@ -19,14 +19,13 @@
 
 #include "terminal.h"
 
-#include "../config.h"
+#include "../util.h"
 
 #include <cstdio>
 
-#if defined(__WIN32__) || defined(__WIN64__) || defined(_WIN32) || defined(_WIN64)
+#if defined(OS_WINDOWS)
 #  include <io.h>
 #  include <windows.h>
-#  define OS_WIN
 #endif
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
@@ -54,7 +53,7 @@ std::ostream& setcolor::operator()(std::ostream& out) const {
 		reset(out);
 		return out;
 	}
-#ifdef OS_WIN
+#ifdef OS_WINDOWS
 	int color_flags = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
 	switch (color) {
 	case black:
@@ -87,7 +86,7 @@ std::ostream& setcolor::operator()(std::ostream& out) const {
 std::ostream& setcolor::reset(std::ostream& out) {
 	if (!isAvailable())
 		return out;
-#ifdef OS_WIN
+#ifdef OS_WINDOWS
 	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hStdout, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 	return out;

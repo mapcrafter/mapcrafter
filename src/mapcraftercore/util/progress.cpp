@@ -28,6 +28,9 @@
 #if defined(HAVE_SYS_IOCTL_H) && defined(HAVE_UNISTD_H)
 #  include <sys/ioctl.h> // ioctl, TIOCGWINSZ
 #  include <unistd.h> // STDOUT_FILENO
+#if defined(OS_WINDOWS)
+#  include <windows.h>
+#endif
 #endif
 
 namespace mapcrafter {
@@ -195,6 +198,11 @@ void ProgressBar::update(double percentage, double average_speed, int eta) {
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
 	if (ws.ws_col != 0)
 		terminal_width = ws.ws_col;
+#elif defined(OS_WINDOWS)
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
+		terminal_width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+	}
 #endif
 
 	// create the progress stats: percentage, current/maximum value, speed, eta
