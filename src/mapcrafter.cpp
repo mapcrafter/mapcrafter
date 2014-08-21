@@ -82,17 +82,17 @@ int main(int argc, char** argv) {
 	try {
 		po::store(po::parse_command_line(argc, argv, all), vm);
 	} catch (po::error& ex) {
-		std::cout << "There is a problem parsing the command line arguments: "
-				<< ex.what() << std::endl << std::endl;
-		std::cout << all << std::endl;
+		std::cerr << "There is a problem parsing the command line arguments: "
+				<< ex.what() << std::endl;
+		std::cerr << "Use '" << argv[0] << " --help' for more information." << std::endl;
 		return 1;
 	}
 
 	po::notify(vm);
 
 	if (vm.count("help")) {
-		std::cout << all << std::endl;
-		return 1;
+		std::cout << all;
+		return 0;
 	}
 
 	if (vm.count("version")) {
@@ -139,8 +139,8 @@ int main(int argc, char** argv) {
 	}
 
 	if (!vm.count("config")) {
-		std::cout << "You have to specify a config file!" << std::endl;
-		std::cout << all << std::endl;
+		std::cerr << "You have to specify a config file!" << std::endl;
+		std::cerr << "Use '" << argv[0] << " --help' for more information." << std::endl;
 		return 1;
 	}
 
