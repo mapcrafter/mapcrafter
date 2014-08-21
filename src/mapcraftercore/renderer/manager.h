@@ -41,12 +41,13 @@ namespace renderer {
  * This are the render options from the command line.
  */
 struct RenderOpts {
-	fs::path config_file;
+	fs::path logging_config;
+	bool batch;
+
+	fs::path config;
 	std::vector<std::string> render_skip, render_auto, render_force;
 	bool skip_all;
-
 	int jobs;
-	bool batch;
 };
 
 /**

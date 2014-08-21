@@ -41,11 +41,8 @@ po::typed_value<T>* value(T* v, const char* value_typename) {
 }
 
 int main(int argc, char** argv) {
-	fs::path logging_config;
+	renderer::RenderOpts opts;
 	std::string color;
-	fs::path config_file;
-	std::vector<std::string> render_skip, render_auto, render_force;
-	int jobs;
 
 	po::options_description general("General options");
 	general.add_options()
@@ -54,26 +51,26 @@ int main(int argc, char** argv) {
 
 	po::options_description logging("Logging/output options");
 	logging.add_options()
-		("logging-config", value<fs::path>(&logging_config, "path"),
-			"global logging configuration file (automatically determined of not specified)")
+		("logging-config", value<fs::path>(&opts.logging_config, "path"),
+			"the path to the global logging configuration file to use (automatically determined if not specified)")
 		("color", value<std::string>(&color, "colored")->default_value("auto"),
 			"whether logging output is colored (true, false or auto)")
 		("batch,b", "deactivates the animated progress bar and enables the progress logger instead");
 
 	po::options_description renderer("Renderer options");
 	renderer.add_options()
-		("find-resources", "shows available resource directories")
-		("config,c", value<fs::path>(&config_file, "path"),
+		("find-resources", "shows available resource paths, for example template/texture directory and global logging configuration file")
+		("config,c", value<fs::path>(&opts.config, "path"),
 			"the path to the configuration file to use (required)")
-		("render-skip,s", value<std::vector<std::string>>(&render_skip, "maps")->multitoken(),
+		("render-skip,s", value<std::vector<std::string>>(&opts.render_skip, "maps")->multitoken(),
 			"skips rendering the specified map(s)")
 		("render-reset,r", "skips rendering all maps")
-		("render-auto,a", value<std::vector<std::string>>(&render_auto, "maps")->multitoken(),
+		("render-auto,a", value<std::vector<std::string>>(&opts.render_auto, "maps")->multitoken(),
 			"renders the specified map(s)")
-		("render-force,f", value<std::vector<std::string>>(&render_force, "maps")->multitoken(),
+		("render-force,f", value<std::vector<std::string>>(&opts.render_force, "maps")->multitoken(),
 			"renders the specified map(s) completely")
-		("jobs,j", value<int>(&jobs, "number")->default_value(1),
-			"the count of jobs to render the map");
+		("jobs,j", value<int>(&opts.jobs, "number")->default_value(1),
+			"the count of jobs to use when rendering the map");
 
 	po::options_description all("Allowed options");
 	all.add(general).add(logging).add(renderer);
@@ -91,7 +88,8 @@ int main(int argc, char** argv) {
 	po::notify(vm);
 
 	if (vm.count("help")) {
-		std::cout << all;
+		std::cout << all << std::endl;
+		std::cout << "Mapcrafter online documentation: <http://docs.mapcrafter.org>" << std::endl;
 		return 0;
 	}
 
@@ -139,19 +137,16 @@ int main(int argc, char** argv) {
 	}
 
 	if (!vm.count("config")) {
-		std::cerr << "You have to specify a config file!" << std::endl;
+		std::cerr << "You have to specify a configuration file!" << std::endl;
 		std::cerr << "Use '" << argv[0] << " --help' for more information." << std::endl;
 		return 1;
 	}
 
-	renderer::RenderOpts opts;
-	opts.config_file = config_file.string();
-	opts.render_skip = render_skip;
 	opts.skip_all = vm.count("render-reset");
-	opts.render_auto = render_auto;
-	opts.render_force = render_force;
-	opts.jobs = jobs;
 	opts.batch = vm.count("batch");
+	if (!vm.count("logging-config"))
+		opts.logging_config = util::findLoggingConfigFile();
+
 	renderer::RenderManager manager(opts);
 	if (!manager.run())
 		return 1;

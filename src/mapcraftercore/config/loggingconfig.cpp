@@ -59,16 +59,19 @@ const std::vector<LogSection>& LoggingConfig::getLogSections() {
 	return log_sections;
 }
 
-void LoggingConfig::configureLogging(const fs::path& logging_conf) {
-	if (logging_conf.empty()) {
+void LoggingConfig::configureLogging(const fs::path& logging_config) {
+	if (logging_config.empty()) {
 		LOG(WARNING) << "Unable to find a global logging configuration file!";
 		return;
 	}
 
 	LoggingConfig config;
-	ValidationMap validation = config.parse(logging_conf.string());
+	ValidationMap validation = config.parse(logging_config.string());
 	if (!validation.isEmpty()) {
-		LOG(WARNING) << "There is a problem parsing the global logging configuration file:";
+		if (validation.isCritical())
+			LOG(FATAL) << "Unable to parse global logging configuration file:";
+		else
+			LOG(WARNING) << "There is a problem parsing the global logging configuration file:";
 		validation.log();
 	}
 	if (validation.isCritical())

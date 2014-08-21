@@ -400,22 +400,22 @@ bool RenderManager::run() {
 	// ### First big step: Load/parse/validate the configuration file
 	// ###
 
-	config::ValidationMap validation = config.parse(opts.config_file.string());
+	config::ValidationMap validation = config.parse(opts.config.string());
 
 	// show infos/warnings/errors if configuration file has something
 	if (!validation.isEmpty()) {
 		if (validation.isCritical())
-			LOG(FATAL) << "Your configuration file is invalid!";
+			LOG(FATAL) << "Unable to parse configuration file:";
 		else
-			LOG(WARNING) << "Some notes on your configuration file:";
+			LOG(WARNING) << "There is a problem parsing the configuration file:";
 		validation.log();
-		LOG(WARNING) << "Please read the documentation about the configuration file format.";
+		LOG(WARNING) << "Please have a look at the documentation.";
 	}
 	if (validation.isCritical())
 		return false;
 
 	// parse global logging configuration file and configure logging
-	config::LoggingConfig::configureLogging(util::findLoggingConfigFile());
+	config::LoggingConfig::configureLogging(opts.logging_config);
 
 	// configure logging from this configuration file
 	config.configureLogging();
