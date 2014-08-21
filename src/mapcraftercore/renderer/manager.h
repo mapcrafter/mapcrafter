@@ -41,7 +41,7 @@ namespace renderer {
  * This are the render options from the command line.
  */
 struct RenderOpts {
-	std::string config_file;
+	fs::path config_file;
 	std::vector<std::string> render_skip, render_auto, render_force;
 	bool skip_all;
 

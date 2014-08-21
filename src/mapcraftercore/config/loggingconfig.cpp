@@ -59,8 +59,7 @@ const std::vector<LogSection>& LoggingConfig::getLogSections() {
 	return log_sections;
 }
 
-void LoggingConfig::configureLogging() {
-	fs::path logging_conf = util::findLoggingConfigFile();
+void LoggingConfig::configureLogging(const fs::path& logging_conf) {
 	if (logging_conf.empty()) {
 		LOG(WARNING) << "Unable to find a global logging configuration file!";
 		return;

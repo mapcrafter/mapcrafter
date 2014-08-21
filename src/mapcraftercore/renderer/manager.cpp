@@ -400,7 +400,7 @@ bool RenderManager::run() {
 	// ### First big step: Load/parse/validate the configuration file
 	// ###
 
-	config::ValidationMap validation = config.parse(opts.config_file);
+	config::ValidationMap validation = config.parse(opts.config_file.string());
 
 	// show infos/warnings/errors if configuration file has something
 	if (!validation.isEmpty()) {
@@ -415,7 +415,7 @@ bool RenderManager::run() {
 		return false;
 
 	// parse global logging configuration file and configure logging
-	config::LoggingConfig::configureLogging();
+	config::LoggingConfig::configureLogging(util::findLoggingConfigFile());
 
 	// configure logging from this configuration file
 	config.configureLogging();

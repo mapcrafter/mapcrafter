@@ -43,10 +43,10 @@ public:
 	const std::vector<LogSection>& getLogSections();
 
 	/**
-	 * Automatically finds the global logging configuration file with the
-	 * util::findLoggingConfigFile() method, parses it and configures the log sinks.
+	 * Parses/validates a global logging configuration file and configures the log sinks.
+	 * Use the util::findLoggingConfigFile() to automatically find the config file.
 	 */
-	static void configureLogging();
+	static void configureLogging(const fs::path& logging_conf);
 
 private:
 	std::vector<LogSection> log_sections;
