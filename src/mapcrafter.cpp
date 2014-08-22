@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 		("logging-config", value<fs::path>(&opts.logging_config, "path"),
 			"the path to the global logging configuration file to use (automatically determined if not specified)")
 		("color", value<std::string>(&color, "colored")->default_value("auto"),
-			"whether logging output is colored (true, false or auto)")
+			"whether terminal output is colored (true, false or auto)")
 		("batch,b", "deactivates the animated progress bar and enables the progress logger instead");
 
 	po::options_description renderer("Renderer options");
