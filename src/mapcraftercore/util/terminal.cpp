@@ -47,7 +47,7 @@ setcolor::setcolor(int type, int color)
 }
 
 std::ostream& setcolor::operator()(std::ostream& out) const {
-	if (!isAvailable())
+	if (!isEnabled())
 		return out;
 	if (color == 0) {
 		reset(out);
@@ -84,7 +84,7 @@ std::ostream& setcolor::operator()(std::ostream& out) const {
 }
 
 std::ostream& setcolor::reset(std::ostream& out) {
-	if (!isAvailable())
+	if (!isEnabled())
 		return out;
 #ifdef OS_WINDOWS
 	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -95,16 +95,24 @@ std::ostream& setcolor::reset(std::ostream& out) {
 #endif
 }
 
-bool setcolor::isAvailable() {
-	if (!available_initialized) {
-		available_initialized = true;
-		available = isOutTTY();
-	}
-	return available;
+void setcolor::setEnabled(TerminalColorStates state) {
+	if (state == TerminalColorStates::ENABLED)
+		enabled = true;
+	else if (state == TerminalColorStates::DISABLED)
+		enabled = false;
+	else if (state == TerminalColorStates::AUTO)
+		enabled = isOutTTY();
+	enabled_initialized = true;
 }
 
-bool setcolor::available_initialized = false;
-bool setcolor::available = false;
+bool setcolor::isEnabled() {
+	if (!enabled_initialized)
+		setEnabled(TerminalColorStates::AUTO);
+	return enabled;
+}
+
+bool setcolor::enabled_initialized = false;
+bool setcolor::enabled = false;
 
 std::ostream& operator<<(std::ostream& out, const setcolor& color) {
 	return color(out);

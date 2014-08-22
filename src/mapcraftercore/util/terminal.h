@@ -32,6 +32,12 @@ namespace util {
  */
 bool isOutTTY();
 
+enum class TerminalColorStates {
+	ENABLED,
+	DISABLED,
+	AUTO
+};
+
 /**
  * std::ostream manipulator to change the terminal color.
  *
@@ -47,6 +53,8 @@ public:
 	std::ostream& operator()(std::ostream& out) const;
 
 	static std::ostream& reset(std::ostream& out);
+
+	static void setEnabled(TerminalColorStates enabled);
 
 	static const int foreground = 30;
 	static const int background = 40;
@@ -65,11 +73,10 @@ private:
 	int type, color;
 
 	/**
-	 * Returns whether colored terminal output is supported.
-	 * For example not available when the output is redirected to a file.
+	 * Returns whether colored terminal output is enabled.
 	 */
-	static bool isAvailable();
-	static bool available_initialized, available;
+	static bool isEnabled();
+	static bool enabled_initialized, enabled;
 };
 
 class setfgcolor : public setcolor {
