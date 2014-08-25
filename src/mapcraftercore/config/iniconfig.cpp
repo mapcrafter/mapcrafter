@@ -94,10 +94,10 @@ std::ostream& operator<<(std::ostream& out, const INIConfigSection& section) {
 	std::string type = section.getType();
 
 	if (!name.empty()) {
-		if (!type.empty())
+		if (type.empty())
 			out << "[" << name << "]" << std::endl;
 		else
-			out << "[" << section << ":" << name << "]" << std::endl;
+			out << "[" << type << ":" << name << "]" << std::endl;
 	}
 
 	auto entries = section.getEntries();
