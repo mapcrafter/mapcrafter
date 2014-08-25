@@ -28,7 +28,7 @@
   #include <mach-o/dyld.h>
 #elif defined(__FreeBSD__)
   #include <sys/sysctl.h>
-#elif defined(__WIN32__) || defined(__WIN64__) || defined(_WIN32) || defined(_WIN64)
+#elif defined(OS_WINDOWS)
   #include <windows.h>
 #endif
 
@@ -79,7 +79,7 @@ bool moveFile(const fs::path& from, const fs::path& to) {
 // TODO make sure this works on different OSes
 fs::path findHomeDir() {
 	char* path;
-#if defined(__WIN32__) || defined(__WIN64__) || defined(_WIN32) || defined(_WIN64)
+#if defined(OS_WINDOWS)
 	path = getenv("APPDATA");
 #else
 	path = getenv("HOME");
@@ -114,7 +114,7 @@ fs::path findExecutablePath() {
 	int len;
 	if ((len = readlink("/proc/self/exe", buf, sizeof(buf))) != -1)
 		return fs::path(std::string(buf, len));
-#elif defined(__WIN32__) || defined(__WIN64__) || defined(_WIN32) || defined(_WIN64)
+#elif defined(OS_WINDOWS)
 	GetModuleFileName(NULL, buf, 1024);
 	return fs::path(std::string(buf));
 #else

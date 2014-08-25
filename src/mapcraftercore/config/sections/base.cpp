@@ -47,6 +47,10 @@ std::string ConfigSectionBase::getPrettyName() const {
 	return "unknown section";
 }
 
+void ConfigSectionBase::dump(std::ostream& out) const {
+	out << getPrettyName() << std::endl;
+}
+
 ValidationList ConfigSectionBase::parse(const INIConfigSection& section) {
 	section_name = section.getName();
 
@@ -77,6 +81,11 @@ bool ConfigSectionBase::parseField(const std::string key, const std::string valu
 
 void ConfigSectionBase::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
+}
+
+std::ostream& operator<<(std::ostream& out, const ConfigSectionBase& section) {
+	section.dump(out);
+	return out;
 }
 
 }

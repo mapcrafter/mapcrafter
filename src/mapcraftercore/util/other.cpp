@@ -96,7 +96,9 @@ int64_t bigEndian64(int64_t x) {
 #endif
 }
 
-std::string strBool(bool value) {
+// nicer bool -> string conversion
+template <>
+std::string str<bool>(bool value) {
 	return value ? "true" : "false";
 }
 

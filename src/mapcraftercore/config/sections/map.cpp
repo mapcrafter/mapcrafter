@@ -39,10 +39,17 @@ config::ImageFormat as<config::ImageFormat>(const std::string& from) {
 namespace mapcrafter {
 namespace config {
 
-MapSection::MapSection(bool global)
+std::ostream& operator<<(std::ostream& out, ImageFormat image_format) {
+	if (image_format == ImageFormat::PNG)
+		out << "png";
+	else if (image_format == ImageFormat::JPEG)
+		out << "jpeg";
+	return out;
+}
+
+MapSection::MapSection()
 	: texture_size(12), render_unknown_blocks(false),
 	  render_leaves_transparent(false), render_biomes(false) {
-	setGlobal(global);
 }
 
 MapSection::~MapSection() {
@@ -50,8 +57,25 @@ MapSection::~MapSection() {
 
 std::string MapSection::getPrettyName() const {
 	if (isGlobal())
-		return "global map section";
-	return "map section '" + getSectionName() + "'";
+		return "Global map section";
+	return "Map section '" + getSectionName() + "'";
+}
+
+void MapSection::dump(std::ostream& out) const {
+	out << getPrettyName() << ":" << std::endl;
+	out << "  name = " << getLongName() << std::endl;
+	out << "  world = " << world << std::endl;
+	out << "  rendermode = " << rendermode << std::endl;
+	out << "  rotations = " << rotations << std::endl;
+	out << "  texture_dir = " << texture_dir << std::endl;
+	out << "  texture_size = " << texture_size << std::endl;
+	out << "  image_format = " << image_format << std::endl;
+	out << "  jpeg_quality = " << jpeg_quality << std::endl;
+	out << "  lighting_intensity = " << lighting_intensity << std::endl;
+	out << "  render_unknown_blocks = " << render_unknown_blocks << std::endl;
+	out << "  render_leaves_transparent = " << render_leaves_transparent << std::endl;
+	out << "  render_biomes = " << render_biomes << std::endl;
+	out << "  use_image_timestamps = " << use_image_mtimes << std::endl;
 }
 
 void MapSection::setConfigDir(const fs::path& config_dir) {

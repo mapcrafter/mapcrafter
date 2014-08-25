@@ -29,10 +29,11 @@ namespace config {
 
 class MarkerSection : public ConfigSectionBase {
 public:
-	MarkerSection(bool global = false);
+	MarkerSection();
 	~MarkerSection();
 
 	virtual std::string getPrettyName() const;
+	virtual void dump(std::ostream& out) const;
 
 	std::string getShortName() const;
 	std::string getLongName() const;
@@ -41,6 +42,7 @@ public:
 	std::string getTextFormat() const;
 	std::string getIcon() const;
 	std::string getIconSize() const;
+	bool isMatchedEmpty() const;
 	bool isShownByDefault() const;
 
 	bool matchesSign(const mc::SignEntity& sign) const;

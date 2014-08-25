@@ -33,48 +33,77 @@ namespace fs = boost::filesystem;
 // evil, I know
 using namespace mapcrafter;
 
+template<class T>
+po::typed_value<T>* value(T* v, const char* value_typename) {
+    po::typed_value<T>* r = po::value<T>(v);
+    r->value_name(value_typename);
+    return r;
+}
+
 int main(int argc, char** argv) {
-	std::string config_file;
-	std::string output_dir;
-	std::vector<std::string> render_skip, render_auto, render_force;
-	int jobs;
+	renderer::RenderOpts opts;
+	std::string color;
 
-	po::options_description all("Allowed options");
-	all.add_options()
+	po::options_description general("General options");
+	general.add_options()
 		("help,h", "shows this help message")
-		("version,v", "shows the version of mapcrafter")
-		("find-resources", "shows available resource directories")
+		("version,v", "shows the version of Mapcrafter");
 
-		("config,c",po::value<std::string>(&config_file),
+	po::options_description logging("Logging/output options");
+	logging.add_options()
+		("logging-config", value<fs::path>(&opts.logging_config, "path"),
+			"the path to the global logging configuration file to use (automatically determined if not specified)")
+		("color", value<std::string>(&color, "colored")->default_value("auto"),
+			"whether terminal output is colored (true, false or auto)")
+		("batch,b", "deactivates the animated progress bar and enables the progress logger instead");
+
+	po::options_description renderer("Renderer options");
+	renderer.add_options()
+		("find-resources", "shows available resource paths, for example template/texture directory and global logging configuration file")
+		("config,c", value<fs::path>(&opts.config, "path"),
 			"the path to the configuration file to use (required)")
-
-		("render-skip,s", po::value<std::vector<std::string>>(&render_skip)->multitoken(),
+		("render-skip,s", value<std::vector<std::string>>(&opts.render_skip, "maps")->multitoken(),
 			"skips rendering the specified map(s)")
 		("render-reset,r", "skips rendering all maps")
-		("render-auto,a", po::value<std::vector<std::string>>(&render_auto)->multitoken(),
+		("render-auto,a", value<std::vector<std::string>>(&opts.render_auto, "maps")->multitoken(),
 			"renders the specified map(s)")
-		("render-force,f", po::value<std::vector<std::string>>(&render_force)->multitoken(),
+		("render-force,f", value<std::vector<std::string>>(&opts.render_force, "maps")->multitoken(),
 			"renders the specified map(s) completely")
+		("jobs,j", value<int>(&opts.jobs, "number")->default_value(1),
+			"the count of jobs to use when rendering the map");
 
-		("jobs,j", po::value<int>(&jobs),
-			"the count of jobs to render the map")
-		("batch,b", "deactivates the animated progress bar");
+	po::options_description all("Allowed options");
+	all.add(general).add(logging).add(renderer);
 
 	po::variables_map vm;
 	try {
 		po::store(po::parse_command_line(argc, argv, all), vm);
 	} catch (po::error& ex) {
-		std::cout << "There is a problem parsing the command line arguments: "
-				<< ex.what() << std::endl << std::endl;
-		std::cout << all << std::endl;
+		std::cerr << "There is a problem parsing the command line arguments: "
+				<< ex.what() << std::endl;
+		std::cerr << "Use '" << argv[0] << " --help' for more information." << std::endl;
 		return 1;
 	}
 
 	po::notify(vm);
 
+	if (color == "true")
+		util::setcolor::setEnabled(util::TerminalColorStates::ENABLED);
+	else if (color == "false")
+		util::setcolor::setEnabled(util::TerminalColorStates::DISABLED);
+	else if (color == "auto")
+		util::setcolor::setEnabled(util::TerminalColorStates::AUTO);
+	else {
+		std::cerr << "Invalid argument '" << color << "' for '--color'." << std::endl;
+		std::cerr << "Allowed arguments are 'true', 'false' or 'auto'." << std::endl;
+		std::cerr << "Use '" << argv[0] << " --help' for more information." << std::endl;
+		return 1;
+	}
+
 	if (vm.count("help")) {
 		std::cout << all << std::endl;
-		return 1;
+		std::cout << "Mapcrafter online documentation: <http://docs.mapcrafter.org>" << std::endl;
+		return 0;
 	}
 
 	if (vm.count("version")) {
@@ -121,22 +150,16 @@ int main(int argc, char** argv) {
 	}
 
 	if (!vm.count("config")) {
-		std::cout << "You have to specify a config file!" << std::endl;
-		std::cout << all << std::endl;
+		std::cerr << "You have to specify a configuration file!" << std::endl;
+		std::cerr << "Use '" << argv[0] << " --help' for more information." << std::endl;
 		return 1;
 	}
 
-	renderer::RenderOpts opts;
-	opts.config_file = config_file;
-	opts.render_skip = render_skip;
 	opts.skip_all = vm.count("render-reset");
-	opts.render_auto = render_auto;
-	opts.render_force = render_force;
-	opts.jobs = jobs;
-	if (!vm.count("jobs"))
-		opts.jobs = 1;
-
 	opts.batch = vm.count("batch");
+	if (!vm.count("logging-config"))
+		opts.logging_config = util::findLoggingConfigFile();
+
 	renderer::RenderManager manager(opts);
 	if (!manager.run())
 		return 1;

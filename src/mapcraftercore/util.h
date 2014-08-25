@@ -41,6 +41,11 @@ private:
 } nullptr = {};              // and whose name is nullptr
 #endif
 
+// shortcut to detect Windows
+#if defined(__WIN32__) || defined(__WIN64__) || defined(_WIN32) || defined(_WIN64)
+#  define OS_WINDOWS
+#endif
+
 // include compat/*.h here if all files need it
 #include "compat/boost.h"
 
@@ -49,5 +54,6 @@ private:
 #include "util/progress.h"
 #include "util/math.h"
 #include "util/other.h"
+#include "util/terminal.h"
 
 #endif /* UTIL_H_ */

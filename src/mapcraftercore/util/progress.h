@@ -20,7 +20,9 @@
 #ifndef PROGRESS_H_
 #define PROGRESS_H_
 
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace mapcrafter {
 namespace util {
@@ -41,6 +43,25 @@ public:
 	virtual void setValue(int value) = 0;
 };
 
+class MultiplexingProgressHandler : public IProgressHandler {
+public:
+	MultiplexingProgressHandler();
+	virtual ~MultiplexingProgressHandler();
+
+	void addHandler(IProgressHandler* handler);
+
+	virtual int getMax() const;
+	virtual void setMax(int max);
+
+	virtual int getValue() const;
+	virtual void setValue(int value);
+
+protected:
+	int max, value;
+
+	std::vector<std::shared_ptr<IProgressHandler>> handlers;
+};
+
 /**
  * A dummy progress handler. Implements progress handler interface and allows setting
  * and getting the progress values.
@@ -55,29 +76,22 @@ public:
 
 	virtual int getValue() const;
 	virtual void setValue(int value);
+
 protected:
 	// the maximum and current value of the progress
 	int max, value;
 };
 
-/**
- * Shows a nice command line progress bar.
- */
-class ProgressBar : public DummyProgressHandler {
+class AbstractOutputProgressHandler : public DummyProgressHandler {
 public:
-	ProgressBar(int max = 0, bool animated = true);
-	virtual ~ProgressBar();
-
-	void setAnimated(bool animated);
-	bool isAnimated() const;
+	AbstractOutputProgressHandler();
+	virtual ~AbstractOutputProgressHandler();
 
 	virtual void setValue(int value);
-	void finish();
-private:
-	// animated? if yes, it updates the progress bar and makes it "animated"
-	// but not good if you pipe the output in a file, so you can disable it
-	bool animated;
 
+	virtual void update(double percentage, double average_speed, int eta);
+
+protected:
 	// the time of the start of progress
 	int start;
 	// time of last update
@@ -86,10 +100,33 @@ private:
 	int last_value;
 	// percentage of last update
 	int last_percentage;
+};
+
+class LogOutputProgressHandler : public AbstractOutputProgressHandler {
+public:
+	LogOutputProgressHandler();
+	virtual ~LogOutputProgressHandler();
+
+	virtual void update(double percentage, double average_speed, int eta);
+
+private:
+	int last_step;
+};
+
+/**
+ * Shows a nice command line progress bar.
+ */
+class ProgressBar : public AbstractOutputProgressHandler {
+public:
+	ProgressBar();
+	virtual ~ProgressBar();
+
+	virtual void update(double percentage, double average_speed, int eta);
+
+	void finish();
+private:
 	// length of last output needed to clear the line
 	int last_output_len;
-
-	void update(int value);
 
 	std::string createProgressBar(int width, double percentage) const;
 	std::string createProgressStats(double percentage, int value, int max,

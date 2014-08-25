@@ -37,10 +37,11 @@ class INIConfigSection;
 
 class WorldSection : public ConfigSectionBase {
 public:
-	WorldSection(bool global = false);
+	WorldSection();
 	~WorldSection();
 
 	virtual std::string getPrettyName() const;
+	virtual void dump(std::ostream& out) const;
 
 	void setConfigDir(const fs::path& config_dir);
 
@@ -72,8 +73,8 @@ private:
 	fs::path config_dir;
 
 	Field<fs::path> input_dir;
-	Field<std::string> dimension_name, world_name;
-	mc::Dimension dimension;
+	Field<mc::Dimension> dimension;
+	Field<std::string> world_name;
 
 	Field<std::string> default_view;
 	Field<int> default_zoom, default_rotation;

@@ -21,6 +21,7 @@
 #define CONFIGPARSER_H_
 
 #include "validation.h"
+#include "sections/base.h"
 #include "../util.h"
 
 #include <map>
@@ -30,19 +31,6 @@
 
 namespace mapcrafter {
 namespace config {
-
-/**
- * Generic section object factory. Just creates an instance of the specified type and
- * returns it.
- *
- * All section factories must have a constant operator() that returns a new instance of
- * the section type.
- */
-template <typename T>
-class GenericSectionFactory {
-public:
-	T operator()() const;
-};
 
 /**
  * A class to parse and validate arbitrary configuration files.
@@ -106,11 +94,6 @@ private:
 };
 
 template <typename T>
-T GenericSectionFactory<T>::operator()() const {
-	return T();
-}
-
-template <typename T>
 void ConfigParser::parseRootSection(T& section) {
 	ValidationList root_validation = section.parse(config.getRootSection());
 	if (!root_validation.isEmpty())
@@ -127,10 +110,8 @@ void ConfigParser::parseSections(std::vector<Section>& sections,
 	section_global.setGlobal(true);
 	if (config.hasSection("global", type)) {
 		ValidationList global_validation = section_global.parse(config.getSection("global", type));
-		if (!global_validation.isEmpty()) {
-			std::string pretty_name = util::capitalize(section_global.getPrettyName());
-			validation.section(pretty_name) = global_validation;
-		}
+		if (!global_validation.isEmpty())
+			validation.section(section_global.getPrettyName()) = global_validation;
 		// stop parsing here if global section contains critical errors
 		// parsing also the other sections would lead to redundant error messages
 		if (global_validation.isCritical())
@@ -163,11 +144,8 @@ void ConfigParser::parseSections(std::vector<Section>& sections,
 		}
 
 		// add validation messages (if any) to global validation object
-		if (!section_validation.isEmpty()) {
-			std::string pretty_name = util::capitalize(section.getPrettyName());
-			validation.section(pretty_name) = section_validation;
-		}
-
+		if (!section_validation.isEmpty())
+			validation.section(section.getPrettyName()) = section_validation;
 	}
 }
 

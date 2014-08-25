@@ -398,7 +398,8 @@ Map Options
 
     * directory ``chest/`` with normal.png, normal_double.png and ender.png 
     * directory ``colormap/`` with foliage.png and grass.png 
-    * directory ``blocks/`` from your texture pack * endportal.png
+    * directory ``blocks/`` from your texture pack
+    * endportal.png
 
     See also :ref:`resources_textures` to see how to get these files.
 
@@ -516,31 +517,31 @@ Marker Options
 
 ``title_format = <format>``
 
-    **Default:** ``%text``
+    **Default:** ``%(text)``
     
     You can change the title used for markers (the name shown when you 
     hover over a marker) by using different placeholders:
     
-    ============= =======
-    Placeholder   Meaning
-    ============= =======
-    ``%text``     Complete text of the sign without the prefix.
-    ``%prefix``   Configured prefix of this marker group.
-    ``%textp``    Complete text of the sign with the prefix.
-    ``%line1``    First line of the sign.
-    ``%line2``    Second line of the sign.
-    ``%line3``    Third line of the sign.
-    ``%line4``    Fourth line of the sign.
-    ``%x``        X coordinate of the sign position.
-    ``%z``        Z coordinate of the sign position.
-    ``%y``        Y coordinate of the sign position.
-    ============= =======
+    =============== =======
+    Placeholder     Meaning
+    =============== =======
+    ``%(text)``     Complete text of the sign without the prefix.
+    ``%(prefix)``   Configured prefix of this marker group.
+    ``%(textp)``    Complete text of the sign with the prefix.
+    ``%(line1)``    First line of the sign.
+    ``%(line2)``    Second line of the sign.
+    ``%(line3)``    Third line of the sign.
+    ``%(line4)``    Fourth line of the sign.
+    ``%(x)``        X coordinate of the sign position.
+    ``%(z)``        Z coordinate of the sign position.
+    ``%(y)``        Y coordinate of the sign position.
+    =============== =======
     
     The title of markers defaults to the text (without the prefix) of 
-    the belonging sign, e.g. the placeholder ``%text``.
+    the belonging sign, e.g. the placeholder ``%(text)``.
     
     You can use different placeholders and other text in this format
-    string as well, for example ``Marker at x=%x, y=%y, z=%z: %text``.
+    string as well, for example ``Marker at x=%(x), y=%(y), z=%(z): %(text)``.
 
 ``text_format = <format>``
 

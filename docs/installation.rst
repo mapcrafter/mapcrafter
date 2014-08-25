@@ -222,7 +222,7 @@ package::
 
     $ mapcrafter --find-resources
     Your home directory: /home/moritz
-    mapcrafter binary: /usr/bin/mapcrafter
+    Mapcrafter binary: /usr/bin/mapcrafter
     Resource directories:
       1. /home/moritz/.mapcrafter
       2. /usr/share/mapcrafter
@@ -230,6 +230,8 @@ package::
       1. /usr/share/mapcrafter/template
     Texture directories:
       1. /usr/share/mapcrafter/textures
+    Logging configuration file:
+      1. /etc/mapcrafter/logging.conf
 
 You can see that Mapcrafter found a resource directory in the home directory
 but no ``template/`` or ``textures/`` directory in it. So it's just using the

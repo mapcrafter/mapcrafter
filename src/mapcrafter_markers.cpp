@@ -179,7 +179,7 @@ int main(int argc, char** argv) {
 		std::cout << markers_json;
 	else {
 		if (output_file == "")
-			output_file = config.getOutputPath("markers-generated.js");
+			output_file = config.getOutputPath("markers-generated.js").string();
 		std::ofstream out(output_file);
 		out << markers_json;
 		out.close();

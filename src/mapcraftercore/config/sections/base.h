@@ -27,6 +27,34 @@
 namespace mapcrafter {
 namespace config {
 
+/**
+ * Generic section object factory. Just creates an instance of the specified type
+ * without any special options.
+ *
+ * All section factories must have a constant operator() that returns a new instance of
+ * the section type.
+ */
+template <typename T>
+class GenericSectionFactory {
+public:
+	T operator()() const;
+};
+
+/**
+ * Customized section factory that passes the config directory to the section objects.
+ */
+template <typename T>
+class ConfigDirSectionFactory {
+public:
+	ConfigDirSectionFactory(fs::path config_dir = "");
+	~ConfigDirSectionFactory();
+
+	T operator()() const;
+
+private:
+	fs::path config_dir;
+};
+
 class INIConfigSection;
 
 class ConfigSectionBase {
@@ -46,16 +74,21 @@ public:
 	std::string getSectionName() const;
 
 	/**
-	 * Returns the pretty name of the section.
-	 * For example "map section my_map" or "global world section".
-	 */
-	virtual std::string getPrettyName() const;
-
-	/**
 	 * Parses the given configurations section and returns false if there was a critical
 	 * parsing/validation error.
 	 */
 	ValidationList parse(const INIConfigSection& section);
+
+	/**
+	 * Returns the pretty name of the section.
+	 * For example "Map section my_map" or "Global world section".
+	 */
+	virtual std::string getPrettyName() const;
+
+	/**
+	 * Prints information about the parsed section to a
+	 */
+	virtual void dump(std::ostream& out) const;
 
 protected:
 	/**
@@ -94,6 +127,29 @@ private:
 
 	ValidationList validation;
 };
+
+std::ostream& operator<<(std::ostream& out, const ConfigSectionBase& section);
+
+template <typename T>
+T GenericSectionFactory<T>::operator()() const {
+	return T();
+}
+
+template <typename T>
+ConfigDirSectionFactory<T>::ConfigDirSectionFactory(fs::path config_dir)
+	: config_dir(config_dir) {
+}
+
+template <typename T>
+ConfigDirSectionFactory<T>::~ConfigDirSectionFactory() {
+}
+
+template <typename T>
+T ConfigDirSectionFactory<T>::operator()() const {
+	T section;
+	section.setConfigDir(config_dir);
+	return section;
+}
 
 }
 }

@@ -22,11 +22,27 @@
 #include "../iniconfig.h"
 
 namespace mapcrafter {
+namespace util {
+
+template <>
+mc::Dimension as<mc::Dimension>(const std::string& from) {
+	if (from == "nether")
+		return mc::Dimension::NETHER;
+	else if (from == "overworld")
+		return mc::Dimension::OVERWORLD;
+	else if (from == "end")
+		return mc::Dimension::END;
+	else
+		throw std::invalid_argument("Dimension must be one of 'nether', 'overworld' or 'end'!");
+}
+
+}
+}
+
+namespace mapcrafter {
 namespace config {
 
-WorldSection::WorldSection(bool global)
-	: dimension(mc::Dimension::OVERWORLD) {
-	setGlobal(global);
+WorldSection::WorldSection() {
 }
 
 WorldSection::~WorldSection() {
@@ -34,8 +50,29 @@ WorldSection::~WorldSection() {
 
 std::string WorldSection::getPrettyName() const {
 	if (isGlobal())
-		return "global world section";
-	return "world section '" + getSectionName() + "'";
+		return "Global world section";
+	return "World section '" + getSectionName() + "'";
+}
+
+void WorldSection::dump(std::ostream& out) const {
+	out << getPrettyName() << ":" << std::endl;
+	out << "  input_dir = " << input_dir << std::endl;
+	out << "  dimension = " << dimension << std::endl;
+	out << "  world_name = " << world_name << std::endl;
+	out << "  default_view = " << default_view << std::endl;
+	out << "  default_zoom = " << default_zoom << std::endl;
+	out << "  default_rotation = " << default_rotation << std::endl;
+	out << "  min_y = " << min_y << std::endl;
+	out << "  max_y = " << max_y << std::endl;
+	out << "  min_x = " << min_x << std::endl;
+	out << "  max_x = " << max_x << std::endl;
+	out << "  min_z = " << min_z << std::endl;
+	out << "  max_z = " << max_z << std::endl;
+	out << "  center_x = " << center_x << std::endl;
+	out << "  center_z = " << center_z << std::endl;
+	out << "  radius = " << radius << std::endl;
+	out << "  crop_unpopulated_chunks = " << crop_unpopulated_chunks << std::endl;
+	out << "  block_mask = " << block_mask << std::endl;
 }
 
 void WorldSection::setConfigDir(const fs::path& config_dir) {
@@ -51,7 +88,7 @@ fs::path WorldSection::getInputDir() const {
 }
 
 mc::Dimension WorldSection::getDimension() const {
-	return dimension;
+	return dimension.getValue();
 }
 
 std::string WorldSection::getWorldName() const {
@@ -70,6 +107,14 @@ int WorldSection::getDefaultRotation() const {
 	return default_rotation.getValue();
 }
 
+bool WorldSection::hasCropUnpopulatedChunks() const {
+	return crop_unpopulated_chunks.getValue();
+}
+
+std::string WorldSection::getBlockMask() const {
+	return block_mask.getValue();
+}
+
 const mc::WorldCrop WorldSection::getWorldCrop() const {
 	return world_crop;
 }
@@ -82,7 +127,7 @@ bool WorldSection::needsWorldCentering() const {
 
 void WorldSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
-	dimension_name.setDefault("overworld");
+	dimension.setDefault(mc::Dimension::OVERWORLD);
 	world_name.setDefault(section.getName());
 
 	default_view.setDefault("");
@@ -102,7 +147,7 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 						+ input_dir.getValue().string() + "' does not exist!");
 		}
 	} else if (key == "dimension")
-		dimension_name.load(key, value, validation);
+		dimension.load(key, value, validation);
 	else if (key == "world_name")
 		world_name.load(key, value, validation);
 
@@ -155,15 +200,6 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 
 void WorldSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
-	if (dimension_name.getValue() == "nether")
-		dimension = mc::Dimension::NETHER;
-	else if (dimension_name.getValue() == "overworld")
-		dimension = mc::Dimension::OVERWORLD;
-	else if (dimension_name.getValue() == "end")
-		dimension = mc::Dimension::END;
-	else
-		validation.error("Unknown dimension '" + dimension_name.getValue() + "'!");
-
 	if (default_zoom.isLoaded() && default_zoom.getValue() < 0)
 		validation.error("The default zoom level must be bigger or equal to 0 ('default_zoom').");
 

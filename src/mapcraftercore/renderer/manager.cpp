@@ -20,6 +20,7 @@
 #include "manager.h"
 
 #include "tilerenderworker.h"
+#include "../config/loggingconfig.h"
 #include "../thread/impl/singlethread.h"
 #include "../thread/impl/multithreading.h"
 #include "../thread/dispatcher.h"
@@ -50,10 +51,15 @@ MapSettings::MapSettings()
 /**
  * This method reads the map settings from a file.
  */
-bool MapSettings::read(const std::string& filename) {
+bool MapSettings::read(const fs::path& filename) {
 	config::INIConfig config;
-	if (!config.loadFile(filename))
+	try {
+		config.loadFile(filename.string());
+	} catch (config::INIConfigError& exception) {
+		LOG(WARNING) << "Unable to read map.settings file '" << filename.string() << "': "
+				<< exception.what();
 		return false;
+	}
 
 	config::INIConfigSection& root = config.getRootSection();
 
@@ -90,7 +96,7 @@ bool MapSettings::read(const std::string& filename) {
 /**
  * This method writes the map settings to a file.
  */
-bool MapSettings::write(const std::string& filename) const {
+bool MapSettings::write(const fs::path& filename) const {
 	config::INIConfig config;
 	config::INIConfigSection& root = config.getRootSection();
 
@@ -113,7 +119,14 @@ bool MapSettings::write(const std::string& filename) const {
 		}
 	}
 
-	return config.writeFile(filename);
+	try {
+		config.writeFile(filename.string());
+	} catch (config::INIConfigError& exception) {
+		LOG(WARNING) << "Unable to write map.settings file '" << filename.string() << "': "
+				<< exception.what();
+		return false;
+	}
+	return true;
 }
 
 bool MapSettings::syncMapConfig(const config::MapSection& map) {
@@ -149,16 +162,16 @@ bool MapSettings::syncMapConfig(const config::MapSection& map) {
 				<< lighting_intensity.get() << " to " << map.getLightingIntensity() << ".";
 	} else if (render_unknown_blocks.get() != map.renderUnknownBlocks()) {
 		LOG(WARNING) << "You changed the rendering of unknown blocks from "
-				<< util::strBool(render_unknown_blocks.get()) << " to "
-				<< util::strBool(map.renderUnknownBlocks()) << ".";
+				<< util::str(render_unknown_blocks.get()) << " to "
+				<< util::str(map.renderUnknownBlocks()) << ".";
 	} else if (render_leaves_transparent.get() != map.renderLeavesTransparent()) {
 		LOG(WARNING) << "You changed the rendering of transparent leaves from "
-				<< util::strBool(render_leaves_transparent.get()) << " to "
-				<< util::strBool(map.renderLeavesTransparent()) << ".";
+				<< util::str(render_leaves_transparent.get()) << " to "
+				<< util::str(map.renderLeavesTransparent()) << ".";
 	} else if (render_biomes.get() != map.renderBiomes()) {
 		LOG(WARNING) << "You changed the rendering of biomes from "
-				<< util::strBool(render_biomes.get()) << " to "
-				<< util::strBool(map.renderBiomes()) << ".";
+				<< util::str(render_biomes.get()) << " to "
+				<< util::str(map.renderBiomes()) << ".";
 	} else {
 		changed = false;
 	}
@@ -199,7 +212,7 @@ RenderManager::RenderManager(const RenderOpts& opts)
  */
 bool RenderManager::copyTemplateFile(const std::string& filename,
 		const std::map<std::string, std::string>& vars) const {
-	std::ifstream file(config.getTemplatePath(filename).c_str());
+	std::ifstream file(config.getTemplatePath(filename).string().c_str());
 	if (!file)
 		return false;
 	std::stringstream ss;
@@ -212,7 +225,7 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
 		data = util::replaceAll(data, "{" + it->first + "}", it->second);
 	}
 
-	std::ofstream out(config.getOutputPath(filename).c_str());
+	std::ofstream out(config.getOutputPath(filename).string().c_str());
 	if (!out)
 		return false;
 	out << data;
@@ -387,19 +400,25 @@ bool RenderManager::run() {
 	// ### First big step: Load/parse/validate the configuration file
 	// ###
 
-	config::ValidationMap validation = config.parse(opts.config_file);
+	config::ValidationMap validation = config.parse(opts.config.string());
 
 	// show infos/warnings/errors if configuration file has something
 	if (!validation.isEmpty()) {
 		if (validation.isCritical())
-			LOG(FATAL) << "Your configuration file is invalid!";
+			LOG(FATAL) << "Unable to parse configuration file:";
 		else
-			LOG(WARNING) << "Some notes on your configuration file:";
+			LOG(WARNING) << "There is a problem parsing the configuration file:";
 		validation.log();
-		LOG(WARNING) << "Please read the documentation about the new configuration file format.";
+		LOG(WARNING) << "Please have a look at the documentation.";
 	}
 	if (validation.isCritical())
 		return false;
+
+	// parse global logging configuration file and configure logging
+	config::LoggingConfig::configureLogging(opts.logging_config);
+
+	// configure logging from this configuration file
+	config.configureLogging();
 
 	// an output directory would be nice -- create one if it does not exist
 	if (!fs::is_directory(config.getOutputDir()) && !fs::create_directories(config.getOutputDir())) {
@@ -426,8 +445,11 @@ bool RenderManager::run() {
 	//    -> so the user can still view his already rendered maps while new ones are rendering
 	for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
 		confighelper.setUsedRotations(map_it->getWorld(), map_it->getRotations());
+		fs::path settings_file = config.getOutputPath(map_it->getShortName() + "/map.settings");
+		if (!fs::exists(settings_file))
+			continue;
 		MapSettings settings;
-		if (settings.read(config.getOutputPath(map_it->getShortName() + "/map.settings"))) {
+		if (settings.read(settings_file)) {
 			confighelper.setMapZoomlevel(map_it->getShortName(), settings.max_zoom);
 			for (int i = 0; i < 4; i++)
 				confighelper.setWorldTileOffset(map_it->getWorld(), i, settings.tile_offsets[i]);
@@ -536,12 +558,12 @@ bool RenderManager::run() {
 		// check if we have already an old settings file,
 		// but ignore the settings file if the whole map is force-rendered
 		MapSettings settings;
-		std::string settings_filename = config.getOutputPath(map_name + "/map.settings");
+		fs::path settings_file = config.getOutputPath(map_name + "/map.settings");
 		bool old_settings = !confighelper.isCompleteRenderForce(map_name)
-				&& fs::exists(settings_filename);
+				&& fs::exists(settings_file);
 		if (old_settings) {
 			// try to read the map.settings filename
-			if (!settings.read(settings_filename)) {
+			if (!settings.read(settings_file)) {
 				LOG(ERROR) << "Unable to load old map.settings file!"
 						<< "You have to force-render the whole map.";
 				continue;
@@ -578,7 +600,7 @@ bool RenderManager::run() {
 			// if zoom level has increased, increase zoom levels of tile sets
 			for (auto rotation_it = rotations.begin(); rotation_it != rotations.end();
 					++rotation_it) {
-				std::string output_dir = config.getOutputPath(map_name + "/"
+				fs::path output_dir = config.getOutputPath(map_name + "/"
 						+ config::ROTATION_NAMES_SHORT[*rotation_it]);
 				for (int i = settings.max_zoom; i < world_zoomlevels; i++)
 					increaseMaxZoom(output_dir, map.getImageFormatSuffix());
@@ -592,7 +614,7 @@ bool RenderManager::run() {
 
 		// now write the (possibly new) max zoom level to the settings file
 		settings.max_zoom = world_zoomlevels;
-		settings.write(settings_filename);
+		settings.write(settings_file);
 		// and also update the template with the max zoom level
 		confighelper.setMapZoomlevel(map_name, settings.max_zoom);
 		writeTemplateIndexHtml();
@@ -625,7 +647,7 @@ bool RenderManager::run() {
 				LOG(INFO) << "Last rendering was on " << buffer << ".";
 			}
 
-			std::string output_dir = config.getOutputPath(map_name + "/"
+			fs::path output_dir = config.getOutputPath(map_name + "/"
 					+ config::ROTATION_NAMES_SHORT[rotation]);
 			// if incremental render scan which tiles might have changed
 			std::shared_ptr<TileSet> tile_set(new TileSet(*tile_sets[world_name][rotation]));
@@ -674,16 +696,27 @@ bool RenderManager::run() {
 			else
 				dispatcher = std::make_shared<thread::MultiThreadingDispatcher>(opts.jobs);
 
-			util::ProgressBar* progress_ptr = new util::ProgressBar;
-			progress_ptr->setAnimated(!opts.batch);
-			std::shared_ptr<util::ProgressBar> progress(progress_ptr);
+			std::shared_ptr<util::MultiplexingProgressHandler> progress(new util::MultiplexingProgressHandler);
+
+			util::ProgressBar* progress_bar = nullptr;
+			if (opts.batch) {
+				util::Logging::getInstance().setSinkLogProgress("__output__", true);
+			} else {
+				progress_bar = new util::ProgressBar;
+				progress->addHandler(progress_bar);
+			}
+
+			util::LogOutputProgressHandler* log_output = new util::LogOutputProgressHandler;
+			progress->addHandler(log_output);
+
 			dispatcher->dispatch(context, progress);
-			progress->finish();
+			if (progress_bar != nullptr)
+				progress_bar->finish();
 
 			// update the settings file with last render time
 			settings.rotations[rotation] = true;
 			settings.last_render[rotation] = start_scanning;
-			settings.write(settings_filename);
+			settings.write(settings_file);
 
 			std::time_t took = std::time(nullptr) - time_start;
 			LOG(INFO) << "[" << progress_maps << "." << progress_rotations << "/"

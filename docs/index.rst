@@ -67,6 +67,7 @@ Documentation Contents
    installation
    using_mapcrafter
    configuration
+   logging
    markers
 
 Indices and tables

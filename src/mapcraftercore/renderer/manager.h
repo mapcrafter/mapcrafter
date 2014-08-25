@@ -41,12 +41,13 @@ namespace renderer {
  * This are the render options from the command line.
  */
 struct RenderOpts {
-	std::string config_file;
+	fs::path logging_config;
+	bool batch;
+
+	fs::path config;
 	std::vector<std::string> render_skip, render_auto, render_force;
 	bool skip_all;
-
 	int jobs;
-	bool batch;
 };
 
 /**
@@ -67,8 +68,8 @@ struct MapSettings {
 
 	MapSettings();
 
-	bool read(const std::string& filename);
-	bool write(const std::string& filename) const;
+	bool read(const fs::path& filename);
+	bool write(const fs::path& filename) const;
 
 	bool syncMapConfig(const config::MapSection& map);
 	static MapSettings byMapConfig(const config::MapSection& map);

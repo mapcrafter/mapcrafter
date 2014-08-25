@@ -21,7 +21,6 @@
 
 #include "configparser.h"
 #include "iniconfig.h"
-#include "../util.h"
 
 #include <sstream>
 
@@ -51,14 +50,42 @@ mapcrafter::config::Color as<mapcrafter::config::Color>(const std::string& from)
 namespace mapcrafter {
 namespace config {
 
+std::ostream& operator<<(std::ostream& out, const Color& color) {
+	out << color.hex;
+	return out;
+}
+
 MapcrafterConfigRootSection::MapcrafterConfigRootSection() {
 }
 
 MapcrafterConfigRootSection::~MapcrafterConfigRootSection() {
 }
 
+std::string MapcrafterConfigRootSection::getPrettyName() const {
+	return "Mapcrafter config root section";
+}
+
+void MapcrafterConfigRootSection::dump(std::ostream& out) const {
+	out << getPrettyName() << ":" << std::endl;
+	out << "  output_dir = " << output_dir << std::endl;
+	out << "  template_dir = " << template_dir << std::endl;
+	out << "  color = " << background_color << std::endl;
+}
+
 void MapcrafterConfigRootSection::setConfigDir(const fs::path& config_dir) {
 	this->config_dir = config_dir;
+}
+
+fs::path MapcrafterConfigRootSection::getOutputDir() const {
+	return output_dir.getValue();
+}
+
+fs::path MapcrafterConfigRootSection::getTemplateDir() const {
+	return template_dir.getValue();
+}
+
+Color MapcrafterConfigRootSection::getBackgroundColor() const {
+	return background_color.getValue();
 }
 
 void MapcrafterConfigRootSection::preParse(const INIConfigSection& section,
@@ -94,20 +121,10 @@ void MapcrafterConfigRootSection::postParse(const INIConfigSection& section,
 	template_dir.require(validation, "You have to specify a template directory ('template_dir')!");
 }
 
-fs::path MapcrafterConfigRootSection::getOutputDir() const {
-	return output_dir.getValue();
-}
-
-fs::path MapcrafterConfigRootSection::getTemplateDir() const {
-	return template_dir.getValue();
-}
-
-Color MapcrafterConfigRootSection::getBackgroundColor() const {
-	return background_color.getValue();
-}
-
-MapcrafterConfig::MapcrafterConfig()
-	: world_global(true), map_global(true) {
+MapcrafterConfig::MapcrafterConfig() {
+	world_global.setGlobal(true);
+	map_global.setGlobal(true);
+	marker_global.setGlobal(true);
 }
 
 MapcrafterConfig::~MapcrafterConfig() {
@@ -117,9 +134,10 @@ ValidationMap MapcrafterConfig::parse(const std::string& filename) {
 	ValidationMap validation;
 
 	INIConfig config;
-	ValidationMessage msg;
-	if (!config.loadFile(filename, msg)) {
-		validation.section("Configuration file").message(msg);
+	try {
+		config.loadFile(filename);
+	} catch (INIConfigError& exception) {
+		validation.section("Configuration file").error(exception.what());
 		return validation;
 	}
 
@@ -128,9 +146,10 @@ ValidationMap MapcrafterConfig::parse(const std::string& filename) {
 
 	ConfigParser parser(config);
 	parser.parseRootSection(root_section);
-	parser.parseSections(worlds, "world", MapcrafterConfigSectionFactory<WorldSection>(config_dir));
-	parser.parseSections(maps, "map", MapcrafterConfigSectionFactory<MapSection>(config_dir));
+	parser.parseSections(worlds, "world", ConfigDirSectionFactory<WorldSection>(config_dir));
+	parser.parseSections(maps, "map", ConfigDirSectionFactory<MapSection>(config_dir));
 	parser.parseSections(markers, "marker");
+	parser.parseSections(log_sections, "log", ConfigDirSectionFactory<LogSection>(config_dir));
 	parser.validate();
 	validation = parser.getValidation();
 
@@ -138,63 +157,32 @@ ValidationMap MapcrafterConfig::parse(const std::string& filename) {
 	// 'map_it->getWorld() != ""' because that's already handled by map section class
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it)
 		if (map_it->getWorld() != "" && !hasWorld(map_it->getWorld())) {
-			validation.section(util::capitalize(map_it->getPrettyName())).error(
+			validation.section(map_it->getPrettyName()).error(
 					"World '" + map_it->getWorld() + "' does not exist!");
 		}
 
 	return validation;
 }
 
-std::string rotationsToString(std::set<int> rotations) {
-	std::string str;
-	for (auto it = rotations.begin(); it != rotations.end(); ++it)
-		if (*it >= 0 && *it < 4)
-			str += " " + ROTATION_NAMES[*it];
-	return util::trim(str);
-}
-
-void dumpWorldSection(std::ostream& out, const WorldSection& section) {
-	out << "  input_dir = " << section.getInputDir().string() << std::endl;
-}
-
-void dumpMapSection(std::ostream& out, const MapSection& section) {
-	out << "  name = " << section.getLongName() << std::endl;
-	out << "  world = " << section.getWorld() << std::endl;
-	out << "  texture_dir = " << section.getTextureDir() << std::endl;
-	out << "  rotations = " << rotationsToString(section.getRotations()) << std::endl;
-	out << "  rendermode = " << section.getRendermode() << std::endl;
-	out << "  texture_size = " << section.getTextureSize() << std::endl;
-	out << "  render_unknown_blocks = " << section.renderUnknownBlocks() << std::endl;
-	out << "  render_leaves_transparent = " << section.renderLeavesTransparent() << std::endl;
-	out << "  render_biomes = " << section.renderBiomes() << std::endl;
-	out << "  use_image_timestamps = " << section.useImageModificationTimes() << std::endl;
-}
-
 void MapcrafterConfig::dump(std::ostream& out) const {
-	out << "General:" << std::endl;
-	out << "  output_dir = " << getOutputDir().string() << std::endl;
-	out << "  template_dir = " << getTemplateDir().string() << std::endl;
-	out << std::endl;
+	out << root_section << std::endl;
+	out << world_global << std::endl;
+	out << map_global << std::endl;
+	out << marker_global << std::endl;
 
-	out << "Global world configuration:" << std::endl;
-	dumpWorldSection(out, world_global);
-	out << std::endl;
+	for (auto it = worlds.begin(); it != worlds.end(); ++it)
+		out << it->second << std::endl;
+	for (auto it = maps.begin(); it != maps.end(); ++it)
+		out << *it << std::endl;
+	for (auto it = markers.begin(); it != markers.end(); ++it)
+		out << *it << std::endl;
+	for (auto it = log_sections.begin(); it != log_sections.end(); ++it)
+		out << *it << std::endl;
+}
 
-	out << "Global map configuration:" << std::endl;
-	dumpMapSection(out, map_global);
-	out << std::endl;
-
-	for (auto it = worlds.begin(); it != worlds.end(); ++it) {
-		out << "World '" << it->first << "':" << std::endl;
-		dumpWorldSection(out, it->second);
-		out << std::endl;
-	}
-
-	for (auto it = maps.begin(); it != maps.end(); ++it) {
-		out << "Map '" << it->getShortName() << "':" << std::endl;
-		dumpMapSection(out, *it);
-		out << std::endl;
-	}
+void MapcrafterConfig::configureLogging() const {
+	for (auto sink_it = log_sections.begin(); sink_it != log_sections.end(); ++sink_it)
+		sink_it->configureLogging();
 }
 
 fs::path MapcrafterConfig::getOutputDir() const {
@@ -205,18 +193,16 @@ fs::path MapcrafterConfig::getTemplateDir() const {
 	return root_section.getTemplateDir();
 }
 
+fs::path MapcrafterConfig::getOutputPath(const std::string& path) const {
+	return getOutputDir() / path;
+}
+
+fs::path MapcrafterConfig::getTemplatePath(const std::string& path) const {
+	return getTemplateDir() / path;
+}
+
 Color MapcrafterConfig::getBackgroundColor() const {
 	return root_section.getBackgroundColor();
-}
-
-std::string MapcrafterConfig::getOutputPath(
-		const std::string& path) const {
-	return (getOutputDir() / path).string();
-}
-
-std::string MapcrafterConfig::getTemplatePath(
-		const std::string& path) const {
-	return (getTemplateDir() / path).string();
 }
 
 bool MapcrafterConfig::hasWorld(const std::string& world) const {
@@ -266,6 +252,10 @@ const MarkerSection& MapcrafterConfig::getMarker(const std::string& marker) cons
 		if (it->getShortName() == marker)
 			return *it;
 	throw std::out_of_range("Marker not found!");
+}
+
+const std::vector<LogSection>& MapcrafterConfig::getLogSections() const {
+	return log_sections;
 }
 
 } /* namespace config */

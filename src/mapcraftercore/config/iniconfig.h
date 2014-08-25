@@ -25,22 +25,20 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <vector>
 
 namespace mapcrafter {
 namespace config {
 
-class ValidationMessage;
+class INIConfigError : public std::runtime_error {
+public:
+	INIConfigError(const std::string& what)
+		: std::runtime_error(what) {}
+};
 
 typedef std::pair<std::string, std::string> INIConfigEntry;
 
 class INIConfigSection {
-private:
-	std::string type;
-	std::string name;
-
-	std::vector<INIConfigEntry> entries;
-
-	int getEntryIndex(const std::string& key) const;
 public:
 	INIConfigSection(const std::string& type = "", const std::string& name = "");
 	~INIConfigSection();
@@ -54,56 +52,67 @@ public:
 
 	bool has(const std::string& key) const;
 	
-	std::string get(const std::string& key, const std::string& default_value = "") const;
+	std::string get(const std::string& key,
+			const std::string& default_value = "") const;
+
 	template <typename T>
-	T get(const std::string& key, T default_value = T()) const {
-		if (has(key))
-			return util::as<T>(get(key));
-		return default_value;
-	}
+	T get(const std::string& key, T default_value = T()) const;
 	
-	const std::vector<INIConfigEntry> getEntries() const;
+	const std::vector<INIConfigEntry>& getEntries() const;
 
 	void set(const std::string& key, const std::string& value);
 	void remove(const std::string& key);
+
+private:
+	std::string type, name;
+
+	std::vector<INIConfigEntry> entries;
+
+	int getEntryIndex(const std::string& key) const;
 };
 
 std::ostream& operator<<(std::ostream& out, const INIConfigSection& section);
 
 class INIConfig {
-private:
-	std::vector<INIConfigSection> sections;
-	INIConfigSection root;
-
-	INIConfigSection empty_section;
-
-	int getSectionIndex(const std::string& type, const std::string& name) const;
 public:
 	INIConfig();
 	~INIConfig();
 
-	bool load(std::istream& in, ValidationMessage& msg);
-	bool load(std::istream& in);
-	bool loadFile(const std::string& filename, ValidationMessage& msg);
-	bool loadFile(const std::string& filename);
+	void load(std::istream& in);
+	void loadFile(const std::string& filename);
+	void loadString(const std::string& str);
 
-	bool write(std::ostream& out) const;
-	bool writeFile(const std::string& filename) const;
+	void write(std::ostream& out) const;
+	void writeFile(const std::string& filename) const;
 
 	bool hasSection(const std::string& type, const std::string& name) const;
 
 	const INIConfigSection& getRootSection() const;
 	INIConfigSection& getRootSection();
-	const INIConfigSection& getSection(const std::string& type, const std::string& name) const;
+
+	const INIConfigSection& getSection(const std::string& type,
+			const std::string& name) const;
 	INIConfigSection& getSection(const std::string& type, const std::string& name);
 
-	const std::vector<INIConfigSection> getSections() const;
-
-	INIConfigSection& addSection(const std::string& type, const std::string& name);
-	INIConfigSection& addSection(const INIConfigSection& section);
+	const std::vector<INIConfigSection>& getSections() const;
 
 	void removeSection(const std::string& type, const std::string& name);
+
+private:
+	INIConfigSection root;
+	std::vector<INIConfigSection> sections;
+
+	INIConfigSection empty_section;
+
+	int getSectionIndex(const std::string& type, const std::string& name) const;
 };
+
+template <typename T>
+T INIConfigSection::get(const std::string& key, T default_value) const {
+	if (has(key))
+		return util::as<T>(get(key));
+	return default_value;
+}
 
 } /* namespace config */
 } /* namespace mapcrafter */

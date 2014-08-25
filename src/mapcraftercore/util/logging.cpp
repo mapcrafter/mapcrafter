@@ -121,6 +121,11 @@ int LogLevelHelper::levelToSyslog(LogLevel level) {
 
 #endif
 
+std::ostream& operator<<(std::ostream& out, LogLevel level) {
+	out << LogLevelHelper::levelToString(level);
+	return out;
+}
+
 LogStream::LogStream(LogLevel level, const std::string& logger,
 		const std::string& file, int line)
 	: message({level, logger, file, line, ""}), ss(new std::stringstream) {
@@ -153,8 +158,9 @@ LogSink::~LogSink() {
 void LogSink::sink(const LogMessage& message) {
 }
 
-FormattedLogSink::FormattedLogSink(std::string format, std::string date_format)
-	: format(format), date_format(date_format) {
+FormattedLogSink::FormattedLogSink()
+	: format("%(date) [%(level)] [%(logger)] %(message)"),
+	  date_format("%Y-%m-%d %H:%M:%S") {
 }
 
 FormattedLogSink::~FormattedLogSink() {
@@ -192,8 +198,7 @@ void FormattedLogSink::sinkFormatted(const LogMessage& message,
 		const std::string& formatted) {
 }
 
-LogOutputSink::LogOutputSink(std::string format, std::string date_format)
-	: FormattedLogSink(format, date_format) {
+LogOutputSink::LogOutputSink() {
 }
 
 LogOutputSink::~LogOutputSink() {
@@ -201,21 +206,21 @@ LogOutputSink::~LogOutputSink() {
 
 void LogOutputSink::sinkFormatted(const LogMessage& message,
 		const std::string& formatted) {
+	int color = 0;
+	if (message.level == LogLevel::WARNING)
+		color = setcolor::yellow;
+	if (message.level < LogLevel::WARNING)
+		color = setcolor::red;
 	if (message.level < LogLevel::NOTICE || message.level == LogLevel::UNKNOWN)
-		std::cerr << formatted << std::endl;
+		std::cerr << setfgcolor(color) << formatted << setcolor::reset << std::endl;
 	else
 		std::cout << formatted << std::endl;
 }
 
-LogFileSink::LogFileSink(const std::string& filename, std::string format,
-		std::string date_format)
-	: FormattedLogSink(format, date_format) {
+LogFileSink::LogFileSink(const std::string& filename) {
 	out.open(filename, std::fstream::out | std::fstream::app);
-	/*
-	if (!out) {
-		// TODO handle error
-	}
-	*/
+	if (!out)
+		std::cerr << "Internal logging error: Unable to open log file '" << filename << "'!" << std::endl;
 }
 
 LogFileSink::~LogFileSink() {
@@ -238,7 +243,8 @@ LogSyslogSink::~LogSyslogSink() {
 }
 
 void LogSyslogSink::sink(const LogMessage& message) {
-	syslog(LogLevelHelper::levelToSyslog(message.level), message.message.c_str());
+	syslog(LogLevelHelper::levelToSyslog(message.level),
+			util::replaceAll(message.message, "%", "%%").c_str());
 }
 
 #endif
@@ -247,15 +253,15 @@ thread_ns::mutex Logging::instance_mutex;
 std::shared_ptr<Logging> Logging::instance;
 
 Logging::Logging()
-	: global_verbosity(LogLevel::INFO), maximum_verbosity(global_verbosity) {
+	: default_verbosity(LogLevel::INFO), maximum_verbosity(default_verbosity) {
 	reset();
 }
 
 Logging::~Logging() {
 }
 
-void Logging::setGlobalVerbosity(LogLevel level) {
-	global_verbosity = level;
+void Logging::setDefaultVerbosity(LogLevel level) {
+	default_verbosity = level;
 	updateMaximumVerbosity();
 }
 
@@ -267,21 +273,38 @@ void Logging::setSinkVerbosity(const std::string& sink, LogLevel level) {
 LogLevel Logging::getSinkVerbosity(const std::string& sink) const {
 	if (sinks_verbosity.count(sink))
 		return sinks_verbosity.at(sink);
-	return global_verbosity;
+	return default_verbosity;
 }
 
-void Logging::addSink(const std::string& name, LogSink* sink) {
+void Logging::setSinkLogProgress(const std::string& sink, bool log_progress) {
+	sinks_log_progress[sink] = log_progress;
+}
+
+bool Logging::getSinkLogProgress(const std::string& sink) const {
+	if (sinks_log_progress.count(sink))
+		return sinks_log_progress.at(sink);
+	return true;
+}
+
+LogSink* Logging::getSink(const std::string& name) {
+	if (sinks.count(name))
+		return sinks[name].get();
+	return nullptr;
+}
+
+void Logging::setSink(const std::string& name, LogSink* sink) {
 	sinks[name] = std::shared_ptr<LogSink>(sink);
 }
 
 void Logging::reset() {
-	global_verbosity = maximum_verbosity = LogLevel::INFO;
+	default_verbosity = maximum_verbosity = LogLevel::INFO;
 	loggers.clear();
 	sinks.clear();
 	sinks_verbosity.clear();
+	sinks_log_progress.clear();
 
-	// short form for "%Y-%m-%d %H:%M:%S" is "%F %T", but that doesn't work with MinGW
-	addSink("output", new LogOutputSink("%(date) [%(level)] [%(logger)] %(message)", "%Y-%m-%d %H:%M:%S"));
+	setSink("__output__", new LogOutputSink);
+	setSinkLogProgress("__output__", false);
 }
 
 Logger& Logging::getLogger(const std::string& name) {
@@ -310,6 +333,8 @@ void Logging::handleLogMessage(const LogMessage& message) {
 	if (message.level > maximum_verbosity)
 		return;
 	for (auto it = sinks.begin(); it != sinks.end(); ++it) {
+		if (message.logger == "progress" && !getSinkLogProgress(it->first))
+			continue;
 		if (message.level <= getSinkVerbosity(it->first))
 			(*it->second).sink(message);
 	}

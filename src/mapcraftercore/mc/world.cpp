@@ -29,6 +29,16 @@
 namespace mapcrafter {
 namespace mc {
 
+std::ostream& operator<<(std::ostream& out, Dimension dimension) {
+	if (dimension == Dimension::NETHER)
+		out << "nether";
+	else if (dimension == Dimension::OVERWORLD)
+		out << "overworld";
+	else if (dimension == Dimension::END)
+		out << "end";
+	return out;
+}
+
 World::World(std::string world_dir, Dimension dimension)
 	: world_dir(world_dir), dimension(dimension), rotation(0) {
 	std::string world_name = BOOST_FS_FILENAME(this->world_dir);
