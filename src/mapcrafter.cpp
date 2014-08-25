@@ -33,13 +33,6 @@ namespace fs = boost::filesystem;
 // evil, I know
 using namespace mapcrafter;
 
-template<class T>
-po::typed_value<T>* value(T* v, const char* value_typename) {
-    po::typed_value<T>* r = po::value<T>(v);
-    r->value_name(value_typename);
-    return r;
-}
-
 int main(int argc, char** argv) {
 	renderer::RenderOpts opts;
 	std::string color;
@@ -51,25 +44,25 @@ int main(int argc, char** argv) {
 
 	po::options_description logging("Logging/output options");
 	logging.add_options()
-		("logging-config", value<fs::path>(&opts.logging_config, "path"),
+		("logging-config", po::value<fs::path>(&opts.logging_config),
 			"the path to the global logging configuration file to use (automatically determined if not specified)")
-		("color", value<std::string>(&color, "colored")->default_value("auto"),
+		("color", po::value<std::string>(&color)->default_value("auto"),
 			"whether terminal output is colored (true, false or auto)")
 		("batch,b", "deactivates the animated progress bar and enables the progress logger instead");
 
 	po::options_description renderer("Renderer options");
 	renderer.add_options()
 		("find-resources", "shows available resource paths, for example template/texture directory and global logging configuration file")
-		("config,c", value<fs::path>(&opts.config, "path"),
+		("config,c", po::value<fs::path>(&opts.config),
 			"the path to the configuration file to use (required)")
-		("render-skip,s", value<std::vector<std::string>>(&opts.render_skip, "maps")->multitoken(),
+		("render-skip,s", po::value<std::vector<std::string>>(&opts.render_skip)->multitoken(),
 			"skips rendering the specified map(s)")
 		("render-reset,r", "skips rendering all maps")
-		("render-auto,a", value<std::vector<std::string>>(&opts.render_auto, "maps")->multitoken(),
+		("render-auto,a", po::value<std::vector<std::string>>(&opts.render_auto)->multitoken(),
 			"renders the specified map(s)")
-		("render-force,f", value<std::vector<std::string>>(&opts.render_force, "maps")->multitoken(),
+		("render-force,f", po::value<std::vector<std::string>>(&opts.render_force)->multitoken(),
 			"renders the specified map(s) completely")
-		("jobs,j", value<int>(&opts.jobs, "number")->default_value(1),
+		("jobs,j", po::value<int>(&opts.jobs)->default_value(1),
 			"the count of jobs to use when rendering the map");
 
 	po::options_description all("Allowed options");
