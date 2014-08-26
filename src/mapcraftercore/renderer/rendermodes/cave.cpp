@@ -109,7 +109,7 @@ void CaveRendermode::draw(RGBAImage& image, const mc::BlockPos& pos,
 	int G = h2 * 255.0;
 	int B = h3 * 255.0;
 	
-	int Y = (R*10+G*3+B)/14; //get luminance of recolor
+	int Y = (R*3+G*10+B)/14; //get luminance of recolor
 	
 	// We try to do luminance-neutral additive/subtractive color instead of alpha blending, for better contrast
 	// So first subtract luminance from each component.
