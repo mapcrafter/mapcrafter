@@ -72,6 +72,7 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  image_format = " << image_format << std::endl;
 	out << "  jpeg_quality = " << jpeg_quality << std::endl;
 	out << "  lighting_intensity = " << lighting_intensity << std::endl;
+	out << "  cave_high_contrast = " << cave_high_contrast << std::endl;
 	out << "  render_unknown_blocks = " << render_unknown_blocks << std::endl;
 	out << "  render_leaves_transparent = " << render_leaves_transparent << std::endl;
 	out << "  render_biomes = " << render_biomes << std::endl;
@@ -128,6 +129,10 @@ double MapSection::getLightingIntensity() const {
 	return lighting_intensity.getValue();
 }
 
+bool MapSection::hasCaveHighContrast() const {
+	return cave_high_contrast.getValue();
+}
+
 bool MapSection::renderUnknownBlocks() const {
 	return render_unknown_blocks.getValue();
 }
@@ -163,6 +168,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	jpeg_quality.setDefault(85);
 
 	lighting_intensity.setDefault(1.0);
+	cave_high_contrast.setDefault(true);
 	render_unknown_blocks.setDefault(false);
 	render_leaves_transparent.setDefault(true);
 	render_biomes.setDefault(true);
@@ -202,6 +208,8 @@ bool MapSection::parseField(const std::string key, const std::string value,
 			validation.error("'jpeg_quality' must be a number between 0 and 100!");
 	} else if (key == "lighting_intensity") {
 		lighting_intensity.load(key, value, validation);
+	} else if (key == "cave_high_contrast") {
+		cave_high_contrast.load(key, value, validation);
 	} else if (key == "render_unknown_blocks") {
 		render_unknown_blocks.load(key, value, validation);
 	} else if (key == "render_leaves_transparent") {

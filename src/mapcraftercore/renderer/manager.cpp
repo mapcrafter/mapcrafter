@@ -63,12 +63,16 @@ bool MapSettings::read(const fs::path& filename) {
 
 	config::INIConfigSection& root = config.getRootSection();
 
+	// don't set default values for new options here, that's done in syncMapConfig
 	if (root.has("texture_size"))
 		texture_size.set(root.get<int>("texture_size"));
 	if (root.has("image_format"))
 		image_format.set(root.get<std::string>("image_format"));
 	if (root.has("lighting_intensity"))
 		lighting_intensity.set(root.get<double>("lighting_intensity"));
+	// exception for default value of cave_high_contrast
+	// according to config defaults to true, but for older maps it's false
+	cave_high_contrast.set(root.get<bool>("cave_high_contrast", false));
 	if (root.has("render_unknown_blocks"))
 		render_unknown_blocks.set(root.get<bool>("render_unknown_blocks"));
 	if (root.has("render_leaves_transparent"))
@@ -103,6 +107,7 @@ bool MapSettings::write(const fs::path& filename) const {
 	root.set("texture_size", util::str(texture_size.get()));
 	root.set("image_format", image_format.get());
 	root.set("lighting_intensity", util::str(lighting_intensity.get()));
+	root.set("cave_high_contrast", util::str(cave_high_contrast.get()));
 	root.set("render_unknown_blocks", util::str(render_unknown_blocks.get()));
 	root.set("render_leaves_transparent", util::str(render_leaves_transparent.get()));
 	root.set("render_biomes", util::str(render_biomes.get()));
@@ -136,6 +141,8 @@ bool MapSettings::syncMapConfig(const config::MapSection& map) {
 		image_format.set(map.getImageFormatSuffix());
 	if (lighting_intensity.isNull())
 		lighting_intensity.set(map.getLightingIntensity());
+	if (cave_high_contrast.isNull())
+		cave_high_contrast.set(map.hasCaveHighContrast());
 	if (render_unknown_blocks.isNull())
 		render_unknown_blocks.set(map.renderUnknownBlocks());
 	if (render_leaves_transparent.isNull())
@@ -160,6 +167,10 @@ bool MapSettings::syncMapConfig(const config::MapSection& map) {
 	} else if (!util::floatingPointEquals(lighting_intensity.get(), map.getLightingIntensity())) {
 		LOG(WARNING) << "You changed the lighting intensity from "
 				<< lighting_intensity.get() << " to " << map.getLightingIntensity() << ".";
+	} else if (cave_high_contrast.get() != map.hasCaveHighContrast()) {
+		LOG(WARNING) << "You have changed the cave high contrast mode from "
+				<< util::str(cave_high_contrast.get()) << " to "
+				<< util::str(map.hasCaveHighContrast()) << ".";
 	} else if (render_unknown_blocks.get() != map.renderUnknownBlocks()) {
 		LOG(WARNING) << "You changed the rendering of unknown blocks from "
 				<< util::str(render_unknown_blocks.get()) << " to "
@@ -191,6 +202,7 @@ MapSettings MapSettings::byMapConfig(const config::MapSection& map) {
 	settings.texture_size.set(map.getTextureSize());
 	settings.image_format.set(map.getImageFormatSuffix());
 	settings.lighting_intensity.set(map.getLightingIntensity());
+	settings.cave_high_contrast.set(map.hasCaveHighContrast());
 	settings.render_unknown_blocks.set(map.renderUnknownBlocks());
 	settings.render_leaves_transparent.set(map.renderLeavesTransparent());
 	settings.render_biomes.set(map.renderBiomes());

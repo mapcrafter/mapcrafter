@@ -67,6 +67,7 @@ public:
 	int getJPEGQuality() const;
 
 	double getLightingIntensity() const;
+	bool hasCaveHighContrast() const;
 	bool renderUnknownBlocks() const;
 	bool renderLeavesTransparent() const;
 	bool renderBiomes() const;
@@ -97,6 +98,7 @@ private:
 	Field<int> jpeg_quality;
 
 	Field<double> lighting_intensity;
+	Field<bool> cave_high_contrast;
 	Field<bool> render_unknown_blocks, render_leaves_transparent, render_biomes, use_image_mtimes;
 };
 

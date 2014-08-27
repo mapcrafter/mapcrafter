@@ -22,9 +22,8 @@
 namespace mapcrafter {
 namespace renderer {
 
-
-CaveRendermode::CaveRendermode(const RenderState& state)
-	: Rendermode(state) {
+CaveRendermode::CaveRendermode(const RenderState& state, bool high_contrast)
+	: Rendermode(state), high_contrast(high_contrast) {
 }
 
 CaveRendermode::~CaveRendermode() {
@@ -104,27 +103,41 @@ void CaveRendermode::draw(RGBAImage& image, const mc::BlockPos& pos,
 	double h3 = 0;
 	if (pos.y > 64)
 		h3 = (double) (pos.y - 64) / 64;
-	
-	int R = h1 * 128.0 + 128.0;
-	int G = h2 * 255.0;
-	int B = h3 * 255.0;
-	
-	int Y = (R*10+G*3+B)/14; //get luminance of recolor
-	
-	// We try to do luminance-neutral additive/subtractive color instead of alpha blending, for better contrast
-	// So first subtract luminance from each component.
-	R = (R-Y)/3; // /3 is similar to alpha=85
-	G = (G-Y)/3;
-	B = (B-Y)/3;
-	
-	int size = image.getWidth();
-	for (int y = 0; y < size; y++)
-		for (int x = 0; x < size; x++) {
-			uint32_t pixel = image.getPixel(x, y);
-			if (pixel != 0) {				
-				image.setPixel(x,y, rgba_add_clamp(pixel, R, G, B));
+
+	int r = h1 * 128.0 + 128.0;
+	int g = h2 * 255.0;
+	int b = h3 * 255.0;
+
+	if (high_contrast) {
+		// get luminance of recolor
+		int luminance = (10*r + 3*g + b) / 14;
+
+		// We try to do luminance-neutral additive/subtractive color instead of alpha blending, for better contrast
+		// So first subtract luminance from each component.
+		r = (r - luminance) / 3; // /3 is similar to alpha=85
+		g = (g - luminance) / 3;
+		b = (b - luminance) / 3;
+
+		int size = image.getWidth();
+		for (int y = 0; y < size; y++) {
+			for (int x = 0; x < size; x++) {
+				uint32_t pixel = image.getPixel(x, y);
+				if (pixel != 0)
+					image.setPixel(x, y, rgba_add_clamp(pixel, r, g, b));
 			}
 		}
+	} else {
+		uint32_t color = rgba(r, g, b, 128);
+
+		int size = image.getWidth();
+		for (int y = 0; y < size; y++) {
+			for (int x = 0; x < size; x++) {
+				uint32_t pixel = image.getPixel(x, y);
+				if (pixel != 0)
+					image.blendPixel(color, x, y);
+			}
+		}
+	}
 }
 
 } /* namespace render */
