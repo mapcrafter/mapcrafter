@@ -272,28 +272,70 @@ public:
 
 #endif
 
+/**
+ * Global logging facility. Manages the log sinks and allows the configuration of them.
+ */
 class Logging {
 public:
 	~Logging();
 
+	/**
+	 * Returns/sets the default verbosity which is also used as default verbosity for the
+	 * log sinks. The default verbosity defaults to INFO.
+	 */
+	LogLevel getDefaultVerbosity() const;
 	void setDefaultVerbosity(LogLevel level);
-	void setSinkVerbosity(const std::string& sink, LogLevel level);
-	LogLevel getSinkVerbosity(const std::string& sink) const;
 
+	/**
+	 * Returns/sets the verbosity of a sink, i.e. the minimum log level log messages must
+	 * have to be handled by this sink. Defaults to the default verbosity.
+	 */
+	LogLevel getSinkVerbosity(const std::string& sink) const;
+	void setSinkVerbosity(const std::string& sink, LogLevel level);
+
+	/**
+	 * Returns/sets whether a sink handles progress log messages. Defaults to true.
+	 */
 	bool getSinkLogProgress(const std::string& sink) const;
 	void setSinkLogProgress(const std::string& sink, bool log_progress);
 
+	/**
+	 * Returns/sets a sink instance. Returns a nullptr if there is no sink with the
+	 * specific name.
+	 */
 	LogSink* getSink(const std::string& name);
 	void setSink(const std::string& name, LogSink* sink);
+
+	/**
+	 * Resets the configured logging facility.
+	 * Resets the default verbosity to INFO, deletes the log sinks and creates a new
+	 * default output log sink.
+	 */
 	void reset();
 
+	/**
+	 * Returns the instance of a specific logger (thread-safe).
+	 */
 	Logger& getLogger(const std::string& name);
+
+	/**
+	 * Returns the singleton instance of the logging facility (thread-safe).
+	 */
 	static Logging& getInstance();
 
 protected:
 	Logging();
 
+	/**
+	 * Updates the maximum verbosity that is used as verbosity for a log sink.
+	 * That way we do not even need to consider to handle a message if there is no
+	 * log sink with such a verbosity.
+	 */
 	void updateMaximumVerbosity();
+
+	/**
+	 * Handles a log message and passes it to all log sinks with the required verbosity.
+	 */
 	void handleLogMessage(const LogMessage& message);
 
 	LogLevel default_verbosity, maximum_verbosity;
