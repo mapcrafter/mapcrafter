@@ -77,7 +77,10 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 **v.1.5.1 (in progress)**
 
-* TODO
+* Added ability to configure logging facility with configuration files
+* Added colored terminal output for warning/error log messages
+* Improved cave rendermode with a new high contrast block coloring (thanks to dtfinch, #100),
+  old behavior is still available with a configuration option for compatibility reasons
 
 **v.1.5**
 
