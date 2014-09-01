@@ -109,11 +109,14 @@ void CaveRendermode::draw(RGBAImage& image, const mc::BlockPos& pos,
 	int b = h3 * 255.0;
 
 	if (high_contrast) {
+		// if high contrast mode is enabled, then do some magic here
+
 		// get luminance of recolor
 		int luminance = (10*r + 3*g + b) / 14;
 
-		// We try to do luminance-neutral additive/subtractive color instead of alpha blending, for better contrast
-		// So first subtract luminance from each component.
+		// try to do luminance-neutral additive/subtractive color
+		// instead of alpha blending (for better contrast)
+		// so first subtract luminance from each component
 		r = (r - luminance) / 3; // /3 is similar to alpha=85
 		g = (g - luminance) / 3;
 		b = (b - luminance) / 3;
@@ -127,6 +130,7 @@ void CaveRendermode::draw(RGBAImage& image, const mc::BlockPos& pos,
 			}
 		}
 	} else {
+		// otherwise just simple alphablending
 		uint32_t color = rgba(r, g, b, 128);
 
 		int size = image.getWidth();
