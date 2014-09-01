@@ -52,7 +52,8 @@ bool createRendermode(const config::WorldSection& world_config,
 		return true;
 
 	if (name == "cave")
-		modes.push_back(std::shared_ptr<Rendermode>(new CaveRendermode(state)));
+		modes.push_back(std::shared_ptr<Rendermode>(new CaveRendermode(state,
+				map_config.hasCaveHighContrast())));
 	else if (name == "daylight")
 		modes.push_back(std::shared_ptr<Rendermode>(new LightingRendermode(
 				state, true, map_config.getLightingIntensity(),

@@ -57,6 +57,7 @@ struct MapSettings {
 	util::Nullable<int> texture_size;
 	util::Nullable<std::string> image_format;
 	util::Nullable<double> lighting_intensity;
+	util::Nullable<bool> cave_high_contrast;
 	util::Nullable<bool> render_unknown_blocks;
 	util::Nullable<bool> render_leaves_transparent;
 	util::Nullable<bool> render_biomes;
