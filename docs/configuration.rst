@@ -440,6 +440,14 @@ Map Options
     lighting to the rendered map. You can specify a value from 0.0 to 1.0, 
     where 1.0 means full lighting and 0.0 means no lighting.
 
+``cave_high_contrast = true|false``
+
+    **Default:** ``true``
+
+    In Mapcrafter 1.5.1 a new cave rendermode block coloring resulting in a higher
+    contrast was introduced. This option is enabled by default for new maps, but
+    disabled for older, already rendered maps for compatibility reasons.
+
 ``render_unknown_blocks = true|false``
 
     **Default:** ``false``
