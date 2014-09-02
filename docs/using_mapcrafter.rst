@@ -79,8 +79,9 @@ Logging/output options
 
 .. cmdoption:: -b, --batch
 
-    This option deactivates the animated progress bar. This is useful if you
-    let the renderer run with a cronjob and pipe the output into a log file.
+    This option deactivates the animated progress bar and enables the progress logger
+    instead as terminal output. It is also automatically enabled if the output is not
+    connected to a tty (piped to a file for example).
 
 Renderer options
 ----------------

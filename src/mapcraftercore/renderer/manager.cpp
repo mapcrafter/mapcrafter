@@ -711,7 +711,7 @@ bool RenderManager::run() {
 			std::shared_ptr<util::MultiplexingProgressHandler> progress(new util::MultiplexingProgressHandler);
 
 			util::ProgressBar* progress_bar = nullptr;
-			if (opts.batch) {
+			if (opts.batch || !util::isOutTTY()) {
 				util::Logging::getInstance().setSinkLogProgress("__output__", true);
 			} else {
 				progress_bar = new util::ProgressBar;
