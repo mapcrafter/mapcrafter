@@ -317,7 +317,7 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_WEST).id == 131)
 				data |= REDSTONE_WEST | REDSTONE_TOPWEST;
 		}
-	} else if (id == 64 || id == 71) {
+	} else if (id == 64 || id == 71 || (id >= 193 && id <= 197)) {
 		// doors
 		uint16_t top = data & 8 ? DOOR_TOP : 0;
 		uint16_t top_data, bottom_data;

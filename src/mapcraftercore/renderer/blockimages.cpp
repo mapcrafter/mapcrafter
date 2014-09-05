@@ -606,7 +606,7 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & ~(util::binary<1111>::value);
 	} else if (id == 60) // farmland
 		return data & 0xff00;
-	else if (id == 64 || id == 71) // doors
+	else if (id == 64 || id == 71 || (id >= 193 && id <= 197)) // doors
 		return data & util::binary<1111110000>::value;
 	else if (id == 81 || id == 83 || id == 92) // cactus, sugar cane, cake
 		return data & 0xff00;
@@ -2558,6 +2558,11 @@ void BlockImages::loadBlocks() {
 	createFence(190, 0, t.PLANKS_JUNGLE); // jungle fence
 	createFence(191, 0, t.PLANKS_BIG_OAK); // dark oak fence
 	createFence(192, 0, t.PLANKS_ACACIA); // acacia fence
+	createDoor(193, t.DOOR_SPRUCE_LOWER, t.DOOR_SPRUCE_UPPER); // spruce door
+	createDoor(194, t.DOOR_BIRCH_LOWER, t.DOOR_BIRCH_UPPER); // birch door
+	createDoor(195, t.DOOR_JUNGLE_LOWER, t.DOOR_JUNGLE_UPPER); // jungle door
+	createDoor(196, t.DOOR_ACACIA_LOWER, t.DOOR_ACACIA_UPPER); // acacia door
+	createDoor(197, t.DOOR_DARK_OAK_LOWER, t.DOOR_DARK_OAK_UPPER); // dark oak door
 }
 
 bool BlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
