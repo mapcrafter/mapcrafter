@@ -369,8 +369,10 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		if (south.id == 79)
 			data |= DATA_SOUTH;
 
-	} else if (id == 85 || id == 101 || id == 102 || id == 139 || id == 113 || id == 160) {
-		// fence, iron bars, glass panes, cobblestone walls, nether fence, stained glass pane
+	} else if (id == 85 || id == 101 || id == 102 || id == 139 || id == 113 || id == 160
+			|| (id >= 188 && id <= 192)) {
+		// fence, iron bars, glass panes, cobblestone walls, nether fence,
+		// stained glass pane, special wood type fences
 		north = state.getBlock(pos + mc::DIR_NORTH);
 		south = state.getBlock(pos + mc::DIR_SOUTH);
 		east = state.getBlock(pos + mc::DIR_EAST);
@@ -391,7 +393,7 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			data |= DATA_WEST;
 
 		// check fences and cobblestone walls, they can also connect with fence gates
-		if (id == 85 || id == 139) {
+		if (id == 85 || id == 139 || (id >= 188 && id <= 192)) {
 			if (north.id == 107)
 				data |= DATA_NORTH;
 			if (south.id == 107)
