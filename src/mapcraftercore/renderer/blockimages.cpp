@@ -1887,8 +1887,7 @@ RGBAImage createFenceGateTexture(bool opened, RGBAImage texture) {
 	return texture;
 }
 
-void BlockImages::createFenceGate() { // id 107
-	RGBAImage texture = textures.PLANKS_OAK;
+void BlockImages::createFenceGate(uint8_t id, RGBAImage texture) { // id 107
 	RGBAImage opened = createFenceGateTexture(true, texture);
 	RGBAImage closed = createFenceGateTexture(false, texture);
 
@@ -1904,15 +1903,15 @@ void BlockImages::createFenceGate() { // id 107
 		blitFace(east, FACE_EAST, tex, -texture_size * 0.5, texture_size * 0.25, false);
 		uint8_t extra = open ? 4 : 0;
 		if (rotation == 0 || rotation == 2) {
-			setBlockImage(107, 0 | extra, north);
-			setBlockImage(107, 1 | extra, east);
-			setBlockImage(107, 2 | extra, north);
-			setBlockImage(107, 3 | extra, east);
+			setBlockImage(id, 0 | extra, north);
+			setBlockImage(id, 1 | extra, east);
+			setBlockImage(id, 2 | extra, north);
+			setBlockImage(id, 3 | extra, east);
 		} else {
-			setBlockImage(107, 0 | extra, east);
-			setBlockImage(107, 1 | extra, north);
-			setBlockImage(107, 2 | extra, east);
-			setBlockImage(107, 3 | extra, north);
+			setBlockImage(id, 0 | extra, east);
+			setBlockImage(id, 1 | extra, north);
+			setBlockImage(id, 2 | extra, east);
+			setBlockImage(id, 3 | extra, north);
 		}
 	}
 }
@@ -2337,7 +2336,7 @@ void BlockImages::loadBlocks() {
 	createStem(104); // pumpkin stem
 	createStem(105); // melon stem
 	createVines(); // id 106 // vines
-	createFenceGate(); // id 107 // fence gate
+	createFenceGate(107, t.PLANKS_OAK); // oak fence gate
 	createStairs(108, t.BRICK); // brick stairs
 	createStairs(109, t.STONEBRICK); // stone brick stairs
 	createBlock(110, 0, t.MYCELIUM_SIDE, t.MYCELIUM_TOP); // mycelium
@@ -2514,6 +2513,18 @@ void BlockImages::loadBlocks() {
 	createLargePlant(4, t.DOUBLE_PLANT_ROSE_BOTTOM, t.DOUBLE_PLANT_ROSE_TOP);
 	createLargePlant(5, t.DOUBLE_PLANT_PAEONIA_BOTTOM, t.DOUBLE_PLANT_PAEONIA_TOP);
 	// --
+
+	// new fence types (not tested yet)
+	createFenceGate(183, t.PLANKS_SPRUCE);
+	createFenceGate(184, t.PLANKS_BIRCH);
+	createFenceGate(185, t.PLANKS_JUNGLE);
+	createFenceGate(186, t.PLANKS_BIG_OAK);
+	createFenceGate(187, t.PLANKS_ACACIA);
+	createFence(188, 0, t.PLANKS_SPRUCE);
+	createFence(189, 0, t.PLANKS_BIRCH);
+	createFence(190, 0, t.PLANKS_JUNGLE);
+	createFence(191, 0, t.PLANKS_BIG_OAK);
+	createFence(192, 0, t.PLANKS_ACACIA);
 }
 
 bool BlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {

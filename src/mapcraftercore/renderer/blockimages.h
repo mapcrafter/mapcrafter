@@ -356,7 +356,7 @@ private:
 	void createSnow(); // id 78
 	void createIce(uint8_t id); // id 79
 	void createCactus(); // id 81
-	void createFence(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 85, 113
+	void createFence(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 85, 113, 188-192
 	void createPumkin(uint16_t id, const RGBAImage& front); // id 86, 91
 	void createCake(); // id 92
 	void createRedstoneRepeater(uint16_t id, const RGBAImage& texture); // id 93, 94
@@ -365,7 +365,7 @@ private:
 	void createBarsPane(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 101, 102
 	void createStem(uint16_t id); // id 104, 105
 	void createVines(); // id 106
-	void createFenceGate(); // id 107
+	void createFenceGate(uint8_t id, RGBAImage texture); // id 107, 183-187
 	void createBrewingStand(); // id 117
 	void createCauldron(); // id 118
 	void createDragonEgg(); // id 122
