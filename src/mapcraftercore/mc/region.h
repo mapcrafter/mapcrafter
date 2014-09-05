@@ -55,7 +55,7 @@ public:
 	/**
 	 * Sets the boundaries of the world.
 	 */
-	void setWorldCrop(const WorldCrop& worldcrop);
+	void setWorldCrop(const WorldCrop& world_crop);
 
 	/**
 	 * Reads the whole region file with the data of all chunks. Returns false if the
@@ -139,7 +139,7 @@ private:
 	// rotation of the region file
 	int rotation;
 	// and possible boundaries of the world
-	WorldCrop worldcrop;
+	WorldCrop world_crop;
 
 	// a set with all available chunks
 	ChunkMap containing_chunks;

@@ -53,6 +53,23 @@ uint8_t rgba_alpha(RGBAPixel value) {
 	return (value & 0xff000000) >> 24;
 }
 
+uint8_t clamp(int c) {
+	if (c < 0)
+		return 0;
+	if (c > 255)
+		return 255;
+	return c;
+}
+
+RGBAPixel rgba_add_clamp(RGBAPixel value, int r, int g, int b) {
+	return rgba(
+		clamp(r + rgba_red(value)),
+		clamp(g + rgba_green(value)),
+		clamp(b + rgba_blue(value)),
+		rgba_alpha(value)
+	);
+}
+
 RGBAPixel rgba_multiply(RGBAPixel value, double r, double g, double b, double a) {
 	uint8_t red = rgba_red(value);
 	uint8_t green = rgba_green(value);

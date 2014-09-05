@@ -30,10 +30,10 @@
 const                        // this is a const object...
 class {
 public:
-  template<class T>          // convertible to any type
+  template <class T>          // convertible to any type
     operator T*() const      // of null non-member
     { return 0; }            // pointer...
-  template<class C, class T> // or any type of null
+  template <class C, class T> // or any type of null
     operator T C::*() const  // member pointer...
     { return 0; }
 private:
@@ -41,29 +41,19 @@ private:
 } nullptr = {};              // and whose name is nullptr
 #endif
 
-#include <boost/filesystem.hpp>
-
-#if BOOST_FILESYSTEM_VERSION == 2
-# define OLD_BOOST_FILESYSTEM 42
+// shortcut to detect Windows
+#if defined(__WIN32__) || defined(__WIN64__) || defined(_WIN32) || defined(_WIN64)
+#  define OS_WINDOWS
 #endif
 
-#ifndef BOOST_FILESYSTEM_VERSION
-# define OLD_BOOST_FILESYSTEM 42
-#endif
-
-#ifdef OLD_BOOST_FILESYSTEM
-# define BOOST_FS_FILENAME(p) (p).filename()
-# define BOOST_FS_ABSOLUTE(p, b) fs::complete((p), (b))
-# define BOOST_FS_ABSOLUTE1(p) fs::complete((p))
-#else
-# define BOOST_FS_FILENAME(p) (p).filename().string()
-# define BOOST_FS_ABSOLUTE(p, b) fs::absolute((p), (b))
-# define BOOST_FS_ABSOLUTE1(p) fs::absolute((p))
-#endif
+// include compat/*.h here if all files need it
+#include "compat/boost.h"
 
 #include "util/filesystem.h"
+#include "util/logging.h"
 #include "util/progress.h"
 #include "util/math.h"
 #include "util/other.h"
+#include "util/terminal.h"
 
 #endif /* UTIL_H_ */

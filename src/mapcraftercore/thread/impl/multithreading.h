@@ -23,10 +23,10 @@
 #include "concurrentqueue.h"
 #include "../dispatcher.h"
 #include "../workermanager.h"
+#include "../../compat/thread.h"
 #include "../../renderer/tilerenderworker.h"
+#include "../../util.h"
 
-#include <condition_variable>
-#include <mutex>
 #include <set>
 #include <thread>
 #include <vector>
@@ -52,8 +52,8 @@ private:
 	ConcurrentQueue<renderer::RenderWorkResult> result_queue;
 
 	bool finished;
-	std::mutex mutex;
-	std::condition_variable condition_wait_jobs, condition_wait_results;
+	thread_ns::mutex mutex;
+	thread_ns::condition_variable condition_wait_jobs, condition_wait_results;
 };
 
 class ThreadWorker {
@@ -81,7 +81,7 @@ private:
 	int thread_count;
 
 	ThreadManager manager;
-	std::vector<std::thread> threads;
+	std::vector<thread_ns::thread> threads;
 
 	std::set<renderer::TilePath> rendered_tiles;
 };

@@ -20,7 +20,7 @@
 #ifndef RENDER_WORK_H_
 #define RENDER_WORK_H_
 
-#include "../config/mapcrafter_config.h"
+#include "../config/mapcrafterconfig.h"
 #include "../mc/world.h"
 #include "../renderer/blockimages.h"
 #include "../renderer/tileset.h"

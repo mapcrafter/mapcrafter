@@ -2404,6 +2404,7 @@ void BlockImages::loadBlocks() {
 	// id 144 // head
 	// id 145 // anvil
 	createChest(146, chest); // trapped chest
+	createDoubleChest(146, largechest); // double trapped chest
 	createSmallerBlock(147, 0, t.GOLD_BLOCK, t.GOLD_BLOCK, 0, 1); // weighted pressure plate (light)
 	createSmallerBlock(148, 0, t.QUARTZ_BLOCK_LINES, t.QUARTZ_BLOCK_LINES, 0, 1); // weighted pressure plate (heavy)
 	createRedstoneRepeater(149, t.COMPARATOR_OFF); // redstone comparator (inactive)

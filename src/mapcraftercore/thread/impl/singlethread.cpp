@@ -20,6 +20,7 @@
 #include "singlethread.h"
 
 #include "../../mc/worldcache.h"
+#include "../../util.h"
 
 #include <set>
 
@@ -38,8 +39,7 @@ void SingleThreadDispatcher::dispatch(const renderer::RenderContext& context,
 	if (render_tiles == 0)
 		return;
 
-	std::cout << "Single thread will render " << render_tiles;
-	std::cout << " render tiles." << std::endl;
+	LOG(INFO) << "Single thread will render " << render_tiles << " render tiles.";
 
 	renderer::RenderWork work;
 	work.tiles.insert(renderer::TilePath());

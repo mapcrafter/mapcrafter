@@ -24,6 +24,7 @@
 #include "../validation.h"
 #include "../../util.h"
 
+#include <iostream>
 #include <set>
 #include <string>
 #include <boost/filesystem.hpp>
@@ -38,21 +39,19 @@ enum class ImageFormat {
 	JPEG
 };
 
+std::ostream& operator<<(std::ostream& out, ImageFormat image_format);
+
 class INIConfigSection;
 
 class MapSection : public ConfigSectionBase {
 public:
-	MapSection(bool global = false);
+	MapSection();
 	~MapSection();
 
-	void setConfigDir(const fs::path& config_dir);
+	virtual std::string getPrettyName() const;
+	virtual void dump(std::ostream& out) const;
 
-	virtual void preParse(const INIConfigSection& section,
-			ValidationList& validation);
-	virtual bool parseField(const std::string key, const std::string value,
-			ValidationList& validation);
-	virtual void postParse(const INIConfigSection& section,
-			ValidationList& validation);
+	void setConfigDir(const fs::path& config_dir);
 
 	std::string getShortName() const;
 	std::string getLongName() const;
@@ -68,10 +67,19 @@ public:
 	int getJPEGQuality() const;
 
 	double getLightingIntensity() const;
+	bool hasCaveHighContrast() const;
 	bool renderUnknownBlocks() const;
 	bool renderLeavesTransparent() const;
 	bool renderBiomes() const;
 	bool useImageModificationTimes() const;
+
+protected:
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+	virtual void postParse(const INIConfigSection& section,
+			ValidationList& validation);
 
 private:
 	fs::path config_dir;
@@ -90,6 +98,7 @@ private:
 	Field<int> jpeg_quality;
 
 	Field<double> lighting_intensity;
+	Field<bool> cave_high_contrast;
 	Field<bool> render_unknown_blocks, render_leaves_transparent, render_biomes, use_image_mtimes;
 };
 

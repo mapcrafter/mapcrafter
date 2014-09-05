@@ -28,7 +28,7 @@
   #include <mach-o/dyld.h>
 #elif defined(__FreeBSD__)
   #include <sys/sysctl.h>
-#elif defined(__WIN32__) || defined(__WIN64__) || defined(_WIN32) || defined(_WIN64)
+#elif defined(OS_WINDOWS)
   #include <windows.h>
 #endif
 
@@ -79,7 +79,7 @@ bool moveFile(const fs::path& from, const fs::path& to) {
 // TODO make sure this works on different OSes
 fs::path findHomeDir() {
 	char* path;
-#if defined(__WIN32__) || defined(__WIN64__) || defined(_WIN32) || defined(_WIN64)
+#if defined(OS_WINDOWS)
 	path = getenv("APPDATA");
 #else
 	path = getenv("HOME");
@@ -114,7 +114,7 @@ fs::path findExecutablePath() {
 	int len;
 	if ((len = readlink("/proc/self/exe", buf, sizeof(buf))) != -1)
 		return fs::path(std::string(buf, len));
-#elif defined(__WIN32__) || defined(__WIN64__) || defined(_WIN32) || defined(_WIN64)
+#elif defined(OS_WINDOWS)
 	GetModuleFileName(NULL, buf, 1024);
 	return fs::path(std::string(buf));
 #else
@@ -124,9 +124,9 @@ fs::path findExecutablePath() {
 }
 
 fs::path findExecutableMapcrafterDir(fs::path executable) {
-	std::string filename = executable.filename().string();
+	std::string filename = BOOST_FS_FILENAME(executable);
 	if ((filename == "testconfig" || filename == "mapcrafter_markers") &&
-			executable.parent_path().filename().string() == "tools")
+			BOOST_FS_FILENAME(executable.parent_path()) == "tools")
 		return executable.parent_path().parent_path();
 	return executable.parent_path();
 }
@@ -166,6 +166,26 @@ PathList findTextureDirs(const fs::path& executable) {
 	return textures;
 }
 
+PathList findLoggingConfigFiles(const fs::path& executable) {
+	fs::path mapcrafter_dir = findExecutableMapcrafterDir(findExecutablePath());
+	PathList configs = {
+		mapcrafter_dir.parent_path() / "etc" / "mapcrafter" / "logging.conf",
+		mapcrafter_dir / "logging.conf",
+	};
+
+	fs::path home = findHomeDir();
+	if (!home.empty())
+		configs.insert(configs.begin(), home / ".mapcrafter" / "logging.conf");
+
+	for (PathList::iterator it = configs.begin(); it != configs.end(); ) {
+		if (!fs::is_regular_file(*it))
+			configs.erase(it);
+		else
+			++it;
+	}
+	return configs;
+}
+
 fs::path findTemplateDir() {
 	PathList templates = findTemplateDirs(findExecutablePath());
 	if (templates.size())
@@ -177,6 +197,13 @@ fs::path findTextureDir() {
 	PathList textures = findTextureDirs(findExecutablePath());
 	if (textures.size())
 		return *textures.begin();
+	return fs::path();
+}
+
+fs::path findLoggingConfigFile() {
+	PathList configs = findLoggingConfigFiles(findExecutablePath());
+	if (configs.size())
+		return *configs.begin();
 	return fs::path();
 }
 

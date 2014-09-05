@@ -76,7 +76,7 @@ bool RegionFile::readHeaders(std::ifstream& file, int chunk_offsets[1024]) {
 			// get the original (not rotated) position of the chunk
 			ChunkPos chunkpos(x + regionpos_original.x * 32, z + regionpos_original.z * 32);
 			// check if this chunk is not cropped
-			if (!worldcrop.isChunkContained(chunkpos))
+			if (!world_crop.isChunkContained(chunkpos))
 				continue;
 
 			// now rotate this chunk position for the public set with available chunks
@@ -112,8 +112,8 @@ void RegionFile::setRotation(int rotation) {
 	}
 }
 
-void RegionFile::setWorldCrop(const WorldCrop& worldcrop) {
-	this->worldcrop = worldcrop;
+void RegionFile::setWorldCrop(const WorldCrop& world_crop) {
+	this->world_crop = world_crop;
 }
 
 bool RegionFile::read() {
@@ -286,7 +286,7 @@ int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 
 	// set the chunk rotation
 	chunk.setRotation(rotation);
-	chunk.setWorldCrop(worldcrop);
+	chunk.setWorldCrop(world_crop);
 	// try to load the chunk
 	try {
 		if (!chunk.readNBT(reinterpret_cast<char*>(&chunk_data[index][0]), size, comp))

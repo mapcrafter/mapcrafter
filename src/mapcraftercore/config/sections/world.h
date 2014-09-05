@@ -37,17 +37,13 @@ class INIConfigSection;
 
 class WorldSection : public ConfigSectionBase {
 public:
-	WorldSection(bool global = false);
+	WorldSection();
 	~WorldSection();
 
-	void setConfigDir(const fs::path& config_dir);
+	virtual std::string getPrettyName() const;
+	virtual void dump(std::ostream& out) const;
 
-	virtual void preParse(const INIConfigSection& section,
-			ValidationList& validation);
-	virtual bool parseField(const std::string key, const std::string value,
-			ValidationList& validation);
-	virtual void postParse(const INIConfigSection& section,
-			ValidationList& validation);
+	void setConfigDir(const fs::path& config_dir);
 
 	std::string getShortName();
 
@@ -59,15 +55,26 @@ public:
 	int getDefaultZoom() const;
 	int getDefaultRotation() const;
 
+	bool hasCropUnpopulatedChunks() const;
+	std::string getBlockMask() const;
+
 	const mc::WorldCrop getWorldCrop() const;
 	bool needsWorldCentering() const;
+
+protected:
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+	virtual void postParse(const INIConfigSection& section,
+			ValidationList& validation);
 
 private:
 	fs::path config_dir;
 
 	Field<fs::path> input_dir;
-	Field<std::string> dimension_name, world_name;
-	mc::Dimension dimension;
+	Field<mc::Dimension> dimension;
+	Field<std::string> world_name;
 
 	Field<std::string> default_view;
 	Field<int> default_zoom, default_rotation;
@@ -75,7 +82,11 @@ private:
 	Field<int> min_y, max_y;
 	Field<int> min_x, max_x, min_z, max_z;
 	Field<int> center_x, center_z, radius;
-	mc::WorldCrop worldcrop;
+
+	Field<bool> crop_unpopulated_chunks;
+	Field<std::string> block_mask;
+
+	mc::WorldCrop world_crop;
 };
 
 } /* namespace config */

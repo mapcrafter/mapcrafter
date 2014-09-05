@@ -31,13 +31,17 @@ General Instructions
 At first you have to get the source code of Mapcrafter.  Clone it directly from
 GitHub if you want the newest version::
 
-    git clone https://github.com/m0r13/mapcrafter.git
+    git clone https://github.com/mapcrafter/mapcrafter.git
 
 Make sure you have all requirements installed. If you are on a Debian-like
 Linux system, you can install these packages with apt::
 
     sudo apt-get install libpng-dev libjpeg-dev libboost-iostreams-dev \
     libboost-system-dev libboost-filesystem-dev libboost-program-options-dev
+
+If you are on an RPM based system such as Fedora, you can install these packages with yum::
+
+    sudo yum install boost-devel gcc-c++ libjpeg-devel cmake
 
 Then you can go into the directory with the Mapcrafter source (for example
 ``mapcrafter/``, not ``mapcrafter/src/``) and build it with the following
@@ -86,7 +90,7 @@ Or if you got portmaster installed::
 
 Once this is done compiling (takes a long time), you can go ahead with the normal steps::
 
-    git clone https://github.com/m0r13/mapcrafter.git
+    git clone https://github.com/mapcrafter/mapcrafter.git
     cd mapcrafter
     cmake .
     make
@@ -115,7 +119,7 @@ and select install in the window that pops up, and accept the EULA.
 
 First you will have to clone the latest Mapcrafter source by running::
 
-    git clone https://github.com/m0r13/mapcrafter.git
+    git clone https://github.com/mapcrafter/mapcrafter.git
 
 After this, install the dependencies using brew::
 
@@ -172,13 +176,16 @@ file and unpack required texture files.
 Windows
 =======
 
-There is an experimental build for Windows. For now, it's only a 64-bit build.
-Because it's experimental you should only use it if you know what you are doing.
-Please report any problems you find when using it.
+Mapcrafter on Windows is still a bit experimental, but there are pre-built
+packages on mapcrafter.org:
 
-You can download it from mapcrafter.org:
+`http://mapcrafter.org/windows <http://mapcrafter.org/windows>`_
 
-`http://mapcrafter.org/windows/mapcrafterdist.zip <http://mapcrafter.org/windows/mapcrafterdist.zip>`_
+If you are as crazy as experimental Mapcrafter is on Windows, you can build Mapcrafter
+on Windows on your own. There is a build package for Windows with instructions 
+on GitHub in the mapcrafter-buildfiles repository:
+
+`https://github.com/mapcrafter/mapcrafter-buildfiles/tree/master/windows <https://github.com/mapcrafter/mapcrafter-buildfiles/tree/master/windows>`_
 
 .. _resources_textures:
 
@@ -215,7 +222,7 @@ package::
 
     $ mapcrafter --find-resources
     Your home directory: /home/moritz
-    mapcrafter binary: /usr/bin/mapcrafter
+    Mapcrafter binary: /usr/bin/mapcrafter
     Resource directories:
       1. /home/moritz/.mapcrafter
       2. /usr/share/mapcrafter
@@ -223,6 +230,8 @@ package::
       1. /usr/share/mapcrafter/template
     Texture directories:
       1. /usr/share/mapcrafter/textures
+    Logging configuration file:
+      1. /etc/mapcrafter/logging.conf
 
 You can see that Mapcrafter found a resource directory in the home directory
 but no ``template/`` or ``textures/`` directory in it. So it's just using the

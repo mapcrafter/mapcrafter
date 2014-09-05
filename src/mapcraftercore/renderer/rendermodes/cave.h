@@ -26,17 +26,20 @@ namespace mapcrafter {
 namespace renderer {
 
 class CaveRendermode: public Rendermode {
-protected:
-	bool isLight(const mc::BlockPos& pos);
-	bool isTransparentBlock(const mc::Block& block) const;
 public:
-	CaveRendermode(const RenderState& state);
+	CaveRendermode(const RenderState& state, bool high_contrast);
 	virtual ~CaveRendermode();
 
 	virtual bool isHidden(const mc::BlockPos& pos,
 			uint16_t id, uint16_t data);
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos,
 			uint16_t id, uint16_t data);
+
+protected:
+	bool isLight(const mc::BlockPos& pos);
+	bool isTransparentBlock(const mc::Block& block) const;
+
+	bool high_contrast;
 };
 
 } /* namespace render */

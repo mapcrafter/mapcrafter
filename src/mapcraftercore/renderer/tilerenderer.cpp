@@ -245,9 +245,7 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		east = state.getBlock(pos + mc::DIR_EAST);
 		west = state.getBlock(pos + mc::DIR_WEST);
 
-		// we put here in the data the direction of the chest
-		// and if there are neighbor chests
-
+		// determine the direction of the chest
 		if (data == 2)
 			data = DATA_NORTH;
 		else if (data == 3)
@@ -257,14 +255,15 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		else
 			data = DATA_EAST;
 
-		if (id == 54) {
-			if (north.id == 54)
+		// normal chests and trapped chests can appear as double chests
+		if (id == 54 || id == 146) {
+			if (north.id == id)
 				data |= DATA_NORTH << 4;
-			if (south.id == 54)
+			if (south.id == id)
 				data |= DATA_SOUTH << 4;
-			if (east.id == 54)
+			if (east.id == id)
 				data |= DATA_EAST << 4;
-			if (west.id == 54)
+			if (west.id == id)
 				data |= DATA_WEST << 4;
 		}
 	} else if (id == 55 || id == 132) { // redstone wire, tripwire

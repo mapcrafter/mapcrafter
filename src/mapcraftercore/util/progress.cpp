@@ -21,12 +21,16 @@
 
 #include "../util.h"
 
+#include <iomanip>
 #include <iostream>
 #include <cstdio>
 #include <ctime>
 #if defined(HAVE_SYS_IOCTL_H) && defined(HAVE_UNISTD_H)
 #  include <sys/ioctl.h> // ioctl, TIOCGWINSZ
 #  include <unistd.h> // STDOUT_FILENO
+#endif
+#if defined(OS_WINDOWS)
+#  include <windows.h>
 #endif
 
 namespace mapcrafter {
@@ -63,6 +67,37 @@ std::string format_eta(int eta) {
 	return str_seconds;
 }
 
+MultiplexingProgressHandler::MultiplexingProgressHandler()
+	: max(0), value(0) {
+}
+
+MultiplexingProgressHandler::~MultiplexingProgressHandler() {
+}
+
+void MultiplexingProgressHandler::addHandler(IProgressHandler* handler) {
+	handlers.push_back(std::shared_ptr<IProgressHandler>(handler));
+}
+
+int MultiplexingProgressHandler::getMax() const {
+	return max;
+}
+
+void MultiplexingProgressHandler::setMax(int max) {
+	this->max = max;
+	for (auto handler_it = handlers.begin(); handler_it != handlers.end(); ++handler_it)
+		(*handler_it)->setMax(max);
+}
+
+int MultiplexingProgressHandler::getValue() const {
+	return value;
+}
+
+void MultiplexingProgressHandler::setValue(int value) {
+	this->value = value;
+	for (auto handler_it = handlers.begin(); handler_it != handlers.end(); ++handler_it)
+		(*handler_it)->setValue(value);
+}
+
 DummyProgressHandler::DummyProgressHandler()
 	: max(0), value(0) {
 }
@@ -86,29 +121,75 @@ void DummyProgressHandler::setValue(int value) {
 	this->value = value;
 }
 
-ProgressBar::ProgressBar(int max, bool animated)
-		: animated(animated), start(time(NULL)), last_update(0),
-		  last_value(0), last_percentage(0), last_output_len(0) {
-	setMax(max);
+AbstractOutputProgressHandler::AbstractOutputProgressHandler()
+	: start(std::time(nullptr)), last_update(0), last_value(0), last_percentage(0) {
+}
+
+AbstractOutputProgressHandler::~AbstractOutputProgressHandler() {
+}
+
+void AbstractOutputProgressHandler::setValue(int value) {
+	int now = std::time(nullptr);
+	// check whether the time since the last shown update
+	// and the change was big enough to show a new update
+	double percentage = value / (double) max * 100.;
+	if (last_update + 1 > now && !(last_percentage != max && value == max)) {
+		this->value = value;
+		return;
+	}
+
+	// now calculate the average speed
+	double average_speed = (double) value / (now - start);
+
+	// eta only when we have an average speed
+	int eta = -1;
+	if (value != max && value != 0 && (now - start) != 0)
+		eta = (max - value) / average_speed;
+
+	// set this as last update
+	last_update = now;
+	last_value = value;
+	last_percentage = percentage;
+
+	this->value = value;
+
+	// call handler
+	update(percentage, average_speed, eta);
+}
+
+void AbstractOutputProgressHandler::update(double percentage, double average_speed,
+		int eta) {
+}
+
+LogOutputProgressHandler::LogOutputProgressHandler()
+	: last_step(0) {
+}
+
+LogOutputProgressHandler::~LogOutputProgressHandler() {
+}
+
+void LogOutputProgressHandler::update(double percentage, double average_speed,
+		int eta) {
+	if (percentage < last_step + 5)
+		return;
+	last_step = percentage;
+
+	auto log = LOGN(INFO, "progress");
+	log << std::floor(percentage) << "% complete. ";
+	log << "Rendered " << value << "/" << max << " tiles ";
+	log << "with average " << std::setprecision(1) << std::fixed << average_speed << "t/s.";
+	if (eta != -1)
+		log << " ETA " << util::format_eta(eta) << ".";
+}
+
+ProgressBar::ProgressBar()
+	: last_output_len(0) {
 }
 
 ProgressBar::~ProgressBar() {
 }
 
-void ProgressBar::update(int value) {
-	// check when animated if we are at 100% and this is this the first time we are at 100%
-	// so we show the progress bar only one time at the end
-	if (!animated && (value != max || (value == max && last_value == max)))
-		return;
-	int now = time(NULL);
-	// check whether the time since the last show and the change was big enough to show a progress
-	double percentage = value / (double) max * 100.;
-	if (last_update + 1 > now && !(last_percentage != max && value == max))
-		return;
-
-	// now calculate the average speed
-	double average_speed = (double) value / (now - start);
-
+void ProgressBar::update(double percentage, double average_speed, int eta) {
 	// try to determine the width of the terminal
 	// use 80 columns as default if we can't determine a terminal size
 	int terminal_width = 80;
@@ -117,17 +198,19 @@ void ProgressBar::update(int value) {
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
 	if (ws.ws_col != 0)
 		terminal_width = ws.ws_col;
+#elif defined(OS_WINDOWS)
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
+		terminal_width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+		// seems Windows "terminal" has some problems if we use the full terminal width
+		// so let's just pretend the terminal is a bit smaller
+		terminal_width -= 2;
+	}
 #endif
 
 	// create the progress stats: percentage, current/maximum value, speed, eta
 	std::string stats;
-	// show eta only when we have an average speed
-	if (value != max && value != 0 && (now - start) != 0) {
-		int eta = (max - value) / average_speed;
-		stats = createProgressStats(percentage, value, max, average_speed, eta);
-	} else {
-		stats = createProgressStats(percentage, value, max, average_speed);
-	}
+	stats = createProgressStats(percentage, value, max, average_speed, eta);
 
 	// now create the progress bar
 	// with the remaining size minus one as size
@@ -136,25 +219,14 @@ void ProgressBar::update(int value) {
 	std::string progressbar = createProgressBar(progressbar_width, percentage);
 
 	// go to the begin of the line and clear it
-	if (animated) {
-		std::cout << "\r";
-		for (int i = 0; i < last_output_len; i++)
-			std::cout << " ";
-		std::cout << "\r";
-	}
+	std::cout << "\r" << std::string(last_output_len, ' ') << "\r";
 
 	// now show everything
-	std::cout << progressbar << " " << stats;
-	if (animated) {
-		std::cout << "\r";
-		std::cout.flush();
-	} else
-		std::cout << std::endl;
+	// also go back to beginning of line after it, in case there is other output
+	std::cout << progressbar << " " << stats << "\r";
+	std::cout.flush();
 
 	// set this as last shown
-	last_update = now;
-	last_value = value;
-	last_percentage = percentage;
 	last_output_len = progressbar.size() + 1 + stats.size();
 }
 
@@ -195,23 +267,9 @@ std::string ProgressBar::createProgressStats(double percentage, int value, int m
 	return stats + std::string(padding, ' ');
 }
 
-void ProgressBar::setAnimated(bool animated) {
-	this->animated = animated;
-}
-
-bool ProgressBar::isAnimated() const {
-	return animated;
-}
-
-void ProgressBar::setValue(int value) {
-	update(value);
-	this->value = value;
-}
-
 void ProgressBar::finish() {
 	setValue(max);
-	if (animated)
-		std::cout << std::endl;
+	std::cout << std::endl;
 }
 
 } /* namespace util */

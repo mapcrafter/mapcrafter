@@ -214,7 +214,7 @@ Minecraft Server
 ================
 
 If you want player markers from your Minecraft Server on your map, please 
-have a look at the `mapcrafter-playermarkers <https://github.com/m0r13/mapcrafter-playermarkers>`_
+have a look at the `mapcrafter-playermarkers <https://github.com/mapcrafter/mapcrafter-playermarkers>`_
 project.
 
 The plugin adds to your map animated markers of the players on your Minecraft

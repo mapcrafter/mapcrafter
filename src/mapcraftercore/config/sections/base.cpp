@@ -31,12 +31,27 @@ ConfigSectionBase::ConfigSectionBase()
 ConfigSectionBase::~ConfigSectionBase() {
 }
 
+bool ConfigSectionBase::isGlobal() const {
+	return global;
+}
+
 void ConfigSectionBase::setGlobal(bool global) {
 	this->global = global;
 }
 
-bool ConfigSectionBase::parse(const INIConfigSection& section,
-		ValidationList& validation) {
+std::string ConfigSectionBase::getSectionName() const {
+	return section_name;
+}
+
+std::string ConfigSectionBase::getPrettyName() const {
+	return "unknown section";
+}
+
+void ConfigSectionBase::dump(std::ostream& out) const {
+	out << getPrettyName() << std::endl;
+}
+
+ValidationList ConfigSectionBase::parse(const INIConfigSection& section) {
 	section_name = section.getName();
 
 	preParse(section, validation);
@@ -47,13 +62,12 @@ bool ConfigSectionBase::parse(const INIConfigSection& section,
 		std::string value = entry_it->second;
 
 		if (!parseField(key, value, validation))
-			validation.push_back(ValidationMessage::warning(
-					"Unknown configuration option '" + key + "'!"));
+			validation.warning("Unknown configuration option '" + key + "'!");
 	}
 
 	postParse(section, validation);
 
-	return isValidationValid(validation);
+	return validation;
 }
 
 void ConfigSectionBase::preParse(const INIConfigSection& section,
@@ -67,6 +81,11 @@ bool ConfigSectionBase::parseField(const std::string key, const std::string valu
 
 void ConfigSectionBase::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
+}
+
+std::ostream& operator<<(std::ostream& out, const ConfigSectionBase& section) {
+	section.dump(out);
+	return out;
 }
 
 }

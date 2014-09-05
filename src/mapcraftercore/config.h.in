@@ -18,9 +18,13 @@
  */
 
 #cmakedefine HAVE_NULLPTR
+#cmakedefine HAVE_ENUM_CLASS_COMPARISON
 
 #cmakedefine HAVE_ENDIAN_H
 #cmakedefine ENDIAN_H_FREEBSD
 
 #cmakedefine HAVE_SYS_IOCTL_H
 #cmakedefine HAVE_UNISTD_H
+#cmakedefine HAVE_SYSLOG_H
+
+#cmakedefine OPT_USE_BOOST_THREAD

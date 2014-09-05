@@ -68,7 +68,7 @@ public:
 	/**
 	 * Sets the boundaries of the world.
 	 */
-	void setWorldCrop(const WorldCrop& worldcrop);
+	void setWorldCrop(const WorldCrop& world_crop);
 
 	/**
 	 * Reads the NBT data of the chunk from a buffer. You need to specify a compression
@@ -90,12 +90,12 @@ public:
 	/**
 	 * Returns the block ID at a specific position (local coordinates).
 	 */
-	uint16_t getBlockID(const LocalBlockPos& pos) const;
+	uint16_t getBlockID(const LocalBlockPos& pos, bool force = false) const;
 
 	/**
 	 * Returns the block data value at a specific position (local coordinates).
 	 */
-	uint8_t getBlockData(const LocalBlockPos& pos) const;
+	uint8_t getBlockData(const LocalBlockPos& pos, bool force = false) const;
 
 	/**
 	 * Returns the block light at a specific position (local coordinates).
@@ -124,9 +124,13 @@ private:
 
 	// rotation and cropping of the world
 	int rotation;
-	WorldCrop worldcrop;
+	WorldCrop world_crop;
 	// whether the chunk is completely contained (according x- and z-coordinates, not y)
 	bool chunk_completely_contained;
+
+	// whether ores, trees, other special structures are already populated in this chunk
+	// read from the chunk nbt format (Level["TerrainPopulated"])
+	bool terrain_populated;
 
 	// the index of the chunk sections in the sections array
 	// or -1 if section does not exist
@@ -149,7 +153,7 @@ private:
 	 *   1: block light,
 	 *   2: sky light
 	 */
-	uint8_t getData(const LocalBlockPos& pos, int array) const;
+	uint8_t getData(const LocalBlockPos& pos, int array, bool force = false) const;
 };
 
 }

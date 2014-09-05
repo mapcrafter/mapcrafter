@@ -20,14 +20,15 @@
 #ifndef CONCURRENTQUEUE_H_
 #define CONCURRENTQUEUE_H_
 
-#include <condition_variable>
-#include <mutex>
+#include "../../compat/thread.h"
+#include "../../util.h"
+
 #include <queue>
 
 namespace mapcrafter {
 namespace thread {
 
-template<typename T>
+template <typename T>
 class ConcurrentQueue {
 public:
 	ConcurrentQueue();
@@ -39,27 +40,27 @@ public:
 
 private:
 	std::queue<T> queue;
-	std::mutex mutex;
-	std::condition_variable condition_variable;
+	thread_ns::mutex mutex;
+	thread_ns::condition_variable condition_variable;
 };
 
-template<typename T>
+template <typename T>
 ConcurrentQueue<T>::ConcurrentQueue() {
 }
 
-template<typename T>
+template <typename T>
 ConcurrentQueue<T>::~ConcurrentQueue() {
 }
 
-template<typename T>
+template <typename T>
 bool ConcurrentQueue<T>::empty() {
-	std::unique_lock<std::mutex> lock(mutex);
+	thread_ns::unique_lock<thread_ns::mutex> lock(mutex);
 	return queue.empty();
 }
 
-template<typename T>
+template <typename T>
 void ConcurrentQueue<T>::push(T item) {
-	std::unique_lock<std::mutex> lock(mutex);
+	thread_ns::unique_lock<thread_ns::mutex> lock(mutex);
 	if (queue.empty()) {
 		queue.push(item);
 		condition_variable.notify_one();
@@ -68,9 +69,9 @@ void ConcurrentQueue<T>::push(T item) {
 	}
 }
 
-template<typename T>
+template <typename T>
 T ConcurrentQueue<T>::pop() {
-	std::unique_lock<std::mutex> lock(mutex);
+	thread_ns::unique_lock<thread_ns::mutex> lock(mutex);
 	while (queue.empty())
 		condition_variable.wait(lock);
 	T item = queue.front();

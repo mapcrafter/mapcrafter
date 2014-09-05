@@ -21,6 +21,8 @@
 
 #include "../config.h"
 
+#include <cctype>
+
 #ifdef HAVE_ENDIAN_H
 # ifdef ENDIAN_H_FREEBSD
 #  include <sys/endian.h>
@@ -94,7 +96,9 @@ int64_t bigEndian64(int64_t x) {
 #endif
 }
 
-std::string strBool(bool value) {
+// nicer bool -> string conversion
+template <>
+std::string str<bool>(bool value) {
 	return value ? "true" : "false";
 }
 
@@ -102,38 +106,47 @@ std::string strBool(bool value) {
  * Overwrites the string stream solution for string -> string conversion.
  * Why? Converting the string 'This is a test.' would just result in 'This'
  */
-template<>
+template <>
 std::string as<std::string>(const std::string& from) {
 	return from;
 }
 
 /**
- * Same thing with string -> string conversion.
+ * Same thing with path -> string conversion.
  */
-template<>
+template <>
 fs::path as<fs::path>(const std::string& from) {
 	return fs::path(from);
 }
 
-template<>
+template <>
 bool as<bool>(const std::string& from) {
 	if (from == "true" || from == "1")
 		return true;
 	if (from == "false" || from == "0")
 		return false;
-	throw std::invalid_argument("Must be one of true/false or 0/1.");
+	throw std::invalid_argument("Must be one of true/false or 0/1");
+}
+
+unsigned int parseHexNumber(const std::string& hex) {
+	std::stringstream ss;
+	ss << std::hex << hex;
+
+	unsigned int x;
+	ss >> x;
+	return x;
 }
 
 std::string trim(const std::string& str) {
 	// removes trailing and leading whitespaces
 	std::string trimmed = str;
-	size_t end = trimmed.find_last_not_of(" \t");
+	size_t end = trimmed.find_last_not_of(" \t\r\n");
 	if (end != std::string::npos)
 		trimmed = trimmed.substr(0, end+1);
-	size_t start = trimmed.find_first_not_of(" \t");
+	size_t start = trimmed.find_first_not_of(" \t\r\n");
 	if (start != std::string::npos)
 		trimmed = trimmed.substr(start);
-	else if (trimmed.find_first_of(" \t") != std::string::npos)
+	else if (trimmed.find_first_of(" \t\r\n") != std::string::npos)
 		// special case if all characters are whitespaces
 		trimmed = "";
 	return trimmed;
@@ -159,6 +172,14 @@ std::string escapeJSON(const std::string& str) {
 		}
 	}
 	return ss.str();
+}
+
+std::string capitalize(const std::string& str) {
+	if (str.empty())
+		return "";
+	std::string capitalized = str.substr(1);
+	capitalized.insert(capitalized.begin(), toupper(str[0]));
+	return capitalized;
 }
 
 std::string replaceAll(const std::string& str, const std::string& from, const std::string& to) {

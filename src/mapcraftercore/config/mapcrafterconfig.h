@@ -21,10 +21,14 @@
 #define MAPCRAFTERCONFIG_H_
 
 #include "validation.h"
+#include "sections/base.h"
+#include "sections/log.h"
 #include "sections/map.h"
 #include "sections/marker.h"
 #include "sections/world.h"
+#include "../util.h"
 
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -40,31 +44,53 @@ struct Color {
 	uint8_t red, green, blue;
 };
 
-class MapcrafterConfig {
-private:
-	WorldSection world_global;
-	MapSection map_global;
-	MarkerSection marker_global;
+std::ostream& operator<<(std::ostream& out, const Color& color);
 
-	Field<fs::path> output_dir, template_dir;
-	Field<Color> background_color;
-
-	std::map<std::string, WorldSection> worlds;
-	std::vector<MapSection> maps;
-	std::vector<MarkerSection> markers;
+class MapcrafterConfigRootSection : public ConfigSectionBase {
 public:
-	MapcrafterConfig();
-	~MapcrafterConfig();
+	MapcrafterConfigRootSection();
+	~MapcrafterConfigRootSection();
 
-	bool parse(const std::string& filename, ValidationMap& validation);
-	void dump(std::ostream& out) const;
+	virtual std::string getPrettyName() const;
+	virtual void dump(std::ostream& out) const;
+
+	void setConfigDir(const fs::path& config_dir);
 
 	fs::path getOutputDir() const;
 	fs::path getTemplateDir() const;
 	Color getBackgroundColor() const;
 
-	std::string getOutputPath(const std::string& path) const;
-	std::string getTemplatePath(const std::string& path) const;
+protected:
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+	virtual void postParse(const INIConfigSection& section,
+			ValidationList& validation);
+
+private:
+	fs::path config_dir;
+
+	Field<fs::path> output_dir, template_dir;
+	Field<Color> background_color;
+};
+
+class MapcrafterConfig {
+public:
+	MapcrafterConfig();
+	~MapcrafterConfig();
+
+	ValidationMap parse(const std::string& filename);
+	void dump(std::ostream& out) const;
+
+	void configureLogging() const;
+
+	fs::path getOutputDir() const;
+	fs::path getTemplateDir() const;
+	fs::path getOutputPath(const std::string& path) const;
+	fs::path getTemplatePath(const std::string& path) const;
+
+	Color getBackgroundColor() const;
 
 	bool hasWorld(const std::string& world) const;
 	const std::map<std::string, WorldSection>& getWorlds() const;
@@ -77,6 +103,19 @@ public:
 	bool hasMarker(const std::string marker) const;
 	const std::vector<MarkerSection>& getMarkers() const;
 	const MarkerSection& getMarker(const std::string& marker) const;
+
+	const std::vector<LogSection>& getLogSections() const;
+
+private:
+	WorldSection world_global;
+	MapSection map_global;
+	MarkerSection marker_global;
+
+	MapcrafterConfigRootSection root_section;
+	std::map<std::string, WorldSection> worlds;
+	std::vector<MapSection> maps;
+	std::vector<MarkerSection> markers;
+	std::vector<LogSection> log_sections;
 };
 
 } /* namespace config */

@@ -30,7 +30,7 @@ namespace util {
  * Does a rotated shift by m bytes to the right. n is the length of the bits.
  * Example: 0b0010 >> 2 = 0b1000
  */
-template<typename T>
+template <typename T>
 T rotateShiftRight(T x, int m, int n) {
 	return (x >> m) | ((x & ((1 << m) - 1)) << (n - m));
 }
@@ -39,7 +39,7 @@ T rotateShiftRight(T x, int m, int n) {
  * Does a rotated shift by m bytes to the left. n is the length of the bits.
  * Example: 0b0100 << 2 = 0b0001
  */
-template<typename T>
+template <typename T>
 T rotateShiftLeft(T x, int m, int n) {
 	return ((x << m) & ((1 << n) - 1)) | (x >> (n - m));
 }
@@ -47,7 +47,7 @@ T rotateShiftLeft(T x, int m, int n) {
 /**
  * Does a floor division a/b towards -infinity.
  */
-template<typename T>
+template <typename T>
 T floordiv(T a, T b) {
 	if (a >= 0)
 		return a / b;
@@ -57,7 +57,7 @@ T floordiv(T a, T b) {
 /**
  * Checks whether two floating point numbers are equal with a small deviation.
  */
-template<typename T>
+template <typename T>
 bool floatingPointEquals(T a, T b, T epsilon = 0.0001) {
 	return std::abs(a - b) < epsilon;
 }

@@ -26,7 +26,7 @@ namespace thread {
 /**
  * This is an interface for a class managing the work of render workers.
  */
-template<typename Work, typename WorkResult>
+template <typename Work, typename WorkResult>
 class WorkerManager {
 public:
 	virtual ~WorkerManager() {};

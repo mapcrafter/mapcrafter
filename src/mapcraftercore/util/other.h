@@ -34,46 +34,57 @@ int16_t bigEndian16(int16_t x);
 int32_t bigEndian32(int32_t x);
 int64_t bigEndian64(int64_t x);
 
-template<typename T>
+template <typename T>
 std::string str(T value) {
 	std::stringstream ss;
 	ss << value;
 	return ss.str();
 }
 
-std::string strBool(bool value);
+template <>
+std::string str(bool value);
 
 /**
- * A lazy function to convert different datatypes.
- * Works by printing the value into a string stream and reading the new datatype from it.
+ * A lazy function to convert different datatypes. It works by printing the value into a
+ * string stream and reading the new datatype from it.
+ *
+ * The function throws a std::invalid_argument exception in case the string stream is in
+ * an error state after the conversion. However, the behavior of the string stream here
+ * is a bit strange. Because converting '42ff' would just result in '42', it is also
+ * checked whether the whole string was processed (eof bit of string stream set).
  */
-template<typename T>
+template <typename T>
 T as(const std::string& from) {
 	T to;
 	std::stringstream ss(from);
 	ss << from;
 	ss >> to;
+	if (!ss || !ss.eof())
+		throw std::invalid_argument("Unable to parse '" + from + "'");
 	return to;
 }
 
-template<>
+template <>
 std::string as(const std::string& from);
 
-template<>
+template <>
 fs::path as(const std::string& from);
 
-template<>
+template <>
 bool as<bool>(const std::string& from);
+
+unsigned int parseHexNumber(const std::string& hex);
 
 std::string trim(const std::string& str);
 std::string escapeJSON(const std::string& str);
+std::string capitalize(const std::string& str);
 
 std::string replaceAll(const std::string& str, const std::string& from, const std::string& to);
 
 bool startswith(const std::string& str, const std::string& start);
 bool endswith(const std::string& str, const std::string& end);
 
-template<typename T>
+template <typename T>
 class Nullable {
 public:
 	Nullable() : null(true) {}

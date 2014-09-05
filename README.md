@@ -8,7 +8,7 @@ using Leaflet.js.
 
 Mapcrafter is free software and available under the GPL license.  You can
 access the latest source code of Mapcrafter on GitHub:
-http://github.com/m0r13/mapcrafter
+http://github.com/mapcrafter/mapcrafter
 
 Thanks to pigmap and Minecraft Overviewer, whose documentations and source code
 were very helpful. I also used the alpha blending code of pigmap and some maps
@@ -50,19 +50,19 @@ stuff of the template from Minecraft Overviewer.
 ## Examples ##
 
 There are a few example maps of the renderer on the [GitHub
-Wiki](https://github.com/m0r13/mapcrafter/wiki/Example-maps).  Please feel free
+Wiki](https://github.com/mapcrafter/mapcrafter/wiki/Example-maps).  Please feel free
 to add your own map to this list.
 
 ## Documentation and Help ##
 
 The documentation is in the `docs/` directory and you can build it yourself
-with Sphinx. You can read a built version of the documentation
-[here](http://docs.mapcrafter.org) and you can also [download
+with Sphinx. You can read a built version of the documentation on
+[docs.mapcrafter.org](http://docs.mapcrafter.org) and you can also [download
 other builds](https://readthedocs.org/projects/mapcrafter/downloads/).
 
 If you find bugs or problems when using Mapcrafter or if you have ideas for new
 features, then please feel free to add an issue to the [GitHub issue
-tracker](https://github.com/m0r13/mapcrafter/issues).
+tracker](https://github.com/mapcrafter/mapcrafter/issues).
 
 You can contact me in IRC (#mapcrafter on Freenode). Use the 
 [webclient](http://webchat.freenode.net/?channels=mapcrafter>) if you
@@ -74,6 +74,24 @@ You can also ask questions in the [Minecraft Forum
 thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-map-renderer/).
 
 ## Version history ##
+
+**v.1.5.1 (in progress)**
+
+* Added ability to configure logging facility with configuration files
+* Added colored terminal output for warning/error log messages
+* Improved cave rendermode with a new high contrast block coloring (thanks to dtfinch, #100),
+  old behavior is still available with a configuration option for compatibility reasons
+
+**v.1.5**
+
+* Started internal refactoring to improve integration with possible Mapcrafter GUI
+  or other programs using Mapcrafter's functionality
+* Added own logging facility, further configuration with different log sinks
+  will follow soon™
+* Changed global sections from ``[global:sections]`` to ``[global:section]`` to
+  simplify internal parsing procedures
+* Added option to specify a block mask and render only specific blocks
+* Added option to hide chunks that are not populated yet
 
 **v.1.4.3**
 

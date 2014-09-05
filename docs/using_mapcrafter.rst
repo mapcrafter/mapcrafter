@@ -50,6 +50,9 @@ Command Line Options
 
 Here is a list of available command line options:
 
+General options
+---------------
+
 .. cmdoption:: -h, --help
 
     Shows a help about the command line options.
@@ -57,6 +60,31 @@ Here is a list of available command line options:
 .. cmdoption:: -v, --version
 
     Shows the version of Mapcrafter.
+
+Logging/output options
+----------------------
+
+.. cmdoption:: --logging-config <file>
+
+    This option sets the global logging configuration file Mapcrafter's logging facility
+    is using. You do not necessarily need to specify a logging configuration file,
+    Mapcrafter is trying to determine it automatically. 
+
+.. cmdoption:: --color <colored>
+
+    This option specifies whether Mapcrafter's logging facility should use a colored
+    terminal output for special messages (warnings/errors). Possible options are
+    ``true``, ``false`` or ``auto`` (default). ``auto`` means that terminal colors are
+    enabled if the output is connected to a tty (and not piped to a file for example).
+
+.. cmdoption:: -b, --batch
+
+    This option deactivates the animated progress bar and enables the progress logger
+    instead as terminal output. It is also automatically enabled if the output is not
+    connected to a tty (piped to a file for example).
+
+Renderer options
+----------------
 
 .. cmdoption:: --find-resources
 
@@ -75,7 +103,7 @@ Here is a list of available command line options:
     configuration file). You can also specify the rotation of the maps to skip
     by adding a ``:`` and the short name of the rotation (``tl``, ``tr``,
     ``br``, ``bl``). 
-	
+
     For example: ``-s world world2`` or ``-s world:tl world:bl world2:bl world3``.
 
 .. cmdoption:: -r, --render-reset
@@ -87,7 +115,7 @@ Here is a list of available command line options:
 
         This option is useful if you want to update only the template of your
         rendered map::
-		
+
             mapcrafter -c render.conf -r
 
 .. cmdoption:: -a <maps>, --render-auto <maps>
@@ -112,8 +140,3 @@ Here is a list of available command line options:
     map to a solid state disk or a ramdisk to improve the performance.
 
     Every thread needs around 150MB ram.
-
-.. cmdoption:: -b, --batch
-
-    This option deactivates the animated progress bar. This is useful if you
-    let the renderer run with a cronjob and pipe the output into a log file.

@@ -22,9 +22,8 @@
 namespace mapcrafter {
 namespace renderer {
 
-
-CaveRendermode::CaveRendermode(const RenderState& state)
-	: Rendermode(state) {
+CaveRendermode::CaveRendermode(const RenderState& state, bool high_contrast)
+	: Rendermode(state), high_contrast(high_contrast) {
 }
 
 CaveRendermode::~CaveRendermode() {
@@ -96,7 +95,7 @@ void CaveRendermode::draw(RGBAImage& image, const mc::BlockPos& pos,
 		h1 = 0;
 
 	double h2 = 0;
-	if (pos.y > 64 && pos.y < 96)
+	if (pos.y >= 64 && pos.y < 96)
 		h2 = (double) (96 - pos.y) / 32;
 	else if (pos.y > 16 && pos.y < 64)
 		h2 = (double) (pos.y - 16) / 48;
@@ -104,18 +103,45 @@ void CaveRendermode::draw(RGBAImage& image, const mc::BlockPos& pos,
 	double h3 = 0;
 	if (pos.y > 64)
 		h3 = (double) (pos.y - 64) / 64;
-	uint32_t color = rgba(h1 * 128 + 128,
-						  h2 * 255,
-						  h3 * 255,
-						  128);
 
-	int size = image.getWidth();
-	for (int y = 0; y < size; y++)
-		for (int x = 0; x < size; x++) {
-			uint32_t pixel = image.getPixel(x, y);
-			if (pixel != 0)
-				image.blendPixel(color, x, y);
+	int r = h1 * 128.0 + 128.0;
+	int g = h2 * 255.0;
+	int b = h3 * 255.0;
+
+	if (high_contrast) {
+		// if high contrast mode is enabled, then do some magic here
+
+		// get luminance of recolor
+		int luminance = (10*r + 3*g + b) / 14;
+
+		// try to do luminance-neutral additive/subtractive color
+		// instead of alpha blending (for better contrast)
+		// so first subtract luminance from each component
+		r = (r - luminance) / 3; // /3 is similar to alpha=85
+		g = (g - luminance) / 3;
+		b = (b - luminance) / 3;
+
+		int size = image.getWidth();
+		for (int y = 0; y < size; y++) {
+			for (int x = 0; x < size; x++) {
+				uint32_t pixel = image.getPixel(x, y);
+				if (pixel != 0)
+					image.setPixel(x, y, rgba_add_clamp(pixel, r, g, b));
+			}
 		}
+	} else {
+		// otherwise just simple alphablending
+		uint32_t color = rgba(r, g, b, 128);
+
+		int size = image.getWidth();
+		for (int y = 0; y < size; y++) {
+			for (int x = 0; x < size; x++) {
+				uint32_t pixel = image.getPixel(x, y);
+				if (pixel != 0)
+					image.blendPixel(color, x, y);
+			}
+		}
+	}
 }
 
 } /* namespace render */

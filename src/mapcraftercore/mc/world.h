@@ -25,6 +25,7 @@
 #include "region.h"
 #include "worldcrop.h"
 
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -44,6 +45,8 @@ enum class Dimension {
 	OVERWORLD,
 	END,
 };
+
+std::ostream& operator<<(std::ostream& out, Dimension dimension);
 
 /**
  * Simple hash function to use regions in unordered_set/map.
@@ -101,7 +104,7 @@ public:
 	 * loading the world.
 	 */
 	WorldCrop getWorldCrop() const;
-	void setWorldCrop(const WorldCrop& worldcrop);
+	void setWorldCrop(const WorldCrop& world_crop);
 
 	/**
 	 * Loads a world from the specified directory. Returns false if the world- or region
@@ -144,7 +147,7 @@ private:
 
 	// rotation and possible boundaries of the world
 	int rotation;
-	WorldCrop worldcrop;
+	WorldCrop world_crop;
 
 	// (hash-) set containing positions of available region files
 	RegionSet available_regions;
