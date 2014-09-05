@@ -152,6 +152,10 @@ const int REDSTONE_POWERED = 4096;
 
 const int LARGEPLANT_TOP = 16;
 
+enum class SlabType {
+	STONE, STONE2, WOOD
+};
+
 /**
  * The base for an iterator to transform the pixels of a source image to the pixels of a
  * destination image.
@@ -300,14 +304,22 @@ private:
 	BlockImage buildSmallerBlock(const RGBAImage& left_texture, const RGBAImage& right_texture,
 	        const RGBAImage& top_texture, int y1, int y2);
 
-	RGBAImage buildStairsSouth(const RGBAImage& texture);
-	RGBAImage buildStairsNorth(const RGBAImage& texture);
-	RGBAImage buildStairsWest(const RGBAImage& texture);
-	RGBAImage buildStairsEast(const RGBAImage& texture);
-	RGBAImage buildUpsideDownStairsNorth(const RGBAImage& texture);
-	RGBAImage buildUpsideDownStairsSouth(const RGBAImage& texture);
-	RGBAImage buildUpsideDownStairsEast(const RGBAImage& texture);
-	RGBAImage buildUpsideDownStairsWest(const RGBAImage& texture);
+	RGBAImage buildStairsSouth(const RGBAImage& texture,
+			const RGBAImage& texture_top);
+	RGBAImage buildStairsNorth(const RGBAImage& texture,
+			const RGBAImage& texture_top);
+	RGBAImage buildStairsWest(const RGBAImage& texture,
+			const RGBAImage& texture_top);
+	RGBAImage buildStairsEast(const RGBAImage& texture,
+			const RGBAImage& texture_top);
+	RGBAImage buildUpsideDownStairsNorth(const RGBAImage& texture,
+			const RGBAImage& texture_top);
+	RGBAImage buildUpsideDownStairsSouth(const RGBAImage& texture,
+			const RGBAImage& texture_top);
+	RGBAImage buildUpsideDownStairsEast(const RGBAImage& texture,
+			const RGBAImage& texture_top);
+	RGBAImage buildUpsideDownStairsWest(const RGBAImage& texture,
+			const RGBAImage& texture_top);
 
 	void buildCustomTextures();
 
@@ -343,9 +355,11 @@ private:
 	void createBed(); // id 26
 	void createStraightRails(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 27, 28, 66
 	void createPiston(uint16_t id, bool sticky); // id 29, 33
-	void createSlabs(uint16_t id, bool stone_slabs, bool double_slabs); // id 43, 44, 125, 126
+	void createSlabs(uint16_t id, SlabType type, bool double_slabs); // id 43, 44, 125, 126
 	void createTorch(uint16_t, const RGBAImage& texture); // id 50, 75, 76
-	void createStairs(uint16_t id, const RGBAImage& texture); // id 53, 67, 108, 109, 114, 128, 134, 135, 136
+	void createStairs(uint16_t id, const RGBAImage& texture,
+			const RGBAImage& texture_top); // id 53, 67, 108, 109, 114, 128, 134, 135, 136, 180
+	void createStairs(uint16_t id, const RGBAImage& texture);
 	void createChest(uint16_t id, RGBAImage* textures); // id 54, 95, 130
 	void createDoubleChest(uint16_t id, RGBAImage* textures); // id 54
 	void createRedstoneWire(uint16_t id, uint16_t extra_data,

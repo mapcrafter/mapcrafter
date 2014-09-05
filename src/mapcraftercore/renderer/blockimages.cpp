@@ -846,12 +846,13 @@ BlockImage BlockImages::buildSmallerBlock(const RGBAImage& left_texture,
 	return block;
 }
 
-RGBAImage BlockImages::buildStairsSouth(const RGBAImage& texture) {
+RGBAImage BlockImages::buildStairsSouth(const RGBAImage& texture,
+		const RGBAImage& texture_top) {
 	RGBAImage block(texture_size * 2, texture_size * 2);
 
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
 		int y = it.src_x > texture_size / 2 ? 0 : texture_size / 2;
-		block.setPixel(it.dest_x, it.dest_y + y, texture.getPixel(it.src_x, it.src_y));
+		block.setPixel(it.dest_x, it.dest_y + y, texture_top.getPixel(it.src_x, it.src_y));
 	}
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
@@ -868,11 +869,12 @@ RGBAImage BlockImages::buildStairsSouth(const RGBAImage& texture) {
 	return block;
 }
 
-RGBAImage BlockImages::buildStairsNorth(const RGBAImage& texture) {
+RGBAImage BlockImages::buildStairsNorth(const RGBAImage& texture,
+		const RGBAImage& texture_top) {
 	RGBAImage block(texture_size * 2, texture_size * 2);
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
 		int y = it.src_x >= texture_size / 2 ? texture_size / 2 : 0;
-		block.setPixel(it.dest_x, it.dest_y + y, texture.getPixel(it.src_x, it.src_y));
+		block.setPixel(it.dest_x, it.dest_y + y, texture_top.getPixel(it.src_x, it.src_y));
 	}
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
@@ -891,11 +893,12 @@ RGBAImage BlockImages::buildStairsNorth(const RGBAImage& texture) {
 	return block;
 }
 
-RGBAImage BlockImages::buildStairsWest(const RGBAImage& texture) {
+RGBAImage BlockImages::buildStairsWest(const RGBAImage& texture,
+		const RGBAImage& texture_top) {
 	RGBAImage block(texture_size * 2, texture_size * 2);
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
 		int y = it.src_y > texture_size / 2 ? 0 : texture_size / 2;
-		block.setPixel(it.dest_x, it.dest_y + y, texture.getPixel(it.src_x, it.src_y));
+		block.setPixel(it.dest_x, it.dest_y + y, texture_top.getPixel(it.src_x, it.src_y));
 	}
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
@@ -913,7 +916,8 @@ RGBAImage BlockImages::buildStairsWest(const RGBAImage& texture) {
 	return block;
 }
 
-RGBAImage BlockImages::buildStairsEast(const RGBAImage& texture) {
+RGBAImage BlockImages::buildStairsEast(const RGBAImage& texture,
+		const RGBAImage& texture_top) {
 	RGBAImage block(texture_size * 2, texture_size * 2);
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
 		int y = it.src_y > texture_size / 2 ? texture_size / 2 : 0;
@@ -922,7 +926,7 @@ RGBAImage BlockImages::buildStairsEast(const RGBAImage& texture) {
 			y = texture_size / 2;
 		if (it.src_y == texture_size / 2 - 1 && it.src_x % 2 == 0)
 			y = texture_size / 2;
-		block.setPixel(it.dest_x, it.dest_y + y, texture.getPixel(it.src_x, it.src_y));
+		block.setPixel(it.dest_x, it.dest_y + y, texture_top.getPixel(it.src_x, it.src_y));
 	}
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
@@ -942,10 +946,11 @@ RGBAImage BlockImages::buildStairsEast(const RGBAImage& texture) {
 	return block;
 }
 
-RGBAImage BlockImages::buildUpsideDownStairsNorth(const RGBAImage& texture) {
+RGBAImage BlockImages::buildUpsideDownStairsNorth(const RGBAImage& texture,
+		const RGBAImage& texture_top) {
 	RGBAImage block(getBlockImageSize(), getBlockImageSize());
 
-	blitFace(block, FACE_TOP, texture, 0, 0, true, dleft, dright);
+	blitFace(block, FACE_TOP, texture_top, 0, 0, true, dleft, dright);
 
 	for (SideFaceIterator it(texture_size, SideFaceIterator::RIGHT); !it.end();
 	        it.next()) {
@@ -965,11 +970,12 @@ RGBAImage BlockImages::buildUpsideDownStairsNorth(const RGBAImage& texture) {
 	return block;
 }
 
-RGBAImage BlockImages::buildUpsideDownStairsSouth(const RGBAImage& texture) {
+RGBAImage BlockImages::buildUpsideDownStairsSouth(const RGBAImage& texture,
+		const RGBAImage& texture_top) {
 	RGBAImage block(getBlockImageSize(), getBlockImageSize());
 
 	blitFace(block, FACE_SOUTH, texture, 0, 0, true, dleft, dright);
-	blitFace(block, FACE_TOP, texture, 0, 0, true, dleft, dright);
+	blitFace(block, FACE_TOP, texture_top, 0, 0, true, dleft, dright);
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
 		if (it.src_y <= texture_size / 2 || it.src_x >= texture_size / 2) {
@@ -981,10 +987,11 @@ RGBAImage BlockImages::buildUpsideDownStairsSouth(const RGBAImage& texture) {
 	return block;
 }
 
-RGBAImage BlockImages::buildUpsideDownStairsEast(const RGBAImage& texture) {
+RGBAImage BlockImages::buildUpsideDownStairsEast(const RGBAImage& texture,
+		const RGBAImage& texture_top) {
 	RGBAImage block(getBlockImageSize(), getBlockImageSize());
 
-	blitFace(block, FACE_TOP, texture, 0, 0, true, dleft, dright);
+	blitFace(block, FACE_TOP, texture_top, 0, 0, true, dleft, dright);
 
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end();
 	        it.next()) {
@@ -1005,11 +1012,12 @@ RGBAImage BlockImages::buildUpsideDownStairsEast(const RGBAImage& texture) {
 	return block;
 }
 
-RGBAImage BlockImages::buildUpsideDownStairsWest(const RGBAImage& texture) {
+RGBAImage BlockImages::buildUpsideDownStairsWest(const RGBAImage& texture,
+		const RGBAImage& texture_top) {
 	RGBAImage block(getBlockImageSize(), getBlockImageSize());
 
 	blitFace(block, FACE_WEST, texture, 0, 0, true, dleft, dright);
-	blitFace(block, FACE_TOP, texture, 0, 0, true, dleft, dright);
+	blitFace(block, FACE_TOP, texture_top, 0, 0, true, dleft, dright);
 	for (SideFaceIterator it(texture_size, SideFaceIterator::RIGHT); !it.end();
 	        it.next()) {
 		if (it.src_y <= texture_size / 2 || it.src_x <= texture_size / 2) {
@@ -1356,9 +1364,10 @@ void BlockImages::createPiston(uint16_t id, bool sticky) { //  id 29, 33
 	setBlockImage(id, 5, buildPiston(FACE_EAST, front, back, side.rotate(1), side));
 }
 
-void BlockImages::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) { // id 43, 44, 125, 126
+void BlockImages::createSlabs(uint16_t id, SlabType type, bool double_slabs) { // id 43, 44, 125, 126
 	std::map<int, RGBAImage> slab_textures;
-	if (stone_slabs) {
+	if (type == SlabType::STONE) {
+		// stone slabs
 		slab_textures[0x0] = textures.STONE_SLAB_SIDE;
 		slab_textures[0x1] = textures.SANDSTONE_NORMAL;
 		slab_textures[0x2] = textures.PLANKS_OAK;
@@ -1367,7 +1376,11 @@ void BlockImages::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) 
 		slab_textures[0x5] = textures.STONEBRICK;
 		slab_textures[0x6] = textures.NETHER_BRICK;
 		slab_textures[0x7] = textures.QUARTZ_BLOCK_SIDE;
-	} else {
+	} else if (type == SlabType::STONE2) {
+		// stone2 slabs
+		slab_textures[0x0] = textures.RED_SANDSTONE_NORMAL;
+	} else if (type == SlabType::WOOD) {
+		// wooden slabs
 		slab_textures[0x0] = textures.PLANKS_OAK;
 		slab_textures[0x1] = textures.PLANKS_SPRUCE;
 		slab_textures[0x2] = textures.PLANKS_BIRCH;
@@ -1378,8 +1391,14 @@ void BlockImages::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) 
 	for (auto it = slab_textures.begin(); it != slab_textures.end(); ++it) {
 		RGBAImage side = it->second;
 		RGBAImage top = it->second;
-		if (it->first == 0 && stone_slabs)
+
+		if (it->first == 0 && type == SlabType::STONE)
 			top = textures.STONE_SLAB_TOP;
+		if (it->first == 1 && type == SlabType::STONE)
+			top = textures.SANDSTONE_TOP;
+		if (it->first == 0 && type == SlabType::STONE2)
+			top = textures.RED_SANDSTONE_TOP;
+
 		if (double_slabs) {
 			createBlock(id, it->first, side, top);
 		} else {
@@ -1389,7 +1408,7 @@ void BlockImages::createSlabs(uint16_t id, bool stone_slabs, bool double_slabs) 
 	}
 
 	// special double slabs
-	if (stone_slabs && double_slabs) {
+	if (type == SlabType::STONE && double_slabs) {
 		createBlock(id, 0x8, textures.STONE_SLAB_TOP);
 		createBlock(id, 0x9, textures.SANDSTONE_TOP);
 		createBlock(id, 0xF, textures.QUARTZ_BLOCK_TOP);
@@ -1406,9 +1425,12 @@ void BlockImages::createTorch(uint16_t id, const RGBAImage& texture) { // id 50,
 	createItemStyleBlock(id, 6, texture);
 }
 
-void BlockImages::createStairs(uint16_t id, const RGBAImage& texture) { // id 53, 67, 108, 109, 114, 128, 134, 135, 136
-	RGBAImage north = buildStairsNorth(texture), south = buildStairsSouth(texture),
-			east = buildStairsEast(texture), west = buildStairsWest(texture);
+void BlockImages::createStairs(uint16_t id, const RGBAImage& texture,
+		const RGBAImage& texture_top) { // id 53, 67, 108, 109, 114, 128, 134, 135, 136, 180
+	RGBAImage north = buildStairsNorth(texture, texture_top);
+	RGBAImage south = buildStairsSouth(texture, texture_top);
+	RGBAImage east = buildStairsEast(texture, texture_top);
+	RGBAImage west = buildStairsWest(texture, texture_top);
 	rotateImages(north, south, east, west, rotation);
 
 	setBlockImage(id, 0, east);
@@ -1416,16 +1438,20 @@ void BlockImages::createStairs(uint16_t id, const RGBAImage& texture) { // id 53
 	setBlockImage(id, 2, south);
 	setBlockImage(id, 3, north);
 
-	north = buildUpsideDownStairsNorth(texture);
-	south = buildUpsideDownStairsSouth(texture);
-	east = buildUpsideDownStairsEast(texture);
-	west = buildUpsideDownStairsWest(texture);
+	north = buildUpsideDownStairsNorth(texture, texture_top);
+	south = buildUpsideDownStairsSouth(texture, texture_top);
+	east = buildUpsideDownStairsEast(texture, texture_top);
+	west = buildUpsideDownStairsWest(texture, texture_top);
 	rotateImages(north, south, east, west, rotation);
 
 	setBlockImage(id, 0 | 4, east);
 	setBlockImage(id, 1 | 4, west);
 	setBlockImage(id, 2 | 4, south);
 	setBlockImage(id, 3 | 4, north);
+}
+
+void BlockImages::createStairs(uint16_t id, const RGBAImage& texture) {
+	createStairs(id, texture, texture);
 }
 
 void BlockImages::createChest(uint16_t id, RGBAImage* textures) { // id 54, 130
@@ -2230,8 +2256,8 @@ void BlockImages::loadBlocks() {
 	createItemStyleBlock(40, 0, t.MUSHROOM_RED); // red mushroom
 	createBlock(41, 0, t.GOLD_BLOCK); // block of gold
 	createBlock(42, 0, t.IRON_BLOCK); // block of iron
-	createSlabs(43, true, true); // double stone slabs
-	createSlabs(44, true, false); // normal stone slabs
+	createSlabs(43, SlabType::STONE, true); // double stone slabs
+	createSlabs(44, SlabType::STONE, false); // normal stone slabs
 	createBlock(45, 0, t.BRICK); // bricks
 	createBlock(46, 0, t.TNT_SIDE, t.TNT_TOP); // tnt
 	createBlock(47, 0, t.BOOKSHELF, t.PLANKS_OAK); // bookshelf
@@ -2288,7 +2314,7 @@ void BlockImages::loadBlocks() {
 	createBlock(82, 0, t.CLAY); // clay block
 	createItemStyleBlock(83, 0, t.REEDS); // sugar cane
 	createBlock(84, 0, t.NOTEBLOCK, t.JUKEBOX_TOP.rotate(1)); // jukebox
-	createFence(85, 0, t.PLANKS_OAK); // fence
+	createFence(85, 0, t.PLANKS_OAK); // oak fence
 	createPumkin(86, t.PUMPKIN_FACE_OFF); // pumpkin
 	createBlock(87, 0, t.NETHERRACK); // netherrack
 	createBlock(88, 0, t.SOUL_SAND); // soul sand
@@ -2362,10 +2388,10 @@ void BlockImages::loadBlocks() {
 	createDragonEgg(); // id 122
 	createBlock(123, 0, t.REDSTONE_LAMP_OFF); // redstone lamp inactive
 	createBlock(124, 0, t.REDSTONE_LAMP_ON); // redstone lamp active
-	createSlabs(125, false, true); // wooden double slabs
-	createSlabs(126, false, false); // wooden normal slabs
+	createSlabs(125, SlabType::WOOD, true); // double wooden slabs
+	createSlabs(126, SlabType::WOOD, false); // normal wooden slabs
 	createCocoas(); // id 127
-	createStairs(128, t.SANDSTONE_NORMAL); // sandstone stairs
+	createStairs(128, t.SANDSTONE_NORMAL, t.SANDSTONE_TOP); // sandstone stairs
 	createBlock(129, 0, t.EMERALD_ORE); // emerald ore
 	createChest(130, enderchest); // ender chest
 	createTripwireHook(); // tripwire hook
@@ -2514,17 +2540,24 @@ void BlockImages::loadBlocks() {
 	createLargePlant(5, t.DOUBLE_PLANT_PAEONIA_BOTTOM, t.DOUBLE_PLANT_PAEONIA_TOP);
 	// --
 
-	// new fence types (not tested yet)
-	createFenceGate(183, t.PLANKS_SPRUCE);
-	createFenceGate(184, t.PLANKS_BIRCH);
-	createFenceGate(185, t.PLANKS_JUNGLE);
-	createFenceGate(186, t.PLANKS_BIG_OAK);
-	createFenceGate(187, t.PLANKS_ACACIA);
-	createFence(188, 0, t.PLANKS_SPRUCE);
-	createFence(189, 0, t.PLANKS_BIRCH);
-	createFence(190, 0, t.PLANKS_JUNGLE);
-	createFence(191, 0, t.PLANKS_BIG_OAK);
-	createFence(192, 0, t.PLANKS_ACACIA);
+	// -- red sandstone
+	createBlock(179, 0, t.RED_SANDSTONE_NORMAL, t.RED_SANDSTONE_TOP); // normal
+	createBlock(179, 1, t.RED_SANDSTONE_CARVED, t.RED_SANDSTONE_TOP); // chiseled
+	createBlock(179, 2, t.RED_SANDSTONE_SMOOTH, t.RED_SANDSTONE_TOP); // smooth
+	// --
+	createStairs(180, t.RED_SANDSTONE_NORMAL, t.RED_SANDSTONE_TOP); // red sandstone stairs
+	createSlabs(181, SlabType::STONE2, true); // double red sandstone slabs
+	createSlabs(182, SlabType::STONE2, false); // normal red sandstone slabs
+	createFenceGate(183, t.PLANKS_SPRUCE); // spruce fence gate
+	createFenceGate(184, t.PLANKS_BIRCH); // birch fence gate
+	createFenceGate(185, t.PLANKS_JUNGLE); // jungle fence gate
+	createFenceGate(186, t.PLANKS_BIG_OAK); // dark oak fence gate
+	createFenceGate(187, t.PLANKS_ACACIA); // acacia fence gate
+	createFence(188, 0, t.PLANKS_SPRUCE); // spruce fence
+	createFence(189, 0, t.PLANKS_BIRCH); // birch fence
+	createFence(190, 0, t.PLANKS_JUNGLE); // jungle fence
+	createFence(191, 0, t.PLANKS_BIG_OAK); // dark oak fence
+	createFence(192, 0, t.PLANKS_ACACIA); // acacia fence
 }
 
 bool BlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {

@@ -173,7 +173,7 @@ bool isSpecialTransparent(uint16_t id) {
 	// (or the block above above, if the block above is also one of this blocks)
 
 	// they need an average blocklight from near blocks
-	return id == 44      // slabs
+	return id == 44     // stone slabs
 			|| id == 53  // oak wood stairs
 			|| id == 64 || id == 71 // doors
 			|| id == 67  // cobble stairs
@@ -188,7 +188,10 @@ bool isSpecialTransparent(uint16_t id) {
 			|| id == 145 // anvil
 			|| id == 156 // quartz stairs
 			|| id == 163 // acacia wood stairs
-			|| id == 164; // dark oak wood stairs
+			|| id == 164 // dark oak wood stairs
+			|| id == 180 // red sandstone stairs
+			|| id == 182 // stone2 slabs
+			;
 }
 
 /**
