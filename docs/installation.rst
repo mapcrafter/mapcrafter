@@ -243,10 +243,15 @@ directory ``.mapcrafter/textures`` in your home directory.
 Now you have to install the Minecraft texture files. You need the following
 files in your texture directory:
 
-* directory ``chest/`` with normal.png, normal_double.png and ender.png 
-* directory ``colormap/`` with foliage.png and grass.png
-* directory ``blocks/`` from your texture pack
-* endportal.png
+* ``entity/chest/normal.png``
+* ``entity/chest/normal_double.png``
+* ``entity/chest/ender.png``
+* ``entity/chest/trapped.png``
+* ``entity/chest/trapped_double.png``
+* ``colormap/foliage.png``
+* ``colormap/grass.png``
+* ``blocks/`` with block texture files
+* ``endportal.png``
 
 You can get those files from your Minecraft Jar file (default textures) or from
 another resource pack. To extract these texture files there is a python script
@@ -255,7 +260,7 @@ Mapcrafter source if you didn't install Mapcrafter on your system). Run the
 python script with the Minecraft Jar file and the texture directory as
 arguments::
 
-    mapcrafter_textures.py /path/to/my/minecraft/jar/1.7.2.jar /my/texture/directory
+    mapcrafter_textures.py /path/to/my/minecraft/jar/1.8.jar /my/texture/directory
 
 You will probably find your Minecraft Jar file in
 ``~/.minecraft/versions/%version%/%version%.jar``.
