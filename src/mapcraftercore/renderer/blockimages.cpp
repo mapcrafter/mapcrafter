@@ -335,9 +335,17 @@ void BlockImages::setSettings(int texture_size, int rotation, bool render_unknow
  * This function converts the chest image to usable chest textures and stores them
  * in the textures array.
  */
-bool loadChestTexture(const RGBAImage& image, RGBAImage* textures, int texture_size) {
-	if (image.getWidth() != image.getHeight())
+bool loadChestTextures(const std::string& filename, RGBAImage* textures, int texture_size) {
+	RGBAImage image;
+	if (!image.readPNG(filename)) {
+		LOG(ERROR) << "Unable to read '" << filename << "'.";
 		return false;
+	}
+
+	if (image.getWidth() != image.getHeight()) {
+		LOG(ERROR) << "Chest texture has invalid size (width:height must be 1:1): '" << filename << "'.";
+		return false;
+	}
 	// if the image is 64px wide, the chest images are 14x14
 	int ratio = image.getHeight() / 64;
 	int size = ratio * 14;
@@ -361,9 +369,17 @@ bool loadChestTexture(const RGBAImage& image, RGBAImage* textures, int texture_s
  * This function converts the large chest image to usable chest textures and stores them
  * in the textures array.
  */
-bool loadLargeChestTexture(const RGBAImage& image, RGBAImage* textures, int texture_size) {
-	if (image.getWidth() != image.getHeight() * 2)
+bool loadDoubleChestTextures(const std::string& filename, RGBAImage* textures, int texture_size) {
+	RGBAImage image;
+	if (!image.readPNG(filename)) {
+		LOG(ERROR) << "Unable to read '" << filename << "'.";
 		return false;
+	}
+
+	if (image.getWidth() != image.getHeight() * 2) {
+		LOG(ERROR) << "Chest texture has invalid size (width:height must be 1:2): '" << filename << "'.";
+		return false;
+	}
 	int ratio = image.getHeight() / 64;
 	int size = ratio * 14;
 
@@ -408,29 +424,38 @@ bool loadLargeChestTexture(const RGBAImage& image, RGBAImage* textures, int text
 	return true;
 }
 
-bool BlockImages::loadChests(const std::string& normal, const std::string& large,
-        const std::string& ender) {
-	RGBAImage img_chest, img_largechest, img_enderchest;
-	if (!img_chest.readPNG(normal) || !img_largechest.readPNG(large)
-	        || !img_enderchest.readPNG(ender))
-		return false;
-
-	if (!loadChestTexture(img_chest, chest, texture_size)
-	        || !loadChestTexture(img_enderchest, enderchest, texture_size)
-	        || !loadLargeChestTexture(img_largechest, largechest, texture_size))
+bool BlockImages::loadChests(const std::string& normal, const std::string& normal_double,
+		const std::string& ender,
+		const std::string& trapped, const std::string& trapped_double) {
+	if (!loadChestTextures(normal, chest_normal, texture_size)
+			|| !loadDoubleChestTextures(normal_double, chest_normal_double, texture_size)
+			|| !loadChestTextures(ender, chest_ender, texture_size)
+			|| !loadChestTextures(trapped, chest_trapped, texture_size)
+			|| !loadDoubleChestTextures(trapped_double, chest_trapped_double, texture_size))
 		return false;
 	return true;
 }
 
 bool BlockImages::loadColors(const std::string& foliagecolor,
-        const std::string& grasscolor) {
-	return foliagecolors.readPNG(foliagecolor) && grasscolors.readPNG(grasscolor);
+		const std::string& grasscolor) {
+	bool ok = true;
+	if (!foliagecolors.readPNG(foliagecolor)) {
+		LOG(ERROR) << "Unable to read '" << foliagecolor << "'.";
+		ok = false;
+	}
+	if (!grasscolors.readPNG(grasscolor)) {
+		LOG(ERROR) << "Unable to read '" << grasscolor << "'.";
+		ok = false;
+	}
+	return ok;
 }
 
 bool BlockImages::loadOther(const std::string& endportal) {
 	RGBAImage endportal_img;
-	if(!endportal_img.readPNG(endportal))
+	if(!endportal_img.readPNG(endportal)) {
+		LOG(ERROR) << "Unable to read '" << endportal << "'.";
 		return false;
+	}
 	endportal_img.resizeAuto(texture_size, texture_size, endportal_texture);
 	return true;
 }
@@ -451,23 +476,22 @@ bool BlockImages::loadBlocks(const std::string& block_dir) {
 }
 
 bool BlockImages::loadAll(const std::string& textures_dir) {
-	if (!loadChests(textures_dir + "/chest/normal.png", textures_dir + "/chest/normal_double.png",
-			textures_dir + "/chest/ender.png")) {
-		std::cerr << "Error: Unable to load chest/normal.png, chest/normal_double.png or chest/ender.png" << std::endl;
-		std::cerr << "from texture directory '" << textures_dir << "'." << std::endl;
-		return false;
-	} else if (!loadColors(textures_dir + "/colormap/foliage.png",
-			textures_dir + "/colormap/grass.png")) {
-		std::cerr << "Error: Unable to load colormap/foliage.png or colormap/grass.png";
-		std::cerr << "from texture directory '" << textures_dir << "'." << std::endl;
-		return false;
-	} else if (!loadOther(textures_dir + "/endportal.png")) {
-		std::cerr << "Error: Unable to load endportal.png" << std::endl;
-		std::cerr << "from texture directory '" << textures_dir << "'." << std::endl;
-		return false;
-	} else if (!loadBlocks(textures_dir + "/blocks")) {
-		std::cerr << "Error: Unable to load block textures" << std::endl;
-		std::cerr << "from texture directory '" << textures_dir << "'." << std::endl;
+	bool ok = true;
+	if (!loadChests(textures_dir + "/entity/chest/normal.png",
+			textures_dir + "/entity/chest/normal_double.png",
+			textures_dir + "/entity/chest/ender.png",
+			textures_dir + "/entity/chest/trapped.png",
+			textures_dir + "/entity/chest/trapped_double.png"))
+		ok = false;
+	if (!loadColors(textures_dir + "/colormap/foliage.png",
+			textures_dir + "/colormap/grass.png"))
+		ok = false;
+	if (!loadOther(textures_dir + "/endportal.png"))
+		ok = false;
+	if (!loadBlocks(textures_dir + "/blocks"))
+		ok = false;
+	if (!ok) {
+		LOG(ERROR) << "Invalid texture directory '" << textures_dir << "'. See previous log messages.";
 		return false;
 	}
 	return true;
@@ -2267,8 +2291,8 @@ void BlockImages::loadBlocks() {
 	createItemStyleBlock(51, 0, t.FIRE_LAYER_0); // fire
 	createBlock(52, 0, t.MOB_SPAWNER); // monster spawner
 	createStairs(53, t.PLANKS_OAK); // oak wood stairs
-	createChest(54, chest); // chest
-	createDoubleChest(54, largechest); // chest
+	createChest(54, chest_normal); // chest
+	createDoubleChest(54, chest_normal_double); // chest
 	createRedstoneWire(55, 0, 48, 0, 0); // redstone wire not powered
 	createRedstoneWire(55, REDSTONE_POWERED, 192, 0, 0); // redstone wire powered
 	createBlock(56, 0, t.DIAMOND_ORE); // diamond ore
@@ -2393,7 +2417,7 @@ void BlockImages::loadBlocks() {
 	createCocoas(); // id 127
 	createStairs(128, t.SANDSTONE_NORMAL, t.SANDSTONE_TOP); // sandstone stairs
 	createBlock(129, 0, t.EMERALD_ORE); // emerald ore
-	createChest(130, enderchest); // ender chest
+	createChest(130, chest_ender); // ender chest
 	createTripwireHook(); // tripwire hook
 	createRedstoneWire(132, 0, 192, 192, 192); // tripwire
 	createBlock(133, 0, t.EMERALD_BLOCK); // block of emerald
@@ -2428,8 +2452,8 @@ void BlockImages::loadBlocks() {
 	createButton(143, t.PLANKS_OAK); // wooden button
 	// id 144 // head
 	// id 145 // anvil
-	createChest(146, chest); // trapped chest
-	createDoubleChest(146, largechest); // double trapped chest
+	createChest(146, chest_trapped); // trapped chest
+	createDoubleChest(146, chest_trapped_double); // double trapped chest
 	createSmallerBlock(147, 0, t.GOLD_BLOCK, t.GOLD_BLOCK, 0, 1); // weighted pressure plate (light)
 	createSmallerBlock(148, 0, t.QUARTZ_BLOCK_LINES, t.QUARTZ_BLOCK_LINES, 0, 1); // weighted pressure plate (heavy)
 	createRedstoneRepeater(149, t.COMPARATOR_OFF); // redstone comparator (inactive)

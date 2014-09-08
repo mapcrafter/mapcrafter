@@ -5,13 +5,16 @@ import os
 import zipfile
 import argparse
 
-dirs = ("", "chest", "colormap", "blocks")
+dirs = ("", "entity", "entity/chest", "colormap", "blocks")
+assets = "assets/minecraft/textures/"
 files = {
-	"chest/normal.png" : "assets/minecraft/textures/entity/chest/normal.png",
-	"chest/ender.png" : "assets/minecraft/textures/entity/chest/ender.png",
-	"chest/normal_double.png" : "assets/minecraft/textures/entity/chest/normal_double.png",
-	"colormap/foliage.png" : "assets/minecraft/textures/colormap/foliage.png",
-	"colormap/grass.png" : "assets/minecraft/textures/colormap/grass.png",
+	"entity/chest/normal.png" : assets + "entity/chest/normal.png",
+	"entity/chest/normal_double.png" : assets + "entity/chest/normal_double.png",
+	"entity/chest/ender.png" : assets + "entity/chest/ender.png",
+	"entity/chest/trapped.png" : assets + "entity/chest/trapped.png",
+	"entity/chest/trapped_double.png" : assets + "entity/chest/trapped_double.png",
+	"colormap/foliage.png" : assets + "colormap/foliage.png",
+	"colormap/grass.png" : assets + "colormap/grass.png",
 }
 
 if __name__ == "__main__":

@@ -259,9 +259,9 @@ private:
 	RGBAImage empty_texture;
 	RGBAImage endportal_texture;
 
-	RGBAImage chest[3];
-	RGBAImage largechest[7];
-	RGBAImage enderchest[3];
+	RGBAImage chest_normal[3], chest_normal_double[7];
+	RGBAImage chest_ender[3];
+	RGBAImage chest_trapped[3], chest_trapped_double[7];
 
 	RGBAImage foliagecolors, grasscolors;
 
@@ -398,8 +398,9 @@ public:
 	void setSettings(int texture_size, int rotation, bool render_unknown_blocks,
 	        bool render_leaves_transparent, const std::string& rendermode);
 
-	bool loadChests(const std::string& normal, const std::string& large,
-	        const std::string& ender);
+	bool loadChests(const std::string& normal, const std::string& normal_double,
+	        const std::string& ender,
+	        const std::string& trapped, const std::string& trapped_double);
 	bool loadColors(const std::string& foliagecolor, const std::string& grasscolor);
 	bool loadOther(const std::string& endportal);
 	bool loadBlocks(const std::string& block_dir);

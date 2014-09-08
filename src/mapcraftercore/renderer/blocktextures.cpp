@@ -1,5 +1,7 @@
 #include "blocktextures.h"
 
+#include "../util.h"
+
 #include <iostream>
 #include <boost/filesystem.hpp>
 
@@ -765,16 +767,20 @@ BlockTextures::~BlockTextures() {
  */
 bool BlockTextures::load(const std::string& block_dir, int size) {
 	if (!fs::exists(block_dir) || !fs::is_directory(block_dir)) {
-		std::cerr << "Error: Directory 'blocks' with block textures does not exist." << std::endl;
+		LOG(ERROR) << "Directory '" << block_dir << "' with block textures does not exist.";
 		return false;
 	}
 
 	// go through all textures and load them
+	bool loaded_all = true;
 	for (size_t i = 0; i < textures.size(); i++) {
-		if (!textures[i]->load(block_dir, size))
-			std::cerr << "Warning: Unable to load block texture "
-				<< textures[i]->getName() << ".png ." << std::endl;
+		if (!textures[i]->load(block_dir, size)) {
+			LOG(WARNING) << "Unable to load block texture '" << textures[i]->getName() << ".png'.";
+			loaded_all = false;
+		}
 	}
+	if (!loaded_all)
+		LOG(WARNING) << "Unable to load some block textures.";
 	return true;
 }
 
