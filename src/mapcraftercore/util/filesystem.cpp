@@ -169,7 +169,7 @@ PathList findTextureDirs(const fs::path& executable) {
 PathList findLoggingConfigFiles(const fs::path& executable) {
 	fs::path mapcrafter_dir = findExecutableMapcrafterDir(findExecutablePath());
 	PathList configs = {
-		mapcrafter_dir.parent_path() / "etc" / "mapcrafter" / "logging.conf",
+		mapcrafter_dir.parent_path().parent_path() / "etc" / "mapcrafter" / "logging.conf",
 		mapcrafter_dir / "logging.conf",
 	};
 
