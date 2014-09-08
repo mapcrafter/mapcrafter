@@ -82,8 +82,8 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 * Improved cave rendermode with a new high contrast block coloring (thanks to dtfinch, #100),
   old behavior is still available with a configuration option for compatibility reasons
 * Added support for Minecraft 1.8
-  * **Since the structure of the textures has changed a bit (chest textures), you 
-    should extract the texture files from a 1.8 Minecraft Jar file to a fresh, clean
+  * **Since the structure of the textures has changed a bit (especially chest textures),
+    you should extract the texture files from a 1.8 Minecraft Jar file to a new, clean
     texture directory.** 
 
 **v.1.5**
