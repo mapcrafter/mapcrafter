@@ -75,7 +75,7 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
-**v.1.5.1 (in progress)**
+**v.1.5.1**
 
 * Added ability to configure logging facility with configuration files
 * Added colored terminal output for warning/error log messages
