@@ -28,9 +28,17 @@ Here is a very simple example of a logging configuration file:
     type = syslog
     verbosity = INFO
 
-As you can see, every log section (prefixed with ``log:``) configures one log sink.
-The names of the sections are not relevant, you specify the type of the log sink with
-the ``type`` options.
+Every log section (prefixed with ``log:``) configures one log sink.
+You can configure the logging facility with those log sections in the global logging
+configuration file, but you can also use those log sections in the normal render
+configuration files. The log sections in the normal render configuration files are used
+after the ones in the global logging configuration file, so you can use them to overwrite
+the global logging configuration.
+
+The names of the log sections are not relevant because you specify the type of the log
+sink with the ``type`` option. An exception of this are file log sinks. You should make
+sure that you do not use the same section name for file log sinks multiple times because
+they are used for internal representation.
 
 Available options
 =================
