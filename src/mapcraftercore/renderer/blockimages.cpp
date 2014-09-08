@@ -651,7 +651,7 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	else if (id == 132) // trip wire
 		return data & ~0xf;
 	// the light sensor shouldn't have any data, but I had problems with it...
-	else if (id == 151)
+	else if (id == 151 || id == 178)
 		return 0;
 	return data;
 }
@@ -2563,7 +2563,9 @@ void BlockImages::loadBlocks() {
 	createLargePlant(4, t.DOUBLE_PLANT_ROSE_BOTTOM, t.DOUBLE_PLANT_ROSE_TOP);
 	createLargePlant(5, t.DOUBLE_PLANT_PAEONIA_BOTTOM, t.DOUBLE_PLANT_PAEONIA_TOP);
 	// --
-
+	// id 176 // standing banner
+	// id 177 // wall banner
+	createSmallerBlock(178, 0, t.DAYLIGHT_DETECTOR_SIDE, t.DAYLIGHT_DETECTOR_INVERTED_TOP, 0, 8); // inverted daylight sensor
 	// -- red sandstone
 	createBlock(179, 0, t.RED_SANDSTONE_NORMAL, t.RED_SANDSTONE_TOP); // normal
 	createBlock(179, 1, t.RED_SANDSTONE_CARVED, t.RED_SANDSTONE_TOP); // chiseled
