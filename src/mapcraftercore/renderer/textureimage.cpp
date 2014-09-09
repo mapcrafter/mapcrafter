@@ -47,9 +47,8 @@ bool TextureImage::load(const std::string& path, int size) {
 	// check if this is an animated texture, calculate how many frames it has
 	// also make sure there are exactly n frames, so height mod width = 0
 	if ((original.getHeight() % original.getWidth()) != 0) {
-		// TODO use logging
-		std::cerr << "Warning: Texture " << name << " has odd size: ";
-		std::cerr << original.getWidth() << "x" << original.getHeight() << std::endl;
+		LOG(WARNING) << "Texture '" << name << "' has odd size: " << original.getWidth()
+				<< "x" << original.getHeight();
 	}
 	int frames = original.getHeight() / original.getWidth();
 
@@ -90,8 +89,7 @@ RGBAImage TextureImage::getFrame(int frame) const {
 	int width = original_resized.getWidth();
 	// check if texture has this frame, return empty texture if not
 	if ((frame+1) * width > original_resized.getHeight()) {
-		// TODO use logging
-		std::cerr << "Warning: Texture " << name << " does not have frame " << frame << "." << std::endl;
+		LOG(WARNING) << "Texture '" << name << "' does not have frame " << frame << ".";
 		return RGBAImage(width, width);
 	}
 	return original_resized.clip(0, width * frame, width, width);

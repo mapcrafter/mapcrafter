@@ -61,12 +61,12 @@ void TileRenderWorker::saveTile(const TilePath& tile, const RGBAImage& image) {
 		fs::create_directories(file.branch_path());
 
 	if (png && !image.writePNG(file.string()))
-		std::cout << "Unable to write " << file.string() << std::endl;
+		LOG(WARNING) << "Unable to write '" << file.string() << "'.";
 
 	config::Color bg = render_context.background_color;
 	if (!png && !image.writeJPEG(file.string(),
 			render_context.map_config.getJPEGQuality(), rgba(bg.red, bg.green, bg.blue, 255)))
-		std::cout << "Unable to write " << file.string() << std::endl;
+		LOG(WARNING) << "Unable to write '" << file.string() << "'.";
 }
 
 void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
@@ -84,8 +84,8 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 			return;
 		}
 
-		std::cout << "Unable to read tile " << tile.toString();
-		std::cout << ", I will just render it again." << std::endl;
+		LOG(WARNING) << "Unable to read tile '" << tile.toString()
+				<< "', I will just render it again.";
 	}
 
 	if (tile.getDepth() == render_context.tile_set->getDepth()) {
