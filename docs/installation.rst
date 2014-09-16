@@ -179,7 +179,7 @@ Windows
 Mapcrafter on Windows is still a bit experimental, but there are pre-built
 packages on mapcrafter.org:
 
-`http://mapcrafter.org/windows <http://mapcrafter.org/windows>`_
+`http://mapcrafter.org/downloads <http://mapcrafter.org/downloads>`_
 
 If you are as crazy as experimental Mapcrafter is on Windows, you can build Mapcrafter
 on Windows on your own. There is a build package for Windows with instructions 
