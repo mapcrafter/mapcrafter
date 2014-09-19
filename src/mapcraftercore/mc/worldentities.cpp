@@ -22,14 +22,48 @@
 namespace mapcrafter {
 namespace mc {
 
+/**
+ * Checks whether a line from the sign entity is in the new json format (>= mc 1.8).
+ * We assume a line is in the new format if it starts and ends with '"' or is 'null'.
+ */
+bool isJSONLine(const std::string& line) {
+	if (line.empty())
+		return false;
+	return line == "null" || (line[0] == '"' && line[line.size() - 1] == '"');
+}
+
+/**
+ * Extracts the actual text from the json sign line format. Returns the supplied string
+ * if it is not in the new format. Otherwise just removes the '"' or returns '' if the
+ * json string is 'null'.
+ */
+std::string convertJSONLine(const std::string& line) {
+	if (!isJSONLine(line))
+		return line;
+	// TODO there might be more complicated json forms of text
+	if (line == "null")
+		return "";
+	return line.substr(1, line.size() - 2);
+}
+
 SignEntity::SignEntity() {
 }
 
 SignEntity::SignEntity(const mc::BlockPos& pos, const Lines& lines)
 	: pos(pos), lines(lines), text() {
+	// check if the lines of this sign are in the new json format (>= mc 1.8)
+	// if yes, extract actual text
+	if (isJSONLine(lines[0]) && isJSONLine(lines[1])
+			&& isJSONLine(lines[2]) && isJSONLine(lines[3])) {
+		this->lines[0] = convertJSONLine(lines[0]);
+		this->lines[1] = convertJSONLine(lines[1]);
+		this->lines[2] = convertJSONLine(lines[2]);
+		this->lines[3] = convertJSONLine(lines[3]);
+	}
+
 	// join the lines as sign text
 	for (int i = 0; i < 4; i++) {
-		std::string line = util::trim(lines[i]);
+		std::string line = util::trim(this->lines[i]);
 		if (line.empty())
 			continue;
 		text += line + " ";
