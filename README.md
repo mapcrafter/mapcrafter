@@ -75,6 +75,12 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.1.5.2 (in progress)**
+
+* Fixed the marker tool to work with the new internal Minecraft 1.8 sign format
+* Fixed bug with global logging configuration file installed and searched in wrong directory
+* Fixed bug causing the Leaflet map being stuck
+
 **v.1.5.1**
 
 * Added ability to configure logging facility with configuration files
