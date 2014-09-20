@@ -2221,6 +2221,7 @@ void BlockImages::loadBlocks() {
 	// --
 	createLeaves(); // id 18
 	createBlock(19, 0, t.SPONGE); // sponge
+	createBlock(19, 1, t.SPONGE_WET); // wet sponge
 	createGlass(20, 0, t.GLASS);
 	createBlock(21, 0, t.LAPIS_ORE); // lapis lazuli ore
 	createBlock(22, 0, t.LAPIS_BLOCK); // lapis lazuli block
