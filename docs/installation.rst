@@ -37,7 +37,8 @@ Make sure you have all requirements installed. If you are on a Debian-like
 Linux system, you can install these packages with apt::
 
     sudo apt-get install libpng-dev libjpeg-dev libboost-iostreams-dev \
-    libboost-system-dev libboost-filesystem-dev libboost-program-options-dev
+    libboost-system-dev libboost-filesystem-dev libboost-program-options-dev \
+    cmake
 
 If you are on an RPM based system such as Fedora, you can install these packages with yum::
 
