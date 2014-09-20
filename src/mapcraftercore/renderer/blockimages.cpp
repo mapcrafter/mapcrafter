@@ -2522,8 +2522,8 @@ void BlockImages::loadBlocks() {
 	createTrapdoor(167, t.IRON_TRAPDOOR); // iron trapdoor
 	// prismarine --
 	createBlock(168, 0, t.PRISMARINE_ROUGH);
-	createBlock(168, 1, t.PRISMARINE_DARK);
-	createBlock(168, 2, t.PRISMARINE_BRICKS);
+	createBlock(168, 1, t.PRISMARINE_BRICKS);
+	createBlock(168, 2, t.PRISMARINE_DARK);
 	// --
 	createBlock(169, 0, t.SEA_LANTERN); // sea lantern
 	// hay block --
