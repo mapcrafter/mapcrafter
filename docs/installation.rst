@@ -38,7 +38,7 @@ Linux system, you can install these packages with apt::
 
     sudo apt-get install libpng-dev libjpeg-dev libboost-iostreams-dev \
     libboost-system-dev libboost-filesystem-dev libboost-program-options-dev \
-    cmake
+    build-essential cmake
 
 If you are on an RPM based system such as Fedora, you can install these packages with yum::
 
