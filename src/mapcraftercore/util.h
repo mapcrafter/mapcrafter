@@ -51,7 +51,6 @@ private:
 
 #include "util/filesystem.h"
 #include "util/logging.h"
-#include "util/picojson.h"
 #include "util/progress.h"
 #include "util/math.h"
 #include "util/other.h"
