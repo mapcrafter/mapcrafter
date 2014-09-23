@@ -1,19 +1,19 @@
 set(SOURCE
-	${SOURCE}
-	${CMAKE_CURRENT_SOURCE_DIR}/filesystem.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/logging.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/other.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/progress.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/terminal.cpp
-	PARENT_SCOPE
+    ${SOURCE}
+    "${CMAKE_CURRENT_SOURCE_DIR}/filesystem.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/logging.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/other.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/progress.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/terminal.cpp"
+    PARENT_SCOPE
 )
 set(HEADERS
-	${HEADERS}
-	${CMAKE_CURRENT_SOURCE_DIR}/filesystem.h
-	${CMAKE_CURRENT_SOURCE_DIR}/logging.h
-	${CMAKE_CURRENT_SOURCE_DIR}/math.h
-	${CMAKE_CURRENT_SOURCE_DIR}/other.h
-	${CMAKE_CURRENT_SOURCE_DIR}/progress.h
-	${CMAKE_CURRENT_SOURCE_DIR}/terminal.h
-	PARENT_SCOPE
+    ${HEADERS}
+    "${CMAKE_CURRENT_SOURCE_DIR}/filesystem.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/logging.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/math.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/other.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/progress.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/terminal.h"
+    PARENT_SCOPE
 )

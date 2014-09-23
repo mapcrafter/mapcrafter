@@ -28,26 +28,26 @@ if(HAVE_ENDIAN_H)
     endif()
 endif()
 
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/config.h")
 
 add_custom_target(version.cpp
     sh ./version.sh
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} VERBATIM
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" VERBATIM
 )
 if(NOT "${CMAKE_CURRENT_SOURCE_DIR}/version.cpp")
     execute_process(
         COMMAND sh ./version.sh
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 endif()
 
 set(SOURCE
-    ${CMAKE_CURRENT_SOURCE_DIR}/version.cpp
+    "${CMAKE_CURRENT_SOURCE_DIR}/version.cpp"
 )
 set(HEADERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/config.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/version.h
+    "${CMAKE_CURRENT_SOURCE_DIR}/config.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/util.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/version.h"
 )
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/compat")
@@ -63,33 +63,33 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thread/impl")
 add_library(mapcraftercore SHARED ${SOURCE})
 add_dependencies(mapcraftercore version.cpp)
 
-target_link_libraries(mapcraftercore ${Boost_IOSTREAMS_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries(mapcraftercore "${Boost_IOSTREAMS_LIBRARY}" "${Boost_SYSTEM_LIBRARY}" "${Boost_FILESYSTEM_LIBRARY}")
 if(OPT_USE_BOOST_THREAD)
-    target_link_libraries(mapcraftercore ${Boost_THREAD_LIBRARY})
+    target_link_libraries(mapcraftercore "${Boost_THREAD_LIBRARY}")
 endif()
 
 if(OPT_LINK_DEPS_STATICALLY)
-	target_link_libraries(mapcraftercore libpng.a libjpeg.a)
+    target_link_libraries(mapcraftercore libpng.a libjpeg.a)
 else()
-	target_link_libraries(mapcraftercore ${PNG_LIBRARIES})
-	target_link_libraries(mapcraftercore ${JPEG_LIBRARIES})
-	target_link_libraries(mapcraftercore ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(mapcraftercore "${PNG_LIBRARIES}")
+    target_link_libraries(mapcraftercore "${JPEG_LIBRARIES}")
+    target_link_libraries(mapcraftercore "${CMAKE_THREAD_LIBS_INIT}")
 endif()
 
 if(OPT_LINK_BOOST_STATICALLY)
-	if(OPT_LINK_DEPS_STATICALLY)
-		target_link_libraries(mapcraftercore libz.a)
-	else()
-		target_link_libraries(mapcraftercore ${ZLIB_LIBRARIES})
-	endif()
+    if(OPT_LINK_DEPS_STATICALLY)
+        target_link_libraries(mapcraftercore libz.a)
+    else()
+        target_link_libraries(mapcraftercore "${ZLIB_LIBRARIES}")
+    endif()
 endif()
 
 install(TARGETS mapcraftercore DESTINATION lib)
 
 if(OPT_INSTALL_HEADERS)
     foreach(HEADER ${HEADERS})
-        string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" HEADER ${HEADER})
-        string(REGEX MATCH "(.*)[/\\]" DIR ${HEADER})
-        install(FILES ${HEADER} DESTINATION include/mapcraftercore/${DIR})
+        string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" HEADER "${HEADER}")
+        string(REGEX MATCH "(.*)[/\\]" DIR "${HEADER}")
+        install(FILES "${HEADER}" DESTINATION "include/mapcraftercore/${DIR}")
     endforeach(HEADER)
 endif()

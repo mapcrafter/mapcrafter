@@ -12,10 +12,10 @@ option(OPT_BOOST_STATIC "Links boost statically (deprecated, use OPT_LINK_BOOST_
 option(OPT_INSTALL_HEADERS "Installs libmapcraftercore header files" ON)
 
 if(OPT_BOOST_STATIC)
-	set(OPT_LINK_BOOST_STATICALLY ON)
+    set(OPT_LINK_BOOST_STATICALLY ON)
 endif()
 if(OPT_LINK_DEPS_STATICALLY)
-	set(OPT_LINK_BOOST_STATICALLY ON)
+    set(OPT_LINK_BOOST_STATICALLY ON)
 endif()
 
 if(OPT_DEBUG)
