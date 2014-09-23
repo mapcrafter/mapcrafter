@@ -13,11 +13,11 @@ add_custom_target(gen_texture_code
 )
 
 add_executable(mapcrafter mapcrafter.cpp)
-target_link_libraries(mapcrafter mapcraftercore "${Boost_PROGRAM_OPTIONS_LIBRARY}")
+target_link_libraries(mapcrafter mapcraftercore ${Boost_PROGRAM_OPTIONS_LIBRARY})
 install(TARGETS mapcrafter DESTINATION bin)
 
 add_executable(mapcrafter_markers mapcrafter_markers.cpp)
-target_link_libraries(mapcrafter_markers mapcraftercore "${Boost_PROGRAM_OPTIONS_LIBRARY}")
+target_link_libraries(mapcrafter_markers mapcraftercore ${Boost_PROGRAM_OPTIONS_LIBRARY})
 install(TARGETS mapcrafter_markers DESTINATION bin)
 
 install(FILES logging.conf DESTINATION ../etc/mapcrafter)
