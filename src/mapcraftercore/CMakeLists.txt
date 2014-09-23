@@ -63,9 +63,9 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thread/impl")
 add_library(mapcraftercore SHARED ${SOURCE})
 add_dependencies(mapcraftercore version.cpp)
 
-target_link_libraries(mapcraftercore ${Boost_IOSTREAMS_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries(mapcraftercore "${Boost_IOSTREAMS_LIBRARY}" "${Boost_SYSTEM_LIBRARY}" "${Boost_FILESYSTEM_LIBRARY}")
 if(OPT_USE_BOOST_THREAD)
-    target_link_libraries(mapcraftercore ${Boost_THREAD_LIBRARY})
+    target_link_libraries(mapcraftercore "${Boost_THREAD_LIBRARY}")
 endif()
 
 if(OPT_LINK_DEPS_STATICALLY)
