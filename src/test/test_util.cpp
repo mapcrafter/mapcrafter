@@ -48,6 +48,13 @@ BOOST_AUTO_TEST_CASE(util_testMath) {
 }
 
 BOOST_AUTO_TEST_CASE(util_utf8) {
+	BOOST_CHECK_EQUAL("", util::convertUnicodeEscapeSequence(""));
+	BOOST_CHECK_EQUAL("", util::convertUnicodeEscapeSequence("\\a23"));
+	BOOST_CHECK_EQUAL("", util::convertUnicodeEscapeSequence("\\u"));
+	BOOST_CHECK_EQUAL("", util::convertUnicodeEscapeSequence("\\uabcg"));
+	BOOST_CHECK_EQUAL("", util::convertUnicodeEscapeSequence("\\uffffffff"));
+	BOOST_CHECK_EQUAL("", util::convertUnicodeEscapeSequence("\\u1234ffffffff"));
+
 	BOOST_CHECK_EQUAL(u8"a", util::convertUnicodeEscapeSequence("\\u61"));
 	BOOST_CHECK_EQUAL(u8"N", util::convertUnicodeEscapeSequence("\\u4e"));
 

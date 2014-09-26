@@ -22,6 +22,7 @@
 #include "other.h"
 
 #include <cctype>
+#include <iostream>
 
 namespace mapcrafter {
 namespace util {
@@ -41,7 +42,12 @@ std::string convertUnicodeEscapeSequence(const std::string& escape_sequence) {
 	// make sure we really have a unicode character escape sequence
 	if (!startswith(escape_sequence, "\\u") && !startswith(escape_sequence, "\\U"))
 		return "";
-	// todo check length of escape sequence
+	// escape sequence shouldn't be too short or too long
+	if (escape_sequence.size() < 3 || escape_sequence.size() > 10)
+		return "";
+	// escape sequence number must be a hex number
+	if (!isHexString(escape_sequence.substr(2)))
+		return "";
 
 	// parse the hex number from the escape sequence
 	std::stringstream ss;
@@ -79,6 +85,9 @@ std::string convertUnicodeEscapeSequence(const std::string& escape_sequence) {
 		converted += (char) (0b10000000 | ((ordinal >> 12) & 0b00111111));
 		converted += (char) (0b10000000 | ((ordinal >> 6)  & 0b00111111));
 		converted += (char) (0b10000000 | (ordinal & 0b00111111));
+	} else {
+		// invalid escape sequence, it's too long for utf-8
+		return "";
 	}
 	return converted;
 }
