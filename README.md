@@ -80,6 +80,7 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 * Fixed the marker tool to work with the new internal Minecraft 1.8 sign format
 * Fixed bug with global logging configuration file installed and searched in wrong directory
 * Fixed bug causing the Leaflet map being stuck
+* Fixed some small issues with new 1.8 blocks
 
 **v.1.5.1**
 
