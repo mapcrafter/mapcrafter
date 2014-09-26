@@ -46,3 +46,20 @@ BOOST_AUTO_TEST_CASE(util_testMath) {
 	BOOST_CHECK_EQUAL(util::binary<101000101>::value, 325);
 	BOOST_CHECK_EQUAL(util::binary<11011101>::value, 221);
 }
+
+BOOST_AUTO_TEST_CASE(util_utf8) {
+	BOOST_CHECK_EQUAL(u8"a", util::convertUnicodeEscapeSequence("\\u61"));
+	BOOST_CHECK_EQUAL(u8"N", util::convertUnicodeEscapeSequence("\\u4e"));
+
+	BOOST_CHECK_EQUAL(u8"$", util::convertUnicodeEscapeSequence("\\u24"));
+	BOOST_CHECK_EQUAL(u8"€", util::convertUnicodeEscapeSequence("\\u20ac"));
+	BOOST_CHECK_EQUAL(u8"<", util::convertUnicodeEscapeSequence("\\u3c"));
+	BOOST_CHECK_EQUAL(u8"☭", util::convertUnicodeEscapeSequence("\\u262d"));
+
+	BOOST_CHECK_EQUAL(u8"\u007f", util::convertUnicodeEscapeSequence("\\u007f"));
+	BOOST_CHECK_EQUAL(u8"\u07ff", util::convertUnicodeEscapeSequence("\\u07ff"));
+	BOOST_CHECK_EQUAL(u8"\uffff", util::convertUnicodeEscapeSequence("\\uffff"));
+	BOOST_CHECK_EQUAL(u8"\U001fffff", util::convertUnicodeEscapeSequence("\\U001fffff"));
+	BOOST_CHECK_EQUAL(u8"\U03ffffff", util::convertUnicodeEscapeSequence("\\U03ffffff"));
+	BOOST_CHECK_EQUAL(u8"\U7fffffff", util::convertUnicodeEscapeSequence("\\U7fffffff"));
+}
