@@ -55,5 +55,6 @@ private:
 #include "util/math.h"
 #include "util/other.h"
 #include "util/terminal.h"
+#include "util/utf8.h"
 
 #endif /* UTIL_H_ */
