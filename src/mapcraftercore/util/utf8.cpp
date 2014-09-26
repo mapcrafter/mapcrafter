@@ -33,16 +33,24 @@ bool isHexString(const std::string& str) {
 	return true;
 }
 
+/**
+ * Converts a unicode character escape sequence (like \uNNNN, with N's as hex digits)
+ * to an utf-8 encoded string.
+ */
 std::string convertUnicodeEscapeSequence(const std::string& escape_sequence) {
+	// make sure we really have a unicode character escape sequence
 	if (!startswith(escape_sequence, "\\u") && !startswith(escape_sequence, "\\U"))
 		return "";
 	// todo check length of escape sequence
-	std::string hex_numbers = escape_sequence.substr(2);
+
+	// parse the hex number from the escape sequence
 	std::stringstream ss;
-	ss << std::hex << hex_numbers;
+	ss << std::hex << escape_sequence.substr(2);
 	unsigned int ordinal;
 	ss >> ordinal;
 
+	// now convert this code point to the corresponding utf-8 bytes...
+	// tl;dr: http://en.wikipedia.org/wiki/UTF-8#Description
 	std::string converted;
 	if (ordinal <= 0x7f)
 		converted += (char) ordinal;
