@@ -48,47 +48,51 @@ BOOST_AUTO_TEST_CASE(util_testMath) {
 }
 
 BOOST_AUTO_TEST_CASE(util_utf8) {
+	// basic tests if the conversion from unicode character escape sequences to UTF-8 works
 	BOOST_CHECK_EQUAL("", util::convertUnicodeEscapeSequence(""));
 	BOOST_CHECK_EQUAL("", util::convertUnicodeEscapeSequence("\\a23"));
 	BOOST_CHECK_EQUAL("", util::convertUnicodeEscapeSequence("\\u"));
 	BOOST_CHECK_EQUAL("", util::convertUnicodeEscapeSequence("\\uabcg"));
 	BOOST_CHECK_EQUAL("", util::convertUnicodeEscapeSequence("\\uffffffff"));
 	BOOST_CHECK_EQUAL("", util::convertUnicodeEscapeSequence("\\u1234ffffffff"));
-
 	BOOST_CHECK_EQUAL(u8"a", util::convertUnicodeEscapeSequence("\\u0061"));
 	BOOST_CHECK_EQUAL(u8"N", util::convertUnicodeEscapeSequence("\\u004e"));
-
 	BOOST_CHECK_EQUAL(u8"$", util::convertUnicodeEscapeSequence("\\u0024"));
-	BOOST_CHECK_EQUAL(u8"€", util::convertUnicodeEscapeSequence("\\u020ac"));
+	BOOST_CHECK_EQUAL(u8"€", util::convertUnicodeEscapeSequence("\\u20ac"));
 	BOOST_CHECK_EQUAL(u8"<", util::convertUnicodeEscapeSequence("\\u003c"));
 	BOOST_CHECK_EQUAL(u8"☭", util::convertUnicodeEscapeSequence("\\u262d"));
 
+	// test the first/last unicode code points possible per count of bytes
+	// (1/2/3/4/5/6 bytes, see http://en.wikipedia.org/wiki/UTF-8#Description)
 	BOOST_CHECK_EQUAL(u8"\u007f", util::convertUnicodeEscapeSequence("\\u007f"));
+	BOOST_CHECK_EQUAL(u8"\u0080", util::convertUnicodeEscapeSequence("\\u0080"));
 	BOOST_CHECK_EQUAL(u8"\u07ff", util::convertUnicodeEscapeSequence("\\u07ff"));
+	BOOST_CHECK_EQUAL(u8"\u0800", util::convertUnicodeEscapeSequence("\\u0800"));
 	BOOST_CHECK_EQUAL(u8"\uffff", util::convertUnicodeEscapeSequence("\\uffff"));
+	BOOST_CHECK_EQUAL(u8"\U00010000", util::convertUnicodeEscapeSequence("\\U00010000"));
 	BOOST_CHECK_EQUAL(u8"\U001fffff", util::convertUnicodeEscapeSequence("\\U001fffff"));
+	BOOST_CHECK_EQUAL(u8"\U00200000", util::convertUnicodeEscapeSequence("\\U00200000"));
 	BOOST_CHECK_EQUAL(u8"\U03ffffff", util::convertUnicodeEscapeSequence("\\U03ffffff"));
+	BOOST_CHECK_EQUAL(u8"\U04000000", util::convertUnicodeEscapeSequence("\\U04000000"));
 	BOOST_CHECK_EQUAL(u8"\U7fffffff", util::convertUnicodeEscapeSequence("\\U7fffffff"));
 
-	BOOST_CHECK_EQUAL("42€ and $73", util::replaceUnicodeEscapeSequences("42\\u20ac and \\u002473"));
-	BOOST_CHECK_EQUAL(">> Test", util::replaceUnicodeEscapeSequences("\\u003e\\u003e Test"));
-
 	// check if escaping unicode character escape sequences works
-	BOOST_CHECK_EQUAL("\\\\u262d", util::replaceUnicodeEscapeSequences("\\\\u262d"));
-	BOOST_CHECK_EQUAL("\\\\\u262d", util::replaceUnicodeEscapeSequences("\\\\\\u262d"));
-	BOOST_CHECK_EQUAL("test \\\\u262d", util::replaceUnicodeEscapeSequences("test \\\\u262d"));
-	BOOST_CHECK_EQUAL("test \\\\\u262d", util::replaceUnicodeEscapeSequences("test \\\\\\u262d"));
+	// todo maybe more
+	BOOST_CHECK_EQUAL(u8"\\\\u262d", util::replaceUnicodeEscapeSequences("\\\\u262d"));
+	BOOST_CHECK_EQUAL(u8"\\\\\u262d", util::replaceUnicodeEscapeSequences("\\\\\\u262d"));
+	BOOST_CHECK_EQUAL(u8"test \\\\u262d", util::replaceUnicodeEscapeSequences("test \\\\u262d"));
+	BOOST_CHECK_EQUAL(u8"test \\\\\u262d", util::replaceUnicodeEscapeSequences("test \\\\\\u262d"));
 
 	// check if we always use the correct length of hex numbers after the \u and \U
-	BOOST_CHECK_EQUAL("\\u12", util::replaceUnicodeEscapeSequences("\\u12"));
-	BOOST_CHECK_EQUAL("\\U12", util::replaceUnicodeEscapeSequences("\\U12"));
-	BOOST_CHECK_EQUAL("\\u123", util::replaceUnicodeEscapeSequences("\\u123"));
-	BOOST_CHECK_EQUAL("\\U123", util::replaceUnicodeEscapeSequences("\\U123"));
-	BOOST_CHECK_EQUAL("\\U1234", util::replaceUnicodeEscapeSequences("\\U1234"));
-	BOOST_CHECK_EQUAL("\u1234" "5", util::replaceUnicodeEscapeSequences("\\u12345"));
-	BOOST_CHECK_EQUAL("\\U12345", util::replaceUnicodeEscapeSequences("\\U12345"));
-	BOOST_CHECK_EQUAL("\u1234" "567", util::replaceUnicodeEscapeSequences("\\u1234567"));
-	BOOST_CHECK_EQUAL("\\U1234567", util::replaceUnicodeEscapeSequences("\\U1234567"));
-	BOOST_CHECK_EQUAL("\u1234" "5678", util::replaceUnicodeEscapeSequences("\\u12345678"));
-	BOOST_CHECK_EQUAL("\U12345678" "9", util::replaceUnicodeEscapeSequences("\\U123456789"));
+	BOOST_CHECK_EQUAL(u8"\\u12", util::replaceUnicodeEscapeSequences("\\u12"));
+	BOOST_CHECK_EQUAL(u8"\u1234", util::replaceUnicodeEscapeSequences("\\1234"));
+	BOOST_CHECK_EQUAL(u8"\u1234" "567", util::replaceUnicodeEscapeSequences("\\u1234567"));
+	BOOST_CHECK_EQUAL(u8"\\U123", util::replaceUnicodeEscapeSequences("\\U123"));
+	BOOST_CHECK_EQUAL(u8"\U12345678", util::replaceUnicodeEscapeSequences("\\U12345678"));
+	BOOST_CHECK_EQUAL(u8"\U12345678" "9", util::replaceUnicodeEscapeSequences("\\U123456789"));
+
+	// general tests of unicode character escape sequence replacer
+	// todo more
+	BOOST_CHECK_EQUAL(u8"42€ \u0026 $73", util::replaceUnicodeEscapeSequences("42\\u20ac & \\u002473"));
+	BOOST_CHECK_EQUAL(u8">> Test", util::replaceUnicodeEscapeSequences("\\u003e\\u003e Test"));
 }
