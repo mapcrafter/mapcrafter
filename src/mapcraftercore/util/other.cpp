@@ -128,9 +128,16 @@ bool as<bool>(const std::string& from) {
 	throw std::invalid_argument("Must be one of true/false or 0/1");
 }
 
-unsigned int parseHexNumber(const std::string& hex) {
+bool isHexNumber(const std::string& str) {
+	for (size_t i = 0; i < str.size(); i++)
+		if (!isxdigit(str[i]))
+			return false;
+	return true;
+}
+
+unsigned int parseHexNumber(const std::string& str) {
 	std::stringstream ss;
-	ss << std::hex << hex;
+	ss << std::hex << str;
 
 	unsigned int x;
 	ss >> x;

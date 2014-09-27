@@ -73,7 +73,17 @@ fs::path as(const std::string& from);
 template <>
 bool as<bool>(const std::string& from);
 
-unsigned int parseHexNumber(const std::string& hex);
+/**
+ * Checks if a string is also a valid hexadecimal number (= contains only hex digits).
+ */
+bool isHexNumber(const std::string& str);
+
+/**
+ * Parses a string as hexadecimal number. The return value is not defined if the string
+ * does not represent a valid hexadecimal number. Use the isHexNumber function to make
+ * sure a string contains only hexadecimal digits.
+ */
+unsigned int parseHexNumber(const std::string& str);
 
 std::string trim(const std::string& str);
 std::string escapeJSON(const std::string& str);

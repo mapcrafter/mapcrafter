@@ -27,69 +27,64 @@
 namespace mapcrafter {
 namespace util {
 
-bool isHexString(const std::string& str) {
-	for (size_t i = 0; i < str.size(); i++)
-		if (!isxdigit(str[i]))
-			return false;
-	return true;
+/**
+ * Encodes a single unicode code point (numerical value of a unicode character) in UTF-8.
+ * Have a look at http://en.wikipedia.org/wiki/UTF-8#Description to understand how this
+ * works.
+ */
+std::string encodeUTF8(unsigned int ordinal) {
+	std::string utf8;
+	if (ordinal <= 0x7f)
+		utf8 += (char) ordinal;
+	else if (ordinal <= 0x7ff) {
+		utf8 += (char) (0b11000000 | (ordinal >> 6));
+		utf8 += (char) (0b10000000 | (ordinal & 0b00111111));
+	} else if (ordinal <= 0xffff) {
+		utf8 += (char) (0b11100000 | (ordinal >> 12));
+		utf8 += (char) (0b10000000 | ((ordinal >> 6) & 0b00111111));
+		utf8 += (char) (0b10000000 | (ordinal & 0b00111111));
+	} else if (ordinal <= 0x1fffff) {
+		utf8 += (char) (0b11110000 | (ordinal >> 18));
+		utf8 += (char) (0b10000000 | ((ordinal >> 12) & 0b00111111));
+		utf8 += (char) (0b10000000 | ((ordinal >> 6)  & 0b00111111));
+		utf8 += (char) (0b10000000 | (ordinal & 0b00111111));
+	} else if (ordinal <= 0x3ffffff) {
+		utf8 += (char) (0b11111000 | (ordinal >> 24));
+		utf8 += (char) (0b10000000 | ((ordinal >> 18) & 0b00111111));
+		utf8 += (char) (0b10000000 | ((ordinal >> 12) & 0b00111111));
+		utf8 += (char) (0b10000000 | ((ordinal >> 6)  & 0b00111111));
+		utf8 += (char) (0b10000000 | (ordinal & 0b00111111));
+	} else if (ordinal <= 0x7fffffff) {
+		utf8 += (char) (0b11111100 | (ordinal >> 30));
+		utf8 += (char) (0b10000000 | ((ordinal >> 24) & 0b00111111));
+		utf8 += (char) (0b10000000 | ((ordinal >> 18) & 0b00111111));
+		utf8 += (char) (0b10000000 | ((ordinal >> 12) & 0b00111111));
+		utf8 += (char) (0b10000000 | ((ordinal >> 6)  & 0b00111111));
+		utf8 += (char) (0b10000000 | (ordinal & 0b00111111));
+	} else {
+		// invalid code point, value is too high for UTF-8
+		return "";
+	}
+	return utf8;
 }
 
 /**
  * Converts a unicode character escape sequence (like \uNNNN, with N's as hex digits)
- * to an utf-8 encoded string.
+ * to an UTF-8 encoded string.
  */
 std::string convertUnicodeEscapeSequence(const std::string& escape_sequence) {
 	// make sure we really have a unicode character escape sequence
 	if (!startswith(escape_sequence, "\\u") && !startswith(escape_sequence, "\\U"))
 		return "";
-	// escape sequence shouldn't be too short or too long
+	// escape sequence must not be too short or too long
 	if (escape_sequence.size() < 3 || escape_sequence.size() > 10)
 		return "";
 	// escape sequence number must be a hex number
-	if (!isHexString(escape_sequence.substr(2)))
+	if (!isHexNumber(escape_sequence.substr(2)))
 		return "";
 
-	// parse the hex number from the escape sequence
-	std::stringstream ss;
-	ss << std::hex << escape_sequence.substr(2);
-	unsigned int ordinal;
-	ss >> ordinal;
-
-	// now convert this code point to the corresponding utf-8 bytes...
-	// tl;dr: http://en.wikipedia.org/wiki/UTF-8#Description
-	std::string converted;
-	if (ordinal <= 0x7f)
-		converted += (char) ordinal;
-	else if (ordinal <= 0x7ff) {
-		converted += (char) (0b11000000 | (ordinal >> 6));
-		converted += (char) (0b10000000 | (ordinal & 0b00111111));
-	} else if (ordinal <= 0xffff) {
-		converted += (char) (0b11100000 | (ordinal >> 12));
-		converted += (char) (0b10000000 | ((ordinal >> 6) & 0b00111111));
-		converted += (char) (0b10000000 | (ordinal & 0b00111111));
-	} else if (ordinal <= 0x1fffff) {
-		converted += (char) (0b11110000 | (ordinal >> 18));
-		converted += (char) (0b10000000 | ((ordinal >> 12) & 0b00111111));
-		converted += (char) (0b10000000 | ((ordinal >> 6)  & 0b00111111));
-		converted += (char) (0b10000000 | (ordinal & 0b00111111));
-	} else if (ordinal <= 0x3ffffff) {
-		converted += (char) (0b11111000 | (ordinal >> 24));
-		converted += (char) (0b10000000 | ((ordinal >> 18) & 0b00111111));
-		converted += (char) (0b10000000 | ((ordinal >> 12) & 0b00111111));
-		converted += (char) (0b10000000 | ((ordinal >> 6)  & 0b00111111));
-		converted += (char) (0b10000000 | (ordinal & 0b00111111));
-	} else if (ordinal <= 0x7fffffff) {
-		converted += (char) (0b11111100 | (ordinal >> 30));
-		converted += (char) (0b10000000 | ((ordinal >> 24) & 0b00111111));
-		converted += (char) (0b10000000 | ((ordinal >> 18) & 0b00111111));
-		converted += (char) (0b10000000 | ((ordinal >> 12) & 0b00111111));
-		converted += (char) (0b10000000 | ((ordinal >> 6)  & 0b00111111));
-		converted += (char) (0b10000000 | (ordinal & 0b00111111));
-	} else {
-		// invalid escape sequence, it's too long for utf-8
-		return "";
-	}
-	return converted;
+	// parse the hex number from the escape sequence and encode this unicode code point
+	return encodeUTF8(parseHexNumber(escape_sequence.substr(2)));
 }
 
 std::string replaceUnicodeEscapeSequences(const std::string& string) {
@@ -114,11 +109,11 @@ std::string replaceUnicodeEscapeSequences(const std::string& string) {
 			std::string after = converted.substr(pos+2);
 			//std::cout << "after: " << after << std::endl;
 			std::string escape = "";
-			if (after.size() >= 8 && isHexString(after.substr(0, 8)))
+			if (after.size() >= 8 && isHexNumber(after.substr(0, 8)))
 				escape = converted.substr(pos, 10);
-			if (after.size() >= 4 && isHexString(after.substr(0, 4)))
+			if (after.size() >= 4 && isHexNumber(after.substr(0, 4)))
 				escape = converted.substr(pos, 6);
-			if (after.size() >= 2 && isHexString(after.substr(0, 2)))
+			if (after.size() >= 2 && isHexNumber(after.substr(0, 2)))
 				escape = converted.substr(pos, 4);
 			if (!escape.empty()) {
 				converted = converted.substr(0, pos)
