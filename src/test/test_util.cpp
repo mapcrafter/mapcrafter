@@ -55,12 +55,12 @@ BOOST_AUTO_TEST_CASE(util_utf8) {
 	BOOST_CHECK_EQUAL("", util::convertUnicodeEscapeSequence("\\uffffffff"));
 	BOOST_CHECK_EQUAL("", util::convertUnicodeEscapeSequence("\\u1234ffffffff"));
 
-	BOOST_CHECK_EQUAL(u8"a", util::convertUnicodeEscapeSequence("\\u61"));
-	BOOST_CHECK_EQUAL(u8"N", util::convertUnicodeEscapeSequence("\\u4e"));
+	BOOST_CHECK_EQUAL(u8"a", util::convertUnicodeEscapeSequence("\\u0061"));
+	BOOST_CHECK_EQUAL(u8"N", util::convertUnicodeEscapeSequence("\\u004e"));
 
-	BOOST_CHECK_EQUAL(u8"$", util::convertUnicodeEscapeSequence("\\u24"));
-	BOOST_CHECK_EQUAL(u8"€", util::convertUnicodeEscapeSequence("\\u20ac"));
-	BOOST_CHECK_EQUAL(u8"<", util::convertUnicodeEscapeSequence("\\u3c"));
+	BOOST_CHECK_EQUAL(u8"$", util::convertUnicodeEscapeSequence("\\u0024"));
+	BOOST_CHECK_EQUAL(u8"€", util::convertUnicodeEscapeSequence("\\u020ac"));
+	BOOST_CHECK_EQUAL(u8"<", util::convertUnicodeEscapeSequence("\\u003c"));
 	BOOST_CHECK_EQUAL(u8"☭", util::convertUnicodeEscapeSequence("\\u262d"));
 
 	BOOST_CHECK_EQUAL(u8"\u007f", util::convertUnicodeEscapeSequence("\\u007f"));
@@ -69,4 +69,26 @@ BOOST_AUTO_TEST_CASE(util_utf8) {
 	BOOST_CHECK_EQUAL(u8"\U001fffff", util::convertUnicodeEscapeSequence("\\U001fffff"));
 	BOOST_CHECK_EQUAL(u8"\U03ffffff", util::convertUnicodeEscapeSequence("\\U03ffffff"));
 	BOOST_CHECK_EQUAL(u8"\U7fffffff", util::convertUnicodeEscapeSequence("\\U7fffffff"));
+
+	BOOST_CHECK_EQUAL("42€ and $73", util::replaceUnicodeEscapeSequences("42\\u20ac and \\u002473"));
+	BOOST_CHECK_EQUAL(">> Test", util::replaceUnicodeEscapeSequences("\\u003e\\u003e Test"));
+
+	// check if escaping unicode character escape sequences works
+	BOOST_CHECK_EQUAL("\\\\u262d", util::replaceUnicodeEscapeSequences("\\\\u262d"));
+	BOOST_CHECK_EQUAL("\\\\\u262d", util::replaceUnicodeEscapeSequences("\\\\\\u262d"));
+	BOOST_CHECK_EQUAL("test \\\\u262d", util::replaceUnicodeEscapeSequences("test \\\\u262d"));
+	BOOST_CHECK_EQUAL("test \\\\\u262d", util::replaceUnicodeEscapeSequences("test \\\\\\u262d"));
+
+	// check if we always use the correct length of hex numbers after the \u and \U
+	BOOST_CHECK_EQUAL("\\u12", util::replaceUnicodeEscapeSequences("\\u12"));
+	BOOST_CHECK_EQUAL("\\U12", util::replaceUnicodeEscapeSequences("\\U12"));
+	BOOST_CHECK_EQUAL("\\u123", util::replaceUnicodeEscapeSequences("\\u123"));
+	BOOST_CHECK_EQUAL("\\U123", util::replaceUnicodeEscapeSequences("\\U123"));
+	BOOST_CHECK_EQUAL("\\U1234", util::replaceUnicodeEscapeSequences("\\U1234"));
+	BOOST_CHECK_EQUAL("\u1234" "5", util::replaceUnicodeEscapeSequences("\\u12345"));
+	BOOST_CHECK_EQUAL("\\U12345", util::replaceUnicodeEscapeSequences("\\U12345"));
+	BOOST_CHECK_EQUAL("\u1234" "567", util::replaceUnicodeEscapeSequences("\\u1234567"));
+	BOOST_CHECK_EQUAL("\\U1234567", util::replaceUnicodeEscapeSequences("\\U1234567"));
+	BOOST_CHECK_EQUAL("\u1234" "5678", util::replaceUnicodeEscapeSequences("\\u12345678"));
+	BOOST_CHECK_EQUAL("\U12345678" "9", util::replaceUnicodeEscapeSequences("\\U123456789"));
 }
