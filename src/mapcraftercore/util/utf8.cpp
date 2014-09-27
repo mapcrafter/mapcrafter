@@ -69,7 +69,7 @@ std::string encodeUTF8(unsigned int ordinal) {
 }
 
 /**
- * Converts a unicode character escape sequence (like \uNNNN, with N's as hex digits)
+ * Converts a unicode character escape sequence (\uNNNN or \UNNNNNNNN, with N's as hex digits)
  * to an UTF-8 encoded string.
  */
 std::string convertUnicodeEscapeSequence(const std::string& escape_sequence) {
@@ -79,12 +79,19 @@ std::string convertUnicodeEscapeSequence(const std::string& escape_sequence) {
 	// escape sequence must not be too short or too long
 	if (escape_sequence.size() < 3 || escape_sequence.size() > 10)
 		return "";
+	// escape sequence must have the correct length (2+4 for \u, 2+8 for \U)
+	size_t hex_length = escape_sequence[1] == 'u' ? 4 : 8;
+	if (escape_sequence.size() != 2 + hex_length)
+		return "";
+
+	// get actual hexadecimal number part of the escape sequence
+	std::string hex = escape_sequence.substr(2);
 	// escape sequence number must be a hex number
-	if (!isHexNumber(escape_sequence.substr(2)))
+	if (!isHexNumber(hex))
 		return "";
 
 	// parse the hex number from the escape sequence and encode this unicode code point
-	return encodeUTF8(parseHexNumber(escape_sequence.substr(2)));
+	return encodeUTF8(parseHexNumber(hex));
 }
 
 std::string replaceUnicodeEscapeSequences(const std::string& string) {
