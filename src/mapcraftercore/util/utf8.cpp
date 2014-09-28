@@ -107,46 +107,42 @@ int getPrecedingBackslashes(const std::string& str, size_t pos) {
 }
 
 std::string replaceUnicodeEscapeSequences(const std::string& str) {
-	// todo this is a mess... where are your manners, m0r13?!
-
 	std::string converted = str;
+
+	// first replace all \uNNNN
 	size_t pos = 0;
+	// find all occurences of \u
 	while ((pos = converted.find("\\u", pos)) != std::string::npos) {
 		// check if this escape sequence is escaped by counting the preceding backslashes
 		// it is escaped if there is an odd number if backslashes preceding
 		// (an even number of backslashes would mean that there are normal
 		// (also escaped) backslashes preceding)
-		bool escaped = false;
-		int preceding_backslashes = getPrecedingBackslashes(converted, pos);
-		if ((preceding_backslashes % 2) == 1)
-			escaped = true;
-
-		/*
-		std::string before_substr = converted.substr(0, pos);
-		std::string before(before_substr.rbegin(), before_substr.rend());
-		size_t before_backslash = before.find_first_not_of("\\");
-		if ((before_backslash == std::string::npos && (before.size() % 2) == 1)
-				|| (before_backslash != std::string::npos && (before_backslash % 2) == 1)) {
-			//std::cout << "escaped!" << std::endl;
-			escaped = true;
-		}
-		//std::cout << "before: " << before << std::endl;
-		 */
-
-		if (!escaped) {
-			std::string after = converted.substr(pos+2);
-			//std::cout << "after: " << after << std::endl;
-			std::string escape = "";
-			if (after.size() >= 8 && isHexNumber(after.substr(0, 8)))
-				escape = converted.substr(pos, 10);
-			else if (after.size() >= 4 && isHexNumber(after.substr(0, 4)))
-				escape = converted.substr(pos, 6);
-			else if (after.size() >= 2 && isHexNumber(after.substr(0, 2)))
-				escape = converted.substr(pos, 4);
-			if (!escape.empty()) {
+		if ((getPrecedingBackslashes(converted, pos) % 2) == 0) {
+			// so, if this escape sequence is not escaped,
+			// check if a valid 4-digit hexadecimal number is following
+			if (converted.size() >= pos + 6 && isHexNumber(converted.substr(pos + 2, 4))) {
+				// if yes, replace it with the UTF-8 encoded equivalent
+				std::string escape_sequence = converted.substr(pos, 6);
 				converted = converted.substr(0, pos)
-						+ convertUnicodeEscapeSequence(escape)
-						+ converted.substr(pos + escape.size());
+						+ convertUnicodeEscapeSequence(escape_sequence)
+						+ converted.substr(pos + escape_sequence.size());
+			}
+		}
+
+		pos++;
+		if (pos >= converted.size())
+			break;
+	}
+
+	// now do the same for the \UNNNNNNNN sequences
+	pos = 0;
+	while ((pos = converted.find("\\U", pos)) != std::string::npos) {
+		if ((getPrecedingBackslashes(converted, pos) % 2) == 0) {
+			if (converted.size() >= pos + 10 && isHexNumber(converted.substr(pos + 2, 8))) {
+				std::string escape_sequence = converted.substr(pos, 10);
+				converted = converted.substr(0, pos)
+						+ convertUnicodeEscapeSequence(escape_sequence)
+						+ converted.substr(pos + escape_sequence.size());
 			}
 		}
 
