@@ -19,6 +19,8 @@
 
 #include "worldentities.h"
 
+#include "../util/picojson.h"
+
 namespace mapcrafter {
 namespace mc {
 
@@ -33,17 +35,32 @@ bool isJSONLine(const std::string& line) {
 }
 
 /**
- * Extracts the actual text from the json sign line format. Returns the supplied string
- * if it is not in the new format. Otherwise just removes the '"' or returns '' if the
- * json string is 'null'.
+ * Extracts the actual text from the json sign line format. Parses the json with the
+ * picojson library.
  */
 std::string convertJSONLine(const std::string& line) {
-	if (!isJSONLine(line))
-		return line;
-	// TODO there might be more complicated json forms of text
-	if (line == "null")
+	std::string error;
+	picojson::value value;
+	picojson::parse(value, line.begin(), line.end(), &error);
+	if (!error.empty()) {
+		LOG(ERROR) << "Unable to parse sign line json '" << line << "': " << error << ".";
 		return "";
-	return line.substr(1, line.size() - 2);
+	}
+
+	if (value.is<picojson::null>())
+		return "";
+	if (value.is<std::string>())
+		return value.get<std::string>();
+	if (value.is<picojson::object>()) {
+		const picojson::object& object = value.get<picojson::object>();
+		if (!object.count("text") || !object.at("text").is<std::string>()) {
+			LOG(ERROR) << "Invalid sign line json: '" << line << "'.";
+			return "";
+		}
+		return object.at("text").get<std::string>();
+	}
+	LOG(ERROR) << "Invalid sign line json: '" << line << "'.";
+	return "";
 }
 
 SignEntity::SignEntity() {

@@ -14,6 +14,7 @@ set(HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/logging.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/math.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/other.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/picojson.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/progress.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/terminal.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/utf8.h"
