@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(util_utf8) {
 
 	// check if we always use the correct length of hex numbers after the \u and \U
 	BOOST_CHECK_EQUAL(u8"\\u12", util::replaceUnicodeEscapeSequences("\\u12"));
-	BOOST_CHECK_EQUAL(u8"\u1234", util::replaceUnicodeEscapeSequences("\\1234"));
+	BOOST_CHECK_EQUAL(u8"\u1234", util::replaceUnicodeEscapeSequences("\\u1234"));
 	BOOST_CHECK_EQUAL(u8"\u1234" "567", util::replaceUnicodeEscapeSequences("\\u1234567"));
 	BOOST_CHECK_EQUAL(u8"\\U123", util::replaceUnicodeEscapeSequences("\\U123"));
 	BOOST_CHECK_EQUAL(u8"\U12345678", util::replaceUnicodeEscapeSequences("\\U12345678"));
