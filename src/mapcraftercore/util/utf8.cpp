@@ -94,23 +94,44 @@ std::string convertUnicodeEscapeSequence(const std::string& escape_sequence) {
 	return encodeUTF8(parseHexNumber(hex));
 }
 
-std::string replaceUnicodeEscapeSequences(const std::string& string) {
+/**
+ * Returns how many backslashes are preceding a specific position in a string.
+ */
+int getPrecedingBackslashes(const std::string& str, size_t pos) {
+	int preceding = 0;
+	for (int i = pos - 1; i >= 0; i--) {
+		if (str[i] == '\\')
+			preceding++;
+	}
+	return preceding;
+}
+
+std::string replaceUnicodeEscapeSequences(const std::string& str) {
 	// todo this is a mess... where are your manners, m0r13?!
 
-	std::string converted = string;
+	std::string converted = str;
 	size_t pos = 0;
 	while ((pos = converted.find("\\u", pos)) != std::string::npos) {
-		//std::cout << "found \\u at " << pos << std::endl;
+		// check if this escape sequence is escaped by counting the preceding backslashes
+		// it is escaped if there is an odd number if backslashes preceding
+		// (an even number of backslashes would mean that there are normal
+		// (also escaped) backslashes preceding)
+		bool escaped = false;
+		int preceding_backslashes = getPrecedingBackslashes(converted, pos);
+		if ((preceding_backslashes % 2) == 1)
+			escaped = true;
+
+		/*
 		std::string before_substr = converted.substr(0, pos);
 		std::string before(before_substr.rbegin(), before_substr.rend());
 		size_t before_backslash = before.find_first_not_of("\\");
-		bool escaped = false;
 		if ((before_backslash == std::string::npos && (before.size() % 2) == 1)
 				|| (before_backslash != std::string::npos && (before_backslash % 2) == 1)) {
 			//std::cout << "escaped!" << std::endl;
 			escaped = true;
 		}
 		//std::cout << "before: " << before << std::endl;
+		 */
 
 		if (!escaped) {
 			std::string after = converted.substr(pos+2);
@@ -118,9 +139,9 @@ std::string replaceUnicodeEscapeSequences(const std::string& string) {
 			std::string escape = "";
 			if (after.size() >= 8 && isHexNumber(after.substr(0, 8)))
 				escape = converted.substr(pos, 10);
-			if (after.size() >= 4 && isHexNumber(after.substr(0, 4)))
+			else if (after.size() >= 4 && isHexNumber(after.substr(0, 4)))
 				escape = converted.substr(pos, 6);
-			if (after.size() >= 2 && isHexNumber(after.substr(0, 2)))
+			else if (after.size() >= 2 && isHexNumber(after.substr(0, 2)))
 				escape = converted.substr(pos, 4);
 			if (!escape.empty()) {
 				converted = converted.substr(0, pos)

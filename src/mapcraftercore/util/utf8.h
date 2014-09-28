@@ -26,7 +26,7 @@ namespace mapcrafter {
 namespace util {
 
 std::string convertUnicodeEscapeSequence(const std::string& escape_sequence);
-std::string replaceUnicodeEscapeSequences(const std::string& string);
+std::string replaceUnicodeEscapeSequences(const std::string& str);
 
 } /* namespace util */
 } /* namespace mapcrafter */
