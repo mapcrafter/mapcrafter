@@ -5,7 +5,6 @@ set(SOURCE
     "${CMAKE_CURRENT_SOURCE_DIR}/other.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/progress.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/terminal.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/utf8.cpp"
     PARENT_SCOPE
 )
 set(HEADERS
@@ -17,6 +16,5 @@ set(HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/picojson.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/progress.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/terminal.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/utf8.h"
     PARENT_SCOPE
 )
