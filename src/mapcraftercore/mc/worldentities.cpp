@@ -26,12 +26,14 @@ namespace mc {
 
 /**
  * Checks whether a line from the sign entity is in the new json format (>= mc 1.8).
- * We assume a line is in the new format if it starts and ends with '"' or is 'null'.
+ * We assume a line is in the new format if it starts and ends with '"', '{'/'}'
+ * or if it is 'null'.
  */
 bool isJSONLine(const std::string& line) {
 	if (line.empty())
 		return false;
-	return line == "null" || (line[0] == '"' && line[line.size() - 1] == '"');
+	return line == "null" || (line[0] == '"' && line[line.size() - 1] == '"')
+			|| (line[0] == '{' && line[line.size() - 1] == '}');
 }
 
 /**
