@@ -55,6 +55,7 @@ bool RegionFile::readHeaders(std::ifstream& file, uint32_t chunk_offsets[1024]) 
 	file.seekg(0, std::ios::beg);
 	// make sure the region file has a header
 	if (filesize < 8192) {
+		LOG(ERROR) << "Corrupt region '" << filename << "': Header is too short.";
 		return false;
 	}
 
@@ -67,6 +68,8 @@ bool RegionFile::readHeaders(std::ifstream& file, uint32_t chunk_offsets[1024]) 
 				continue;
 			uint32_t offset = util::bigEndian32(tmp << 8) * 4096;
 			if (filesize < offset + 5) {
+				LOG(ERROR) << "Corrupt region '" << filename << "': Invalid offset of chunk "
+						<< x << ":" << z << ".";
 				return false;
 			}
 			//uint8_t sectors = ((uint8_t*) &tmp)[3];
@@ -142,6 +145,11 @@ bool RegionFile::read() {
 		size = util::bigEndian32(size) - 1;
 		uint8_t compression = regiondata[offset + 4];
 		if (filesize < offset + 5 + size) {
+			// i = x + z * 32
+			int x = i % 32;
+			int z = (i - x) / 32;
+			LOG(ERROR) << "Corrupt region '" << filename << "': Invalid size of chunk "
+					<< x << ":" << z << ".";
 			return false;
 		}
 

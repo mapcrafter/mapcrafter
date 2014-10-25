@@ -61,6 +61,7 @@ int WorldCache::getChunkCacheIndex(const ChunkPos& pos) const {
 
 RegionFile* WorldCache::getRegion(const RegionPos& pos) {
 	CacheEntry<RegionPos, RegionFile>& entry = regioncache[getRegionCacheIndex(pos)];
+
 	// check if region is already in cache
 	if (entry.used && entry.key == pos) {
 		//regionstats.hits++;
@@ -69,6 +70,10 @@ RegionFile* WorldCache::getRegion(const RegionPos& pos) {
 
 	// if not try to load the region
 
+	// but make sure we did not already try to load the region file and it was broken
+	if (regions_broken.count(pos))
+		return nullptr;
+
 	// region does not exist, region in cache was not modified
 	if (!world.getRegion(pos, entry.value))
 		return nullptr;
@@ -76,6 +81,8 @@ RegionFile* WorldCache::getRegion(const RegionPos& pos) {
 	if (!entry.value.read()) {
 		// the region is not valid, region in cache was probably modified
 		entry.used = false;
+		// remember this region as broken and do not try to load it again
+		regions_broken.insert(pos);
 		return nullptr;
 	}
 

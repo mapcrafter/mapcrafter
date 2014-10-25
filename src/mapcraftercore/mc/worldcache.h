@@ -25,6 +25,8 @@
 #include "region.h"
 #include "world.h"
 
+#include <set>
+
 namespace mapcrafter {
 namespace mc {
 
@@ -123,6 +125,10 @@ private:
 
 	CacheEntry<RegionPos, RegionFile> regioncache[RSIZE];
 	CacheEntry<ChunkPos, Chunk> chunkcache[CSIZE];
+
+	// provisional set to keep track of broken region files
+	// we do not want to try to load them again and again
+	std::set<RegionPos> regions_broken;
 
 	CacheStats regionstats;
 	CacheStats chunkstats;
