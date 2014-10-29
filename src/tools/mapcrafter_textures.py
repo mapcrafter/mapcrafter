@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
-import sys
-import os
-import zipfile
 import argparse
+import errno
+import glob
+import os
+import subprocess
+import sys
+import zipfile
 
 dirs = ("", "entity", "entity/chest", "colormap", "blocks")
 assets = "assets/minecraft/textures/"
@@ -16,6 +19,16 @@ files = {
 	"colormap/foliage.png" : assets + "colormap/foliage.png",
 	"colormap/grass.png" : assets + "colormap/grass.png",
 }
+
+def has_imagemagick():
+	try:
+		subprocess.check_output("convert")
+	except subprocess.CalledProcessError:
+		return True
+	except OSError as e:
+		if e.errno == errno.ENOENT:
+			return False
+		raise e
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Extracts from a Minecraft Jar file the textures required for mapcrafter.")
@@ -77,3 +90,17 @@ if __name__ == "__main__":
 				print(" - Extracting %s ... extracted." % filename)
 		except KeyError:
 			print(" - Extracting %s ... not found!")
+	
+	if not has_imagemagick():
+		print("")
+		print("Warning: imagemagick is not installed (command 'convert' not found).")
+		print("Install imagemagick to enable automatic texture fixes (to prevent libpng warnings).")
+	else:
+		for filename in glob.glob(os.path.join(args["outdir"], "blocks", "hardened_clay*.png")):
+			subprocess.check_call(["convert", filename, filename])
+		
+		filename = os.path.join(args["outdir"], "blocks", "red_sand.png")
+		subprocess.check_call(["convert", filename, filename])
+		
+		filename = os.path.join(args["outdir"], "blocks", "glass_pane_top_white.png")
+		subprocess.check_call(["convert", filename, "-type", "TrueColorMatte", "-define", "png:color-type=6", filename])
