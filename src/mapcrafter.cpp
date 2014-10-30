@@ -35,7 +35,7 @@ using namespace mapcrafter;
 
 int main(int argc, char** argv) {
 	renderer::RenderOpts opts;
-	std::string color;
+	std::string color, config;
 
 	po::options_description general("General options");
 	general.add_options()
@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
 	po::options_description renderer("Renderer options");
 	renderer.add_options()
 		("find-resources", "shows available resource paths, for example template/texture directory and global logging configuration file")
-		("config,c", po::value<fs::path>(&opts.config),
+		("config,c", po::value<std::string>(&config),
 			"the path to the configuration file to use (required)")
 		("render-skip,s", po::value<std::vector<std::string>>(&opts.render_skip)->multitoken(),
 			"skips rendering the specified map(s)")
@@ -148,6 +148,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+	opts.config = config;
 	opts.skip_all = vm.count("render-reset");
 	opts.batch = vm.count("batch");
 	if (!vm.count("logging-config"))
