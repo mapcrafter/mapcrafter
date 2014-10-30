@@ -75,6 +75,13 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.1.5.3 (in progress)**
+
+* Better handling of corrupt world files
+* Added a fix using imagemagick in texture extraction script to prevent libpng warnings
+* Fixed bug with boost program options which made it unable to use paths containing spaces
+  for the ``--config`` command line option
+
 **v.1.5.2**
 
 * Fixed the marker tool to work with the new internal Minecraft 1.8 sign format
