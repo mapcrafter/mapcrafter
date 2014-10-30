@@ -87,7 +87,7 @@ private:
 	 * Reads the file with the cached entities and returns a timestamp when this cache
 	 * was updated the last time.
 	 */
-	int readCacheFile();
+	unsigned int readCacheFile();
 
 	/**
 	 * Writes the file with the cached entities.

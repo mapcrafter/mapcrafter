@@ -112,7 +112,7 @@ WorldEntitiesCache::WorldEntitiesCache(const World& world)
 WorldEntitiesCache::~WorldEntitiesCache() {
 }
 
-int WorldEntitiesCache::readCacheFile() {
+unsigned int WorldEntitiesCache::readCacheFile() {
 	if (!fs::exists(cache_file))
 		return 0;
 
@@ -178,7 +178,7 @@ void WorldEntitiesCache::writeCacheFile() const {
 }
 
 void WorldEntitiesCache::update(bool verbose) {
-	int timestamp = readCacheFile();
+	unsigned int timestamp = readCacheFile();
 
 	if (verbose)
 		std::cout << "World '" << world.getRegionDir().string() << "':" << std::endl;
