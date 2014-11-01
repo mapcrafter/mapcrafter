@@ -159,7 +159,7 @@ Here are the available options for the markers:
 	This is the text of the marker popup window. 
 	If you do not specifiy a text, the title of the marker is used as text.
 
-Furthermore you can customize your markers by specifying a functions which
+Furthermore you can customize your markers by specifying a function which
 creates the actual Leaflet marker objects with the marker data. This function
 is called for every marker in the marker group and should return a marker-like
 object displayable by Leaflet. Please have a look at the
