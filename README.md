@@ -79,8 +79,10 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 * Better handling of corrupt world files
 * Added a fix using imagemagick in texture extraction script to prevent libpng warnings
-* Fixed bug with boost program options which made it unable to use paths containing spaces
-  for the ``--config`` command line option
+* Fixed bug with boost program options which made it unable to use paths
+  containing spaces for the ``--config`` command line option
+* Fixed wrong error messages when loading configuration files (Mapcrafter tried
+  to read not existing files and even directories if specified as configuration file)
 
 **v.1.5.2**
 
