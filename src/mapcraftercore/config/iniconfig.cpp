@@ -21,6 +21,9 @@
 
 #include <fstream>
 #include <sstream>
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace config {
@@ -180,6 +183,8 @@ void INIConfig::load(std::istream& in) {
 }
 
 void INIConfig::loadFile(const std::string& filename) {
+	if (!fs::is_regular_file(filename))
+		throw INIConfigError("'" + filename + "' is not a valid file!");
 	std::ifstream in(filename);
 	if (!in)
 		throw INIConfigError("Unable to read file '" + filename + "'!");
