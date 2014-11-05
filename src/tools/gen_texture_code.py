@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # developer stuff:
 # lists the block textures in the 'blocks' dir and generates the c++ texture code
@@ -16,7 +16,7 @@ HEADER_TEMPLATE = """#ifndef BLOCKTEXTURES_H_
 #include <vector>
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 /**
  * Collection of Minecraft block textures.
@@ -40,13 +40,15 @@ public:
 
 SOURCE_TEMPLATE = """#include "blocktextures.h"
 
+#include "../util.h"
+
 #include <iostream>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
 
 namespace mapcrafter {
-namespace render {
+namespace renderer {
 
 BlockTextures::BlockTextures()
 	: %(texture_objects)
@@ -61,16 +63,20 @@ BlockTextures::~BlockTextures() {
  */
 bool BlockTextures::load(const std::string& block_dir, int size) {
 	if (!fs::exists(block_dir) || !fs::is_directory(block_dir)) {
-		std::cerr << "Error: Directory 'blocks' with block textures does not exist." << std::endl;
+		LOG(ERROR) << "Directory '" << block_dir << "' with block textures does not exist.";
 		return false;
 	}
 
 	// go through all textures and load them
+	bool loaded_all = true;
 	for (size_t i = 0; i < textures.size(); i++) {
-		if (!textures[i]->load(block_dir, size))
-			std::cerr << "Warning: Unable to load block texture "
-				<< textures[i]->getName() << ".png ." << std::endl;
+		if (!textures[i]->load(block_dir, size)) {
+			LOG(WARNING) << "Unable to load block texture '" << textures[i]->getName() << ".png'.";
+			loaded_all = false;
+		}
 	}
+	if (!loaded_all)
+		LOG(WARNING) << "Unable to load some block textures.";
 	return true;
 }
 
@@ -82,7 +88,7 @@ def lowercase(name):
 
 if __name__ == "__main__":
 	if len(sys.argv) < 3 or sys.argv[1] not in ("--header", "--source"):
-		print "Usage: %s [--header|--source] [directory]" % sys.argv[0]
+		print("Usage: %s [--header|--source] [directory]" % sys.argv[0])
 		sys.exit(1)
 	
 	files = []
@@ -97,11 +103,11 @@ if __name__ == "__main__":
 	
 	if sys.argv[1] == "--header":
 		texture_objects = ",\n\t\t".join(map(lambda name: "%s" % name[1], files))
-		print HEADER_TEMPLATE.replace("%(texture_objects)", texture_objects)
+		print(HEADER_TEMPLATE.replace("%(texture_objects)", texture_objects))
 	if sys.argv[1] == "--source":
 		texture_objects = "\n\t  ".join(map(lambda name: "%s(\"%s\")," % (name[1], name[0]), files))
 		texture_object_references = "\n\t             ".join(map(lambda name: "&%s," % name[1], files))
-		print SOURCE_TEMPLATE.replace("%(texture_objects)", texture_objects).replace("%(texture_object_references)", texture_object_references)
+		print(SOURCE_TEMPLATE.replace("%(texture_objects)", texture_objects).replace("%(texture_object_references)", texture_object_references))
 
 	# code for textures.h
 	

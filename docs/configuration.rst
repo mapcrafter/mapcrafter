@@ -37,7 +37,7 @@ Every world section represents a Minecraft world you want to render and needs a
 directory where it can find the Minecraft world (``input_dir`` of the world
 section ``myworld`` in the example above).
 
-Every map section represents a rendered Minecraft world. You can specifiy
+Every map section represents a rendered Minecraft world. You can specify
 things like rotation of the world, rendermode, texture pack and texture size
 for each map.
 
@@ -60,7 +60,7 @@ A More Advanced Example
 
     output_dir = output
     
-    [global:maps]
+    [global:map]
     rendermode = daylight
     rotations = top-left bottom-right
     
@@ -77,7 +77,7 @@ A More Advanced Example
     [map:map_world_night]
     name = Normal World - Night
     world = world
-    rendermode = night
+    rendermode = nightlight
     
     [map:map_world_cave]
     name = Normal World - Cave
@@ -104,11 +104,11 @@ is rendered with the day, night and cave rendermode and we have a "creative"
 world which is rendered super fancy with a special texture pack, higher texture
 size and all available world rotations with the day and night rendermode.
 
-As you can see there is a new section ``global:maps``. This section is used to
+As you can see there is a new section ``global:map``. This section is used to
 set default values for all map sections. Because of this in this example every
 map has the daylight rendermode and the world rotations top-left and top-right
 as default. Of course you can overwrite these settings in every map section.
-There is also a global section ``global:worlds`` for worlds, but at the moment
+There is also a global section ``global:world`` for worlds, but at the moment
 there is only one configuration option for worlds (``input_dir``), so it
 doesn't make much sense setting a default value here.
 
@@ -156,6 +156,18 @@ General Options
     the file in the output directory you can open with your webbrowser after
     the rendering.
 
+``background_color = <hex color>``
+
+    **Default:** ``#DDDDDD``
+
+    This is the background color of your rendered map. You have to specify
+    it like an HTML hex color (``#rrggbb``).
+    
+    The background color of the map is set with a CSS option in the template.
+    Because the JPEG image format does not support transparency and some tiles
+    are not completely used, you have to re-render your maps which use JPEGs
+    if you change the background color.
+
 World Options
 -------------
 
@@ -163,7 +175,7 @@ World Options
 
     These options are for the worlds. You can specify them in the world
     sections (the ones starting with world:) or you can specify them in the
-    global:worlds section.  If you specify them in the global section, these
+    global:world section.  If you specify them in the global section, these
     options are default values and inherited into the world sections if you do
     not overwrite them.
 
@@ -270,7 +282,62 @@ Furthermore there are two different types of world cropping:
     therefore not supported by the renderer. Due to that you should 
     completely rerender the map when you want to change the boundaries of 
     a cropped world. This also means that you should delete the already 
-    rendered map (delete <output_dir>/<map_name>). 
+    rendered map (delete <output_dir>/<map_name>).
+
+The provided options for world cropping are very versatile as you can see
+with the next two options:
+
+``crop_unpopulated_chunks = true|false``
+
+    **Default:** ``false``
+    
+    If you are bored of the chunks with unpopulated terrain at the edges of
+    your world, e.g. no trees, ores and other structures, you can skip rendering
+    them with this option. If you are afraid someone might use this to find
+    rare ores such as Diamond or Emerald, you should not enable this option.
+
+``block_mask = <block mask>``
+
+    **Default:** *show all blocks*
+    
+    With the block mask option it is possible to hide or shown only specific blocks.
+    The block mask is a space separated list of block groups you want to 
+    hide/show. If a ``!`` precedes a block group, all blocks of this block group are
+    hidden, otherwise they are shown. Per default, all blocks are shown.
+    Possible block groups are:
+    
+    * All blocks:
+      
+      * ``*``
+    
+    * A single block (independent of block data):
+      
+      * ``[blockid]``
+    
+    * A single block with specific block data:
+      
+      * ``[blockid]:[blockdata]``
+    
+    * A range of blocks:
+      
+      * ``[blockid1]-[blockid2]``
+    
+    * All block with a specific id and ``(block data & bitmask) == specified data``:
+      
+      * ``[blockid]:[blockdata]b[bitmask]``
+    
+    For example:
+    
+    * Hide all blocks except blocks with id 1,7,8,9 or id 3 / data 2:
+    
+      * ``!* 1 3:2 7-9``
+    
+    * Show all blocks except jungle wood and jungle leaves:
+    
+      * ``!17:3b3 !18:3b3``
+      * Jungle wood and jungle leaves have id 17 and 18 and use data value 3 for first two bits (bitmask 3 = 0b11)
+      * other bits are used otherwise -> ignore all those bits
+
 
 Map Options
 -----------
@@ -278,7 +345,7 @@ Map Options
 .. note::
 
     These options are for the maps. You can specify them in the map sections
-    (the ones starting with map:) or you can specify them in the global:maps
+    (the ones starting with map:) or you can specify them in the global:map
     section.  If you specify them in the global section, these options are
     default values and inherited into the map sections if you do not overwrite
     them.
@@ -293,15 +360,15 @@ Map Options
     Since the name of the section is used for internal representation, the name
     of the section should be unique and you should only use alphanumeric chars.
 
-``rendermode = normal|cave|daylight|nightlight``
+``rendermode = plain|daylight|nightlight|cave``
 	
     **Default:** ``daylight``
 
     This is the rendermode to use when rendering the world. Possible
     rendermodes are:
 
-    ``normal``
-        The default rendermode.  
+    ``plain``
+        Plain rendermode without lighting or other special magic.
     ``daylight``
         Renders the world with lighting.
     ``nightlight``
@@ -309,6 +376,18 @@ Map Options
     ``cave``
         Renders only caves and colors blocks depending on their height 
         to make them easier to recognize.
+
+``rotations = [top-left] [top-right] [bottom-right] [bottom-left]``
+
+    **Default:** ``top-left``
+
+    This is a list of directions to render the world from. You can rotate the
+    world by n*90 degrees. Later in the output file you can interactively
+    rotate your world. Possible values for this space-separated list are:
+    ``top-left``, ``top-right``, ``bottom-right``, ``bottom-left``. 
+
+    Top left means that north is on the top left side on the map (same thing
+    for other directions).
 
 ``texture_dir = <directory>``
 
@@ -319,7 +398,8 @@ Map Options
 
     * directory ``chest/`` with normal.png, normal_double.png and ender.png 
     * directory ``colormap/`` with foliage.png and grass.png 
-    * directory ``blocks/`` from your texture pack * endportal.png
+    * directory ``blocks/`` from your texture pack
+    * endportal.png
 
     See also :ref:`resources_textures` to see how to get these files.
 
@@ -335,17 +415,22 @@ Map Options
     detail, use texture size 16, but texture size 12 looks still good and is
     faster to render.
 
-``rotations = [top-left] [top-right] [bottom-right] [bottom-left]``
+``image_format = png|jpeg``
 
-    **Default:** ``top-left``
+    **Default:** ``png``
+    
+    This is the image format the renderer uses for the tile images.
+    You can render your maps to PNGs or to JPEGs. PNGs are losless, 
+    JPEGs are faster to write and need less disk space. Also consider
+    the ``jpeg_quality`` option when using JPEGs.
 
-    This is a list of directions to render the world from. You can rotate the
-    world by n*90 degrees. Later in the output file you can interactively
-    rotate your world. Possible values for this space-separated list are:
-    ``top-left``, ``top-right``, ``bottom-right``, ``bottom-left``. 
-	
-    Top left means that north is on the top left side on the map (same thing
-    for other directions).
+``jpeg_quality = <number between 0 and 100>``
+
+    **Default:** ``85``
+    
+    This is the quality to use for the JPEGs. It should be a number
+    between 0 and 100, where 0 is the worst quality which needs the least disk space
+    and 100 is the best quality which needs the most disk space.
 
 ``lighting_intensity = <number>``
 
@@ -354,6 +439,14 @@ Map Options
     This is the lighting intensity, i.e. the strength the renderer applies the
     lighting to the rendered map. You can specify a value from 0.0 to 1.0, 
     where 1.0 means full lighting and 0.0 means no lighting.
+
+``cave_high_contrast = true|false``
+
+    **Default:** ``true``
+
+    In Mapcrafter 1.5.1 a new cave rendermode block coloring resulting in a higher
+    contrast was introduced. This option is enabled by default for new maps, but
+    disabled for older, already rendered maps for compatibility reasons.
 
 ``render_unknown_blocks = true|false``
 
@@ -409,7 +502,7 @@ Marker Options
 
     These options are for the marker groups. You can specify them in the marker
     sections (the ones starting with marker:) or you can specify them in the 
-    global:markers section.  If you specify them in the global section, these
+    global:marker section.  If you specify them in the global section, these
     options are default values and inherited into the marker sections if you 
     do not overwrite them.
 
@@ -432,31 +525,31 @@ Marker Options
 
 ``title_format = <format>``
 
-    **Default:** ``%text``
+    **Default:** ``%(text)``
     
     You can change the title used for markers (the name shown when you 
     hover over a marker) by using different placeholders:
     
-    ============= =======
-    Placeholder   Meaning
-    ============= =======
-    ``%text``     Complete text of the sign without the prefix.
-    ``%prefix``   Configured prefix of this marker group.
-    ``%textp``    Complete text of the sign with the prefix.
-    ``%line1``    First line of the sign.
-    ``%line2``    Second line of the sign.
-    ``%line3``    Third line of the sign.
-    ``%line4``    Fourth line of the sign.
-    ``%x``        X coordinate of the sign position.
-    ``%z``        Z coordinate of the sign position.
-    ``%y``        Y coordinate of the sign position.
-    ============= =======
+    =============== =======
+    Placeholder     Meaning
+    =============== =======
+    ``%(text)``     Complete text of the sign without the prefix.
+    ``%(prefix)``   Configured prefix of this marker group.
+    ``%(textp)``    Complete text of the sign with the prefix.
+    ``%(line1)``    First line of the sign.
+    ``%(line2)``    Second line of the sign.
+    ``%(line3)``    Third line of the sign.
+    ``%(line4)``    Fourth line of the sign.
+    ``%(x)``        X coordinate of the sign position.
+    ``%(z)``        Z coordinate of the sign position.
+    ``%(y)``        Y coordinate of the sign position.
+    =============== =======
     
     The title of markers defaults to the text (without the prefix) of 
-    the belonging sign, e.g. the placeholder ``%text``.
+    the belonging sign, e.g. the placeholder ``%(text)``.
     
     You can use different placeholders and other text in this format
-    string as well, for example ``Marker at x=%x, y=%y, z=%z: %text``.
+    string as well, for example ``Marker at x=%(x), y=%(y), z=%(z): %(text)``.
 
 ``text_format = <format>``
 

@@ -1,9 +1,9 @@
+#include "../mapcraftercore/mc/nbt.h"
+#include "../mapcraftercore/mc/region.h"
+
 #include <iostream>
 #include <sstream>
 #include <fstream>
-
-#include "../mc/nbt.h"
-#include "../mc/region.h"
 
 namespace mc = mapcrafter::mc;
 namespace nbt = mc::nbt;

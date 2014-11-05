@@ -1,0 +1,26 @@
+set(SOURCE
+    ${SOURCE}
+    "${CMAKE_CURRENT_SOURCE_DIR}/biomes.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/blockimages.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/blocktextures.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/image.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/manager.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/textureimage.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tileset.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tilerenderer.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tilerenderworker.cpp"
+    PARENT_SCOPE
+)
+set(HEADERS
+    ${HEADERS}
+    "${CMAKE_CURRENT_SOURCE_DIR}/biomes.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/blockimages.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/blocktextures.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/image.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/manager.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/textureimage.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tileset.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tilerenderer.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tilerenderworker.h"
+    PARENT_SCOPE
+)

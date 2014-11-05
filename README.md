@@ -8,7 +8,7 @@ using Leaflet.js.
 
 Mapcrafter is free software and available under the GPL license.  You can
 access the latest source code of Mapcrafter on GitHub:
-http://github.com/m0r13/mapcrafter
+http://github.com/mapcrafter/mapcrafter
 
 Thanks to pigmap and Minecraft Overviewer, whose documentations and source code
 were very helpful. I also used the alpha blending code of pigmap and some maps
@@ -33,13 +33,14 @@ stuff of the template from Minecraft Overviewer.
 ## Requirements ##
 
 * A Linux-based or Unix-like operating system like Mac OS
-* A decent C++ compiler (gcc >= 4.4, clang), CMake and make if you want to build
+* A decent C++ compiler (preferable gcc >= 4.4, or clang), CMake and make if you want to build
       Mapcrafter from source
 * Some libraries:
   * libpng
+  * libjpeg (but you should use libjpeg-turbo as drop in replacement)
   * libboost-iostreams
   * libboost-system
-  * libboost-filesystem
+  * libboost-filesystem (>= 1.42)
   * libboost-program-options
   * (libboost-test if you want to use the tests)
 * For your Minecraft worlds:
@@ -49,19 +50,19 @@ stuff of the template from Minecraft Overviewer.
 ## Examples ##
 
 There are a few example maps of the renderer on the [GitHub
-Wiki](https://github.com/m0r13/mapcrafter/wiki/Example-maps).  Please feel free
+Wiki](https://github.com/mapcrafter/mapcrafter/wiki/Example-maps).  Please feel free
 to add your own map to this list.
 
 ## Documentation and Help ##
 
 The documentation is in the `docs/` directory and you can build it yourself
-with Sphinx. You can read a built version of the documentation
-[here](http://docs.mapcrafter.org) and you can also [download
+with Sphinx. You can read a built version of the documentation on
+[docs.mapcrafter.org](http://docs.mapcrafter.org) and you can also [download
 other builds](https://readthedocs.org/projects/mapcrafter/downloads/).
 
 If you find bugs or problems when using Mapcrafter or if you have ideas for new
 features, then please feel free to add an issue to the [GitHub issue
-tracker](https://github.com/m0r13/mapcrafter/issues).
+tracker](https://github.com/mapcrafter/mapcrafter/issues).
 
 You can contact me in IRC (#mapcrafter on Freenode). Use the 
 [webclient](http://webchat.freenode.net/?channels=mapcrafter>) if you
@@ -73,6 +74,74 @@ You can also ask questions in the [Minecraft Forum
 thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-map-renderer/).
 
 ## Version history ##
+
+**v.1.5.3 (in progress)**
+
+* Better handling of corrupt world files
+* Added a fix using imagemagick in texture extraction script to prevent libpng warnings
+* Fixed bug with boost program options which made it unable to use paths
+  containing spaces for the ``--config`` command line option
+* Fixed wrong error messages when loading configuration files (Mapcrafter tried
+  to read not existing files and even directories if specified as configuration file)
+
+**v.1.5.2**
+
+* Fixed the marker tool to work with the new internal Minecraft 1.8 sign format
+* Fixed bug with global logging configuration file installed and searched in wrong directory
+* Fixed bug causing the Leaflet map being stuck
+* Fixed some small issues with new 1.8 blocks
+
+**v.1.5.1**
+
+* Added ability to configure logging facility with configuration files
+* Added colored terminal output for warning/error log messages
+* Improved cave rendermode with a new high contrast block coloring (thanks to dtfinch, #100),
+  old behavior is still available with a configuration option for compatibility reasons
+* Added support for Minecraft 1.8
+  * **Since the structure of the textures has changed a bit (especially chest textures),
+    you should extract the texture files from a 1.8 Minecraft Jar file to a new, clean
+    texture directory.** 
+
+**v.1.5**
+
+* Started internal refactoring to improve integration with possible Mapcrafter GUI
+  or other programs using Mapcrafter's functionality
+* Added own logging facility, further configuration with different log sinks
+  will follow soon™
+* Changed global sections from ``[global:sections]`` to ``[global:section]`` to
+  simplify internal parsing procedures
+* Added option to specify a block mask and render only specific blocks
+* Added option to hide chunks that are not populated yet
+
+**v.1.4.3**
+
+* Fixed a lighting bug on FreeBSD and Windows
+* Improved build support on Windows for MinGW and Visual C++
+
+**v.1.4.2**
+
+* Fixed a small problem with the multi threading
+
+**v.1.4.1**
+
+* Fixed ``mapcrafter_markers`` not being installed
+* Fixed debian package dependency issues with libjpeg-turbo
+* Fixed issue with CMake not finding libjpeg outside the default search path
+
+**v.1.4**
+
+* Added option to use JPEGs as image output format
+* Added option to change the background color of the map
+
+**v.1.3.2**
+
+* Added option to hide specific marker groups in the web interface by default
+* Added a way to add more user-defined markers using the Leaflet API (#71)
+* Changed ``markers.js`` file attribute ``icon_size`` to ``iconSize``
+  * **You should update your ``markers.js`` file and re-run ``mapcrafter_markers``
+    if you use markers.** 
+* Fixed a bug causing Mapcrafter not to use the ``data/`` directory as
+  resource directory (#70)
 
 **v.1.3.1**
 

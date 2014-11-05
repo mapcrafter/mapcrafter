@@ -1,6 +1,6 @@
-#include "../util.h"
-#include "../mc/nbt.h"
-#include "../mc/world.h"
+#include "../mapcraftercore/mc/nbt.h"
+#include "../mapcraftercore/mc/world.h"
+#include "../mapcraftercore/util.h"
 
 #include <iostream>
 #include <string>

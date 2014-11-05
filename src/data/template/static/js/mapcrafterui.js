@@ -49,7 +49,8 @@ function MapcrafterUI(config) {
 MapcrafterUI.prototype.init = function() {
 	this.lmap = L.map("mcmap", {
 		crs: L.CRS.Simple
-	}).setView([0, 0], 0);
+	}).setView([0, 0], 0, {animate: false});
+	this.lmap.attributionControl.addAttribution("Map rendered with <a href='http://mapcrafter.org'>Mapcrafter</a>");
 	
 	var firstMap = null;
 	for(var type in this.config) {
@@ -123,7 +124,7 @@ MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 	//this.lmap.invalidateSize();
 	
 	// check whether we are switching to a completely different map
-	if(oldMapLayer == null || oldMapConfig.worldName != mapConfig.worldName) {
+	if(oldMapLayer == null || oldMapConfig.world != mapConfig.world) {
 		// completely different map, reset view
 		
 		// reset zoom level, 0 or user-defined default zoom level
@@ -136,20 +137,19 @@ MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 			var x = mapConfig.defaultView[0];
 			var z = mapConfig.defaultView[1];
 			var y = mapConfig.defaultView[2];
-			this.lmap.setView(this.mcToLatLng(x, z, y), zoom);
+			this.lmap.setView(this.mcToLatLng(x, z, y), zoom, {animate: false});
 		} else {
 			var center = mapConfig.tileSize / 2;
-			this.lmap.setView(this.lmap.unproject([center, center]), zoom);
+			this.lmap.setView(this.lmap.unproject([center, center]), zoom, {animate: false});
 		}
 
 	} else {
 		// same world, we can set the view to the view of the old map
-		this.lmap.setView(this.mcToLatLng(oldView[0], oldView[1], oldView[2]), oldZoom);
+		this.lmap.setView(this.mcToLatLng(oldView[0], oldView[1], oldView[2]), oldZoom, {animate: false});
 		
-		// adjust the zoom level
-		// if one switches between maps with different max zoom levels
-		if(oldMapConfig.maxZoom != mapConfig.maxZoom)
-			this.lmap.setZoom(oldZoom + mapConfig.maxZoom - oldMapConfig.maxZoom);
+		// same world, so should have same zoom levels
+		//if(oldMapConfig.maxZoom != mapConfig.maxZoom)
+		//	this.lmap.setZoom(oldZoom + mapConfig.maxZoom - oldMapConfig.maxZoom, {animate: false});
 	}
 	
 	// call handlers
@@ -163,7 +163,7 @@ MapcrafterUI.prototype.setMap = function(map) {
 	
 	// check whether this the same world and the new map has the current rotation as well
 	// we can use the current rotation then, use the default/first available rotation else
-	var sameWorld = oldMapConfig == null ? false : oldMapConfig.worldName == mapConfig.worldName;
+	var sameWorld = oldMapConfig == null ? false : oldMapConfig.world == mapConfig.world;
 	if(sameWorld && mapConfig.rotations.indexOf(this.currentRotation) != -1) {
 		this.setMapAndRotation(map, this.currentRotation);
 	} else {
@@ -186,6 +186,7 @@ MapcrafterUI.prototype.createTileLayer = function(name, config, rotation) {
 		maxZoom: config.maxZoom,
 		tileSize: config.tileSize,
 		noWrap: true,
+		continuousWorld: true,
 		imageFormat: config.imageFormat,
 	});
 	

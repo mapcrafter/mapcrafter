@@ -7,14 +7,14 @@ Requirements
 
 * A Linux-based or Mac operating system would be good, 
   building the renderer on Windows is possible but not easy.
-* A C++ compiler (preferable gcc >= 4.4), CMake and make to build Mapcrafter.
+* A decent C++ compiler (preferable gcc >= 4.4, or clang), CMake and make to build Mapcrafter.
 * Some libraries:
 
   * libpng
-  * libpthread
+  * libjpeg (but you should use libjpeg-turbo as drop in replacement)
   * libboost-iostreams
   * libboost-system
-  * libboost-filesystem
+  * libboost-filesystem (>= 1.42)
   * libboost-program-options
   * (libboost-test if you want to use the tests)
 * For your Minecraft worlds:
@@ -25,16 +25,24 @@ Requirements
 Building from Source
 ====================
 
+General Instructions
+--------------------
+
 At first you have to get the source code of Mapcrafter.  Clone it directly from
 GitHub if you want the newest version::
 
-    git clone https://github.com/m0r13/mapcrafter.git
+    git clone https://github.com/mapcrafter/mapcrafter.git
 
 Make sure you have all requirements installed. If you are on a Debian-like
 Linux system, you can install these packages with apt::
 
-    sudo apt-get install libpng12-dev libboost-iostreams-dev \
-    libboost-system-dev libboost-filesystem-dev libboost-program-options-dev
+    sudo apt-get install libpng-dev libjpeg-dev libboost-iostreams-dev \
+    libboost-system-dev libboost-filesystem-dev libboost-program-options-dev \
+    build-essential cmake
+
+If you are on an RPM based system such as Fedora, you can install these packages with yum::
+
+    sudo yum install boost-devel libjpeg-devel libpng-devel gcc-c++ make cmake
 
 Then you can go into the directory with the Mapcrafter source (for example
 ``mapcrafter/``, not ``mapcrafter/src/``) and build it with the following
@@ -50,54 +58,95 @@ You can now install Mapcrafter system-wide for all users if you want::
 
     sudo make install
 
-If you get an error concerning ``libmapcraftercore.so`` not found you have to run 
+If you get an error concerning ``libmapcraftercore.so`` not found, you have to run 
 ``ldconfig`` (as root).
-Make sure that you still have to install the texture files needed for Mapcrafter.
+
+Don't forget that you still have to install the texture files needed for Mapcrafter.
+If you install the texture files to ``src/data/textures``, they will be copied
+to a path Mapcrafter will automatically detect when installing Mapcrafter with ``make install``.
+
+FreeBSD 10
+----------
+
+Mapcrafter builds fine on FreeBSD 10, 9 is not tested but could also build there.
+
+For this guide we will be using ports, but could work with packages from pkgng (untested).
+
+First step is to install prerequisites::
+
+    cd /usr/ports/devel/git
+    make install clean; rehash
+    cd /usr/ports/devel/boost-all
+    make install clean; rehash
+    cd /usr/ports/devel/cmake
+    make install clean; rehash
+    cd /usr/ports/misc/compat8x
+    make install clean; rehash
+    cd /usr/ports/graphics/png
+    make install clean; rehash
+
+Or if you got portmaster installed::
+
+    portmaster devel/git devel/boost-all devel/cmake misc/compat8x graphics/png
+
+Once this is done compiling (takes a long time), you can go ahead with the normal steps::
+
+    git clone https://github.com/mapcrafter/mapcrafter.git
+    cd mapcrafter
+    cmake .
+    make
 
 Mac OS X
-========
+--------
 
-Currently there is no pre built packages available for Mac OS X but building it is relatively simple.
+Currently there are no pre built packages available for Mac OS X but building it is relatively simple.
 
 Prerequisites:
 
 * `Xcode <https://itunes.apple.com/us/app/xcode/id497799835?ls=1&mt=12>`_ 
-* `Homebrew <http://brew.sh/>`_
+* `Homebrew <http://brew.sh/>`_ or `Macports <http://www.macports.org/>`_
 
 Depending on your version of OS X you may or may not have git installed. 
 Starting from 10.9 Mavericks git is installed with Xcode, if you got 10.8 Mountain Lion or older, 
 you must install command line tools from Xcode and run the following command::
-	
-	brew install git
+
+    brew install git
 
 On 10.9 Mavericks systems you will have to run the following command after you've installed Xcode::
 
-	xcode-selected --install
+    xcode-select --install
 
 and select install in the window that pops up, and accept the EULA.
 
 First you will have to clone the latest Mapcrafter source by running::
 
-	git clone https://github.com/m0r13/mapcrafter.git
+    git clone https://github.com/mapcrafter/mapcrafter.git
 
 After this, install the dependencies using brew::
 
-	brew install boost libpng cmake
-	
-once you have run this, you should have a working build system for Mapcrafter::
+    brew install boost libpng cmake libjpeg-turbo
 
-	cd mapcrafter
-	cmake .
-	make
-	
-this will build Mapcrafter and put the ready to use binary in the ``src/`` directory
+Or install the dependencies using port::
 
+    port install boost libpng cmake libjpeg-turbo
+
+Once you have run this, you should have a working build system for Mapcrafter::
+
+    cd mapcrafter
+    cmake .
+    make
+
+This will build Mapcrafter and put the ready to use binary in the ``src/`` directory.
+
+**Note**: With homebrew you will have to run the following CMake command::
+
+	cmake . -DJPEG_INCLUDE_DIR=/usr/local/opt/jpeg-turbo/include/ -DJPEG_LIBRARY=/usr/local/opt/jpeg-turbo/lib/libjpeg.dylib
 
 
 Arch Linux
 ==========
 
-If you are running Arch Linux as operating system you can install Mapcrafter
+If you are running Arch Linux as operating system, you can install Mapcrafter
 from the `AUR <https://aur.archlinux.org/packages/mapcrafter-git/>`_. 
 
 Debian Packages
@@ -122,6 +171,22 @@ manually::
 Now you can run ``sudo apt-get install mapcrafter`` to install Mapcrafter.
 During this process it will automatically download a temporary Minecraft Jar
 file and unpack required texture files.
+
+.. _installation_windows:
+
+Windows
+=======
+
+Mapcrafter on Windows is still a bit experimental, but there are pre-built
+packages on mapcrafter.org:
+
+`http://mapcrafter.org/downloads <http://mapcrafter.org/downloads>`_
+
+If you are as crazy as experimental Mapcrafter is on Windows, you can build Mapcrafter
+on Windows on your own. There is a build package for Windows with instructions 
+on GitHub in the mapcrafter-buildfiles repository:
+
+`https://github.com/mapcrafter/mapcrafter-buildfiles/tree/master/windows <https://github.com/mapcrafter/mapcrafter-buildfiles/tree/master/windows>`_
 
 .. _resources_textures:
 
@@ -158,7 +223,7 @@ package::
 
     $ mapcrafter --find-resources
     Your home directory: /home/moritz
-    mapcrafter binary: /usr/bin/mapcrafter
+    Mapcrafter binary: /usr/bin/mapcrafter
     Resource directories:
       1. /home/moritz/.mapcrafter
       2. /usr/share/mapcrafter
@@ -166,6 +231,8 @@ package::
       1. /usr/share/mapcrafter/template
     Texture directories:
       1. /usr/share/mapcrafter/textures
+    Logging configuration file:
+      1. /etc/mapcrafter/logging.conf
 
 You can see that Mapcrafter found a resource directory in the home directory
 but no ``template/`` or ``textures/`` directory in it. So it's just using the
@@ -177,10 +244,15 @@ directory ``.mapcrafter/textures`` in your home directory.
 Now you have to install the Minecraft texture files. You need the following
 files in your texture directory:
 
-* directory ``chest/`` with normal.png, normal_double.png and ender.png 
-* directory ``colormap/`` with foliage.png and grass.png
-* directory ``blocks/`` from your texture pack
-* endportal.png
+* ``entity/chest/normal.png``
+* ``entity/chest/normal_double.png``
+* ``entity/chest/ender.png``
+* ``entity/chest/trapped.png``
+* ``entity/chest/trapped_double.png``
+* ``colormap/foliage.png``
+* ``colormap/grass.png``
+* ``blocks/`` with block texture files
+* ``endportal.png``
 
 You can get those files from your Minecraft Jar file (default textures) or from
 another resource pack. To extract these texture files there is a python script
@@ -189,7 +261,7 @@ Mapcrafter source if you didn't install Mapcrafter on your system). Run the
 python script with the Minecraft Jar file and the texture directory as
 arguments::
 
-    mapcrafter_textures.py /path/to/my/minecraft.jar /my/texture/directory
+    mapcrafter_textures.py /path/to/my/minecraft/jar/1.8.jar /my/texture/directory
 
 You will probably find your Minecraft Jar file in
-``~/.minecraft/version/%version%/%version%.jar``.
+``~/.minecraft/versions/%version%/%version%.jar``.

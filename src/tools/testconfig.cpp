@@ -17,7 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../config/mapcrafterconfig.h"
+#include "../mapcraftercore/config/mapcrafterconfig.h"
 
 #include <iostream>
 #include <string>
@@ -30,25 +30,21 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	std::string configfile = argv[1];
-
 	config::MapcrafterConfig parser;
-	config::ValidationMap validation;
-	bool ok = parser.parse(configfile, validation);
+	config::ValidationMap validation = parser.parse(argv[1]);
 
-	if (validation.size() > 0) {
-		std::cout << (ok ? "Some notes on your configuration file:" : "Your configuration file is invalid!") << std::endl;
-		for (auto it = validation.begin(); it != validation.end(); ++it) {
-			std::cout << it->first << ":" << std::endl;
-			for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
-				std::cout << " - " << *it2 << std::endl;
-			}
-		}
-	} else {
-		std::cout << "Everything ok." << std::endl;
+	if (!validation.isEmpty()) {
+		if (validation.isCritical())
+			LOG(FATAL) << "Your configuration file is invalid!";
+		else
+			LOG(WARNING) << "Some notes on your configuration file:";
+		validation.log();
+		LOG(WARNING) << "Please read the documentation about the new configuration file format.";
 	}
 
-	std::cout << std::endl << "The parsed configuration file:" << std::endl;
+	if (validation.isCritical())
+		return 1;
+
 	parser.dump(std::cout);
 
 	return 0;
