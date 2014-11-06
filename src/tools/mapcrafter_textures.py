@@ -10,15 +10,15 @@ import zipfile
 
 dirs = ("", "entity", "entity/chest", "colormap", "blocks")
 assets = "assets/minecraft/textures/"
-files = {
-	"entity/chest/normal.png" : assets + "entity/chest/normal.png",
-	"entity/chest/normal_double.png" : assets + "entity/chest/normal_double.png",
-	"entity/chest/ender.png" : assets + "entity/chest/ender.png",
-	"entity/chest/trapped.png" : assets + "entity/chest/trapped.png",
-	"entity/chest/trapped_double.png" : assets + "entity/chest/trapped_double.png",
-	"colormap/foliage.png" : assets + "colormap/foliage.png",
-	"colormap/grass.png" : assets + "colormap/grass.png",
-}
+files = [
+	("entity/chest/normal.png", assets + "entity/chest/normal.png"),
+	("entity/chest/normal_double.png", assets + "entity/chest/normal_double.png"),
+	("entity/chest/ender.png", assets + "entity/chest/ender.png"),
+	("entity/chest/trapped.png", assets + "entity/chest/trapped.png"),
+	("entity/chest/trapped_double.png", assets + "entity/chest/trapped_double.png"),
+	("colormap/foliage.png", assets + "colormap/foliage.png"),
+	("colormap/grass.png", assets + "colormap/grass.png"),
+]
 
 def has_imagemagick():
 	try:
@@ -52,7 +52,7 @@ if __name__ == "__main__":
 	print("Extracting block images:")
 	found, extracted, skipped = 0, 0, 0
 	for info in jar.infolist():
-		if info.filename.startswith("assets/minecraft/textures/blocks/"):
+		if info.filename.startswith("assets/minecraft/textures/blocks/") and info.filename != "assets/minecraft/textures/blocks/":
 			filename = info.filename.replace("assets/minecraft/textures/", "")
 			filename = os.path.join(args["outdir"], filename)
 			found += 1
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 	print("")
 	print("Extracting other textures:")
 	
-	for filename, zipname in files.items():
+	for filename, zipname in files:
 		try:
 			info = jar.getinfo(zipname)
 			filename = os.path.join(args["outdir"], filename)
@@ -89,7 +89,7 @@ if __name__ == "__main__":
 				fout.close()
 				print(" - Extracting %s ... extracted." % filename)
 		except KeyError:
-			print(" - Extracting %s ... not found!")
+			print(" - Extracting %s ... not found!" % filename)
 	
 	if not has_imagemagick():
 		print("")
@@ -97,10 +97,13 @@ if __name__ == "__main__":
 		print("Install imagemagick to enable automatic texture fixes (to prevent libpng warnings).")
 	else:
 		for filename in glob.glob(os.path.join(args["outdir"], "blocks", "hardened_clay*.png")):
-			subprocess.check_call(["convert", filename, filename])
+			if os.path.exists(filename):
+				subprocess.check_call(["convert", filename, filename])
 		
 		filename = os.path.join(args["outdir"], "blocks", "red_sand.png")
-		subprocess.check_call(["convert", filename, filename])
+		if os.path.exists(filename):
+			subprocess.check_call(["convert", filename, filename])
 		
 		filename = os.path.join(args["outdir"], "blocks", "glass_pane_top_white.png")
-		subprocess.check_call(["convert", filename, "-type", "TrueColorMatte", "-define", "png:color-type=6", filename])
+		if os.path.exists(filename):
+			subprocess.check_call(["convert", filename, "-type", "TrueColorMatte", "-define", "png:color-type=6", filename])
