@@ -58,14 +58,14 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 
 	// find "level" tag
 	if (!nbt.hasTag<nbt::TagCompound>("Level")) {
-		std::cerr << "Warning: Corrupt chunk (No level tag)!" << std::endl;
+		LOG(ERROR) << "Corrupt chunk: No level tag found!";
 		return false;
 	}
 	const nbt::TagCompound& level = nbt.findTag<nbt::TagCompound>("Level");
 
 	// then find x/z pos of the chunk
 	if (!level.hasTag<nbt::TagInt>("xPos") || !level.hasTag<nbt::TagInt>("zPos")) {
-		std::cerr << "Warning: Corrupt chunk (No x/z position found)!" << std::endl;
+		LOG(ERROR) << "Corrupt chunk: No x/z position found!";
 		return false;
 	}
 	chunkpos_original = ChunkPos(level.findTag<nbt::TagInt>("xPos").payload,
@@ -81,15 +81,13 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 	if (level.hasTag<nbt::TagByte>("TerrainPopulated"))
 		terrain_populated = level.findTag<nbt::TagByte>("TerrainPopulated").payload;
 	else
-		std::cerr << "Warning: Corrupt chunk at " << chunkpos.x << ":" << chunkpos.z
-		<< " (No terrain populated tag found)!" << std::endl;
+		LOG(ERROR) << "Corrupt chunk " << chunkpos << ": No terrain populated tag found!";
 
 	if (level.hasArray<nbt::TagByteArray>("Biomes", 256)) {
 		const nbt::TagByteArray& biomes_tag = level.findTag<nbt::TagByteArray>("Biomes");
 		std::copy(biomes_tag.payload.begin(), biomes_tag.payload.end(), biomes);
 	} else
-		std::cerr << "Warning: Corrupt chunk at " << chunkpos.x << ":" << chunkpos.z
-				<< " (No biome data found)!" << std::endl;
+		LOG(ERROR) << "Corrupt chunk " << chunkpos << ": No biome data found!";
 
 	// find sections list
 	// ignore it if section list does not exist, can happen sometimes with the empty
