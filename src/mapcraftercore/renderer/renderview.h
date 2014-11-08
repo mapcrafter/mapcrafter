@@ -17,16 +17,27 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BLOCKIMAGES_H_
-#define BLOCKIMAGES_H_
+#ifndef RENDERVIEW_H_
+#define RENDERVIEW_H_
+
+#include "blockimages.h"
+#include "tileset.h"
+#include "tilerenderer.h"
 
 namespace mapcrafter {
 namespace renderer {
 
-class BlockImages {
+class RenderView {
+public:
+	RenderView();
+	virtual ~RenderView();
+
+	virtual BlockImages createBlockImages() const = 0;
+	virtual TileSet createTileSet() const = 0;
+	virtual TileRenderer createTileRenderer() const = 0;
 };
 
-}
-}
+} /* namespace renderer */
+} /* namespace mapcrafter */
 
-#endif /* BLOCKIMAGES_H_ */
+#endif /* RENDERVIEW_H_ */

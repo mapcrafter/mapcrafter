@@ -20,9 +20,8 @@
 #ifndef TILERENDERER_H_
 #define TILERENDERER_H_
 
-#include "blockimages.h"
 #include "image.h"
-#include "tileset.h"
+#include "blockimages.h"
 #include "../config/sections/map.h"
 #include "../config/sections/world.h"
 #include "../mc/pos.h"
@@ -36,43 +35,6 @@ namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace renderer {
-
-/**
- * Iterates over the top blocks of a tile.
- */
-class TileTopBlockIterator {
-private:
-	int block_size, tile_size;
-
-	bool is_end;
-	int min_row, max_row;
-	int min_col, max_col;
-	mc::BlockPos top;
-public:
-	TileTopBlockIterator(const TilePos& tile, int block_size, int tile_size);
-	~TileTopBlockIterator();
-
-	void next();
-	bool end() const;
-
-	mc::BlockPos current;
-	int draw_x, draw_y;
-};
-
-/**
- * Iterates over the blocks, which are on a tile on the same position,
- * this means every block is (x+1, z-1 and y-1) of the last block
- */
-class BlockRowIterator {
-public:
-	BlockRowIterator(const mc::BlockPos& block);
-	~BlockRowIterator();
-
-	void next();
-	bool end() const;
-
-	mc::BlockPos current;
-};
 
 /**
  * Data required to render a tile.
@@ -93,47 +55,7 @@ struct RenderState {
 	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
 };
 
-/**
- * A block, which should get drawed on a tile.
- */
-struct RenderBlock {
-
-	// drawing position in pixels on the tile
-	int x, y;
-	bool transparent;
-	RGBAImage image;
-	mc::BlockPos pos;
-	uint8_t id, data;
-
-	bool operator<(const RenderBlock& other) const;
-};
-
-class Rendermode;
-
-/**
- * Renders tiles from world data.
- */
 class TileRenderer {
-private:
-	RenderState state;
-
-	bool render_biomes;
-	bool water_preblit;
-
-	std::vector<std::shared_ptr<Rendermode>> rendermodes;
-
-	Biome getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk);
-
-	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
-public:
-	TileRenderer();
-	TileRenderer(std::shared_ptr<mc::WorldCache> world,
-			std::shared_ptr<BlockImages> images,
-			const config::WorldSection& world_config,
-			const config::MapSection& map_config);
-	~TileRenderer();
-
-	void renderTile(const TilePos& tile_pos, const TilePos& tile_offset, RGBAImage& tile);
 };
 
 }

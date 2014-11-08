@@ -17,16 +17,21 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BLOCKIMAGES_H_
-#define BLOCKIMAGES_H_
+#ifndef ISOMETRIC_RENDERVIEW_H_
+#define ISOMETRIC_RENDERVIEW_H_
+
+#include "../../renderview.h"
 
 namespace mapcrafter {
 namespace renderer {
 
-class BlockImages {
+class IsometricRenderView : public RenderView {
+public:
+	IsometricRenderView();
+	virtual ~IsometricRenderView();
 };
 
-}
-}
+} /* namespace renderer */
+} /* namespace mapcrafter */
 
-#endif /* BLOCKIMAGES_H_ */
+#endif /* ISOMETRIC_RENDERVIEW_H_ */
