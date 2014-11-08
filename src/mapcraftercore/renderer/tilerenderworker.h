@@ -44,10 +44,9 @@ struct RenderContext {
 	config::Color background_color;
 	config::WorldSection world_config;
 	config::MapSection map_config;
-	std::shared_ptr<renderer::BlockImages> block_images;
 
-	mc::World world;
 	std::shared_ptr<renderer::TileSet> tile_set;
+	std::shared_ptr<renderer::TileRenderer> tile_renderer;
 };
 
 struct RenderWork {
@@ -87,8 +86,6 @@ private:
 	// progress handler
 	std::shared_ptr<util::IProgressHandler> progress;
 	std::shared_ptr<bool> finished;
-
-	TileRenderer renderer;
 };
 
 } /* namespace render */

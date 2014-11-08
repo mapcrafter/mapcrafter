@@ -90,7 +90,7 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 
 	if (tile.getDepth() == render_context.tile_set->getDepth()) {
 		// this tile is a render tile, render it
-		renderer.renderTile(tile.getTilePos(),
+		render_context.tile_renderer->renderTile(tile.getTilePos(),
 				render_context.tile_set->getTileOffset(), image);
 		render_work_result.tiles_rendered++;
 
@@ -161,12 +161,6 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 }
 
 void TileRenderWorker::operator()() {
-	// TODO
-	// really create world cache here?
-	std::shared_ptr<mc::WorldCache> world_cache(new mc::WorldCache(render_context.world));
-	renderer = TileRenderer(world_cache, render_context.block_images,
-			render_context.world_config, render_context.map_config);
-	
 	int work = 0;
 	for (auto it = render_work.tiles.begin(); it != render_work.tiles.end(); ++it)
 		work += render_context.tile_set->getContainingRenderTiles(*it);

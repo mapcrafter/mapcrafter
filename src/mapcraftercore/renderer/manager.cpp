@@ -693,14 +693,18 @@ bool RenderManager::run() {
 				continue;
 			}
 
+
+			std::shared_ptr<mc::WorldCache> world_cache(new mc::WorldCache(worlds[world_name][rotation]));
+			std::shared_ptr<TileRenderer> tile_renderer(new TileRenderer(world_cache, block_images,
+					config.getWorld(world_name), config.getMap(map_name)));
+
 			RenderContext context;
 			context.output_dir = output_dir;
 			context.background_color = config.getBackgroundColor();
 			context.world_config = config.getWorld(map.getWorld());
 			context.map_config = map;
-			context.block_images = block_images;
-			context.world = worlds[world_name][rotation];
 			context.tile_set = tile_set;
+			context.tile_renderer = tile_renderer;
 
 			std::shared_ptr<thread::Dispatcher> dispatcher;
 			if (opts.jobs == 1)
