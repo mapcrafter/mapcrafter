@@ -26,6 +26,8 @@ namespace mapcrafter {
 namespace renderer {
 
 class IsometricTileSet : public TileSet {
+public:
+	virtual void mapChunkToTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles);
 };
 
 }

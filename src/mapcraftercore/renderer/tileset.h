@@ -157,7 +157,9 @@ class TileSet {
 public:
 	TileSet();
 	TileSet(const mc::World& World);
-	~TileSet();
+	virtual ~TileSet();
+
+	virtual void mapChunkToTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles) = 0;
 
 	/**
 	 * Scans the tiles of a world.

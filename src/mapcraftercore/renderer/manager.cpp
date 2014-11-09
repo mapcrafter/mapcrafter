@@ -513,7 +513,7 @@ bool RenderManager::run() {
 				return false;
 			}
 			// create a tileset for this world
-			std::shared_ptr<TileSet> tile_set(new TileSet);
+			std::shared_ptr<TileSet> tile_set(render_view.createTileSet());
 			// and scan for tiles of this world,
 			// we automatically center the tiles for cropped worlds, but only...
 			//  - the circular cropped ones and
@@ -666,7 +666,9 @@ bool RenderManager::run() {
 			fs::path output_dir = config.getOutputPath(map_name + "/"
 					+ config::ROTATION_NAMES_SHORT[rotation]);
 			// if incremental render scan which tiles might have changed
-			std::shared_ptr<TileSet> tile_set(new TileSet(*tile_sets[world_name][rotation]));
+			std::shared_ptr<TileSet> tile_set(render_view.createTileSet());
+			// TODO ewwwwwwww
+			tile_set->operator=(*tile_sets[world_name][rotation]);
 			if (confighelper.getRenderBehavior(map_name, rotation)
 					== config::MapcrafterConfigHelper::RENDER_AUTO) {
 				LOG(INFO) << "Scanning required tiles...";
