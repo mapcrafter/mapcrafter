@@ -19,6 +19,10 @@
 
 #include "renderview.h"
 
+#include "blockimages.h"
+#include "tileset.h"
+#include "tilerenderer.h"
+
 namespace mapcrafter {
 namespace renderer {
 
@@ -26,6 +30,18 @@ IsometricRenderView::IsometricRenderView() {
 }
 
 IsometricRenderView::~IsometricRenderView() {
+}
+
+BlockImages* IsometricRenderView::createBlockImages() const {
+	return new IsometricBlockImages();
+}
+
+TileSet* IsometricRenderView::createTileSet() const {
+	return new IsometricTileSet();
+}
+
+TileRenderer* IsometricRenderView::createTileRenderer() const {
+	return new IsometricTileRenderer();
 }
 
 } /* namespace renderer */

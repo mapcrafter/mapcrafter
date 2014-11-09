@@ -17,7 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../mapcraftercore/renderer/blockimages.h"
+#include "../mapcraftercore/renderer/renderviews/isometric/blockimages.h"
 
 #include <iostream>
 #include <string>
@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
 	if (!vm.count("texture-size"))
 		texture_size = 16;
 
-	BlockImages images;
+	IsometricBlockImages images;
 	images.setSettings(texture_size, 0, true, true, "");
 	if(images.loadAll(texture_dir)) {
 		images.saveBlocks(output_file);

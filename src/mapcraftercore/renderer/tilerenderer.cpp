@@ -22,5 +22,8 @@
 namespace mapcrafter {
 namespace renderer {
 
+TileRenderer::~TileRenderer() {
+}
+
 }
 }

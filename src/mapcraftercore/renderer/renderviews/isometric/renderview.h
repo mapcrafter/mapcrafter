@@ -29,6 +29,10 @@ class IsometricRenderView : public RenderView {
 public:
 	IsometricRenderView();
 	virtual ~IsometricRenderView();
+
+	virtual BlockImages* createBlockImages() const;
+	virtual TileSet* createTileSet() const;
+	virtual TileRenderer* createTileRenderer() const;
 };
 
 } /* namespace renderer */

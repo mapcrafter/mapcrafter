@@ -22,6 +22,7 @@
 
 #include "image.h"
 #include "blockimages.h"
+#include "tileset.h"
 #include "../config/sections/map.h"
 #include "../config/sections/world.h"
 #include "../mc/pos.h"
@@ -56,6 +57,15 @@ struct RenderState {
 };
 
 class TileRenderer {
+public:
+	virtual ~TileRenderer();
+
+	virtual void setStuff(std::shared_ptr<mc::WorldCache> world,
+			std::shared_ptr<BlockImages> images,
+			const config::WorldSection& world_config,
+			const config::MapSection& map_config) = 0;
+
+	virtual void renderTile(const TilePos& tile_pos, const TilePos& tile_offset, RGBAImage& tile) = 0;
 };
 
 }

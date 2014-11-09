@@ -21,6 +21,7 @@
 #define ISOMETRIC_BLOCKIMAGES_H_
 
 #include "../../biomes.h"
+#include "../../blockimages.h"
 #include "../../blocktextures.h"
 #include "../../image.h"
 
@@ -248,7 +249,7 @@ public:
  * This class is responsible for reading the Minecraft textures and creating the block
  * images.
  */
-class IsometricBlockImages {
+class IsometricBlockImages : public BlockImages {
 private:
 	int texture_size;
 	int rotation;

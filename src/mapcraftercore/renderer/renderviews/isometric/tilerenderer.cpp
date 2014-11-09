@@ -145,6 +145,19 @@ IsometricTileRenderer::IsometricTileRenderer(std::shared_ptr<mc::WorldCache> wor
 IsometricTileRenderer::~IsometricTileRenderer() {
 }
 
+void IsometricTileRenderer::setStuff(std::shared_ptr<mc::WorldCache> world,
+		std::shared_ptr<BlockImages> images,
+		const config::WorldSection& world_config,
+		const config::MapSection& map_config) {
+	this->state.world = world;
+	this->state.images = images;
+	this->render_biomes = map_config.renderBiomes();
+	this->water_preblit = map_config.getRendermode() != "daylight" && map_config.getRendermode() != "nightlight";
+
+	rendermodes.clear();
+	createRendermode(world_config, map_config, state, rendermodes);
+}
+
 Biome IsometricTileRenderer::getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk) {
 	// return default biome if we don't want to render different biomes
 	if (!render_biomes)

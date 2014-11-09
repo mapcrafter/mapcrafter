@@ -95,7 +95,7 @@ class Rendermode;
 /**
  * Renders tiles from world data.
  */
-class IsometricTileRenderer {
+class IsometricTileRenderer : public TileRenderer {
 private:
 	RenderState state;
 
@@ -115,7 +115,12 @@ public:
 			const config::MapSection& map_config);
 	~IsometricTileRenderer();
 
-	void renderTile(const TilePos& tile_pos, const TilePos& tile_offset, RGBAImage& tile);
+	virtual void setStuff(std::shared_ptr<mc::WorldCache> world,
+			std::shared_ptr<BlockImages> images,
+			const config::WorldSection& world_config,
+			const config::MapSection& map_config);
+
+	virtual void renderTile(const TilePos& tile_pos, const TilePos& tile_offset, RGBAImage& tile);
 };
 
 }

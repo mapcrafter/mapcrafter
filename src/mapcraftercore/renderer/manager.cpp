@@ -19,6 +19,8 @@
 
 #include "manager.h"
 
+#include "renderviews/isometric/blockimages.h"
+#include "renderviews/isometric/renderview.h"
 #include "tilerenderworker.h"
 #include "../config/loggingconfig.h"
 #include "../thread/impl/singlethread.h"
@@ -408,6 +410,8 @@ void RenderManager::increaseMaxZoom(const fs::path& dir,
  */
 bool RenderManager::run() {
 
+	IsometricRenderView render_view;
+
 	// ###
 	// ### First big step: Load/parse/validate the configuration file
 	// ###
@@ -677,7 +681,7 @@ bool RenderManager::run() {
 			std::time_t time_start = std::time(nullptr);
 
 			// create block images
-			std::shared_ptr<BlockImages> block_images(new BlockImages);
+			std::shared_ptr<BlockImages> block_images(render_view.createBlockImages());
 			block_images->setSettings(map.getTextureSize(), rotation, map.renderUnknownBlocks(),
 					map.renderLeavesTransparent(), map.getRendermode());
 			// if textures do not work, it does not make much sense
@@ -693,10 +697,11 @@ bool RenderManager::run() {
 				continue;
 			}
 
-
 			std::shared_ptr<mc::WorldCache> world_cache(new mc::WorldCache(worlds[world_name][rotation]));
-			std::shared_ptr<TileRenderer> tile_renderer(new TileRenderer(world_cache, block_images,
-					config.getWorld(world_name), config.getMap(map_name)));
+			//std::shared_ptr<TileRenderer> tile_renderer(new TileRenderer(world_cache, block_images,
+			//		config.getWorld(world_name), config.getMap(map_name)));
+			std::shared_ptr<TileRenderer> tile_renderer(render_view.createTileRenderer());
+			tile_renderer->setStuff(world_cache, block_images, config.getWorld(world_name), config.getMap(map_name));
 
 			RenderContext context;
 			context.output_dir = output_dir;

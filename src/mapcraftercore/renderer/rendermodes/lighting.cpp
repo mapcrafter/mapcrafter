@@ -20,6 +20,7 @@
 #include "lighting.h"
 
 #include "../blockimages.h"
+#include "../renderviews/isometric/blockimages.h"
 #include "../../util.h"
 
 #include <cmath>

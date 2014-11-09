@@ -32,9 +32,9 @@ public:
 	RenderView();
 	virtual ~RenderView();
 
-	virtual BlockImages createBlockImages() const = 0;
-	virtual TileSet createTileSet() const = 0;
-	virtual TileRenderer createTileRenderer() const = 0;
+	virtual BlockImages* createBlockImages() const = 0;
+	virtual TileSet* createTileSet() const = 0;
+	virtual TileRenderer* createTileRenderer() const = 0;
 };
 
 } /* namespace renderer */
