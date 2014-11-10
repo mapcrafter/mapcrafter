@@ -31,21 +31,6 @@ BlockImageTextureResources::BlockImageTextureResources()
 BlockImageTextureResources::~BlockImageTextureResources() {
 }
 
-/*
-void BlockImageTextureResources::setSettings(int texture_size, int rotation, bool render_unknown_blocks,
-        bool render_leaves_transparent, const std::string& rendermode) {
-	this->texture_size = texture_size;
-	this->rotation = rotation;
-	this->render_unknown_blocks = render_unknown_blocks;
-	this->render_leaves_transparent = render_leaves_transparent;
-
-	if (rendermode == "daylight" || rendermode == "nightlight") {
-		dleft = 0.95;
-		dright = 0.8;
-	}
-}
-*/
-
 void BlockImageTextureResources::setTextureSize(int texture_size) {
 	this->texture_size = texture_size;
 }
@@ -186,18 +171,7 @@ bool BlockImageTextureResources::loadOther(const std::string& endportal) {
 bool BlockImageTextureResources::loadBlocks(const std::string& block_dir) {
 	if (!textures.load(block_dir, texture_size))
 		return false;
-
 	empty_texture.setSize(texture_size, texture_size);
-
-	/*
-	unknown_block.setSize(texture_size, texture_size);
-	if (render_unknown_blocks)
-		unknown_block.fill(rgba(255, 0, 0, 255), 0, 0, texture_size, texture_size);
-
-	loadBlocks();
-	testWaterTransparency();
-	createBiomeBlocks();
-	*/
 	return true;
 }
 

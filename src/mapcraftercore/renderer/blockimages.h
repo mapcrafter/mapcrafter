@@ -89,14 +89,8 @@ public:
 	virtual ~BlockImages();
 
 	virtual void setSettings(int texture_size, int rotation, bool render_unknown_blocks,
-		        bool render_leaves_transparent, const std::string& rendermode) = 0;
+			bool render_leaves_transparent, const std::string& rendermode) = 0;
 
-	virtual bool loadChests(const std::string& normal, const std::string& normal_double,
-			const std::string& ender,
-			const std::string& trapped, const std::string& trapped_double) = 0;
-	virtual bool loadColors(const std::string& foliagecolor, const std::string& grasscolor) = 0;
-	virtual bool loadOther(const std::string& endportal) = 0;
-	virtual bool loadBlocks(const std::string& block_dir) = 0;
 	virtual bool loadAll(const std::string& textures_dir) = 0;
 	virtual bool saveBlocks(const std::string& filename) = 0;
 

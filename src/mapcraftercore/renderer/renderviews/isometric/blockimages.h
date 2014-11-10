@@ -126,18 +126,6 @@ const int DOOR_WEST = 128;
 const int DOOR_TOP = 256;
 const int DOOR_FLIP_X = 512;
 
-const int CHEST_FRONT = 0;
-const int CHEST_SIDE = 1;
-const int CHEST_TOP = 2;
-
-const int LARGECHEST_FRONT_LEFT = 0;
-const int LARGECHEST_FRONT_RIGHT = 1;
-const int LARGECHEST_SIDE = 2;
-const int LARGECHEST_TOP_LEFT = 3;
-const int LARGECHEST_TOP_RIGHT = 4;
-const int LARGECHEST_BACK_LEFT = 5;
-const int LARGECHEST_BACK_RIGHT = 6;
-
 const int LARGECHEST_DATA_LARGE = 256;
 const int LARGECHEST_DATA_LEFT = 512;
 
@@ -258,18 +246,6 @@ private:
 
 	BlockImageTextureResources resources;
 	RGBAImage empty_texture;
-
-	/*
-	BlockTextures textures;
-	RGBAImage empty_texture;
-	RGBAImage endportal_texture;
-
-	RGBAImage chest_normal[3], chest_normal_double[7];
-	RGBAImage chest_ender[3];
-	RGBAImage chest_trapped[3], chest_trapped_double[7];
-
-	RGBAImage foliagecolors, grasscolors;
-	*/
 
 	int max_water;
 	RGBAImage opaque_water[4];
@@ -404,12 +380,6 @@ public:
 	void setSettings(int texture_size, int rotation, bool render_unknown_blocks,
 	        bool render_leaves_transparent, const std::string& rendermode);
 
-	bool loadChests(const std::string& normal, const std::string& normal_double,
-	        const std::string& ender,
-	        const std::string& trapped, const std::string& trapped_double);
-	bool loadColors(const std::string& foliagecolor, const std::string& grasscolor);
-	bool loadOther(const std::string& endportal);
-	bool loadBlocks(const std::string& block_dir);
 	bool loadAll(const std::string& textures_dir);
 	bool saveBlocks(const std::string& filename);
 
