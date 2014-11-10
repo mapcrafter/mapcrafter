@@ -21,6 +21,7 @@
 #define BLOCKIMAGES_H_
 
 #include "biomes.h"
+#include "blocktextures.h"
 #include "image.h"
 
 #include <string>
@@ -28,6 +29,60 @@
 
 namespace mapcrafter {
 namespace renderer {
+
+class BlockImageTextureResources {
+public:
+	BlockImageTextureResources();
+	~BlockImageTextureResources();
+
+	void setTextureSize(int texture_size);
+
+	bool loadChests(const std::string& normal, const std::string& normal_double,
+			const std::string& ender,
+			const std::string& trapped, const std::string& trapped_double);
+	bool loadColors(const std::string& foliagecolor, const std::string& grasscolor);
+	bool loadOther(const std::string& endportal);
+	bool loadBlocks(const std::string& block_dir);
+	bool loadAll(const std::string& textures_dir);
+	bool saveBlocks(const std::string& filename);
+
+	const BlockTextures& getBlockTextures() const;
+	const RGBAImage& getEndportalTexture() const;
+
+	const RGBAImage* getNormalChest() const;
+	const RGBAImage* getNormalDoubleChest() const;
+	const RGBAImage* getEnderChest() const;
+	const RGBAImage* getTrappedChest() const;
+	const RGBAImage* getTrappedDoubleChest() const;
+
+	const RGBAImage& getFoliageColors() const;
+	const RGBAImage& getGrassColors() const;
+
+	static const int CHEST_FRONT = 0;
+	static const int CHEST_SIDE = 1;
+	static const int CHEST_TOP = 2;
+
+	static const int LARGECHEST_FRONT_LEFT = 0;
+	static const int LARGECHEST_FRONT_RIGHT = 1;
+	static const int LARGECHEST_SIDE = 2;
+	static const int LARGECHEST_TOP_LEFT = 3;
+	static const int LARGECHEST_TOP_RIGHT = 4;
+	static const int LARGECHEST_BACK_LEFT = 5;
+	static const int LARGECHEST_BACK_RIGHT = 6;
+
+private:
+	int texture_size;
+
+	BlockTextures textures;
+	RGBAImage empty_texture;
+	RGBAImage endportal_texture;
+
+	RGBAImage chest_normal[3], chest_normal_double[7];
+	RGBAImage chest_ender[3];
+	RGBAImage chest_trapped[3], chest_trapped_double[7];
+
+	RGBAImage foliagecolors, grasscolors;
+};
 
 class BlockImages {
 public:
