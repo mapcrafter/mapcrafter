@@ -256,6 +256,10 @@ private:
 	bool render_unknown_blocks;
 	bool render_leaves_transparent;
 
+	BlockImageTextureResources resources;
+	RGBAImage empty_texture;
+
+	/*
 	BlockTextures textures;
 	RGBAImage empty_texture;
 	RGBAImage endportal_texture;
@@ -265,6 +269,7 @@ private:
 	RGBAImage chest_trapped[3], chest_trapped_double[7];
 
 	RGBAImage foliagecolors, grasscolors;
+	*/
 
 	int max_water;
 	RGBAImage opaque_water[4];
@@ -361,8 +366,8 @@ private:
 	void createStairs(uint16_t id, const RGBAImage& texture,
 			const RGBAImage& texture_top); // id 53, 67, 108, 109, 114, 128, 134, 135, 136, 180
 	void createStairs(uint16_t id, const RGBAImage& texture);
-	void createChest(uint16_t id, RGBAImage* textures); // id 54, 95, 130
-	void createDoubleChest(uint16_t id, RGBAImage* textures); // id 54
+	void createChest(uint16_t id, const RGBAImage* textures); // id 54, 95, 130
+	void createDoubleChest(uint16_t id, const RGBAImage* textures); // id 54
 	void createRedstoneWire(uint16_t id, uint16_t extra_data,
 			uint8_t r, uint8_t g, uint8_t b); // id 55
 	void createDoor(uint16_t id, const RGBAImage& bottom, const RGBAImage& top); // id 64, 71

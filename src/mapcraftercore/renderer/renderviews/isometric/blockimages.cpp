@@ -321,6 +321,7 @@ IsometricBlockImages::~IsometricBlockImages() {
 void IsometricBlockImages::setSettings(int texture_size, int rotation, bool render_unknown_blocks,
         bool render_leaves_transparent, const std::string& rendermode) {
 	this->texture_size = texture_size;
+	resources.setTextureSize(texture_size);
 	this->rotation = rotation;
 	this->render_unknown_blocks = render_unknown_blocks;
 	this->render_leaves_transparent = render_leaves_transparent;
@@ -427,6 +428,7 @@ bool loadDoubleChestTextures(const std::string& filename, RGBAImage* textures, i
 bool IsometricBlockImages::loadChests(const std::string& normal, const std::string& normal_double,
 		const std::string& ender,
 		const std::string& trapped, const std::string& trapped_double) {
+	/*
 	if (!loadChestTextures(normal, chest_normal, texture_size)
 			|| !loadDoubleChestTextures(normal_double, chest_normal_double, texture_size)
 			|| !loadChestTextures(ender, chest_ender, texture_size)
@@ -434,10 +436,13 @@ bool IsometricBlockImages::loadChests(const std::string& normal, const std::stri
 			|| !loadDoubleChestTextures(trapped_double, chest_trapped_double, texture_size))
 		return false;
 	return true;
+	*/
+	return true;
 }
 
 bool IsometricBlockImages::loadColors(const std::string& foliagecolor,
 		const std::string& grasscolor) {
+	/*
 	bool ok = true;
 	if (!foliagecolors.readPNG(foliagecolor)) {
 		LOG(ERROR) << "Unable to read '" << foliagecolor << "'.";
@@ -448,9 +453,12 @@ bool IsometricBlockImages::loadColors(const std::string& foliagecolor,
 		ok = false;
 	}
 	return ok;
+	*/
+	return true;
 }
 
 bool IsometricBlockImages::loadOther(const std::string& endportal) {
+	/*
 	RGBAImage endportal_img;
 	if(!endportal_img.readPNG(endportal)) {
 		LOG(ERROR) << "Unable to read '" << endportal << "'.";
@@ -458,10 +466,20 @@ bool IsometricBlockImages::loadOther(const std::string& endportal) {
 	}
 	endportal_img.resizeAuto(texture_size, texture_size, endportal_texture);
 	return true;
+	*/
+	return true;
 }
 
 bool IsometricBlockImages::loadBlocks(const std::string& block_dir) {
-	if (!textures.load(block_dir, texture_size))
+	//if (!textures.load(block_dir, texture_size))
+	//	return false;
+
+
+	return true;
+}
+
+bool IsometricBlockImages::loadAll(const std::string& textures_dir) {
+	if (!resources.loadAll(textures_dir))
 		return false;
 
 	empty_texture.setSize(texture_size, texture_size);
@@ -473,9 +491,8 @@ bool IsometricBlockImages::loadBlocks(const std::string& block_dir) {
 	testWaterTransparency();
 	createBiomeBlocks();
 	return true;
-}
 
-bool IsometricBlockImages::loadAll(const std::string& textures_dir) {
+	/*
 	bool ok = true;
 	if (!loadChests(textures_dir + "/entity/chest/normal.png",
 			textures_dir + "/entity/chest/normal_double.png",
@@ -495,6 +512,7 @@ bool IsometricBlockImages::loadAll(const std::string& textures_dir) {
 		return false;
 	}
 	return true;
+	*/
 }
 
 /**
@@ -733,9 +751,9 @@ RGBAImage IsometricBlockImages::createBiomeBlock(uint16_t id, uint16_t data,
 	// leaves have the foliage colors
 	// for birches, the color x/y coordinate is flipped
 	if (id == 18)
-		color = biome_data.getColor(foliagecolors, (data & util::binary<11>::value) == 2);
+		color = biome_data.getColor(resources.getFoliageColors(), (data & util::binary<11>::value) == 2);
 	else
-		color = biome_data.getColor(grasscolors, false);
+		color = biome_data.getColor(resources.getGrassColors(), false);
 
 	double r = (double) rgba_red(color) / 255;
 	double g = (double) rgba_green(color) / 255;
@@ -744,7 +762,7 @@ RGBAImage IsometricBlockImages::createBiomeBlock(uint16_t id, uint16_t data,
 	// grass block needs something special
 	if (id == 2) {
 		RGBAImage block = block_images.at(id | (data << 16));
-		RGBAImage side = textures.GRASS_SIDE_OVERLAY.colorize(r, g, b);
+		RGBAImage side = resources.getBlockTextures().GRASS_SIDE_OVERLAY.colorize(r, g, b);
 
 		// blit the side overlay over the block
 		blitFace(block, FACE_WEST, side, 0, 0, false);
@@ -787,7 +805,7 @@ void IsometricBlockImages::createBiomeBlocks() {
  */
 void IsometricBlockImages::testWaterTransparency() {
 	// just use the Ocean biome watercolor
-	RGBAImage water = textures.WATER_STILL.colorize(0, 0.39, 0.89);
+	RGBAImage water = resources.getBlockTextures().WATER_STILL.colorize(0, 0.39, 0.89);
 
 	// opaque_water[0] is water block when water texture is only on the top
 	opaque_water[0].setSize(getBlockImageSize(), getBlockImageSize());
@@ -1146,6 +1164,7 @@ void IsometricBlockImages::createSingleFaceBlock(uint16_t id, uint16_t data, int
 }
 
 void IsometricBlockImages::createGrassBlock() { // id 2
+	const BlockTextures& textures = resources.getBlockTextures();
 	RGBAImage dirt = textures.DIRT;
 
 	RGBAImage grass = dirt;
@@ -1170,7 +1189,7 @@ void IsometricBlockImages::createGrassBlock() { // id 2
 }
 
 void IsometricBlockImages::createWater() { // id 8, 9
-	RGBAImage water = textures.WATER_STILL.colorize(0, 0.39, 0.89);
+	RGBAImage water = resources.getBlockTextures().WATER_STILL.colorize(0, 0.39, 0.89);
 	for (int data = 0; data < 8; data++) {
 		int smaller = data / 8.0 * texture_size;
 		RGBAImage side_texture = water.move(0, smaller);
@@ -1210,7 +1229,7 @@ void IsometricBlockImages::createWater() { // id 8, 9
 }
 
 void IsometricBlockImages::createLava() { // id 10, 11
-	RGBAImage lava = textures.LAVA_STILL;
+	RGBAImage lava = resources.getBlockTextures().LAVA_STILL;
 	for (int data = 0; data < 8; data++) {
 		int smaller = data / 8.0 * texture_size;
 		RGBAImage side_texture = lava.move(0, smaller);
@@ -1242,6 +1261,7 @@ RGBAImage makeLeavesOpaque(const RGBAImage& texture, uint8_t color) {
 }
 
 void IsometricBlockImages::createLeaves() { // id 18
+	const BlockTextures& textures = resources.getBlockTextures();
 	if (render_leaves_transparent) {
 		createBlock(18, 0, textures.LEAVES_OAK); // oak
 		createBlock(18, 1, textures.LEAVES_SPRUCE); // pine/spruce
@@ -1269,8 +1289,8 @@ void IsometricBlockImages::createGlass(uint16_t id, uint16_t data, const RGBAIma
 }
 
 void IsometricBlockImages::createDispenserDropper(uint16_t id, const RGBAImage& front) { // id 23, 158
-	RGBAImage side = textures.FURNACE_SIDE;
-	RGBAImage top = textures.FURNACE_TOP;
+	RGBAImage side = resources.getBlockTextures().FURNACE_SIDE;
+	RGBAImage top = resources.getBlockTextures().FURNACE_TOP;
 
 	createRotatedBlock(id, 0, front, side, top);
 	createBlock(id, 0, side, top);
@@ -1295,6 +1315,7 @@ BlockImage buildBed(const RGBAImage& top, const RGBAImage& north_south, const RG
 }
 
 void IsometricBlockImages::createBed() { // id 26
+	const BlockTextures& textures = resources.getBlockTextures();
 	RGBAImage front = textures.BED_FEET_END;
 	RGBAImage side = textures.BED_FEET_SIDE;
 	RGBAImage top = textures.BED_FEET_TOP;
@@ -1375,6 +1396,7 @@ BlockImage buildPiston(int frontface, const RGBAImage& front, const RGBAImage& b
 }
 
 void IsometricBlockImages::createPiston(uint16_t id, bool sticky) { //  id 29, 33
+	const BlockTextures& textures = resources.getBlockTextures();
 	RGBAImage front = sticky ? textures.PISTON_TOP_STICKY : textures.PISTON_TOP_NORMAL;
 	RGBAImage side = textures.PISTON_SIDE;
 	RGBAImage back = textures.PISTON_BOTTOM;
@@ -1389,6 +1411,7 @@ void IsometricBlockImages::createPiston(uint16_t id, bool sticky) { //  id 29, 3
 }
 
 void IsometricBlockImages::createSlabs(uint16_t id, SlabType type, bool double_slabs) { // id 43, 44, 125, 126
+	const BlockTextures& textures = resources.getBlockTextures();
 	std::map<int, RGBAImage> slab_textures;
 	if (type == SlabType::STONE) {
 		// stone slabs
@@ -1478,7 +1501,7 @@ void IsometricBlockImages::createStairs(uint16_t id, const RGBAImage& texture) {
 	createStairs(id, texture, texture);
 }
 
-void IsometricBlockImages::createChest(uint16_t id, RGBAImage* textures) { // id 54, 130
+void IsometricBlockImages::createChest(uint16_t id, const RGBAImage* textures) { // id 54, 130
 	BlockImage chest;
 	chest.setFace(FACE_SOUTH, textures[CHEST_FRONT]);
 	chest.setFace(FACE_NORTH | FACE_EAST | FACE_WEST, textures[CHEST_SIDE]);
@@ -1490,7 +1513,7 @@ void IsometricBlockImages::createChest(uint16_t id, RGBAImage* textures) { // id
 	setBlockImage(id, DATA_WEST, buildImage(chest.rotate(1)));
 }
 
-void IsometricBlockImages::createDoubleChest(uint16_t id, RGBAImage* textures) { // id 54
+void IsometricBlockImages::createDoubleChest(uint16_t id, const RGBAImage* textures) { // id 54
 	BlockImage left, right;
 
 	// left side of the chest, south orientation
@@ -1519,8 +1542,8 @@ void IsometricBlockImages::createDoubleChest(uint16_t id, RGBAImage* textures) {
 
 void IsometricBlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data,
 		uint8_t r, uint8_t g, uint8_t b) { // id 55
-	RGBAImage redstone_cross = textures.REDSTONE_DUST_CROSS;
-	RGBAImage redstone_line = textures.REDSTONE_DUST_LINE;
+	RGBAImage redstone_cross = resources.getBlockTextures().REDSTONE_DUST_CROSS;
+	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE;
 
 	//uint8_t color = powered ? 50 : 255;
 	redstone_cross = redstone_cross.colorize(r, g, b);
@@ -1619,8 +1642,8 @@ void IsometricBlockImages::createDoor(uint16_t id, const RGBAImage& texture_bott
 }
 
 void IsometricBlockImages::createRails() { // id 66
-	RGBAImage texture = textures.RAIL_NORMAL;
-	RGBAImage corner_texture = textures.RAIL_NORMAL_TURNED;
+	RGBAImage texture = resources.getBlockTextures().RAIL_NORMAL;
+	RGBAImage corner_texture = resources.getBlockTextures().RAIL_NORMAL_TURNED;
 
 	createStraightRails(66, 0, texture);
 	createSingleFaceBlock(66, 6, FACE_BOTTOM, corner_texture.flip(false, true));
@@ -1652,7 +1675,7 @@ void IsometricBlockImages::createButton(uint16_t id, const RGBAImage& tex) { // 
 }
 
 void IsometricBlockImages::createSnow() { // id 78
-	RGBAImage snow = textures.SNOW;
+	RGBAImage snow = resources.getBlockTextures().SNOW;
 	for (int data = 0; data < 8; data++) {
 		int height = (data+1) / 8.0 * texture_size;
 		setBlockImage(78, data, buildSmallerBlock(snow, snow, snow, 0, height));
@@ -1660,7 +1683,7 @@ void IsometricBlockImages::createSnow() { // id 78
 }
 
 void IsometricBlockImages::createIce(uint8_t id) { // id 79
-	RGBAImage texture = textures.ICE;
+	RGBAImage texture = resources.getBlockTextures().ICE;
 
 	for (int w = 0; w <= 1; w++)
 		for (int s = 0; s <= 1; s++) {
@@ -1682,9 +1705,9 @@ void IsometricBlockImages::createIce(uint8_t id) { // id 79
 
 void IsometricBlockImages::createCactus() { // id 81
 	BlockImage block;
-	block.setFace(FACE_WEST, textures.CACTUS_SIDE, 2, 0);
-	block.setFace(FACE_SOUTH, textures.CACTUS_SIDE, -2, 0);
-	block.setFace(FACE_TOP, textures.CACTUS_TOP);
+	block.setFace(FACE_WEST, resources.getBlockTextures().CACTUS_SIDE, 2, 0);
+	block.setFace(FACE_SOUTH, resources.getBlockTextures().CACTUS_SIDE, -2, 0);
+	block.setFace(FACE_TOP, resources.getBlockTextures().CACTUS_TOP);
 	setBlockImage(81, 0, buildImage(block));
 }
 
@@ -1761,8 +1784,8 @@ void IsometricBlockImages::createFence(uint16_t id, uint16_t extra_data, const R
 }
 
 void IsometricBlockImages::createPumkin(uint16_t id, const RGBAImage& front) { // id 86, 91
-	RGBAImage side = textures.PUMPKIN_SIDE;
-	RGBAImage top = textures.PUMPKIN_TOP;
+	RGBAImage side = resources.getBlockTextures().PUMPKIN_SIDE;
+	RGBAImage top = resources.getBlockTextures().PUMPKIN_TOP;
 	createBlock(id, 0, side, front, top);
 	createBlock(id, 1, front, side, top);
 	createBlock(id, 2, side, side, top);
@@ -1772,9 +1795,9 @@ void IsometricBlockImages::createPumkin(uint16_t id, const RGBAImage& front) { /
 
 void IsometricBlockImages::createCake() { // id 92
 	BlockImage block;
-	block.setFace(FACE_WEST, textures.CAKE_SIDE, 1, 0);
-	block.setFace(FACE_SOUTH, textures.CAKE_SIDE, -1, 0);
-	block.setFace(FACE_TOP, textures.CAKE_TOP, 0, 9);
+	block.setFace(FACE_WEST, resources.getBlockTextures().CAKE_SIDE, 1, 0);
+	block.setFace(FACE_SOUTH, resources.getBlockTextures().CAKE_SIDE, -1, 0);
+	block.setFace(FACE_TOP, resources.getBlockTextures().CAKE_TOP, 0, 9);
 	setBlockImage(92, 0, buildImage(block));
 }
 
@@ -1822,8 +1845,8 @@ BlockImage buildHugeMushroom(const RGBAImage& pores, const RGBAImage& cap = RGBA
 }
 
 void IsometricBlockImages::createHugeMushroom(uint16_t id, const RGBAImage& cap) { // id 99, 100
-	RGBAImage pores = textures.MUSHROOM_BLOCK_INSIDE;
-	RGBAImage stem = textures.MUSHROOM_BLOCK_SKIN_STEM;
+	RGBAImage pores = resources.getBlockTextures().MUSHROOM_BLOCK_INSIDE;
+	RGBAImage stem = resources.getBlockTextures().MUSHROOM_BLOCK_SKIN_STEM;
 
 	setBlockImage(id, 0, buildHugeMushroom(pores));
 	setBlockImage(id, 1, buildHugeMushroom(pores, cap, FACE_TOP | FACE_WEST | FACE_NORTH));
@@ -1880,7 +1903,7 @@ void IsometricBlockImages::createBarsPane(uint16_t id, uint16_t extra_data,
 
 void IsometricBlockImages::createStem(uint16_t id) { // id 104, 105
 	// build here only growing normal stem
-	RGBAImage texture = textures.PUMPKIN_STEM_DISCONNECTED;
+	RGBAImage texture = resources.getBlockTextures().PUMPKIN_STEM_DISCONNECTED;
 
 	for (int i = 0; i <= 7; i++) {
 		double percentage = 1 - ((double) i / 7);
@@ -1894,7 +1917,7 @@ void IsometricBlockImages::createStem(uint16_t id) { // id 104, 105
 }
 
 void IsometricBlockImages::createVines() { // id 106
-	RGBAImage texture = textures.VINE;
+	RGBAImage texture = resources.getBlockTextures().VINE;
 
 	createSingleFaceBlock(106, 0, FACE_TOP, texture);
 	for (int i = 1; i < 16; i++) {
@@ -1967,6 +1990,7 @@ void IsometricBlockImages::createFenceGate(uint8_t id, RGBAImage texture) { // i
 }
 
 void IsometricBlockImages::createBrewingStand() { // id 117
+	const BlockTextures& textures = resources.getBlockTextures();
 	RGBAImage block(getBlockImageSize(), getBlockImageSize());
 	blitFace(block, FACE_BOTTOM, textures.BREWING_STAND_BASE);
 	blitItemStyleBlock(block, textures.BREWING_STAND, textures.BREWING_STAND);
@@ -1974,8 +1998,8 @@ void IsometricBlockImages::createBrewingStand() { // id 117
 }
 
 void IsometricBlockImages::createCauldron() { // id 118
-	RGBAImage side = textures.CAULDRON_SIDE;
-	RGBAImage water = textures.WATER_STILL;
+	RGBAImage side = resources.getBlockTextures().CAULDRON_SIDE;
+	RGBAImage water = resources.getBlockTextures().WATER_STILL;
 
 	for (int i = 0; i < 4; i++) {
 		RGBAImage block(getBlockImageSize(), getBlockImageSize());
@@ -1997,7 +2021,7 @@ void IsometricBlockImages::createDragonEgg() { // id 122
 	// create an half circle of the dragon egg texture
 	// to create an item style block with this texture
 
-	RGBAImage texture = textures.DRAGON_EGG;
+	RGBAImage texture = resources.getBlockTextures().DRAGON_EGG;
 
 	// the formula for an half circle is sqrt(r*r - x*x)
 	// the circle would go from -r to +r
@@ -2017,6 +2041,7 @@ void IsometricBlockImages::createDragonEgg() { // id 122
 }
 
 RGBAImage IsometricBlockImages::buildCocoa(int stage) {
+	const BlockTextures& textures = resources.getBlockTextures();
 	RGBAImage texture;
 	if (stage == 0)
 		texture = textures.COCOA_STAGE_0.getOriginal();
@@ -2073,10 +2098,10 @@ void IsometricBlockImages::createCocoas() { // id 127
 }
 
 void IsometricBlockImages::createTripwireHook() { // id 131
-	RGBAImage tripwire = textures.REDSTONE_DUST_LINE.colorize((uint8_t) 192, 192, 192);
+	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE.colorize((uint8_t) 192, 192, 192);
 
 	BlockImage block;
-	block.setFace(FACE_NORTH, textures.TRIP_WIRE_SOURCE);
+	block.setFace(FACE_NORTH, resources.getBlockTextures().TRIP_WIRE_SOURCE);
 	block.setFace(FACE_BOTTOM, tripwire);
 
 	setBlockImage(131, 0, block); // trip wire hook on the north side
@@ -2086,6 +2111,7 @@ void IsometricBlockImages::createTripwireHook() { // id 131
 }
 
 void IsometricBlockImages::createBeacon() { // id 138
+	const BlockTextures& textures = resources.getBlockTextures();
 	RGBAImage beacon(texture_size * 2, texture_size * 2);
 
 	// at first create this little block in the middle
@@ -2115,6 +2141,7 @@ void IsometricBlockImages::createBeacon() { // id 138
 }
 
 void IsometricBlockImages::createFlowerPot() { // id 140
+	const BlockTextures& textures = resources.getBlockTextures();
 	double s = (double) textures.FLOWER_POT.getOriginal().getWidth() / 16;
 	RGBAImage tmptex = textures.FLOWER_POT.getOriginal().clip(s*5, s*10, s*6, s*6);
 	RGBAImage pot_texture;
@@ -2175,7 +2202,7 @@ void IsometricBlockImages::loadBlocks() {
 	buildCustomTextures();
 	unknown_block = buildImage(BlockImage().setFace(util::binary<11111>::value, unknown_block));
 
-	BlockTextures& t = textures;
+	const BlockTextures& t = resources.getBlockTextures();
 
 	createBlock(1, 0, t.STONE); // stone
 	createBlock(1, 1, t.STONE_GRANITE); // granite
@@ -2292,8 +2319,8 @@ void IsometricBlockImages::loadBlocks() {
 	createItemStyleBlock(51, 0, t.FIRE_LAYER_0); // fire
 	createBlock(52, 0, t.MOB_SPAWNER); // monster spawner
 	createStairs(53, t.PLANKS_OAK); // oak wood stairs
-	createChest(54, chest_normal); // chest
-	createDoubleChest(54, chest_normal_double); // chest
+	createChest(54, resources.getNormalChest()); // chest
+	createDoubleChest(54, resources.getNormalDoubleChest()); // chest
 	createRedstoneWire(55, 0, 48, 0, 0); // redstone wire not powered
 	createRedstoneWire(55, REDSTONE_POWERED, 192, 0, 0); // redstone wire powered
 	createBlock(56, 0, t.DIAMOND_ORE); // diamond ore
@@ -2405,7 +2432,7 @@ void IsometricBlockImages::loadBlocks() {
 			t.ENCHANTING_TABLE_TOP, 0, texture_size * 0.75); // enchantment table
 	createBrewingStand(); // id 117
 	createCauldron(); // id 118 // cauldron
-	createSmallerBlock(119, 0, endportal_texture, endportal_texture,
+	createSmallerBlock(119, 0, resources.getEndportalTexture(), resources.getEndportalTexture(),
 			texture_size * 0.25, texture_size * 0.75); // end portal
 	createSmallerBlock(120, 0, t.ENDFRAME_SIDE, t.ENDFRAME_TOP, 0,
 			texture_size * 0.8125); // end portal frame
@@ -2418,7 +2445,7 @@ void IsometricBlockImages::loadBlocks() {
 	createCocoas(); // id 127
 	createStairs(128, t.SANDSTONE_NORMAL, t.SANDSTONE_TOP); // sandstone stairs
 	createBlock(129, 0, t.EMERALD_ORE); // emerald ore
-	createChest(130, chest_ender); // ender chest
+	createChest(130, resources.getEnderChest()); // ender chest
 	createTripwireHook(); // tripwire hook
 	createRedstoneWire(132, 0, 192, 192, 192); // tripwire
 	createBlock(133, 0, t.EMERALD_BLOCK); // block of emerald
@@ -2453,8 +2480,8 @@ void IsometricBlockImages::loadBlocks() {
 	createButton(143, t.PLANKS_OAK); // wooden button
 	// id 144 // head
 	// id 145 // anvil
-	createChest(146, chest_trapped); // trapped chest
-	createDoubleChest(146, chest_trapped_double); // double trapped chest
+	createChest(146, resources.getTrappedChest()); // trapped chest
+	createDoubleChest(146, resources.getTrappedDoubleChest()); // double trapped chest
 	createSmallerBlock(147, 0, t.GOLD_BLOCK, t.GOLD_BLOCK, 0, 1); // weighted pressure plate (light)
 	createSmallerBlock(148, 0, t.QUARTZ_BLOCK_LINES, t.QUARTZ_BLOCK_LINES, 0, 1); // weighted pressure plate (heavy)
 	createRedstoneRepeater(149, t.COMPARATOR_OFF); // redstone comparator (inactive)
