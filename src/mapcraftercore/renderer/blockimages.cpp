@@ -21,6 +21,9 @@
 
 #include "../util.h"
 
+#include <map>
+#include <vector>
+
 namespace mapcrafter {
 namespace renderer {
 
@@ -234,6 +237,168 @@ const RGBAImage& BlockImageTextureResources::getGrassColors() const {
 }
 
 BlockImages::~BlockImages() {
+}
+
+AbstractBlockImages::~AbstractBlockImages() {
+
+}
+
+void AbstractBlockImages::setSettings(int texture_size, int rotation,
+		bool render_unknown_blocks, bool render_leaves_transparent,
+		const std::string& rendermode) {
+	this->texture_size = texture_size;
+	resources.setTextureSize(texture_size);
+	this->rotation = rotation;
+	this->render_unknown_blocks = render_unknown_blocks;
+	this->render_leaves_transparent = render_leaves_transparent;
+
+	/*
+	// TODO
+	if (rendermode == "daylight" || rendermode == "nightlight") {
+		dleft = 0.95;
+		dright = 0.8;
+	}
+	*/
+}
+
+bool AbstractBlockImages::loadAll(const std::string& textures_dir) {
+	if (!resources.loadAll(textures_dir))
+		return false;
+
+	unknown_block = createUnknownBlock();
+	createBlocks();
+	createBiomeBlocks();
+
+	return true;
+}
+
+namespace {
+
+/**
+ * Comparator to sort the block int's with id and data.
+ */
+struct block_comparator {
+	bool operator()(uint32_t b1, uint32_t b2) const {
+		uint16_t id1 = b1 & 0xffff;
+		uint16_t id2 = b2 & 0xffff;
+		if (id1 != id2)
+			return id1 < id2;
+		uint16_t data1 = (b1 & 0xffff0000) >> 16;
+		uint16_t data2 = (b2 & 0xffff0000) >> 16;
+		return data1 < data2;
+	}
+};
+
+}
+
+bool AbstractBlockImages::saveBlocks(const std::string& filename) {
+	std::map<uint32_t, RGBAImage, block_comparator> blocks_sorted;
+	for (auto it = block_images.begin(); it != block_images.end(); ++it) {
+		uint16_t data = (it->first & 0xffff0000) >> 16;
+		if ((data & (EDGE_NORTH | EDGE_EAST | EDGE_BOTTOM)) == 0)
+			blocks_sorted[it->first] = it->second;
+	}
+
+	std::vector<RGBAImage> blocks;
+	for (auto it = blocks_sorted.begin(); it != blocks_sorted.end(); ++it)
+		blocks.push_back(it->second);
+
+	/*
+	blocks.push_back(opaque_water[0]);
+	blocks.push_back(opaque_water[1]);
+	blocks.push_back(opaque_water[2]);
+	blocks.push_back(opaque_water[3]);
+	*/
+
+	/*
+	for (std::unordered_map<uint64_t, RGBAImage>::const_iterator it = biome_images.begin();
+			it != biome_images.end(); ++it)
+		blocks.push_back(it->second);
+	*/
+
+	int blocksize = getBlockImageSize();
+	int width = 16;
+	int height = std::ceil(blocks.size() / (double) width);
+	RGBAImage img(width * blocksize, height * blocksize);
+
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			int offset = y * width + x;
+			if ((size_t) offset >= blocks.size())
+				break;
+			img.alphablit(blocks.at(offset), x * blocksize, y * blocksize);
+		}
+	}
+	std::cout << block_images.size() << " blocks" << std::endl;
+	std::cout << "all: " << blocks.size() << std::endl;
+
+	return img.writePNG(filename);
+}
+
+bool AbstractBlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
+	data = filterBlockData(id, data);
+	// remove edge data
+	data &= ~(EDGE_NORTH | EDGE_EAST | EDGE_BOTTOM);
+
+	// special case for doors because they are only used with special data
+	// and not with the original minecraft data
+	// without this the lighting code for example would need to filter the door data
+	// FIXME
+	if (id == 64 || id == 71)
+		return true;
+	if (block_images.count(id | (data << 16)) == 0)
+		return !render_unknown_blocks;
+	return block_transparency.count(id | (data << 16)) != 0;
+}
+
+bool AbstractBlockImages::hasBlock(uint16_t id, uint16_t data) const {
+	return block_images.count(id | (data << 16)) != 0;
+}
+
+const RGBAImage& AbstractBlockImages::getBlock(uint16_t id, uint16_t data) const {
+	data = filterBlockData(id, data);
+	if (!hasBlock(id, data))
+		return unknown_block;
+	return block_images.at(id | (data << 16));
+}
+
+RGBAImage AbstractBlockImages::getBiomeDependBlock(uint16_t id, uint16_t data,
+		const Biome& biome) const {
+	data = filterBlockData(id, data);
+	// return normal block for the snowy grass block
+	if (id == 2 && (data & GRASS_SNOW))
+		return getBlock(id, data);
+
+	if (!hasBlock(id, data))
+		return unknown_block;
+
+	// check if this biome block is precalculated
+	if (biome == getBiome(biome.getID())) {
+		int64_t key = id | (((int64_t) data) << 16) | (((int64_t) biome.getID()) << 32);
+		if (!biome_images.count(key))
+			return unknown_block;
+		return biome_images.at(key);
+	}
+
+	// create the block if not
+	return createBiomeBlock(id, data, biome);
+}
+
+int AbstractBlockImages::getTextureSize() const {
+	return texture_size;
+}
+
+void AbstractBlockImages::setBlockImage(uint16_t id, uint16_t data,
+		const RGBAImage& block) {
+	block_images[id | (data << 16)] = block;
+
+	// check if block contains transparency
+	if (checkImageTransparency(block))
+		block_transparency.insert(id | (data << 16));
+	// TODO in IsometricBlockImages
+	// if block is not transparent, add shadow edges
+	//else
+	//	addBlockShadowEdges(id, data, block);
 }
 
 }

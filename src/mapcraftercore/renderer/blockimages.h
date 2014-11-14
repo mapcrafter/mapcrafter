@@ -25,10 +25,49 @@
 #include "image.h"
 
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <cstdint>
 
 namespace mapcrafter {
 namespace renderer {
+
+// extra data starting at the 5. bit
+const int DATA_NORTH = 16;
+const int DATA_EAST = 32;
+const int DATA_SOUTH = 64;
+const int DATA_WEST = 128;
+const int DATA_TOP = 256;
+
+// the last three bits of 2 bytes
+const int EDGE_NORTH = 8192;
+const int EDGE_EAST = 16384;
+const int EDGE_BOTTOM = 32768;
+
+// some data values and stuff for special blocks
+const int GRASS_SNOW = 16;
+
+const int DOOR_NORTH = 16;
+const int DOOR_SOUTH = 32;
+const int DOOR_EAST = 64;
+const int DOOR_WEST = 128;
+const int DOOR_TOP = 256;
+const int DOOR_FLIP_X = 512;
+
+const int LARGECHEST_DATA_LARGE = 256;
+const int LARGECHEST_DATA_LEFT = 512;
+
+const int REDSTONE_NORTH = 16;
+const int REDSTONE_EAST = 32;
+const int REDSTONE_SOUTH = 64;
+const int REDSTONE_WEST = 128;
+const int REDSTONE_TOPNORTH = 256;
+const int REDSTONE_TOPEAST = 512;
+const int REDSTONE_TOPSOUTH = 1024;
+const int REDSTONE_TOPWEST = 2048;
+const int REDSTONE_POWERED = 4096;
+
+const int LARGEPLANT_TOP = 16;
 
 class BlockImageTextureResources {
 public:
@@ -102,9 +141,63 @@ public:
 	virtual int getMaxWaterNeededOpaque() const = 0;
 	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const = 0;
 
-	virtual int getBlockImageSize() const = 0;
 	virtual int getTextureSize() const = 0;
+	virtual int getBlockImageSize() const = 0;
 	virtual int getTileSize() const = 0;
+};
+
+class AbstractBlockImages : public BlockImages {
+public:
+	virtual ~AbstractBlockImages();
+
+	virtual void setSettings(int texture_size, int rotation, bool render_unknown_blocks,
+			bool render_leaves_transparent, const std::string& rendermode);
+
+	virtual bool loadAll(const std::string& textures_dir);
+	virtual bool saveBlocks(const std::string& filename);
+
+	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const;
+	virtual bool hasBlock(uint16_t id, uint16_t) const;
+	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data) const;
+	virtual RGBAImage getBiomeDependBlock(uint16_t id, uint16_t data, const Biome& biome) const;
+
+	virtual int getMaxWaterNeededOpaque() const = 0;
+	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const = 0;
+
+	int getTextureSize() const;
+	virtual int getBlockImageSize() const = 0;
+	virtual int getTileSize() const = 0;
+
+protected:
+	virtual uint16_t filterBlockData(uint16_t id, uint16_t data) const = 0;
+	virtual bool checkImageTransparency(const RGBAImage& block) const = 0;
+
+	void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
+
+	virtual RGBAImage createUnknownBlock() const = 0;
+	virtual RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome_data) const = 0;
+
+	virtual void createBlocks() = 0;
+	virtual void createBiomeBlocks() = 0;
+
+	int texture_size;
+	int rotation;
+	bool render_unknown_blocks;
+	bool render_leaves_transparent;
+
+	BlockImageTextureResources resources;
+	RGBAImage empty_texture;
+
+	// map of block images
+	// key is a 32 bit integer, first two bytes id, second two bytes data
+	std::unordered_map<uint32_t, RGBAImage> block_images;
+
+	// map of biome block images, first four bytes id+data, next byte is the biome id
+	std::unordered_map<uint64_t, RGBAImage> biome_images;
+
+	// set of id/data block combinations, which contain transparency
+	std::unordered_set<uint32_t> block_transparency;
+	RGBAImage unknown_block;
 };
 
 }

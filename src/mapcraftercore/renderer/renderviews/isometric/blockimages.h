@@ -104,43 +104,6 @@ const int FACE_WEST = 8;
 const int FACE_TOP = 16;
 const int FACE_BOTTOM = 32;
 
-// extra data starting at the 5. bit
-const int DATA_NORTH = 16;
-const int DATA_EAST = 32;
-const int DATA_SOUTH = 64;
-const int DATA_WEST = 128;
-const int DATA_TOP = 256;
-
-// the last three bits of 2 bytes
-const int EDGE_NORTH = 8192;
-const int EDGE_EAST = 16384;
-const int EDGE_BOTTOM = 32768;
-
-// some data values and stuff for special blocks
-const int GRASS_SNOW = 16;
-
-const int DOOR_NORTH = 16;
-const int DOOR_SOUTH = 32;
-const int DOOR_EAST = 64;
-const int DOOR_WEST = 128;
-const int DOOR_TOP = 256;
-const int DOOR_FLIP_X = 512;
-
-const int LARGECHEST_DATA_LARGE = 256;
-const int LARGECHEST_DATA_LEFT = 512;
-
-const int REDSTONE_NORTH = 16;
-const int REDSTONE_EAST = 32;
-const int REDSTONE_SOUTH = 64;
-const int REDSTONE_WEST = 128;
-const int REDSTONE_TOPNORTH = 256;
-const int REDSTONE_TOPEAST = 512;
-const int REDSTONE_TOPSOUTH = 1024;
-const int REDSTONE_TOPWEST = 2048;
-const int REDSTONE_POWERED = 4096;
-
-const int LARGEPLANT_TOP = 16;
-
 enum class SlabType {
 	STONE, STONE2, WOOD
 };
