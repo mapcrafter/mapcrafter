@@ -228,7 +228,7 @@ protected:
 	void addBlockShadowEdges(uint16_t id, uint16_t data, const RGBAImage& block);
 
 	void setBlockImage(uint16_t id, uint16_t data, const BlockImage& block);
-	void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
+	virtual void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
 
 	void testWaterTransparency();
 
