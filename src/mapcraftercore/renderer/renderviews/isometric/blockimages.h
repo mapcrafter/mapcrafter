@@ -200,16 +200,21 @@ public:
  * This class is responsible for reading the Minecraft textures and creating the block
  * images.
  */
-class IsometricBlockImages : public BlockImages {
-private:
-	int texture_size;
-	int rotation;
-	bool render_unknown_blocks;
-	bool render_leaves_transparent;
+class IsometricBlockImages : public AbstractBlockImages {
+public:
+	IsometricBlockImages();
+	~IsometricBlockImages();
 
-	BlockImageTextureResources resources;
-	RGBAImage empty_texture;
+	void setSettings(int texture_size, int rotation, bool render_unknown_blocks,
+			bool render_leaves_transparent, const std::string& rendermode);
 
+	int getMaxWaterNeededOpaque() const;
+	const RGBAImage& getOpaqueWater(bool south, bool west) const;
+
+	int getBlockImageSize() const;
+	int getTileSize() const;
+
+protected:
 	int max_water;
 	RGBAImage opaque_water[4];
 	RGBAImage shadow_edge_masks[4];
@@ -218,36 +223,22 @@ private:
 	// defaults to 0.75 and 0.6
 	double dleft, dright;
 
-	// map of block images
-	// key is a 32 bit integer, first two bytes id, second two bytes data
-	std::unordered_map<uint32_t, RGBAImage> block_images;
-
-	// map of biome block images, first four bytes id+data, next byte is the biome id
-	std::unordered_map<uint64_t, RGBAImage> biome_images;
-
-	// set of id/data block combinations, which contain transparency
-	std::unordered_set<uint32_t> block_transparency;
-	RGBAImage unknown_block;
-
-	uint16_t filterBlockData(uint16_t id, uint16_t data) const;
-	bool checkImageTransparency(const RGBAImage& block) const;
+	virtual uint16_t filterBlockData(uint16_t id, uint16_t data) const;
+	virtual bool checkImageTransparency(const RGBAImage& block) const;
 	void addBlockShadowEdges(uint16_t id, uint16_t data, const RGBAImage& block);
 
 	void setBlockImage(uint16_t id, uint16_t data, const BlockImage& block);
 	void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
-
-	RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome_data) const;
-	void createBiomeBlocks();
 
 	void testWaterTransparency();
 
 	uint32_t darkenLeft(uint32_t pixel) const;
 	uint32_t darkenRight(uint32_t pixel) const;
 
-	RGBAImage buildImage(const BlockImage& image);
+	RGBAImage buildImage(const BlockImage& image) const;
 
 	BlockImage buildSmallerBlock(const RGBAImage& left_texture, const RGBAImage& right_texture,
-	        const RGBAImage& top_texture, int y1, int y2);
+	        const RGBAImage& top_texture, int y1, int y2) const;
 
 	RGBAImage buildStairsSouth(const RGBAImage& texture,
 			const RGBAImage& texture_top);
@@ -335,28 +326,10 @@ private:
 	void createFlowerPot(); // id 140
 	void createLargePlant(uint16_t data, const RGBAImage& texture, const RGBAImage& top_texture); // id 175
 
-	void loadBlocks();
-public:
-	IsometricBlockImages();
-	~IsometricBlockImages();
-
-	void setSettings(int texture_size, int rotation, bool render_unknown_blocks,
-	        bool render_leaves_transparent, const std::string& rendermode);
-
-	bool loadAll(const std::string& textures_dir);
-	bool saveBlocks(const std::string& filename);
-
-	bool isBlockTransparent(uint16_t id, uint16_t data) const;
-	bool hasBlock(uint16_t id, uint16_t) const;
-	const RGBAImage& getBlock(uint16_t id, uint16_t data) const;
-	RGBAImage getBiomeDependBlock(uint16_t id, uint16_t data, const Biome& biome) const;
-
-	int getMaxWaterNeededOpaque() const;
-	const RGBAImage& getOpaqueWater(bool south, bool west) const;
-
-	int getBlockImageSize() const;
-	int getTextureSize() const;
-	int getTileSize() const;
+	virtual RGBAImage createUnknownBlock() const;
+	virtual RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome_data) const;
+	virtual void createBlocks();
+	virtual void createBiomeBlocks();
 };
 
 }

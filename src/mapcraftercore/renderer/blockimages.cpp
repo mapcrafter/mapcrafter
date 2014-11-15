@@ -239,8 +239,11 @@ const RGBAImage& BlockImageTextureResources::getGrassColors() const {
 BlockImages::~BlockImages() {
 }
 
-AbstractBlockImages::~AbstractBlockImages() {
+AbstractBlockImages::AbstractBlockImages()
+	: texture_size(12), rotation(0), render_unknown_blocks(false), render_leaves_transparent(true) {
+}
 
+AbstractBlockImages::~AbstractBlockImages() {
 }
 
 void AbstractBlockImages::setSettings(int texture_size, int rotation,
@@ -265,6 +268,7 @@ bool AbstractBlockImages::loadAll(const std::string& textures_dir) {
 	if (!resources.loadAll(textures_dir))
 		return false;
 
+	empty_texture.setSize(texture_size, texture_size);
 	unknown_block = createUnknownBlock();
 	createBlocks();
 	createBiomeBlocks();

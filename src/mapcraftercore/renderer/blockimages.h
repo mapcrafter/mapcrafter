@@ -148,6 +148,7 @@ public:
 
 class AbstractBlockImages : public BlockImages {
 public:
+	AbstractBlockImages();
 	virtual ~AbstractBlockImages();
 
 	virtual void setSettings(int texture_size, int rotation, bool render_unknown_blocks,

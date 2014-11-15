@@ -310,9 +310,7 @@ RGBAImage BlockImage::buildImage(double dleft, double dright) const {
 }
 
 IsometricBlockImages::IsometricBlockImages()
-		: texture_size(12), rotation(0), render_unknown_blocks(false),
-		  render_leaves_transparent(false), max_water(99),
-		  dleft(0.75), dright(0.6) {
+	: AbstractBlockImages() {
 }
 
 IsometricBlockImages::~IsometricBlockImages() {
@@ -320,11 +318,8 @@ IsometricBlockImages::~IsometricBlockImages() {
 
 void IsometricBlockImages::setSettings(int texture_size, int rotation, bool render_unknown_blocks,
         bool render_leaves_transparent, const std::string& rendermode) {
-	this->texture_size = texture_size;
-	resources.setTextureSize(texture_size);
-	this->rotation = rotation;
-	this->render_unknown_blocks = render_unknown_blocks;
-	this->render_leaves_transparent = render_leaves_transparent;
+	AbstractBlockImages::setSettings(texture_size, rotation, render_unknown_blocks,
+			render_leaves_transparent, rendermode);
 
 	if (rendermode == "daylight" || rendermode == "nightlight") {
 		dleft = 0.95;
@@ -332,103 +327,21 @@ void IsometricBlockImages::setSettings(int texture_size, int rotation, bool rend
 	}
 }
 
-bool IsometricBlockImages::loadAll(const std::string& textures_dir) {
-	if (!resources.loadAll(textures_dir))
-		return false;
-
-	empty_texture.setSize(texture_size, texture_size);
-	unknown_block.setSize(texture_size, texture_size);
-	if (render_unknown_blocks)
-		unknown_block.fill(rgba(255, 0, 0, 255), 0, 0, texture_size, texture_size);
-
-	loadBlocks();
-	testWaterTransparency();
-	createBiomeBlocks();
-	return true;
+int IsometricBlockImages::getMaxWaterNeededOpaque() const {
+	return max_water;
 }
 
-/**
- * Comparator to sort the block int's with id and data.
- */
-struct block_comparator {
-	bool operator()(uint32_t b1, uint32_t b2) const {
-		uint16_t id1 = b1 & 0xffff;
-		uint16_t id2 = b2 & 0xffff;
-		if (id1 != id2)
-			return id1 < id2;
-		uint16_t data1 = (b1 & 0xffff0000) >> 16;
-		uint16_t data2 = (b2 & 0xffff0000) >> 16;
-		return data1 < data2;
-	}
-};
+const RGBAImage& IsometricBlockImages::getOpaqueWater(bool south, bool west) const {
+	int index = ((south ? 0 : 1) | ((west ? 0 : 1) << 1));
+	return opaque_water[index];
+}
 
-bool IsometricBlockImages::saveBlocks(const std::string& filename) {
-	std::map<uint32_t, RGBAImage, block_comparator> blocks_sorted;
-	for (auto it = block_images.begin(); it != block_images.end(); ++it) {
-		uint16_t data = (it->first & 0xffff0000) >> 16;
-		if ((data & (EDGE_NORTH | EDGE_EAST | EDGE_BOTTOM)) == 0)
-			blocks_sorted[it->first] = it->second;
-	}
+int IsometricBlockImages::getBlockImageSize() const {
+	return texture_size * 2;
+}
 
-		std::vector<RGBAImage> blocks;
-	for (auto it = blocks_sorted.begin(); it != blocks_sorted.end(); ++it)
-		blocks.push_back(it->second);
-
-	blocks.push_back(opaque_water[0]);
-	blocks.push_back(opaque_water[1]);
-	blocks.push_back(opaque_water[2]);
-	blocks.push_back(opaque_water[3]);
-
-	/*
-	for (std::unordered_map<uint64_t, RGBAImage>::const_iterator it = biome_images.begin();
-			it != biome_images.end(); ++it)
-		blocks.push_back(it->second);
-	*/
-
-	int blocksize = getBlockImageSize();
-	int width = 16;
-	int height = std::ceil(blocks.size() / (double) width);
-	RGBAImage img(width * blocksize, height * blocksize);
-
-	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width; x++) {
-			int offset = y * width + x;
-			if ((size_t) offset >= blocks.size())
-				break;
-			img.alphablit(blocks.at(offset), x * blocksize, y * blocksize);
-		}
-	}
-	std::cout << block_images.size() << " blocks" << std::endl;
-	std::cout << "all: " << blocks.size() << std::endl;
-
-	/*
-	srand(time(NULL));
-	BlockImage test(BlockImage::ITEM_STYLE);
-	//for(int i = 0; i < 6; i++)
-	//	test.setFace(1 << i, getTexture(rand() % 15, rand() % 15));
-	test.setFace(FACE_NORTH | FACE_SOUTH, getTexture(rand() % 15, rand() % 15));
-	test.setFace(FACE_EAST | FACE_WEST, getTexture(rand() % 15, rand() % 15));
-
-	RGBAImage testimg(32*5, 32);
-	for(int i = 0; i < 5; i++) {
-		BlockImage block = test.rotate(i);
-		RGBAImage test = block.buildImage();
-		testimg.simpleblit(test, i*32, 0);
-	}
-	testimg.writePNG("test.png");
-	*/
-
-	/*
-	RGBAImage terrain(texture_size * 16, texture_size * 16);
-	for (int x = 0; x < 16; x++) {
-		for (int y = 0; y < 16; y++) {
-			terrain.simpleblit(getTexture(x, y), texture_size * x, texture_size * y);
-		}
-	}
-	terrain.writePNG("test.png");
-	*/
-
-	return img.writePNG(filename);
+int IsometricBlockImages::getTileSize() const {
+	return texture_size * 2 * 16 * TILE_WIDTH;
 }
 
 /**
@@ -560,75 +473,12 @@ void IsometricBlockImages::setBlockImage(uint16_t id, uint16_t data, const Block
 	setBlockImage(id, data, buildImage(block.rotate(rotation)));
 }
 
-/**
- * Sets a block image in the block image list.
- */
 void IsometricBlockImages::setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block) {
-	block_images[id | (data << 16)] = block;
+	AbstractBlockImages::setBlockImage(id, data, block);
 
-	// check if block contains transparency
-	if (checkImageTransparency(block))
-		block_transparency.insert(id | (data << 16));
 	// if block is not transparent, add shadow edges
-	else
+	if (!isBlockTransparent(id, data))
 		addBlockShadowEdges(id, data, block);
-}
-
-RGBAImage IsometricBlockImages::createBiomeBlock(uint16_t id, uint16_t data,
-        const Biome& biome_data) const {
-	if (!block_images.count(id | (data << 16)))
-		return unknown_block;
-
-	uint32_t color;
-	// leaves have the foliage colors
-	// for birches, the color x/y coordinate is flipped
-	if (id == 18)
-		color = biome_data.getColor(resources.getFoliageColors(), (data & util::binary<11>::value) == 2);
-	else
-		color = biome_data.getColor(resources.getGrassColors(), false);
-
-	double r = (double) rgba_red(color) / 255;
-	double g = (double) rgba_green(color) / 255;
-	double b = (double) rgba_blue(color) / 255;
-
-	// grass block needs something special
-	if (id == 2) {
-		RGBAImage block = block_images.at(id | (data << 16));
-		RGBAImage side = resources.getBlockTextures().GRASS_SIDE_OVERLAY.colorize(r, g, b);
-
-		// blit the side overlay over the block
-		blitFace(block, FACE_WEST, side, 0, 0, false);
-		blitFace(block, FACE_SOUTH, side, 0, 0, false);
-
-		// now tint the top of the block
-		for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
-			uint32_t pixel = block.getPixel(it.dest_x, it.dest_y);
-			block.setPixel(it.dest_x, it.dest_y, rgba_multiply(pixel, r, g, b));
-		}
-
-		return block;
-	}
-
-	return block_images.at(id | (data << 16)).colorize(r, g, b);
-}
-
-void IsometricBlockImages::createBiomeBlocks() {
-	for (std::unordered_map<uint32_t, RGBAImage>::iterator it = block_images.begin();
-			it != block_images.end(); ++it) {
-		uint16_t id = it->first & 0xffff;
-		uint16_t data = (it->first & 0xffff0000) >> 16;
-
-		// check if this is a biome block
-		if (!Biome::isBiomeBlock(id, data))
-			continue;
-
-		for (size_t i = 0; i < BIOMES_SIZE; i++) {
-			Biome biome = BIOMES[i];
-			uint64_t b = biome.getID();
-			biome_images[id | ((uint64_t) data << 16) | (b << 32)] =
-					createBiomeBlock(id, data, biome);
-		}
-	}
 }
 
 /**
@@ -699,12 +549,12 @@ uint32_t IsometricBlockImages::darkenRight(uint32_t pixel) const {
 	return rgba_multiply(pixel, dright, dright, dright);
 }
 
-RGBAImage IsometricBlockImages::buildImage(const BlockImage& image) {
+RGBAImage IsometricBlockImages::buildImage(const BlockImage& image) const {
 	return image.buildImage(dleft, dright);
 }
 
 BlockImage IsometricBlockImages::buildSmallerBlock(const RGBAImage& left_texture,
-        const RGBAImage& right_texture, const RGBAImage& top_texture, int y1, int y2) {
+        const RGBAImage& right_texture, const RGBAImage& top_texture, int y1, int y2) const {
 	RGBAImage left = left_texture;
 	RGBAImage right = right_texture;
 	left.fill(0, 0, 0, texture_size, texture_size - y2);
@@ -2030,9 +1880,53 @@ void IsometricBlockImages::createLargePlant(uint16_t data, const RGBAImage& text
 	createItemStyleBlock(175, data | LARGEPLANT_TOP, top_texture);
 }
 
-void IsometricBlockImages::loadBlocks() {
+RGBAImage IsometricBlockImages::createUnknownBlock() const {
+	RGBAImage texture = empty_texture;
+	if (render_unknown_blocks)
+		texture.fill(rgba(255, 0, 0, 255), 0, 0, texture_size, texture_size);
+	return buildImage(BlockImage().setFace(util::binary<11111>::value, texture));
+}
+
+RGBAImage IsometricBlockImages::createBiomeBlock(uint16_t id, uint16_t data,
+        const Biome& biome_data) const {
+	if (!block_images.count(id | (data << 16)))
+		return unknown_block;
+
+	uint32_t color;
+	// leaves have the foliage colors
+	// for birches, the color x/y coordinate is flipped
+	if (id == 18)
+		color = biome_data.getColor(resources.getFoliageColors(), (data & util::binary<11>::value) == 2);
+	else
+		color = biome_data.getColor(resources.getGrassColors(), false);
+
+	double r = (double) rgba_red(color) / 255;
+	double g = (double) rgba_green(color) / 255;
+	double b = (double) rgba_blue(color) / 255;
+
+	// grass block needs something special
+	if (id == 2) {
+		RGBAImage block = block_images.at(id | (data << 16));
+		RGBAImage side = resources.getBlockTextures().GRASS_SIDE_OVERLAY.colorize(r, g, b);
+
+		// blit the side overlay over the block
+		blitFace(block, FACE_WEST, side, 0, 0, false);
+		blitFace(block, FACE_SOUTH, side, 0, 0, false);
+
+		// now tint the top of the block
+		for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
+			uint32_t pixel = block.getPixel(it.dest_x, it.dest_y);
+			block.setPixel(it.dest_x, it.dest_y, rgba_multiply(pixel, r, g, b));
+		}
+
+		return block;
+	}
+
+	return block_images.at(id | (data << 16)).colorize(r, g, b);
+}
+
+void IsometricBlockImages::createBlocks() {
 	buildCustomTextures();
-	unknown_block = buildImage(BlockImage().setFace(util::binary<11111>::value, unknown_block));
 
 	const BlockTextures& t = resources.getBlockTextures();
 
@@ -2449,76 +2343,27 @@ void IsometricBlockImages::loadBlocks() {
 	createDoor(195, t.DOOR_JUNGLE_LOWER, t.DOOR_JUNGLE_UPPER); // jungle door
 	createDoor(196, t.DOOR_ACACIA_LOWER, t.DOOR_ACACIA_UPPER); // acacia door
 	createDoor(197, t.DOOR_DARK_OAK_LOWER, t.DOOR_DARK_OAK_UPPER); // dark oak door
+
+	testWaterTransparency();
 }
 
-bool IsometricBlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
-	data = filterBlockData(id, data);
-	// remove edge data
-	data &= ~(EDGE_NORTH | EDGE_EAST | EDGE_BOTTOM);
+void IsometricBlockImages::createBiomeBlocks() {
+	for (std::unordered_map<uint32_t, RGBAImage>::iterator it = block_images.begin();
+			it != block_images.end(); ++it) {
+		uint16_t id = it->first & 0xffff;
+		uint16_t data = (it->first & 0xffff0000) >> 16;
 
-	// special case for doors because they are only used with special data
-	// and not with the original minecraft data
-	// without this the lighting code for example would need to filter the door data
-	// FIXME
-	if (id == 64 || id == 71)
-		return true;
-	if (block_images.count(id | (data << 16)) == 0)
-		return !render_unknown_blocks;
-	return block_transparency.count(id | (data << 16)) != 0;
-}
+		// check if this is a biome block
+		if (!Biome::isBiomeBlock(id, data))
+			continue;
 
-bool IsometricBlockImages::hasBlock(uint16_t id, uint16_t data) const {
-	return block_images.count(id | (data << 16)) != 0;
-}
-
-const RGBAImage& IsometricBlockImages::getBlock(uint16_t id, uint16_t data) const {
-	data = filterBlockData(id, data);
-	if (!hasBlock(id, data))
-		return unknown_block;
-	return block_images.at(id | (data << 16));
-}
-
-RGBAImage IsometricBlockImages::getBiomeDependBlock(uint16_t id, uint16_t data,
-        const Biome& biome) const {
-	data = filterBlockData(id, data);
-	// return normal block for the snowy grass block
-	if (id == 2 && (data & GRASS_SNOW))
-		return getBlock(id, data);
-
-	if (!hasBlock(id, data))
-		return unknown_block;
-
-	// check if this biome block is precalculated
-	if (biome == getBiome(biome.getID())) {
-		int64_t key = id | (((int64_t) data) << 16) | (((int64_t) biome.getID()) << 32);
-		if (!biome_images.count(key))
-			return unknown_block;
-		return biome_images.at(key);
+		for (size_t i = 0; i < BIOMES_SIZE; i++) {
+			Biome biome = BIOMES[i];
+			uint64_t b = biome.getID();
+			biome_images[id | ((uint64_t) data << 16) | (b << 32)] =
+					createBiomeBlock(id, data, biome);
+		}
 	}
-
-	// create the block if not
-	return createBiomeBlock(id, data, biome);
-}
-
-int IsometricBlockImages::getMaxWaterNeededOpaque() const {
-	return max_water;
-}
-
-const RGBAImage& IsometricBlockImages::getOpaqueWater(bool south, bool west) const {
-	int index = ((south ? 0 : 1) | ((west ? 0 : 1) << 1));
-	return opaque_water[index];
-}
-
-int IsometricBlockImages::getBlockImageSize() const {
-	return texture_size * 2;
-}
-
-int IsometricBlockImages::getTextureSize() const {
-	return texture_size;
-}
-
-int IsometricBlockImages::getTileSize() const {
-	return texture_size * 2 * 16 * TILE_WIDTH;
 }
 
 }
