@@ -173,7 +173,8 @@ protected:
 	virtual uint16_t filterBlockData(uint16_t id, uint16_t data) const = 0;
 	virtual bool checkImageTransparency(const RGBAImage& block) const = 0;
 
-	void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
+	// you can overwrite this if you need special handling of generated block images
+	virtual void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
 
 	virtual RGBAImage createUnknownBlock() const = 0;
 	virtual RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome_data) const = 0;
