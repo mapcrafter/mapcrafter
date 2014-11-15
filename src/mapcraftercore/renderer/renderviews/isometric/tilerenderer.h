@@ -96,24 +96,9 @@ class Rendermode;
  * Renders tiles from world data.
  */
 class IsometricTileRenderer : public TileRenderer {
-private:
-	RenderState state;
-
-	bool render_biomes;
-	bool water_preblit;
-
-	std::vector<std::shared_ptr<Rendermode>> rendermodes;
-
-	Biome getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk);
-
-	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 public:
 	IsometricTileRenderer();
-	IsometricTileRenderer(std::shared_ptr<mc::WorldCache> world,
-			std::shared_ptr<BlockImages> images,
-			const config::WorldSection& world_config,
-			const config::MapSection& map_config);
-	~IsometricTileRenderer();
+	virtual ~IsometricTileRenderer();
 
 	virtual void setStuff(std::shared_ptr<mc::WorldCache> world,
 			std::shared_ptr<BlockImages> images,
@@ -121,6 +106,11 @@ public:
 			const config::MapSection& map_config);
 
 	virtual void renderTile(const TilePos& tile_pos, const TilePos& tile_offset, RGBAImage& tile);
+
+protected:
+	bool water_preblit;
+
+	std::vector<std::shared_ptr<Rendermode>> rendermodes;
 };
 
 }
