@@ -121,11 +121,10 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		south = state.getBlock(pos + mc::DIR_SOUTH);
 		top = state.getBlock(pos + mc::DIR_TOP);
 
-		/*
 		// TODO
 		// check if the neighbors on visible faces (top, west, south)
 		// are also full water blocks
-		if (!water_preblit && top.isFullWater())
+		if (/*!water_preblit &&*/ top.isFullWater())
 			data |= DATA_TOP;
 
 		if (west.isFullWater())
@@ -133,7 +132,6 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 
 		if (south.isFullWater())
 			data |= DATA_SOUTH;
-		*/
 	} else if (id == 54 || id == 130 || id == 146) { // chests
 		// at first get all neighbor blocks
 		north = state.getBlock(pos + mc::DIR_NORTH);
