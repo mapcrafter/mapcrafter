@@ -143,7 +143,6 @@ public:
 
 	virtual int getTextureSize() const = 0;
 	virtual int getBlockImageSize() const = 0;
-	virtual int getTileSize() const = 0;
 };
 
 class AbstractBlockImages : public BlockImages {
@@ -167,7 +166,6 @@ public:
 
 	int getTextureSize() const;
 	virtual int getBlockImageSize() const = 0;
-	virtual int getTileSize() const = 0;
 
 protected:
 	virtual uint16_t filterBlockData(uint16_t id, uint16_t data) const = 0;

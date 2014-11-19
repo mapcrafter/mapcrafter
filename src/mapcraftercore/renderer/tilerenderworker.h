@@ -27,6 +27,7 @@
 #include "../mc/world.h"
 #include "../mc/worldcache.h"
 #include "../renderer/blockimages.h"
+#include "../renderer/renderview.h"
 #include "../renderer/tileset.h"
 #include "../util.h"
 
@@ -45,6 +46,7 @@ struct RenderContext {
 	config::WorldSection world_config;
 	config::MapSection map_config;
 
+	std::shared_ptr<renderer::RenderView> render_view;
 	std::shared_ptr<renderer::TileSet> tile_set;
 	std::shared_ptr<renderer::TileRenderer> tile_renderer;
 };

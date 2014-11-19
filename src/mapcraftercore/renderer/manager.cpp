@@ -21,6 +21,7 @@
 
 #include "renderviews/isometric/blockimages.h"
 #include "renderviews/isometric/renderview.h"
+#include "renderviews/topdown/renderview.h"
 #include "tilerenderworker.h"
 #include "../config/loggingconfig.h"
 #include "../thread/impl/singlethread.h"
@@ -410,7 +411,9 @@ void RenderManager::increaseMaxZoom(const fs::path& dir,
  */
 bool RenderManager::run() {
 
-	IsometricRenderView render_view;
+	// TODO
+	std::shared_ptr<RenderView> render_view(new IsometricRenderView);
+	//std::shared_ptr<RenderView> render_view(new TopdownRenderView);
 
 	// ###
 	// ### First big step: Load/parse/validate the configuration file
@@ -461,6 +464,8 @@ bool RenderManager::run() {
 	//    -> so the user can still view his already rendered maps while new ones are rendering
 	for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
 		confighelper.setUsedRotations(map_it->getWorld(), map_it->getRotations());
+		// TODO
+		confighelper.setMapTileSize(map_it->getShortName(), render_view->getTileSize(map_it->getTextureSize(), 1));
 		fs::path settings_file = config.getOutputPath(map_it->getShortName() + "/map.settings");
 		if (!fs::exists(settings_file))
 			continue;
@@ -513,7 +518,7 @@ bool RenderManager::run() {
 				return false;
 			}
 			// create a tileset for this world
-			std::shared_ptr<TileSet> tile_set(render_view.createTileSet());
+			std::shared_ptr<TileSet> tile_set(render_view->createTileSet());
 			// and scan for tiles of this world,
 			// we automatically center the tiles for cropped worlds, but only...
 			//  - the circular cropped ones and
@@ -666,7 +671,7 @@ bool RenderManager::run() {
 			fs::path output_dir = config.getOutputPath(map_name + "/"
 					+ config::ROTATION_NAMES_SHORT[rotation]);
 			// if incremental render scan which tiles might have changed
-			std::shared_ptr<TileSet> tile_set(render_view.createTileSet());
+			std::shared_ptr<TileSet> tile_set(render_view->createTileSet());
 			// TODO ewwwwwwww
 			tile_set->operator=(*tile_sets[world_name][rotation]);
 			if (confighelper.getRenderBehavior(map_name, rotation)
@@ -683,7 +688,7 @@ bool RenderManager::run() {
 			std::time_t time_start = std::time(nullptr);
 
 			// create block images
-			std::shared_ptr<BlockImages> block_images(render_view.createBlockImages());
+			std::shared_ptr<BlockImages> block_images(render_view->createBlockImages());
 			block_images->setSettings(map.getTextureSize(), rotation, map.renderUnknownBlocks(),
 					map.renderLeavesTransparent(), map.getRendermode());
 			// if textures do not work, it does not make much sense
@@ -702,7 +707,7 @@ bool RenderManager::run() {
 			std::shared_ptr<mc::WorldCache> world_cache(new mc::WorldCache(worlds[world_name][rotation]));
 			//std::shared_ptr<TileRenderer> tile_renderer(new TileRenderer(world_cache, block_images,
 			//		config.getWorld(world_name), config.getMap(map_name)));
-			std::shared_ptr<TileRenderer> tile_renderer(render_view.createTileRenderer());
+			std::shared_ptr<TileRenderer> tile_renderer(render_view->createTileRenderer());
 			tile_renderer->setStuff(world_cache, block_images, config.getWorld(world_name), config.getMap(map_name));
 
 			RenderContext context;
@@ -710,6 +715,7 @@ bool RenderManager::run() {
 			context.background_color = config.getBackgroundColor();
 			context.world_config = config.getWorld(map.getWorld());
 			context.map_config = map;
+			context.render_view = render_view;
 			context.tile_set = tile_set;
 			context.tile_renderer = tile_renderer;
 

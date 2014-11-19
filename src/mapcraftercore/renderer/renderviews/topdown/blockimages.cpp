@@ -30,10 +30,6 @@ int TopdownBlockImages::getBlockImageSize() const {
 	return texture_size;
 }
 
-int TopdownBlockImages::getTileSize() const {
-	return texture_size * 16;
-}
-
 uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	if (id == 6)
 		return data & (0xff00 | 0b00000011);

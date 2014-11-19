@@ -44,5 +44,13 @@ TileRenderer* TopdownRenderView::createTileRenderer() const {
 	return new TopdownTileRenderer();
 }
 
+int TopdownRenderView::getBlockSizeFactor() const {
+	return 1;
+}
+
+int TopdownRenderView::getTileSizeFactor() const {
+	return 16;
+}
+
 } /* namespace renderer */
 } /* namespace mapcrafter */

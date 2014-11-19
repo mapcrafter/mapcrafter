@@ -35,6 +35,10 @@ public:
 	virtual BlockImages* createBlockImages() const = 0;
 	virtual TileSet* createTileSet() const = 0;
 	virtual TileRenderer* createTileRenderer() const = 0;
+
+	virtual int getBlockSizeFactor() const = 0;
+	virtual int getTileSizeFactor() const = 0;
+	virtual int getTileSize(int texture_size, int tile_chunk_width) const;
 };
 
 } /* namespace renderer */

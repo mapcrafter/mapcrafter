@@ -115,7 +115,9 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 		// this tile is a composite tile, we need to compose it from its children
 		// just check, if children 1, 2, 3, 4 exists, render it, resize it to the half size
 		// and blit it to the properly position
-		int size = render_context.map_config.getTextureSize() * 32 * TILE_WIDTH;
+		//int size = render_context.map_config.getTextureSize() * 32 * TILE_WIDTH;
+		// TODO
+		int size = render_context.render_view->getTileSize(render_context.map_config.getTextureSize(), 1);
 		image.setSize(size, size);
 
 		RGBAImage other;

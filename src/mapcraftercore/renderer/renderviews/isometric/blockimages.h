@@ -212,7 +212,6 @@ public:
 	const RGBAImage& getOpaqueWater(bool south, bool west) const;
 
 	int getBlockImageSize() const;
-	int getTileSize() const;
 
 protected:
 	int max_water;

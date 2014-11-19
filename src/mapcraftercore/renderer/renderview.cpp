@@ -28,5 +28,9 @@ RenderView::RenderView() {
 RenderView::~RenderView() {
 }
 
+int RenderView::getTileSize(int texture_size, int tile_chunk_width) const {
+	return texture_size * getBlockSizeFactor() * getTileSizeFactor() * tile_chunk_width;
+}
+
 } /* namespace renderer */
 } /* namespace mapcrafter */

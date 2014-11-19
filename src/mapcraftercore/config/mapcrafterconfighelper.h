@@ -36,8 +36,7 @@ private:
 	MapcrafterConfig config;
 
 	std::map<std::string, std::set<int> > world_rotations;
-	std::map<std::string, int> world_zoomlevels;
-	std::map<std::string, int> map_zoomlevels;
+	std::map<std::string, int> map_tile_sizes, world_zoomlevels, map_zoomlevels;
 	std::map<std::string, std::array<renderer::TilePos, 4> > world_tile_offsets;
 
 	std::map<std::string, std::array<int, 4> > render_behaviors;
@@ -52,6 +51,9 @@ public:
 
 	const std::set<int>& getUsedRotations(const std::string& world) const;
 	void setUsedRotations(const std::string& world, const std::set<int>& rotations);
+
+	int getMapTileSize(const std::string& map) const;
+	void setMapTileSize(const std::string& map, int tile_size);
 
 	int getWorldZoomlevel(const std::string& world) const;
 	int getMapZoomlevel(const std::string& map) const;

@@ -150,7 +150,8 @@ void IsometricTileRenderer::setStuff(std::shared_ptr<mc::WorldCache> world,
 void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 	// some vars, set correct image size
 	int block_size = state.images->getBlockImageSize();
-	int tile_size = state.images->getTileSize();
+	// TODO
+	int tile_size = block_size * 16;
 	tile.setSize(tile_size, tile_size);
 
 	// get the maximum count of water blocks

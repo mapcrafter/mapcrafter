@@ -340,10 +340,6 @@ int IsometricBlockImages::getBlockImageSize() const {
 	return texture_size * 2;
 }
 
-int IsometricBlockImages::getTileSize() const {
-	return texture_size * 2 * 16 * TILE_WIDTH;
-}
-
 /**
  * This method filters unnecessary block data, for example the leaves decay counter.
  */

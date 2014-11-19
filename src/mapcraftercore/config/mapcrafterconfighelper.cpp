@@ -29,6 +29,7 @@ MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfig& config)
 	: config(config) {
 	auto maps = config.getMaps();
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
+		map_tile_sizes[map_it->getShortName()] = 0;
 		map_zoomlevels[map_it->getShortName()] = 0;
 		for (int i = 0; i < 4; i++)
 			render_behaviors[map_it->getShortName()][i] = RENDER_AUTO;
@@ -57,7 +58,7 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 		js += "\tworld: \"" + it->getWorld() + "\",\n";
 		js += "\tworldName: \"" + world.getWorldName() + "\",\n";
 		js += "\ttextureSize: " + util::str(it->getTextureSize()) + ",\n";
-		js += "\ttileSize: " + util::str(32 * it->getTextureSize()) + ",\n";
+		js += "\ttileSize: " + util::str(getMapTileSize(it->getShortName())) + ",\n";
 		js += "\tmaxZoom: " + util::str(getMapZoomlevel(it->getShortName())) + ",\n";
 		js += "\timageFormat: \"" + it->getImageFormatSuffix() + "\",\n";
 
@@ -96,6 +97,14 @@ const std::set<int>& MapcrafterConfigHelper::getUsedRotations(const std::string&
 void MapcrafterConfigHelper::setUsedRotations(const std::string& world, const std::set<int>& rotations) {
 	for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it)
 		world_rotations[world].insert(*rotation_it);
+}
+
+int MapcrafterConfigHelper::getMapTileSize(const std::string& map) const {
+	return map_tile_sizes.at(map);
+}
+
+void MapcrafterConfigHelper::setMapTileSize(const std::string& map, int tile_size) {
+	map_tile_sizes[map] = tile_size;
 }
 
 int MapcrafterConfigHelper::getWorldZoomlevel(const std::string& world) const {
