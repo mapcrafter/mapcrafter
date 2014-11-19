@@ -90,8 +90,8 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 
 	if (tile.getDepth() == render_context.tile_set->getDepth()) {
 		// this tile is a render tile, render it
-		render_context.tile_renderer->renderTile(tile.getTilePos(),
-				render_context.tile_set->getTileOffset(), image);
+		render_context.tile_renderer->renderTile(tile.getTilePos()
+				+ render_context.tile_set->getTileOffset(), image);
 		render_work_result.tiles_rendered++;
 
 		/*

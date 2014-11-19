@@ -92,8 +92,7 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 		}
 }
 
-void TopdownTileRenderer::renderTile(const TilePos& tile_pos, const TilePos& tile_offset,
-		RGBAImage& tile) {
+void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 	int texture_size = state.images->getTextureSize();
 	int tile_size = texture_size * 16 * TILE_WIDTH;
 	tile.setSize(tile_size, tile_size);

@@ -66,8 +66,7 @@ public:
 			const config::WorldSection& world_config,
 			const config::MapSection& map_config);
 
-	virtual void renderTile(const TilePos& tile_pos, const TilePos& tile_offset,
-			RGBAImage& tile) = 0;
+	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile) = 0;
 
 protected:
 	Biome getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk);

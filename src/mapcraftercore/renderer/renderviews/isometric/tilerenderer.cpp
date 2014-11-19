@@ -147,8 +147,7 @@ void IsometricTileRenderer::setStuff(std::shared_ptr<mc::WorldCache> world,
 	createRendermode(world_config, map_config, state, rendermodes);
 }
 
-void IsometricTileRenderer::renderTile(const TilePos& tile_pos, const TilePos& tile_offset,
-		RGBAImage& tile) {
+void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 	// some vars, set correct image size
 	int block_size = state.images->getBlockImageSize();
 	int tile_size = state.images->getTileSize();
@@ -168,7 +167,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, const TilePos& t
 	// iterate over the highest blocks in the tile
 	// we use as tile position tile_pos+tile_offset because the offset means that
 	// we treat the tile position as tile_pos, but it's actually tile_pos+tile_offset
-	for (TileTopBlockIterator it(tile_pos + tile_offset, block_size, tile_size);
+	for (TileTopBlockIterator it(tile_pos, block_size, tile_size);
 			!it.end(); it.next()) {
 		// water render behavior n1:
 		// are we already in a row of water?
