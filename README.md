@@ -75,6 +75,12 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.1.5.4 (in progress)**
+
+* Added a detection in the CMake files which C++11 flag to use (for newer C++ compilers who
+  do not support the older ``-std=c++0x`` flag)
+* Fixed bug with the marker tool (new json sign text format was not parsed properly)
+
 **v.1.5.3**
 
 * Better handling of corrupt world files (for now, bigger refactoring of that probably later)
