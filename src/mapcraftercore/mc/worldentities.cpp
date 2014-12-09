@@ -37,10 +37,36 @@ bool isJSONLine(const std::string& line) {
 }
 
 /**
- * Extracts the actual text from the json sign line format. Parses the json with the
- * picojson library.
+ * Extracts the sign line text from a json object. Also recursively extracts the json
+ * objects in the "extra" array. Throws a std::runtime_error if the json is invalid.
  */
-std::string convertJSONLine(const std::string& line) {
+std::string extractTextFromJSON(const picojson::value& value) {
+	if (value.is<picojson::null>())
+		return "";
+	if (value.is<std::string>())
+		return value.get<std::string>();
+	if (value.is<picojson::object>()) {
+		const picojson::object& object = value.get<picojson::object>();
+		if (!object.count("text") || !object.at("text").is<std::string>())
+			throw std::runtime_error("No string 'text' found");
+		std::string extra = "";
+		if (object.count("extra")) {
+			if (!object.at("extra").is<picojson::array>())
+				throw std::runtime_error("Object 'extra' must be an array");
+			picojson::array array = object.at("extra").get<picojson::array>();
+			for (auto value_it = array.begin(); value_it != array.end(); ++value_it)
+				extra += extractTextFromJSON(*value_it);
+		}
+		return object.at("text").get<std::string>() + extra;
+	}
+	throw std::runtime_error("Unknown object type");
+}
+
+/**
+ * Parses a sign line in the json sign line format. Parses the json with the picojson
+ * library and uses the extractTextFromJSON function to extract the actual text.
+ */
+std::string parseJSONLine(const std::string& line) {
 	std::string error;
 	picojson::value value;
 	picojson::parse(value, line.begin(), line.end(), &error);
@@ -48,20 +74,11 @@ std::string convertJSONLine(const std::string& line) {
 		LOG(ERROR) << "Unable to parse sign line json '" << line << "': " << error << ".";
 		return "";
 	}
-
-	if (value.is<picojson::null>())
-		return "";
-	if (value.is<std::string>())
-		return value.get<std::string>();
-	if (value.is<picojson::object>()) {
-		const picojson::object& object = value.get<picojson::object>();
-		if (!object.count("text") || !object.at("text").is<std::string>()) {
-			LOG(ERROR) << "Invalid sign line json: '" << line << "'.";
-			return "";
-		}
-		return object.at("text").get<std::string>();
+	try {
+		return extractTextFromJSON(value);
+	} catch (std::runtime_error& e) {
+		LOG(ERROR) << "Invalid json sign line (" << e.what() << "): "  << line;
 	}
-	LOG(ERROR) << "Invalid sign line json: '" << line << "'.";
 	return "";
 }
 
@@ -74,10 +91,10 @@ SignEntity::SignEntity(const mc::BlockPos& pos, const Lines& lines)
 	// if yes, extract actual text
 	if (isJSONLine(lines[0]) && isJSONLine(lines[1])
 			&& isJSONLine(lines[2]) && isJSONLine(lines[3])) {
-		this->lines[0] = convertJSONLine(lines[0]);
-		this->lines[1] = convertJSONLine(lines[1]);
-		this->lines[2] = convertJSONLine(lines[2]);
-		this->lines[3] = convertJSONLine(lines[3]);
+		this->lines[0] = parseJSONLine(lines[0]);
+		this->lines[1] = parseJSONLine(lines[1]);
+		this->lines[2] = parseJSONLine(lines[2]);
+		this->lines[3] = parseJSONLine(lines[3]);
 	}
 
 	// join the lines as sign text
