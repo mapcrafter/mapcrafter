@@ -80,6 +80,7 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 * Added a detection in the CMake files which compiler C++11 flag to use (for newer
   compilers which do not support the older ``-std=c++0x`` flag)
 * Fixed bug with the marker tool (new json sign text format was not parsed properly)
+* Fixed bug in texture extraction script (convert command was not properly detected)
 
 **v.1.5.3**
 

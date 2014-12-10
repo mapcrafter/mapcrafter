@@ -22,10 +22,14 @@ files = [
 
 def has_imagemagick():
 	try:
+		# try to call convert command
 		subprocess.check_output("convert")
+		return True
 	except subprocess.CalledProcessError:
+		# command exited with error status, probably because we didn't specify any files to convert
 		return True
 	except OSError as e:
+		# return False if command not found
 		if e.errno == errno.ENOENT:
 			return False
 		raise e
