@@ -117,7 +117,7 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 		// and blit it to the properly position
 		//int size = render_context.map_config.getTextureSize() * 32 * TILE_WIDTH;
 		// TODO
-		int size = render_context.render_view->getTileSize(render_context.map_config.getTextureSize(), 1);
+		int size = render_context.tile_renderer->getTileSize();
 		image.setSize(size, size);
 
 		RGBAImage other;

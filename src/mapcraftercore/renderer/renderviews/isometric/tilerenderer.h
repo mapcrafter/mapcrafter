@@ -107,6 +107,8 @@ public:
 
 	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile);
 
+	virtual int getTileSize() const;
+
 protected:
 	bool water_preblit;
 

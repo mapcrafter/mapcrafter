@@ -114,5 +114,10 @@ void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 	// 	rendermodes[i]->end();
 }
 
+int TopdownTileRenderer::getTileSize() const {
+	// TODO tile_width
+	return state.images->getBlockImageSize() * 16;
+}
+
 }
 }

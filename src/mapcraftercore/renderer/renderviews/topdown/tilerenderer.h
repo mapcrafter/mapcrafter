@@ -44,6 +44,8 @@ public:
 
 	void renderChunk(const mc::Chunk& chunk, RGBAImage& tile, int dx, int dy);
 	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile);
+
+	virtual int getTileSize() const;
 };
 
 }

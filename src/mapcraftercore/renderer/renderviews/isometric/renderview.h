@@ -27,15 +27,9 @@ namespace renderer {
 
 class IsometricRenderView : public RenderView {
 public:
-	IsometricRenderView();
-	virtual ~IsometricRenderView();
-
 	virtual BlockImages* createBlockImages() const;
 	virtual TileSet* createTileSet() const;
 	virtual TileRenderer* createTileRenderer() const;
-
-	virtual int getBlockSizeFactor() const;
-	virtual int getTileSizeFactor() const;
 };
 
 } /* namespace renderer */

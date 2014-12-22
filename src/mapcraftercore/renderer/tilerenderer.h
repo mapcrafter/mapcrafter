@@ -68,6 +68,8 @@ public:
 
 	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile) = 0;
 
+	virtual int getTileSize() const = 0;
+
 protected:
 	Biome getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk);
 	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);

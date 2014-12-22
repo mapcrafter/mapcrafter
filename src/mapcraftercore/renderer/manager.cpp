@@ -464,8 +464,9 @@ bool RenderManager::run() {
 	//    -> so the user can still view his already rendered maps while new ones are rendering
 	for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
 		confighelper.setUsedRotations(map_it->getWorld(), map_it->getRotations());
-		// TODO
-		confighelper.setMapTileSize(map_it->getShortName(), render_view->getTileSize(map_it->getTextureSize(), 1));
+		// TODO add this to the point where TileRenderer is available
+		// and add tile_size to MapSettings
+		//confighelper.setMapTileSize(map_it->getShortName(), render_view->getTileSize(map_it->getTextureSize(), 1));
 		fs::path settings_file = config.getOutputPath(map_it->getShortName() + "/map.settings");
 		if (!fs::exists(settings_file))
 			continue;
@@ -715,7 +716,6 @@ bool RenderManager::run() {
 			context.background_color = config.getBackgroundColor();
 			context.world_config = config.getWorld(map.getWorld());
 			context.map_config = map;
-			context.render_view = render_view;
 			context.tile_set = tile_set;
 			context.tile_renderer = tile_renderer;
 

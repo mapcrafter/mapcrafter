@@ -26,12 +26,6 @@
 namespace mapcrafter {
 namespace renderer {
 
-IsometricRenderView::IsometricRenderView() {
-}
-
-IsometricRenderView::~IsometricRenderView() {
-}
-
 BlockImages* IsometricRenderView::createBlockImages() const {
 	return new IsometricBlockImages();
 }
@@ -42,14 +36,6 @@ TileSet* IsometricRenderView::createTileSet() const {
 
 TileRenderer* IsometricRenderView::createTileRenderer() const {
 	return new IsometricTileRenderer();
-}
-
-int IsometricRenderView::getBlockSizeFactor() const {
-	return 2;
-}
-
-int IsometricRenderView::getTileSizeFactor() const {
-	return 16;
 }
 
 } /* namespace renderer */

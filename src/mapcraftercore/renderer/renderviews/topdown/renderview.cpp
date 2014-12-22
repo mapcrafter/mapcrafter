@@ -26,12 +26,6 @@
 namespace mapcrafter {
 namespace renderer {
 
-TopdownRenderView::TopdownRenderView() {
-}
-
-TopdownRenderView::~TopdownRenderView() {
-}
-
 BlockImages* TopdownRenderView::createBlockImages() const {
 	return new TopdownBlockImages;
 }
@@ -42,14 +36,6 @@ TileSet* TopdownRenderView::createTileSet() const {
 
 TileRenderer* TopdownRenderView::createTileRenderer() const {
 	return new TopdownTileRenderer();
-}
-
-int TopdownRenderView::getBlockSizeFactor() const {
-	return 1;
-}
-
-int TopdownRenderView::getTileSizeFactor() const {
-	return 16;
 }
 
 } /* namespace renderer */
