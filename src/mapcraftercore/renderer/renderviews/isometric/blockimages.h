@@ -205,13 +205,13 @@ public:
 	IsometricBlockImages();
 	~IsometricBlockImages();
 
-	void setSettings(int texture_size, int rotation, bool render_unknown_blocks,
+	virtual void setSettings(int texture_size, int rotation, bool render_unknown_blocks,
 			bool render_leaves_transparent, const std::string& rendermode);
 
-	int getMaxWaterNeededOpaque() const;
-	const RGBAImage& getOpaqueWater(bool south, bool west) const;
+	virtual int getMaxWaterNeededOpaque() const;
+	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const;
 
-	int getBlockSize() const;
+	virtual int getBlockSize() const;
 
 protected:
 	int max_water;

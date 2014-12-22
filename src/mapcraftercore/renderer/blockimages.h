@@ -164,7 +164,7 @@ public:
 	virtual int getMaxWaterNeededOpaque() const = 0;
 	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const = 0;
 
-	int getTextureSize() const;
+	virtual int getTextureSize() const;
 	virtual int getBlockSize() const = 0;
 
 protected:

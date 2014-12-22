@@ -81,7 +81,7 @@ public:
 	~MapcrafterConfig();
 
 	ValidationMap parse(const std::string& filename);
-	void dump(std::ostream& out) const;
+	virtual void dump(std::ostream& out) const;
 
 	void configureLogging() const;
 
