@@ -336,7 +336,7 @@ const RGBAImage& IsometricBlockImages::getOpaqueWater(bool south, bool west) con
 	return opaque_water[index];
 }
 
-int IsometricBlockImages::getBlockImageSize() const {
+int IsometricBlockImages::getBlockSize() const {
 	return texture_size * 2;
 }
 
@@ -486,7 +486,7 @@ void IsometricBlockImages::testWaterTransparency() {
 	RGBAImage water = resources.getBlockTextures().WATER_STILL.colorize(0, 0.39, 0.89);
 
 	// opaque_water[0] is water block when water texture is only on the top
-	opaque_water[0].setSize(getBlockImageSize(), getBlockImageSize());
+	opaque_water[0].setSize(getBlockSize(), getBlockSize());
 	blitFace(opaque_water[0], FACE_TOP, water, 0, 0, false);
 	// same, water top and south (right)
 	opaque_water[1] = opaque_water[0];
@@ -668,7 +668,7 @@ RGBAImage IsometricBlockImages::buildStairsEast(const RGBAImage& texture,
 
 RGBAImage IsometricBlockImages::buildUpsideDownStairsNorth(const RGBAImage& texture,
 		const RGBAImage& texture_top) {
-	RGBAImage block(getBlockImageSize(), getBlockImageSize());
+	RGBAImage block(getBlockSize(), getBlockSize());
 
 	blitFace(block, FACE_TOP, texture_top, 0, 0, true, dleft, dright);
 
@@ -692,7 +692,7 @@ RGBAImage IsometricBlockImages::buildUpsideDownStairsNorth(const RGBAImage& text
 
 RGBAImage IsometricBlockImages::buildUpsideDownStairsSouth(const RGBAImage& texture,
 		const RGBAImage& texture_top) {
-	RGBAImage block(getBlockImageSize(), getBlockImageSize());
+	RGBAImage block(getBlockSize(), getBlockSize());
 
 	blitFace(block, FACE_SOUTH, texture, 0, 0, true, dleft, dright);
 	blitFace(block, FACE_TOP, texture_top, 0, 0, true, dleft, dright);
@@ -709,7 +709,7 @@ RGBAImage IsometricBlockImages::buildUpsideDownStairsSouth(const RGBAImage& text
 
 RGBAImage IsometricBlockImages::buildUpsideDownStairsEast(const RGBAImage& texture,
 		const RGBAImage& texture_top) {
-	RGBAImage block(getBlockImageSize(), getBlockImageSize());
+	RGBAImage block(getBlockSize(), getBlockSize());
 
 	blitFace(block, FACE_TOP, texture_top, 0, 0, true, dleft, dright);
 
@@ -734,7 +734,7 @@ RGBAImage IsometricBlockImages::buildUpsideDownStairsEast(const RGBAImage& textu
 
 RGBAImage IsometricBlockImages::buildUpsideDownStairsWest(const RGBAImage& texture,
 		const RGBAImage& texture_top) {
-	RGBAImage block(getBlockImageSize(), getBlockImageSize());
+	RGBAImage block(getBlockSize(), getBlockSize());
 
 	blitFace(block, FACE_WEST, texture, 0, 0, true, dleft, dright);
 	blitFace(block, FACE_TOP, texture_top, 0, 0, true, dleft, dright);
@@ -750,9 +750,9 @@ RGBAImage IsometricBlockImages::buildUpsideDownStairsWest(const RGBAImage& textu
 }
 
 void IsometricBlockImages::buildCustomTextures() {
-	shadow_edge_masks[0].setSize(getBlockImageSize(), getBlockImageSize());
-	shadow_edge_masks[1].setSize(getBlockImageSize(), getBlockImageSize());
-	shadow_edge_masks[2].setSize(getBlockImageSize(), getBlockImageSize());
+	shadow_edge_masks[0].setSize(getBlockSize(), getBlockSize());
+	shadow_edge_masks[1].setSize(getBlockSize(), getBlockSize());
+	shadow_edge_masks[2].setSize(getBlockSize(), getBlockSize());
 
 	uint32_t darkness = rgba(0, 0, 0, 64);
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
@@ -872,7 +872,7 @@ void IsometricBlockImages::createWater() { // id 8, 9
 		int smaller = data / 8.0 * texture_size;
 		RGBAImage side_texture = water.move(0, smaller);
 
-		RGBAImage block(getBlockImageSize(), getBlockImageSize());
+		RGBAImage block(getBlockSize(), getBlockSize());
 		blitFace(block, FACE_WEST, side_texture, 0, 0, true, dleft, dright);
 		blitFace(block, FACE_SOUTH, side_texture, 0, 0, true, dleft, dright);
 		blitFace(block, FACE_TOP, water, 0, smaller, true, dleft, dright);
@@ -884,7 +884,7 @@ void IsometricBlockImages::createWater() { // id 8, 9
 		bool south = i & util::binary<10>::value;
 		bool top = i & util::binary<1>::value;
 
-		RGBAImage block(getBlockImageSize(), getBlockImageSize());
+		RGBAImage block(getBlockSize(), getBlockSize());
 		uint16_t extra_data = 0;
 
 		if (top)
@@ -1019,10 +1019,10 @@ void IsometricBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
 	createSingleFaceBlock(id, 1 | extra_data, FACE_BOTTOM, texture);
 
 	RGBAImage rotated_texture = texture.rotate(ROTATE_90);
-	RGBAImage north(getBlockImageSize(), getBlockImageSize()),
-			south(getBlockImageSize(), getBlockImageSize()),
-			east(getBlockImageSize(), getBlockImageSize()),
-			west(getBlockImageSize(), getBlockImageSize());
+	RGBAImage north(getBlockSize(), getBlockSize()),
+			south(getBlockSize(), getBlockSize()),
+			east(getBlockSize(), getBlockSize()),
+			west(getBlockSize(), getBlockSize());
 
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
 		east.setPixel(it.dest_x, it.dest_y + it.src_y,
@@ -1365,7 +1365,7 @@ void IsometricBlockImages::createIce(uint8_t id) { // id 79
 
 	for (int w = 0; w <= 1; w++)
 		for (int s = 0; s <= 1; s++) {
-			RGBAImage block(getBlockImageSize(), getBlockImageSize());
+			RGBAImage block(getBlockSize(), getBlockSize());
 			uint16_t extra_data = 0;
 			if (w == 1)
 				blitFace(block, FACE_WEST, texture, 0, 0, true, dleft, dright);
@@ -1669,7 +1669,7 @@ void IsometricBlockImages::createFenceGate(uint8_t id, RGBAImage texture) { // i
 
 void IsometricBlockImages::createBrewingStand() { // id 117
 	const BlockTextures& textures = resources.getBlockTextures();
-	RGBAImage block(getBlockImageSize(), getBlockImageSize());
+	RGBAImage block(getBlockSize(), getBlockSize());
 	blitFace(block, FACE_BOTTOM, textures.BREWING_STAND_BASE);
 	blitItemStyleBlock(block, textures.BREWING_STAND, textures.BREWING_STAND);
 	setBlockImage(117, 0, block);
@@ -1680,7 +1680,7 @@ void IsometricBlockImages::createCauldron() { // id 118
 	RGBAImage water = resources.getBlockTextures().WATER_STILL;
 
 	for (int i = 0; i < 4; i++) {
-		RGBAImage block(getBlockImageSize(), getBlockImageSize());
+		RGBAImage block(getBlockSize(), getBlockSize());
 		blitFace(block, FACE_NORTH, side, 0, 0, true, dleft, dright);
 		blitFace(block, FACE_EAST, side, 0, 0, true, dleft, dright);
 		if (i == 3)
@@ -1830,7 +1830,7 @@ void IsometricBlockImages::createFlowerPot() { // id 140
 	int xoff = std::ceil(s*10);
 	int yoff = std::ceil(s*16);
 
-	RGBAImage pot(getBlockImageSize(), getBlockImageSize());
+	RGBAImage pot(getBlockSize(), getBlockSize());
 	blitFace(pot, FACE_NORTH, pot_texture, xoff, yoff, true, dleft, dright);
 	blitFace(pot, FACE_EAST, pot_texture, xoff, yoff, true, dleft, dright);
 	blitFace(pot, FACE_TOP, textures.DIRT.clip(0, 0, s*6, s*6), xoff, yoff+s*3);

@@ -26,7 +26,7 @@ const RGBAImage& TopdownBlockImages::getOpaqueWater(bool south, bool west) const
 	return unknown_block;
 }
 
-int TopdownBlockImages::getBlockImageSize() const {
+int TopdownBlockImages::getBlockSize() const {
 	return texture_size;
 }
 

@@ -21,7 +21,7 @@ public:
 	virtual int getMaxWaterNeededOpaque() const;
 	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const;
 
-	virtual int getBlockImageSize() const;
+	virtual int getBlockSize() const;
 
 protected:
 	virtual uint16_t filterBlockData(uint16_t id, uint16_t data) const;

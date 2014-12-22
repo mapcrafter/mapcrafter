@@ -320,7 +320,7 @@ bool AbstractBlockImages::saveBlocks(const std::string& filename) {
 		blocks.push_back(it->second);
 	*/
 
-	int blocksize = getBlockImageSize();
+	int blocksize = getBlockSize();
 	int width = 16;
 	int height = std::ceil(blocks.size() / (double) width);
 	RGBAImage img(width * blocksize, height * blocksize);

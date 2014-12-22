@@ -211,7 +211,7 @@ public:
 	int getMaxWaterNeededOpaque() const;
 	const RGBAImage& getOpaqueWater(bool south, bool west) const;
 
-	int getBlockImageSize() const;
+	int getBlockSize() const;
 
 protected:
 	int max_water;
