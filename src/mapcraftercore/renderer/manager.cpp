@@ -706,10 +706,14 @@ bool RenderManager::run() {
 			}
 
 			std::shared_ptr<mc::WorldCache> world_cache(new mc::WorldCache(worlds[world_name][rotation]));
-			//std::shared_ptr<TileRenderer> tile_renderer(new TileRenderer(world_cache, block_images,
-			//		config.getWorld(world_name), config.getMap(map_name)));
-			std::shared_ptr<TileRenderer> tile_renderer(render_view->createTileRenderer());
-			tile_renderer->setStuff(world_cache, block_images, config.getWorld(world_name), config.getMap(map_name));
+			std::shared_ptr<TileRenderer> tile_renderer(render_view->createTileRenderer(block_images, world_cache));
+			tile_renderer->setRenderBiomes(map.renderBiomes());
+
+			// TODO isometric tile renderer --> setUsePreblitWater
+
+			// TODO maybe set only once per map?
+			confighelper.setMapTileSize(map_name, tile_renderer->getTileSize());
+			writeTemplateIndexHtml();
 
 			RenderContext context;
 			context.output_dir = output_dir;

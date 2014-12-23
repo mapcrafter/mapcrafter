@@ -58,23 +58,25 @@ struct RenderState {
 
 class TileRenderer {
 public:
-	TileRenderer();
+	TileRenderer(std::shared_ptr<BlockImages> images,
+			std::shared_ptr<mc::WorldCache> world);
 	virtual ~TileRenderer();
 
-	virtual void setStuff(std::shared_ptr<mc::WorldCache> world,
-			std::shared_ptr<BlockImages> images,
-			const config::WorldSection& world_config,
-			const config::MapSection& map_config);
+	void setRenderBiomes(bool render_biomes);
 
 	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile) = 0;
 
 	virtual int getTileSize() const = 0;
 
 protected:
+	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
 	Biome getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk);
 	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
-	RenderState state;
+	std::shared_ptr<BlockImages> images;
+	std::shared_ptr<mc::WorldCache> world;
+	mc::Chunk* current_chunk;
+
 	bool render_biomes;
 };
 

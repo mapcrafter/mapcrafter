@@ -39,7 +39,8 @@ namespace renderer {
 
 class TopdownTileRenderer : public TileRenderer {
 public:
-	TopdownTileRenderer();
+	TopdownTileRenderer(std::shared_ptr<BlockImages> images,
+			std::shared_ptr<mc::WorldCache> world);
 	~TopdownTileRenderer();
 
 	void renderChunk(const mc::Chunk& chunk, RGBAImage& tile, int dx, int dy);

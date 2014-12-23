@@ -34,8 +34,10 @@ TileSet* TopdownRenderView::createTileSet() const {
 	return new TopdownTileSet();
 }
 
-TileRenderer* TopdownRenderView::createTileRenderer() const {
-	return new TopdownTileRenderer();
+TileRenderer* TopdownRenderView::createTileRenderer(
+		std::shared_ptr<BlockImages> images,
+		std::shared_ptr<mc::WorldCache> world) const {
+	return new TopdownTileRenderer(images, world);
 }
 
 } /* namespace renderer */

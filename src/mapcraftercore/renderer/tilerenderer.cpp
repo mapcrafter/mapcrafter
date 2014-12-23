@@ -22,20 +22,20 @@
 namespace mapcrafter {
 namespace renderer {
 
-TileRenderer::TileRenderer()
-	: render_biomes(true) {
+TileRenderer::TileRenderer(std::shared_ptr<BlockImages> images,
+		std::shared_ptr<mc::WorldCache> world)
+	: images(images), world(world), current_chunk(nullptr), render_biomes(true) {
 }
 
 TileRenderer::~TileRenderer() {
 }
 
-void TileRenderer::setStuff(std::shared_ptr<mc::WorldCache> world,
-		std::shared_ptr<BlockImages> images,
-		const config::WorldSection& world_config,
-		const config::MapSection& map_config) {
-	this->state.world = world;
-	this->state.images = images;
-	this->render_biomes = map_config.renderBiomes();
+void TileRenderer::setRenderBiomes(bool render_biomes) {
+	this->render_biomes = render_biomes;
+}
+
+mc::Block TileRenderer::getBlock(const mc::BlockPos& pos, int get) {
+	return world->getBlock(pos, current_chunk, get);
 }
 
 Biome TileRenderer::getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk) {
@@ -57,7 +57,7 @@ Biome TileRenderer::getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* ch
 			mc::ChunkPos chunk_pos(other);
 			uint8_t other_id = chunk->getBiomeAt(mc::LocalBlockPos(other));
 			if (chunk_pos != chunk->getPos()) {
-				mc::Chunk* other_chunk = state.world->getChunk(chunk_pos);
+				mc::Chunk* other_chunk = world->getChunk(chunk_pos);
 				if (other_chunk == nullptr)
 					continue;
 				other_id = other_chunk->getBiomeAt(mc::LocalBlockPos(other));
@@ -112,14 +112,14 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 
 	if (id == 2) { // grass blocks
 		// check if snow is on top to use the snowy sides instead of grass
-		top = state.getBlock(pos + mc::DIR_TOP);
+		top = getBlock(pos + mc::DIR_TOP);
 		if (top.id == 78 || top.id == 80)
 			data |= GRASS_SNOW;
 
 	} else if ((id == 8 || id == 9) && data == 0) { // full water blocks
-		west = state.getBlock(pos + mc::DIR_WEST);
-		south = state.getBlock(pos + mc::DIR_SOUTH);
-		top = state.getBlock(pos + mc::DIR_TOP);
+		west = getBlock(pos + mc::DIR_WEST);
+		south = getBlock(pos + mc::DIR_SOUTH);
+		top = getBlock(pos + mc::DIR_TOP);
 
 		// TODO
 		// check if the neighbors on visible faces (top, west, south)
@@ -134,10 +134,10 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			data |= DATA_SOUTH;
 	} else if (id == 54 || id == 130 || id == 146) { // chests
 		// at first get all neighbor blocks
-		north = state.getBlock(pos + mc::DIR_NORTH);
-		south = state.getBlock(pos + mc::DIR_SOUTH);
-		east = state.getBlock(pos + mc::DIR_EAST);
-		west = state.getBlock(pos + mc::DIR_WEST);
+		north = getBlock(pos + mc::DIR_NORTH);
+		south = getBlock(pos + mc::DIR_SOUTH);
+		east = getBlock(pos + mc::DIR_EAST);
+		west = getBlock(pos + mc::DIR_WEST);
 
 		// determine the direction of the chest
 		if (data == 2)
@@ -162,53 +162,53 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		}
 	} else if (id == 55 || id == 132) { // redstone wire, tripwire
 		// check if the redstone wire is connected to other redstone wires
-		if (state.getBlock(pos + mc::DIR_NORTH).id == id
-				|| state.getBlock(pos + mc::DIR_NORTH + mc::DIR_BOTTOM).id == id)
+		if (getBlock(pos + mc::DIR_NORTH).id == id
+				|| getBlock(pos + mc::DIR_NORTH + mc::DIR_BOTTOM).id == id)
 			data |= REDSTONE_NORTH;
-		else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_NORTH).id == id)
+		else if (getBlock(pos + mc::DIR_TOP + mc::DIR_NORTH).id == id)
 			data |= REDSTONE_NORTH | REDSTONE_TOPNORTH;
 
-		if (state.getBlock(pos + mc::DIR_SOUTH).id == id
-				|| state.getBlock(pos + mc::DIR_SOUTH + mc::DIR_BOTTOM).id == id)
+		if (getBlock(pos + mc::DIR_SOUTH).id == id
+				|| getBlock(pos + mc::DIR_SOUTH + mc::DIR_BOTTOM).id == id)
 			data |= REDSTONE_SOUTH;
-		else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_SOUTH).id == id)
+		else if (getBlock(pos + mc::DIR_TOP + mc::DIR_SOUTH).id == id)
 			data |= REDSTONE_SOUTH | REDSTONE_TOPSOUTH;
 
-		if (state.getBlock(pos + mc::DIR_EAST).id == id
-				|| state.getBlock(pos + mc::DIR_EAST + mc::DIR_BOTTOM).id == id)
+		if (getBlock(pos + mc::DIR_EAST).id == id
+				|| getBlock(pos + mc::DIR_EAST + mc::DIR_BOTTOM).id == id)
 			data |= REDSTONE_EAST;
-		else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_EAST).id == id)
+		else if (getBlock(pos + mc::DIR_TOP + mc::DIR_EAST).id == id)
 			data |= REDSTONE_EAST | REDSTONE_TOPEAST;
 
-		if (state.getBlock(pos + mc::DIR_WEST).id == id
-				|| state.getBlock(pos + mc::DIR_WEST + mc::DIR_BOTTOM).id == id)
+		if (getBlock(pos + mc::DIR_WEST).id == id
+				|| getBlock(pos + mc::DIR_WEST + mc::DIR_BOTTOM).id == id)
 			data |= REDSTONE_WEST;
-		else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_WEST).id == id)
+		else if (getBlock(pos + mc::DIR_TOP + mc::DIR_WEST).id == id)
 			data |= REDSTONE_WEST | REDSTONE_TOPWEST;
 
 		if (id == 132) {
-			if (state.getBlock(pos + mc::DIR_NORTH).id == 131
-					|| state.getBlock(pos + mc::DIR_NORTH + mc::DIR_BOTTOM).id == 131)
+			if (getBlock(pos + mc::DIR_NORTH).id == 131
+					|| getBlock(pos + mc::DIR_NORTH + mc::DIR_BOTTOM).id == 131)
 				data |= REDSTONE_NORTH;
-			else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_NORTH).id == 131)
+			else if (getBlock(pos + mc::DIR_TOP + mc::DIR_NORTH).id == 131)
 				data |= REDSTONE_NORTH | REDSTONE_TOPNORTH;
 
-			if (state.getBlock(pos + mc::DIR_SOUTH).id == 131
-					|| state.getBlock(pos + mc::DIR_SOUTH + mc::DIR_BOTTOM).id == 131)
+			if (getBlock(pos + mc::DIR_SOUTH).id == 131
+					|| getBlock(pos + mc::DIR_SOUTH + mc::DIR_BOTTOM).id == 131)
 				data |= REDSTONE_SOUTH;
-			else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_SOUTH).id == 131)
+			else if (getBlock(pos + mc::DIR_TOP + mc::DIR_SOUTH).id == 131)
 				data |= REDSTONE_SOUTH | REDSTONE_TOPSOUTH;
 
-			if (state.getBlock(pos + mc::DIR_EAST).id == 131
-					|| state.getBlock(pos + mc::DIR_EAST + mc::DIR_BOTTOM).id == 131)
+			if (getBlock(pos + mc::DIR_EAST).id == 131
+					|| getBlock(pos + mc::DIR_EAST + mc::DIR_BOTTOM).id == 131)
 				data |= REDSTONE_EAST;
-			else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_EAST).id == 131)
+			else if (getBlock(pos + mc::DIR_TOP + mc::DIR_EAST).id == 131)
 				data |= REDSTONE_EAST | REDSTONE_TOPEAST;
 
-			if (state.getBlock(pos + mc::DIR_WEST).id == 131
-					|| state.getBlock(pos + mc::DIR_WEST + mc::DIR_BOTTOM).id == 131)
+			if (getBlock(pos + mc::DIR_WEST).id == 131
+					|| getBlock(pos + mc::DIR_WEST + mc::DIR_BOTTOM).id == 131)
 				data |= REDSTONE_WEST;
-			else if (state.getBlock(pos + mc::DIR_TOP + mc::DIR_WEST).id == 131)
+			else if (getBlock(pos + mc::DIR_TOP + mc::DIR_WEST).id == 131)
 				data |= REDSTONE_WEST | REDSTONE_TOPWEST;
 		}
 	} else if (id == 64 || id == 71 || (id >= 193 && id <= 197)) {
@@ -218,11 +218,11 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		// at first get the data of both parts of the door, top and bottom
 		if (top) {
 			top_data = data;
-			bottom_data = state.getBlock(pos + mc::DIR_BOTTOM).data;
+			bottom_data = getBlock(pos + mc::DIR_BOTTOM).data;
 
 			data |= DOOR_TOP;
 		} else {
-			top_data = state.getBlock(pos + mc::DIR_TOP).data;
+			top_data = getBlock(pos + mc::DIR_TOP).data;
 			bottom_data = data;
 		}
 
@@ -254,8 +254,8 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 
 	} else if (id == 79) {
 		// ice blocks
-		west = state.getBlock(pos + mc::DIR_WEST);
-		south = state.getBlock(pos + mc::DIR_SOUTH);
+		west = getBlock(pos + mc::DIR_WEST);
+		south = getBlock(pos + mc::DIR_SOUTH);
 
 		// check if west and south neighbors are also ice blocks
 		if (west.id == 79)
@@ -267,23 +267,23 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			|| (id >= 188 && id <= 192)) {
 		// fence, iron bars, glass panes, cobblestone walls, nether fence,
 		// stained glass pane, special wood type fences
-		north = state.getBlock(pos + mc::DIR_NORTH);
-		south = state.getBlock(pos + mc::DIR_SOUTH);
-		east = state.getBlock(pos + mc::DIR_EAST);
-		west = state.getBlock(pos + mc::DIR_WEST);
+		north = getBlock(pos + mc::DIR_NORTH);
+		south = getBlock(pos + mc::DIR_SOUTH);
+		east = getBlock(pos + mc::DIR_EAST);
+		west = getBlock(pos + mc::DIR_WEST);
 
 		// check for same neighbors
 		if (north.id != 0 && (north.id == id
-				|| !state.images->isBlockTransparent(north.id, north.data)))
+				|| !images->isBlockTransparent(north.id, north.data)))
 			data |= DATA_NORTH;
 		if (south.id != 0 && (south.id == id
-				|| !state.images->isBlockTransparent(south.id, south.data)))
+				|| !images->isBlockTransparent(south.id, south.data)))
 			data |= DATA_SOUTH;
 		if (east.id != 0 && (east.id == id
-				|| !state.images->isBlockTransparent(east.id, east.data)))
+				|| !images->isBlockTransparent(east.id, east.data)))
 			data |= DATA_EAST;
 		if (west.id != 0 && (west.id == id
-				|| !state.images->isBlockTransparent(west.id, west.data)))
+				|| !images->isBlockTransparent(west.id, west.data)))
 			data |= DATA_WEST;
 
 		// check fences and cobblestone walls, they can also connect with fence gates
@@ -303,23 +303,23 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			// if this is the top part of a plant,
 			// get the flower type from the block below
 			// and add the special 'flower-top-part' bit
-			return state.getBlock(pos + mc::DIR_BOTTOM).data | LARGEPLANT_TOP;
+			return getBlock(pos + mc::DIR_BOTTOM).data | LARGEPLANT_TOP;
 		}
 	}
 
 
-	if (!state.images->isBlockTransparent(id, data)) {
+	if (!images->isBlockTransparent(id, data)) {
 		// add shadow edges on opaque blockes
-		north = state.getBlock(pos + mc::DIR_NORTH);
-		east = state.getBlock(pos + mc::DIR_EAST);
-		bottom = state.getBlock(pos + mc::DIR_BOTTOM);
+		north = getBlock(pos + mc::DIR_NORTH);
+		east = getBlock(pos + mc::DIR_EAST);
+		bottom = getBlock(pos + mc::DIR_BOTTOM);
 
 		// check if neighbors are opaque
-		if (north.id == 0 || state.images->isBlockTransparent(north.id, north.data))
+		if (north.id == 0 || images->isBlockTransparent(north.id, north.data))
 			data |= EDGE_NORTH;
-		if (east.id == 0 || state.images->isBlockTransparent(east.id, east.data))
+		if (east.id == 0 || images->isBlockTransparent(east.id, east.data))
 			data |= EDGE_EAST;
-		if (bottom.id == 0 || state.images->isBlockTransparent(bottom.id, bottom.data))
+		if (bottom.id == 0 || images->isBlockTransparent(bottom.id, bottom.data))
 			data |= EDGE_BOTTOM;
 	}
 

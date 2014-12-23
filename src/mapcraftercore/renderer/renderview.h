@@ -23,6 +23,9 @@
 #include "blockimages.h"
 #include "tileset.h"
 #include "tilerenderer.h"
+#include "../mc/world.h"
+
+#include <memory>
 
 namespace mapcrafter {
 namespace renderer {
@@ -33,7 +36,8 @@ public:
 
 	virtual BlockImages* createBlockImages() const = 0;
 	virtual TileSet* createTileSet() const = 0;
-	virtual TileRenderer* createTileRenderer() const = 0;
+	virtual TileRenderer* createTileRenderer(std::shared_ptr<BlockImages> images,
+			std::shared_ptr<mc::WorldCache> world) const = 0;
 };
 
 } /* namespace renderer */

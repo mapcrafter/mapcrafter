@@ -97,20 +97,18 @@ class Rendermode;
  */
 class IsometricTileRenderer : public TileRenderer {
 public:
-	IsometricTileRenderer();
+	IsometricTileRenderer(std::shared_ptr<BlockImages> images,
+			std::shared_ptr<mc::WorldCache> world);
 	virtual ~IsometricTileRenderer();
 
-	virtual void setStuff(std::shared_ptr<mc::WorldCache> world,
-			std::shared_ptr<BlockImages> images,
-			const config::WorldSection& world_config,
-			const config::MapSection& map_config);
+	void setUsePreblitWater(bool use_preblit_water);
 
 	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile);
 
 	virtual int getTileSize() const;
 
 protected:
-	bool water_preblit;
+	bool use_preblit_water;
 
 	std::vector<std::shared_ptr<Rendermode>> rendermodes;
 };

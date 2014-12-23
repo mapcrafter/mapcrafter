@@ -128,13 +128,19 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 	return pos < other.pos;
 }
 
-IsometricTileRenderer::IsometricTileRenderer()
-	: TileRenderer(), water_preblit(false) {
+IsometricTileRenderer::IsometricTileRenderer(std::shared_ptr<BlockImages> images,
+		std::shared_ptr<mc::WorldCache> world)
+	: TileRenderer(images, world), use_preblit_water(false) {
 }
 
 IsometricTileRenderer::~IsometricTileRenderer() {
 }
 
+void IsometricTileRenderer::setUsePreblitWater(bool use_preblit_water) {
+	this->use_preblit_water = use_preblit_water;
+}
+
+/*
 void IsometricTileRenderer::setStuff(std::shared_ptr<mc::WorldCache> world,
 		std::shared_ptr<BlockImages> images,
 		const config::WorldSection& world_config,
@@ -146,15 +152,16 @@ void IsometricTileRenderer::setStuff(std::shared_ptr<mc::WorldCache> world,
 	rendermodes.clear();
 	createRendermode(world_config, map_config, state, rendermodes);
 }
+*/
 
 void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 	// some vars, set correct image size
-	int block_size = state.images->getBlockSize();
+	int block_size = images->getBlockSize();
 	tile.setSize(getTileSize(), getTileSize());
 
 	// get the maximum count of water blocks
 	// blitted about each over, until they are nearly opaque
-	int max_water = state.images->getMaxWaterNeededOpaque();
+	int max_water = images->getMaxWaterNeededOpaque();
 
 	// all visible blocks which are rendered in this tile
 	std::set<RenderBlock> blocks;
@@ -182,16 +189,16 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 		// beginning from the highest block
 		for (BlockRowIterator block(it.current); !block.end(); block.next()) {
 			// get current chunk position
-			mc::ChunkPos current_chunk(block.current);
+			mc::ChunkPos current_chunk_pos(block.current);
 
 			// check if current chunk is not null
 			// and if the chunk wasn't replaced in the cache (i.e. position changed)
-			if (state.chunk == nullptr || state.chunk->getPos() != current_chunk)
+			if (current_chunk == nullptr || current_chunk->getPos() != current_chunk_pos)
 				// get chunk if not
 				//if (!state.world->hasChunkSection(current_chunk, block.current.y))
 				//	continue;
-				state.chunk = state.world->getChunk(current_chunk);
-			if (state.chunk == nullptr) {
+				current_chunk = world->getChunk(current_chunk_pos);
+			if (current_chunk == nullptr) {
 				// here is nothing (= air),
 				// so reset state if we are in water
 				in_water = false;
@@ -202,7 +209,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 			mc::LocalBlockPos local(block.current);
 
 			// now get block id
-			uint16_t id = state.chunk->getBlockID(local);
+			uint16_t id = current_chunk->getBlockID(local);
 			// air is completely transparent so continue
 			if (id == 0) {
 				in_water = false;
@@ -210,7 +217,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 			}
 
 			// now get the block data
-			uint16_t data = state.chunk->getBlockData(local);
+			uint16_t data = current_chunk->getBlockData(local);
 
 			// check if a rendermode hides this block
 			bool visible = true;
@@ -224,7 +231,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 				continue;
 
 			bool is_water = (id == 8 || id == 9) && data == 0;
-			if (is_water && !water_preblit) {
+			if (is_water && !use_preblit_water) {
 				// water render behavior n1:
 				// render only the top sides of the water blocks
 				// and darken the ground with the lighting data
@@ -235,7 +242,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 					continue;
 				in_water = is_water;
 
-			} else if (water_preblit) {
+			} else if (use_preblit_water) {
 				// water render behavior n2:
 				// render the top side of every water block
 				// have also preblit water blocks to skip redundant alphablitting
@@ -265,8 +272,8 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 
 								// check for neighbors
 								mc::Block south, west;
-								south = state.getBlock(top.pos + mc::DIR_SOUTH);
-								west = state.getBlock(top.pos + mc::DIR_WEST);
+								south = getBlock(top.pos + mc::DIR_SOUTH);
+								west = getBlock(top.pos + mc::DIR_WEST);
 
 								bool neighbor_south = (south.id == 8 || south.id == 9);
 								if (neighbor_south)
@@ -276,7 +283,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 									data |= DATA_WEST;
 
 								// get image and replace the old render block with this
-								top.image = state.images->getOpaqueWater(neighbor_south,
+								top.image = images->getOpaqueWater(neighbor_south,
 										neighbor_west);
 
 								// don't forget the rendermodes
@@ -303,13 +310,13 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 			//if (is_water && (data & DATA_WEST) && (data & DATA_SOUTH))
 			//	continue;
 			RGBAImage image;
-			bool transparent = state.images->isBlockTransparent(id, data);
+			bool transparent = images->isBlockTransparent(id, data);
 
 			// check for biome data
 			if (Biome::isBiomeBlock(id, data))
-				image = state.images->getBiomeDependBlock(id, data, getBiomeOfBlock(block.current, state.chunk));
+				image = images->getBiomeDependBlock(id, data, getBiomeOfBlock(block.current, current_chunk));
 			else
-				image = state.images->getBlock(id, data);
+				image = images->getBlock(id, data);
 
 			RenderBlock node;
 			node.x = it.draw_x;
@@ -361,7 +368,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 
 int IsometricTileRenderer::getTileSize() const {
 	// TODO tile_width
-	return state.images->getBlockSize() * 16;
+	return images->getBlockSize() * 16;
 }
 
 }

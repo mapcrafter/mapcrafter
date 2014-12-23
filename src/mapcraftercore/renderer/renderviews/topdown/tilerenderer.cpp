@@ -33,15 +33,16 @@
 namespace mapcrafter {
 namespace renderer {
 
-TopdownTileRenderer::TopdownTileRenderer()
-	: TileRenderer() {
+TopdownTileRenderer::TopdownTileRenderer(std::shared_ptr<BlockImages> images,
+		std::shared_ptr<mc::WorldCache> world)
+	: TileRenderer(images, world) {
 }
 
 TopdownTileRenderer::~TopdownTileRenderer() {
 }
 
 void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, int dx, int dy) {
-	int texture_size = state.images->getTextureSize();
+	int texture_size = images->getTextureSize();
 
 	for (int x = 0; x < 16; x++)
 		for (int z = 0; z < 16; z++) {
@@ -71,14 +72,14 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 					continue;
 				}
 				uint16_t data = chunk.getBlockData(localpos);
-				RGBAImage block = state.images->getBlock(id, data);
+				RGBAImage block = images->getBlock(id, data);
 				if (Biome::isBiomeBlock(id, data)) {
-					block = state.images->getBiomeDependBlock(id, data, getBiomeOfBlock(globalpos, &chunk));
+					block = images->getBiomeDependBlock(id, data, getBiomeOfBlock(globalpos, &chunk));
 				}
 				//for (size_t i = 0; i < rendermodes.size(); i++)
 				//	rendermodes[i]->draw(block, globalpos, id, data);
 				blocks.push_back(block);
-				if (!state.images->isBlockTransparent(id, data)) {
+				if (!images->isBlockTransparent(id, data)) {
 					break;
 				}
 				localpos.y--;
@@ -93,9 +94,8 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 }
 
 void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
-	int texture_size = state.images->getTextureSize();
-	int tile_size = texture_size * 16 * TILE_WIDTH;
-	tile.setSize(tile_size, tile_size);
+	int texture_size = images->getTextureSize();
+	tile.setSize(getTileSize(), getTileSize());
 
 	// call start method of the rendermodes
 	// for (size_t i = 0; i < rendermodes.size(); i++)
@@ -104,9 +104,9 @@ void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 	for (int x = 0; x < TILE_WIDTH; x++)
 		for (int z = 0; z < TILE_WIDTH; z++) {
 			mc::ChunkPos chunkpos(tile_pos.getX() * TILE_WIDTH + x, tile_pos.getY() * TILE_WIDTH + z);
-			mc::Chunk* chunk = state.world->getChunk(chunkpos);
-			if (chunk != nullptr)
-				renderChunk(*chunk, tile, texture_size*16*x, texture_size*16*z);
+			current_chunk = world->getChunk(chunkpos);
+			if (current_chunk != nullptr)
+				renderChunk(*current_chunk, tile, texture_size*16*x, texture_size*16*z);
 		}
 
 	// call the end method of the rendermodes
@@ -116,7 +116,7 @@ void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 
 int TopdownTileRenderer::getTileSize() const {
 	// TODO tile_width
-	return state.images->getBlockSize() * 16;
+	return images->getBlockSize() * 16;
 }
 
 }
