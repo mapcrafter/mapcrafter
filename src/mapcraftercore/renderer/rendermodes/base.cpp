@@ -24,8 +24,15 @@
 namespace mapcrafter {
 namespace renderer {
 
-Rendermode::Rendermode(const RenderState& state)
-		: state(state) {
+Rendermode::Rendermode()
+	: current_chunk(nullptr) {
+}
+
+void Rendermode::initialize(std::shared_ptr<BlockImages> images,
+		std::shared_ptr<mc::WorldCache> world, mc::Chunk** current_chunk) {
+	this->images = images;
+	this->world = world;
+	this->current_chunk = current_chunk;
 }
 
 Rendermode::~Rendermode() {
@@ -44,23 +51,27 @@ bool Rendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 void Rendermode::draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 }
 
+mc::Block Rendermode::getBlock(const mc::BlockPos& pos, int get) {
+	return world->getBlock(pos, *current_chunk, get);
+}
+
 bool createRendermode(const config::WorldSection& world_config,
 		const config::MapSection& map_config,
-		const RenderState& state, std::vector<std::shared_ptr<Rendermode>>& modes) {
+		std::vector<std::shared_ptr<Rendermode>>& modes) {
 	std::string name = map_config.getRendermode();
 	if (name.empty() || name == "plain")
 		return true;
 
 	if (name == "cave")
-		modes.push_back(std::shared_ptr<Rendermode>(new CaveRendermode(state,
+		modes.push_back(std::shared_ptr<Rendermode>(new CaveRendermode(
 				map_config.hasCaveHighContrast())));
 	else if (name == "daylight")
 		modes.push_back(std::shared_ptr<Rendermode>(new LightingRendermode(
-				state, true, map_config.getLightingIntensity(),
+				true, map_config.getLightingIntensity(),
 				world_config.getDimension() == mc::Dimension::END)));
 	else if (name == "nightlight")
 		modes.push_back(std::shared_ptr<Rendermode>(new LightingRendermode(
-				state, false, map_config.getLightingIntensity(),
+				false, map_config.getLightingIntensity(),
 				world_config.getDimension() == mc::Dimension::END)));
 	else
 		return false;

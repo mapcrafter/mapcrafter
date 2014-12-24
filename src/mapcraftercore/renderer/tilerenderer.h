@@ -37,25 +37,6 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace renderer {
 
-/**
- * Data required to render a tile.
- */
-struct RenderState {
-	std::shared_ptr<mc::WorldCache> world;
-	std::shared_ptr<BlockImages> images;
-
-	mc::Chunk* chunk;
-
-	RenderState()
-		: chunk(nullptr) {}
-	RenderState(std::shared_ptr<mc::WorldCache> world,
-			std::shared_ptr<BlockImages> images)
-		: world(world), images(images), chunk(nullptr) {}
-	~RenderState() {}
-
-	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
-};
-
 class TileRenderer {
 public:
 	TileRenderer(std::shared_ptr<BlockImages> images,

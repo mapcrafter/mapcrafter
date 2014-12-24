@@ -22,19 +22,19 @@
 namespace mapcrafter {
 namespace renderer {
 
-CaveRendermode::CaveRendermode(const RenderState& state, bool high_contrast)
-	: Rendermode(state), high_contrast(high_contrast) {
+CaveRendermode::CaveRendermode(bool high_contrast)
+	: high_contrast(high_contrast) {
 }
 
 CaveRendermode::~CaveRendermode() {
 }
 
 bool CaveRendermode::isLight(const mc::BlockPos& pos) {
-	return state.getBlock(pos, mc::GET_SKY_LIGHT).sky_light > 0;
+	return getBlock(pos, mc::GET_SKY_LIGHT).sky_light > 0;
 }
 
 bool CaveRendermode::isTransparentBlock(const mc::Block& block) const {
-	return block.id == 0 || state.images->isBlockTransparent(block.id, block.data);
+	return block.id == 0 || images->isBlockTransparent(block.id, block.data);
 }
 
 bool CaveRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
@@ -53,14 +53,14 @@ bool CaveRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t dat
 	// we need to check if there is sunlight on the surface of the water
 	// if yes => no cave, hide block
 	// if no  => lake in a cave, show it
-	mc::Block top = state.getBlock(pos + mc::DIR_TOP,
+	mc::Block top = getBlock(pos + mc::DIR_TOP,
 			mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
 	if (id == 8 || id == 9 || top.id == 8 || top.id == 9) {
 		mc::BlockPos p = pos + mc::DIR_TOP;
 		mc::Block block(top.id, top.data, 0, 0, top.sky_light);
 
 		while (block.id == 8 || block.id == 9) {
-			block = state.getBlock(p, mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
+			block = getBlock(p, mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
 			p.y++;
 		}
 
@@ -69,8 +69,8 @@ bool CaveRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t dat
 	}
 
 	mc::Block south, west;
-	south = state.getBlock(pos + mc::DIR_SOUTH);
-	west = state.getBlock(pos + mc::DIR_WEST);
+	south = getBlock(pos + mc::DIR_SOUTH);
+	west = getBlock(pos + mc::DIR_WEST);
 
 	// show all blocks, which don't touch sunlight
 	// and have a transparent block on the south, west or top side

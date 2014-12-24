@@ -112,8 +112,7 @@ private:
 	void doSmoothLight(RGBAImage& image, const mc::BlockPos& pos,
 			uint16_t id, uint16_t data);
 public:
-	LightingRendermode(const RenderState& state, bool day,
-			double lighting_intensity, bool dimension_end);
+	LightingRendermode(bool day, double lighting_intensity, bool dimension_end);
 	virtual ~LightingRendermode();
 
 	virtual bool isHidden(const mc::BlockPos& pos,

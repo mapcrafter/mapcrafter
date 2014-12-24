@@ -27,7 +27,7 @@ namespace renderer {
 
 class CaveRendermode: public Rendermode {
 public:
-	CaveRendermode(const RenderState& state, bool high_contrast);
+	CaveRendermode(bool high_contrast);
 	virtual ~CaveRendermode();
 
 	virtual bool isHidden(const mc::BlockPos& pos,

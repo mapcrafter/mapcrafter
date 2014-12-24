@@ -20,12 +20,15 @@
 #ifndef RENDERMODES_BASE_H_
 #define RENDERMODES_BASE_H_
 
+#include "../blockimages.h"
 #include "../image.h"
 #include "../tilerenderer.h"
+#include "../../mc/chunk.h"
 #include "../../mc/pos.h"
 #include "../../mc/worldcache.h"
 #include "../../config/mapcrafterconfig.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -36,11 +39,12 @@ namespace renderer {
  * A simple interface to implement different rendermodes.
  */
 class Rendermode {
-protected:
-	RenderState state;
 public:
-	Rendermode(const RenderState& state);
+	Rendermode();
 	virtual ~Rendermode();
+
+	void initialize(std::shared_ptr<BlockImages> images,
+			std::shared_ptr<mc::WorldCache> world, mc::Chunk** current_chunk);
 
 	// is called when the tile renderer starts rendering a tile
 	virtual void start();
@@ -51,11 +55,18 @@ public:
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 	// is called to allow the rendermode to change a block image
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+protected:
+	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
+
+	std::shared_ptr<BlockImages> images;
+	std::shared_ptr<mc::WorldCache> world;
+	mc::Chunk** current_chunk;
 };
 
 bool createRendermode(const config::WorldSection& world_config,
 		const config::MapSection& map_config,
-		const RenderState& state, std::vector<std::shared_ptr<Rendermode>>& modes);
+		std::vector<std::shared_ptr<Rendermode>>& modes);
 
 } /* namespace render */
 } /* namespace mapcrafter */

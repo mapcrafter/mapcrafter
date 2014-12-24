@@ -120,10 +120,6 @@ bool BlockRowIterator::end() const {
 	return current.y < 0;
 }
 
-mc::Block RenderState::getBlock(const mc::BlockPos& pos, int get) {
-	return world->getBlock(pos, chunk, get);
-}
-
 bool RenderBlock::operator<(const RenderBlock& other) const {
 	return pos < other.pos;
 }

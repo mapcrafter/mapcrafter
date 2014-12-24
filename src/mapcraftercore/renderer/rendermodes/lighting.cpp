@@ -134,10 +134,9 @@ void drawTopTriangle(RGBAImage& image, int size, double c1, double c2, double c3
 	}
 }
 
-LightingRendermode::LightingRendermode(const RenderState& state, bool day,
-		double lighting_intensity, bool dimension_end)
-	: Rendermode(state), day(day), lighting_intensity(lighting_intensity),
-	  dimension_end(dimension_end) {
+LightingRendermode::LightingRendermode(bool day, double lighting_intensity,
+		bool dimension_end)
+	: day(day), lighting_intensity(lighting_intensity), dimension_end(dimension_end) {
 }
 
 LightingRendermode::~LightingRendermode() {
@@ -204,10 +203,10 @@ void LightingRendermode::estimateBlockLight(mc::Block& block,
 	mc::BlockPos off(0, 0, 0);
 	mc::Block above;
 	while (++off.y) {
-		above = state.getBlock(pos + off, mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
+		above = getBlock(pos + off, mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
 		if (isSpecialTransparent(above.id))
 			continue;
-		if (above.id == 0 || state.images->isBlockTransparent(above.id, above.data))
+		if (above.id == 0 || images->isBlockTransparent(above.id, above.data))
 			block.sky_light = above.sky_light;
 		else
 			block.sky_light = 15;
@@ -220,10 +219,10 @@ void LightingRendermode::estimateBlockLight(mc::Block& block,
 	for (int dx = -1; dx <= 1; dx++)
 		for (int dz = -1; dz <= 1; dz++)
 			for (int dy = -1; dy <= 1; dy++) {
-				mc::Block other = state.getBlock(pos + mc::BlockPos(dx, dz, dy),
+				mc::Block other = getBlock(pos + mc::BlockPos(dx, dz, dy),
 						mc::GET_ID | mc::GET_DATA | mc::GET_BLOCK_LIGHT);
 				if ((other.id == 0
-						|| state.images->isBlockTransparent(other.id, other.data))
+						|| images->isBlockTransparent(other.id, other.data))
 						&& !isSpecialTransparent(other.id)) {
 					block_lights += other.block_light;
 					block_lights_count++;
@@ -239,7 +238,7 @@ void LightingRendermode::estimateBlockLight(mc::Block& block,
  * estimated if this is a special transparent block.
  */
 LightingData LightingRendermode::getBlockLight(const mc::BlockPos& pos) {
-	mc::Block block = state.getBlock(pos, mc::GET_ID | mc::GET_DATA | mc::GET_LIGHT);
+	mc::Block block = getBlock(pos, mc::GET_ID | mc::GET_DATA | mc::GET_LIGHT);
 	if (isSpecialTransparent(block.id))
 		estimateBlockLight(block, pos);
 	
@@ -252,7 +251,7 @@ LightingData LightingRendermode::getBlockLight(const mc::BlockPos& pos) {
 	// just emulate the sun light for transparent blocks
 	if (dimension_end) {
 		light.sky = 15;
-		if (block.id != 0 && !state.images->isBlockTransparent(block.id, block.data))
+		if (block.id != 0 && !images->isBlockTransparent(block.id, block.data))
 			light.sky = 0;
 	}
 	return light;
@@ -402,16 +401,16 @@ void LightingRendermode::doSlabLight(RGBAImage& image, const mc::BlockPos& pos,
 
 	// light the faces
 	mc::Block block;
-	block = state.getBlock(pos + mc::DIR_WEST);
-	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
+	block = getBlock(pos + mc::DIR_WEST);
+	if (block.id == 0 || images->isBlockTransparent(block.id, block.data))
 		lightLeft(image, getCornerColors(pos, CORNERS_LEFT), ystart, yend);
 
-	block = state.getBlock(pos + mc::DIR_SOUTH);
-	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
+	block = getBlock(pos + mc::DIR_SOUTH);
+	if (block.id == 0 || images->isBlockTransparent(block.id, block.data))
 		lightRight(image, getCornerColors(pos, CORNERS_RIGHT), ystart, yend);
 
-	block = state.getBlock(pos + mc::DIR_TOP);
-	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
+	block = getBlock(pos + mc::DIR_TOP);
+	if (block.id == 0 || images->isBlockTransparent(block.id, block.data))
 		lightTop(image, getCornerColors(pos, CORNERS_TOP), yoff);
 }
 
@@ -455,16 +454,16 @@ void LightingRendermode::doSmoothLight(RGBAImage& image, const mc::BlockPos& pos
 
 	mc::Block block;
 	if (light_left) {
-		block = state.getBlock(pos + mc::DIR_WEST);
-		light_left = block.id == 0 || state.images->isBlockTransparent(block.id, block.data);
+		block = getBlock(pos + mc::DIR_WEST);
+		light_left = block.id == 0 || images->isBlockTransparent(block.id, block.data);
 	}
 	if (light_right) {
-		block = state.getBlock(pos + mc::DIR_SOUTH);
-		light_right = block.id == 0 || state.images->isBlockTransparent(block.id, block.data);
+		block = getBlock(pos + mc::DIR_SOUTH);
+		light_right = block.id == 0 || images->isBlockTransparent(block.id, block.data);
 	}
 	if (light_top) {
-		block = state.getBlock(pos + mc::DIR_TOP);
-		light_top = block.id == 0 || state.images->isBlockTransparent(block.id, block.data);
+		block = getBlock(pos + mc::DIR_TOP);
+		light_top = block.id == 0 || images->isBlockTransparent(block.id, block.data);
 	}
 
 	// do the lighting
@@ -485,7 +484,7 @@ bool LightingRendermode::isHidden(const mc::BlockPos& pos,
 
 void LightingRendermode::draw(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
-	bool transparent = state.images->isBlockTransparent(id, data);
+	bool transparent = images->isBlockTransparent(id, data);
 
 	bool water = (id == 8 || id == 9) && (data & util::binary<1111>::value) == 0;
 	int texture_size = image.getHeight() / 2;
