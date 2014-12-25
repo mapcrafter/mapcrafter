@@ -36,8 +36,8 @@ TileSet* IsometricRenderView::createTileSet() const {
 
 TileRenderer* IsometricRenderView::createTileRenderer(
 		std::shared_ptr<BlockImages> images,
-		std::shared_ptr<mc::WorldCache> world) const {
-	return new IsometricTileRenderer(images, world);
+		std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes) const {
+	return new IsometricTileRenderer(images, world, render_modes);
 }
 
 } /* namespace renderer */

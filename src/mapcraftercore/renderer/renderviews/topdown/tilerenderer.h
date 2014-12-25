@@ -20,10 +20,10 @@
 #ifndef TOPDOWN_TILERENDERER_H_
 #define TOPDOWN_TILERENDERER_H_
 
-#include "../../tilerenderer.h"
 #include "blockimages.h"
-#include "../../image.h"
 #include "tileset.h"
+#include "../../tilerenderer.h"
+#include "../../image.h"
 #include "../../../config/sections/map.h"
 #include "../../../config/sections/world.h"
 #include "../../../mc/worldcache.h"
@@ -40,7 +40,7 @@ namespace renderer {
 class TopdownTileRenderer : public TileRenderer {
 public:
 	TopdownTileRenderer(std::shared_ptr<BlockImages> images,
-			std::shared_ptr<mc::WorldCache> world);
+			std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes);
 	~TopdownTileRenderer();
 
 	void renderChunk(const mc::Chunk& chunk, RGBAImage& tile, int dx, int dy);

@@ -17,8 +17,9 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../mc/world.h"
 #include "rendermode.h"
+
+#include "../mc/world.h"
 
 namespace mapcrafter {
 namespace renderer {
@@ -54,9 +55,8 @@ mc::Block RenderMode::getBlock(const mc::BlockPos& pos, int get) {
 	return world->getBlock(pos, *current_chunk, get);
 }
 
-bool createRenderMode(const config::WorldSection& world_config,
-		const config::MapSection& map_config,
-		std::vector<std::shared_ptr<RenderMode>>& modes) {
+bool createRenderModes(const config::WorldSection& world_config,
+		const config::MapSection& map_config, RenderModes& modes) {
 	std::string name = map_config.getRendermode();
 	if (name.empty() || name == "plain")
 		return true;

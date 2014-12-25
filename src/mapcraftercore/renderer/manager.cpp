@@ -706,7 +706,9 @@ bool RenderManager::run() {
 			}
 
 			std::shared_ptr<mc::WorldCache> world_cache(new mc::WorldCache(worlds[world_name][rotation]));
-			std::shared_ptr<TileRenderer> tile_renderer(render_view->createTileRenderer(block_images, world_cache));
+			RenderModes render_modes;
+			createRenderModes(config.getWorld(map.getWorld()), map, render_modes);
+			std::shared_ptr<TileRenderer> tile_renderer(render_view->createTileRenderer(block_images, world_cache, render_modes));
 			tile_renderer->setRenderBiomes(map.renderBiomes());
 
 			// TODO isometric tile renderer --> setUsePreblitWater

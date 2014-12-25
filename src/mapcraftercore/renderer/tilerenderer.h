@@ -22,6 +22,7 @@
 
 #include "image.h"
 #include "blockimages.h"
+#include "rendermode.h"
 #include "tileset.h"
 #include "../config/sections/map.h"
 #include "../config/sections/world.h"
@@ -30,6 +31,7 @@
 #include "../util.h"
 
 #include <memory>
+#include <vector>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
@@ -40,7 +42,7 @@ namespace renderer {
 class TileRenderer {
 public:
 	TileRenderer(std::shared_ptr<BlockImages> images,
-			std::shared_ptr<mc::WorldCache> world);
+			std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes);
 	virtual ~TileRenderer();
 
 	void setRenderBiomes(bool render_biomes);
@@ -57,6 +59,7 @@ protected:
 	std::shared_ptr<BlockImages> images;
 	std::shared_ptr<mc::WorldCache> world;
 	mc::Chunk* current_chunk;
+	RenderModes render_modes;
 
 	bool render_biomes;
 };

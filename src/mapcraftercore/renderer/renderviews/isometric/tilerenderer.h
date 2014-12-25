@@ -90,15 +90,13 @@ struct RenderBlock {
 	bool operator<(const RenderBlock& other) const;
 };
 
-class RenderMode;
-
 /**
  * Renders tiles from world data.
  */
 class IsometricTileRenderer : public TileRenderer {
 public:
 	IsometricTileRenderer(std::shared_ptr<BlockImages> images,
-			std::shared_ptr<mc::WorldCache> world);
+			std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes);
 	virtual ~IsometricTileRenderer();
 
 	void setUsePreblitWater(bool use_preblit_water);
@@ -109,8 +107,6 @@ public:
 
 protected:
 	bool use_preblit_water;
-
-	std::vector<std::shared_ptr<RenderMode>> render_modes;
 };
 
 }

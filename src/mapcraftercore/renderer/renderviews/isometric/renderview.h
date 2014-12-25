@@ -30,7 +30,7 @@ public:
 	virtual BlockImages* createBlockImages() const;
 	virtual TileSet* createTileSet() const;
 	virtual TileRenderer* createTileRenderer(std::shared_ptr<BlockImages> images,
-			std::shared_ptr<mc::WorldCache> world) const;
+			std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes) const;
 };
 
 } /* namespace renderer */

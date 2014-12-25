@@ -21,6 +21,7 @@
 #define RENDERVIEW_H_
 
 #include "blockimages.h"
+#include "rendermode.h"
 #include "tileset.h"
 #include "tilerenderer.h"
 #include "../mc/world.h"
@@ -37,7 +38,7 @@ public:
 	virtual BlockImages* createBlockImages() const = 0;
 	virtual TileSet* createTileSet() const = 0;
 	virtual TileRenderer* createTileRenderer(std::shared_ptr<BlockImages> images,
-			std::shared_ptr<mc::WorldCache> world) const = 0;
+			std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes) const = 0;
 };
 
 } /* namespace renderer */

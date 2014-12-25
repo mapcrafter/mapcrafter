@@ -34,8 +34,8 @@ namespace mapcrafter {
 namespace renderer {
 
 TopdownTileRenderer::TopdownTileRenderer(std::shared_ptr<BlockImages> images,
-		std::shared_ptr<mc::WorldCache> world)
-	: TileRenderer(images, world) {
+		std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes)
+	: TileRenderer(images, world, render_modes) {
 }
 
 TopdownTileRenderer::~TopdownTileRenderer() {
@@ -76,8 +76,8 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 				if (Biome::isBiomeBlock(id, data)) {
 					block = images->getBiomeDependBlock(id, data, getBiomeOfBlock(globalpos, &chunk));
 				}
-				//for (size_t i = 0; i < rendermodes.size(); i++)
-				//	rendermodes[i]->draw(block, globalpos, id, data);
+				//for (size_t i = 0; i < render_modes.size(); i++)
+				//	render_modes[i]->draw(block, globalpos, id, data);
 				blocks.push_back(block);
 				if (!images->isBlockTransparent(id, data)) {
 					break;
@@ -98,8 +98,8 @@ void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 	tile.setSize(getTileSize(), getTileSize());
 
 	// call start method of the rendermodes
-	// for (size_t i = 0; i < rendermodes.size(); i++)
-	// 	rendermodes[i]->start();
+	//for (size_t i = 0; i < render_modes.size(); i++)
+	//	render_modes[i]->start();
 
 	for (int x = 0; x < TILE_WIDTH; x++)
 		for (int z = 0; z < TILE_WIDTH; z++) {
@@ -110,8 +110,8 @@ void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 		}
 
 	// call the end method of the rendermodes
-	// for (size_t i = 0; i < rendermodes.size(); i++)
-	// 	rendermodes[i]->end();
+	//for (size_t i = 0; i < render_modes.size(); i++)
+	//	render_modes[i]->end();
 }
 
 int TopdownTileRenderer::getTileSize() const {

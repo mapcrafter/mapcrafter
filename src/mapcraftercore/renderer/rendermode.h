@@ -22,7 +22,6 @@
 
 #include "blockimages.h"
 #include "image.h"
-#include "tilerenderer.h"
 #include "../mc/chunk.h"
 #include "../mc/pos.h"
 #include "../mc/worldcache.h"
@@ -64,9 +63,10 @@ protected:
 	mc::Chunk** current_chunk;
 };
 
-bool createRenderMode(const config::WorldSection& world_config,
-		const config::MapSection& map_config,
-		std::vector<std::shared_ptr<RenderMode>>& modes);
+typedef std::vector<std::shared_ptr<RenderMode>> RenderModes;
+
+bool createRenderModes(const config::WorldSection& world_config,
+		const config::MapSection& map_config, RenderModes& render_modes);
 
 } /* namespace render */
 } /* namespace mapcrafter */
