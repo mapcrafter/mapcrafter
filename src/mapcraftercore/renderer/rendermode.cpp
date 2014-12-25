@@ -17,60 +17,59 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "base.h"
-
-#include "../../mc/world.h"
+#include "../mc/world.h"
+#include "rendermode.h"
 
 namespace mapcrafter {
 namespace renderer {
 
-Rendermode::Rendermode()
+RenderMode::RenderMode()
 	: current_chunk(nullptr) {
 }
 
-void Rendermode::initialize(std::shared_ptr<BlockImages> images,
+void RenderMode::initialize(std::shared_ptr<BlockImages> images,
 		std::shared_ptr<mc::WorldCache> world, mc::Chunk** current_chunk) {
 	this->images = images;
 	this->world = world;
 	this->current_chunk = current_chunk;
 }
 
-Rendermode::~Rendermode() {
+RenderMode::~RenderMode() {
 }
 
-void Rendermode::start() {
+void RenderMode::start() {
 }
 
-void Rendermode::end() {
+void RenderMode::end() {
 }
 
-bool Rendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+bool RenderMode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	return false;
 }
 
-void Rendermode::draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+void RenderMode::draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 }
 
-mc::Block Rendermode::getBlock(const mc::BlockPos& pos, int get) {
+mc::Block RenderMode::getBlock(const mc::BlockPos& pos, int get) {
 	return world->getBlock(pos, *current_chunk, get);
 }
 
-bool createRendermode(const config::WorldSection& world_config,
+bool createRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config,
-		std::vector<std::shared_ptr<Rendermode>>& modes) {
+		std::vector<std::shared_ptr<RenderMode>>& modes) {
 	std::string name = map_config.getRendermode();
 	if (name.empty() || name == "plain")
 		return true;
 
 	if (name == "cave")
-		modes.push_back(std::shared_ptr<Rendermode>(new CaveRendermode(
+		modes.push_back(std::shared_ptr<RenderMode>(new CaveRenderMode(
 				map_config.hasCaveHighContrast())));
 	else if (name == "daylight")
-		modes.push_back(std::shared_ptr<Rendermode>(new LightingRendermode(
+		modes.push_back(std::shared_ptr<RenderMode>(new LightingRenderMode(
 				true, map_config.getLightingIntensity(),
 				world_config.getDimension() == mc::Dimension::END)));
 	else if (name == "nightlight")
-		modes.push_back(std::shared_ptr<Rendermode>(new LightingRendermode(
+		modes.push_back(std::shared_ptr<RenderMode>(new LightingRenderMode(
 				false, map_config.getLightingIntensity(),
 				world_config.getDimension() == mc::Dimension::END)));
 	else

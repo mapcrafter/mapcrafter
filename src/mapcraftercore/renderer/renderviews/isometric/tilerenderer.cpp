@@ -19,7 +19,7 @@
 
 #include "tilerenderer.h"
 
-#include "../../rendermodes/base.h"
+#include "../../rendermode.h"
 #include "../../biomes.h"
 
 #include <fstream>
@@ -163,8 +163,8 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 	std::set<RenderBlock> blocks;
 
 	// call start method of the rendermodes
-	for (size_t i = 0; i < rendermodes.size(); i++)
-		rendermodes[i]->start();
+	for (size_t i = 0; i < render_modes.size(); i++)
+		render_modes[i]->start();
 
 	// iterate over the highest blocks in the tile
 	// we use as tile position tile_pos+tile_offset because the offset means that
@@ -217,8 +217,8 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 
 			// check if a rendermode hides this block
 			bool visible = true;
-			for (size_t i = 0; i < rendermodes.size(); i++) {
-				if (rendermodes[i]->isHidden(block.current, id, data)) {
+			for (size_t i = 0; i < render_modes.size(); i++) {
+				if (render_modes[i]->isHidden(block.current, id, data)) {
 					visible = false;
 					break;
 				}
@@ -283,8 +283,8 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 										neighbor_west);
 
 								// don't forget the rendermodes
-								for (size_t i = 0; i < rendermodes.size(); i++)
-									rendermodes[i]->draw(top.image, top.pos, id, data);
+								for (size_t i = 0; i < render_modes.size(); i++)
+									render_modes[i]->draw(top.image, top.pos, id, data);
 
 								row_nodes.insert(top);
 								break;
@@ -323,8 +323,8 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 			node.data = data;
 
 			// let the rendermodes do their magic with the block image
-			for (size_t i = 0; i < rendermodes.size(); i++)
-				rendermodes[i]->draw(node.image, node.pos, id, data);
+			for (size_t i = 0; i < render_modes.size(); i++)
+				render_modes[i]->draw(node.image, node.pos, id, data);
 
 			// insert into current row
 			row_nodes.insert(node);
@@ -358,8 +358,8 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 	}
 
 	// call the end method of the rendermodes
-	for (size_t i = 0; i < rendermodes.size(); i++)
-		rendermodes[i]->end();
+	for (size_t i = 0; i < render_modes.size(); i++)
+		render_modes[i]->end();
 }
 
 int IsometricTileRenderer::getTileSize() const {

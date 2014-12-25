@@ -90,7 +90,7 @@ struct RenderBlock {
 	bool operator<(const RenderBlock& other) const;
 };
 
-class Rendermode;
+class RenderMode;
 
 /**
  * Renders tiles from world data.
@@ -110,7 +110,7 @@ public:
 protected:
 	bool use_preblit_water;
 
-	std::vector<std::shared_ptr<Rendermode>> rendermodes;
+	std::vector<std::shared_ptr<RenderMode>> render_modes;
 };
 
 }

@@ -20,7 +20,7 @@
 #ifndef RENDERMODES_LIGHTING_H_
 #define RENDERMODES_LIGHTING_H_
 
-#include "base.h"
+#include "../rendermode.h"
 
 #include <array>
 
@@ -78,7 +78,7 @@ typedef double LightingColor;
 // - defined as array with corners top left / top right / bottom left / bottom right
 typedef std::array<LightingColor, 4> CornerColors;
 
-class LightingRendermode : public Rendermode {
+class LightingRenderMode : public RenderMode {
 private:
 	bool day;
 	double lighting_intensity;
@@ -112,8 +112,8 @@ private:
 	void doSmoothLight(RGBAImage& image, const mc::BlockPos& pos,
 			uint16_t id, uint16_t data);
 public:
-	LightingRendermode(bool day, double lighting_intensity, bool dimension_end);
-	virtual ~LightingRendermode();
+	LightingRenderMode(bool day, double lighting_intensity, bool dimension_end);
+	virtual ~LightingRenderMode();
 
 	virtual bool isHidden(const mc::BlockPos& pos,
 			uint16_t id, uint16_t data);

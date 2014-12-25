@@ -17,16 +17,16 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RENDERMODES_BASE_H_
-#define RENDERMODES_BASE_H_
+#ifndef RENDERMODE_H_
+#define RENDERMODE_H_
 
-#include "../blockimages.h"
-#include "../image.h"
-#include "../tilerenderer.h"
-#include "../../mc/chunk.h"
-#include "../../mc/pos.h"
-#include "../../mc/worldcache.h"
-#include "../../config/mapcrafterconfig.h"
+#include "blockimages.h"
+#include "image.h"
+#include "tilerenderer.h"
+#include "../mc/chunk.h"
+#include "../mc/pos.h"
+#include "../mc/worldcache.h"
+#include "../config/mapcrafterconfig.h"
 
 #include <memory>
 #include <string>
@@ -38,10 +38,10 @@ namespace renderer {
 /**
  * A simple interface to implement different rendermodes.
  */
-class Rendermode {
+class RenderMode {
 public:
-	Rendermode();
-	virtual ~Rendermode();
+	RenderMode();
+	virtual ~RenderMode();
 
 	void initialize(std::shared_ptr<BlockImages> images,
 			std::shared_ptr<mc::WorldCache> world, mc::Chunk** current_chunk);
@@ -64,14 +64,14 @@ protected:
 	mc::Chunk** current_chunk;
 };
 
-bool createRendermode(const config::WorldSection& world_config,
+bool createRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config,
-		std::vector<std::shared_ptr<Rendermode>>& modes);
+		std::vector<std::shared_ptr<RenderMode>>& modes);
 
 } /* namespace render */
 } /* namespace mapcrafter */
 
-#include "cave.h"
-#include "lighting.h"
+#include "rendermodes/cave.h"
+#include "rendermodes/lighting.h"
 
-#endif /* RENDERMODES_BASE_H_ */
+#endif /* RENDERMODE_H_ */

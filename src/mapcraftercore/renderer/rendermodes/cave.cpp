@@ -22,22 +22,22 @@
 namespace mapcrafter {
 namespace renderer {
 
-CaveRendermode::CaveRendermode(bool high_contrast)
+CaveRenderMode::CaveRenderMode(bool high_contrast)
 	: high_contrast(high_contrast) {
 }
 
-CaveRendermode::~CaveRendermode() {
+CaveRenderMode::~CaveRenderMode() {
 }
 
-bool CaveRendermode::isLight(const mc::BlockPos& pos) {
+bool CaveRenderMode::isLight(const mc::BlockPos& pos) {
 	return getBlock(pos, mc::GET_SKY_LIGHT).sky_light > 0;
 }
 
-bool CaveRendermode::isTransparentBlock(const mc::Block& block) const {
+bool CaveRenderMode::isTransparentBlock(const mc::Block& block) const {
 	return block.id == 0 || images->isBlockTransparent(block.id, block.data);
 }
 
-bool CaveRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+bool CaveRenderMode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	mc::BlockPos directions[6] = {
 			mc::DIR_NORTH, mc::DIR_SOUTH, mc::DIR_EAST, mc::DIR_WEST,
 			mc::DIR_TOP, mc::DIR_BOTTOM
@@ -84,7 +84,7 @@ bool CaveRendermode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t dat
 	return true;
 }
 
-void CaveRendermode::draw(RGBAImage& image, const mc::BlockPos& pos,
+void CaveRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
 	// a nice color gradient to see something
 	// (because the whole map is just full of cave stuff,

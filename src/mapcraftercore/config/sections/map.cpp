@@ -65,7 +65,7 @@ void MapSection::dump(std::ostream& out) const {
 	out << getPrettyName() << ":" << std::endl;
 	out << "  name = " << getLongName() << std::endl;
 	out << "  world = " << world << std::endl;
-	out << "  rendermode = " << rendermode << std::endl;
+	out << "  rendermode = " << render_mode << std::endl;
 	out << "  rotations = " << rotations << std::endl;
 	out << "  texture_dir = " << texture_dir << std::endl;
 	out << "  texture_size = " << texture_size << std::endl;
@@ -96,7 +96,7 @@ std::string MapSection::getWorld() const {
 }
 
 std::string MapSection::getRendermode() const {
-	return rendermode.getValue();
+	return render_mode.getValue();
 }
 
 std::set<int> MapSection::getRotations() const {
@@ -155,7 +155,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	name_long = name_short;
 
 	// set some default configuration values
-	rendermode.setDefault("daylight");
+	render_mode.setDefault("daylight");
 	rotations.setDefault("top-left");
 
 	// check if we can find a default texture directory
@@ -182,8 +182,8 @@ bool MapSection::parseField(const std::string key, const std::string value,
 	} else if (key == "world") {
 		world.load(key, value, validation);
 	} else if (key == "rendermode") {
-		if (rendermode.load(key, value, validation)) {
-			std::string r = rendermode.getValue();
+		if (render_mode.load(key, value, validation)) {
+			std::string r = render_mode.getValue();
 			if (r != "plain" && r != "daylight" && r != "nightlight" && r != "cave")
 				validation.error("'rendermode' must be one of: 'plain', 'daylight', 'nightlight', 'cave'");
 		}

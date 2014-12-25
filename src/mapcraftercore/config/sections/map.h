@@ -87,7 +87,7 @@ private:
 	std::string name_short, name_long;
 	Field<std::string> world;
 
-	Field<std::string> rendermode;
+	Field<std::string> render_mode;
 	Field<std::string> rotations;
 	std::set<int> rotations_set;
 

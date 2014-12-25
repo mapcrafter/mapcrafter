@@ -19,7 +19,7 @@
 
 #include "tilerenderer.h"
 
-#include "../../rendermodes/base.h"
+#include "../../rendermode.h"
 #include "../../biomes.h"
 
 #include <deque>

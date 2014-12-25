@@ -20,15 +20,15 @@
 #ifndef RENDERMODES_CAVE_H_
 #define RENDERMODES_CAVE_H_
 
-#include "base.h"
+#include "../rendermode.h"
 
 namespace mapcrafter {
 namespace renderer {
 
-class CaveRendermode: public Rendermode {
+class CaveRenderMode: public RenderMode {
 public:
-	CaveRendermode(bool high_contrast);
-	virtual ~CaveRendermode();
+	CaveRenderMode(bool high_contrast);
+	virtual ~CaveRenderMode();
 
 	virtual bool isHidden(const mc::BlockPos& pos,
 			uint16_t id, uint16_t data);
