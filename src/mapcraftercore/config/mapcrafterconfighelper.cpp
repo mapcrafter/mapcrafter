@@ -19,6 +19,8 @@
 
 #include "mapcrafterconfighelper.h"
 
+#include "../util/picojson.h"
+
 namespace mapcrafter {
 namespace config {
 
@@ -47,46 +49,48 @@ MapcrafterConfigHelper::~MapcrafterConfigHelper() {
 }
 
 std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
-	std::string js = "";
+	picojson::object config_json;
 
 	auto maps = config.getMaps();
 	for (auto it = maps.begin(); it != maps.end(); ++it) {
 		auto world = config.getWorld(it->getWorld());
 
-		js += "\"" + it->getShortName() + "\" : {\n";
-		js += "\tname: \"" + it->getLongName() + "\",\n";
-		js += "\tworld: \"" + it->getWorld() + "\",\n";
-		js += "\tworldName: \"" + world.getWorldName() + "\",\n";
-		js += "\ttextureSize: " + util::str(it->getTextureSize()) + ",\n";
-		js += "\ttileSize: " + util::str(getMapTileSize(it->getShortName())) + ",\n";
-		js += "\tmaxZoom: " + util::str(getMapZoomlevel(it->getShortName())) + ",\n";
-		js += "\timageFormat: \"" + it->getImageFormatSuffix() + "\",\n";
+		picojson::object map_json;
+		map_json["name"] = picojson::value(it->getLongName());
+		map_json["world"] = picojson::value(it->getWorld());
+		map_json["worldName"] = picojson::value(world.getWorldName());
+		map_json["textureSize"] = picojson::value((double) it->getTextureSize());
+		map_json["tileSize"] = picojson::value((double) getMapTileSize(it->getShortName()));
+		map_json["maxZoom"] = picojson::value((double) getMapZoomlevel(it->getShortName()));
+		map_json["imageFormat"] = picojson::value(it->getImageFormatSuffix());
 
-		js += "\trotations: [";
+		picojson::array rotations_json;
 		auto rotations = it->getRotations();
 		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2)
-			js += util::str(*it2) + ",";
-		js += "],\n";
+			rotations_json.push_back(picojson::value((double) *it2));
+		map_json["rotations"] = picojson::value(rotations_json);
 
-		std::string tile_offsets = "[";
+		picojson::array tile_offsets_json;
 		auto offsets = world_tile_offsets.at(it->getWorld());
-		for (auto it2 = offsets.begin(); it2 != offsets.end(); ++it2)
-			tile_offsets += "[" + util::str(it2->getX()) + ", " + util::str(it2->getY()) + "], ";
-		tile_offsets += "]";
-
-		js += "\ttileOffsets: " + tile_offsets + ",\n";
+		for (auto it2 = offsets.begin(); it2 != offsets.end(); ++it2) {
+			picojson::array offset;
+			offset.push_back(picojson::value((double) it2->getX()));
+			offset.push_back(picojson::value((double) it2->getY()));
+			tile_offsets_json.push_back(picojson::value(offset));
+		}
+		map_json["tileOffsets"] = picojson::value(tile_offsets_json);
 
 		if (!world.getDefaultView().empty())
-			js += "\tdefaultView: [" + world.getDefaultView() + "],\n";
+			map_json["defaultView"] = picojson::value(world.getDefaultView());
 		if (world.getDefaultZoom() != 0)
-			js += "\tdefaultZoom: " + util::str(world.getDefaultZoom()) + ",\n";
+			map_json["defaultZoom"] = picojson::value((double) world.getDefaultZoom());
 		if (world.getDefaultRotation() != -1)
-			js += "\tdefaultRotation: " + util::str(world.getDefaultRotation()) + ",\n";
+			map_json["defaultRotation"] = picojson::value((double) world.getDefaultRotation());
 
-		js += "},";
+		config_json[it->getShortName()] = picojson::value(map_json);
 	}
 
-	return js;
+	return picojson::value(config_json).serialize(true);
 }
 
 
