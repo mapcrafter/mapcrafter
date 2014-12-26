@@ -43,7 +43,7 @@ namespace renderer {
 MapSettings::MapSettings()
 	: texture_size(12), image_format("png"), lighting_intensity(1.0),
 	  render_unknown_blocks(0), render_leaves_transparent(0), render_biomes(false),
-	  max_zoom(0) {
+	  tile_size(0), max_zoom(0) {
 	for (int i = 0; i < 4; i++) {
 		rotations[i] = false;
 		last_render[i] = 0;
@@ -83,6 +83,13 @@ bool MapSettings::read(const fs::path& filename) {
 	if (root.has("render_biomes"))
 		render_biomes.set(root.get<bool>("render_biomes"));
 
+	// TODO
+	// try to read tile size, otherwise fall back to the default value
+	// when there was only the 3d isometric render mode
+	if (root.has("tile_size"))
+		tile_size = root.get<int>("tile_size");
+	else
+		tile_size = texture_size.get() * 32;
 	max_zoom = root.get<int>("max_zoom");
 
 	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
@@ -115,6 +122,7 @@ bool MapSettings::write(const fs::path& filename) const {
 	root.set("render_leaves_transparent", util::str(render_leaves_transparent.get()));
 	root.set("render_biomes", util::str(render_biomes.get()));
 
+	root.set("tile_size", util::str(tile_size));
 	root.set("max_zoom", util::str(max_zoom));
 
 	std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
@@ -475,14 +483,17 @@ bool RenderManager::run() {
 	//    -> so the user can still view his already rendered maps while new ones are rendering
 	for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
 		confighelper.setUsedRotations(map_it->getWorld(), map_it->getRotations());
-		// TODO add this to the point where TileRenderer is available
-		// and add tile_size to MapSettings
-		//confighelper.setMapTileSize(map_it->getShortName(), render_view->getTileSize(map_it->getTextureSize(), 1));
+		// TODO workaround for tile size:
+		// set tile size to something != 0 for now
+		confighelper.setMapTileSize(map_it->getShortName(), 1);
+
 		fs::path settings_file = config.getOutputPath(map_it->getShortName() + "/map.settings");
 		if (!fs::exists(settings_file))
 			continue;
 		MapSettings settings;
 		if (settings.read(settings_file)) {
+			// TODO workaround for tile size
+			confighelper.setMapTileSize(map_it->getShortName(), settings.tile_size);
 			confighelper.setMapZoomlevel(map_it->getShortName(), settings.max_zoom);
 			for (int i = 0; i < 4; i++)
 				confighelper.setWorldTileOffset(map_it->getWorld(), i, settings.tile_offsets[i]);
@@ -724,6 +735,9 @@ bool RenderManager::run() {
 
 			// TODO isometric tile renderer --> setUsePreblitWater
 
+			// TODO part of the tile size workaround:
+			settings.tile_size = tile_renderer->getTileSize();
+			settings.write(settings_file);
 			// TODO maybe set only once per map?
 			confighelper.setMapTileSize(map_name, tile_renderer->getTileSize());
 			writeTemplateConfig();

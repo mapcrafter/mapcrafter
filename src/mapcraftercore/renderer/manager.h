@@ -62,6 +62,7 @@ struct MapSettings {
 	util::Nullable<bool> render_leaves_transparent;
 	util::Nullable<bool> render_biomes;
 
+	int tile_size;
 	int max_zoom;
 	std::array<bool, 4> rotations;
 	std::array<int, 4> last_render;
