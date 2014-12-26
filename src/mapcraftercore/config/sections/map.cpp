@@ -65,7 +65,8 @@ void MapSection::dump(std::ostream& out) const {
 	out << getPrettyName() << ":" << std::endl;
 	out << "  name = " << getLongName() << std::endl;
 	out << "  world = " << world << std::endl;
-	out << "  rendermode = " << render_mode << std::endl;
+	out << "  render_view" << render_view << std::endl;
+	out << "  render_mode = " << render_mode << std::endl;
 	out << "  rotations = " << rotations << std::endl;
 	out << "  texture_dir = " << texture_dir << std::endl;
 	out << "  texture_size = " << texture_size << std::endl;
@@ -95,7 +96,11 @@ std::string MapSection::getWorld() const {
 	return world.getValue();
 }
 
-std::string MapSection::getRendermode() const {
+std::string MapSection::getRenderView() const {
+	return render_view.getValue();
+}
+
+std::string MapSection::getRenderMode() const {
 	return render_mode.getValue();
 }
 
@@ -155,6 +160,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	name_long = name_short;
 
 	// set some default configuration values
+	render_view.setDefault("isometric");
 	render_mode.setDefault("daylight");
 	rotations.setDefault("top-left");
 
@@ -181,6 +187,9 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		name_long = value;
 	} else if (key == "world") {
 		world.load(key, value, validation);
+	} else if (key == "render_view") {
+		render_view.load(key, value, validation);
+	// TODO render_mode instead of rendermode, warning if rendermode
 	} else if (key == "rendermode") {
 		if (render_mode.load(key, value, validation)) {
 			std::string r = render_mode.getValue();

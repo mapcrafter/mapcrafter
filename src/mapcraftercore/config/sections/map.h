@@ -57,7 +57,8 @@ public:
 	std::string getLongName() const;
 	std::string getWorld() const;
 
-	std::string getRendermode() const;
+	std::string getRenderView() const;
+	std::string getRenderMode() const;
 	std::set<int> getRotations() const;
 	fs::path getTextureDir() const;
 	int getTextureSize() const;
@@ -87,7 +88,7 @@ private:
 	std::string name_short, name_long;
 	Field<std::string> world;
 
-	Field<std::string> render_mode;
+	Field<std::string> render_view, render_mode;
 	Field<std::string> rotations;
 	std::set<int> rotations_set;
 
