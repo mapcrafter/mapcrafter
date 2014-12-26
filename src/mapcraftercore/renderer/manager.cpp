@@ -264,10 +264,19 @@ bool RenderManager::writeTemplateIndexHtml() const {
 	std::strftime(buffer, sizeof(buffer), "%d.%m.%Y, %H:%M:%S", std::localtime(&t));
 	vars["lastUpdate"] = buffer;
 
-	vars["worlds"] = confighelper.generateTemplateJavascript();
 	vars["backgroundColor"] = config.getBackgroundColor().hex;
 
 	return copyTemplateFile("index.html", vars);
+}
+
+bool RenderManager::writeTemplateConfig() const {
+	std::ofstream out(config.getOutputPath("config.js").string().c_str());
+	if (!out)
+		return false;
+	std::string config = util::trim(confighelper.generateTemplateJavascript());
+	out << "var CONFIG = " << config << ";";
+	out.close();
+	return true;
 }
 
 /**
@@ -281,6 +290,8 @@ void RenderManager::writeTemplates() const {
 
 	if (!writeTemplateIndexHtml())
 		LOG(WARNING) << "Warning: Unable to copy template file index.html!";
+	if (!writeTemplateConfig())
+		LOG(WARNING) << "Warning: Unable to write config.js file!";
 
 	if (!fs::exists(config.getOutputPath("markers.js"))
 			&& !util::copyFile(config.getTemplatePath("markers.js"), config.getOutputPath("markers.js")))
@@ -639,7 +650,7 @@ bool RenderManager::run() {
 		settings.write(settings_file);
 		// and also update the template with the max zoom level
 		confighelper.setMapZoomlevel(map_name, settings.max_zoom);
-		writeTemplateIndexHtml();
+		writeTemplateConfig();
 
 		// again some progress stuff
 		int progress_rotations = 0;
@@ -715,7 +726,7 @@ bool RenderManager::run() {
 
 			// TODO maybe set only once per map?
 			confighelper.setMapTileSize(map_name, tile_renderer->getTileSize());
-			writeTemplateIndexHtml();
+			writeTemplateConfig();
 
 			RenderContext context;
 			context.output_dir = output_dir;
