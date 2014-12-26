@@ -37,12 +37,14 @@ MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfig& config)
 			render_behaviors[map_it->getShortName()][i] = RENDER_AUTO;
 	}
 
+	/*
 	auto worlds = config.getWorlds();
 	for (auto world_it = worlds.begin(); world_it != worlds.end(); ++world_it) {
 		world_rotations[world_it->first] = std::set<int>();
 		world_zoomlevels[world_it->first] = 0;
 		world_tile_offsets[world_it->first] = std::array<renderer::TilePos, 4>();
 	}
+	*/
 }
 
 MapcrafterConfigHelper::~MapcrafterConfigHelper() {
@@ -59,6 +61,7 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 		map_json["name"] = picojson::value(it->getLongName());
 		map_json["world"] = picojson::value(it->getWorld());
 		map_json["worldName"] = picojson::value(world.getWorldName());
+		map_json["renderView"] = picojson::value(it->getRenderView());
 		map_json["textureSize"] = picojson::value((double) it->getTextureSize());
 		map_json["tileSize"] = picojson::value((double) getMapTileSize(it->getShortName()));
 		map_json["maxZoom"] = picojson::value((double) getMapZoomlevel(it->getShortName()));
@@ -71,12 +74,12 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 		map_json["rotations"] = picojson::value(rotations_json);
 
 		picojson::array tile_offsets_json;
-		auto offsets = world_tile_offsets.at(it->getWorld());
-		for (auto it2 = offsets.begin(); it2 != offsets.end(); ++it2) {
-			picojson::array offset;
-			offset.push_back(picojson::value((double) it2->getX()));
-			offset.push_back(picojson::value((double) it2->getY()));
-			tile_offsets_json.push_back(picojson::value(offset));
+		for (int rotation = 0; rotation < 4; rotation++) {
+			renderer::TilePos offset = getWorldTileOffset(it->getWorld(), it->getRenderView(), rotation);
+			picojson::array offset_json;
+			offset_json.push_back(picojson::value((double) offset.getX()));
+			offset_json.push_back(picojson::value((double) offset.getY()));
+			tile_offsets_json.push_back(picojson::value(offset_json));
 		}
 		map_json["tileOffsets"] = picojson::value(tile_offsets_json);
 
@@ -94,13 +97,45 @@ std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
 }
 
 
-const std::set<int>& MapcrafterConfigHelper::getUsedRotations(const std::string& world) const {
-	return world_rotations.at(world);
+std::set<int> MapcrafterConfigHelper::getUsedRotations(
+		const std::string& world, const std::string& render_view) const {
+	WorldRenderView key(world, render_view);
+	if (!world_rotations.count(key))
+		return std::set<int>();
+	return world_rotations.at(key);
 }
 
-void MapcrafterConfigHelper::setUsedRotations(const std::string& world, const std::set<int>& rotations) {
+void MapcrafterConfigHelper::addUsedRotations(const std::string& world,
+		const std::string& render_view, const std::set<int>& rotations) {
 	for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it)
-		world_rotations[world].insert(*rotation_it);
+		world_rotations[WorldRenderView(world, render_view)].insert(*rotation_it);
+}
+
+int MapcrafterConfigHelper::getWorldZoomlevel(const std::string& world,
+		const std::string& render_view) const {
+	WorldRenderView key(world, render_view);
+	if (!world_zoomlevels.count(key))
+		return 0;
+	return world_zoomlevels.at(key);
+}
+
+void MapcrafterConfigHelper::setWorldZoomlevel(const std::string& world,
+		const std::string& render_view, int zoomlevel) {
+	world_zoomlevels[WorldRenderView(world, render_view)] = zoomlevel;
+}
+
+renderer::TilePos MapcrafterConfigHelper::getWorldTileOffset(
+		const std::string& world, const std::string& render_view, int rotation) const {
+	WorldRenderView key(world, render_view);
+	if (!world_tile_offsets.count(key))
+		return renderer::TilePos(0, 0);
+	return world_tile_offsets.at(key)[rotation];
+}
+
+void MapcrafterConfigHelper::setWorldTileOffset(const std::string& world,
+		const std::string& render_view, int rotation,
+		const renderer::TilePos& tile_offset) {
+	world_tile_offsets[WorldRenderView(world, render_view)][rotation] = tile_offset;
 }
 
 int MapcrafterConfigHelper::getMapTileSize(const std::string& map) const {
@@ -111,32 +146,14 @@ void MapcrafterConfigHelper::setMapTileSize(const std::string& map, int tile_siz
 	map_tile_sizes[map] = tile_size;
 }
 
-int MapcrafterConfigHelper::getWorldZoomlevel(const std::string& world) const {
-	return world_zoomlevels.at(world);
-}
-
 int MapcrafterConfigHelper::getMapZoomlevel(const std::string& map) const {
 	if (!map_zoomlevels.count(map))
 		return 0;
 	return map_zoomlevels.at(map);
 }
 
-void MapcrafterConfigHelper::setWorldZoomlevel(const std::string& world, int zoomlevel) {
-	world_zoomlevels[world] = zoomlevel;
-}
-
 void MapcrafterConfigHelper::setMapZoomlevel(const std::string& map, int zoomlevel) {
 	map_zoomlevels[map] = zoomlevel;
-}
-
-void MapcrafterConfigHelper::setWorldTileOffset(const std::string& world,
-		int rotation, const renderer::TilePos& tile_offset) {
-	world_tile_offsets[world][rotation] = tile_offset;
-}
-
-const renderer::TilePos& MapcrafterConfigHelper::getWorldTileOffset(
-		const std::string& world, int rotation) {
-	return world_tile_offsets.at(world)[rotation];
 }
 
 int MapcrafterConfigHelper::getRenderBehavior(const std::string& map, int rotation) const {

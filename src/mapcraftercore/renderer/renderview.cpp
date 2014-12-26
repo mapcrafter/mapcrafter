@@ -19,10 +19,21 @@
 
 #include "renderview.h"
 
+#include "renderviews/isometric/renderview.h"
+#include "renderviews/topdown/renderview.h"
+
 namespace mapcrafter {
 namespace renderer {
 
 RenderView::~RenderView() {
+}
+
+RenderView* createRenderView(const std::string& render_view) {
+	if (render_view == "isometric")
+		return new IsometricRenderView();
+	else if (render_view == "topdown")
+		return new TopdownRenderView();
+	return nullptr;
 }
 
 } /* namespace renderer */

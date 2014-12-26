@@ -57,7 +57,7 @@ mc::Block RenderMode::getBlock(const mc::BlockPos& pos, int get) {
 
 bool createRenderModes(const config::WorldSection& world_config,
 		const config::MapSection& map_config, RenderModes& modes) {
-	std::string name = map_config.getRendermode();
+	std::string name = map_config.getRenderMode();
 	if (name.empty() || name == "plain")
 		return true;
 

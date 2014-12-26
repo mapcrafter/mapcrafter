@@ -41,6 +41,8 @@ public:
 			std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes) const = 0;
 };
 
+RenderView* createRenderView(const std::string& render_view);
+
 } /* namespace renderer */
 } /* namespace mapcrafter */
 

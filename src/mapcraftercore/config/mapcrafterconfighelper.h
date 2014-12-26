@@ -26,6 +26,7 @@
 #include <array>
 #include <map>
 #include <set>
+#include <tuple>
 #include <vector>
 
 namespace mapcrafter {
@@ -35,10 +36,12 @@ class MapcrafterConfigHelper {
 private:
 	MapcrafterConfig config;
 
-	std::map<std::string, std::set<int> > world_rotations;
-	std::map<std::string, int> map_tile_sizes, world_zoomlevels, map_zoomlevels;
-	std::map<std::string, std::array<renderer::TilePos, 4> > world_tile_offsets;
+	typedef std::tuple<std::string, std::string> WorldRenderView;
+	std::map<WorldRenderView, std::set<int> > world_rotations;
+	std::map<WorldRenderView, int> world_zoomlevels;
+	std::map<WorldRenderView, std::array<renderer::TilePos, 4> > world_tile_offsets;
 
+	std::map<std::string, int> map_tile_sizes, map_zoomlevels;
 	std::map<std::string, std::array<int, 4> > render_behaviors;
 
 	void setRenderBehaviors(std::vector<std::string> maps, int behavior);
@@ -49,20 +52,27 @@ public:
 
 	std::string generateTemplateJavascript() const;
 
-	const std::set<int>& getUsedRotations(const std::string& world) const;
-	void setUsedRotations(const std::string& world, const std::set<int>& rotations);
+	std::set<int> getUsedRotations(const std::string& world,
+			const std::string& render_view) const;
+	void addUsedRotations(const std::string& world,
+			const std::string& render_view, const std::set<int>& rotations);
+
+	int getWorldZoomlevel(const std::string& world,
+			const std::string& render_view) const;
+	void setWorldZoomlevel(const std::string& world,
+			const std::string& render_view, int zoomlevel);
+
+	renderer::TilePos getWorldTileOffset(const std::string& world,
+			const std::string& render_view, int rotation) const;
+	void setWorldTileOffset(const std::string& world,
+			const std::string& render_view, int rotation,
+			const renderer::TilePos& tile_offset);
 
 	int getMapTileSize(const std::string& map) const;
 	void setMapTileSize(const std::string& map, int tile_size);
 
-	int getWorldZoomlevel(const std::string& world) const;
 	int getMapZoomlevel(const std::string& map) const;
-	void setWorldZoomlevel(const std::string& world, int zoomlevel);
 	void setMapZoomlevel(const std::string& map, int zoomlevel);
-
-	void setWorldTileOffset(const std::string& world, int rotation,
-			const renderer::TilePos& tile_offset);
-	const renderer::TilePos& getWorldTileOffset(const std::string& world, int rotation);
 
 	int getRenderBehavior(const std::string& map, int rotation) const;
 	void setRenderBehavior(const std::string& map, int rotation, int behavior);
