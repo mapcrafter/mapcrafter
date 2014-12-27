@@ -22,22 +22,26 @@
 namespace mapcrafter {
 namespace renderer {
 
+IsometricTileSet::IsometricTileSet(int tile_width)
+	: TileSet(tile_width) {
+}
+
 /**
  * Calculates the tiles a row and column covers.
  */
-void addRowColTiles(int row, int col, std::set<TilePos>& tiles) {
+void addRowColTiles(int row, int col, int tile_width, std::set<TilePos>& tiles) {
 	// the tiles have are 2 * TILE_WIDTH columns wide
 	// and 4 * TILE_WIDTH row tall
 	// calculate the approximate position of the tile
-	int x = col / (2 * TILE_WIDTH);
-	int y = row / (4 * TILE_WIDTH);
+	int x = col / (2 * tile_width);
+	int y = row / (4 * tile_width);
 
 	// add this tile
 	tiles.insert(TilePos(x, y));
 
 	// check if this row/col is on the border of two tiles
-	bool edge_col = col % (2 * TILE_WIDTH) == 0;
-	bool edge_row = row % (4 * TILE_WIDTH) == 0;
+	bool edge_col = col % (2 * tile_width) == 0;
+	bool edge_row = row % (4 * tile_width) == 0;
 	// if yes, we have to add the neighbor tiles
 	if (edge_col)
 		tiles.insert(TilePos(x-1, y));
@@ -61,7 +65,7 @@ void IsometricTileSet::mapChunkToTiles(const mc::ChunkPos& chunk,
 	// plus one on the bottom side because with chunk section is here
 	// only the top of a chunk section meant
 	for (int i = 0; i <= mc::CHUNK_HEIGHT; i++)
-		addRowColTiles(row + 2*i, col, tiles);
+		addRowColTiles(row + 2*i, col, getTileWidth(), tiles);
 }
 
 }

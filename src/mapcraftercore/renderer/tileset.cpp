@@ -224,13 +224,8 @@ std::string TilePath::toString() const {
 	return ss.str();
 }
 
-TileSet::TileSet()
-	: min_depth(0), depth(0) {
-}
-
-TileSet::TileSet(const mc::World& world)
-	: min_depth(0), depth(0) {
-	scan(world);
+TileSet::TileSet(int tile_width)
+	: tile_width(tile_width), min_depth(0), depth(0) {
 }
 
 TileSet::~TileSet() {
@@ -402,6 +397,10 @@ void TileSet::scanRequiredByFiletimes(const fs::path& output_dir,
 	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
 
 	updateContainingRenderTiles();
+}
+
+int TileSet::getTileWidth() const {
+	return tile_width;
 }
 
 int TileSet::getMinDepth() const {

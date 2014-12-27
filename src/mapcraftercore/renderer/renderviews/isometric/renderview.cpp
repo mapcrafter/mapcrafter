@@ -30,14 +30,14 @@ BlockImages* IsometricRenderView::createBlockImages() const {
 	return new IsometricBlockImages();
 }
 
-TileSet* IsometricRenderView::createTileSet() const {
-	return new IsometricTileSet();
+TileSet* IsometricRenderView::createTileSet(int tile_width) const {
+	return new IsometricTileSet(tile_width);
 }
 
 TileRenderer* IsometricRenderView::createTileRenderer(
-		std::shared_ptr<BlockImages> images,
+		std::shared_ptr<BlockImages> images, int tile_width,
 		std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes) const {
-	return new IsometricTileRenderer(images, world, render_modes);
+	return new IsometricTileRenderer(images, tile_width, world, render_modes);
 }
 
 } /* namespace renderer */

@@ -30,14 +30,14 @@ BlockImages* TopdownRenderView::createBlockImages() const {
 	return new TopdownBlockImages;
 }
 
-TileSet* TopdownRenderView::createTileSet() const {
-	return new TopdownTileSet();
+TileSet* TopdownRenderView::createTileSet(int tile_width) const {
+	return new TopdownTileSet(tile_width);
 }
 
 TileRenderer* TopdownRenderView::createTileRenderer(
-		std::shared_ptr<BlockImages> images,
+		std::shared_ptr<BlockImages> images, int tile_width,
 		std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes) const {
-	return new TopdownTileRenderer(images, world, render_modes);
+	return new TopdownTileRenderer(images, tile_width, world, render_modes);
 }
 
 } /* namespace renderer */

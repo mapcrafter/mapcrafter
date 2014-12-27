@@ -39,7 +39,7 @@ namespace renderer {
 
 class TopdownTileRenderer : public TileRenderer {
 public:
-	TopdownTileRenderer(std::shared_ptr<BlockImages> images,
+	TopdownTileRenderer(std::shared_ptr<BlockImages> images, int tile_width,
 			std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes);
 	~TopdownTileRenderer();
 

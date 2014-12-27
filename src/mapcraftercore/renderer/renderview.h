@@ -36,9 +36,10 @@ public:
 	virtual ~RenderView();
 
 	virtual BlockImages* createBlockImages() const = 0;
-	virtual TileSet* createTileSet() const = 0;
+	virtual TileSet* createTileSet(int tile_width) const = 0;
 	virtual TileRenderer* createTileRenderer(std::shared_ptr<BlockImages> images,
-			std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes) const = 0;
+			int tile_width, std::shared_ptr<mc::WorldCache> world,
+			RenderModes& render_modes) const = 0;
 };
 
 RenderView* createRenderView(const std::string& render_view);

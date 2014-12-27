@@ -27,6 +27,9 @@ namespace renderer {
 
 class TopdownTileSet : public TileSet {
 public:
+	TopdownTileSet(int tile_width);
+	virtual ~TopdownTileSet();
+
 	virtual void mapChunkToTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles);
 };
 

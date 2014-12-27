@@ -22,9 +22,16 @@
 namespace mapcrafter {
 namespace renderer {
 
+TopdownTileSet::TopdownTileSet(int tile_width)
+	: TileSet(tile_width) {
+}
+
+TopdownTileSet::~TopdownTileSet() {
+}
+
 void TopdownTileSet::mapChunkToTiles(const mc::ChunkPos& chunk,
 		std::set<TilePos>& tiles) {
-	tiles.insert(TilePos(chunk.x, chunk.z));
+	tiles.insert(TilePos(chunk.x / getTileWidth(), chunk.z / getTileWidth()));
 }
 
 }

@@ -34,8 +34,8 @@ namespace mapcrafter {
 namespace renderer {
 
 TopdownTileRenderer::TopdownTileRenderer(std::shared_ptr<BlockImages> images,
-		std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes)
-	: TileRenderer(images, world, render_modes) {
+		int tile_width, std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes)
+	: TileRenderer(images, tile_width, world, render_modes) {
 }
 
 TopdownTileRenderer::~TopdownTileRenderer() {
@@ -101,9 +101,9 @@ void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 	//for (size_t i = 0; i < render_modes.size(); i++)
 	//	render_modes[i]->start();
 
-	for (int x = 0; x < TILE_WIDTH; x++)
-		for (int z = 0; z < TILE_WIDTH; z++) {
-			mc::ChunkPos chunkpos(tile_pos.getX() * TILE_WIDTH + x, tile_pos.getY() * TILE_WIDTH + z);
+	for (int x = 0; x < tile_width; x++)
+		for (int z = 0; z < tile_width; z++) {
+			mc::ChunkPos chunkpos(tile_pos.getX() * tile_width + x, tile_pos.getY() * tile_width + z);
 			current_chunk = world->getChunk(chunkpos);
 			if (current_chunk != nullptr)
 				renderChunk(*current_chunk, tile, texture_size*16*x, texture_size*16*z);
@@ -115,8 +115,7 @@ void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 }
 
 int TopdownTileRenderer::getTileSize() const {
-	// TODO tile_width
-	return images->getBlockSize() * 16;
+	return images->getBlockSize() * 16 * tile_width;
 }
 
 }

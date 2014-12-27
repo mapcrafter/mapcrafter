@@ -50,7 +50,8 @@ private:
 	int min_col, max_col;
 	mc::BlockPos top;
 public:
-	TileTopBlockIterator(const TilePos& tile, int block_size, int tile_size);
+	TileTopBlockIterator(const TilePos& tile, int block_size, int tile_width,
+			int tile_size);
 	~TileTopBlockIterator();
 
 	void next();
@@ -95,7 +96,7 @@ struct RenderBlock {
  */
 class IsometricTileRenderer : public TileRenderer {
 public:
-	IsometricTileRenderer(std::shared_ptr<BlockImages> images,
+	IsometricTileRenderer(std::shared_ptr<BlockImages> images, int tile_width,
 			std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes);
 	virtual ~IsometricTileRenderer();
 

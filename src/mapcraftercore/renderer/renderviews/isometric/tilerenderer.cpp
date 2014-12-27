@@ -33,11 +33,11 @@ namespace mapcrafter {
 namespace renderer {
 
 TileTopBlockIterator::TileTopBlockIterator(const TilePos& tile, int block_size,
-        int tile_size)
+		int tile_width, int tile_size)
 		: block_size(block_size), tile_size(tile_size), is_end(false) {
 	// at first get the chunk, whose row and column is at the top right of the tile
-	mc::ChunkPos topright_chunk = mc::ChunkPos::byRowCol(4 * TILE_WIDTH * tile.getY(),
-			2 * TILE_WIDTH * tile.getX() + 2);
+	mc::ChunkPos topright_chunk = mc::ChunkPos::byRowCol(4 * tile_width * tile.getY(),
+			2 * tile_width * tile.getX() + 2);
 
 	// now get the first visible block from this chunk in this tile
 	top = mc::LocalBlockPos(8, 6, mc::CHUNK_HEIGHT * 16 - 1).toGlobalPos(topright_chunk);
@@ -46,9 +46,9 @@ TileTopBlockIterator::TileTopBlockIterator(const TilePos& tile, int block_size,
 
 	// calculate bounds of the tile
 	min_row = top.getRow() + 1;
-	max_row = top.getRow() + (64 * TILE_WIDTH) + 4;
+	max_row = top.getRow() + (64 * tile_width) + 4;
 	max_col = top.getCol() + 2;
-	min_col = max_col - (32 * TILE_WIDTH);
+	min_col = max_col - (32 * tile_width);
 
 	// calculate position of the first block, relative row/col in this tile are needed
 	int row = current.getRow() - min_row;
@@ -125,8 +125,8 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 }
 
 IsometricTileRenderer::IsometricTileRenderer(std::shared_ptr<BlockImages> images,
-		std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes)
-	: TileRenderer(images, world, render_modes), use_preblit_water(false) {
+		int tile_width, std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes)
+	: TileRenderer(images, tile_width, world, render_modes), use_preblit_water(false) {
 }
 
 IsometricTileRenderer::~IsometricTileRenderer() {
@@ -169,7 +169,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 	// iterate over the highest blocks in the tile
 	// we use as tile position tile_pos+tile_offset because the offset means that
 	// we treat the tile position as tile_pos, but it's actually tile_pos+tile_offset
-	for (TileTopBlockIterator it(tile_pos, block_size, getTileSize());
+	for (TileTopBlockIterator it(tile_pos, block_size, tile_width, getTileSize());
 			!it.end(); it.next()) {
 		// water render behavior n1:
 		// are we already in a row of water?
@@ -363,8 +363,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 }
 
 int IsometricTileRenderer::getTileSize() const {
-	// TODO tile_width
-	return images->getBlockSize() * 16;
+	return images->getBlockSize() * 16 * tile_width;
 }
 
 }

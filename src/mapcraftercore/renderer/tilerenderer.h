@@ -41,7 +41,7 @@ namespace renderer {
 
 class TileRenderer {
 public:
-	TileRenderer(std::shared_ptr<BlockImages> images,
+	TileRenderer(std::shared_ptr<BlockImages> images, int tile_width,
 			std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes);
 	virtual ~TileRenderer();
 
@@ -57,6 +57,7 @@ protected:
 	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 	std::shared_ptr<BlockImages> images;
+	int tile_width;
 	std::shared_ptr<mc::WorldCache> world;
 	mc::Chunk* current_chunk;
 	RenderModes render_modes;

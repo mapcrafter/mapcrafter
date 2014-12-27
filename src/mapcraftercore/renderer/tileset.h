@@ -62,8 +62,6 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace renderer {
 
-const int TILE_WIDTH = 1;
-
 /**
  * This class represents the position of a tile in the quadtree.
  */
@@ -155,8 +153,7 @@ std::ostream& operator<<(std::ostream& stream, const TilePos& tile);
  */
 class TileSet {
 public:
-	TileSet();
-	TileSet(const mc::World& World);
+	TileSet(int tile_width);
 	virtual ~TileSet();
 
 	virtual void mapChunkToTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles) = 0;
@@ -186,6 +183,11 @@ public:
 	 */
 	void scanRequiredByFiletimes(const fs::path& output_dir,
 			std::string image_format = "png");
+
+	/**
+	 * Returns the width of the tiles in chunks.
+	 */
+	int getTileWidth() const;
 
 	/**
 	 * Returns the minimum maximum zoom level required to render all render tiles.
@@ -244,6 +246,9 @@ public:
 	int getContainingRenderTiles(const TilePath& tile) const;
 
 private:
+	// width of the tiles in chunks
+	int tile_width;
+
 	// the minimum maximum zoom level which would be required to render all tiles
 	int min_depth;
 	// actual maximum zoom level used by the tile set

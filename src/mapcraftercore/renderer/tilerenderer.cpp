@@ -22,9 +22,10 @@
 namespace mapcrafter {
 namespace renderer {
 
-TileRenderer::TileRenderer(std::shared_ptr<BlockImages> images,
+TileRenderer::TileRenderer(std::shared_ptr<BlockImages> images, int tile_width,
 		std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes)
-	: images(images), world(world), current_chunk(nullptr), render_modes(render_modes),
+	: images(images), tile_width(tile_width), world(world), current_chunk(nullptr),
+	  render_modes(render_modes),
 	  render_biomes(true) {
 	for (size_t i = 0; i < render_modes.size(); i++)
 		render_modes[i]->initialize(images, world, &current_chunk);

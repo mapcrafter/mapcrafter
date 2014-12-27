@@ -434,6 +434,9 @@ bool RenderManager::run() {
 	// ### First big step: Load/parse/validate the configuration file
 	// ###
 
+	// TODO configuration
+	const int TILE_WIDTH = 1;
+
 	config::ValidationMap validation = config.parse(opts.config.string());
 
 	// show infos/warnings/errors if configuration file has something
@@ -529,6 +532,7 @@ bool RenderManager::run() {
 		for (auto render_view_it = render_views.begin();
 				render_view_it != render_views.end(); ++render_view_it) {
 			std::string render_view_name = render_view_it->first;
+			// TODO also validation
 			RenderView* render_view = render_view_it->second;
 			// scan the different rotated versions of the world
 			// -> the rotations which are used by maps, so not necessarily all rotations
@@ -548,7 +552,7 @@ bool RenderManager::run() {
 					return false;
 				}
 				// create a tileset for this world
-				std::shared_ptr<TileSet> tile_set(render_view->createTileSet());
+				std::shared_ptr<TileSet> tile_set(render_view->createTileSet(TILE_WIDTH));
 				// and scan for tiles of this world,
 				// we automatically center the tiles for cropped worlds, but only...
 				//  - the circular cropped ones and
@@ -573,6 +577,9 @@ bool RenderManager::run() {
 				tile_sets[TileSetsKey(world_name, render_view_name, *rotation_it)]->setDepth(zoomlevels_max);
 			// also give this highest max zoom level to the config helper
 			confighelper.setWorldZoomlevel(world_name, render_view_name, zoomlevels_max);
+
+			// clean up render view
+			delete render_view_it->second;
 		}
 	}
 
@@ -711,7 +718,7 @@ bool RenderManager::run() {
 			fs::path output_dir = config.getOutputPath(map_name + "/"
 					+ config::ROTATION_NAMES_SHORT[rotation]);
 			// if incremental render scan which tiles might have changed
-			std::shared_ptr<TileSet> tile_set(render_view->createTileSet());
+			std::shared_ptr<TileSet> tile_set(render_view->createTileSet(TILE_WIDTH));
 			// TODO ewwwwwwww
 			tile_set->operator=(*tile_sets[TileSetsKey(world_name, render_view_name, *rotation_it)]);
 			if (confighelper.getRenderBehavior(map_name, rotation)
@@ -747,7 +754,7 @@ bool RenderManager::run() {
 			std::shared_ptr<mc::WorldCache> world_cache(new mc::WorldCache(worlds[world_name][rotation]));
 			RenderModes render_modes;
 			createRenderModes(config.getWorld(map.getWorld()), map, render_modes);
-			std::shared_ptr<TileRenderer> tile_renderer(render_view->createTileRenderer(block_images, world_cache, render_modes));
+			std::shared_ptr<TileRenderer> tile_renderer(render_view->createTileRenderer(block_images, TILE_WIDTH, world_cache, render_modes));
 			tile_renderer->setRenderBiomes(map.renderBiomes());
 
 			// TODO isometric tile renderer --> setUsePreblitWater
@@ -790,6 +797,7 @@ bool RenderManager::run() {
 			if (progress_bar != nullptr)
 				progress_bar->finish();
 
+
 			// update the settings file with last render time
 			settings.rotations[rotation] = true;
 			settings.last_render[rotation] = start_scanning;
@@ -802,6 +810,9 @@ bool RenderManager::run() {
 					<< " took " << took << " seconds.";
 
 		}
+
+		// clean up render view
+		delete render_view;
 	}
 
 	std::time_t took_all = std::time(nullptr) - time_start_all;

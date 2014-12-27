@@ -28,9 +28,10 @@ namespace renderer {
 class TopdownRenderView : public RenderView {
 public:
 	virtual BlockImages* createBlockImages() const;
-	virtual TileSet* createTileSet() const;
+	virtual TileSet* createTileSet(int tile_width) const;
 	virtual TileRenderer* createTileRenderer(std::shared_ptr<BlockImages> images,
-			std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes) const;
+			int tile_width, std::shared_ptr<mc::WorldCache> world,
+			RenderModes& render_modes) const;
 };
 
 } /* namespace renderer */

@@ -27,6 +27,8 @@ namespace renderer {
 
 class IsometricTileSet : public TileSet {
 public:
+	IsometricTileSet(int tile_width);
+
 	virtual void mapChunkToTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles);
 };
 
