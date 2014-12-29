@@ -91,7 +91,6 @@ private:
 	bool copyTemplateFile(const std::string& filename) const;
 
 	bool writeTemplateIndexHtml() const;
-	bool writeTemplateConfig() const;
 	void writeTemplates() const;
 
 	void increaseMaxZoom(const fs::path& dir, std::string image_format,

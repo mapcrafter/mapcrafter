@@ -22,35 +22,40 @@
 
 #include "mapcrafterconfig.h"
 #include "../renderer/tileset.h"
+#include "../util/picojson.h"
 
 #include <array>
 #include <map>
 #include <set>
 #include <tuple>
 #include <vector>
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace config {
 
+struct TileSetKey {
+	std::string map_name;
+	std::string render_view;
+	int tile_width;
+	int rotation;
+
+	TileSetKey(const std::string& map_name, const std::string render_view,
+			int tile_width, int rotation);
+
+	bool operator<(const TileSetKey& other) const;
+};
+
 class MapcrafterConfigHelper {
-private:
-	MapcrafterConfig config;
-
-	typedef std::tuple<std::string, std::string> WorldRenderView;
-	std::map<WorldRenderView, std::set<int> > world_rotations;
-	std::map<WorldRenderView, int> world_zoomlevels;
-	std::map<WorldRenderView, std::array<renderer::TilePos, 4> > world_tile_offsets;
-
-	std::map<std::string, int> map_tile_sizes, map_zoomlevels;
-	std::map<std::string, std::array<int, 4> > render_behaviors;
-
-	void setRenderBehaviors(std::vector<std::string> maps, int behavior);
 public:
 	MapcrafterConfigHelper();
 	MapcrafterConfigHelper(const MapcrafterConfig& config);
 	~MapcrafterConfigHelper();
 
-	std::string generateTemplateJavascript() const;
+	void readMapSettings();
+	void writeMapSettings() const;
 
 	std::set<int> getUsedRotations(const std::string& world,
 			const std::string& render_view) const;
@@ -88,6 +93,21 @@ public:
 	static const int RENDER_SKIP = 0;
 	static const int RENDER_AUTO = 1;
 	static const int RENDER_FORCE = 2;
+
+private:
+	MapcrafterConfig config;
+
+	typedef std::tuple<std::string, std::string> WorldRenderView;
+	std::map<WorldRenderView, std::set<int> > world_rotations;
+	std::map<WorldRenderView, int> world_zoomlevels;
+	std::map<WorldRenderView, std::array<renderer::TilePos, 4> > world_tile_offsets;
+
+	std::map<std::string, int> map_tile_sizes, map_zoomlevels;
+	std::map<std::string, std::array<int, 4> > render_behaviors;
+
+	picojson::value getConfigJSON() const;
+
+	void setRenderBehaviors(std::vector<std::string> maps, int behavior);
 };
 
 } /* namespace config */

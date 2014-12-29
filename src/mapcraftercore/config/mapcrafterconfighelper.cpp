@@ -19,10 +19,26 @@
 
 #include "mapcrafterconfighelper.h"
 
-#include "../util/picojson.h"
-
 namespace mapcrafter {
 namespace config {
+
+TileSetKey::TileSetKey(const std::string& map_name, const std::string render_view,
+		int tile_width, int rotation)
+	: map_name(map_name), render_view(render_view), tile_width(tile_width),
+	  rotation(rotation) {
+}
+
+bool TileSetKey::operator<(const TileSetKey& other) const {
+	if (map_name != other.map_name)
+		return map_name < other.map_name;
+	if (render_view != other.render_view)
+		return render_view < other.render_view;
+	if (tile_width != other.tile_width)
+		return tile_width < other.tile_width;
+	if (rotation != other.rotation)
+		return rotation < other.rotation;
+	return false;
+}
 
 MapcrafterConfigHelper::MapcrafterConfigHelper() {
 }
@@ -50,52 +66,18 @@ MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfig& config)
 MapcrafterConfigHelper::~MapcrafterConfigHelper() {
 }
 
-std::string MapcrafterConfigHelper::generateTemplateJavascript() const {
-	picojson::object config_json;
-
-	auto maps = config.getMaps();
-	for (auto it = maps.begin(); it != maps.end(); ++it) {
-		auto world = config.getWorld(it->getWorld());
-
-		picojson::object map_json;
-		map_json["name"] = picojson::value(it->getLongName());
-		map_json["world"] = picojson::value(it->getWorld());
-		map_json["worldName"] = picojson::value(world.getWorldName());
-		map_json["renderView"] = picojson::value(it->getRenderView());
-		map_json["textureSize"] = picojson::value((double) it->getTextureSize());
-		map_json["tileSize"] = picojson::value((double) getMapTileSize(it->getShortName()));
-		map_json["maxZoom"] = picojson::value((double) getMapZoomlevel(it->getShortName()));
-		map_json["imageFormat"] = picojson::value(it->getImageFormatSuffix());
-
-		picojson::array rotations_json;
-		auto rotations = it->getRotations();
-		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2)
-			rotations_json.push_back(picojson::value((double) *it2));
-		map_json["rotations"] = picojson::value(rotations_json);
-
-		picojson::array tile_offsets_json;
-		for (int rotation = 0; rotation < 4; rotation++) {
-			renderer::TilePos offset = getWorldTileOffset(it->getWorld(), it->getRenderView(), rotation);
-			picojson::array offset_json;
-			offset_json.push_back(picojson::value((double) offset.getX()));
-			offset_json.push_back(picojson::value((double) offset.getY()));
-			tile_offsets_json.push_back(picojson::value(offset_json));
-		}
-		map_json["tileOffsets"] = picojson::value(tile_offsets_json);
-
-		if (!world.getDefaultView().empty())
-			map_json["defaultView"] = picojson::value(world.getDefaultView());
-		if (world.getDefaultZoom() != 0)
-			map_json["defaultZoom"] = picojson::value((double) world.getDefaultZoom());
-		if (world.getDefaultRotation() != -1)
-			map_json["defaultRotation"] = picojson::value((double) world.getDefaultRotation());
-
-		config_json[it->getShortName()] = picojson::value(map_json);
-	}
-
-	return picojson::value(config_json).serialize(true);
+void MapcrafterConfigHelper::readMapSettings() {
 }
 
+void MapcrafterConfigHelper::writeMapSettings() const {
+	std::ofstream out(config.getOutputPath("config.js").string());
+	if (!out) {
+		LOG(ERROR) << "Unable to write config.js file!";
+		return;
+	}
+	out << "var CONFIG = " << util::trim(getConfigJSON().serialize(true)) << ";";
+	out.close();
+}
 
 std::set<int> MapcrafterConfigHelper::getUsedRotations(
 		const std::string& world, const std::string& render_view) const {
@@ -184,6 +166,66 @@ bool MapcrafterConfigHelper::isCompleteRenderForce(const std::string& map) const
 	return true;
 }
 
+void MapcrafterConfigHelper::parseRenderBehaviors(bool skip_all,
+		std::vector<std::string> render_skip,
+		std::vector<std::string> render_auto,
+		std::vector<std::string> render_force) {
+	if (!skip_all)
+		setRenderBehaviors(render_skip, RENDER_SKIP);
+	else
+		for (size_t i = 0; i < config.getMaps().size(); i++)
+			for (int j = 0; j < 4; j++)
+				render_behaviors[config.getMaps()[i].getShortName()][j] = RENDER_SKIP;
+	setRenderBehaviors(render_auto, RENDER_AUTO);
+	setRenderBehaviors(render_force, RENDER_FORCE);
+}
+
+picojson::value MapcrafterConfigHelper::getConfigJSON() const {
+	picojson::object config_json;
+
+	auto maps = config.getMaps();
+	for (auto it = maps.begin(); it != maps.end(); ++it) {
+		auto world = config.getWorld(it->getWorld());
+
+		picojson::object map_json;
+		map_json["name"] = picojson::value(it->getLongName());
+		map_json["world"] = picojson::value(it->getWorld());
+		map_json["worldName"] = picojson::value(world.getWorldName());
+		map_json["renderView"] = picojson::value(it->getRenderView());
+		map_json["textureSize"] = picojson::value((double) it->getTextureSize());
+		map_json["tileSize"] = picojson::value((double) getMapTileSize(it->getShortName()));
+		map_json["maxZoom"] = picojson::value((double) getMapZoomlevel(it->getShortName()));
+		map_json["imageFormat"] = picojson::value(it->getImageFormatSuffix());
+
+		picojson::array rotations_json;
+		auto rotations = it->getRotations();
+		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2)
+			rotations_json.push_back(picojson::value((double) *it2));
+		map_json["rotations"] = picojson::value(rotations_json);
+
+		picojson::array tile_offsets_json;
+		for (int rotation = 0; rotation < 4; rotation++) {
+			renderer::TilePos offset = getWorldTileOffset(it->getWorld(), it->getRenderView(), rotation);
+			picojson::array offset_json;
+			offset_json.push_back(picojson::value((double) offset.getX()));
+			offset_json.push_back(picojson::value((double) offset.getY()));
+			tile_offsets_json.push_back(picojson::value(offset_json));
+		}
+		map_json["tileOffsets"] = picojson::value(tile_offsets_json);
+
+		if (!world.getDefaultView().empty())
+			map_json["defaultView"] = picojson::value(world.getDefaultView());
+		if (world.getDefaultZoom() != 0)
+			map_json["defaultZoom"] = picojson::value((double) world.getDefaultZoom());
+		if (world.getDefaultRotation() != -1)
+			map_json["defaultRotation"] = picojson::value((double) world.getDefaultRotation());
+
+		config_json[it->getShortName()] = picojson::value(map_json);
+	}
+
+	return picojson::value(config_json);
+}
+
 void MapcrafterConfigHelper::setRenderBehaviors(std::vector<std::string> maps, int behavior) {
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
 		std::string map = *map_it;
@@ -218,20 +260,6 @@ void MapcrafterConfigHelper::setRenderBehaviors(std::vector<std::string> maps, i
 		else
 			std::fill(&render_behaviors[map][0], &render_behaviors[map][4], behavior);
 	}
-}
-
-void MapcrafterConfigHelper::parseRenderBehaviors(bool skip_all,
-		std::vector<std::string> render_skip,
-		std::vector<std::string> render_auto,
-		std::vector<std::string> render_force) {
-	if (!skip_all)
-		setRenderBehaviors(render_skip, RENDER_SKIP);
-	else
-		for (size_t i = 0; i < config.getMaps().size(); i++)
-			for (int j = 0; j < 4; j++)
-				render_behaviors[config.getMaps()[i].getShortName()][j] = RENDER_SKIP;
-	setRenderBehaviors(render_auto, RENDER_AUTO);
-	setRenderBehaviors(render_force, RENDER_FORCE);
 }
 
 } /* namespace config */
