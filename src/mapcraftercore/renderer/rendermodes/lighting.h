@@ -78,49 +78,109 @@ typedef double LightingColor;
 // - defined as array with corners top left / top right / bottom left / bottom right
 typedef std::array<LightingColor, 4> CornerColors;
 
+void drawBottomTriangle(RGBAImage& image, int size, double c1, double c2, double c3);
+void drawTopTriangle(RGBAImage& image, int size, double c1, double c2, double c3);
+
 class LightingRenderMode : public RenderMode {
+public:
+	LightingRenderMode(bool day, double lighting_intensity, bool dimension_end);
+	virtual ~LightingRenderMode();
+
+	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
 private:
 	bool day;
 	double lighting_intensity;
 	bool dimension_end;
 
+	/**
+	 * Draws the shade of the corners by drawing two triangles with the supplied colors.
+	 */
 	void createShade(RGBAImage& image, const CornerColors& corners) const;
 	
-	LightingColor calculateLightingColor(uint8_t block_light, uint8_t sky_light) const;
-	void estimateBlockLight(mc::Block& block, const mc::BlockPos& pos);
+	/**
+	 * Calculates the color of the light of a block.
+	 *
+	 * This uses the formula 0.8**(15 - max(block_light, sky_light))
+	 * When calculating nightlight, the skylight is reduced by 11.
+	 */
+	LightingColor calculateLightingColor(const LightingData& light) const;
+
+	/**
+	 * Estimates the light of a block from its neighbors.
+	 */
+	LightingData estimateLight(const mc::BlockPos& pos);
+
+	/**
+	 * Returns the light of a block (sky/block light). This also means that the light is
+	 * estimated if the block is a special transparent block.
+	 */
 	LightingData getBlockLight(const mc::BlockPos& pos);
 
+	/**
+	 * Returns the lighting color of a block.
+	 */
 	LightingColor getLightingColor(const mc::BlockPos& pos);
-	LightingColor getCornerColor(const mc::BlockPos& pos,
-			const CornerNeighbors& corner);
-	CornerColors getCornerColors(const mc::BlockPos& pos,
-			const FaceCorners& corners);
-	
+
+	/**
+	 * Returns the lighting color of a corner by calculating the average lighting color of
+	 * the four neighbor blocks.
+	 */
+	LightingColor getCornerColor(const mc::BlockPos& pos, const CornerNeighbors& corner);
+
+	/**
+	 * Returns the corner lighting colors of a block face.
+	 */
+	CornerColors getCornerColors(const mc::BlockPos& pos, const FaceCorners& corners);
+
+	/**
+	 * Adds smooth lighting to the left face of a block image, but only a part of the
+	 * face (specify y_start, y_end, used for slab lighting for example).
+	 */
+	void lightLeft(RGBAImage& image, const CornerColors& colors, int y_start, int y_end);
+
+	/**
+	 * Adds smooth lighting to the left face of a block image.
+	 */
 	void lightLeft(RGBAImage& image, const CornerColors& colors);
-	void lightLeft(RGBAImage& image, const CornerColors& colors,
-			int ystart, int yend);
+
+	/**
+	 * Adds smooth lighting to the right face of a block image, but only a part of the
+	 * face (specify y_start, y_end, used for slab lighting for example).
+	 */
+	void lightRight(RGBAImage& image, const CornerColors& colors, int y_start, int y_end);
+
+	/**
+	 * Adds smooth lighting to the right face of a block image.
+	 */
 	void lightRight(RGBAImage& image, const CornerColors& colors);
-	void lightRight(RGBAImage& image, const CornerColors& colors,
-			int ystart, int yend);
+
+	/**
+	 * Adds smooth lighting to the top face of a block image.
+	 */
 	void lightTop(RGBAImage& image, const CornerColors& colors, int yoff = 0);
 	
-	void doSlabLight(RGBAImage& image, const mc::BlockPos& pos,
-			uint16_t id, uint16_t data);
-
-	void doSimpleLight(RGBAImage& image, const mc::BlockPos& pos,
-			uint16_t id, uint16_t data);
+	/**
+	 * Applies the smooth lighting to a block by adding lighting to the top, left and
+	 * right face (if not covered by another, not transparent, block).
+	 */
 	void doSmoothLight(RGBAImage& image, const mc::BlockPos& pos,
 			uint16_t id, uint16_t data);
-public:
-	LightingRenderMode(bool day, double lighting_intensity, bool dimension_end);
-	virtual ~LightingRenderMode();
 
-	virtual bool isHidden(const mc::BlockPos& pos,
-			uint16_t id, uint16_t data);
-	virtual void draw(RGBAImage& image, const mc::BlockPos& pos,
-			uint16_t id, uint16_t data);
+	/**
+	 * Applies the smooth lighting to a slab (not double slabs).
+	 */
+	void doSlabLight(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+	/**
+	 * Applies a simple lighting to a block by coloring the whole block with the lighting
+	 * color of the block.
+	 */
+	void doSimpleLight(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 };
 
 } /* namespace render */
 } /* namespace mapcrafter */
+
 #endif /* RENDERMODES_LIGHTING_H_ */
