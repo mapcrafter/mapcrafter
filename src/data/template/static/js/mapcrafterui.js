@@ -256,32 +256,43 @@ MapcrafterUI.prototype.mcToLatLng = function(x, z, y) {
 		z = nz;
 	}
 	
-	// the size of a 1/4 block image divided by the total size of all render tiles 
-	// on the highest zoom level
-	var block = (config.textureSize/2.0) / (config.tileSize * Math.pow(2, config.maxZoom));
+	// TODO maybe move this out to somewhere else
+	if (config.renderView == "isometric") {
+		// the size of a 1/4 block image divided by the total size of all render tiles 
+		// on the highest zoom level
+		var block = (config.textureSize/2.0) / (config.tileSize * Math.pow(2, config.maxZoom));
+		
+		// at first calculate the row and the column of the block:
+		// column is just x+z
+		// also don't forget the possible tile offset: one tile has 32 columns
+		var col = x+z - config.tileOffsets[rotation][0]*32;
+		// row is z-x, and every y to bottom adds 2 rows
+		// tile offset again: one tile has 64 rows
+		var row = z-x + (256-y)*2 - config.tileOffsets[rotation][1]*64;
 	
-	// at first calculate the row and the column of the block:
-	// column is just x+z
-	// also don't forget the possible tile offset: one tile has 32 columns
-	var col = x+z - config.tileOffsets[rotation][0]*32;
-	// row is z-x, and every y to bottom adds 2 rows
-	// tile offset again: one tile has 64 rows
-	var row = z-x + (256-y)*2 - config.tileOffsets[rotation][1]*64;
-
-	// midpoint of the map is in lat/lng 0.5|0.5
-	// we have to move the lng by the size of one tile
-	// lng is now 2*block size for every column
-	var lng = 0.5 - (1.0 / Math.pow(2, config.maxZoom + 1)) + col * 2*block;
-	// lat is now one block size for every row 
-	var lat = 0.5 + row * block;
-
-	// now we have coordinates in the range [0; 1]
-	// we use the unproject method of leaflet to convert pixel coordinates
-	// to real lat/lng coordinates
-	// every zoom level has tileSize * 2^zoom pixels, so just multiplicate
-	// the [0; 1] coordinates with this pixel count and use the unproject method
-	var size = config.tileSize * Math.pow(2, this.lmap.getZoom());
-	return this.lmap.unproject([lng * size, lat * size]);
+		// midpoint of the map is in lat/lng 0.5|0.5
+		// we have to move the lng by the size of one tile
+		// lng is now 2*block size for every column
+		var lng = 0.5 - (1.0 / Math.pow(2, config.maxZoom + 1)) + col * 2*block;
+		// lat is now one block size for every row 
+		var lat = 0.5 + row * block;
+	
+		// now we have coordinates in the range [0; 1]
+		// we use the unproject method of leaflet to convert pixel coordinates
+		// to real lat/lng coordinates
+		// every zoom level has tileSize * 2^zoom pixels, so just multiplicate
+		// the [0; 1] coordinates with this pixel count and use the unproject method
+		var size = config.tileSize * Math.pow(2, this.lmap.getZoom());
+		return this.lmap.unproject([lng * size, lat * size]);
+	} else {
+		var block = config.textureSize / (config.tileSize * Math.pow(2, config.maxZoom));
+		
+		var lng = 0.5 + x * block;
+		var lat = 0.5 + z * block;
+		
+		var size = config.tileSize * Math.pow(2, this.lmap.getZoom());
+		return this.lmap.unproject([lng * size, lat * size]);
+	}
 };
 
 MapcrafterUI.prototype.latLngToMC = function(latlng, y) {
@@ -308,28 +319,42 @@ MapcrafterUI.prototype.latLngToMC = function(latlng, y) {
 	var config = this.getCurrentMapConfig();
 	var rotation = this.getCurrentRotation();
 	
-	// same way like in the other method:
-	// we convert the lat/lng coordinates to pixel coordinates
-	// in the range [0; count of tiles * tile size]
-	var point = this.lmap.project(latlng);
-	// size = count of tiles on this zoom level * tile size
-	var size = config.tileSize * Math.pow(2, this.lmap.getZoom());
-	// then we need to convert the pixel coordinates to lat/lng coordinates
-	// in the range [0; 1] to use them for the lat/lng -> MC algorithm
-	var lat = point.y / size;
-	var lng = point.x / size;
-	// add tile offset to lat/lng coordinates,
-	// as we have now lat/lng coordinates in the range [0; 1],
-	// divide tile offset by the count of tiles on max zoom level 
-	lat += config.tileOffsets[rotation][1] / Math.pow(2, config.maxZoom);
-	lng += config.tileOffsets[rotation][0] / Math.pow(2, config.maxZoom);
-	
-	// convert lat/lng coordinates to Minecraft coordinates
-	var tile = (1.0 / Math.pow(2, config.maxZoom + 1));
-	var block = (config.textureSize/2.0) / (config.tileSize * Math.pow(2, config.maxZoom));
-	
-	var z = (4*y*block - 1024*block + 2*lat + lng + tile - 1.5) / (4*block);
-	var x = (0.5 - tile - lng + 2*z*block) / (-2*block);
+	// TODO maybe move this out to somewhere else too?
+	var x = 0, z = 0;
+	if (config.renderView == "isometric") {
+		// same way like in the other method:
+		// we convert the lat/lng coordinates to pixel coordinates
+		// in the range [0; count of tiles * tile size]
+		var point = this.lmap.project(latlng);
+		// size = count of tiles on this zoom level * tile size
+		var size = config.tileSize * Math.pow(2, this.lmap.getZoom());
+		// then we need to convert the pixel coordinates to lat/lng coordinates
+		// in the range [0; 1] to use them for the lat/lng -> MC algorithm
+		var lat = point.y / size;
+		var lng = point.x / size;
+		// add tile offset to lat/lng coordinates,
+		// as we have now lat/lng coordinates in the range [0; 1],
+		// divide tile offset by the count of tiles on max zoom level 
+		lat += config.tileOffsets[rotation][1] / Math.pow(2, config.maxZoom);
+		lng += config.tileOffsets[rotation][0] / Math.pow(2, config.maxZoom);
+		
+		// convert lat/lng coordinates to Minecraft coordinates
+		var tile = (1.0 / Math.pow(2, config.maxZoom + 1));
+		var block = (config.textureSize/2.0) / (config.tileSize * Math.pow(2, config.maxZoom));
+		
+		z = (4*y*block - 1024*block + 2*lat + lng + tile - 1.5) / (4*block);
+		x = (0.5 - tile - lng + 2*z*block) / (-2*block);
+	} else {
+		var point = this.lmap.project(latlng);
+		var size = config.tileSize * Math.pow(2, this.lmap.getZoom());
+		
+		var lat = point.y / size;
+		var lng = point.x / size;
+
+		var block = config.textureSize / (config.tileSize * Math.pow(2, config.maxZoom));
+		x = (lng - 0.5) / block;
+		z = (lat - 0.5) / block;
+	}
 	
 	// rotate the position in the other direction
 	for(var i = 0; i < this.currentRotation; i++) {
