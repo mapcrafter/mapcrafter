@@ -75,9 +75,16 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
-**v.1.5.3 (in progress)**
+**v.1.5.4 (in progress)**
 
-* Better handling of corrupt world files
+* Added a detection in the CMake files which compiler C++11 flag to use (for newer
+  compilers which do not support the older ``-std=c++0x`` flag)
+* Fixed bug with the marker tool (new json sign text format was not parsed properly)
+* Fixed bug in texture extraction script (convert command was not properly detected)
+
+**v.1.5.3**
+
+* Better handling of corrupt world files (for now, bigger refactoring of that probably later)
 * Added a fix using imagemagick in texture extraction script to prevent libpng warnings
 * Fixed bug with boost program options which made it unable to use paths
   containing spaces for the ``--config`` command line option
