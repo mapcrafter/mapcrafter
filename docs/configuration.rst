@@ -380,7 +380,7 @@ Map Options
 .. note::
 
     The old option name ``rendermode`` is still available, but deprecated.
-    Therefor you can still use it in old configuration files, but Mapcrafter
+    Therefore you can still use it in old configuration files, but Mapcrafter
     will show a warning.
 
 ``rotations = [top-left] [top-right] [bottom-right] [bottom-left]``
