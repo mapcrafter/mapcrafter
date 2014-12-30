@@ -3,8 +3,8 @@ Configuration File Format
 =========================
 
 To tell the Mapcrafter which maps to render, simple INI-like configuration
-files are used. With configuration files it is possible to render multiple
-maps/rotations/rendermodes into one output file. 
+files are used. With configuration files it is possible to render maps with
+multiple rotations and render modes into one output file. 
 
 A First Example
 ===============
@@ -38,7 +38,7 @@ directory where it can find the Minecraft world (``input_dir`` of the world
 section ``myworld`` in the example above).
 
 Every map section represents a rendered Minecraft world. You can specify
-things like rotation of the world, rendermode, texture pack and texture size
+things like rotation of the world, render mode, texture pack and texture size
 for each map.
 
 In this example you can see that we have a world ``myworld`` in the directory
@@ -61,7 +61,7 @@ A More Advanced Example
     output_dir = output
     
     [global:map]
-    rendermode = daylight
+    render_mode = daylight
     rotations = top-left bottom-right
     
     [world:world]
@@ -77,12 +77,12 @@ A More Advanced Example
     [map:map_world_night]
     name = Normal World - Night
     world = world
-    rendermode = nightlight
+    render_mode = nightlight
     
     [map:map_world_cave]
     name = Normal World - Cave
     world = world
-    rendermode = cave
+    render_mode = cave
     
     [map:map_creative_day]
     name = Creative World - Day
@@ -94,19 +94,19 @@ A More Advanced Example
     [map:map_creative_night]
     name = Creative World - Night
     world = creative
-    rendermode = nightlight
+    render_mode = nightlight
     rotations = top-left top-right bottom-right bottom-left
     texture_dir = textures/special_textures
     texture_size = 16
 
 Here we have some more worlds and maps defined. We have a "normal" world which
-is rendered with the day, night and cave rendermode and we have a "creative"
+is rendered with the day, night and cave render mode and we have a "creative"
 world which is rendered super fancy with a special texture pack, higher texture
-size and all available world rotations with the day and night rendermode.
+size and all available world rotations with the day and night render mode.
 
 As you can see there is a new section ``global:map``. This section is used to
 set default values for all map sections. Because of this in this example every
-map has the daylight rendermode and the world rotations top-left and top-right
+map has the daylight render mode and the world rotations top-left and top-right
 as default. Of course you can overwrite these settings in every map section.
 There is also a global section ``global:world`` for worlds, but at the moment
 there is only one configuration option for worlds (``input_dir``), so it
@@ -199,7 +199,7 @@ World Options
 .. note::
 
     If you want to render The Nether and want to see something, you should use the cave
-    rendermode or use the crop_max_y option to remove the top bedrock layers.
+    render mode or use the crop_max_y option to remove the top bedrock layers.
 
 ``world_name = <name>``
 
@@ -360,15 +360,15 @@ Map Options
     Since the name of the section is used for internal representation, the name
     of the section should be unique and you should only use alphanumeric chars.
 
-``rendermode = plain|daylight|nightlight|cave``
+``render_mode = plain|daylight|nightlight|cave``
 	
     **Default:** ``daylight``
 
-    This is the rendermode to use when rendering the world. Possible
-    rendermodes are:
+    This is the render mode to use when rendering the world. Possible
+    render modes are:
 
     ``plain``
-        Plain rendermode without lighting or other special magic.
+        Plain render mode without lighting or other special magic.
     ``daylight``
         Renders the world with lighting.
     ``nightlight``
@@ -376,6 +376,12 @@ Map Options
     ``cave``
         Renders only caves and colors blocks depending on their height 
         to make them easier to recognize.
+
+.. note::
+
+    The old option name ``rendermode`` is still available, but deprecated.
+    Therefor you can still use it in old configuration files, but Mapcrafter
+    will show a warning.
 
 ``rotations = [top-left] [top-right] [bottom-right] [bottom-left]``
 
@@ -444,7 +450,7 @@ Map Options
 
     **Default:** ``true``
 
-    In Mapcrafter 1.5.1 a new cave rendermode block coloring resulting in a higher
+    In Mapcrafter 1.5.1 a new cave render mode block coloring resulting in a higher
     contrast was introduced. This option is enabled by default for new maps, but
     disabled for older, already rendered maps for compatibility reasons.
 

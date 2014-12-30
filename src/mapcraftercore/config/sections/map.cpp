@@ -190,11 +190,14 @@ bool MapSection::parseField(const std::string key, const std::string value,
 	} else if (key == "render_view") {
 		render_view.load(key, value, validation);
 	// TODO render_mode instead of rendermode, warning if rendermode
-	} else if (key == "rendermode") {
+	} else if (key == "render_mode" || key == "rendermode") {
+		if (key == "rendermode")
+			LOG(WARNING) << "Using the option 'rendermode' is deprecated. "
+					<< "It's called 'render_mode' now.";
 		if (render_mode.load(key, value, validation)) {
 			std::string r = render_mode.getValue();
 			if (r != "plain" && r != "daylight" && r != "nightlight" && r != "cave")
-				validation.error("'rendermode' must be one of: 'plain', 'daylight', 'nightlight', 'cave'");
+				validation.error("'" + key + "' must be one of: 'plain', 'daylight', 'nightlight', 'cave'");
 		}
 	} else if (key == "rotations") {
 		rotations.load(key, value ,validation);

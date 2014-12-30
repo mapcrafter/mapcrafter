@@ -34,10 +34,10 @@ Features
   3D perspective viewable in any webbrowser!
 * **Different directions**: Choose from four different directions to 
   render your worlds!
-* **Different rendermodes**: Choose between different rendermodes like 
+* **Different render modes**: Choose between different render modes like 
   day, night and cave for your maps!
 * **Configuration files**: Control which worlds are rendered from which 
-  direction and with which rendermodes!
+  direction and with which render modes!
 * **Markers**: Automatically generated markers from your Minecraft world data!
 * **Other stuff**: Biome colors, incremental rendering, multithreading
 
