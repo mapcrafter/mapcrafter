@@ -310,7 +310,7 @@ RGBAImage BlockImage::buildImage(double dleft, double dright) const {
 }
 
 IsometricBlockImages::IsometricBlockImages()
-	: AbstractBlockImages() {
+	: AbstractBlockImages(), dleft(0.75), dright(0.6) {
 }
 
 IsometricBlockImages::~IsometricBlockImages() {
