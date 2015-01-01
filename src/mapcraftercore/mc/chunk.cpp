@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 Moritz Hilscher
+ * Copyright 2012-2015 Moritz Hilscher
  *
  * This file is part of Mapcrafter.
  *
