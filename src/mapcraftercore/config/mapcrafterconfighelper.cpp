@@ -96,12 +96,13 @@ void MapcrafterConfigHelper::readMapSettings() {
 			return;
 		}
 
-		if (!value.is<picojson::object>()) {
+		if (!value.is<picojson::object>() || !value.contains("maps")
+				|| !value.get("maps").is<picojson::object>()) {
 			LOG(WARNING) << "Invalid config json object in config.js file!";
 			return;
 		}
 
-		picojson::object maps_json = value.get<picojson::object>();
+		picojson::object maps_json = value.get<picojson::object>()["maps"].get<picojson::object>();
 
 		auto maps = config.getMaps();
 		for (auto map_it = maps.begin(); map_it < maps.end(); ++map_it) {
@@ -281,12 +282,15 @@ void MapcrafterConfigHelper::parseRenderBehaviors(bool skip_all,
 }
 
 picojson::value MapcrafterConfigHelper::getConfigJSON() const {
-	picojson::object config_json;
+	picojson::object config_json, maps_json;
+	picojson::array maps_order_json;
 
 	auto maps = config.getMaps();
 	for (auto it = maps.begin(); it != maps.end(); ++it) {
 		auto world = config.getWorld(it->getWorld());
 		// TODO also this a bit cleaner maybe?
+
+		maps_order_json.push_back(picojson::value(it->getShortName()));
 
 		picojson::object map_json;
 		map_json["name"] = picojson::value(it->getLongName());
@@ -326,8 +330,11 @@ picojson::value MapcrafterConfigHelper::getConfigJSON() const {
 		}
 		map_json["tileOffsets"] = picojson::value(tile_offsets_json);
 
-		config_json[it->getShortName()] = picojson::value(map_json);
+		maps_json[it->getShortName()] = picojson::value(map_json);
 	}
+
+	config_json["maps_order"] = picojson::value(maps_order_json);
+	config_json["maps"] = picojson::value(maps_json);
 
 	return picojson::value(config_json);
 }

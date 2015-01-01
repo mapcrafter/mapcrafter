@@ -53,11 +53,13 @@ MapcrafterUI.prototype.init = function() {
 	this.lmap.attributionControl.addAttribution("Map rendered with <a href='http://mapcrafter.org'>Mapcrafter</a>");
 	
 	var firstMap = null;
-	for(var type in this.config) {
+	for(var i in this.config["maps_order"]) {
+		var type = this.config["maps_order"][i];
+		var mapConfig = this.config["maps"][type];
 		this.layers[type] = {};
-		for(var i in this.config[type].rotations) {
-			var rotation = this.config[type].rotations[i];
-			this.layers[type][rotation] = this.createTileLayer(type, this.config[type], rotation);
+		for(var i2 in mapConfig.rotations) {
+			var rotation = mapConfig.rotations[i2];
+			this.layers[type][rotation] = this.createTileLayer(type, mapConfig, rotation);
 			if(firstMap === null)
 				firstMap = type;
 		}
@@ -87,12 +89,12 @@ MapcrafterUI.prototype.getCurrentRotation = function() {
 	return this.currentRotation;
 };
 
-MapcrafterUI.prototype.getConfig = function() {
-	return this.config;
+MapcrafterUI.prototype.getMapConfigs = function() {
+	return this.config["maps"];
 };
 
 MapcrafterUI.prototype.getMapConfig = function(map) {
-	return map in this.config ? this.config[map] : null;
+	return map in this.config["maps"] ? this.config["maps"][map] : null;
 };
 
 MapcrafterUI.prototype.getCurrentMapConfig = function() {
