@@ -455,6 +455,7 @@ bool RenderManager::run() {
 
 	// create a helper for the configuration
 	confighelper = config::MapcrafterConfigHelper(config);
+	confighelper.readMapSettings();
 	// set the render behaviors the user specified with the -rsaf flags
 	confighelper.parseRenderBehaviors(opts.skip_all, opts.render_skip, opts.render_auto, opts.render_force);
 
@@ -487,7 +488,7 @@ bool RenderManager::run() {
 		if (settings.read(settings_file)) {
 			// TODO workaround for tile size
 			confighelper.setMapTileSize(map_it->getShortName(), settings.tile_size);
-			confighelper.setMapZoomlevel(map_it->getShortName(), settings.max_zoom);
+			confighelper.setMapMaxZoom(map_it->getShortName(), settings.max_zoom);
 			for (int i = 0; i < 4; i++)
 				confighelper.setWorldTileOffset(map_it->getWorld(), map_it->getRenderView(), i, settings.tile_offsets[i]);
 		}
@@ -566,7 +567,7 @@ bool RenderManager::run() {
 			for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it)
 				tile_sets[TileSetsKey(world_name, render_view_name, *rotation_it)]->setDepth(zoomlevels_max);
 			// also give this highest max zoom level to the config helper
-			confighelper.setWorldZoomlevel(world_name, render_view_name, zoomlevels_max);
+			confighelper.setTileSetMaxZoom(world_name, render_view_name, zoomlevels_max);
 
 			// clean up render view
 			delete render_view_it->second;
@@ -645,13 +646,14 @@ bool RenderManager::run() {
 		std::time_t start_scanning = std::time(nullptr);
 
 		auto rotations = map.getRotations();
-		// get the max zoom level calculated with the current tile set
-		int world_zoomlevels = confighelper.getWorldZoomlevel(world_name, render_view_name);
-		// check if the zoom level of the world has increased
-		// since the map was rendered last time (if it was already rendered)
-		if (old_settings && settings.max_zoom < world_zoomlevels) {
-			LOG(INFO) << "The max zoom level was increased from " << settings.max_zoom
-					<< " to " << world_zoomlevels << ".";
+		// get the max zoom level calculated of the current tile set
+		int max_zoom = confighelper.getTileSetMaxZoom(world_name, render_view_name);
+		// get the old max zoom level (from config.js), will 0 if not rendered yet
+		int old_max_zoom = confighelper.getMapMaxZoom(map_name);
+		// if map already rendered: check if the zoom level of the world has increased
+		if (old_max_zoom != 0 && old_max_zoom < max_zoom) {
+			LOG(INFO) << "The max zoom level was increased from " << old_max_zoom
+					<< " to " << max_zoom << ".";
 			LOG(INFO) << "I will move some files around...";
 
 			// if zoom level has increased, increase zoom levels of tile sets
@@ -659,7 +661,7 @@ bool RenderManager::run() {
 					++rotation_it) {
 				fs::path output_dir = config.getOutputPath(map_name + "/"
 						+ config::ROTATION_NAMES_SHORT[*rotation_it]);
-				for (int i = settings.max_zoom; i < world_zoomlevels; i++)
+				for (int i = old_max_zoom; i < max_zoom; i++)
 					increaseMaxZoom(output_dir, map.getImageFormatSuffix());
 			}
 		}
@@ -671,10 +673,10 @@ bool RenderManager::run() {
 					render_view_name, rotation);
 
 		// now write the (possibly new) max zoom level to the settings file
-		settings.max_zoom = world_zoomlevels;
+		settings.max_zoom = max_zoom;
 		settings.write(settings_file);
 		// and also update the template with the max zoom level
-		confighelper.setMapZoomlevel(map_name, settings.max_zoom);
+		confighelper.setMapMaxZoom(map_name, settings.max_zoom);
 		confighelper.writeMapSettings();
 
 		// again some progress stuff
@@ -698,8 +700,10 @@ bool RenderManager::run() {
 					<< "Rendering rotation " << config::ROTATION_NAMES[rotation] << ":";
 
 			// output a small notice if we render this map incrementally
-			if (settings.last_render[rotation] != 0) {
-				std::time_t t = settings.last_render[rotation];
+			//if (settings.last_render[rotation] != 0) {
+			int last_rendered = confighelper.getMapLastRendered(map_name, rotation);
+			if (last_rendered != 0) {
+				std::time_t t = last_rendered;
 				char buffer[256];
 				std::strftime(buffer, sizeof(buffer), "%d %b %Y, %H:%M:%S", std::localtime(&t));
 				LOG(INFO) << "Last rendering was on " << buffer << ".";
@@ -719,7 +723,8 @@ bool RenderManager::run() {
 					tile_set->scanRequiredByFiletimes(output_dir,
 							map.getImageFormatSuffix());
 				else
-					tile_set->scanRequiredByTimestamp(settings.last_render[rotation]);
+					//tile_set->scanRequiredByTimestamp(settings.last_render[rotation]);
+					tile_set->scanRequiredByTimestamp(confighelper.getMapLastRendered(map_name, rotation));
 			}
 
 			std::time_t time_start = std::time(nullptr);
@@ -787,18 +792,18 @@ bool RenderManager::run() {
 			if (progress_bar != nullptr)
 				progress_bar->finish();
 
-
 			// update the settings file with last render time
 			settings.rotations[rotation] = true;
 			settings.last_render[rotation] = start_scanning;
 			settings.write(settings_file);
+			confighelper.setMapLastRendered(map_name, rotation, start_scanning);
+			confighelper.writeMapSettings();
 
 			std::time_t took = std::time(nullptr) - time_start;
 			LOG(INFO) << "[" << progress_maps << "." << progress_rotations << "/"
 					<< progress_maps << "." << progress_rotations_all << "] "
 					<< "Rendering rotation " << config::ROTATION_NAMES[*rotation_it]
 					<< " took " << took << " seconds.";
-
 		}
 
 		// clean up render view

@@ -47,10 +47,13 @@ MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfig& config)
 	: config(config) {
 	auto maps = config.getMaps();
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
-		map_tile_sizes[map_it->getShortName()] = 0;
-		map_zoomlevels[map_it->getShortName()] = 0;
+		map_tile_size[map_it->getShortName()] = 0;
+		map_max_zoom[map_it->getShortName()] = 0;
 		for (int i = 0; i < 4; i++)
 			render_behaviors[map_it->getShortName()][i] = RENDER_AUTO;
+
+		// TODO initialize here what we can already initialize, don't do it in manager.cpp
+		addUsedRotations(map_it->getWorld(), map_it->getRenderView(), map_it->getRotations());
 	}
 
 	/*
@@ -67,6 +70,91 @@ MapcrafterConfigHelper::~MapcrafterConfigHelper() {
 }
 
 void MapcrafterConfigHelper::readMapSettings() {
+	if (fs::is_regular_file(config.getOutputPath("config.js"))) {
+		// TODO try to read config.js file
+		// TODO better validation? this is only a first try...
+
+		std::ifstream in(config.getOutputPath("config.js").string());
+		if (!in) {
+			LOG(WARNING) << "Unable to open config.js file!";
+		}
+		std::stringstream ss;
+		ss << in.rdbuf();
+		std::string config_data = ss.str();
+		if (!util::startswith(config_data, "var CONFIG = ")) {
+			LOG(WARNING) << "Invalid config.js file! "
+					<< "'var CONFIG = ' is expected at beginning of file!";
+			return;
+		}
+
+		config_data = config_data.substr(std::string("var CONFIG = ").size());
+		picojson::value value;
+		std::string json_error;
+		picojson::parse(value, config_data.begin(), config_data.end(), &json_error);
+		if (!json_error.empty()) {
+			LOG(WARNING) << "Unable to parse config.js file: " << json_error;
+			return;
+		}
+
+		if (!value.is<picojson::object>()) {
+			LOG(WARNING) << "Invalid config json object in config.js file!";
+			return;
+		}
+
+		picojson::object maps_json = value.get<picojson::object>();
+
+		auto maps = config.getMaps();
+		for (auto map_it = maps.begin(); map_it < maps.end(); ++map_it) {
+			std::string map_name = map_it->getShortName();
+			if (!maps_json.count(map_name)
+					|| !maps_json[map_name].is<picojson::object>())
+				continue;
+			picojson::object map_json = maps_json[map_name].get<picojson::object>();
+
+			if (map_json.count("tileSize") && map_json["tileSize"].is<double>()) {
+				map_tile_size[map_name] = map_json["tileSize"].get<double>();
+				LOG(DEBUG) << map_name << " tile_size=" << map_tile_size[map_name];
+			}
+
+			if (map_json.count("maxZoom") && map_json["maxZoom"].is<double>()) {
+				map_max_zoom[map_name] = map_json["maxZoom"].get<double>();
+				LOG(DEBUG) << map_name << " max_zoom=" << map_max_zoom[map_name];
+			}
+
+			if (map_json.count("lastRendered") && map_json["lastRendered"].is<picojson::array>()) {
+				picojson::array last_rendered_json = map_json["lastRendered"].get<picojson::array>();
+				if (last_rendered_json.size() == 4
+						&& last_rendered_json[0].is<double>()
+						&& last_rendered_json[1].is<double>()
+						&& last_rendered_json[2].is<double>()
+						&& last_rendered_json[3].is<double>()) {
+					for (size_t i = 0; i < 4; i++)
+						map_last_rendered[map_name][i] = last_rendered_json[i].get<double>();
+					LOG(DEBUG) << map_name << " last_rendered=["
+							<< map_last_rendered[map_name][0] << ", "
+							<< map_last_rendered[map_name][1] << ", "
+							<< map_last_rendered[map_name][2] << ", "
+							<< map_last_rendered[map_name][3] << "]";
+				}
+			}
+		}
+		return;
+	}
+
+	// TODO try to migrate old map.settings files
+	bool map_settings_found = false;
+	auto maps = config.getMaps();
+	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
+		if (fs::is_regular_file(config.getOutputPath(map_it->getShortName()
+				+ "/map.settings"))) {
+			if (!map_settings_found) {
+				LOG(INFO) << "Found old map.settings file(s), trying to migrate to config.js";
+				map_settings_found = true;
+			}
+
+			// TODO read map.settings file
+		}
+	}
 }
 
 void MapcrafterConfigHelper::writeMapSettings() const {
@@ -93,53 +181,65 @@ void MapcrafterConfigHelper::addUsedRotations(const std::string& world,
 		world_rotations[WorldRenderView(world, render_view)].insert(*rotation_it);
 }
 
-int MapcrafterConfigHelper::getWorldZoomlevel(const std::string& world,
+int MapcrafterConfigHelper::getTileSetMaxZoom(const std::string& world,
 		const std::string& render_view) const {
 	WorldRenderView key(world, render_view);
-	if (!world_zoomlevels.count(key))
+	if (!world_max_max_zoom.count(key))
 		return 0;
-	return world_zoomlevels.at(key);
+	return world_max_max_zoom.at(key);
 }
 
-void MapcrafterConfigHelper::setWorldZoomlevel(const std::string& world,
-		const std::string& render_view, int zoomlevel) {
-	world_zoomlevels[WorldRenderView(world, render_view)] = zoomlevel;
+void MapcrafterConfigHelper::setTileSetMaxZoom(const std::string& world,
+		const std::string& render_view, int max_zoom) {
+	world_max_max_zoom[WorldRenderView(world, render_view)] = max_zoom;
 }
 
 renderer::TilePos MapcrafterConfigHelper::getWorldTileOffset(
 		const std::string& world, const std::string& render_view, int rotation) const {
 	WorldRenderView key(world, render_view);
-	if (!world_tile_offsets.count(key))
+	if (!world_tile_offset.count(key))
 		return renderer::TilePos(0, 0);
-	return world_tile_offsets.at(key)[rotation];
+	return world_tile_offset.at(key)[rotation];
 }
 
 void MapcrafterConfigHelper::setWorldTileOffset(const std::string& world,
 		const std::string& render_view, int rotation,
 		const renderer::TilePos& tile_offset) {
-	world_tile_offsets[WorldRenderView(world, render_view)][rotation] = tile_offset;
+	world_tile_offset[WorldRenderView(world, render_view)][rotation] = tile_offset;
 }
 
 int MapcrafterConfigHelper::getMapTileSize(const std::string& map) const {
-	return map_tile_sizes.at(map);
+	return map_tile_size.at(map);
 }
 
 void MapcrafterConfigHelper::setMapTileSize(const std::string& map, int tile_size) {
-	map_tile_sizes[map] = tile_size;
+	map_tile_size[map] = tile_size;
 }
 
-int MapcrafterConfigHelper::getMapZoomlevel(const std::string& map) const {
-	if (!map_zoomlevels.count(map))
+int MapcrafterConfigHelper::getMapMaxZoom(const std::string& map) const {
+	if (!map_max_zoom.count(map))
 		return 0;
-	return map_zoomlevels.at(map);
+	return map_max_zoom.at(map);
 }
 
-void MapcrafterConfigHelper::setMapZoomlevel(const std::string& map, int zoomlevel) {
-	map_zoomlevels[map] = zoomlevel;
+void MapcrafterConfigHelper::setMapMaxZoom(const std::string& map, int zoomlevel) {
+	map_max_zoom[map] = zoomlevel;
 }
 
 int MapcrafterConfigHelper::getRenderBehavior(const std::string& map, int rotation) const {
 	return render_behaviors.at(map).at(rotation);
+}
+
+int MapcrafterConfigHelper::getMapLastRendered(const std::string& map,
+		int rotation) const {
+	if (!map_last_rendered.count(map))
+		return 0;
+	return map_last_rendered.at(map).at(rotation);
+}
+
+void MapcrafterConfigHelper::setMapLastRendered(const std::string& map,
+		int rotation, int last_rendered) {
+	map_last_rendered[map][rotation] = last_rendered;
 }
 
 void MapcrafterConfigHelper::setRenderBehavior(const std::string& map, int rotation, int behavior) {
@@ -186,6 +286,7 @@ picojson::value MapcrafterConfigHelper::getConfigJSON() const {
 	auto maps = config.getMaps();
 	for (auto it = maps.begin(); it != maps.end(); ++it) {
 		auto world = config.getWorld(it->getWorld());
+		// TODO also this a bit cleaner maybe?
 
 		picojson::object map_json;
 		map_json["name"] = picojson::value(it->getLongName());
@@ -193,15 +294,27 @@ picojson::value MapcrafterConfigHelper::getConfigJSON() const {
 		map_json["worldName"] = picojson::value(world.getWorldName());
 		map_json["renderView"] = picojson::value(it->getRenderView());
 		map_json["textureSize"] = picojson::value((double) it->getTextureSize());
-		map_json["tileSize"] = picojson::value((double) getMapTileSize(it->getShortName()));
-		map_json["maxZoom"] = picojson::value((double) getMapZoomlevel(it->getShortName()));
 		map_json["imageFormat"] = picojson::value(it->getImageFormatSuffix());
+		if (!world.getDefaultView().empty())
+			map_json["defaultView"] = picojson::value(world.getDefaultView());
+		if (world.getDefaultZoom() != 0)
+			map_json["defaultZoom"] = picojson::value((double) world.getDefaultZoom());
+		if (world.getDefaultRotation() != -1)
+			map_json["defaultRotation"] = picojson::value((double) world.getDefaultRotation());
 
 		picojson::array rotations_json;
 		auto rotations = it->getRotations();
 		for (auto it2 = rotations.begin(); it2 != rotations.end(); ++it2)
 			rotations_json.push_back(picojson::value((double) *it2));
 		map_json["rotations"] = picojson::value(rotations_json);
+
+		map_json["tileSize"] = picojson::value((double) getMapTileSize(it->getShortName()));
+		map_json["maxZoom"] = picojson::value((double) getMapMaxZoom(it->getShortName()));
+
+		picojson::array last_rendered_json;
+		for (int rotation = 0; rotation < 4; rotation++)
+			last_rendered_json.push_back(picojson::value((double) getMapLastRendered(it->getShortName(), rotation)));
+		map_json["lastRendered"] = picojson::value(last_rendered_json);
 
 		picojson::array tile_offsets_json;
 		for (int rotation = 0; rotation < 4; rotation++) {
@@ -212,13 +325,6 @@ picojson::value MapcrafterConfigHelper::getConfigJSON() const {
 			tile_offsets_json.push_back(picojson::value(offset_json));
 		}
 		map_json["tileOffsets"] = picojson::value(tile_offsets_json);
-
-		if (!world.getDefaultView().empty())
-			map_json["defaultView"] = picojson::value(world.getDefaultView());
-		if (world.getDefaultZoom() != 0)
-			map_json["defaultZoom"] = picojson::value((double) world.getDefaultZoom());
-		if (world.getDefaultRotation() != -1)
-			map_json["defaultRotation"] = picojson::value((double) world.getDefaultRotation());
 
 		config_json[it->getShortName()] = picojson::value(map_json);
 	}

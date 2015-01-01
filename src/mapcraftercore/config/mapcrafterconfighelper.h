@@ -62,9 +62,9 @@ public:
 	void addUsedRotations(const std::string& world,
 			const std::string& render_view, const std::set<int>& rotations);
 
-	int getWorldZoomlevel(const std::string& world,
+	int getTileSetMaxZoom(const std::string& world,
 			const std::string& render_view) const;
-	void setWorldZoomlevel(const std::string& world,
+	void setTileSetMaxZoom(const std::string& world,
 			const std::string& render_view, int zoomlevel);
 
 	renderer::TilePos getWorldTileOffset(const std::string& world,
@@ -76,8 +76,11 @@ public:
 	int getMapTileSize(const std::string& map) const;
 	void setMapTileSize(const std::string& map, int tile_size);
 
-	int getMapZoomlevel(const std::string& map) const;
-	void setMapZoomlevel(const std::string& map, int zoomlevel);
+	int getMapMaxZoom(const std::string& map) const;
+	void setMapMaxZoom(const std::string& map, int max_zoom);
+
+	int getMapLastRendered(const std::string& map, int rotation) const;
+	void setMapLastRendered(const std::string& map, int rotation, int last_rendered);
 
 	int getRenderBehavior(const std::string& map, int rotation) const;
 	void setRenderBehavior(const std::string& map, int rotation, int behavior);
@@ -98,11 +101,21 @@ private:
 	MapcrafterConfig config;
 
 	typedef std::tuple<std::string, std::string> WorldRenderView;
-	std::map<WorldRenderView, std::set<int> > world_rotations;
-	std::map<WorldRenderView, int> world_zoomlevels;
-	std::map<WorldRenderView, std::array<renderer::TilePos, 4> > world_tile_offsets;
 
-	std::map<std::string, int> map_tile_sizes, map_zoomlevels;
+	// tile offset of world/view/tile_width/rotation
+	std::map<WorldRenderView, std::array<renderer::TilePos, 4> > world_tile_offset;
+	// used rotations of world/view/tile_width
+	std::map<WorldRenderView, std::set<int> > world_rotations;
+	// max max zoom of world/view/tile_width (iterate over rotations to calculate)
+	std::map<WorldRenderView, int> world_max_max_zoom;
+
+	// tile size of map
+	std::map<std::string, int> map_tile_size;
+	// max zoom of map (= max max zoom level of the world at time of rendering)
+	std::map<std::string, int> map_max_zoom;
+	// last render time of map/rotation
+	std::map<std::string, std::array<int, 4> > map_last_rendered;
+	// how to render each map/rotation (render-auto/skip/force)
 	std::map<std::string, std::array<int, 4> > render_behaviors;
 
 	picojson::value getConfigJSON() const;
