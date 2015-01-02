@@ -70,6 +70,8 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & 0xff00;
 	else if (id == 64 || id == 71) // doors
 		return data & 0b1111110000;
+	else if (id == 78) // snow
+		return 0;
 	else if (id == 81 || id == 83 || id == 92) // cactus, sugar cane, cake
 		return data & 0xff00;
 	else if (id == 84) // jukebox
@@ -179,6 +181,8 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(32, 0, empty_texture); // dead bush
 
 	setBlockImage(48, 0, t.COBBLESTONE_MOSSY); // moss stone
+
+	setBlockImage(78, 0, t.SNOW); // snow
 
 	setBlockImage(82, 0, t.CLAY); // clay block
 
