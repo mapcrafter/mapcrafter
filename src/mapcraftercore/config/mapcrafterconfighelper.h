@@ -116,7 +116,7 @@ private:
 	// last render time of map/rotation
 	std::map<std::string, std::array<int, 4> > map_last_rendered;
 	// how to render each map/rotation (render-auto/skip/force)
-	std::map<std::string, std::array<int, 4> > render_behaviors;
+	std::map<std::string, std::array<int, 4> > map_render_behavior;
 
 	picojson::value getConfigJSON() const;
 

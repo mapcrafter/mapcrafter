@@ -47,26 +47,39 @@ MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfig& config)
 	: config(config) {
 	auto maps = config.getMaps();
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
-		map_tile_size[map_it->getShortName()] = 0;
-		map_max_zoom[map_it->getShortName()] = 0;
-		for (int i = 0; i < 4; i++)
-			render_behaviors[map_it->getShortName()][i] = RENDER_AUTO;
+		std::string map_name = map_it->getShortName();
 
-		// TODO initialize here what we can already initialize, don't do it in manager.cpp
-		addUsedRotations(map_it->getWorld(), map_it->getRenderView(), map_it->getRotations());
-	}
+		// set tile size to something != 0 for now,
+		// because Leaflet is sad if the tile size is 0
+		map_tile_size[map_name] = 1;
+		map_max_zoom[map_name] = 0;
+		for (int i = 0; i < 4; i++) {
+			map_last_rendered[map_name][i] = 0;
+			map_render_behavior[map_name][i] = RENDER_AUTO;
+		}
 
-	/*
-	auto worlds = config.getWorlds();
-	for (auto world_it = worlds.begin(); world_it != worlds.end(); ++world_it) {
-		world_rotations[world_it->first] = std::set<int>();
-		world_zoomlevels[world_it->first] = 0;
-		world_tile_offsets[world_it->first] = std::array<renderer::TilePos, 4>();
+		auto rotations = map_it->getRotations();
+		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
+			WorldRenderView key(map_it->getWorld(), map_it->getRenderView());
+			world_rotations[key].insert(*rotation_it);
+			world_max_max_zoom[key] = 0;
+		}
 	}
-	*/
 }
 
 MapcrafterConfigHelper::~MapcrafterConfigHelper() {
+}
+
+bool parseTilePosJSON(const picojson::value& value, renderer::TilePos& tile) {
+	if (!value.is<picojson::array>())
+		return false;
+	picojson::array array = value.get<picojson::array>();
+	if (!array.size() == 2)
+		return false;
+	if (!array[0].is<double>() || !array[1].is<double>())
+		return false;
+	tile = renderer::TilePos(array[0].get<double>(), array[1].get<double>());
+	return true;
 }
 
 void MapcrafterConfigHelper::readMapSettings() {
@@ -111,6 +124,20 @@ void MapcrafterConfigHelper::readMapSettings() {
 					|| !maps_json[map_name].is<picojson::object>())
 				continue;
 			picojson::object map_json = maps_json[map_name].get<picojson::object>();
+
+			if (map_json.count("tileOffsets") && map_json["tileOffsets"].is<picojson::array>()) {
+				picojson::array array = map_json["tileOffsets"].get<picojson::array>();
+				if (array.size() == 4) {
+					WorldRenderView key(map_it->getWorld(), map_it->getRenderView());
+					for (int rotation = 0; rotation < 4; rotation++)
+						parseTilePosJSON(array[rotation], world_tile_offset[key][rotation]);
+					LOG(DEBUG) << map_name << " tile_offsets="
+							<< world_tile_offset[key][0] << ","
+							<< world_tile_offset[key][1] << ","
+							<< world_tile_offset[key][2] << ","
+							<< world_tile_offset[key][3];
+				}
+			}
 
 			if (map_json.count("tileSize") && map_json["tileSize"].is<double>()) {
 				map_tile_size[map_name] = map_json["tileSize"].get<double>();
@@ -228,7 +255,7 @@ void MapcrafterConfigHelper::setMapMaxZoom(const std::string& map, int zoomlevel
 }
 
 int MapcrafterConfigHelper::getRenderBehavior(const std::string& map, int rotation) const {
-	return render_behaviors.at(map).at(rotation);
+	return map_render_behavior.at(map).at(rotation);
 }
 
 int MapcrafterConfigHelper::getMapLastRendered(const std::string& map,
@@ -246,9 +273,9 @@ void MapcrafterConfigHelper::setMapLastRendered(const std::string& map,
 void MapcrafterConfigHelper::setRenderBehavior(const std::string& map, int rotation, int behavior) {
 	if (rotation == -1)
 		for (size_t i = 0; i < 4; i++)
-			render_behaviors[map][i] = behavior;
+			map_render_behavior[map][i] = behavior;
 	else
-		render_behaviors[map][rotation] = behavior;
+		map_render_behavior[map][rotation] = behavior;
 }
 
 bool MapcrafterConfigHelper::isCompleteRenderSkip(const std::string& map) const {
@@ -276,7 +303,7 @@ void MapcrafterConfigHelper::parseRenderBehaviors(bool skip_all,
 	else
 		for (size_t i = 0; i < config.getMaps().size(); i++)
 			for (int j = 0; j < 4; j++)
-				render_behaviors[config.getMaps()[i].getShortName()][j] = RENDER_SKIP;
+				map_render_behavior[config.getMaps()[i].getShortName()][j] = RENDER_SKIP;
 	setRenderBehaviors(render_auto, RENDER_AUTO);
 	setRenderBehaviors(render_force, RENDER_FORCE);
 }
@@ -369,9 +396,9 @@ void MapcrafterConfigHelper::setRenderBehaviors(std::vector<std::string> maps, i
 		}
 
 		if (r != -1)
-			render_behaviors[map][r] = behavior;
+			map_render_behavior[map][r] = behavior;
 		else
-			std::fill(&render_behaviors[map][0], &render_behaviors[map][4], behavior);
+			std::fill(&map_render_behavior[map][0], &map_render_behavior[map][4], behavior);
 	}
 }
 
