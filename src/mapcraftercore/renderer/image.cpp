@@ -444,17 +444,30 @@ bool RGBAImage::readPNG(const std::string& filename) {
 
 	png_read_info(png, info);
 	int color = png_get_color_type(png, info);
-	if (png_get_bit_depth(png, info) != 8 || (color & PNG_COLOR_TYPE_RGB) == 0) {
-		return false;
-	}
+	int bit_depth = png_get_bit_depth(png, info);
+
+	// strip down images of 16 bits per channel to 8 bits per channel
+	if (bit_depth == 16)
+		png_set_strip_16(png);
+
+	// convert gray images to rgb(a)
+	if (color == PNG_COLOR_TYPE_GRAY || color == PNG_COLOR_TYPE_GRAY_ALPHA)
+		png_set_gray_to_rgb(png);
+	// make sure they are also using 8 bit per channel
+	if (color == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
+		png_set_expand_gray_1_2_4_to_8(png);
+
+	// convert indexed images to rgb(a)
+	if (color == PNG_COLOR_TYPE_PALETTE)
+		png_set_palette_to_rgb(png);
+
+	// add alpha channel if not existing
+	if ((color & PNG_COLOR_MASK_ALPHA) == 0)
+		png_set_add_alpha(png, 0xff, PNG_FILLER_AFTER);
 
 	setSize(png_get_image_width(png, info), png_get_image_height(png, info));
 
 	png_set_interlace_handling(png);
-	// add alpha channel, if needed
-	if ((color & PNG_COLOR_MASK_ALPHA) == 0) {
-		png_set_add_alpha(png, 0xff, PNG_FILLER_AFTER);
-	}
 	png_read_update_info(png, info);
 
 	png_bytep* rows = new png_bytep[height];
