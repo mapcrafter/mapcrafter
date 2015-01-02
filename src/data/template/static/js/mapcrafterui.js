@@ -93,6 +93,10 @@ MapcrafterUI.prototype.getMapConfigs = function() {
 	return this.config["maps"];
 };
 
+MapcrafterUI.prototype.getMapConfigsOrder = function() {
+	return this.config["maps_order"];
+}
+
 MapcrafterUI.prototype.getMapConfig = function(map) {
 	return map in this.config["maps"] ? this.config["maps"][map] : null;
 };
@@ -289,8 +293,8 @@ MapcrafterUI.prototype.mcToLatLng = function(x, z, y) {
 	} else {
 		var block = config.textureSize / (config.tileSize * Math.pow(2, config.maxZoom));
 		
-		var lng = 0.5 + x * block;
-		var lat = 0.5 + z * block;
+		var lng = 0.5 + (x - config.tileOffsets[rotation][0]*16) * block;
+		var lat = 0.5 + (z - config.tileOffsets[rotation][1]*16) * block;
 		
 		var size = config.tileSize * Math.pow(2, this.lmap.getZoom());
 		return this.lmap.unproject([lng * size, lat * size]);
@@ -352,6 +356,8 @@ MapcrafterUI.prototype.latLngToMC = function(latlng, y) {
 		
 		var lat = point.y / size;
 		var lng = point.x / size;
+		lat += config.tileOffsets[rotation][1] / Math.pow(2, config.maxZoom);
+		lng += config.tileOffsets[rotation][0] / Math.pow(2, config.maxZoom);
 
 		var block = config.textureSize / (config.tileSize * Math.pow(2, config.maxZoom));
 		x = (lng - 0.5) / block;
