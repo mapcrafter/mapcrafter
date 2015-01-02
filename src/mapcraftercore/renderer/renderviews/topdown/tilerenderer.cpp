@@ -72,12 +72,27 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 					continue;
 				}
 				uint16_t data = chunk.getBlockData(localpos);
+
+				bool hidden = false;
+				for (size_t i = 0; i < render_modes.size(); i++) {
+					if (render_modes[i]->isHidden(globalpos, id, data)) {
+						hidden = true;
+						break;
+					}
+				}
+				if (hidden) {
+					localpos.y--;
+					continue;
+				}
+
 				RGBAImage block = images->getBlock(id, data);
 				if (Biome::isBiomeBlock(id, data)) {
 					block = images->getBiomeDependBlock(id, data, getBiomeOfBlock(globalpos, &chunk));
 				}
-				//for (size_t i = 0; i < render_modes.size(); i++)
-				//	render_modes[i]->draw(block, globalpos, id, data);
+
+				for (size_t i = 0; i < render_modes.size(); i++)
+					render_modes[i]->draw(block, globalpos, id, data);
+
 				blocks.push_back(block);
 				if (!images->isBlockTransparent(id, data)) {
 					break;
@@ -98,8 +113,8 @@ void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 	tile.setSize(getTileSize(), getTileSize());
 
 	// call start method of the rendermodes
-	//for (size_t i = 0; i < render_modes.size(); i++)
-	//	render_modes[i]->start();
+	for (size_t i = 0; i < render_modes.size(); i++)
+		render_modes[i]->start();
 
 	for (int x = 0; x < tile_width; x++)
 		for (int z = 0; z < tile_width; z++) {
@@ -110,8 +125,8 @@ void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 		}
 
 	// call the end method of the rendermodes
-	//for (size_t i = 0; i < render_modes.size(); i++)
-	//	render_modes[i]->end();
+	for (size_t i = 0; i < render_modes.size(); i++)
+		render_modes[i]->end();
 }
 
 int TopdownTileRenderer::getTileSize() const {

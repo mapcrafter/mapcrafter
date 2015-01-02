@@ -94,6 +94,9 @@ private:
 	double lighting_intensity;
 	bool dimension_end;
 
+	bool render_view_initialized;
+	bool isometric_render_view;
+
 	/**
 	 * Draws the shade of the corners by drawing two triangles with the supplied colors.
 	 */

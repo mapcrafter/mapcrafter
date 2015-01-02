@@ -82,7 +82,8 @@ FaceCorners::FaceCorners(const CornerNeighbors& corner1)
 
 LightingRenderMode::LightingRenderMode(bool day, double lighting_intensity,
 		bool dimension_end)
-	: day(day), lighting_intensity(lighting_intensity), dimension_end(dimension_end) {
+	: day(day), lighting_intensity(lighting_intensity), dimension_end(dimension_end),
+	  render_view_initialized(false), isometric_render_view(true) {
 }
 
 LightingRenderMode::~LightingRenderMode() {
@@ -95,30 +96,45 @@ bool LightingRenderMode::isHidden(const mc::BlockPos& pos,
 
 void LightingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
+	// TODO BIG ONE!
+	// split render modes up to some kind of frontend/backend
+	if (!render_view_initialized) {
+		render_view_initialized = true;
+		isometric_render_view = dynamic_cast<IsometricBlockImages*>(images.get()) != nullptr;
+	}
+
 	bool transparent = images->isBlockTransparent(id, data);
 
 	bool water = (id == 8 || id == 9) && (data & util::binary<1111>::value) == 0;
 	int texture_size = image.getHeight() / 2;
 
-	if (id == 78 && (data & util::binary<1111>::value) == 0) {
-		// flat snow gets also smooth lighting
-		int height = ((data & util::binary<1111>::value) + 1) / 8.0 * texture_size;
-		lightTop(image, getCornerColors(pos, CORNERS_BOTTOM),
-				texture_size - height);
-		lightLeft(image, getCornerColors(pos, CORNERS_LEFT),
-				texture_size - height, texture_size);
-		lightRight(image, getCornerColors(pos, CORNERS_RIGHT),
-				texture_size - height, texture_size);
-	} else if (id == 44 || id == 126) {
-		// slabs and wooden slabs
-		doSlabLight(image, pos, id, data);
-	} else if (transparent && !water && id != 79) {
-		// transparent blocks (except full water blocks and ice)
-		// get simple lighting, they are completely lighted, not per face
-		doSimpleLight(image, pos, id, data);
+	if (isometric_render_view) {
+		if (id == 78 && (data & util::binary<1111>::value) == 0) {
+			// flat snow gets also smooth lighting
+			int height = ((data & util::binary<1111>::value) + 1) / 8.0 * texture_size;
+			lightTop(image, getCornerColors(pos, CORNERS_BOTTOM),
+					texture_size - height);
+			lightLeft(image, getCornerColors(pos, CORNERS_LEFT),
+					texture_size - height, texture_size);
+			lightRight(image, getCornerColors(pos, CORNERS_RIGHT),
+					texture_size - height, texture_size);
+		} else if (id == 44 || id == 126) {
+			// slabs and wooden slabs
+			doSlabLight(image, pos, id, data);
+		} else if (transparent && !water && id != 79) {
+			// transparent blocks (except full water blocks and ice)
+			// get simple lighting, they are completely lighted, not per face
+			doSimpleLight(image, pos, id, data);
+		} else {
+			// do smooth lighting for all other blocks
+			doSmoothLight(image, pos, id, data);
+		}
 	} else {
-		// do smooth lighting for all other blocks
-		doSmoothLight(image, pos, id, data);
+		if (id == 44 || id == 126) {
+		} else if (transparent && !water && id != 79) {
+		} else {
+			lightTop(image, getCornerColors(pos, CORNERS_TOP));
+		}
 	}
 }
 
@@ -348,18 +364,32 @@ void LightingRenderMode::lightRight(RGBAImage& image, const CornerColors& colors
 
 void LightingRenderMode::lightTop(RGBAImage& image, const CornerColors& colors,
 		int yoff) {
-	int size = image.getWidth() / 2;
-	RGBAImage tex(size, size);
-	// we need to rotate the corners a bit to make them suitable for the TopFaceIterator
-	CornerColors rotated = {{colors[1], colors[3], colors[0], colors[2]}};
-	createShade(tex, rotated);
+	if (isometric_render_view) {
+		int size = image.getWidth() / 2;
+		RGBAImage tex(size, size);
+		// we need to rotate the corners a bit to make them suitable for the TopFaceIterator
+		CornerColors rotated = {{colors[1], colors[3], colors[0], colors[2]}};
+		createShade(tex, rotated);
 
-	for (TopFaceIterator it(size); !it.end(); it.next()) {
-		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + yoff);
-		if (pixel != 0) {
-			uint8_t d = rgba_alpha(tex.pixel(it.src_x, it.src_y));
-			pixel = rgba_multiply(pixel, d, d, d);
+		for (TopFaceIterator it(size); !it.end(); it.next()) {
+			uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + yoff);
+			if (pixel != 0) {
+				uint8_t d = rgba_alpha(tex.pixel(it.src_x, it.src_y));
+				pixel = rgba_multiply(pixel, d, d, d);
+			}
 		}
+	} else {
+		int size = image.getWidth();
+		RGBAImage tex(size, size);
+		createShade(tex, colors);
+		for (int x = 0; x < size; x++)
+			for (int y = 0; y < size; y++) {
+				uint32_t& pixel = image.pixel(x, y);
+				if (pixel != 0) {
+					uint8_t d = rgba_alpha(tex.pixel(x, y));
+					pixel = rgba_multiply(pixel, d, d, d);
+				}
+			}
 	}
 }
 
