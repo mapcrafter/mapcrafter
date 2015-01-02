@@ -22,24 +22,6 @@
 namespace mapcrafter {
 namespace config {
 
-TileSetKey::TileSetKey(const std::string& map_name, const std::string render_view,
-		int tile_width, int rotation)
-	: map_name(map_name), render_view(render_view), tile_width(tile_width),
-	  rotation(rotation) {
-}
-
-bool TileSetKey::operator<(const TileSetKey& other) const {
-	if (map_name != other.map_name)
-		return map_name < other.map_name;
-	if (render_view != other.render_view)
-		return render_view < other.render_view;
-	if (tile_width != other.tile_width)
-		return tile_width < other.tile_width;
-	if (rotation != other.rotation)
-		return rotation < other.rotation;
-	return false;
-}
-
 MapcrafterConfigHelper::MapcrafterConfigHelper() {
 }
 
@@ -60,9 +42,8 @@ MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfig& config)
 
 		auto rotations = map_it->getRotations();
 		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
-			WorldRenderView key(map_it->getWorld(), map_it->getRenderView());
-			world_rotations[key].insert(*rotation_it);
-			world_max_max_zoom[key] = 0;
+			world_rotations[map_it->getTileSetKey()].insert(*rotation_it);
+			world_max_max_zoom[map_it->getTileSetKey()] = 0;
 		}
 	}
 }
@@ -128,7 +109,7 @@ void MapcrafterConfigHelper::readMapSettings() {
 			if (map_json.count("tileOffsets") && map_json["tileOffsets"].is<picojson::array>()) {
 				picojson::array array = map_json["tileOffsets"].get<picojson::array>();
 				if (array.size() == 4) {
-					WorldRenderView key(map_it->getWorld(), map_it->getRenderView());
+					TileSetKey key = map_it->getTileSetKey();
 					for (int rotation = 0; rotation < 4; rotation++)
 						parseTilePosJSON(array[rotation], world_tile_offset[key][rotation]);
 					LOG(DEBUG) << map_name << " tile_offsets="
@@ -196,44 +177,33 @@ void MapcrafterConfigHelper::writeMapSettings() const {
 }
 
 std::set<int> MapcrafterConfigHelper::getUsedRotations(
-		const std::string& world, const std::string& render_view) const {
-	WorldRenderView key(world, render_view);
-	if (!world_rotations.count(key))
+		const TileSetKey& tile_set) const {
+	if (!world_rotations.count(tile_set))
 		return std::set<int>();
-	return world_rotations.at(key);
+	return world_rotations.at(tile_set);
 }
 
-void MapcrafterConfigHelper::addUsedRotations(const std::string& world,
-		const std::string& render_view, const std::set<int>& rotations) {
-	for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it)
-		world_rotations[WorldRenderView(world, render_view)].insert(*rotation_it);
-}
-
-int MapcrafterConfigHelper::getTileSetMaxZoom(const std::string& world,
-		const std::string& render_view) const {
-	WorldRenderView key(world, render_view);
-	if (!world_max_max_zoom.count(key))
+int MapcrafterConfigHelper::getTileSetMaxZoom(const TileSetKey& tile_set) const {
+	if (!world_max_max_zoom.count(tile_set))
 		return 0;
-	return world_max_max_zoom.at(key);
+	return world_max_max_zoom.at(tile_set);
 }
 
-void MapcrafterConfigHelper::setTileSetMaxZoom(const std::string& world,
-		const std::string& render_view, int max_zoom) {
-	world_max_max_zoom[WorldRenderView(world, render_view)] = max_zoom;
+void MapcrafterConfigHelper::setTileSetMaxZoom(const TileSetKey& tile_set,
+		int max_zoom) {
+	world_max_max_zoom[tile_set] = max_zoom;
 }
 
 renderer::TilePos MapcrafterConfigHelper::getWorldTileOffset(
-		const std::string& world, const std::string& render_view, int rotation) const {
-	WorldRenderView key(world, render_view);
-	if (!world_tile_offset.count(key))
+		const TileSetKey& tile_set, int rotation) const {
+	if (!world_tile_offset.count(tile_set))
 		return renderer::TilePos(0, 0);
-	return world_tile_offset.at(key)[rotation];
+	return world_tile_offset.at(tile_set)[rotation];
 }
 
-void MapcrafterConfigHelper::setWorldTileOffset(const std::string& world,
-		const std::string& render_view, int rotation,
-		const renderer::TilePos& tile_offset) {
-	world_tile_offset[WorldRenderView(world, render_view)][rotation] = tile_offset;
+void MapcrafterConfigHelper::setWorldTileOffset(const TileSetKey& tile_set,
+		int rotation, const renderer::TilePos& tile_offset) {
+	world_tile_offset[tile_set][rotation] = tile_offset;
 }
 
 int MapcrafterConfigHelper::getMapTileSize(const std::string& map) const {
@@ -349,7 +319,7 @@ picojson::value MapcrafterConfigHelper::getConfigJSON() const {
 
 		picojson::array tile_offsets_json;
 		for (int rotation = 0; rotation < 4; rotation++) {
-			renderer::TilePos offset = getWorldTileOffset(it->getWorld(), it->getRenderView(), rotation);
+			renderer::TilePos offset = getWorldTileOffset(it->getTileSetKey(), rotation);
 			picojson::array offset_json;
 			offset_json.push_back(picojson::value((double) offset.getX()));
 			offset_json.push_back(picojson::value((double) offset.getY()));

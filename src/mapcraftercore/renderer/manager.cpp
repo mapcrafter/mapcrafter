@@ -413,8 +413,6 @@ void RenderManager::increaseMaxZoom(const fs::path& dir,
 		base.writeJPEG((dir / "base.jpg").string(), jpeg_quality);
 }
 
-typedef std::tuple<std::string, std::string, int> TileSetsKey;
-
 /**
  * Starts the whole rendering thing.
  */
@@ -423,9 +421,6 @@ bool RenderManager::run() {
 	// ###
 	// ### First big step: Load/parse/validate the configuration file
 	// ###
-
-	// TODO configuration
-	const int TILE_WIDTH = 1;
 
 	config::ValidationMap validation = config.parse(opts.config.string());
 
@@ -468,13 +463,14 @@ bool RenderManager::run() {
 	// world -> (render view -> (rotation -> tile set)) ?
 	//std::map<std::string, std::array<std::shared_ptr<TileSet>, 4> > tile_sets;
 	// (world, render view, rotation) -> tile set
-	std::map<std::tuple<std::string, std::string, int>, std::shared_ptr<TileSet>> tile_sets;
+	std::map<config::TileSetKey, std::array<std::shared_ptr<TileSet>, 4> > tile_sets;
 
 	// go through all maps and:
 	// 1. - find out which rotations are needed for which world
 	// 2. - and check if there are already rendered maps
 	//    - get the old max zoom levels of these maps for the template
 	//    -> so the user can still view his already rendered maps while new ones are rendering
+	/*
 	for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
 		confighelper.addUsedRotations(map_it->getWorld(), map_it->getRenderView(), map_it->getRotations());
 		// TODO workaround for tile size:
@@ -493,6 +489,7 @@ bool RenderManager::run() {
 				confighelper.setWorldTileOffset(map_it->getWorld(), map_it->getRenderView(), i, settings.tile_offsets[i]);
 		}
 	}
+	*/
 
 	// ###
 	// ### Second big step: Scan the worlds
@@ -507,31 +504,31 @@ bool RenderManager::run() {
 		//  ... is rendered with this world and which
 		//  ... is not set to skip
 		std::map<std::string, RenderView*> render_views;
+		std::set<config::TileSetKey> used_tile_sets;
 		bool used = false;
 		for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
 			if (map_it->getWorld() == world_name &&
 					!confighelper.isCompleteRenderSkip(map_it->getShortName())) {
 				used = true;
-				std::string render_view = map_it->getRenderView();
-				if (!render_views.count(render_view))
-					render_views[render_view] = createRenderView(render_view);
+				config::TileSetKey tile_set = map_it->getTileSetKey();
+				if (!tile_sets.count(tile_set))
+					used_tile_sets.insert(tile_set);
 			}
 		}
 		if (!used)
 			continue;
 
-		for (auto render_view_it = render_views.begin();
-				render_view_it != render_views.end(); ++render_view_it) {
-			std::string render_view_name = render_view_it->first;
+		for (auto tile_set_it = used_tile_sets.begin();
+				tile_set_it != used_tile_sets.end(); ++tile_set_it) {
 			// TODO also validation
-			RenderView* render_view = render_view_it->second;
+			RenderView* render_view = createRenderView(tile_set_it->render_view);
 			// scan the different rotated versions of the world
 			// -> the rotations which are used by maps, so not necessarily all rotations
 			// find the highest max zoom level of these tilesets to use this for all rotations
 			// -> all rotations should have the same max zoom level
 			//    to allow a nice interactively rotatable map
 			int zoomlevels_max = 0;
-			auto rotations = confighelper.getUsedRotations(world_name, render_view_name);
+			auto rotations = confighelper.getUsedRotations(*tile_set_it);
 			for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
 				// load the world
 				mc::World world(world_it->second.getInputDir().string(),
@@ -543,7 +540,7 @@ bool RenderManager::run() {
 					return false;
 				}
 				// create a tileset for this world
-				std::shared_ptr<TileSet> tile_set(render_view->createTileSet(TILE_WIDTH));
+				std::shared_ptr<TileSet> tile_set(render_view->createTileSet(tile_set_it->tile_width));
 				// and scan for tiles of this world,
 				// we automatically center the tiles for cropped worlds, but only...
 				//  - the circular cropped ones and
@@ -551,7 +548,7 @@ bool RenderManager::run() {
 				if (world_it->second.needsWorldCentering()) {
 					TilePos tile_offset;
 					tile_set->scan(world, true, tile_offset);
-					confighelper.setWorldTileOffset(world_name, render_view_name, *rotation_it, tile_offset);
+					confighelper.setWorldTileOffset(*tile_set_it, *rotation_it, tile_offset);
 				} else {
 					tile_set->scan(world);
 				}
@@ -560,17 +557,17 @@ bool RenderManager::run() {
 
 				// set world- and tileset object in the map
 				worlds[world_name][*rotation_it] = world;
-				tile_sets[TileSetsKey(world_name, render_view_name, *rotation_it)] = tile_set;
+				tile_sets[*tile_set_it][*rotation_it] = tile_set;
 			}
 
 			// now apply this highest max zoom level
 			for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it)
-				tile_sets[TileSetsKey(world_name, render_view_name, *rotation_it)]->setDepth(zoomlevels_max);
+				tile_sets[*tile_set_it][*rotation_it]->setDepth(zoomlevels_max);
 			// also give this highest max zoom level to the config helper
-			confighelper.setTileSetMaxZoom(world_name, render_view_name, zoomlevels_max);
+			confighelper.setTileSetMaxZoom(*tile_set_it, zoomlevels_max);
 
 			// clean up render view
-			delete render_view_it->second;
+			delete render_view;
 		}
 	}
 
@@ -647,7 +644,7 @@ bool RenderManager::run() {
 
 		auto rotations = map.getRotations();
 		// get the max zoom level calculated of the current tile set
-		int max_zoom = confighelper.getTileSetMaxZoom(world_name, render_view_name);
+		int max_zoom = confighelper.getTileSetMaxZoom(map.getTileSetKey());
 		// get the old max zoom level (from config.js), will 0 if not rendered yet
 		int old_max_zoom = confighelper.getMapMaxZoom(map_name);
 		// if map already rendered: check if the zoom level of the world has increased
@@ -666,11 +663,13 @@ bool RenderManager::run() {
 			}
 		}
 
+		/*
 		// also write the tile offsets to the map settings file
 		// to have them next time available even if we don't render/scan this world
 		for (int rotation = 0; rotation < 4; rotation++)
 			settings.tile_offsets[rotation] = confighelper.getWorldTileOffset(world_name,
 					render_view_name, rotation);
+		*/
 
 		// now write the (possibly new) max zoom level to the settings file
 		settings.max_zoom = max_zoom;
@@ -712,9 +711,9 @@ bool RenderManager::run() {
 			fs::path output_dir = config.getOutputPath(map_name + "/"
 					+ config::ROTATION_NAMES_SHORT[rotation]);
 			// if incremental render scan which tiles might have changed
-			std::shared_ptr<TileSet> tile_set(render_view->createTileSet(TILE_WIDTH));
+			std::shared_ptr<TileSet> tile_set(render_view->createTileSet(map.getTileWidth()));
 			// TODO ewwwwwwww
-			tile_set->operator=(*tile_sets[TileSetsKey(world_name, render_view_name, *rotation_it)]);
+			tile_set->operator=(*tile_sets[map.getTileSetKey()][*rotation_it]);
 			if (confighelper.getRenderBehavior(map_name, rotation)
 					== config::MapcrafterConfigHelper::RENDER_AUTO) {
 				LOG(INFO) << "Scanning required tiles...";
@@ -749,7 +748,7 @@ bool RenderManager::run() {
 			std::shared_ptr<mc::WorldCache> world_cache(new mc::WorldCache(worlds[world_name][rotation]));
 			RenderModes render_modes;
 			createRenderModes(config.getWorld(map.getWorld()), map, render_modes);
-			std::shared_ptr<TileRenderer> tile_renderer(render_view->createTileRenderer(block_images, TILE_WIDTH, world_cache, render_modes));
+			std::shared_ptr<TileRenderer> tile_renderer(render_view->createTileRenderer(block_images, map.getTileWidth(), world_cache, render_modes));
 			tile_renderer->setRenderBiomes(map.renderBiomes());
 
 			// TODO isometric tile renderer --> setUsePreblitWater

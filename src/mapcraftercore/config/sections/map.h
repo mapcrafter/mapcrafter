@@ -34,6 +34,18 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace config {
 
+// TODO is that name appropriate??
+struct TileSetKey {
+	std::string map_name;
+	std::string render_view;
+	int tile_width;
+
+	TileSetKey(const std::string& map_name, const std::string render_view,
+			int tile_width);
+
+	bool operator<(const TileSetKey& other) const;
+};
+
 enum class ImageFormat {
 	PNG,
 	JPEG
@@ -62,6 +74,7 @@ public:
 	std::set<int> getRotations() const;
 	fs::path getTextureDir() const;
 	int getTextureSize() const;
+	int getTileWidth() const;
 
 	ImageFormat getImageFormat() const;
 	std::string getImageFormatSuffix() const;
@@ -73,6 +86,8 @@ public:
 	bool renderLeavesTransparent() const;
 	bool renderBiomes() const;
 	bool useImageModificationTimes() const;
+
+	TileSetKey getTileSetKey() const;
 
 protected:
 	virtual void preParse(const INIConfigSection& section,
@@ -93,7 +108,7 @@ private:
 	std::set<int> rotations_set;
 
 	Field<fs::path> texture_dir;
-	Field<int> texture_size;
+	Field<int> texture_size, tile_width;
 
 	Field<ImageFormat> image_format;
 	Field<int> jpeg_quality;

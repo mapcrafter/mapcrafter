@@ -39,6 +39,21 @@ config::ImageFormat as<config::ImageFormat>(const std::string& from) {
 namespace mapcrafter {
 namespace config {
 
+TileSetKey::TileSetKey(const std::string& map_name, const std::string render_view,
+		int tile_width)
+	: map_name(map_name), render_view(render_view), tile_width(tile_width) {
+}
+
+bool TileSetKey::operator<(const TileSetKey& other) const {
+	if (map_name != other.map_name)
+		return map_name < other.map_name;
+	if (render_view != other.render_view)
+		return render_view < other.render_view;
+	if (tile_width != other.tile_width)
+		return tile_width < other.tile_width;
+	return false;
+}
+
 std::ostream& operator<<(std::ostream& out, ImageFormat image_format) {
 	if (image_format == ImageFormat::PNG)
 		out << "png";
@@ -116,6 +131,10 @@ int MapSection::getTextureSize() const {
 	return texture_size.getValue();
 }
 
+int MapSection::getTileWidth() const {
+	return tile_width.getValue();
+}
+
 ImageFormat MapSection::getImageFormat() const {
 	return image_format.getValue();
 }
@@ -154,6 +173,10 @@ bool MapSection::useImageModificationTimes() const {
 	return use_image_mtimes.getValue();
 }
 
+TileSetKey MapSection::getTileSetKey() const {
+	return TileSetKey(getWorld(), getRenderView(), getTileWidth());
+}
+
 void MapSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	name_short = getSectionName();
@@ -169,6 +192,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	if (!texture_dir_found.empty())
 		texture_dir.setDefault(texture_dir_found);
 	texture_size.setDefault(12);
+	tile_width.setDefault(1);
 
 	image_format.setDefault(ImageFormat::PNG);
 	jpeg_quality.setDefault(85);
@@ -212,6 +236,9 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		if (texture_size.load(key, value, validation)
 				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 32))
 				validation.error("'texture_size' must a number between 1 and 32!");
+	} else if (key == "tile_width") {
+		// TODO validation
+		tile_width.load(key, value, validation);
 	} else if (key == "image_format") {
 		image_format.load(key, value, validation);
 	} else if (key == "jpeg_quality") {

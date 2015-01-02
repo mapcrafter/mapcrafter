@@ -36,18 +36,6 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace config {
 
-struct TileSetKey {
-	std::string map_name;
-	std::string render_view;
-	int tile_width;
-	int rotation;
-
-	TileSetKey(const std::string& map_name, const std::string render_view,
-			int tile_width, int rotation);
-
-	bool operator<(const TileSetKey& other) const;
-};
-
 class MapcrafterConfigHelper {
 public:
 	MapcrafterConfigHelper();
@@ -57,20 +45,14 @@ public:
 	void readMapSettings();
 	void writeMapSettings() const;
 
-	std::set<int> getUsedRotations(const std::string& world,
-			const std::string& render_view) const;
-	void addUsedRotations(const std::string& world,
-			const std::string& render_view, const std::set<int>& rotations);
+	std::set<int> getUsedRotations(const TileSetKey& tile_set) const;
 
-	int getTileSetMaxZoom(const std::string& world,
-			const std::string& render_view) const;
-	void setTileSetMaxZoom(const std::string& world,
-			const std::string& render_view, int zoomlevel);
+	int getTileSetMaxZoom(const TileSetKey& tile_set) const;
+	void setTileSetMaxZoom(const TileSetKey& tile_set, int zoomlevel);
 
-	renderer::TilePos getWorldTileOffset(const std::string& world,
-			const std::string& render_view, int rotation) const;
-	void setWorldTileOffset(const std::string& world,
-			const std::string& render_view, int rotation,
+	renderer::TilePos getWorldTileOffset(const TileSetKey& tile_set,
+			int rotation) const;
+	void setWorldTileOffset(const TileSetKey& tile_set, int rotation,
 			const renderer::TilePos& tile_offset);
 
 	int getMapTileSize(const std::string& map) const;
@@ -100,14 +82,12 @@ public:
 private:
 	MapcrafterConfig config;
 
-	typedef std::tuple<std::string, std::string> WorldRenderView;
-
 	// tile offset of world/view/tile_width/rotation
-	std::map<WorldRenderView, std::array<renderer::TilePos, 4> > world_tile_offset;
+	std::map<TileSetKey, std::array<renderer::TilePos, 4> > world_tile_offset;
 	// used rotations of world/view/tile_width
-	std::map<WorldRenderView, std::set<int> > world_rotations;
+	std::map<TileSetKey, std::set<int> > world_rotations;
 	// max max zoom of world/view/tile_width (iterate over rotations to calculate)
-	std::map<WorldRenderView, int> world_max_max_zoom;
+	std::map<TileSetKey, int> world_max_max_zoom;
 
 	// tile size of map
 	std::map<std::string, int> map_tile_size;
