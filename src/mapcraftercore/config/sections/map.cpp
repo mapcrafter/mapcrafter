@@ -216,8 +216,8 @@ bool MapSection::parseField(const std::string key, const std::string value,
 	// TODO render_mode instead of rendermode, warning if rendermode
 	} else if (key == "render_mode" || key == "rendermode") {
 		if (key == "rendermode")
-			LOG(WARNING) << "Using the option 'rendermode' is deprecated. "
-					<< "It's called 'render_mode' now.";
+			validation.warning("Using the option 'rendermode' is deprecated. "
+					"It's called 'render_mode' now.");
 		if (render_mode.load(key, value, validation)) {
 			std::string r = render_mode.getValue();
 			if (r != "plain" && r != "daylight" && r != "nightlight" && r != "cave")
