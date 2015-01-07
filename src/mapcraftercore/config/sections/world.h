@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include "../validation.h"
+#include "../../mc/pos.h"
 #include "../../mc/world.h"
 #include "../../mc/worldcrop.h"
 
@@ -51,7 +52,7 @@ public:
 	mc::Dimension getDimension() const;
 	std::string getWorldName() const;
 
-	std::string getDefaultView() const;
+	mc::BlockPos getDefaultView() const;
 	int getDefaultZoom() const;
 	int getDefaultRotation() const;
 
@@ -76,7 +77,7 @@ private:
 	Field<mc::Dimension> dimension;
 	Field<std::string> world_name;
 
-	Field<std::string> default_view;
+	Field<mc::BlockPos> default_view;
 	Field<int> default_zoom, default_rotation;
 
 	Field<int> min_y, max_y;

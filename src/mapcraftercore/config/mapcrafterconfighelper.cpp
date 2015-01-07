@@ -497,8 +497,14 @@ picojson::value MapcrafterConfigHelper::getConfigJSON() const {
 		map_json["renderView"] = picojson::value(it->getRenderView());
 		map_json["textureSize"] = picojson::value((double) it->getTextureSize());
 		map_json["imageFormat"] = picojson::value(it->getImageFormatSuffix());
-		if (!world.getDefaultView().empty())
-			map_json["defaultView"] = picojson::value(world.getDefaultView());
+		if (world.getDefaultView() != mc::BlockPos(0, 0, 0)) {
+			mc::BlockPos default_view = world.getDefaultView();
+			picojson::array default_view_json;
+			default_view_json.push_back(picojson::value((double) default_view.x));
+			default_view_json.push_back(picojson::value((double) default_view.z));
+			default_view_json.push_back(picojson::value((double) default_view.y));
+			map_json["defaultView"] = picojson::value(default_view_json);
+		}
 		if (world.getDefaultZoom() != 0)
 			map_json["defaultZoom"] = picojson::value((double) world.getDefaultZoom());
 		if (world.getDefaultRotation() != -1)

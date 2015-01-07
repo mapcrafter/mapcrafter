@@ -20,6 +20,9 @@
 #include "world.h"
 
 #include "../iniconfig.h"
+#include "../../util.h"
+
+#include <sstream>
 
 namespace mapcrafter {
 namespace util {
@@ -34,6 +37,17 @@ mc::Dimension as<mc::Dimension>(const std::string& from) {
 		return mc::Dimension::END;
 	else
 		throw std::invalid_argument("Dimension must be one of 'nether', 'overworld' or 'end'!");
+}
+
+template <>
+mc::BlockPos as<mc::BlockPos>(const std::string& from) {
+	std::stringstream ss(util::replaceAll(from, ",", " "));
+	mc::BlockPos pos;
+	ss >> pos.x >> pos.z >> pos.y;
+	if (!ss || !ss.eof())
+		throw std::invalid_argument("Invalid block coordinates '" + from + "', "
+				"must be of the format '<x>,<z>,<y>'!");
+	return pos;
 }
 
 }
@@ -95,7 +109,7 @@ std::string WorldSection::getWorldName() const {
 	return world_name.getValue();
 }
 
-std::string WorldSection::getDefaultView() const {
+mc::BlockPos WorldSection::getDefaultView() const {
 	return default_view.getValue();
 }
 
@@ -130,7 +144,7 @@ void WorldSection::preParse(const INIConfigSection& section,
 	dimension.setDefault(mc::Dimension::OVERWORLD);
 	world_name.setDefault(section.getName());
 
-	default_view.setDefault("");
+	default_view.setDefault(mc::BlockPos(0, 0, 0));
 	default_zoom.setDefault(0);
 	default_rotation.setDefault(-1);
 
