@@ -37,33 +37,6 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace config {
 
-/**
- * This informations are stored with the rendered map and used for incremental rendering.
- */
-struct MapSettings {
-	util::Nullable<int> texture_size;
-	util::Nullable<std::string> image_format;
-	util::Nullable<double> lighting_intensity;
-	util::Nullable<bool> cave_high_contrast;
-	util::Nullable<bool> render_unknown_blocks;
-	util::Nullable<bool> render_leaves_transparent;
-	util::Nullable<bool> render_biomes;
-
-	int tile_size;
-	int max_zoom;
-	std::array<bool, 4> rotations;
-	std::array<int, 4> last_render;
-	std::array<renderer::TilePos, 4> tile_offsets;
-
-	MapSettings();
-
-	bool read(const fs::path& filename);
-	bool write(const fs::path& filename) const;
-
-	bool syncMapConfig(const config::MapSection& map);
-	static MapSettings byMapConfig(const config::MapSection& map);
-};
-
 class MapcrafterConfigHelper {
 public:
 	MapcrafterConfigHelper();

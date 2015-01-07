@@ -265,6 +265,8 @@ bool RenderManager::run() {
 
 	// create a helper for the configuration
 	confighelper = config::MapcrafterConfigHelper(config);
+	// read old settings from already rendered maps
+	// TODO fancy description blah blah
 	confighelper.readMapSettings();
 	// set the render behaviors the user specified with the -rsaf flags
 	confighelper.parseRenderBehaviors(opts.skip_all, opts.render_skip, opts.render_auto, opts.render_force);
@@ -272,39 +274,11 @@ bool RenderManager::run() {
 	// and get the maps and worlds of the configuration
 	auto config_worlds = config.getWorlds();
 	auto config_maps = config.getMaps();
-	// maps for world- and tileset objects
+
+	// maps for world- and tile set objects
 	std::map<std::string, std::array<mc::World, 4> > worlds;
-	// TODO
-	// world -> (render view -> (rotation -> tile set)) ?
-	//std::map<std::string, std::array<std::shared_ptr<TileSet>, 4> > tile_sets;
 	// (world, render view, rotation) -> tile set
 	std::map<config::TileSetKey, std::array<std::shared_ptr<TileSet>, 4> > tile_sets;
-
-	// go through all maps and:
-	// 1. - find out which rotations are needed for which world
-	// 2. - and check if there are already rendered maps
-	//    - get the old max zoom levels of these maps for the template
-	//    -> so the user can still view his already rendered maps while new ones are rendering
-	/*
-	for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
-		confighelper.addUsedRotations(map_it->getWorld(), map_it->getRenderView(), map_it->getRotations());
-		// TODO workaround for tile size:
-		// set tile size to something != 0 for now
-		confighelper.setMapTileSize(map_it->getShortName(), 1);
-
-		fs::path settings_file = config.getOutputPath(map_it->getShortName() + "/map.settings");
-		if (!fs::exists(settings_file))
-			continue;
-		MapSettings settings;
-		if (settings.read(settings_file)) {
-			// TODO workaround for tile size
-			confighelper.setMapTileSize(map_it->getShortName(), settings.tile_size);
-			confighelper.setMapMaxZoom(map_it->getShortName(), settings.max_zoom);
-			for (int i = 0; i < 4; i++)
-				confighelper.setWorldTileOffset(map_it->getWorld(), map_it->getRenderView(), i, settings.tile_offsets[i]);
-		}
-	}
-	*/
 
 	// ###
 	// ### Second big step: Scan the worlds
@@ -425,38 +399,6 @@ bool RenderManager::run() {
 		if (!fs::is_directory(config.getOutputDir() / map_name))
 			fs::create_directories(config.getOutputDir() / map_name);
 
-		// check if we have already an old settings file,
-		// but ignore the settings file if the whole map is force-rendered
-		/*
-		MapSettings settings;
-		fs::path settings_file = config.getOutputPath(map_name + "/map.settings");
-		bool old_settings = !confighelper.isCompleteRenderForce(map_name)
-				&& fs::exists(settings_file);
-		if (old_settings) {
-			// try to read the map.settings filename
-			if (!settings.read(settings_file)) {
-				LOG(ERROR) << "Unable to load old map.settings file!"
-						<< "You have to force-render the whole map.";
-				continue;
-			}
-
-			// check whether the config file was changed when rendering incrementally
-			if (!settings.syncMapConfig(map))
-				continue;
-
-			// for force-render rotations
-			// -> set the last render time to 0 -> to render all tiles
-			for (int i = 0; i < 4; i++)
-				if (confighelper.getRenderBehavior(map_name, i)
-						== config::MapcrafterConfigHelper::RENDER_FORCE)
-					settings.last_render[i] = 0;
-		} else {
-			// if we don't have a settings file or if we should force-render the whole map
-			// -> create a new settings file
-			settings = MapSettings::byMapConfig(map);
-		}
-		*/
-
 		std::time_t start_scanning = std::time(nullptr);
 
 		auto rotations = map.getRotations();
@@ -480,18 +422,7 @@ bool RenderManager::run() {
 			}
 		}
 
-		/*
-		// also write the tile offsets to the map settings file
-		// to have them next time available even if we don't render/scan this world
-		for (int rotation = 0; rotation < 4; rotation++)
-			settings.tile_offsets[rotation] = confighelper.getWorldTileOffset(world_name,
-					render_view_name, rotation);
-		*/
-
-		// now write the (possibly new) max zoom level to the settings file
-		//settings.max_zoom = max_zoom;
-		//settings.write(settings_file);
-		// and also update the template with the max zoom level
+		// update the template with the max zoom level
 		confighelper.setMapMaxZoom(map_name, max_zoom);
 		confighelper.writeMapSettings();
 
@@ -570,9 +501,6 @@ bool RenderManager::run() {
 
 			// TODO isometric tile renderer --> setUsePreblitWater
 
-			// TODO part of the tile size workaround:
-			//settings.tile_size = tile_renderer->getTileSize();
-			//settings.write(settings_file);
 			// TODO maybe set only once per map?
 			confighelper.setMapTileSize(map_name, tile_renderer->getTileSize());
 			confighelper.writeMapSettings();
@@ -608,10 +536,7 @@ bool RenderManager::run() {
 			if (progress_bar != nullptr)
 				progress_bar->finish();
 
-			// update the settings file with last render time
-			//settings.rotations[rotation] = true;
-			//settings.last_render[rotation] = start_scanning;
-			//settings.write(settings_file);
+			// update the map settings with last render time
 			confighelper.setMapLastRendered(map_name, rotation, start_scanning);
 			confighelper.writeMapSettings();
 
