@@ -26,8 +26,6 @@
 #include "tilerenderer.h"
 #include "../mc/world.h"
 
-#include <memory>
-
 namespace mapcrafter {
 namespace renderer {
 
@@ -37,9 +35,8 @@ public:
 
 	virtual BlockImages* createBlockImages() const = 0;
 	virtual TileSet* createTileSet(int tile_width) const = 0;
-	virtual TileRenderer* createTileRenderer(std::shared_ptr<BlockImages> images,
-			int tile_width, std::shared_ptr<mc::WorldCache> world,
-			RenderModes& render_modes) const = 0;
+	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
+			mc::WorldCache* world, RenderModes& render_modes) const = 0;
 };
 
 RenderView* createRenderView(const std::string& render_view);

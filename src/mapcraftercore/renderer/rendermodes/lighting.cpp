@@ -100,7 +100,7 @@ void LightingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 	// split render modes up to some kind of frontend/backend
 	if (!render_view_initialized) {
 		render_view_initialized = true;
-		isometric_render_view = dynamic_cast<IsometricBlockImages*>(images.get()) != nullptr;
+		isometric_render_view = dynamic_cast<IsometricBlockImages*>(images) != nullptr;
 	}
 
 	bool transparent = images->isBlockTransparent(id, data);

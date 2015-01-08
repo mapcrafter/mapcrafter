@@ -30,7 +30,6 @@
 #include "../../../mc/worldcache.h"
 #include "../../../util.h"
 
-#include <memory>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
@@ -96,8 +95,8 @@ struct RenderBlock {
  */
 class IsometricTileRenderer : public TileRenderer {
 public:
-	IsometricTileRenderer(std::shared_ptr<BlockImages> images, int tile_width,
-			std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes);
+	IsometricTileRenderer(BlockImages* images, int tile_width, mc::WorldCache* world,
+			RenderModes& render_modes);
 	virtual ~IsometricTileRenderer();
 
 	void setUsePreblitWater(bool use_preblit_water);

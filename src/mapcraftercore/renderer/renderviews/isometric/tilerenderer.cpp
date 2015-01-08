@@ -124,8 +124,8 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 	return pos < other.pos;
 }
 
-IsometricTileRenderer::IsometricTileRenderer(std::shared_ptr<BlockImages> images,
-		int tile_width, std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes)
+IsometricTileRenderer::IsometricTileRenderer(BlockImages* images, int tile_width,
+		mc::WorldCache* world, RenderModes& render_modes)
 	: TileRenderer(images, tile_width, world, render_modes), use_preblit_water(false) {
 }
 

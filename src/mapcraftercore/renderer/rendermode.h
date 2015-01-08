@@ -42,8 +42,7 @@ public:
 	RenderMode();
 	virtual ~RenderMode();
 
-	void initialize(std::shared_ptr<BlockImages> images,
-			std::shared_ptr<mc::WorldCache> world, mc::Chunk** current_chunk);
+	void initialize(BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk);
 
 	// is called when the tile renderer starts rendering a tile
 	virtual void start();
@@ -58,8 +57,8 @@ public:
 protected:
 	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
 
-	std::shared_ptr<BlockImages> images;
-	std::shared_ptr<mc::WorldCache> world;
+	BlockImages* images;
+	mc::WorldCache* world;
 	mc::Chunk** current_chunk;
 };
 

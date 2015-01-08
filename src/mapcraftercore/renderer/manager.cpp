@@ -380,8 +380,8 @@ bool RenderManager::run() {
 		std::string render_view_name = map.getRenderView();
 
 		// TODO validation, where exactly create the render view?
-		RenderView* render_view = createRenderView(render_view_name);
-		if (render_view == nullptr) {
+		std::shared_ptr<RenderView> render_view(createRenderView(render_view_name));
+		if (!render_view) {
 			LOG(ERROR) << "Invalid render view '" << map.getRenderView() << "'!";
 			continue;
 		}
@@ -496,7 +496,7 @@ bool RenderManager::run() {
 			std::shared_ptr<mc::WorldCache> world_cache(new mc::WorldCache(worlds[world_name][rotation]));
 			RenderModes render_modes;
 			createRenderModes(config.getWorld(map.getWorld()), map, render_modes);
-			std::shared_ptr<TileRenderer> tile_renderer(render_view->createTileRenderer(block_images, map.getTileWidth(), world_cache, render_modes));
+			std::shared_ptr<TileRenderer> tile_renderer(render_view->createTileRenderer(block_images.get(), map.getTileWidth(), world_cache.get(), render_modes));
 			tile_renderer->setRenderBiomes(map.renderBiomes());
 
 			// TODO isometric tile renderer --> setUsePreblitWater
@@ -510,8 +510,8 @@ bool RenderManager::run() {
 			context.background_color = config.getBackgroundColor();
 			context.world_config = config.getWorld(map.getWorld());
 			context.map_config = map;
-			context.tile_set = tile_set;
-			context.tile_renderer = tile_renderer;
+			context.tile_set = tile_set.get();
+			context.tile_renderer = tile_renderer.get();
 
 			std::shared_ptr<thread::Dispatcher> dispatcher;
 			if (opts.jobs == 1)
@@ -532,9 +532,12 @@ bool RenderManager::run() {
 			util::LogOutputProgressHandler* log_output = new util::LogOutputProgressHandler;
 			progress->addHandler(log_output);
 
-			dispatcher->dispatch(context, progress);
-			if (progress_bar != nullptr)
+			dispatcher->dispatch(context, progress.get());
+			if (progress_bar != nullptr) {
 				progress_bar->finish();
+				delete progress_bar;
+			}
+			delete log_output;
 
 			// update the map settings with last render time
 			confighelper.setMapLastRendered(map_name, rotation, start_scanning);
@@ -546,9 +549,6 @@ bool RenderManager::run() {
 					<< "Rendering rotation " << config::ROTATION_NAMES[*rotation_it]
 					<< " took " << took << " seconds.";
 		}
-
-		// clean up render view
-		delete render_view;
 	}
 
 	std::time_t took_all = std::time(nullptr) - time_start_all;

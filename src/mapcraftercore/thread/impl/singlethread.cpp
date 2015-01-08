@@ -34,7 +34,7 @@ SingleThreadDispatcher::~SingleThreadDispatcher() {
 }
 
 void SingleThreadDispatcher::dispatch(const renderer::RenderContext& context,
-		std::shared_ptr<util::IProgressHandler> progress) {
+		util::IProgressHandler* progress) {
 	int render_tiles = context.tile_set->getRequiredRenderTilesCount();
 	if (render_tiles == 0)
 		return;

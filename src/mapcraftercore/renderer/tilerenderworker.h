@@ -31,7 +31,6 @@
 #include "../renderer/tileset.h"
 #include "../util.h"
 
-#include <memory> // shared_ptr
 #include <set>
 #include <boost/filesystem.hpp>
 
@@ -46,8 +45,8 @@ struct RenderContext {
 	config::WorldSection world_config;
 	config::MapSection map_config;
 
-	std::shared_ptr<renderer::TileSet> tile_set;
-	std::shared_ptr<renderer::TileRenderer> tile_renderer;
+	renderer::TileSet* tile_set;
+	renderer::TileRenderer* tile_renderer;
 };
 
 struct RenderWork {
@@ -71,8 +70,7 @@ public:
 	void setRenderWork(const RenderWork& work);
 	const RenderWorkResult& getRenderWorkResult() const;
 
-	void setProgressHandler(std::shared_ptr<util::IProgressHandler> progress,
-			std::shared_ptr<bool> finished = std::shared_ptr<bool>(new bool));
+	void setProgressHandler(util::IProgressHandler* progress);
 
 	void saveTile(const TilePath& tile, const RGBAImage& image);
 	void renderRecursive(const TilePath& path, RGBAImage& image);
@@ -85,8 +83,7 @@ private:
 	RenderWorkResult render_work_result;
 
 	// progress handler
-	std::shared_ptr<util::IProgressHandler> progress;
-	std::shared_ptr<bool> finished;
+	util::IProgressHandler* progress;
 };
 
 } /* namespace render */

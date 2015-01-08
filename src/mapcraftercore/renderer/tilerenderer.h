@@ -30,7 +30,6 @@
 #include "../mc/worldcache.h"
 #include "../util.h"
 
-#include <memory>
 #include <vector>
 #include <boost/filesystem.hpp>
 
@@ -41,8 +40,8 @@ namespace renderer {
 
 class TileRenderer {
 public:
-	TileRenderer(std::shared_ptr<BlockImages> images, int tile_width,
-			std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes);
+	TileRenderer(BlockImages* images, int tile_width,
+			mc::WorldCache* world, RenderModes& render_modes);
 	virtual ~TileRenderer();
 
 	void setRenderBiomes(bool render_biomes);
@@ -56,9 +55,9 @@ protected:
 	Biome getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk);
 	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
-	std::shared_ptr<BlockImages> images;
+	BlockImages* images;
 	int tile_width;
-	std::shared_ptr<mc::WorldCache> world;
+	mc::WorldCache* world;
 	mc::Chunk* current_chunk;
 	RenderModes render_modes;
 

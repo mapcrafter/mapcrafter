@@ -20,7 +20,6 @@
 #ifndef PROGRESS_H_
 #define PROGRESS_H_
 
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -59,7 +58,7 @@ public:
 protected:
 	int max, value;
 
-	std::vector<std::shared_ptr<IProgressHandler>> handlers;
+	std::vector<IProgressHandler*> handlers;
 };
 
 /**

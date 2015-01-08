@@ -28,8 +28,8 @@ RenderMode::RenderMode()
 	: current_chunk(nullptr) {
 }
 
-void RenderMode::initialize(std::shared_ptr<BlockImages> images,
-		std::shared_ptr<mc::WorldCache> world, mc::Chunk** current_chunk) {
+void RenderMode::initialize(BlockImages* images, mc::WorldCache* world,
+		mc::Chunk** current_chunk) {
 	this->images = images;
 	this->world = world;
 	this->current_chunk = current_chunk;

@@ -29,7 +29,6 @@
 #include "../../../mc/worldcache.h"
 #include "../../../util.h"
 
-#include <memory>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
@@ -39,8 +38,8 @@ namespace renderer {
 
 class TopdownTileRenderer : public TileRenderer {
 public:
-	TopdownTileRenderer(std::shared_ptr<BlockImages> images, int tile_width,
-			std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes);
+	TopdownTileRenderer(BlockImages* images, int tile_width, mc::WorldCache* world,
+			RenderModes& render_modes);
 	~TopdownTileRenderer();
 
 	void renderChunk(const mc::Chunk& chunk, RGBAImage& tile, int dx, int dy);

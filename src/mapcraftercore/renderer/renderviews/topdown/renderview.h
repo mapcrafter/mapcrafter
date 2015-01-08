@@ -29,9 +29,8 @@ class TopdownRenderView : public RenderView {
 public:
 	virtual BlockImages* createBlockImages() const;
 	virtual TileSet* createTileSet(int tile_width) const;
-	virtual TileRenderer* createTileRenderer(std::shared_ptr<BlockImages> images,
-			int tile_width, std::shared_ptr<mc::WorldCache> world,
-			RenderModes& render_modes) const;
+	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
+			mc::WorldCache* world, RenderModes& render_modes) const;
 };
 
 } /* namespace renderer */

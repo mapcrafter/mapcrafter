@@ -75,7 +75,7 @@ MultiplexingProgressHandler::~MultiplexingProgressHandler() {
 }
 
 void MultiplexingProgressHandler::addHandler(IProgressHandler* handler) {
-	handlers.push_back(std::shared_ptr<IProgressHandler>(handler));
+	handlers.push_back(handler);
 }
 
 int MultiplexingProgressHandler::getMax() const {

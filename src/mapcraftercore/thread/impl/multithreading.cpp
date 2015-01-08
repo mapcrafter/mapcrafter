@@ -114,7 +114,7 @@ MultiThreadingDispatcher::~MultiThreadingDispatcher() {
 }
 
 void MultiThreadingDispatcher::dispatch(const renderer::RenderContext& context,
-		std::shared_ptr<util::IProgressHandler> progress) {
+		util::IProgressHandler* progress) {
 	auto tiles = context.tile_set->getRequiredCompositeTiles();
 	if (tiles.size() == 0)
 		return;

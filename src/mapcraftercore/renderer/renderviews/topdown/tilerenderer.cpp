@@ -33,8 +33,8 @@
 namespace mapcrafter {
 namespace renderer {
 
-TopdownTileRenderer::TopdownTileRenderer(std::shared_ptr<BlockImages> images,
-		int tile_width, std::shared_ptr<mc::WorldCache> world, RenderModes& render_modes)
+TopdownTileRenderer::TopdownTileRenderer(BlockImages* images, int tile_width,
+		mc::WorldCache* world, RenderModes& render_modes)
 	: TileRenderer(images, tile_width, world, render_modes) {
 }
 
