@@ -493,25 +493,20 @@ bool RenderManager::run() {
 				continue;
 			}
 
-			std::shared_ptr<mc::WorldCache> world_cache(new mc::WorldCache(worlds[world_name][rotation]));
-			RenderModes render_modes;
-			createRenderModes(config.getWorld(map.getWorld()), map, render_modes);
-			std::shared_ptr<TileRenderer> tile_renderer(render_view->createTileRenderer(block_images.get(), map.getTileWidth(), world_cache.get(), render_modes));
-			tile_renderer->setRenderBiomes(map.renderBiomes());
-
-			// TODO isometric tile renderer --> setUsePreblitWater
-
-			// TODO maybe set only once per map?
-			confighelper.setMapTileSize(map_name, tile_renderer->getTileSize());
-			confighelper.writeMapSettings();
-
 			RenderContext context;
 			context.output_dir = output_dir;
 			context.background_color = config.getBackgroundColor();
 			context.world_config = config.getWorld(map.getWorld());
 			context.map_config = map;
+			context.render_view = render_view.get();
+			context.block_images = block_images.get();
 			context.tile_set = tile_set.get();
-			context.tile_renderer = tile_renderer.get();
+			context.world = worlds[world_name][rotation];
+			context.initializeTileRenderer();
+
+			// TODO maybe set only once per map?
+			confighelper.setMapTileSize(map_name, context.tile_renderer->getTileSize());
+			confighelper.writeMapSettings();
 
 			std::shared_ptr<thread::Dispatcher> dispatcher;
 			if (opts.jobs == 1)

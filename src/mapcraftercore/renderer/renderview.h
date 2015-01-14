@@ -37,6 +37,16 @@ public:
 	virtual TileSet* createTileSet(int tile_width) const = 0;
 	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderModes& render_modes) const = 0;
+
+	/**
+	 * Configures a tile renderer with the belonging world- and map section.
+	 *
+	 * If you overwrite this method, you should also call the parent method since it
+	 * sets generic tile renderer options such as whether to render biomes.
+	 */
+	virtual void configureTileRenderer(TileRenderer* tile_renderer,
+			const config::WorldSection& world_config,
+			const config::MapSection& map_config) const;
 };
 
 RenderView* createRenderView(const std::string& render_view);

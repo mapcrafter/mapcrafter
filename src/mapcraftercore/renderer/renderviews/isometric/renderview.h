@@ -31,6 +31,10 @@ public:
 	virtual TileSet* createTileSet(int tile_width) const;
 	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderModes& render_modes) const;
+
+	virtual void configureTileRenderer(TileRenderer* tile_renderer,
+			const config::WorldSection& world_config,
+			const config::MapSection& map_config) const;
 };
 
 } /* namespace renderer */

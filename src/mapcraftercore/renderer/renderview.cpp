@@ -28,6 +28,12 @@ namespace renderer {
 RenderView::~RenderView() {
 }
 
+void RenderView::configureTileRenderer(TileRenderer* tile_renderer,
+		const config::WorldSection& world_config,
+		const config::MapSection& map_config) const {
+	tile_renderer->setRenderBiomes(map_config.renderBiomes());
+}
+
 RenderView* createRenderView(const std::string& render_view) {
 	if (render_view == "isometric")
 		return new IsometricRenderView();

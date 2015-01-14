@@ -131,8 +131,11 @@ void MultiThreadingDispatcher::dispatch(const renderer::RenderContext& context,
 	int render_tiles = context.tile_set->getRequiredRenderTilesCount();
 	LOG(INFO) << thread_count << " threads will render " << render_tiles << " render tiles.";
 
-	for (int i = 0; i < thread_count; i++)
-		threads.push_back(thread_ns::thread(ThreadWorker(manager, context)));
+	for (int i = 0; i < thread_count; i++) {
+		renderer::RenderContext thread_context = context;
+		thread_context.initializeTileRenderer();
+		threads.push_back(thread_ns::thread(ThreadWorker(manager, thread_context)));
+	}
 
 	progress->setMax(context.tile_set->getRequiredRenderTilesCount());
 	renderer::RenderWorkResult result;

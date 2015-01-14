@@ -39,5 +39,17 @@ TileRenderer* IsometricRenderView::createTileRenderer(BlockImages* images,
 	return new IsometricTileRenderer(images, tile_width, world, render_modes);
 }
 
+void IsometricRenderView::configureTileRenderer(TileRenderer* tile_renderer,
+		const config::WorldSection& world_config,
+		const config::MapSection& map_config) const {
+	RenderView::configureTileRenderer(tile_renderer, world_config, map_config);
+
+	IsometricTileRenderer* renderer = dynamic_cast<IsometricTileRenderer*>(tile_renderer);
+	if (renderer != nullptr) {
+		// TODO
+		renderer->setUsePreblitWater(false);
+	}
+}
+
 } /* namespace renderer */
 } /* namespace mapcrafter */

@@ -22,6 +22,15 @@
 namespace mapcrafter {
 namespace renderer {
 
+void RenderContext::initializeTileRenderer() {
+	world_cache = std::make_shared<mc::WorldCache>(world);
+	RenderModes render_modes;
+	createRenderModes(world_config, map_config, render_modes);
+	tile_renderer = std::shared_ptr<TileRenderer>(render_view->createTileRenderer(
+			block_images, map_config.getTileWidth(), world_cache.get(), render_modes));
+	render_view->configureTileRenderer(tile_renderer.get(), world_config, map_config);
+}
+
 TileRenderWorker::TileRenderWorker()
 	: progress(nullptr) {
 }

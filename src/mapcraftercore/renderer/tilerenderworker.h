@@ -31,6 +31,7 @@
 #include "../renderer/tileset.h"
 #include "../util.h"
 
+#include <memory>
 #include <set>
 #include <boost/filesystem.hpp>
 
@@ -45,8 +46,24 @@ struct RenderContext {
 	config::WorldSection world_config;
 	config::MapSection map_config;
 
+	renderer::RenderView* render_view;
+	renderer::BlockImages* block_images;
 	renderer::TileSet* tile_set;
-	renderer::TileRenderer* tile_renderer;
+	mc::World world;
+
+	// TODO really do it like this?
+	std::shared_ptr<mc::WorldCache> world_cache;
+	std::shared_ptr<renderer::TileRenderer> tile_renderer;
+
+	/**
+	 * Creates/initializes the world cache and tile renderer with the render view and
+	 * other supplied objects (block images, tile set, world).
+	 *
+	 * This is method is already called in the render management code, but you can copy
+	 * the render context and call this method again if you need multiple tile renderers
+	 * (for multithreading for example).
+	 */
+	void initializeTileRenderer();
 };
 
 struct RenderWork {
