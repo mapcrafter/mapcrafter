@@ -1945,6 +1945,7 @@ void IsometricBlockImages::createBlocks() {
 	createBlock(5, 3, t.PLANKS_JUNGLE); // jungle
 	createBlock(5, 4, t.PLANKS_ACACIA); // acacia
 	createBlock(5, 5, t.PLANKS_BIG_OAK); // dark oak
+	// --
 	// -- saplings
 	createItemStyleBlock(6, 0, t.SAPLING_OAK); // oak
 	createItemStyleBlock(6, 1, t.SAPLING_SPRUCE); // spruce
