@@ -52,8 +52,8 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 			//int height = chunk.getHeightAt(localpos);
 			//localpos.y = height;
 			localpos.y = -1;
-			if (localpos.y > 256 || localpos.y < 0)
-				localpos.y = 255;
+			if (localpos.y >= mc::CHUNK_HEIGHT*16 || localpos.y < 0)
+				localpos.y = mc::CHUNK_HEIGHT*16 - 1;
 
 			uint16_t id = chunk.getBlockID(localpos);
 			while (id == 0 && localpos.y > 0) {
