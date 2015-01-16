@@ -66,7 +66,7 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 			if (localpos.y < 0)
 				continue;
 
-			while (localpos.y > 0) {
+			while (localpos.y >= 0) {
 				mc::BlockPos globalpos = localpos.toGlobalPos(chunk.getPos());
 
 				id = chunk.getBlockID(localpos);
