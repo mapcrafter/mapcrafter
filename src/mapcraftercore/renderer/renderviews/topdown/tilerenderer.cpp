@@ -48,6 +48,9 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 		for (int z = 0; z < 16; z++) {
 			std::deque<RGBAImage> blocks;
 
+			// TODO make this water thing a bit nicer
+			bool in_water = false;
+
 			mc::LocalBlockPos localpos(x, z, 0);
 			//int height = chunk.getHeightAt(localpos);
 			//localpos.y = height;
@@ -68,10 +71,13 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 
 				id = chunk.getBlockID(localpos);
 				if (id == 0) {
+					in_water = false;
 					localpos.y--;
 					continue;
 				}
 				uint16_t data = chunk.getBlockData(localpos);
+
+				bool is_water = (id == 8 || id == 9) && data == 0;
 
 				bool hidden = false;
 				for (size_t i = 0; i < render_modes.size(); i++) {
@@ -83,6 +89,14 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 				if (hidden) {
 					localpos.y--;
 					continue;
+				}
+
+				if (is_water) {
+					if (is_water == in_water) {
+						localpos.y--;
+						continue;
+					}
+					in_water = is_water;
 				}
 
 				RGBAImage block = images->getBlock(id, data);
