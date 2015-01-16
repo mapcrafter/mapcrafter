@@ -354,7 +354,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 	// now blit all blocks
 	for (std::set<RenderBlock>::const_iterator it = blocks.begin(); it != blocks.end();
 			++it) {
-		tile.alphablit(it->image, it->x, it->y);
+		tile.alphaBlit(it->image, it->x, it->y);
 	}
 
 	// call the end method of the rendermodes

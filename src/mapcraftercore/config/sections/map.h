@@ -74,6 +74,7 @@ public:
 	std::set<int> getRotations() const;
 	fs::path getTextureDir() const;
 	int getTextureSize() const;
+	int getTextureBlur() const;
 	int getTileWidth() const;
 
 	ImageFormat getImageFormat() const;
@@ -108,7 +109,7 @@ private:
 	std::set<int> rotations_set;
 
 	Field<fs::path> texture_dir;
-	Field<int> texture_size, tile_width;
+	Field<int> texture_size, texture_blur, tile_width;
 
 	Field<ImageFormat> image_format;
 	Field<int> jpeg_quality;

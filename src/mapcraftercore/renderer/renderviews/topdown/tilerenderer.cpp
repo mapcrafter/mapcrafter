@@ -116,7 +116,7 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 
 			while (blocks.size() > 0) {
 				RGBAImage block = blocks.back();
-				tile.alphablit(block, dx + x*texture_size, dy + z*texture_size);
+				tile.alphaBlit(block, dx + x*texture_size, dy + z*texture_size);
 				blocks.pop_back();
 			}
 		}

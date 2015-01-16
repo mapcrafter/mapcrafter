@@ -316,9 +316,10 @@ IsometricBlockImages::IsometricBlockImages()
 IsometricBlockImages::~IsometricBlockImages() {
 }
 
-void IsometricBlockImages::setSettings(int texture_size, int rotation, bool render_unknown_blocks,
-        bool render_leaves_transparent, const std::string& rendermode) {
-	AbstractBlockImages::setSettings(texture_size, rotation, render_unknown_blocks,
+void IsometricBlockImages::setSettings(int texture_size, int blur, int rotation,
+		bool render_unknown_blocks, bool render_leaves_transparent,
+		const std::string& rendermode) {
+	AbstractBlockImages::setSettings(texture_size, blur, rotation, render_unknown_blocks,
 			render_leaves_transparent, rendermode);
 
 	if (rendermode == "daylight" || rendermode == "nightlight") {
@@ -447,15 +448,15 @@ void IsometricBlockImages::addBlockShadowEdges(uint16_t id, uint16_t data, const
 				RGBAImage image = block;
 				uint16_t extra_data = 0;
 				if (n) {
-					image.alphablit(shadow_edge_masks[0], 0, 0);
+					image.alphaBlit(shadow_edge_masks[0], 0, 0);
 					extra_data |= EDGE_NORTH;
 				}
 				if (e) {
-					image.alphablit(shadow_edge_masks[1], 0, 0);
+					image.alphaBlit(shadow_edge_masks[1], 0, 0);
 					extra_data |= EDGE_EAST;
 				}
 				if (b) {
-					image.alphablit(shadow_edge_masks[2], 0, 0);
+					image.alphaBlit(shadow_edge_masks[2], 0, 0);
 					extra_data |= EDGE_BOTTOM;
 				}
 				block_images[id | ((data | extra_data) << 16)] = image;
@@ -505,7 +506,7 @@ void IsometricBlockImages::testWaterTransparency() {
 		// make a copy of the first images
 		RGBAImage tmp = opaque_water[0];
 		// blit it over
-		tmp.alphablit(tmp, 0, 0);
+		tmp.alphaBlit(tmp, 0, 0);
 
 		// then check alpha
 		uint8_t min_alpha = 255;
@@ -532,7 +533,7 @@ void IsometricBlockImages::testWaterTransparency() {
 		} else {
 			// blit all images over
 			for (int i = 0; i < 4; i++)
-				opaque_water[i].alphablit(opaque_water[i], 0, 0);
+				opaque_water[i].alphaBlit(opaque_water[i], 0, 0);
 		}
 	}
 }
@@ -847,7 +848,7 @@ void IsometricBlockImages::createGrassBlock() { // id 2
 
 	RGBAImage grass = dirt;
 	RGBAImage grass_mask = textures.GRASS_SIDE_OVERLAY;
-	grass.alphablit(grass_mask, 0, 0);
+	grass.alphaBlit(grass_mask, 0, 0);
 
 	RGBAImage top = textures.GRASS_TOP;
 
@@ -934,7 +935,7 @@ void IsometricBlockImages::createWood(uint16_t id, uint16_t data, const RGBAImag
 RGBAImage makeLeavesOpaque(const RGBAImage& texture, uint8_t color) {
 	RGBAImage opaque = texture;
 	opaque.fill(rgba(color, color, color), 0, 0, opaque.getWidth(), opaque.getHeight());
-	opaque.simpleblit(texture, 0, 0);
+	opaque.simpleAlphaBlit(texture, 0, 0);
 	return opaque;
 }
 
@@ -1744,13 +1745,13 @@ RGBAImage IsometricBlockImages::buildCocoa(int stage) {
 	// however, the size of the third stage is not 8px, it's 7px. why?
 	// just resize it to 8px...
 	if (stage == 2)
-		texture.clip(0, 0, size-1, size-1).resizeSimple(size, size, top);
+		texture.clip(0, 0, size-1, size-1).resizeSimple(top, size, size);
 
 	// now size according to the texture size the renderer should use
 	r = (double) texture_size / 16;
 	size = 2 * (stage+2) * r;
 	// resize the texture to this size
-	RGBAImage(top).resizeSimple(size, size, top);
+	RGBAImage(top).resizeSimple(top, size, size);
 
 	// and create a simple cubic cocoa bean
 	RGBAImage cocoa(size*2, size*2);
@@ -1768,7 +1769,7 @@ void IsometricBlockImages::createCocoas() { // id 127
 		RGBAImage block(texture_size * 2, texture_size * 2);
 		int xoff = (block.getWidth() - cocoa.getWidth()) / 2;
 		int yoff = (block.getHeight() - cocoa.getHeight()) / 2;
-		block.simpleblit(cocoa, xoff, yoff);
+		block.simpleAlphaBlit(cocoa, xoff, yoff);
 
 		uint16_t data = i == 0 ? 0 : (i == 1 ? util::binary<100>::value : util::binary<1000>::value);
 		setBlockImage(127, data, block);
@@ -1794,7 +1795,7 @@ void IsometricBlockImages::createBeacon() { // id 138
 
 	// at first create this little block in the middle
 	RGBAImage beacon_texture;
-	textures.BEACON.resizeAuto(texture_size * 0.75, texture_size * 0.75, beacon_texture);
+	textures.BEACON.resizeAuto(beacon_texture, texture_size * 0.75, texture_size * 0.75);
 	RGBAImage smallblock(texture_size * 2, texture_size * 2);
 	blitFace(smallblock, FACE_WEST, beacon_texture, 0, 0, true, dleft, dright);
 	blitFace(smallblock, FACE_SOUTH, beacon_texture, 0, 0, true, dleft, dright);
@@ -1806,8 +1807,8 @@ void IsometricBlockImages::createBeacon() { // id 138
 			obsidian_texture, 0, texture_size / 4));
 
 	// blit block and obsidian ground
-	beacon.simpleblit(obsidian, 0, 0);
-	beacon.simpleblit(smallblock, texture_size / 4, texture_size / 4);
+	beacon.simpleAlphaBlit(obsidian, 0, 0);
+	beacon.simpleAlphaBlit(smallblock, texture_size / 4, texture_size / 4);
 
 	// then blit outside glass
 	RGBAImage glass_texture = textures.GLASS;
@@ -1825,7 +1826,7 @@ void IsometricBlockImages::createFlowerPot() { // id 140
 	RGBAImage pot_texture;
 
 	s = (double) texture_size / 16;
-	tmptex.resizeAuto(s*6, s*6, pot_texture);
+	tmptex.resizeAuto(pot_texture, s*6, s*6);
 
 	int xoff = std::ceil(s*10);
 	int yoff = std::ceil(s*16);
@@ -1856,12 +1857,12 @@ void IsometricBlockImages::createFlowerPot() { // id 140
 		if (i == 9) {
 			RGBAImage cactus = getBlock(81, 0);
 			RGBAImage content;
-			cactus.resizeSimple(s*16, s*16, content);
-			block.alphablit(content, s*8, s*8);
+			cactus.resizeSimple(content, s*16, s*16);
+			block.alphaBlit(content, s*8, s*8);
 		} else if (i != 0) {
 			RGBAImage content(texture_size*2, texture_size*2);
 			blitItemStyleBlock(content, contents[i], contents[i]);
-			block.alphablit(content, 0, s*-3);
+			block.alphaBlit(content, 0, s*-3);
 		}
 
 		blitFace(block, FACE_WEST, pot_texture, xoff, yoff, true, dleft, dright);
@@ -2306,7 +2307,7 @@ void IsometricBlockImages::createBlocks() {
 	// large plants, id 175 --
 	// the top texture of the sunflower is a bit modified
 	RGBAImage sunflower_top = t.DOUBLE_PLANT_SUNFLOWER_TOP;
-	sunflower_top.alphablit(t.DOUBLE_PLANT_SUNFLOWER_FRONT, 0, -texture_size * 0.25);
+	sunflower_top.alphaBlit(t.DOUBLE_PLANT_SUNFLOWER_FRONT, 0, -texture_size * 0.25);
 	createLargePlant(0, t.DOUBLE_PLANT_SUNFLOWER_BOTTOM, sunflower_top);
 	createLargePlant(1, t.DOUBLE_PLANT_SYRINGA_BOTTOM, t.DOUBLE_PLANT_SYRINGA_TOP);
 	createLargePlant(2, t.DOUBLE_PLANT_GRASS_BOTTOM, t.DOUBLE_PLANT_GRASS_TOP);

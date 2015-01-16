@@ -81,6 +81,13 @@ bool CaveRenderMode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t dat
 		return false;
 	}
 
+	/*
+	top = getBlock(pos + mc::DIR_TOP);
+	if (isTransparentBlock(top)) {
+		return false;
+	}
+	*/
+
 	return true;
 }
 

@@ -131,6 +131,10 @@ int MapSection::getTextureSize() const {
 	return texture_size.getValue();
 }
 
+int MapSection::getTextureBlur() const {
+	return texture_blur.getValue();
+}
+
 int MapSection::getTileWidth() const {
 	return tile_width.getValue();
 }
@@ -192,6 +196,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	if (!texture_dir_found.empty())
 		texture_dir.setDefault(texture_dir_found);
 	texture_size.setDefault(12);
+	texture_blur.setDefault(0);
 	tile_width.setDefault(1);
 
 	image_format.setDefault(ImageFormat::PNG);
@@ -232,6 +237,8 @@ bool MapSection::parseField(const std::string key, const std::string value,
 				validation.error("'texture_dir' must be an existing directory! '"
 						+ texture_dir.getValue().string() + "' does not exist!");
 		}
+	} else if (key == "texture_blur") {
+		texture_blur.load(key, value, validation);
 	} else if (key == "texture_size") {
 		if (texture_size.load(key, value, validation)
 				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 32))

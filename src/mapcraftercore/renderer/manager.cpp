@@ -197,10 +197,10 @@ void RenderManager::increaseMaxZoom(const fs::path& dir,
 	img4.resizeHalf(old4);
 
 	// ...to blit them to the images of the new directories
-	new1.simpleblit(old1, s/2, s/2);
-	new2.simpleblit(old2, 0, s/2);
-	new3.simpleblit(old3, s/2, 0);
-	new4.simpleblit(old4, 0, 0);
+	new1.simpleAlphaBlit(old1, s/2, s/2);
+	new2.simpleAlphaBlit(old2, 0, s/2);
+	new3.simpleAlphaBlit(old3, s/2, 0);
+	new4.simpleAlphaBlit(old4, 0, 0);
 
 	// now save the new images in the output directory
 	if (image_format == "png") {
@@ -217,10 +217,10 @@ void RenderManager::increaseMaxZoom(const fs::path& dir,
 
 	// don't forget the base.png
 	RGBAImage base_big(2*s, 2*s), base;
-	base_big.simpleblit(new1, 0, 0);
-	base_big.simpleblit(new2, s, 0);
-	base_big.simpleblit(new3, 0, s);
-	base_big.simpleblit(new4, s, s);
+	base_big.simpleAlphaBlit(new1, 0, 0);
+	base_big.simpleAlphaBlit(new2, s, 0);
+	base_big.simpleAlphaBlit(new3, 0, s);
+	base_big.simpleAlphaBlit(new4, s, s);
 	base_big.resizeHalf(base);
 	if (image_format == "png")
 		base.writePNG((dir / "base.png").string());
@@ -478,8 +478,9 @@ bool RenderManager::run() {
 
 			// create block images
 			std::shared_ptr<BlockImages> block_images(render_view->createBlockImages());
-			block_images->setSettings(map.getTextureSize(), rotation, map.renderUnknownBlocks(),
-					map.renderLeavesTransparent(), map.getRenderMode());
+			block_images->setSettings(map.getTextureSize(), map.getTextureBlur(), rotation,
+					map.renderUnknownBlocks(), map.renderLeavesTransparent(),
+					map.getRenderMode());
 			// if textures do not work, it does not make much sense
 			// to try the other rotations with the same textures
 			if (!block_images->loadAll(map.getTextureDir().string())) {

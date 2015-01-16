@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 		texture_size = 16;
 
 	IsometricBlockImages images;
-	images.setSettings(texture_size, 0, true, true, "");
+	images.setSettings(texture_size, 0, 0, true, true, "");
 	if(images.loadAll(texture_dir)) {
 		images.saveBlocks(output_file);
 		return 0;

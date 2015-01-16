@@ -73,14 +73,30 @@ const int ROTATE_90 = 1;
 const int ROTATE_180 = 2;
 const int ROTATE_270 = 3;
 
+// TODO better documentation...
 class RGBAImage : public Image<RGBAPixel> {
 public:
 	RGBAImage(int width = 0, int height = 0);
 	~RGBAImage();
 
-	void simpleblit(const RGBAImage& image, int x, int y);
-	void alphablit(const RGBAImage& image, int x, int y);
+	/**
+	 * Blits one image to another one. Just copies the pixels over without any processing.
+	 */
+	void simpleBlit(const RGBAImage& image, int x, int y);
+
+	/**
+	 * Blits one image to another one. Just copies the pixels over, but skips completely
+	 * transparent pixels (alpha(pixel) == 0).
+	 */
+	void simpleAlphaBlit(const RGBAImage& image, int x, int y);
+
+	/**
+	 * Blits one image to another one. Also Alphablends transparent pixels of the source
+	 * image with the pixels of the destination image.
+	 */
+	void alphaBlit(const RGBAImage& image, int x, int y);
 	void blendPixel(RGBAPixel color, int x, int y);
+
 	void fill(RGBAPixel color, int x1, int y1, int w, int h);
 	void clear();
 
@@ -91,11 +107,17 @@ public:
 	RGBAImage flip(bool flip_x, bool flip_y) const;
 	RGBAImage move(int x_off, int y_off) const;
 
-	void resizeInterpolated(int new_width, int new_height, RGBAImage& dest) const;
-	void resizeSimple(int new_width, int new_height, RGBAImage& dest) const;
+	void resizeInterpolated(RGBAImage& dest, int new_width, int new_height) const;
+	void resizeSimple(RGBAImage& dest, int new_width, int new_height) const;
 	// automatically chooses an image resize interpolation
-	void resizeAuto(int new_width, int new_height, RGBAImage& dest) const;
+	void resizeAuto(RGBAImage& dest, int new_width, int new_height) const;
 	void resizeHalf(RGBAImage& dest) const;
+
+	/**
+	 * Applies a simple blur filter to the image. Uses the specified radius for the
+	 * (quadratic) blur effect.
+	 */
+	void blur(RGBAImage& dest, int radius) const;
 
 	bool readPNG(const std::string& filename);
 	bool writePNG(const std::string& filename) const;

@@ -24,17 +24,18 @@
 namespace mapcrafter {
 namespace renderer {
 
-TextureImage::TextureImage() {
+TextureImage::TextureImage()
+	: frame_count(1) {
 }
 
 TextureImage::TextureImage(const std::string& name)
-	: name(name) {
+	: name(name), frame_count(1) {
 }
 
 TextureImage::~TextureImage() {
 }
 
-bool TextureImage::load(const std::string& path, int size) {
+bool TextureImage::load(const std::string& path, int size, int blur) {
 	// at first try to load the texture file
 	if (!original.readPNG(path + "/" + name + ".png")) {
 		// make sure the texture image does not have zero dimension
@@ -50,7 +51,7 @@ bool TextureImage::load(const std::string& path, int size) {
 		LOG(WARNING) << "Texture '" << name << "' has odd size: " << original.getWidth()
 				<< "x" << original.getHeight();
 	}
-	int frames = original.getHeight() / original.getWidth();
+	frame_count = original.getHeight() / original.getWidth();
 
 	// now resize the texture image
 	// resize some textures with the nearest neighbor interpolation:
@@ -62,14 +63,26 @@ bool TextureImage::load(const std::string& path, int size) {
 	// style of the textures and prevents fuzziness when resizing
 	if ((util::startswith(name, "leaves") && !util::endswith(name, "opaque"))
 		|| util::startswith(name, "redstone_dust"))
-		original.resizeSimple(size, size * frames, original_resized);
+		original.resizeSimple(original_resized, size, size * frame_count);
 	else
-		original.resizeAuto(size, size * frames, original_resized);
+		original.resizeAuto(original_resized, size, size * frame_count);
+
+	// apply a blur to the texture if wanted
+	// this is useful if you use small texture sizes (< 6 maybe) to prevent grainy textures
+	if (blur != 0) {
+		int width = original_resized.getWidth();
+		for (int i = 0; i < frame_count; i++) {
+			RGBAImage frame;
+			// process every frame individually
+			original_resized.clip(0, width * i, width, width).blur(frame, blur);
+			original_resized.simpleBlit(frame, 0, width * i);
+		}
+	}
 
 	// assign actual texture to parent RGBAImage object
 	// uses first frame if this is an animated texture
 	this->setSize(size, size);
-	this->simpleblit(getFrame(0), 0, 0);
+	this->simpleAlphaBlit(getFrame(0), 0, 0);
 	return true;
 }
 
@@ -83,6 +96,10 @@ const RGBAImage& TextureImage::getOriginal() const {
 
 bool TextureImage::isAnimated() const {
 	return original.getWidth() < original.getHeight();
+}
+
+int TextureImage::getFrameCount() const {
+	return frame_count;
 }
 
 RGBAImage TextureImage::getFrame(int frame) const {

@@ -28,14 +28,15 @@ namespace mapcrafter {
 namespace renderer {
 
 BlockImageTextureResources::BlockImageTextureResources()
-	: texture_size(12) {
+	: texture_size(12), blur(0) {
 }
 
 BlockImageTextureResources::~BlockImageTextureResources() {
 }
 
-void BlockImageTextureResources::setTextureSize(int texture_size) {
+void BlockImageTextureResources::setTextureSize(int texture_size, int blur) {
 	this->texture_size = texture_size;
+	this->blur = blur;
 }
 
 namespace {
@@ -60,16 +61,16 @@ bool loadChestTextures(const std::string& filename, RGBAImage* textures, int tex
 	int size = ratio * 14;
 
 	RGBAImage front = image.clip(size, 29 * ratio, size, size);
-	front.alphablit(image.clip(size, size, size, 4 * ratio), 0, 0);
-	front.alphablit(image.clip(ratio, ratio, 2 * ratio, 4 * ratio), 6 * ratio, 3 * ratio);
+	front.alphaBlit(image.clip(size, size, size, 4 * ratio), 0, 0);
+	front.alphaBlit(image.clip(ratio, ratio, 2 * ratio, 4 * ratio), 6 * ratio, 3 * ratio);
 	RGBAImage side = image.clip(0, 29 * ratio, size, size);
-	side.alphablit(image.clip(0, size, size, 4 * ratio), 0, 0);
+	side.alphaBlit(image.clip(0, size, size, 4 * ratio), 0, 0);
 	RGBAImage top = image.clip(size, 0, size, size);
 
 	// resize the chest images to texture size
-	front.resizeAuto(texture_size, texture_size, textures[BlockImageTextureResources::CHEST_FRONT]);
-	side.resizeAuto(texture_size, texture_size, textures[BlockImageTextureResources::CHEST_SIDE]);
-	top.resizeAuto(texture_size, texture_size, textures[BlockImageTextureResources::CHEST_TOP]);
+	front.resizeAuto(textures[BlockImageTextureResources::CHEST_FRONT], texture_size, texture_size);
+	side.resizeAuto(textures[BlockImageTextureResources::CHEST_SIDE], texture_size, texture_size);
+	top.resizeAuto(textures[BlockImageTextureResources::CHEST_TOP], texture_size, texture_size);
 
 	return true;
 }
@@ -96,39 +97,40 @@ bool loadDoubleChestTextures(const std::string& filename, RGBAImage* textures, i
 	// chest textures are only 14x14 * ratio pixels, so we need to omit two rows in the middle
 	// => the second image starts not at x*size, it starts at x*size+2*ratio
 	RGBAImage front_left = image.clip(size, 29 * ratio, size, size);
-	front_left.alphablit(image.clip(size, size, size, 4 * ratio), 0, 0);
-	front_left.alphablit(image.clip(ratio, ratio, 2 * ratio, 4 * ratio), 13 * ratio,
+	front_left.alphaBlit(image.clip(size, size, size, 4 * ratio), 0, 0);
+	front_left.alphaBlit(image.clip(ratio, ratio, 2 * ratio, 4 * ratio), 13 * ratio,
 	        3 * ratio);
 	RGBAImage front_right = image.clip(2 * size + 2 * ratio, 29 * ratio, size, size);
-	front_right.alphablit(image.clip(2 * size + 2 * ratio, size, size, 4 * ratio), 0, 0);
-	front_right.alphablit(image.clip(ratio, ratio, 2 * ratio, 4 * ratio), -ratio,
+	front_right.alphaBlit(image.clip(2 * size + 2 * ratio, size, size, 4 * ratio), 0, 0);
+	front_right.alphaBlit(image.clip(ratio, ratio, 2 * ratio, 4 * ratio), -ratio,
 	        3 * ratio);
 
 	RGBAImage side = image.clip(0, 29 * ratio, size, size);
-	side.alphablit(image.clip(0, size, size, 4 * ratio), 0, 0);
+	side.alphaBlit(image.clip(0, size, size, 4 * ratio), 0, 0);
 
 	RGBAImage top_left = image.clip(size, 0, size, size);
 	RGBAImage top_right = image.clip(2 * size + 2 * ratio, 0, size, size);
 
 	RGBAImage back_left = image.clip(4 * size + 2, 29 * ratio, size, size);
-	back_left.alphablit(image.clip(4 * size + 2, size, size, 4 * ratio), 0, 0);
+	back_left.alphaBlit(image.clip(4 * size + 2, size, size, 4 * ratio), 0, 0);
 	RGBAImage back_right = image.clip(5 * size + 4, 29 * ratio, size, size);
-	back_right.alphablit(image.clip(5 * size + 4, size, size, 4 * ratio), 0, 0);
+	back_right.alphaBlit(image.clip(5 * size + 4, size, size, 4 * ratio), 0, 0);
 
 	// resize the chest images to texture size
-	front_left.resizeAuto(texture_size, texture_size,
-	        textures[BlockImageTextureResources::LARGECHEST_FRONT_LEFT]);
-	front_right.resizeAuto(texture_size, texture_size,
-	        textures[BlockImageTextureResources::LARGECHEST_FRONT_RIGHT]);
-	side.resizeAuto(texture_size, texture_size, textures[BlockImageTextureResources::LARGECHEST_SIDE]);
-	top_left.resizeAuto(texture_size, texture_size,
-	        textures[BlockImageTextureResources::LARGECHEST_TOP_LEFT]);
-	top_right.resizeAuto(texture_size, texture_size,
-	        textures[BlockImageTextureResources::LARGECHEST_TOP_RIGHT]);
-	back_left.resizeAuto(texture_size, texture_size,
-	        textures[BlockImageTextureResources::LARGECHEST_BACK_LEFT]);
-	back_right.resizeAuto(texture_size, texture_size,
-	        textures[BlockImageTextureResources::LARGECHEST_BACK_RIGHT]);
+	front_left.resizeAuto(textures[BlockImageTextureResources::LARGECHEST_FRONT_LEFT],
+			texture_size, texture_size);
+	front_right.resizeAuto(textures[BlockImageTextureResources::LARGECHEST_FRONT_RIGHT],
+			texture_size, texture_size);
+	side.resizeAuto(textures[BlockImageTextureResources::LARGECHEST_SIDE],
+			texture_size, texture_size);
+	top_left.resizeAuto(textures[BlockImageTextureResources::LARGECHEST_TOP_LEFT],
+			texture_size, texture_size);
+	top_right.resizeAuto(textures[BlockImageTextureResources::LARGECHEST_TOP_RIGHT],
+			texture_size, texture_size);
+	back_left.resizeAuto(textures[BlockImageTextureResources::LARGECHEST_BACK_LEFT],
+			texture_size, texture_size);
+	back_right.resizeAuto(textures[BlockImageTextureResources::LARGECHEST_BACK_RIGHT],
+			texture_size, texture_size);
 
 	return true;
 }
@@ -167,12 +169,12 @@ bool BlockImageTextureResources::loadOther(const std::string& endportal) {
 		LOG(ERROR) << "Unable to read '" << endportal << "'.";
 		return false;
 	}
-	endportal_img.resizeAuto(texture_size, texture_size, endportal_texture);
+	endportal_img.resizeAuto(endportal_texture, texture_size, texture_size);
 	return true;
 }
 
 bool BlockImageTextureResources::loadBlocks(const std::string& block_dir) {
-	if (!textures.load(block_dir, texture_size))
+	if (!textures.load(block_dir, texture_size, blur))
 		return false;
 	empty_texture.setSize(texture_size, texture_size);
 	return true;
@@ -240,17 +242,18 @@ BlockImages::~BlockImages() {
 }
 
 AbstractBlockImages::AbstractBlockImages()
-	: texture_size(12), rotation(0), render_unknown_blocks(false), render_leaves_transparent(true) {
+	: texture_size(12), blur(0), rotation(0), render_unknown_blocks(false),
+	  render_leaves_transparent(true) {
 }
 
 AbstractBlockImages::~AbstractBlockImages() {
 }
 
-void AbstractBlockImages::setSettings(int texture_size, int rotation,
+void AbstractBlockImages::setSettings(int texture_size, int blur, int rotation,
 		bool render_unknown_blocks, bool render_leaves_transparent,
 		const std::string& rendermode) {
 	this->texture_size = texture_size;
-	resources.setTextureSize(texture_size);
+	resources.setTextureSize(texture_size, blur);
 	this->rotation = rotation;
 	this->render_unknown_blocks = render_unknown_blocks;
 	this->render_leaves_transparent = render_leaves_transparent;
@@ -330,7 +333,7 @@ bool AbstractBlockImages::saveBlocks(const std::string& filename) {
 			int offset = y * width + x;
 			if ((size_t) offset >= blocks.size())
 				break;
-			img.alphablit(blocks.at(offset), x * blocksize, y * blocksize);
+			img.alphaBlit(blocks.at(offset), x * blocksize, y * blocksize);
 		}
 	}
 	std::cout << block_images.size() << " blocks" << std::endl;

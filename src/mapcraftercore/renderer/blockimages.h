@@ -74,7 +74,7 @@ public:
 	BlockImageTextureResources();
 	~BlockImageTextureResources();
 
-	void setTextureSize(int texture_size);
+	void setTextureSize(int texture_size, int blur);
 
 	bool loadChests(const std::string& normal, const std::string& normal_double,
 			const std::string& ender,
@@ -111,6 +111,7 @@ public:
 
 private:
 	int texture_size;
+	int blur;
 
 	BlockTextures textures;
 	RGBAImage empty_texture;
@@ -127,8 +128,11 @@ class BlockImages {
 public:
 	virtual ~BlockImages();
 
-	virtual void setSettings(int texture_size, int rotation, bool render_unknown_blocks,
-			bool render_leaves_transparent, const std::string& rendermode) = 0;
+	// TODO
+	// also something configureBlockImages() like for tile renderers?
+	virtual void setSettings(int texture_size, int blur, int rotation,
+			bool render_unknown_blocks, bool render_leaves_transparent,
+			const std::string& rendermode) = 0;
 
 	virtual bool loadAll(const std::string& textures_dir) = 0;
 	virtual bool saveBlocks(const std::string& filename) = 0;
@@ -150,8 +154,9 @@ public:
 	AbstractBlockImages();
 	virtual ~AbstractBlockImages();
 
-	virtual void setSettings(int texture_size, int rotation, bool render_unknown_blocks,
-			bool render_leaves_transparent, const std::string& rendermode);
+	virtual void setSettings(int texture_size, int blur, int rotation,
+			bool render_unknown_blocks, bool render_leaves_transparent,
+			const std::string& rendermode);
 
 	virtual bool loadAll(const std::string& textures_dir);
 	virtual bool saveBlocks(const std::string& filename);
@@ -181,6 +186,7 @@ protected:
 	virtual void createBiomeBlocks() = 0;
 
 	int texture_size;
+	int blur;
 	int rotation;
 	bool render_unknown_blocks;
 	bool render_leaves_transparent;

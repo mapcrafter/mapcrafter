@@ -169,7 +169,21 @@ RGBAImage::RGBAImage(int width, int height)
 RGBAImage::~RGBAImage() {
 }
 
-void RGBAImage::simpleblit(const RGBAImage& image, int x, int y) {
+void RGBAImage::simpleBlit(const RGBAImage& image, int x, int y) {
+	if (x >= width || y >= height)
+		return;
+
+	int sx = std::max(0, -x);
+	int sy;
+	for (; sx < image.width && sx+x < width; sx++) {
+		sy = std::max(0, -y);
+		for (; sy < image.height && sy+y < height; sy++) {
+				data[(sy+y) * width + (sx+x)] = image.data[sy * image.width + sx];
+		}
+	}
+}
+
+void RGBAImage::simpleAlphaBlit(const RGBAImage& image, int x, int y) {
 	if (x >= width || y >= height)
 		return;
 
@@ -201,7 +215,7 @@ void RGBAImage::simpleblit(const RGBAImage& image, int x, int y) {
 	}
 }
 
-void RGBAImage::alphablit(const RGBAImage& image, int x, int y) {
+void RGBAImage::alphaBlit(const RGBAImage& image, int x, int y) {
 	if (x >= width || y >= height)
 		return;
 
@@ -333,7 +347,7 @@ inline uint8_t interpolate(uint8_t a, uint8_t b, uint8_t c, uint8_t d, double w,
 	return result * 255.0;
 }
 
-void RGBAImage::resizeInterpolated(int new_width, int new_height, RGBAImage& dest) const {
+void RGBAImage::resizeInterpolated(RGBAImage& dest, int new_width, int new_height) const {
 	if (new_width == width && new_height == height) {
 		dest = *this;
 		return;
@@ -372,7 +386,7 @@ void RGBAImage::resizeInterpolated(int new_width, int new_height, RGBAImage& des
 	}
 }
 
-void RGBAImage::resizeSimple(int new_width, int new_height, RGBAImage& dest) const {
+void RGBAImage::resizeSimple(RGBAImage& dest, int new_width, int new_height) const {
 	if (new_width == width && new_height == height) {
 		dest = *this;
 		return;
@@ -388,14 +402,14 @@ void RGBAImage::resizeSimple(int new_width, int new_height, RGBAImage& dest) con
 	}
 }
 
-void RGBAImage::resizeAuto(int new_width, int new_height, RGBAImage& dest) const {
+void RGBAImage::resizeAuto(RGBAImage& dest, int new_width, int new_height) const {
 	// for increasing an image resolution the nearest neighbor interpolation is the best
 	// for Minecraft textures because it preserves the pixelated style of the textures
 	// and prevents the textures becoming blurry
 	if (width < new_width)
-		resizeSimple(new_width, new_height, dest);
+		resizeSimple(dest, new_width, new_height);
 	else
-		resizeInterpolated(new_width, new_height, dest);
+		resizeInterpolated(dest, new_width, new_height);
 }
 
 void RGBAImage::resizeHalf(RGBAImage& dest) const {
@@ -410,6 +424,33 @@ void RGBAImage::resizeHalf(RGBAImage& dest) const {
 			dest.data[(y / 2) * dest.width + (x / 2)] = p1 + p2 + p3 + p4;
 		}
 	}
+}
+
+RGBAPixel blurKernel(const RGBAImage& image, int x, int y, int radius) {
+	int r = 0, g = 0, b = 0, a = 0;
+	int count = 0;
+	for (int dx = -radius; dx <= radius; dx++)
+		for (int dy = -radius; dy <= radius; dy++) {
+			int x2 = x + dx;
+			int y2 = y + dy;
+			if (x2 < 0 || y2 < 0 || x2 >= image.getWidth() || y2 >= image.getHeight())
+				continue;
+			RGBAPixel pixel = image.getPixel(x2, y2);
+			r += rgba_red(pixel);
+			g += rgba_green(pixel);
+			b += rgba_blue(pixel);
+			a += rgba_alpha(pixel);
+			count++;
+		}
+	return rgba(r / count, g / count, b / count, a / count);
+}
+
+void RGBAImage::blur(RGBAImage& dest, int radius) const {
+	dest.setSize(width, height);
+
+	for (int x = 0; x < width; x++)
+		for (int y = 0; y < height; y++)
+			dest.pixel(x, y) = blurKernel(*this, x, y, radius);
 }
 
 bool RGBAImage::readPNG(const std::string& filename) {
