@@ -20,14 +20,25 @@
 #ifndef RENDERVIEW_H_
 #define RENDERVIEW_H_
 
-#include "blockimages.h"
 #include "rendermode.h"
-#include "tileset.h"
-#include "tilerenderer.h"
-#include "../mc/world.h"
 
 namespace mapcrafter {
+
+// some forward declarations
+namespace mc {
+class WorldCache;
+}
+
+namespace config {
+class MapSection;
+class WorldSection;
+}
+
 namespace renderer {
+
+class BlockImages;
+class TileSet;
+class TileRenderer;
 
 class RenderView {
 public:

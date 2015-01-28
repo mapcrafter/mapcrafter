@@ -19,8 +19,13 @@
 
 #include "renderview.h"
 
+#include "blockimages.h"
+#include "tileset.h"
+#include "tilerenderer.h"
 #include "renderviews/isometric/renderview.h"
 #include "renderviews/topdown/renderview.h"
+#include "../config/sections/map.h"
+#include "../config/sections/world.h"
 
 #include <cassert>
 

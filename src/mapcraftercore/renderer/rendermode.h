@@ -20,19 +20,30 @@
 #ifndef RENDERMODE_H_
 #define RENDERMODE_H_
 
-#include "blockimages.h"
-#include "image.h"
-#include "../mc/chunk.h"
-#include "../mc/pos.h"
 #include "../mc/worldcache.h"
-#include "../config/mapcrafterconfig.h"
 
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace mapcrafter {
+
+// some forward declarations
+namespace config {
+class MapSection;
+class WorldSection;
+}
+
+namespace mc {
+class Block;
+class BlockPos;
+class Chunk;
+}
+
 namespace renderer {
+
+class BlockImages;
+class RGBAImage;
 
 /**
  * A simple interface to implement different rendermodes.

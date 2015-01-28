@@ -19,8 +19,12 @@
 
 #include "tilerenderer.h"
 
+#include "../../blockimages.h"
+#include "../../image.h"
 #include "../../rendermode.h"
-#include "../../biomes.h"
+#include "../../tileset.h"
+#include "../../../mc/pos.h"
+#include "../../../mc/worldcache.h"
 
 #include <fstream>
 #include <iostream>
@@ -135,20 +139,6 @@ IsometricTileRenderer::~IsometricTileRenderer() {
 void IsometricTileRenderer::setUsePreblitWater(bool use_preblit_water) {
 	this->use_preblit_water = use_preblit_water;
 }
-
-/*
-void IsometricTileRenderer::setStuff(std::shared_ptr<mc::WorldCache> world,
-		std::shared_ptr<BlockImages> images,
-		const config::WorldSection& world_config,
-		const config::MapSection& map_config) {
-	TileRenderer::setStuff(world, images, world_config, map_config);
-
-	this->water_preblit = map_config.getRendermode() != "daylight" && map_config.getRendermode() != "nightlight";
-
-	rendermodes.clear();
-	createRendermode(world_config, map_config, state, rendermodes);
-}
-*/
 
 void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 	// some vars, set correct image size

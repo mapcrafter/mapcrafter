@@ -20,8 +20,13 @@
 #include "lighting.h"
 
 #include "../blockimages.h"
+#include "../image.h"
 #include "../renderviews/isometric/blockimages.h"
 #include "../renderviews/topdown/blockimages.h"
+#include "../../config/sections/map.h"
+#include "../../config/sections/world.h"
+#include "../../mc/chunk.h"
+#include "../../mc/pos.h"
 #include "../../util.h"
 
 #include <cmath>

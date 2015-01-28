@@ -19,8 +19,13 @@
 
 #include "tilerenderer.h"
 
-#include "../../rendermode.h"
 #include "../../biomes.h"
+#include "../../blockimages.h"
+#include "../../image.h"
+#include "../../rendermode.h"
+#include "../../tileset.h"
+#include "../../../mc/pos.h"
+#include "../../../mc/worldcache.h"
 
 #include <deque>
 #include <fstream>

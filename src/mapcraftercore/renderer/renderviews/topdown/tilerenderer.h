@@ -20,14 +20,7 @@
 #ifndef TOPDOWN_TILERENDERER_H_
 #define TOPDOWN_TILERENDERER_H_
 
-#include "blockimages.h"
-#include "tileset.h"
 #include "../../tilerenderer.h"
-#include "../../image.h"
-#include "../../../config/sections/map.h"
-#include "../../../config/sections/world.h"
-#include "../../../mc/worldcache.h"
-#include "../../../util.h"
 
 #include <boost/filesystem.hpp>
 

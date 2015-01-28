@@ -20,15 +20,8 @@
 #ifndef TILERENDERER_H_
 #define TILERENDERER_H_
 
-#include "image.h"
-#include "blockimages.h"
+#include "biomes.h"
 #include "rendermode.h"
-#include "tileset.h"
-#include "../config/sections/map.h"
-#include "../config/sections/world.h"
-#include "../mc/pos.h"
-#include "../mc/worldcache.h"
-#include "../util.h"
 
 #include <vector>
 #include <boost/filesystem.hpp>
@@ -36,7 +29,19 @@
 namespace fs = boost::filesystem;
 
 namespace mapcrafter {
+
+// some forward declarations
+namespace mc {
+class BlockPos;
+class Chunk;
+class WorldCache;
+}
+
 namespace renderer {
+
+class BlockImages;
+class TilePos;
+class RGBAImage;
 
 class TileRenderer {
 public:

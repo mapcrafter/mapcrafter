@@ -19,13 +19,18 @@
 
 #include "rendermode.h"
 
-#include "../mc/world.h"
+#include "blockimages.h"
+#include "image.h"
+#include "../config/sections/map.h"
+#include "../config/sections/world.h"
+#include "../mc/chunk.h"
+#include "../mc/pos.h"
 
 namespace mapcrafter {
 namespace renderer {
 
 RenderMode::RenderMode()
-	: current_chunk(nullptr) {
+	: images(nullptr), world(nullptr), current_chunk(nullptr) {
 }
 
 void RenderMode::initialize(BlockImages* images, mc::WorldCache* world,

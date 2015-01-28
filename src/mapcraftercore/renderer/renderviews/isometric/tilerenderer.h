@@ -21,14 +21,6 @@
 #define ISOMETRIC_TILERENDERER_H_
 
 #include "../../tilerenderer.h"
-#include "blockimages.h"
-#include "../../image.h"
-#include "tileset.h"
-#include "../../../config/sections/map.h"
-#include "../../../config/sections/world.h"
-#include "../../../mc/pos.h"
-#include "../../../mc/worldcache.h"
-#include "../../../util.h"
 
 #include <boost/filesystem.hpp>
 
