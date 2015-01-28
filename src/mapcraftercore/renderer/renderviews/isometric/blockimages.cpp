@@ -310,22 +310,15 @@ RGBAImage BlockImage::buildImage(double dleft, double dright) const {
 }
 
 IsometricBlockImages::IsometricBlockImages()
-	: AbstractBlockImages(), dleft(0.75), dright(0.6) {
+	: AbstractBlockImages(), dleft(1), dright(1) {
 }
 
 IsometricBlockImages::~IsometricBlockImages() {
 }
 
-void IsometricBlockImages::setSettings(int texture_size, int blur, int rotation,
-		bool render_unknown_blocks, bool render_leaves_transparent,
-		const std::string& rendermode) {
-	AbstractBlockImages::setSettings(texture_size, blur, rotation, render_unknown_blocks,
-			render_leaves_transparent, rendermode);
-
-	if (rendermode == "daylight" || rendermode == "nightlight") {
-		dleft = 0.95;
-		dright = 0.8;
-	}
+void IsometricBlockImages::setBlockSideDarkening(double left, double right) {
+	this->dleft = left;
+	this->dright = right;
 }
 
 int IsometricBlockImages::getMaxWaterNeededOpaque() const {

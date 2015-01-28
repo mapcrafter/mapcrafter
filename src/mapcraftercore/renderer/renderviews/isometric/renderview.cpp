@@ -39,16 +39,33 @@ TileRenderer* IsometricRenderView::createTileRenderer(BlockImages* images,
 	return new IsometricTileRenderer(images, tile_width, world, render_modes);
 }
 
+void IsometricRenderView::configureBlockImages(BlockImages* block_images,
+		const config::WorldSection& world_config,
+		const config::MapSection& map_config) const {
+	assert(block_images != nullptr);
+	RenderView::configureBlockImages(block_images, world_config, map_config);
+
+	IsometricBlockImages* images = dynamic_cast<IsometricBlockImages*>(block_images);
+	assert(images != nullptr);
+
+	std::string render_mode = map_config.getRenderMode();
+	if (render_mode == "daylight" || render_mode == "nightlight")
+		images->setBlockSideDarkening(0.95, 0.8);
+	else
+		images->setBlockSideDarkening(0.75, 0.6);
+}
+
 void IsometricRenderView::configureTileRenderer(TileRenderer* tile_renderer,
 		const config::WorldSection& world_config,
 		const config::MapSection& map_config) const {
+	assert(tile_renderer != nullptr);
 	RenderView::configureTileRenderer(tile_renderer, world_config, map_config);
 
 	IsometricTileRenderer* renderer = dynamic_cast<IsometricTileRenderer*>(tile_renderer);
-	if (renderer != nullptr) {
-		// TODO
-		renderer->setUsePreblitWater(false);
-	}
+	assert(renderer != nullptr);
+
+	// TODO
+	renderer->setUsePreblitWater(false);
 }
 
 } /* namespace renderer */

@@ -39,10 +39,30 @@ public:
 			mc::WorldCache* world, RenderModes& render_modes) const = 0;
 
 	/**
-	 * Configures a tile renderer with the belonging world- and map section.
+	 * Configures a block images object by calling some (eventually per render view
+	 * specific) methods of the block images and passing information from the world- and
+	 * map configuration. It is possible to call these methods manually (for example
+	 * needed in the testtextures program where we don't want to initialize a whole
+	 * configuration object just for the block images).
 	 *
 	 * If you overwrite this method, you should also call the parent method since it
-	 * sets generic tile renderer options such as whether to render biomes.
+	 * sets generic block images options (for example whether to render leaves transparent).
+	 *
+	 * It is also very important that you pass only BlockImages*'s to this method which
+	 * were created by this render view (because the render view might rely on using
+	 * the BlockImages* as an IsometricBlockImages* like it was created for example).
+	 */
+	virtual void configureBlockImages(BlockImages* block_images,
+			const config::WorldSection& world_config,
+			const config::MapSection& map_config) const;
+
+	/**
+	 * Configures a tile renderer object just like the configureBlockImages() method.
+	 * Make sure when overwriting this method that you should also call the parent
+	 * method since it sets generic tile renderer options.
+	 *
+	 * It is also very important that you pass only TileRenderer*'s to this method which
+	 * were created by this render view.
 	 */
 	virtual void configureTileRenderer(TileRenderer* tile_renderer,
 			const config::WorldSection& world_config,

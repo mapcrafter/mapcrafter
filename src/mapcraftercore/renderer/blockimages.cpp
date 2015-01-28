@@ -249,25 +249,23 @@ AbstractBlockImages::AbstractBlockImages()
 AbstractBlockImages::~AbstractBlockImages() {
 }
 
-void AbstractBlockImages::setSettings(int texture_size, int blur, int rotation,
-		bool render_unknown_blocks, bool render_leaves_transparent,
-		const std::string& rendermode) {
+void AbstractBlockImages::setTextureSize(int texture_size, int blur) {
 	this->texture_size = texture_size;
-	resources.setTextureSize(texture_size, blur);
+	this->blur = blur;
+}
+
+void AbstractBlockImages::setRotation(int rotation) {
 	this->rotation = rotation;
+}
+
+void AbstractBlockImages::setRenderSpecialBlocks(bool render_unknown_blocks,
+		bool render_leaves_transparent) {
 	this->render_unknown_blocks = render_unknown_blocks;
 	this->render_leaves_transparent = render_leaves_transparent;
-
-	/*
-	// TODO
-	if (rendermode == "daylight" || rendermode == "nightlight") {
-		dleft = 0.95;
-		dright = 0.8;
-	}
-	*/
 }
 
 bool AbstractBlockImages::loadAll(const std::string& textures_dir) {
+	resources.setTextureSize(texture_size, blur);
 	if (!resources.loadAll(textures_dir))
 		return false;
 

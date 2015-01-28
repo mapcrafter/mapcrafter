@@ -205,9 +205,7 @@ public:
 	IsometricBlockImages();
 	~IsometricBlockImages();
 
-	virtual void setSettings(int texture_size, int blur, int rotation,
-			bool render_unknown_blocks, bool render_leaves_transparent,
-			const std::string& rendermode);
+	void setBlockSideDarkening(double left, double right);
 
 	virtual int getMaxWaterNeededOpaque() const;
 	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const;

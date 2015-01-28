@@ -22,15 +22,28 @@
 #include "renderviews/isometric/renderview.h"
 #include "renderviews/topdown/renderview.h"
 
+#include <cassert>
+
 namespace mapcrafter {
 namespace renderer {
 
 RenderView::~RenderView() {
 }
 
+void RenderView::configureBlockImages(BlockImages* block_images,
+	const config::WorldSection& world_config,
+	const config::MapSection& map_config) const {
+	// TODO add some handling of NDEBUG assert stuff to cmake files
+	assert(block_images != nullptr);
+	block_images->setTextureSize(map_config.getTextureSize(), map_config.getTextureBlur());
+	block_images->setRenderSpecialBlocks(map_config.renderUnknownBlocks(),
+			map_config.renderLeavesTransparent());
+}
+
 void RenderView::configureTileRenderer(TileRenderer* tile_renderer,
 		const config::WorldSection& world_config,
 		const config::MapSection& map_config) const {
+	assert(tile_renderer != nullptr);
 	tile_renderer->setRenderBiomes(map_config.renderBiomes());
 }
 

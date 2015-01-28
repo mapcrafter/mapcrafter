@@ -478,9 +478,8 @@ bool RenderManager::run() {
 
 			// create block images
 			std::shared_ptr<BlockImages> block_images(render_view->createBlockImages());
-			block_images->setSettings(map.getTextureSize(), map.getTextureBlur(), rotation,
-					map.renderUnknownBlocks(), map.renderLeavesTransparent(),
-					map.getRenderMode());
+			render_view->configureBlockImages(block_images.get(), config.getWorld(world_name), map);
+
 			// if textures do not work, it does not make much sense
 			// to try the other rotations with the same textures
 			if (!block_images->loadAll(map.getTextureDir().string())) {
