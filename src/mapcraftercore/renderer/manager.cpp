@@ -474,24 +474,27 @@ bool RenderManager::run() {
 					tile_set->scanRequiredByTimestamp(confighelper.getMapLastRendered(map_name, rotation));
 			}
 
-			std::time_t time_start = std::time(nullptr);
-
-			// create block images
-			std::shared_ptr<BlockImages> block_images(render_view->createBlockImages());
-			render_view->configureBlockImages(block_images.get(), config.getWorld(world_name), map);
-
-			// if textures do not work, it does not make much sense
-			// to try the other rotations with the same textures
-			if (!block_images->loadAll(map.getTextureDir().string())) {
-				LOG(ERROR) << "Skipping remaining rotations.";
-				break;
-			}
-
 			// render the map
 			if (tile_set->getRequiredRenderTilesCount() == 0) {
 				LOG(INFO) << "No tiles need to get rendered.";
 				continue;
 			}
+
+			std::time_t time_start = std::time(nullptr);
+
+			// create block images
+			BlockImageTextureResources resources;
+			resources.setTextureSize(map.getTextureSize(), map.getTextureBlur());
+			// if textures do not work, it does not make much sense
+			// to try the other rotations with the same textures
+			if (!resources.loadAll(map.getTextureDir().string())) {
+				LOG(ERROR) << "Skipping remaining rotations.";
+				break;
+			}
+
+			std::shared_ptr<BlockImages> block_images(render_view->createBlockImages());
+			render_view->configureBlockImages(block_images.get(), config.getWorld(world_name), map);
+			block_images->loadBlocks(resources);
 
 			RenderContext context;
 			context.output_dir = output_dir;

@@ -28,15 +28,15 @@ namespace mapcrafter {
 namespace renderer {
 
 BlockImageTextureResources::BlockImageTextureResources()
-	: texture_size(12), blur(0) {
+	: texture_size(12), texture_blur(0) {
 }
 
 BlockImageTextureResources::~BlockImageTextureResources() {
 }
 
-void BlockImageTextureResources::setTextureSize(int texture_size, int blur) {
+void BlockImageTextureResources::setTextureSize(int texture_size, int texture_blur) {
 	this->texture_size = texture_size;
-	this->blur = blur;
+	this->texture_blur = texture_blur;
 }
 
 namespace {
@@ -174,7 +174,7 @@ bool BlockImageTextureResources::loadOther(const std::string& endportal) {
 }
 
 bool BlockImageTextureResources::loadBlocks(const std::string& block_dir) {
-	if (!textures.load(block_dir, texture_size, blur))
+	if (!textures.load(block_dir, texture_size, texture_blur))
 		return false;
 	empty_texture.setSize(texture_size, texture_size);
 	return true;
@@ -200,6 +200,14 @@ bool BlockImageTextureResources::loadAll(const std::string& textures_dir) {
 		return false;
 	}
 	return true;
+}
+
+int BlockImageTextureResources::getTextureSize() const {
+	return texture_size;
+}
+
+int BlockImageTextureResources::getTextureBlur() const {
+	return texture_blur;
 }
 
 const BlockTextures& BlockImageTextureResources::getBlockTextures() const {
@@ -242,16 +250,11 @@ BlockImages::~BlockImages() {
 }
 
 AbstractBlockImages::AbstractBlockImages()
-	: texture_size(12), blur(0), rotation(0), render_unknown_blocks(false),
+	: texture_size(12), rotation(0), render_unknown_blocks(false),
 	  render_leaves_transparent(true) {
 }
 
 AbstractBlockImages::~AbstractBlockImages() {
-}
-
-void AbstractBlockImages::setTextureSize(int texture_size, int blur) {
-	this->texture_size = texture_size;
-	this->blur = blur;
 }
 
 void AbstractBlockImages::setRotation(int rotation) {
@@ -264,17 +267,14 @@ void AbstractBlockImages::setRenderSpecialBlocks(bool render_unknown_blocks,
 	this->render_leaves_transparent = render_leaves_transparent;
 }
 
-bool AbstractBlockImages::loadAll(const std::string& textures_dir) {
-	resources.setTextureSize(texture_size, blur);
-	if (!resources.loadAll(textures_dir))
-		return false;
+void AbstractBlockImages::loadBlocks(const BlockImageTextureResources& resources) {
+	this->resources = resources;
+	this->texture_size = resources.getTextureSize();
 
 	empty_texture.setSize(texture_size, texture_size);
 	unknown_block = createUnknownBlock();
 	createBlocks();
 	createBiomeBlocks();
-
-	return true;
 }
 
 namespace {

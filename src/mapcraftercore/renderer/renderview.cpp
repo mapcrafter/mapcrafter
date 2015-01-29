@@ -40,7 +40,6 @@ void RenderView::configureBlockImages(BlockImages* block_images,
 	const config::MapSection& map_config) const {
 	// TODO add some handling of NDEBUG assert stuff to cmake files
 	assert(block_images != nullptr);
-	block_images->setTextureSize(map_config.getTextureSize(), map_config.getTextureBlur());
 	block_images->setRenderSpecialBlocks(map_config.renderUnknownBlocks(),
 			map_config.renderLeavesTransparent());
 }

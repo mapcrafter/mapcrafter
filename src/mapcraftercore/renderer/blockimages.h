@@ -74,7 +74,7 @@ public:
 	BlockImageTextureResources();
 	~BlockImageTextureResources();
 
-	void setTextureSize(int texture_size, int blur);
+	void setTextureSize(int texture_size, int texture_blur);
 
 	bool loadChests(const std::string& normal, const std::string& normal_double,
 			const std::string& ender,
@@ -84,6 +84,9 @@ public:
 	bool loadBlocks(const std::string& block_dir);
 	bool loadAll(const std::string& textures_dir);
 	bool saveBlocks(const std::string& filename);
+
+	int getTextureSize() const;
+	int getTextureBlur() const;
 
 	const BlockTextures& getBlockTextures() const;
 	const RGBAImage& getEndportalTexture() const;
@@ -110,8 +113,7 @@ public:
 	static const int LARGECHEST_BACK_RIGHT = 6;
 
 private:
-	int texture_size;
-	int blur;
+	int texture_size, texture_blur;
 
 	BlockTextures textures;
 	RGBAImage empty_texture;
@@ -128,13 +130,11 @@ class BlockImages {
 public:
 	virtual ~BlockImages();
 
-	// TODO replace this later by passing a texture resources object directly
-	virtual void setTextureSize(int texture_size, int blur) = 0;
 	virtual void setRotation(int rotation) = 0;
 	virtual void setRenderSpecialBlocks(bool render_unknown_blocks,
 			bool render_leaves_transparent) = 0;
 
-	virtual bool loadAll(const std::string& textures_dir) = 0;
+	virtual void loadBlocks(const BlockImageTextureResources& resources) = 0;
 	virtual bool saveBlocks(const std::string& filename) = 0;
 
 	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const = 0;
@@ -154,12 +154,11 @@ public:
 	AbstractBlockImages();
 	virtual ~AbstractBlockImages();
 
-	virtual void setTextureSize(int texture_size, int blur);
 	virtual void setRotation(int rotation);
 	virtual void setRenderSpecialBlocks(bool render_unknown_blocks,
 			bool render_leaves_transparent);
 
-	virtual bool loadAll(const std::string& textures_dir);
+	virtual void loadBlocks(const BlockImageTextureResources& resources);
 	virtual bool saveBlocks(const std::string& filename);
 
 	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const;
@@ -187,7 +186,6 @@ protected:
 	virtual void createBiomeBlocks() = 0;
 
 	int texture_size;
-	int blur;
 	int rotation;
 	bool render_unknown_blocks;
 	bool render_leaves_transparent;
