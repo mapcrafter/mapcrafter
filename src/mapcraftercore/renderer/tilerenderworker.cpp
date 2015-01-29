@@ -19,6 +19,13 @@
 
 #include "tilerenderworker.h"
 
+#include "blockimages.h"
+#include "image.h"
+#include "renderview.h"
+#include "tilerenderer.h"
+#include "tileset.h"
+#include "../mc/worldcache.h"
+
 namespace mapcrafter {
 namespace renderer {
 

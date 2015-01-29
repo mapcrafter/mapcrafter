@@ -20,10 +20,12 @@
 #ifndef BIOMES_H_
 #define BIOMES_H_
 
-#include "image.h"
+#include <cstdint>
 
 namespace mapcrafter {
 namespace renderer {
+
+class RGBAImage;
 
 /**
  * A Minecraft Biome with data to tint the biome-depend blocks.
@@ -130,7 +132,7 @@ static const Biome BIOMES[] = {
 	{167, 2.0, 0.0},   // Mesa Plateau M (= Mesa Plateau)
 };
 
-static const size_t BIOMES_SIZE = sizeof(BIOMES) / sizeof(Biome);
+static const std::size_t BIOMES_SIZE = sizeof(BIOMES) / sizeof(Biome);
 static const int DEFAULT_BIOME = 21;		// Jungle
 
 Biome getBiome(uint8_t id);

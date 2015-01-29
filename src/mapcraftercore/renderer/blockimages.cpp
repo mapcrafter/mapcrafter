@@ -19,6 +19,7 @@
 
 #include "blockimages.h"
 
+#include "biomes.h"
 #include "../util.h"
 
 #include <map>

@@ -19,7 +19,7 @@
 
 #include "blockimages.h"
 
-#include "../../tileset.h"
+#include "../../biomes.h"
 #include "../../../util.h"
 
 #include <cmath>

@@ -20,6 +20,7 @@
 #ifndef ISOMETRIC_TILERENDERER_H_
 #define ISOMETRIC_TILERENDERER_H_
 
+#include "../../image.h"
 #include "../../tilerenderer.h"
 
 #include <boost/filesystem.hpp>

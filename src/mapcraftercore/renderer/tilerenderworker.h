@@ -20,16 +20,10 @@
 #ifndef TILERENDERWORKER_H_
 #define TILERENDERWORKER_H_
 
-#include "blockimages.h"
-#include "tilerenderer.h"
-#include "tileset.h"
 #include "../config/mapcrafterconfig.h"
+#include "../config/sections/map.h"
+#include "../config/sections/world.h"
 #include "../mc/world.h"
-#include "../mc/worldcache.h"
-#include "../renderer/blockimages.h"
-#include "../renderer/renderview.h"
-#include "../renderer/tileset.h"
-#include "../util.h"
 
 #include <memory>
 #include <set>
@@ -38,7 +32,19 @@
 namespace fs = boost::filesystem;
 
 namespace mapcrafter {
+
+namespace mc {
+class WorldCache;
+}
+
 namespace renderer {
+
+class BlockImages;
+class RenderView;
+class RGBAImage;
+class TilePath;
+class TileRenderer;
+class TileSet;
 
 struct RenderContext {
 	fs::path output_dir;
@@ -46,14 +52,14 @@ struct RenderContext {
 	config::WorldSection world_config;
 	config::MapSection map_config;
 
-	renderer::RenderView* render_view;
-	renderer::BlockImages* block_images;
-	renderer::TileSet* tile_set;
+	RenderView* render_view;
+	BlockImages* block_images;
+	TileSet* tile_set;
 	mc::World world;
 
 	// TODO really do it like this?
 	std::shared_ptr<mc::WorldCache> world_cache;
-	std::shared_ptr<renderer::TileRenderer> tile_renderer;
+	std::shared_ptr<TileRenderer> tile_renderer;
 
 	/**
 	 * Creates/initializes the world cache and tile renderer with the render view and

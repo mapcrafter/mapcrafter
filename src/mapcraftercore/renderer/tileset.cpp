@@ -19,8 +19,9 @@
 
 #include "tileset.h"
 
+#include "../mc/chunk.h"
 #include "../mc/pos.h"
-#include "../util.h"
+#include "../mc/world.h"
 
 #include <algorithm>
 #include <cmath>

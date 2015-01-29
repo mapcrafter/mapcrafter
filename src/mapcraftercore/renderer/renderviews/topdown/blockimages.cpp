@@ -19,7 +19,7 @@
 
 #include "blockimages.h"
 
-#include "../../../util.h"
+#include "../../biomes.h"
 
 namespace mapcrafter {
 namespace renderer {

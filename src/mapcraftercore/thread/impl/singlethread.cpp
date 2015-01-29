@@ -20,6 +20,7 @@
 #include "singlethread.h"
 
 #include "../../mc/worldcache.h"
+#include "../../renderer/tileset.h"
 #include "../../util.h"
 
 #include <set>

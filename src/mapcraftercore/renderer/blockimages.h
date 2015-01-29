@@ -20,7 +20,6 @@
 #ifndef BLOCKIMAGES_H_
 #define BLOCKIMAGES_H_
 
-#include "biomes.h"
 #include "blocktextures.h"
 #include "image.h"
 
@@ -31,6 +30,8 @@
 
 namespace mapcrafter {
 namespace renderer {
+
+class Biome;
 
 // extra data starting at the 5. bit
 const int DATA_NORTH = 16;

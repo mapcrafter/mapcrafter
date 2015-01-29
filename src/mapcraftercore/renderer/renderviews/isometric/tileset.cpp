@@ -19,6 +19,9 @@
 
 #include "tileset.h"
 
+#include "../../../mc/chunk.h"
+#include "../../../mc/pos.h"
+
 namespace mapcrafter {
 namespace renderer {
 

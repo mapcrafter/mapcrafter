@@ -20,10 +20,7 @@
 #ifndef ISOMETRIC_BLOCKIMAGES_H_
 #define ISOMETRIC_BLOCKIMAGES_H_
 
-#include "../../biomes.h"
 #include "../../blockimages.h"
-#include "../../blocktextures.h"
-#include "../../image.h"
 
 #include <cstdint>
 #include <string>

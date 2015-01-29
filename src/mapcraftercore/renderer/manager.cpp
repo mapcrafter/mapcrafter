@@ -19,6 +19,7 @@
 
 #include "manager.h"
 
+#include "blockimages.h"
 #include "tilerenderworker.h"
 #include "renderview.h"
 #include "../config/loggingconfig.h"

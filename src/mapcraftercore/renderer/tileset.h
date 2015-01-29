@@ -20,8 +20,7 @@
 #ifndef TILE_H_
 #define TILE_H_
 
-#include "../mc/world.h"
-
+#include <map>
 #include <set>
 #include <vector>
 #include <boost/filesystem.hpp>
@@ -60,6 +59,12 @@ namespace fs = boost::filesystem;
  */
 
 namespace mapcrafter {
+
+namespace mc {
+class ChunkPos;
+class World;
+}
+
 namespace renderer {
 
 /**
