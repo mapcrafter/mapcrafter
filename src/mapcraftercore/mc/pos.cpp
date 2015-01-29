@@ -19,8 +19,8 @@
 
 #include "pos.h"
 
-#include "../util.h"
 #include "chunk.h"
+#include "../util.h"
 
 #include <cmath>
 #include <cstdio>

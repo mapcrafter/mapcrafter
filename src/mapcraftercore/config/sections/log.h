@@ -22,7 +22,7 @@
 
 #include "base.h"
 #include "../validation.h"
-#include "../../util.h"
+#include "../../util/logging.h"
 
 #include <iostream>
 #include <string>

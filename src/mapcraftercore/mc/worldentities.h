@@ -24,7 +24,6 @@
 #include "pos.h"
 #include "world.h"
 #include "worldcrop.h"
-#include "../util.h"
 
 #include <array>
 #include <map>

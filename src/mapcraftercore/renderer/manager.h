@@ -26,7 +26,6 @@
 #include "../config/mapcrafterconfighelper.h"
 #include "../mc/world.h"
 #include "../mc/worldcache.h"
-#include "../util.h"
 
 #include <boost/filesystem.hpp>
 

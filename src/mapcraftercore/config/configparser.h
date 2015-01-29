@@ -22,7 +22,6 @@
 
 #include "validation.h"
 #include "sections/base.h"
-#include "../util.h"
 
 #include <map>
 #include <set>

@@ -22,7 +22,6 @@
 
 #include "base.h"
 #include "../validation.h"
-#include "../../util.h"
 
 #include <iostream>
 #include <set>

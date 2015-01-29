@@ -19,8 +19,6 @@
 
 #include "worldcache.h"
 
-#include "../util.h"
-
 namespace mapcrafter {
 namespace mc {
 

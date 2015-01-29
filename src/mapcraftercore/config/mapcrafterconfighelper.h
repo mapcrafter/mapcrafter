@@ -23,7 +23,6 @@
 #include "mapcrafterconfig.h"
 #include "../renderer/tileset.h"
 #include "../util/picojson.h"
-#include "../util.h"
 
 #include <array>
 #include <map>

@@ -23,7 +23,6 @@
 #include "validation.h"
 #include "sections/base.h"
 #include "sections/log.h"
-#include "../util.h"
 
 #include <vector>
 
