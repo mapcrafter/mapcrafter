@@ -1,6 +1,7 @@
 set(SOURCE
     ${SOURCE}
     "${CMAKE_CURRENT_SOURCE_DIR}/configparser.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/configsection.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/iniconfig.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/loggingconfig.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/mapcrafterconfig.cpp"
@@ -12,6 +13,7 @@ set(SOURCE
 set(HEADERS
     ${HEADERS}
     "${CMAKE_CURRENT_SOURCE_DIR}/configparser.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/configsection.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/iniconfig.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/loggingconfig.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/mapcrafterconfig.h"

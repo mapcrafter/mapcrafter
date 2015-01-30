@@ -17,8 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "marker.h"
-
+#include "../configsections/marker.h"
 #include "../../util.h"
 
 #include <vector>

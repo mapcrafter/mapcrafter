@@ -24,10 +24,9 @@
 #include "tilerenderer.h"
 #include "renderviews/isometric/renderview.h"
 #include "renderviews/topdown/renderview.h"
-#include "../config/sections/map.h"
-#include "../config/sections/world.h"
-
 #include <cassert>
+#include "../config/configsections/map.h"
+#include "../config/configsections/world.h"
 
 namespace mapcrafter {
 namespace renderer {

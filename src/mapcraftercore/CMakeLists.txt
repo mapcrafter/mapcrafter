@@ -52,7 +52,7 @@ set(HEADERS
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/compat")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/config")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/config/sections")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/config/configsections")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/mc")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/renderer")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/renderer/rendermodes")

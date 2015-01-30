@@ -19,10 +19,10 @@
 
 #include "rendermode.h"
 
+#include "../config/configsections/map.h"
+#include "../config/configsections/world.h"
 #include "blockimages.h"
 #include "image.h"
-#include "../config/sections/map.h"
-#include "../config/sections/world.h"
 #include "../mc/chunk.h"
 #include "../mc/pos.h"
 

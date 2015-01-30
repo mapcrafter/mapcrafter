@@ -20,7 +20,8 @@
 #ifndef SECTIONS_WORLD_H_
 #define SECTIONS_WORLD_H_
 
-#include "base.h"
+#include "../configsection.h"
+
 #include "../validation.h"
 #include "../../mc/pos.h"
 #include "../../mc/world.h"
@@ -36,7 +37,7 @@ namespace config {
 
 class INIConfigSection;
 
-class WorldSection : public ConfigSectionBase {
+class WorldSection : public ConfigSection {
 public:
 	WorldSection();
 	~WorldSection();

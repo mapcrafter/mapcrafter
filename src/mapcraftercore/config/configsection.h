@@ -17,12 +17,12 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SECTIONS_BASE_H_
-#define SECTIONS_BASE_H_
+#ifndef CONFIGSECTION_H_
+#define CONFIGSECTION_H_
 
 #include <string>
 
-#include "../validation.h"
+#include "validation.h"
 
 namespace mapcrafter {
 namespace config {
@@ -44,10 +44,10 @@ private:
 
 class INIConfigSection;
 
-class ConfigSectionBase {
+class ConfigSection {
 public:
-	ConfigSectionBase();
-	virtual ~ConfigSectionBase();
+	ConfigSection();
+	virtual ~ConfigSection();
 
 	/**
 	 * Gets/sets whether this is a global section.
@@ -115,7 +115,7 @@ private:
 	ValidationList validation;
 };
 
-std::ostream& operator<<(std::ostream& out, const ConfigSectionBase& section);
+std::ostream& operator<<(std::ostream& out, const ConfigSection& section);
 
 template <typename T>
 ConfigDirSectionFactory<T>::ConfigDirSectionFactory(fs::path config_dir)
@@ -136,4 +136,4 @@ T ConfigDirSectionFactory<T>::operator()() const {
 }
 }
 
-#endif /* SECTIONS_BASE_H_ */
+#endif /* CONFIGSECTION_H_ */

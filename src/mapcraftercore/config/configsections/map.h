@@ -20,7 +20,8 @@
 #ifndef SECTIONS_MAP_H_
 #define SECTIONS_MAP_H_
 
-#include "base.h"
+#include "../configsection.h"
+
 #include "../validation.h"
 
 #include <iostream>
@@ -54,7 +55,7 @@ std::ostream& operator<<(std::ostream& out, ImageFormat image_format);
 
 class INIConfigSection;
 
-class MapSection : public ConfigSectionBase {
+class MapSection : public ConfigSection {
 public:
 	MapSection();
 	~MapSection();

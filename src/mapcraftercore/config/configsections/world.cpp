@@ -17,8 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "world.h"
-
+#include "../configsections/world.h"
 #include "../iniconfig.h"
 #include "../../util.h"
 

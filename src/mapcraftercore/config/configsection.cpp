@@ -17,41 +17,41 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "base.h"
+#include "configsection.h"
 
-#include "../iniconfig.h"
+#include "iniconfig.h"
 
 namespace mapcrafter {
 namespace config {
 
-ConfigSectionBase::ConfigSectionBase()
+ConfigSection::ConfigSection()
 	: global(false) {
 }
 
-ConfigSectionBase::~ConfigSectionBase() {
+ConfigSection::~ConfigSection() {
 }
 
-bool ConfigSectionBase::isGlobal() const {
+bool ConfigSection::isGlobal() const {
 	return global;
 }
 
-void ConfigSectionBase::setGlobal(bool global) {
+void ConfigSection::setGlobal(bool global) {
 	this->global = global;
 }
 
-std::string ConfigSectionBase::getSectionName() const {
+std::string ConfigSection::getSectionName() const {
 	return section_name;
 }
 
-std::string ConfigSectionBase::getPrettyName() const {
+std::string ConfigSection::getPrettyName() const {
 	return "unknown section";
 }
 
-void ConfigSectionBase::dump(std::ostream& out) const {
+void ConfigSection::dump(std::ostream& out) const {
 	out << getPrettyName() << std::endl;
 }
 
-ValidationList ConfigSectionBase::parse(const INIConfigSection& section) {
+ValidationList ConfigSection::parse(const INIConfigSection& section) {
 	section_name = section.getName();
 
 	preParse(section, validation);
@@ -70,20 +70,20 @@ ValidationList ConfigSectionBase::parse(const INIConfigSection& section) {
 	return validation;
 }
 
-void ConfigSectionBase::preParse(const INIConfigSection& section,
+void ConfigSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 }
 
-bool ConfigSectionBase::parseField(const std::string key, const std::string value,
+bool ConfigSection::parseField(const std::string key, const std::string value,
 		ValidationList& validation) {
 	return false;
 }
 
-void ConfigSectionBase::postParse(const INIConfigSection& section,
+void ConfigSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
 }
 
-std::ostream& operator<<(std::ostream& out, const ConfigSectionBase& section) {
+std::ostream& operator<<(std::ostream& out, const ConfigSection& section) {
 	section.dump(out);
 	return out;
 }

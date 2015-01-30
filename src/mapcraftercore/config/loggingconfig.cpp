@@ -45,7 +45,7 @@ ValidationMap LoggingConfig::parse(const std::string& filename) {
 	ConfigParser parser(config);
 
 	// use an empty root section to also get warnings for unknown entries here
-	ConfigSectionBase root_section;
+	ConfigSection root_section;
 	parser.parseRootSection(root_section);
 
 	fs::path config_dir = BOOST_FS_ABSOLUTE1(fs::path(filename)).parent_path();

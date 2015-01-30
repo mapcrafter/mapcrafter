@@ -20,8 +20,8 @@
 #include "mapcrafterconfig.h"
 
 #include "configparser.h"
+#include "configsection.h"
 #include "iniconfig.h"
-#include "sections/base.h"
 
 #include <sstream>
 

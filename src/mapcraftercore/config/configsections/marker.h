@@ -17,75 +17,58 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LOG_H_
-#define LOG_H_
+#ifndef SECTIONS_MARKER_H
+#define SECTIONS_MARKER_H
 
-#include "base.h"
+#include "../configsection.h"
+
 #include "../validation.h"
-#include "../../util/logging.h"
-
-#include <iostream>
-#include <string>
+#include "../../mc/worldentities.h"
 
 namespace mapcrafter {
 namespace config {
 
-enum class LogSinkType {
-	OUTPUT,
-	FILE,
-	SYSLOG
-};
-
-std::ostream& operator<<(std::ostream& out, LogSinkType sink_type);
-
-class LogSection : public ConfigSectionBase {
+class MarkerSection : public ConfigSection {
 public:
-	LogSection();
-	~LogSection();
+	MarkerSection();
+	~MarkerSection();
 
 	virtual std::string getPrettyName() const;
 	virtual void dump(std::ostream& out) const;
 
-	void setConfigDir(const fs::path& config_dir);
-	void configureLogging() const;
+	std::string getShortName() const;
+	std::string getLongName() const;
+	std::string getPrefix() const;
+	std::string getTitleFormat() const;
+	std::string getTextFormat() const;
+	std::string getIcon() const;
+	std::string getIconSize() const;
+	bool isMatchedEmpty() const;
+	bool isShownByDefault() const;
 
-	LogSinkType getType() const;
-	util::LogLevel getVerbosity() const;
-	bool getLogProgress() const;
-
-	// only for output, file log
-	std::string getFormat() const;
-	std::string getDateFormat() const;
-
-	// only for file log
-	fs::path getFile() const;
-
-	// only for syslog
-	bool isEnabled() const;
+	bool matchesSign(const mc::SignEntity& sign) const;
+	std::string formatTitle(const mc::SignEntity& sign) const;
+	std::string formatText(const mc::SignEntity& sign) const;
 
 protected:
 	virtual void preParse(const INIConfigSection& section,
-			ValidationList& validation);
+				ValidationList& validation);
 	virtual bool parseField(const std::string key, const std::string value,
 			ValidationList& validation);
 	virtual void postParse(const INIConfigSection& section,
 			ValidationList& validation);
 
 private:
-	fs::path config_dir;
+	Field<std::string> name_long;
+	Field<std::string> prefix;
+	Field<std::string> title_format, text_format;
+	Field<std::string> icon, icon_size;
+	Field<bool> match_empty, show_default;
 
-	Field<LogSinkType> type;
-	Field<util::LogLevel> verbosity;
-	Field<bool> log_progress;
-
-	// only for output, file log
-	Field<std::string> format, date_format;
-
-	// only for file log
-	Field<fs::path> file;
+	std::string formatSign(std::string format, const mc::SignEntity& sign) const;
 };
 
-}
-}
+} /* namespace config */
+} /* namespace mapcrafter */
 
-#endif /* LOG_H_ */
+#endif /* SECTIONS_MARKER_H */

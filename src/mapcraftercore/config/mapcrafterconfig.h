@@ -20,12 +20,12 @@
 #ifndef MAPCRAFTERCONFIG_H_
 #define MAPCRAFTERCONFIG_H_
 
-#include "validation.h"
-#include "sections/log.h"
-#include "sections/map.h"
-#include "sections/marker.h"
-#include "sections/world.h"
+#include "configsections/log.h"
+#include "configsections/map.h"
+#include "configsections/marker.h"
+#include "configsections/world.h"
 
+#include "validation.h"
 #include <iostream>
 #include <map>
 #include <string>
@@ -44,7 +44,7 @@ struct Color {
 
 std::ostream& operator<<(std::ostream& out, const Color& color);
 
-class MapcrafterConfigRootSection : public ConfigSectionBase {
+class MapcrafterConfigRootSection : public ConfigSection {
 public:
 	MapcrafterConfigRootSection();
 	~MapcrafterConfigRootSection();

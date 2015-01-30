@@ -21,8 +21,8 @@
 #define TILERENDERWORKER_H_
 
 #include "../config/mapcrafterconfig.h"
-#include "../config/sections/map.h"
-#include "../config/sections/world.h"
+#include "../config/configsections/map.h"
+#include "../config/configsections/world.h"
 #include "../mc/world.h"
 
 #include <memory>

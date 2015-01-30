@@ -17,7 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "log.h"
+#include "../configsections/log.h"
 
 namespace mapcrafter {
 namespace util {
