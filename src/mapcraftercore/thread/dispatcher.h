@@ -20,10 +20,14 @@
 #ifndef DISPATCHER_H_
 #define DISPATCHER_H_
 
-#include "../renderer/tilerenderworker.h"
 #include "../util.h"
 
 namespace mapcrafter {
+
+namespace renderer {
+class RenderContext;
+}
+
 namespace thread {
 
 /**

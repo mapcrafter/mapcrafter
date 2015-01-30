@@ -21,6 +21,7 @@
 
 #include "configparser.h"
 #include "iniconfig.h"
+#include "sections/base.h"
 
 #include <sstream>
 

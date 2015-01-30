@@ -19,6 +19,9 @@
 
 #include "mapcrafterconfighelper.h"
 
+#include "iniconfig.h"
+#include "../util.h"
+
 namespace mapcrafter {
 namespace config {
 

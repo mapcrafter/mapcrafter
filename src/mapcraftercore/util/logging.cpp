@@ -19,7 +19,8 @@
 
 #include "logging.h"
 
-#include "../util.h"
+#include "other.h"
+#include "terminal.h"
 
 #include <ctime>
 #ifdef HAVE_SYSLOG_H

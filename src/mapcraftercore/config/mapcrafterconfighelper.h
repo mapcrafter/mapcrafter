@@ -36,6 +36,8 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace config {
 
+class MapcrafterConfig;
+
 class MapcrafterConfigHelper {
 public:
 	MapcrafterConfigHelper();

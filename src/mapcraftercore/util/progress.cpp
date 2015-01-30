@@ -19,7 +19,8 @@
 
 #include "progress.h"
 
-#include "../util.h"
+#include "logging.h"
+#include "other.h"
 
 #include <iomanip>
 #include <iostream>

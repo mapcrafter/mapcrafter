@@ -25,7 +25,6 @@
 #include "../workermanager.h"
 #include "../../compat/thread.h"
 #include "../../renderer/tilerenderworker.h"
-#include "../../util.h"
 
 #include <set>
 #include <thread>

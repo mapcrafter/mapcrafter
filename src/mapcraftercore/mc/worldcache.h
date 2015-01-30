@@ -30,6 +30,8 @@
 namespace mapcrafter {
 namespace mc {
 
+class World;
+
 /**
  * A block with id/data/biome/lighting data.
  */
@@ -138,7 +140,8 @@ private:
 	int getChunkCacheIndex(const ChunkPos& pos) const;
 
 public:
-	WorldCache(const World& world = World());
+	WorldCache();
+	WorldCache(const World& world);
 
 	RegionFile* getRegion(const RegionPos& pos);
 	Chunk* getChunk(const ChunkPos& pos);

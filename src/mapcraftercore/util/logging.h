@@ -21,7 +21,6 @@
 #define LOGGING_H_
 
 #include "../compat/thread.h"
-#include "../util.h"
 
 #include <fstream>
 #include <iostream>

@@ -20,7 +20,7 @@
 #ifndef VALIDATION_H_
 #define VALIDATION_H_
 
-#include "iniconfig.h"
+#include "../util.h"
 
 #include <iostream>
 #include <map>

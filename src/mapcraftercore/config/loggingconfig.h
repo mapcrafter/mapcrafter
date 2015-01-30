@@ -21,10 +21,13 @@
 #define LOGGINGCONFIG_H_
 
 #include "validation.h"
-#include "sections/base.h"
 #include "sections/log.h"
 
+#include <string>
 #include <vector>
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace config {

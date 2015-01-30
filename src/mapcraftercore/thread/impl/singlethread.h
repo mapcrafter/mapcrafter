@@ -21,7 +21,6 @@
 #define SINGLETHREAD_H_
 
 #include "../dispatcher.h"
-#include "../../renderer/tilerenderworker.h"
 
 namespace mapcrafter {
 namespace thread {

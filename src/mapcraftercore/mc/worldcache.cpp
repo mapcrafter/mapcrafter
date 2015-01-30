@@ -32,14 +32,16 @@ bool Block::isFullWater() const {
 	return (id == 8 || id == 9) && data == 0;
 }
 
-WorldCache::WorldCache(const World& world)
-		: world(world) {
-	for (int i = 0; i < RSIZE; i++) {
+WorldCache::WorldCache() {
+	for (int i = 0; i < RSIZE; i++)
 		regioncache[i].used = false;
-	}
-	for (int i = 0; i < CSIZE; i++) {
+	for (int i = 0; i < CSIZE; i++)
 		chunkcache[i].used = false;
-	}
+}
+
+WorldCache::WorldCache(const World& world)
+	: WorldCache() {
+	this->world = world;
 }
 
 /**

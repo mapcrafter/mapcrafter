@@ -19,7 +19,7 @@
 
 #include "terminal.h"
 
-#include "../util.h"
+#include "../util.h" // OS_WINDOWS
 
 #include <cstdio>
 

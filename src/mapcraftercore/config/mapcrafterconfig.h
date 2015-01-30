@@ -21,7 +21,6 @@
 #define MAPCRAFTERCONFIG_H_
 
 #include "validation.h"
-#include "sections/base.h"
 #include "sections/log.h"
 #include "sections/map.h"
 #include "sections/marker.h"
