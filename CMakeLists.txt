@@ -20,6 +20,8 @@ endif()
 
 if(OPT_DEBUG)
     add_definitions(-g)
+else()
+    add_definitions(-DNDEBUG)
 endif()
 if(OPT_OPTIMIZE)
     add_definitions(-O3)
