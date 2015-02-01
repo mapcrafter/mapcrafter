@@ -19,67 +19,66 @@
 
 #include "rendermode.h"
 
-#include "../config/configsections/map.h"
-#include "../config/configsections/world.h"
 #include "blockimages.h"
 #include "image.h"
+#include "../config/configsections/map.h"
+#include "../config/configsections/world.h"
 #include "../mc/chunk.h"
 #include "../mc/pos.h"
 
 namespace mapcrafter {
 namespace renderer {
 
-RenderMode::RenderMode()
+AbstractRenderMode::AbstractRenderMode()
 	: images(nullptr), world(nullptr), current_chunk(nullptr) {
 }
 
-void RenderMode::initialize(BlockImages* images, mc::WorldCache* world,
+AbstractRenderMode::~AbstractRenderMode() {
+}
+
+void AbstractRenderMode::initialize(BlockImages* images, mc::WorldCache* world,
 		mc::Chunk** current_chunk) {
 	this->images = images;
 	this->world = world;
 	this->current_chunk = current_chunk;
 }
 
-RenderMode::~RenderMode() {
+void AbstractRenderMode::start() {
 }
 
-void RenderMode::start() {
+void AbstractRenderMode::end() {
 }
 
-void RenderMode::end() {
-}
-
-bool RenderMode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+bool AbstractRenderMode::isHidden(const mc::BlockPos& pos, uint16_t id,
+		uint16_t data) {
 	return false;
 }
 
-void RenderMode::draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+void AbstractRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id,
+		uint16_t data) {
 }
 
-mc::Block RenderMode::getBlock(const mc::BlockPos& pos, int get) {
+mc::Block AbstractRenderMode::getBlock(const mc::BlockPos& pos, int get) {
 	return world->getBlock(pos, *current_chunk, get);
 }
 
-bool createRenderModes(const config::WorldSection& world_config,
-		const config::MapSection& map_config, RenderModes& modes) {
+RenderMode* createRenderMode(const config::WorldSection& world_config,
+		const config::MapSection& map_config) {
 	std::string name = map_config.getRenderMode();
+	// TODO maybe use a dummy render mode here instead of the empty abstract one?
 	if (name.empty() || name == "plain")
-		return true;
+		return new AbstractRenderMode();
 
 	if (name == "cave")
-		modes.push_back(std::shared_ptr<RenderMode>(new CaveRenderMode(
-				map_config.hasCaveHighContrast())));
+		return new CaveRenderMode(map_config.hasCaveHighContrast());
 	else if (name == "daylight")
-		modes.push_back(std::shared_ptr<RenderMode>(new LightingRenderMode(
-				true, map_config.getLightingIntensity(),
-				world_config.getDimension() == mc::Dimension::END)));
+		return new LightingRenderMode(true, map_config.getLightingIntensity(),
+				world_config.getDimension() == mc::Dimension::END);
 	else if (name == "nightlight")
-		modes.push_back(std::shared_ptr<RenderMode>(new LightingRenderMode(
-				false, map_config.getLightingIntensity(),
-				world_config.getDimension() == mc::Dimension::END)));
-	else
-		return false;
-	return true;
+		return new LightingRenderMode(false, map_config.getLightingIntensity(),
+				world_config.getDimension() == mc::Dimension::END);
+	// TODO assertion/validation is needed if this returns null!
+	return nullptr;
 }
 
 } /* namespace render */

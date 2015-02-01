@@ -50,19 +50,32 @@ class RGBAImage;
  */
 class RenderMode {
 public:
-	RenderMode();
-	virtual ~RenderMode();
+	virtual ~RenderMode() {}
 
-	void initialize(BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk);
+	virtual void initialize(BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk) = 0;
 
 	// is called when the tile renderer starts rendering a tile
-	virtual void start();
+	virtual void start() = 0;
 	// is called when the tile renderer finished rendering a tile
-	virtual void end();
+	virtual void end() = 0;
 
 	// is called to allow the rendermode to hide specific blocks
-	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
 	// is called to allow the rendermode to change a block image
+	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
+};
+
+class AbstractRenderMode : public RenderMode {
+public:
+	AbstractRenderMode();
+	virtual ~AbstractRenderMode();
+
+	virtual void initialize(BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk);
+
+	virtual void start();
+	virtual void end();
+
+	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 protected:
@@ -73,10 +86,8 @@ protected:
 	mc::Chunk** current_chunk;
 };
 
-typedef std::vector<std::shared_ptr<RenderMode>> RenderModes;
-
-bool createRenderModes(const config::WorldSection& world_config,
-		const config::MapSection& map_config, RenderModes& render_modes);
+RenderMode* createRenderMode(const config::WorldSection& world_config,
+		const config::MapSection& map_config);
 
 } /* namespace render */
 } /* namespace mapcrafter */

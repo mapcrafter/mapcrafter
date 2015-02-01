@@ -47,7 +47,7 @@ public:
 	virtual BlockImages* createBlockImages() const = 0;
 	virtual TileSet* createTileSet(int tile_width) const = 0;
 	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
-			mc::WorldCache* world, RenderModes& render_modes) const = 0;
+			mc::WorldCache* world, RenderMode* render_mode) const = 0;
 
 	/**
 	 * Configures a block images object by calling some (eventually per render view

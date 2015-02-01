@@ -21,7 +21,7 @@
 #define TILERENDERER_H_
 
 #include "biomes.h"
-#include "rendermode.h"
+#include "../mc/worldcache.h" // mc::DIR_*
 
 #include <vector>
 #include <boost/filesystem.hpp>
@@ -34,19 +34,19 @@ namespace mapcrafter {
 namespace mc {
 class BlockPos;
 class Chunk;
-class WorldCache;
 }
 
 namespace renderer {
 
 class BlockImages;
 class TilePos;
+class RenderMode;
 class RGBAImage;
 
 class TileRenderer {
 public:
 	TileRenderer(BlockImages* images, int tile_width,
-			mc::WorldCache* world, RenderModes& render_modes);
+			mc::WorldCache* world, RenderMode* render_mode);
 	virtual ~TileRenderer();
 
 	void setRenderBiomes(bool render_biomes);
@@ -64,7 +64,7 @@ protected:
 	int tile_width;
 	mc::WorldCache* world;
 	mc::Chunk* current_chunk;
-	RenderModes render_modes;
+	RenderMode* render_mode;
 
 	bool render_biomes;
 };

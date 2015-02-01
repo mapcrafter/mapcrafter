@@ -19,6 +19,7 @@
 
 #include "tilerenderer.h"
 
+#include "../../biomes.h"
 #include "../../blockimages.h"
 #include "../../image.h"
 #include "../../rendermode.h"
@@ -129,8 +130,8 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 }
 
 IsometricTileRenderer::IsometricTileRenderer(BlockImages* images, int tile_width,
-		mc::WorldCache* world, RenderModes& render_modes)
-	: TileRenderer(images, tile_width, world, render_modes), use_preblit_water(false) {
+		mc::WorldCache* world, RenderMode* render_mode)
+	: TileRenderer(images, tile_width, world, render_mode), use_preblit_water(false) {
 }
 
 IsometricTileRenderer::~IsometricTileRenderer() {
@@ -152,9 +153,8 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 	// all visible blocks which are rendered in this tile
 	std::set<RenderBlock> blocks;
 
-	// call start method of the rendermodes
-	for (size_t i = 0; i < render_modes.size(); i++)
-		render_modes[i]->start();
+	// call start method of the render mode
+	render_mode->start();
 
 	// iterate over the highest blocks in the tile
 	// we use as tile position tile_pos+tile_offset because the offset means that
@@ -205,15 +205,8 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 			// now get the block data
 			uint16_t data = current_chunk->getBlockData(local);
 
-			// check if a rendermode hides this block
-			bool visible = true;
-			for (size_t i = 0; i < render_modes.size(); i++) {
-				if (render_modes[i]->isHidden(block.current, id, data)) {
-					visible = false;
-					break;
-				}
-			}
-			if (!visible)
+			// check if the render mode hides this block
+			if (render_mode->isHidden(block.current, id, data))
 				continue;
 
 			bool is_water = (id == 8 || id == 9) && data == 0;
@@ -272,9 +265,8 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 								top.image = images->getOpaqueWater(neighbor_south,
 										neighbor_west);
 
-								// don't forget the rendermodes
-								for (size_t i = 0; i < render_modes.size(); i++)
-									render_modes[i]->draw(top.image, top.pos, id, data);
+								// don't forget the render mode
+								render_mode->draw(top.image, top.pos, id, data);
 
 								row_nodes.insert(top);
 								break;
@@ -312,9 +304,8 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 			node.id = id;
 			node.data = data;
 
-			// let the rendermodes do their magic with the block image
-			for (size_t i = 0; i < render_modes.size(); i++)
-				render_modes[i]->draw(node.image, node.pos, id, data);
+			// let the render mode do their magic with the block image
+			render_mode->draw(node.image, node.pos, id, data);
 
 			// insert into current row
 			row_nodes.insert(node);
@@ -347,9 +338,8 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 		tile.alphaBlit(it->image, it->x, it->y);
 	}
 
-	// call the end method of the rendermodes
-	for (size_t i = 0; i < render_modes.size(); i++)
-		render_modes[i]->end();
+	// call the end method of the render mode
+	render_mode->end();
 }
 
 int IsometricTileRenderer::getTileSize() const {

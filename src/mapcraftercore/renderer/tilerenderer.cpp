@@ -21,20 +21,19 @@
 
 #include "blockimages.h"
 #include "image.h"
+#include "rendermode.h"
 #include "tileset.h"
 #include "../mc/pos.h"
-#include "../mc/worldcache.h"
 
 namespace mapcrafter {
 namespace renderer {
 
 TileRenderer::TileRenderer(BlockImages* images, int tile_width,
-		mc::WorldCache* world, RenderModes& render_modes)
+		mc::WorldCache* world, RenderMode* render_mode)
 	: images(images), tile_width(tile_width), world(world), current_chunk(nullptr),
-	  render_modes(render_modes),
+	  render_mode(render_mode),
 	  render_biomes(true) {
-	for (size_t i = 0; i < render_modes.size(); i++)
-		render_modes[i]->initialize(images, world, &current_chunk);
+	render_mode->initialize(images, world, &current_chunk);
 }
 
 TileRenderer::~TileRenderer() {

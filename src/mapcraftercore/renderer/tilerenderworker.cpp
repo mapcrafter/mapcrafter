@@ -21,6 +21,7 @@
 
 #include "blockimages.h"
 #include "image.h"
+#include "rendermode.h"
 #include "renderview.h"
 #include "tilerenderer.h"
 #include "tileset.h"
@@ -30,11 +31,10 @@ namespace mapcrafter {
 namespace renderer {
 
 void RenderContext::initializeTileRenderer() {
-	world_cache = std::make_shared<mc::WorldCache>(world);
-	RenderModes render_modes;
-	createRenderModes(world_config, map_config, render_modes);
-	tile_renderer = std::shared_ptr<TileRenderer>(render_view->createTileRenderer(
-			block_images, map_config.getTileWidth(), world_cache.get(), render_modes));
+	world_cache.reset(new mc::WorldCache(world));
+	render_mode.reset(createRenderMode(world_config, map_config));
+	tile_renderer.reset(render_view->createTileRenderer(block_images,
+			map_config.getTileWidth(), world_cache.get(), render_mode.get()));
 	render_view->configureTileRenderer(tile_renderer.get(), world_config, map_config);
 }
 

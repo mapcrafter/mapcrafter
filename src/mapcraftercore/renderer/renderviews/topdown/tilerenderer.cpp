@@ -39,8 +39,8 @@ namespace mapcrafter {
 namespace renderer {
 
 TopdownTileRenderer::TopdownTileRenderer(BlockImages* images, int tile_width,
-		mc::WorldCache* world, RenderModes& render_modes)
-	: TileRenderer(images, tile_width, world, render_modes) {
+		mc::WorldCache* world, RenderMode* render_mode)
+	: TileRenderer(images, tile_width, world, render_mode) {
 }
 
 TopdownTileRenderer::~TopdownTileRenderer() {
@@ -81,17 +81,9 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 					continue;
 				}
 				uint16_t data = chunk.getBlockData(localpos);
-
 				bool is_water = (id == 8 || id == 9) && data == 0;
 
-				bool hidden = false;
-				for (size_t i = 0; i < render_modes.size(); i++) {
-					if (render_modes[i]->isHidden(globalpos, id, data)) {
-						hidden = true;
-						break;
-					}
-				}
-				if (hidden) {
+				if (render_mode->isHidden(globalpos, id, data)) {
 					localpos.y--;
 					continue;
 				}
@@ -109,8 +101,7 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 					block = images->getBiomeDependBlock(id, data, getBiomeOfBlock(globalpos, &chunk));
 				}
 
-				for (size_t i = 0; i < render_modes.size(); i++)
-					render_modes[i]->draw(block, globalpos, id, data);
+				render_mode->draw(block, globalpos, id, data);
 
 				blocks.push_back(block);
 				if (!images->isBlockTransparent(id, data)) {
@@ -131,9 +122,8 @@ void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 	int texture_size = images->getTextureSize();
 	tile.setSize(getTileSize(), getTileSize());
 
-	// call start method of the rendermodes
-	for (size_t i = 0; i < render_modes.size(); i++)
-		render_modes[i]->start();
+	// call start method of the render mode
+	render_mode->start();
 
 	for (int x = 0; x < tile_width; x++)
 		for (int z = 0; z < tile_width; z++) {
@@ -143,9 +133,8 @@ void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 				renderChunk(*current_chunk, tile, texture_size*16*x, texture_size*16*z);
 		}
 
-	// call the end method of the rendermodes
-	for (size_t i = 0; i < render_modes.size(); i++)
-		render_modes[i]->end();
+	// call the end method of the render mode
+	render_mode->end();
 }
 
 int TopdownTileRenderer::getTileSize() const {

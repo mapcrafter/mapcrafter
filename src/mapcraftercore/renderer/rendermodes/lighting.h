@@ -81,7 +81,7 @@ typedef std::array<LightingColor, 4> CornerColors;
 void drawBottomTriangle(RGBAImage& image, int size, double c1, double c2, double c3);
 void drawTopTriangle(RGBAImage& image, int size, double c1, double c2, double c3);
 
-class LightingRenderMode : public RenderMode {
+class LightingRenderMode : public AbstractRenderMode {
 public:
 	LightingRenderMode(bool day, double lighting_intensity, bool dimension_end);
 	virtual ~LightingRenderMode();

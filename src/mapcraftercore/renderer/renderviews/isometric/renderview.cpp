@@ -38,8 +38,8 @@ TileSet* IsometricRenderView::createTileSet(int tile_width) const {
 }
 
 TileRenderer* IsometricRenderView::createTileRenderer(BlockImages* images,
-		int tile_width, mc::WorldCache* world, RenderModes& render_modes) const {
-	return new IsometricTileRenderer(images, tile_width, world, render_modes);
+		int tile_width, mc::WorldCache* world, RenderMode* render_mode) const {
+	return new IsometricTileRenderer(images, tile_width, world, render_mode);
 }
 
 void IsometricRenderView::configureBlockImages(BlockImages* block_images,

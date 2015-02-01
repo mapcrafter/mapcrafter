@@ -25,7 +25,7 @@
 namespace mapcrafter {
 namespace renderer {
 
-class CaveRenderMode: public RenderMode {
+class CaveRenderMode: public AbstractRenderMode {
 public:
 	CaveRenderMode(bool high_contrast);
 	virtual ~CaveRenderMode();

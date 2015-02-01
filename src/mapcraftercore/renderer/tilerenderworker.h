@@ -40,6 +40,7 @@ class WorldCache;
 namespace renderer {
 
 class BlockImages;
+class RenderMode;
 class RenderView;
 class RGBAImage;
 class TilePath;
@@ -59,6 +60,7 @@ struct RenderContext {
 
 	// TODO really do it like this?
 	std::shared_ptr<mc::WorldCache> world_cache;
+	std::shared_ptr<RenderMode> render_mode;
 	std::shared_ptr<TileRenderer> tile_renderer;
 
 	/**

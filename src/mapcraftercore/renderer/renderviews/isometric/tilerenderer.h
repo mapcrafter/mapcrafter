@@ -89,7 +89,7 @@ struct RenderBlock {
 class IsometricTileRenderer : public TileRenderer {
 public:
 	IsometricTileRenderer(BlockImages* images, int tile_width, mc::WorldCache* world,
-			RenderModes& render_modes);
+			RenderMode* render_mode);
 	virtual ~IsometricTileRenderer();
 
 	void setUsePreblitWater(bool use_preblit_water);
