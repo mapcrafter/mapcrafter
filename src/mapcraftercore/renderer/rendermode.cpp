@@ -62,6 +62,45 @@ mc::Block AbstractRenderMode::getBlock(const mc::BlockPos& pos, int get) {
 	return world->getBlock(pos, *current_chunk, get);
 }
 
+MultiplexingRenderMode::~MultiplexingRenderMode() {
+	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
+		delete *it;
+}
+
+void MultiplexingRenderMode::addRenderMode(RenderMode* render_mode) {
+	render_modes.push_back(render_mode);
+}
+
+void MultiplexingRenderMode::initialize(BlockImages* images, mc::WorldCache* world,
+		mc::Chunk** current_chunk) {
+	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
+		(*it)->initialize(images, world, current_chunk);
+}
+
+void MultiplexingRenderMode::start() {
+	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
+		(*it)->start();
+}
+
+void MultiplexingRenderMode::end() {
+	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
+		(*it)->end();
+}
+
+bool MultiplexingRenderMode::isHidden(const mc::BlockPos& pos, uint16_t id,
+		uint16_t data) {
+	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
+		if ((*it)->isHidden(pos, id, data))
+			return true;
+	return false;
+}
+
+void MultiplexingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
+		uint16_t id, uint16_t data) {
+	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
+		(*it)->draw(image, pos, id, data);
+}
+
 RenderMode* createRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config) {
 	std::string name = map_config.getRenderMode();

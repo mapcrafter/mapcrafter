@@ -86,6 +86,29 @@ protected:
 	mc::Chunk** current_chunk;
 };
 
+/**
+ * A render mode which combines multiple render modes into one.
+ *
+ * TODO comments blah blah
+ */
+class MultiplexingRenderMode : public RenderMode {
+public:
+	virtual ~MultiplexingRenderMode();
+
+	void addRenderMode(RenderMode* render_mode);
+
+	virtual void initialize(BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk);
+
+	virtual void start();
+	virtual void end();
+
+	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+protected:
+	std::vector<RenderMode*> render_modes;
+};
+
 RenderMode* createRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config);
 
