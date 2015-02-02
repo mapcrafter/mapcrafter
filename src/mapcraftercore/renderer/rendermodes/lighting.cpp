@@ -28,8 +28,6 @@
 #include "../../util.h"
 
 #include <cmath>
-#include "../../config/configsections/map.h"
-#include "../../config/configsections/world.h"
 
 namespace mapcrafter {
 namespace renderer {

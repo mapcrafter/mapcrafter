@@ -21,6 +21,9 @@
 
 #include "blockimages.h"
 #include "image.h"
+#include "rendermodes/cave.h"
+#include "rendermodes/lighting.h"
+#include "rendermodes/heighttinting.h"
 #include "../config/configsections/map.h"
 #include "../config/configsections/world.h"
 #include "../mc/chunk.h"
@@ -108,8 +111,17 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 	if (name.empty() || name == "plain")
 		return new AbstractRenderMode();
 
-	if (name == "cave")
-		return new CaveRenderMode(map_config.hasCaveHighContrast());
+	if (name == "cave") {
+		MultiplexingRenderMode* render_mode = new MultiplexingRenderMode();
+		// hide some walls of caves which would cover the view into the caves
+		if (map_config.getRenderView() == "isometric")
+			render_mode->addRenderMode(new CaveRenderMode({mc::DIR_SOUTH, mc::DIR_WEST, mc::DIR_TOP}));
+		else
+			render_mode->addRenderMode(new CaveRenderMode({mc::DIR_TOP}));
+		//render_mode->addRenderMode(new LightingRenderMode(true, map_config.getLightingIntensity(), true));
+		render_mode->addRenderMode(new HeightTintingRenderMode(map_config.hasCaveHighContrast()));
+		return render_mode;
+	}
 	else if (name == "daylight")
 		return new LightingRenderMode(true, map_config.getLightingIntensity(),
 				world_config.getDimension() == mc::Dimension::END);

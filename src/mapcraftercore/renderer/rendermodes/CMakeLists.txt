@@ -1,12 +1,14 @@
 set(SOURCE
     ${SOURCE}
     "${CMAKE_CURRENT_SOURCE_DIR}/cave.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/heighttinting.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/lighting.cpp"
     PARENT_SCOPE
 )
 set(HEADERS
     ${HEADERS}
     "${CMAKE_CURRENT_SOURCE_DIR}/cave.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/heighttinting.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/lighting.h"
     PARENT_SCOPE
 )

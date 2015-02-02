@@ -115,7 +115,4 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 } /* namespace render */
 } /* namespace mapcrafter */
 
-#include "rendermodes/cave.h"
-#include "rendermodes/lighting.h"
-
 #endif /* RENDERMODE_H_ */
