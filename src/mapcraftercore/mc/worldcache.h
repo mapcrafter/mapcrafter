@@ -30,8 +30,6 @@
 namespace mapcrafter {
 namespace mc {
 
-class World;
-
 /**
  * A block with id/data/biome/lighting data.
  */
