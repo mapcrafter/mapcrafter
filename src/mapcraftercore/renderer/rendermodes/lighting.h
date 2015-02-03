@@ -83,7 +83,7 @@ void drawTopTriangle(RGBAImage& image, int size, double c1, double c2, double c3
 
 class LightingRenderMode : public AbstractRenderMode {
 public:
-	LightingRenderMode(bool day, double lighting_intensity, bool dimension_end);
+	LightingRenderMode(bool day, double lighting_intensity, bool simulate_sun_light);
 	virtual ~LightingRenderMode();
 
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
@@ -92,7 +92,7 @@ public:
 private:
 	bool day;
 	double lighting_intensity;
-	bool dimension_end;
+	bool simulate_sun_light;
 
 	bool render_view_initialized;
 	bool isometric_render_view;

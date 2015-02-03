@@ -224,7 +224,8 @@ bool MapSection::parseField(const std::string key, const std::string value,
 					"It's called 'render_mode' now.");
 		if (render_mode.load(key, value, validation)) {
 			std::string r = render_mode.getValue();
-			if (r != "plain" && r != "daylight" && r != "nightlight" && r != "cave")
+			if (r != "plain" && r != "daylight" && r != "nightlight" && r != "cave"
+					&& r != "cavelight")
 				validation.error("'" + key + "' must be one of: 'plain', 'daylight', 'nightlight', 'cave'");
 		}
 	} else if (key == "rotations") {

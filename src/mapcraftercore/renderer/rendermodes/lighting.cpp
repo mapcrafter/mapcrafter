@@ -84,9 +84,10 @@ FaceCorners::FaceCorners(const CornerNeighbors& corner1)
 }
 
 LightingRenderMode::LightingRenderMode(bool day, double lighting_intensity,
-		bool dimension_end)
-	: day(day), lighting_intensity(lighting_intensity), dimension_end(dimension_end),
-	  render_view_initialized(false), isometric_render_view(true) {
+		bool simulate_sun_light)
+	: day(day), lighting_intensity(lighting_intensity),
+	  simulate_sun_light(simulate_sun_light), render_view_initialized(false),
+	  isometric_render_view(true) {
 }
 
 LightingRenderMode::~LightingRenderMode() {
@@ -288,7 +289,7 @@ LightingData LightingRenderMode::getBlockLight(const mc::BlockPos& pos) {
 	// lighting fix for The End
 	// The End has no sun light set -> lighting looks ugly
 	// just emulate the sun light for transparent blocks
-	if (dimension_end) {
+	if (simulate_sun_light) {
 		light.sky = 15;
 		if (block.id != 0 && !images->isBlockTransparent(block.id, block.data))
 			light.sky = 0;
