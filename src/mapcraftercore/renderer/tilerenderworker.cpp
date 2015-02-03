@@ -26,6 +26,7 @@
 #include "tilerenderer.h"
 #include "tileset.h"
 #include "../mc/worldcache.h"
+#include "../util.h"
 
 namespace mapcrafter {
 namespace renderer {

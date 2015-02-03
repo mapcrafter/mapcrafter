@@ -24,6 +24,7 @@
 #include "rendermode.h"
 #include "tileset.h"
 #include "../mc/pos.h"
+#include "../util.h"
 
 namespace mapcrafter {
 namespace renderer {

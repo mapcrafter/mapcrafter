@@ -28,6 +28,7 @@
 #include "../config/configsections/world.h"
 #include "../mc/chunk.h"
 #include "../mc/pos.h"
+#include "../util.h"
 
 namespace mapcrafter {
 namespace renderer {

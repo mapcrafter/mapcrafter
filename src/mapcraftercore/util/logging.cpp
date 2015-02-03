@@ -21,6 +21,7 @@
 
 #include "other.h"
 #include "terminal.h"
+#include "../compat/nullptr.h"
 
 #include <ctime>
 #ifdef HAVE_SYSLOG_H

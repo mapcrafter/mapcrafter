@@ -21,6 +21,7 @@
 #define BIOMES_H_
 
 #include <cstdint>
+#include <cstdlib>
 
 namespace mapcrafter {
 namespace renderer {

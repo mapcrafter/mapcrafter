@@ -22,9 +22,11 @@
 #include "blockimages.h"
 #include "tileset.h"
 #include "tilerenderer.h"
-#include <cassert>
 #include "../../../config/configsections/map.h"
 #include "../../../config/configsections/world.h"
+#include "../../../util.h"
+
+#include <cassert>
 
 namespace mapcrafter {
 namespace renderer {

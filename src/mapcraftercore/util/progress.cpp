@@ -21,9 +21,11 @@
 
 #include "logging.h"
 #include "other.h"
+#include "../compat/nullptr.h"
 
 #include <iomanip>
 #include <iostream>
+#include <cmath>
 #include <cstdio>
 #include <ctime>
 #if defined(HAVE_SYS_IOCTL_H) && defined(HAVE_UNISTD_H)

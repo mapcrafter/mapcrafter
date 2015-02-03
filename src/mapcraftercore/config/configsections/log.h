@@ -21,9 +21,8 @@
 #define LOG_H_
 
 #include "../configsection.h"
-
 #include "../validation.h"
-#include "../../util/logging.h"
+#include "../../util.h"
 
 #include <iostream>
 #include <string>
