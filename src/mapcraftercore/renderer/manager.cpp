@@ -39,6 +39,102 @@
 namespace mapcrafter {
 namespace renderer {
 
+RenderBehaviorMap::RenderBehaviorMap(RenderBehavior default_behavior)
+	: default_behavior(default_behavior) {
+}
+
+RenderBehaviorMap::~RenderBehaviorMap() {
+}
+
+RenderBehavior RenderBehaviorMap::getRenderBehavior(const std::string& map,
+		int rotation) const {
+	if (!render_behaviors.count(map))
+		return default_behavior;
+	return render_behaviors.at(map).at(rotation);
+}
+
+void RenderBehaviorMap::setRenderBehavior(const std::string& map,
+		RenderBehavior behavior) {
+	for (int rotation = 0; rotation < 4; rotation++)
+		setRenderBehavior(map, rotation, behavior);
+}
+
+void RenderBehaviorMap::setRenderBehavior(const std::string& map, int rotation,
+		RenderBehavior behavior) {
+	render_behaviors[map][rotation] = behavior;
+}
+
+bool RenderBehaviorMap::isCompleteRenderSkip(const std::string& map) const {
+	if (!render_behaviors.count(map))
+		return default_behavior == RenderBehavior::SKIP;
+	for (int rotation = 0; rotation < 4; rotation++)
+		if (render_behaviors.at(map).at(rotation) != RenderBehavior::SKIP)
+			return false;
+	return true;
+}
+
+namespace {
+
+void parseRenderBehaviorMaps(const std::vector<std::string>& maps,
+		RenderBehavior behavior, RenderBehaviorMap& behaviors,
+		const config::MapcrafterConfig& config) {
+	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
+		std::string map = *map_it;
+		std::string rotation;
+
+		size_t pos = map.find(":");
+		if (pos != std::string::npos) {
+			rotation = map.substr(pos+1);
+			map = map.substr(0, pos);
+		} else {
+			rotation = "";
+		}
+
+		// TODO maybe also move that conversion out to a file with global constants
+		int r = -1;
+		if (rotation == "tl") r = 0;
+		if (rotation == "tr") r = 1;
+		if (rotation == "br") r = 2;
+		if (rotation == "bl") r = 3;
+
+		if (!config.hasMap(map)) {
+			LOG(WARNING) << "Unknown map '" << map << "'.";
+			continue;
+		}
+
+		if (!rotation.empty()) {
+			if (r == -1) {
+				LOG(WARNING) << "Unknown rotation '" << rotation << "'.";
+				continue;
+			}
+			if (!config.getMap(map).getRotations().count(r)) {
+				LOG(WARNING) << "Map '" << map << "' does not have rotation '" << rotation << "'.";
+				continue;
+			}
+		}
+
+		if (r != -1)
+			behaviors.setRenderBehavior(map, r, behavior);
+		else
+			behaviors.setRenderBehavior(map, behavior);
+	}
+}
+
+}
+
+RenderBehaviorMap RenderBehaviorMap::fromRenderOpts(
+		const config::MapcrafterConfig& config, const RenderOpts& render_opts) {
+	RenderBehaviorMap behaviors;
+
+	if (!render_opts.skip_all)
+		parseRenderBehaviorMaps(render_opts.render_skip, RenderBehavior::SKIP, behaviors, config);
+	else
+		behaviors = RenderBehaviorMap(RenderBehavior::SKIP);
+	parseRenderBehaviorMaps(render_opts.render_auto, RenderBehavior::AUTO, behaviors, config);
+	parseRenderBehaviorMaps(render_opts.render_force, RenderBehavior::FORCE, behaviors, config);
+	return behaviors;
+}
+
 RenderManager::RenderManager(const RenderOpts& opts)
 	: opts(opts) {
 }
@@ -270,7 +366,7 @@ bool RenderManager::run() {
 	// TODO fancy description blah blah
 	confighelper.readMapSettings();
 	// set the render behaviors the user specified with the -rsaf flags
-	confighelper.parseRenderBehaviors(opts.skip_all, opts.render_skip, opts.render_auto, opts.render_force);
+	RenderBehaviorMap render_behaviors = RenderBehaviorMap::fromRenderOpts(config, opts);
 
 	// and get the maps and worlds of the configuration
 	auto config_worlds = config.getWorlds();
@@ -298,7 +394,7 @@ bool RenderManager::run() {
 		bool used = false;
 		for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
 			if (map_it->getWorld() == world_name &&
-					!confighelper.isCompleteRenderSkip(map_it->getShortName())) {
+					!render_behaviors.isCompleteRenderSkip(map_it->getShortName())) {
 				used = true;
 				config::TileSetKey tile_set = map_it->getTileSetKey();
 				if (!tile_sets.count(tile_set))
@@ -388,7 +484,7 @@ bool RenderManager::run() {
 		}
 
 		// continue if all rotations of this map are skipped
-		if (confighelper.isCompleteRenderSkip(map_name))
+		if (render_behaviors.isCompleteRenderSkip(map_name))
 			continue;
 
 		int progress_maps = i+1;
@@ -439,8 +535,8 @@ bool RenderManager::run() {
 			int rotation = *rotation_it;
 
 			// continue if we should skip this rotation
-			if (confighelper.getRenderBehavior(map_name, rotation)
-					== config::MapcrafterConfigHelper::RENDER_SKIP)
+			if (render_behaviors.getRenderBehavior(map_name, rotation)
+					== RenderBehavior::SKIP)
 				continue;
 
 			LOG(INFO) << "[" << progress_maps << "." << progress_rotations << "/"
@@ -463,8 +559,8 @@ bool RenderManager::run() {
 			std::shared_ptr<TileSet> tile_set(render_view->createTileSet(map.getTileWidth()));
 			// TODO ewwwwwwww
 			tile_set->operator=(*tile_sets[map.getTileSetKey()][*rotation_it]);
-			if (confighelper.getRenderBehavior(map_name, rotation)
-					== config::MapcrafterConfigHelper::RENDER_AUTO) {
+			if (render_behaviors.getRenderBehavior(map_name, rotation)
+					== RenderBehavior::AUTO) {
 				LOG(INFO) << "Scanning required tiles...";
 				// use the incremental check specified in the config
 				if (map.useImageModificationTimes())

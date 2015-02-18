@@ -49,6 +49,32 @@ struct RenderOpts {
 	int jobs;
 };
 
+enum class RenderBehavior {
+	SKIP, AUTO, FORCE
+};
+
+// TODO a better name?
+class RenderBehaviorMap {
+public:
+	RenderBehaviorMap(RenderBehavior default_behavior = RenderBehavior::AUTO);
+	~RenderBehaviorMap();
+
+	RenderBehavior getRenderBehavior(const std::string& map, int rotation) const;
+	void setRenderBehavior(const std::string& map, RenderBehavior behavior);
+	void setRenderBehavior(const std::string& map, int rotation, RenderBehavior behavior);
+
+	bool isCompleteRenderSkip(const std::string& map) const;
+
+	static RenderBehaviorMap fromRenderOpts(const config::MapcrafterConfig& config,
+			const RenderOpts& render_opts);
+
+private:
+	RenderBehavior default_behavior;
+
+	// render behavior of each map: map -> (rotation -> render behavior)
+	std::map<std::string, std::array<RenderBehavior, 4> > render_behaviors;
+};
+
 /**
  * This does the whole rendering process.
  */

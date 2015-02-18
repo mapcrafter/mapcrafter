@@ -66,21 +66,6 @@ public:
 	int getMapLastRendered(const std::string& map, int rotation) const;
 	void setMapLastRendered(const std::string& map, int rotation, int last_rendered);
 
-	int getRenderBehavior(const std::string& map, int rotation) const;
-	void setRenderBehavior(const std::string& map, int rotation, int behavior);
-
-	bool isCompleteRenderSkip(const std::string& map) const;
-	bool isCompleteRenderForce(const std::string& map) const;
-
-	void parseRenderBehaviors(bool skip_all,
-			std::vector<std::string>,
-			std::vector<std::string> render_auto,
-			std::vector<std::string> render_force);
-
-	static const int RENDER_SKIP = 0;
-	static const int RENDER_AUTO = 1;
-	static const int RENDER_FORCE = 2;
-
 private:
 	MapcrafterConfig config;
 
@@ -98,12 +83,7 @@ private:
 	// last render time of map/rotation
 	std::map<std::string, std::array<int, 4> > map_last_rendered;
 
-	// how to render each map/rotation (render-auto/skip/force)
-	std::map<std::string, std::array<int, 4> > map_render_behavior;
-
 	picojson::value getConfigJSON() const;
-
-	void setRenderBehaviors(std::vector<std::string> maps, int behavior);
 };
 
 } /* namespace config */

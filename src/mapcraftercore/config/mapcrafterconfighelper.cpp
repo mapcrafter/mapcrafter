@@ -38,10 +38,8 @@ MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfig& config)
 		// because Leaflet is sad if the tile size is 0
 		map_tile_size[map_name] = 1;
 		map_max_zoom[map_name] = 0;
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++)
 			map_last_rendered[map_name][i] = 0;
-			map_render_behavior[map_name][i] = RENDER_AUTO;
-		}
 
 		auto rotations = map_it->getRotations();
 		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
@@ -261,10 +259,6 @@ void MapcrafterConfigHelper::setMapMaxZoom(const std::string& map, int zoomlevel
 	map_max_zoom[map] = zoomlevel;
 }
 
-int MapcrafterConfigHelper::getRenderBehavior(const std::string& map, int rotation) const {
-	return map_render_behavior.at(map).at(rotation);
-}
-
 int MapcrafterConfigHelper::getMapLastRendered(const std::string& map,
 		int rotation) const {
 	if (!map_last_rendered.count(map))
@@ -275,44 +269,6 @@ int MapcrafterConfigHelper::getMapLastRendered(const std::string& map,
 void MapcrafterConfigHelper::setMapLastRendered(const std::string& map,
 		int rotation, int last_rendered) {
 	map_last_rendered[map][rotation] = last_rendered;
-}
-
-void MapcrafterConfigHelper::setRenderBehavior(const std::string& map, int rotation, int behavior) {
-	if (rotation == -1)
-		for (size_t i = 0; i < 4; i++)
-			map_render_behavior[map][i] = behavior;
-	else
-		map_render_behavior[map][rotation] = behavior;
-}
-
-bool MapcrafterConfigHelper::isCompleteRenderSkip(const std::string& map) const {
-	const std::set<int>& rotations = config.getMap(map).getRotations();
-	for (auto it = rotations.begin(); it != rotations.end(); ++it)
-		if (getRenderBehavior(map, *it) != RENDER_SKIP)
-			return false;
-	return true;
-}
-
-bool MapcrafterConfigHelper::isCompleteRenderForce(const std::string& map) const {
-	const std::set<int>& rotations = config.getMap(map).getRotations();
-	for (auto it = rotations.begin(); it != rotations.end(); ++it)
-		if (getRenderBehavior(map, *it) != RENDER_FORCE)
-			return false;
-	return true;
-}
-
-void MapcrafterConfigHelper::parseRenderBehaviors(bool skip_all,
-		std::vector<std::string> render_skip,
-		std::vector<std::string> render_auto,
-		std::vector<std::string> render_force) {
-	if (!skip_all)
-		setRenderBehaviors(render_skip, RENDER_SKIP);
-	else
-		for (size_t i = 0; i < config.getMaps().size(); i++)
-			for (int j = 0; j < 4; j++)
-				map_render_behavior[config.getMaps()[i].getShortName()][j] = RENDER_SKIP;
-	setRenderBehaviors(render_auto, RENDER_AUTO);
-	setRenderBehaviors(render_force, RENDER_FORCE);
 }
 
 picojson::value MapcrafterConfigHelper::getConfigJSON() const {
@@ -379,6 +335,7 @@ picojson::value MapcrafterConfigHelper::getConfigJSON() const {
 	return picojson::value(config_json);
 }
 
+/*
 void MapcrafterConfigHelper::setRenderBehaviors(std::vector<std::string> maps, int behavior) {
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
 		std::string map = *map_it;
@@ -414,6 +371,7 @@ void MapcrafterConfigHelper::setRenderBehaviors(std::vector<std::string> maps, i
 			std::fill(&map_render_behavior[map][0], &map_render_behavior[map][4], behavior);
 	}
 }
+*/
 
 } /* namespace config */
 } /* namespace mapcrafter */
