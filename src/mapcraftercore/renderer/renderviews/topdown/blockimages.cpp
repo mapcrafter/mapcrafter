@@ -81,15 +81,15 @@ RGBAImage TopdownBlockImages::createUnknownBlock() const {
 }
 
 RGBAImage TopdownBlockImages::createBiomeBlock(uint16_t id, uint16_t data,
-		const Biome& biome_data) const {if (!block_images.count(id | (data << 16)))
+		const Biome& biome) const {if (!block_images.count(id | (data << 16)))
 			return unknown_block;
 	uint32_t color;
 	// leaves have the foliage colors
 	// for birches, the color x/y coordinate is flipped
 	if (id == 18)
-		color = biome_data.getColor(resources.getGrassColors(), (data & 0b11) == 2);
+		color = biome.getColor(resources.getGrassColors(), (data & 0b11) == 2);
 	else
-		color = biome_data.getColor(resources.getFoliageColors(), false);
+		color = biome.getColor(resources.getFoliageColors(), false);
 
 	double r = (double) rgba_red(color) / 255;
 	double g = (double) rgba_green(color) / 255;
@@ -509,24 +509,6 @@ void TopdownBlockImages::createBlocks() {
 	// id 195 // jungle door
 	// id 196 // acacia door
 	// id 197 // dark oak door
-}
-
-void TopdownBlockImages::createBiomeBlocks() {
-	for (auto it = block_images.begin(); it != block_images.end(); ++it) {
-		uint16_t id = it->first & 0xffff;
-		uint16_t data = (it->first & 0xffff0000) >> 16;
-
-		// check if this is a biome block
-		if (!Biome::isBiomeBlock(id, data))
-			continue;
-
-		for (size_t i = 0; i < BIOMES_SIZE; i++) {
-			Biome biome = BIOMES[i];
-			uint64_t b = biome.getID();
-			biome_images[id | ((uint64_t) data << 16) | (b << 32)] =
-					createBiomeBlock(id, data, biome);
-		}
-	}
 }
 
 } /* namespace renderer */

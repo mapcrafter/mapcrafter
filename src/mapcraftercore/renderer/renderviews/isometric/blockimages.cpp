@@ -321,6 +321,14 @@ void IsometricBlockImages::setBlockSideDarkening(double left, double right) {
 	this->dright = right;
 }
 
+RGBAImage IsometricBlockImages::getBiomeBlock(uint16_t id, uint16_t data,
+		const Biome& biome) const {
+	// return normal block for the snowy grass block
+	if (id == 2 && (data & GRASS_SNOW))
+		return getBlock(id, data);
+	return AbstractBlockImages::getBiomeBlock(id, data, biome);
+}
+
 int IsometricBlockImages::getMaxWaterNeededOpaque() const {
 	return max_water;
 }
@@ -1878,7 +1886,7 @@ RGBAImage IsometricBlockImages::createUnknownBlock() const {
 }
 
 RGBAImage IsometricBlockImages::createBiomeBlock(uint16_t id, uint16_t data,
-        const Biome& biome_data) const {
+        const Biome& biome) const {
 	if (!block_images.count(id | (data << 16)))
 		return unknown_block;
 
@@ -1886,9 +1894,9 @@ RGBAImage IsometricBlockImages::createBiomeBlock(uint16_t id, uint16_t data,
 	// leaves have the foliage colors
 	// for birches, the color x/y coordinate is flipped
 	if (id == 18)
-		color = biome_data.getColor(resources.getFoliageColors(), (data & util::binary<11>::value) == 2);
+		color = biome.getColor(resources.getFoliageColors(), (data & util::binary<11>::value) == 2);
 	else
-		color = biome_data.getColor(resources.getGrassColors(), false);
+		color = biome.getColor(resources.getGrassColors(), false);
 
 	double r = (double) rgba_red(color) / 255;
 	double g = (double) rgba_green(color) / 255;
@@ -2336,25 +2344,6 @@ void IsometricBlockImages::createBlocks() {
 	createDoor(197, t.DOOR_DARK_OAK_LOWER, t.DOOR_DARK_OAK_UPPER); // dark oak door
 
 	testWaterTransparency();
-}
-
-void IsometricBlockImages::createBiomeBlocks() {
-	for (std::unordered_map<uint32_t, RGBAImage>::iterator it = block_images.begin();
-			it != block_images.end(); ++it) {
-		uint16_t id = it->first & 0xffff;
-		uint16_t data = (it->first & 0xffff0000) >> 16;
-
-		// check if this is a biome block
-		if (!Biome::isBiomeBlock(id, data))
-			continue;
-
-		for (size_t i = 0; i < BIOMES_SIZE; i++) {
-			Biome biome = BIOMES[i];
-			uint64_t b = biome.getID();
-			biome_images[id | ((uint64_t) data << 16) | (b << 32)] =
-					createBiomeBlock(id, data, biome);
-		}
-	}
 }
 
 }

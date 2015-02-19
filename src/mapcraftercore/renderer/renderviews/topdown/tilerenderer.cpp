@@ -99,7 +99,7 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 
 				RGBAImage block = images->getBlock(id, data);
 				if (Biome::isBiomeBlock(id, data)) {
-					block = images->getBiomeDependBlock(id, data, getBiomeOfBlock(globalpos, &chunk));
+					block = images->getBiomeBlock(id, data, getBiomeOfBlock(globalpos, &chunk));
 				}
 
 				render_mode->draw(block, globalpos, id, data);

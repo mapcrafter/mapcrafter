@@ -141,7 +141,11 @@ public:
 	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const = 0;
 	virtual bool hasBlock(uint16_t id, uint16_t) const = 0;
 	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data) const = 0;
-	virtual RGBAImage getBiomeDependBlock(uint16_t id, uint16_t data, const Biome& biome) const = 0;
+
+	/**
+	 * Returns the block image of a block whose appearance is depending on the biome.
+	 */
+	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const = 0;
 
 	virtual int getMaxWaterNeededOpaque() const = 0;
 	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const = 0;
@@ -165,7 +169,8 @@ public:
 	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const;
 	virtual bool hasBlock(uint16_t id, uint16_t) const;
 	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data) const;
-	virtual RGBAImage getBiomeDependBlock(uint16_t id, uint16_t data, const Biome& biome) const;
+
+	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;
 
 	virtual int getMaxWaterNeededOpaque() const = 0;
 	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const = 0;
@@ -181,10 +186,25 @@ protected:
 	virtual void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
 
 	virtual RGBAImage createUnknownBlock() const = 0;
-	virtual RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome_data) const = 0;
+
+	/**
+	 * Implement this and create the biome-specific version of the specified block.
+	 * This method is called by the createBiomeBlocks() method and the result is stored
+	 * by it, so you don't need to cache any biome block images, just create them in here.
+	 */
+	virtual RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const = 0;
 
 	virtual void createBlocks() = 0;
-	virtual void createBiomeBlocks() = 0;
+
+	/**
+	 * Creates the biome block images by iterating the generated blocks (the method is
+	 * called after createBlocks()), checking with the Biome::isBiomeBlock(id, data)
+	 * function if this is a biome block and then calling the createBiomeBlock() method
+	 * for every biome. The biome blocks are stored in the biome_images map then.
+	 *
+	 * Overwrite this if you need special handling for biome blocks.
+	 */
+	virtual void createBiomeBlocks();
 
 	int texture_size;
 	int rotation;

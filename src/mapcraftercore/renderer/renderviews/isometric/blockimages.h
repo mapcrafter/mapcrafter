@@ -204,6 +204,11 @@ public:
 
 	void setBlockSideDarkening(double left, double right);
 
+	/**
+	 * We need to overwrite this because there is a special case for the snowy grass block.
+	 */
+	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;
+
 	virtual int getMaxWaterNeededOpaque() const;
 	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const;
 
@@ -322,9 +327,8 @@ protected:
 	void createLargePlant(uint16_t data, const RGBAImage& texture, const RGBAImage& top_texture); // id 175
 
 	virtual RGBAImage createUnknownBlock() const;
-	virtual RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome_data) const;
+	virtual RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;
 	virtual void createBlocks();
-	virtual void createBiomeBlocks();
 };
 
 }

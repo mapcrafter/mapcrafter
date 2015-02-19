@@ -368,13 +368,9 @@ const RGBAImage& AbstractBlockImages::getBlock(uint16_t id, uint16_t data) const
 	return block_images.at(id | (data << 16));
 }
 
-RGBAImage AbstractBlockImages::getBiomeDependBlock(uint16_t id, uint16_t data,
+RGBAImage AbstractBlockImages::getBiomeBlock(uint16_t id, uint16_t data,
 		const Biome& biome) const {
 	data = filterBlockData(id, data);
-	// return normal block for the snowy grass block
-	if (id == 2 && (data & GRASS_SNOW))
-		return getBlock(id, data);
-
 	if (!hasBlock(id, data))
 		return unknown_block;
 
@@ -405,6 +401,25 @@ void AbstractBlockImages::setBlockImage(uint16_t id, uint16_t data,
 	// if block is not transparent, add shadow edges
 	//else
 	//	addBlockShadowEdges(id, data, block);
+}
+
+void AbstractBlockImages::createBiomeBlocks() {
+	for (std::unordered_map<uint32_t, RGBAImage>::iterator it = block_images.begin();
+			it != block_images.end(); ++it) {
+		uint16_t id = it->first & 0xffff;
+		uint16_t data = (it->first & 0xffff0000) >> 16;
+
+		// check if this is a biome block
+		if (!Biome::isBiomeBlock(id, data))
+			continue;
+
+		for (size_t i = 0; i < BIOMES_SIZE; i++) {
+			Biome biome = BIOMES[i];
+			uint64_t b = biome.getID();
+			biome_images[id | ((uint64_t) data << 16) | (b << 32)] =
+					createBiomeBlock(id, data, biome);
+		}
+	}
 }
 
 }
