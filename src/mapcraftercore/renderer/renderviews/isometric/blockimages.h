@@ -224,7 +224,7 @@ protected:
 	double dleft, dright;
 
 	virtual uint16_t filterBlockData(uint16_t id, uint16_t data) const;
-	virtual bool checkImageTransparency(const RGBAImage& block) const;
+	virtual bool isImageTransparent(const RGBAImage& block) const;
 	void addBlockShadowEdges(uint16_t id, uint16_t data, const RGBAImage& block);
 
 	void setBlockImage(uint16_t id, uint16_t data, const BlockImage& block);

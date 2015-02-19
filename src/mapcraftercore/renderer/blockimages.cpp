@@ -273,7 +273,9 @@ void AbstractBlockImages::loadBlocks(const BlockImageTextureResources& resources
 	this->texture_size = resources.getTextureSize();
 
 	empty_texture.setSize(texture_size, texture_size);
-	unknown_block = createUnknownBlock();
+	unknown_block.setSize(getBlockSize(), getBlockSize());
+	if (render_unknown_blocks)
+		unknown_block = createUnknownBlock();
 	createBlocks();
 	createBiomeBlocks();
 }
@@ -395,7 +397,7 @@ void AbstractBlockImages::setBlockImage(uint16_t id, uint16_t data,
 	block_images[id | (data << 16)] = block;
 
 	// check if block contains transparency
-	if (checkImageTransparency(block))
+	if (isImageTransparent(block))
 		block_transparency.insert(id | (data << 16));
 	// TODO in IsometricBlockImages
 	// if block is not transparent, add shadow edges

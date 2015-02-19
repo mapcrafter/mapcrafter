@@ -127,6 +127,10 @@ private:
 	RGBAImage foliagecolors, grasscolors;
 };
 
+/**
+ * Responsible for generating and managing the block images which are required to render
+ * a map.
+ */
 class BlockImages {
 public:
 	virtual ~BlockImages();
@@ -154,6 +158,11 @@ public:
 	virtual int getBlockSize() const = 0;
 };
 
+/**
+ * Implements most of the methods of the BlockImages class which are related to managing
+ * the generated block images. You just have to implement some methods to generate all
+ * the required block images.
+ */
 class AbstractBlockImages : public BlockImages {
 public:
 	AbstractBlockImages();
@@ -179,12 +188,33 @@ public:
 	virtual int getBlockSize() const = 0;
 
 protected:
+	/**
+	 * Filters out unnecessary parts of the block data since of some blocks not everything
+	 * of the block data is relevant.
+	 */
 	virtual uint16_t filterBlockData(uint16_t id, uint16_t data) const = 0;
-	virtual bool checkImageTransparency(const RGBAImage& block) const = 0;
 
-	// you can overwrite this if you need special handling of generated block images
+	/**
+	 * Checks whether a block image contains transparent pixels. This is method is called
+	 * for every block that is stored with the setBlockImage-method.
+	 */
+	virtual bool isImageTransparent(const RGBAImage& block) const = 0;
+
+	/**
+	 * This method stores a generated block image in the map of generated block images.
+	 * It also checks with the isBlockTransparent-method whether a block image is
+	 * transparent. You can overwrite this method if you need special handling for
+	 * generated blocks.
+	 */
 	virtual void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
 
+	/**
+	 * This method should create a block image of an unknown block (i.e. just a simple
+	 * #ff0000 block). You can access is later as the unknown_block variable. The method
+	 * will be called depending on whether rendering of unknown block is enabled or not.
+	 * If rendering of unknown blocks is disabled, the unknown_block is just a transparent
+	 * block image.
+	 */
 	virtual RGBAImage createUnknownBlock() const = 0;
 
 	/**
@@ -194,12 +224,16 @@ protected:
 	 */
 	virtual RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const = 0;
 
+	/**
+	 * You have to create all your block images in this method and store them with the
+	 * setBlockImage-method.
+	 */
 	virtual void createBlocks() = 0;
 
 	/**
 	 * Creates the biome block images by iterating the generated blocks (the method is
 	 * called after createBlocks()), checking with the Biome::isBiomeBlock(id, data)
-	 * function if this is a biome block and then calling the createBiomeBlock() method
+	 * function if this is a biome block and then calling the createBiomeBlock-method
 	 * for every biome. The biome blocks are stored in the biome_images map then.
 	 *
 	 * Overwrite this if you need special handling for biome blocks.

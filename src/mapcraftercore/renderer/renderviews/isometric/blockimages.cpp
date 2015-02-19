@@ -420,7 +420,7 @@ uint16_t IsometricBlockImages::filterBlockData(uint16_t id, uint16_t data) const
 /**
  * Checks, if a block images has transparent pixels.
  */
-bool IsometricBlockImages::checkImageTransparency(const RGBAImage& image) const {
+bool IsometricBlockImages::isImageTransparent(const RGBAImage& image) const {
 	// TODO
 	// Find out why blocks on Windows contain slightly transparency (>250)
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end(); it.next()) {
@@ -1879,9 +1879,8 @@ void IsometricBlockImages::createLargePlant(uint16_t data, const RGBAImage& text
 }
 
 RGBAImage IsometricBlockImages::createUnknownBlock() const {
-	RGBAImage texture = empty_texture;
-	if (render_unknown_blocks)
-		texture.fill(rgba(255, 0, 0, 255), 0, 0, texture_size, texture_size);
+	RGBAImage texture(texture_size, texture_size);
+	texture.fill(rgba(255, 0, 0, 255), 0, 0, texture_size, texture_size);
 	return buildImage(BlockImage().setFace(util::binary<11111>::value, texture));
 }
 

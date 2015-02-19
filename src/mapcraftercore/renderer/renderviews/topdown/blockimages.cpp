@@ -66,7 +66,7 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	return data;
 }
 
-bool TopdownBlockImages::checkImageTransparency(const RGBAImage& block) const {
+bool TopdownBlockImages::isImageTransparent(const RGBAImage& block) const {
 	for (int x = 0; x < block.getWidth(); x++)
 		for (int y = 0; y < block.getHeight(); y++)
 			if (rgba_alpha(block.getPixel(x, y)) < 255)
