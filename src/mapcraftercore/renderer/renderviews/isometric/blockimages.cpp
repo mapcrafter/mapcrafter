@@ -1181,11 +1181,11 @@ void IsometricBlockImages::createStairs(uint16_t id, const RGBAImage& texture) {
 	createStairs(id, texture, texture);
 }
 
-void IsometricBlockImages::createChest(uint16_t id, const RGBAImage* textures) { // id 54, 130
+void IsometricBlockImages::createChest(uint16_t id, const ChestTextures& textures) { // id 54, 130
 	BlockImage chest;
-	chest.setFace(FACE_SOUTH, textures[BlockImageTextureResources::CHEST_FRONT]);
-	chest.setFace(FACE_NORTH | FACE_EAST | FACE_WEST, textures[BlockImageTextureResources::CHEST_SIDE]);
-	chest.setFace(FACE_TOP, textures[BlockImageTextureResources::CHEST_TOP]);
+	chest.setFace(FACE_SOUTH, textures[ChestTextures::FRONT]);
+	chest.setFace(FACE_NORTH | FACE_EAST | FACE_WEST, textures[ChestTextures::SIDE]);
+	chest.setFace(FACE_TOP, textures[ChestTextures::TOP]);
 
 	setBlockImage(id, DATA_NORTH, buildImage(chest.rotate(2)));
 	setBlockImage(id, DATA_SOUTH, buildImage(chest));
@@ -1193,20 +1193,20 @@ void IsometricBlockImages::createChest(uint16_t id, const RGBAImage* textures) {
 	setBlockImage(id, DATA_WEST, buildImage(chest.rotate(1)));
 }
 
-void IsometricBlockImages::createDoubleChest(uint16_t id, const RGBAImage* textures) { // id 54
+void IsometricBlockImages::createDoubleChest(uint16_t id, const DoubleChestTextures& textures) { // id 54
 	BlockImage left, right;
 
 	// left side of the chest, south orientation
-	left.setFace(FACE_SOUTH, textures[BlockImageTextureResources::LARGECHEST_FRONT_LEFT]);
-	left.setFace(FACE_NORTH, textures[BlockImageTextureResources::LARGECHEST_BACK_LEFT].flip(true, false));
-	left.setFace(FACE_WEST, textures[BlockImageTextureResources::LARGECHEST_SIDE]);
-	left.setFace(FACE_TOP, textures[BlockImageTextureResources::LARGECHEST_TOP_LEFT].rotate(3));
+	left.setFace(FACE_SOUTH, textures[DoubleChestTextures::FRONT_LEFT]);
+	left.setFace(FACE_NORTH, textures[DoubleChestTextures::BACK_LEFT].flip(true, false));
+	left.setFace(FACE_WEST, textures[DoubleChestTextures::SIDE]);
+	left.setFace(FACE_TOP, textures[DoubleChestTextures::TOP_LEFT].rotate(3));
 
 	// right side of the chest, south orientation
-	right.setFace(FACE_SOUTH, textures[BlockImageTextureResources::LARGECHEST_FRONT_RIGHT]);
-	right.setFace(FACE_NORTH, textures[BlockImageTextureResources::LARGECHEST_BACK_RIGHT].flip(true, false));
-	right.setFace(FACE_EAST, textures[BlockImageTextureResources::LARGECHEST_SIDE]);
-	right.setFace(FACE_TOP, textures[BlockImageTextureResources::LARGECHEST_TOP_RIGHT].rotate(3));
+	right.setFace(FACE_SOUTH, textures[DoubleChestTextures::FRONT_RIGHT]);
+	right.setFace(FACE_NORTH, textures[DoubleChestTextures::BACK_RIGHT].flip(true, false));
+	right.setFace(FACE_EAST, textures[DoubleChestTextures::SIDE]);
+	right.setFace(FACE_TOP, textures[DoubleChestTextures::TOP_RIGHT].rotate(3));
 
 	int l = LARGECHEST_DATA_LARGE;
 	setBlockImage(id, DATA_NORTH | l | LARGECHEST_DATA_LEFT, buildImage(left.rotate(2)));

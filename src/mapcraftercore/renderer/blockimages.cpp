@@ -28,25 +28,7 @@
 namespace mapcrafter {
 namespace renderer {
 
-BlockImageTextureResources::BlockImageTextureResources()
-	: texture_size(12), texture_blur(0) {
-}
-
-BlockImageTextureResources::~BlockImageTextureResources() {
-}
-
-void BlockImageTextureResources::setTextureSize(int texture_size, int texture_blur) {
-	this->texture_size = texture_size;
-	this->texture_blur = texture_blur;
-}
-
-namespace {
-
-/**
- * This function converts the chest image to usable chest textures and stores them
- * in the textures array.
- */
-bool loadChestTextures(const std::string& filename, RGBAImage* textures, int texture_size) {
+bool ChestTextures::load(const std::string& filename, int texture_size) {
 	RGBAImage image;
 	if (!image.readPNG(filename)) {
 		LOG(ERROR) << "Unable to read '" << filename << "'.";
@@ -54,7 +36,8 @@ bool loadChestTextures(const std::string& filename, RGBAImage* textures, int tex
 	}
 
 	if (image.getWidth() != image.getHeight()) {
-		LOG(ERROR) << "Chest texture has invalid size (width:height must be 1:1): '" << filename << "'.";
+		LOG(ERROR) << "Chest texture has invalid size (width:height must be 1:1): '"
+				<< filename << "'.";
 		return false;
 	}
 	// if the image is 64px wide, the chest images are 14x14
@@ -69,18 +52,14 @@ bool loadChestTextures(const std::string& filename, RGBAImage* textures, int tex
 	RGBAImage top = image.clip(size, 0, size, size);
 
 	// resize the chest images to texture size
-	front.resizeAuto(textures[BlockImageTextureResources::CHEST_FRONT], texture_size, texture_size);
-	side.resizeAuto(textures[BlockImageTextureResources::CHEST_SIDE], texture_size, texture_size);
-	top.resizeAuto(textures[BlockImageTextureResources::CHEST_TOP], texture_size, texture_size);
+	front.resizeAuto((*this)[ChestTextures::FRONT], texture_size, texture_size);
+	side.resizeAuto((*this)[ChestTextures::SIDE], texture_size, texture_size);
+	top.resizeAuto((*this)[ChestTextures::TOP], texture_size, texture_size);
 
 	return true;
 }
 
-/**
- * This function converts the large chest image to usable chest textures and stores them
- * in the textures array.
- */
-bool loadDoubleChestTextures(const std::string& filename, RGBAImage* textures, int texture_size) {
+bool DoubleChestTextures::load(const std::string& filename, int texture_size) {
 	RGBAImage image;
 	if (!image.readPNG(filename)) {
 		LOG(ERROR) << "Unable to read '" << filename << "'.";
@@ -88,7 +67,8 @@ bool loadDoubleChestTextures(const std::string& filename, RGBAImage* textures, i
 	}
 
 	if (image.getWidth() != image.getHeight() * 2) {
-		LOG(ERROR) << "Chest texture has invalid size (width:height must be 1:2): '" << filename << "'.";
+		LOG(ERROR) << "Chest texture has invalid size (width:height must be 1:2): '"
+				<< filename << "'.";
 		return false;
 	}
 	int ratio = image.getHeight() / 64;
@@ -118,133 +98,137 @@ bool loadDoubleChestTextures(const std::string& filename, RGBAImage* textures, i
 	back_right.alphaBlit(image.clip(5 * size + 4, size, size, 4 * ratio), 0, 0);
 
 	// resize the chest images to texture size
-	front_left.resizeAuto(textures[BlockImageTextureResources::LARGECHEST_FRONT_LEFT],
-			texture_size, texture_size);
-	front_right.resizeAuto(textures[BlockImageTextureResources::LARGECHEST_FRONT_RIGHT],
-			texture_size, texture_size);
-	side.resizeAuto(textures[BlockImageTextureResources::LARGECHEST_SIDE],
-			texture_size, texture_size);
-	top_left.resizeAuto(textures[BlockImageTextureResources::LARGECHEST_TOP_LEFT],
-			texture_size, texture_size);
-	top_right.resizeAuto(textures[BlockImageTextureResources::LARGECHEST_TOP_RIGHT],
-			texture_size, texture_size);
-	back_left.resizeAuto(textures[BlockImageTextureResources::LARGECHEST_BACK_LEFT],
-			texture_size, texture_size);
-	back_right.resizeAuto(textures[BlockImageTextureResources::LARGECHEST_BACK_RIGHT],
-			texture_size, texture_size);
+	front_left.resizeAuto((*this)[DoubleChestTextures::FRONT_LEFT], texture_size, texture_size);
+	front_right.resizeAuto((*this)[DoubleChestTextures::FRONT_RIGHT], texture_size, texture_size);
+	side.resizeAuto((*this)[DoubleChestTextures::SIDE], texture_size, texture_size);
+	top_left.resizeAuto((*this)[DoubleChestTextures::TOP_LEFT], texture_size, texture_size);
+	top_right.resizeAuto((*this)[DoubleChestTextures::TOP_RIGHT], texture_size, texture_size);
+	back_left.resizeAuto((*this)[DoubleChestTextures::BACK_LEFT], texture_size, texture_size);
+	back_right.resizeAuto((*this)[DoubleChestTextures::BACK_RIGHT], texture_size, texture_size);
 
 	return true;
 }
 
+TextureResources::TextureResources()
+	: texture_size(12), texture_blur(0) {
 }
 
-bool BlockImageTextureResources::loadChests(const std::string& normal, const std::string& normal_double,
-		const std::string& ender,
-		const std::string& trapped, const std::string& trapped_double) {
-	if (!loadChestTextures(normal, chest_normal, texture_size)
-			|| !loadDoubleChestTextures(normal_double, chest_normal_double, texture_size)
-			|| !loadChestTextures(ender, chest_ender, texture_size)
-			|| !loadChestTextures(trapped, chest_trapped, texture_size)
-			|| !loadDoubleChestTextures(trapped_double, chest_trapped_double, texture_size))
+TextureResources::~TextureResources() {
+}
+
+int TextureResources::getTextureSize() const {
+	return texture_size;
+}
+
+int TextureResources::getTextureBlur() const {
+	return texture_blur;
+}
+
+bool TextureResources::loadTextures(const std::string& texture_dir,
+		int texture_size, int texture_blur) {
+	// set texture size and blur
+	this->texture_size = texture_size;
+	this->texture_blur = texture_blur;
+
+	// add a slash to the path if it's not already there
+	std::string dir = texture_dir;
+	if (dir[dir.size() - 1] != '/')
+		dir = dir + '/';
+	bool ok = true;
+	if (!loadChests(dir + "entity/chest/normal.png",
+			dir + "entity/chest/normal_double.png",
+			dir + "entity/chest/ender.png",
+			dir + "entity/chest/trapped.png",
+			dir + "entity/chest/trapped_double.png"))
+		ok = false;
+	if (!loadColors(dir + "colormap/foliage.png",
+			dir + "colormap/grass.png"))
+		ok = false;
+	if (!loadBlocks(dir + "blocks", dir + "endportal.png"))
+		ok = false;
+	if (!ok) {
+		LOG(ERROR) << "Invalid texture directory '" << dir << "'. See previous log messages.";
+		return false;
+	}
+	return true;
+}
+
+const BlockTextures& TextureResources::getBlockTextures() const {
+	return block_textures;
+}
+
+const RGBAImage& TextureResources::getEndportalTexture() const {
+	return endportal_texture;
+}
+
+const ChestTextures& TextureResources::getNormalChest() const {
+	return normal_chest;
+}
+
+const DoubleChestTextures& TextureResources::getNormalDoubleChest() const {
+	return normal_double_chest;
+}
+
+const ChestTextures& TextureResources::getEnderChest() const {
+	return ender_chest;
+}
+
+const ChestTextures& TextureResources::getTrappedChest() const {
+	return trapped_chest;
+}
+
+const DoubleChestTextures& TextureResources::getTrappedDoubleChest() const {
+	return trapped_double_chest;
+}
+
+const RGBAImage& TextureResources::getFoliageColors() const {
+	return foliage_colors;
+}
+
+const RGBAImage& TextureResources::getGrassColors() const {
+	return grass_colors;
+}
+
+bool TextureResources::loadChests(const std::string& normal_png,
+		const std::string& normal_double_png, const std::string& ender_png,
+		const std::string& trapped_png, const std::string& trapped_double_png) {
+	if (!normal_chest.load(normal_png, texture_size)
+			|| !normal_double_chest.load(normal_double_png, texture_size)
+			|| !ender_chest.load(ender_png, texture_size)
+			|| !trapped_chest.load(trapped_png, texture_size)
+			|| !trapped_double_chest.load(trapped_double_png, texture_size))
 		return false;
 	return true;
 }
 
-bool BlockImageTextureResources::loadColors(const std::string& foliagecolor,
-		const std::string& grasscolor) {
+bool TextureResources::loadColors(const std::string& foliage_png,
+		const std::string& grass_png) {
 	bool ok = true;
-	if (!foliagecolors.readPNG(foliagecolor)) {
-		LOG(ERROR) << "Unable to read '" << foliagecolor << "'.";
+	if (!foliage_colors.readPNG(foliage_png)) {
+		LOG(ERROR) << "Unable to read '" << foliage_png << "'.";
 		ok = false;
 	}
-	if (!grasscolors.readPNG(grasscolor)) {
-		LOG(ERROR) << "Unable to read '" << grasscolor << "'.";
+	if (!grass_colors.readPNG(grass_png)) {
+		LOG(ERROR) << "Unable to read '" << grass_png << "'.";
 		ok = false;
 	}
 	return ok;
 }
 
-bool BlockImageTextureResources::loadOther(const std::string& endportal) {
-	RGBAImage endportal_img;
-	if(!endportal_img.readPNG(endportal)) {
-		LOG(ERROR) << "Unable to read '" << endportal << "'.";
-		return false;
-	}
-	endportal_img.resizeAuto(endportal_texture, texture_size, texture_size);
-	return true;
-}
-
-bool BlockImageTextureResources::loadBlocks(const std::string& block_dir) {
-	if (!textures.load(block_dir, texture_size, texture_blur))
+bool TextureResources::loadBlocks(const std::string& block_dir,
+		const std::string& endportal_png) {
+	if (!block_textures.load(block_dir, texture_size, texture_blur))
 		return false;
 	empty_texture.setSize(texture_size, texture_size);
-	return true;
-}
 
-bool BlockImageTextureResources::loadAll(const std::string& textures_dir) {
-	bool ok = true;
-	if (!loadChests(textures_dir + "/entity/chest/normal.png",
-			textures_dir + "/entity/chest/normal_double.png",
-			textures_dir + "/entity/chest/ender.png",
-			textures_dir + "/entity/chest/trapped.png",
-			textures_dir + "/entity/chest/trapped_double.png"))
-		ok = false;
-	if (!loadColors(textures_dir + "/colormap/foliage.png",
-			textures_dir + "/colormap/grass.png"))
-		ok = false;
-	if (!loadOther(textures_dir + "/endportal.png"))
-		ok = false;
-	if (!loadBlocks(textures_dir + "/blocks"))
-		ok = false;
-	if (!ok) {
-		LOG(ERROR) << "Invalid texture directory '" << textures_dir << "'. See previous log messages.";
+	RGBAImage endportal;
+	if(!endportal.readPNG(endportal_png)) {
+		LOG(ERROR) << "Unable to read '" << endportal_png << "'.";
 		return false;
 	}
+	endportal.resizeAuto(endportal_texture, texture_size, texture_size);
+
 	return true;
-}
-
-int BlockImageTextureResources::getTextureSize() const {
-	return texture_size;
-}
-
-int BlockImageTextureResources::getTextureBlur() const {
-	return texture_blur;
-}
-
-const BlockTextures& BlockImageTextureResources::getBlockTextures() const {
-	return textures;
-}
-
-const RGBAImage& BlockImageTextureResources::getEndportalTexture() const {
-	return endportal_texture;
-}
-
-const RGBAImage* BlockImageTextureResources::getNormalChest() const {
-	return chest_normal;
-}
-
-const RGBAImage* BlockImageTextureResources::getNormalDoubleChest() const {
-	return chest_normal_double;
-}
-
-const RGBAImage* BlockImageTextureResources::getEnderChest() const {
-	return chest_ender;
-}
-
-const RGBAImage* BlockImageTextureResources::getTrappedChest() const {
-	return chest_trapped;
-}
-
-const RGBAImage* BlockImageTextureResources::getTrappedDoubleChest() const {
-	return chest_trapped_double;
-}
-
-const RGBAImage& BlockImageTextureResources::getFoliageColors() const {
-	return foliagecolors;
-}
-
-const RGBAImage& BlockImageTextureResources::getGrassColors() const {
-	return grasscolors;
 }
 
 BlockImages::~BlockImages() {
@@ -268,12 +252,14 @@ void AbstractBlockImages::setRenderSpecialBlocks(bool render_unknown_blocks,
 	this->render_leaves_transparent = render_leaves_transparent;
 }
 
-void AbstractBlockImages::loadBlocks(const BlockImageTextureResources& resources) {
+void AbstractBlockImages::loadBlocks(const TextureResources& resources) {
 	this->resources = resources;
 	this->texture_size = resources.getTextureSize();
 
 	empty_texture.setSize(texture_size, texture_size);
 	unknown_block.setSize(getBlockSize(), getBlockSize());
+	// set unknown block to something recognizable if rendering of unknown blocks is enabled,
+	// otherwise just keep it a transparent image
 	if (render_unknown_blocks)
 		unknown_block = createUnknownBlock();
 	createBlocks();

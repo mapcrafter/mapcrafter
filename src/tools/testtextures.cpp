@@ -84,10 +84,9 @@ int main(int argc, char **argv) {
 	if (!vm.count("texture-blur"))
 		texture_blur = 0;
 
-	BlockImageTextureResources resources;
-	resources.setTextureSize(texture_size, texture_blur);
-	if (!resources.loadAll(texture_dir))
-		return 0;
+	TextureResources resources;
+	if (!resources.loadTextures(texture_dir, texture_size, texture_blur))
+		return 1;
 
 	BlockImages* images;
 	if (render_view == "isometric") {
@@ -102,5 +101,5 @@ int main(int argc, char **argv) {
 	images->loadBlocks(resources);
 	images->saveBlocks(output_file);
 
-	return 1;
+	return 0;
 }

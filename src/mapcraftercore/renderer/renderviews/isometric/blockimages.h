@@ -296,8 +296,8 @@ protected:
 	void createStairs(uint16_t id, const RGBAImage& texture,
 			const RGBAImage& texture_top); // id 53, 67, 108, 109, 114, 128, 134, 135, 136, 180
 	void createStairs(uint16_t id, const RGBAImage& texture);
-	void createChest(uint16_t id, const RGBAImage* textures); // id 54, 95, 130
-	void createDoubleChest(uint16_t id, const RGBAImage* textures); // id 54
+	void createChest(uint16_t id, const ChestTextures& textures); // id 54, 95, 130
+	void createDoubleChest(uint16_t id, const DoubleChestTextures& textures); // id 54
 	void createRedstoneWire(uint16_t id, uint16_t extra_data,
 			uint8_t r, uint8_t g, uint8_t b); // id 55
 	void createDoor(uint16_t id, const RGBAImage& bottom, const RGBAImage& top); // id 64, 71

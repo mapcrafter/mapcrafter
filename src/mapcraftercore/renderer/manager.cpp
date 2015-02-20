@@ -580,11 +580,11 @@ bool RenderManager::run() {
 			std::time_t time_start = std::time(nullptr);
 
 			// create block images
-			BlockImageTextureResources resources;
-			resources.setTextureSize(map.getTextureSize(), map.getTextureBlur());
+			TextureResources resources;
 			// if textures do not work, it does not make much sense
 			// to try the other rotations with the same textures
-			if (!resources.loadAll(map.getTextureDir().string())) {
+			if (!resources.loadTextures(map.getTextureDir().string(),
+					map.getTextureSize(), map.getTextureBlur())) {
 				LOG(ERROR) << "Skipping remaining rotations.";
 				break;
 			}

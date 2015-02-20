@@ -23,6 +23,7 @@
 #include "blocktextures.h"
 #include "image.h"
 
+#include <array>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -70,61 +71,147 @@ const int REDSTONE_POWERED = 4096;
 
 const int LARGEPLANT_TOP = 16;
 
-class BlockImageTextureResources {
+/**
+ * The textures of a single chest, just an array with three images.
+ */
+class ChestTextures : public std::array<RGBAImage, 3> {
 public:
-	BlockImageTextureResources();
-	~BlockImageTextureResources();
+	/**
+	 * Loads the textures from a chest texture file, you have to specify a texture size
+	 * to use.
+	 */
+	bool load(const std::string& filename, int texture_size);
 
-	void setTextureSize(int texture_size, int texture_blur);
+	static const int FRONT = 0;
+	static const int SIDE = 1;
+	static const int TOP = 2;
+};
 
-	bool loadChests(const std::string& normal, const std::string& normal_double,
-			const std::string& ender,
-			const std::string& trapped, const std::string& trapped_double);
-	bool loadColors(const std::string& foliagecolor, const std::string& grasscolor);
-	bool loadOther(const std::string& endportal);
-	bool loadBlocks(const std::string& block_dir);
-	bool loadAll(const std::string& textures_dir);
-	bool saveBlocks(const std::string& filename);
+/**
+ * The textures of a double chest, just an array with seven images.
+ */
+class DoubleChestTextures : public std::array<RGBAImage, 7> {
+public:
+	/**
+	 * Loads the textures from a double chest texture file, you have to specify a texture
+	 * size to use.
+	 */
+	bool load(const std::string& filename, int texture_size);
 
+	static const int FRONT_LEFT = 0;
+	static const int FRONT_RIGHT = 1;
+	static const int SIDE = 2;
+	static const int TOP_LEFT = 3;
+	static const int TOP_RIGHT = 4;
+	static const int BACK_LEFT = 5;
+	static const int BACK_RIGHT = 6;
+};
+
+/**
+ * This class is responsible for loading the required texture files from a texture dir.
+ */
+class TextureResources {
+public:
+	TextureResources();
+	~TextureResources();
+
+	/**
+	 * Returns the used texture size (defaults to 12).
+	 */
 	int getTextureSize() const;
+
+	/**
+	 * Returns the used texture blur radius (defaults to 0).
+	 */
 	int getTextureBlur() const;
 
+	/**
+	 * Loads the texture files from a texture directory and returns if it was successful.
+	 * Error/warning messages will be logged with the logging facility if there is
+	 * something wrong with the textures.
+	 *
+	 * You can also specify a texture size and a texture blur radius to apply to the
+	 * texture files. A texture size of 12px and a texture blur radius of 0px is used
+	 * per default.
+	 */
+	bool loadTextures(const std::string& texture_dir, int texture_size = 12,
+			int texture_blur = 0);
+
+	/**
+	 * Returns the loaded block texture files.
+	 */
 	const BlockTextures& getBlockTextures() const;
+
+	/**
+	 * Returns the loaded endportal texture file.
+	 */
 	const RGBAImage& getEndportalTexture() const;
 
-	const RGBAImage* getNormalChest() const;
-	const RGBAImage* getNormalDoubleChest() const;
-	const RGBAImage* getEnderChest() const;
-	const RGBAImage* getTrappedChest() const;
-	const RGBAImage* getTrappedDoubleChest() const;
+	/**
+	 * Returns the loaded texture files of the normal chest.
+	 */
+	const ChestTextures& getNormalChest() const;
 
+	/**
+	 * Returns the loaded texture files of the normal double chest.
+	 */
+	const DoubleChestTextures& getNormalDoubleChest() const;
+
+	/**
+	 * Returns the loaded texture files of the ender chest.
+	 */
+	const ChestTextures& getEnderChest() const;
+
+	/**
+	 * Returns the loaded texture files of the trapped chest.
+	 */
+	const ChestTextures& getTrappedChest() const;
+
+	/**
+	 * Returns the loaded textures files of the trapped double chest.
+	 */
+	const DoubleChestTextures& getTrappedDoubleChest() const;
+
+	/**
+	 * Returns the foliage color biomes texture.
+	 */
 	const RGBAImage& getFoliageColors() const;
+
+	/**
+	 * Returns the grass color biomes texture.
+	 */
 	const RGBAImage& getGrassColors() const;
 
-	static const int CHEST_FRONT = 0;
-	static const int CHEST_SIDE = 1;
-	static const int CHEST_TOP = 2;
-
-	static const int LARGECHEST_FRONT_LEFT = 0;
-	static const int LARGECHEST_FRONT_RIGHT = 1;
-	static const int LARGECHEST_SIDE = 2;
-	static const int LARGECHEST_TOP_LEFT = 3;
-	static const int LARGECHEST_TOP_RIGHT = 4;
-	static const int LARGECHEST_BACK_LEFT = 5;
-	static const int LARGECHEST_BACK_RIGHT = 6;
-
 private:
+	/**
+	 * Loads the chest textures from the supplied files.
+	 */
+	bool loadChests(const std::string& normal_png, const std::string& normal_double_png,
+			const std::string& ender_png, const std::string& trapped_png,
+			const std::string& trapped_double_png);
+
+	/**
+	 * Loads the biome color textures from the supplied files.
+	 */
+	bool loadColors(const std::string& foliage_png, const std::string& grass_png);
+
+	/**
+	 * Loads the block textures and the endportal texture from the supplied directory/file.
+	 */
+	bool loadBlocks(const std::string& block_dir, const std::string& endportal_png);
+
+	// used texture size, blur
 	int texture_size, texture_blur;
 
-	BlockTextures textures;
+	// all the loaded texture images
+	BlockTextures block_textures;
 	RGBAImage empty_texture;
 	RGBAImage endportal_texture;
 
-	RGBAImage chest_normal[3], chest_normal_double[7];
-	RGBAImage chest_ender[3];
-	RGBAImage chest_trapped[3], chest_trapped_double[7];
+	ChestTextures normal_chest, ender_chest, trapped_chest;
+	DoubleChestTextures normal_double_chest, trapped_double_chest;
 
-	RGBAImage foliagecolors, grasscolors;
+	RGBAImage foliage_colors, grass_colors;
 };
 
 /**
@@ -139,7 +226,7 @@ public:
 	virtual void setRenderSpecialBlocks(bool render_unknown_blocks,
 			bool render_leaves_transparent) = 0;
 
-	virtual void loadBlocks(const BlockImageTextureResources& resources) = 0;
+	virtual void loadBlocks(const TextureResources& resources) = 0;
 	virtual bool saveBlocks(const std::string& filename) = 0;
 
 	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const = 0;
@@ -172,7 +259,15 @@ public:
 	virtual void setRenderSpecialBlocks(bool render_unknown_blocks,
 			bool render_leaves_transparent);
 
-	virtual void loadBlocks(const BlockImageTextureResources& resources);
+	/**
+	 * Creates the block images with the supplied textures. Handles the creation of the
+	 * blocks by calling the abstract methods (createBlocks(), createBiomeBlocks(), ...).
+	 */
+	virtual void loadBlocks(const TextureResources& resources);
+
+	/**
+	 * Saves an image with all created blocks.
+	 */
 	virtual bool saveBlocks(const std::string& filename);
 
 	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const;
@@ -245,7 +340,7 @@ protected:
 	bool render_unknown_blocks;
 	bool render_leaves_transparent;
 
-	BlockImageTextureResources resources;
+	TextureResources resources;
 	RGBAImage empty_texture;
 
 	// map of block images
