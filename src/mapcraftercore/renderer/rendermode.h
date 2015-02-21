@@ -35,7 +35,7 @@ class WorldSection;
 }
 
 namespace mc {
-class Block;
+struct Block;
 class BlockPos;
 class Chunk;
 }

@@ -25,7 +25,7 @@
 namespace mapcrafter {
 
 namespace renderer {
-class RenderContext;
+struct RenderContext;
 }
 
 namespace thread {

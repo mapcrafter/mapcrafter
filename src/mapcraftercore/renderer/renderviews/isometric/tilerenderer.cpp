@@ -39,8 +39,8 @@ namespace mapcrafter {
 namespace renderer {
 
 TileTopBlockIterator::TileTopBlockIterator(const TilePos& tile, int block_size,
-		int tile_width, int tile_size)
-		: block_size(block_size), tile_size(tile_size), is_end(false) {
+		int tile_width)
+		: block_size(block_size), is_end(false) {
 	// at first get the chunk, whose row and column is at the top right of the tile
 	mc::ChunkPos topright_chunk = mc::ChunkPos::byRowCol(4 * tile_width * tile.getY(),
 			2 * tile_width * tile.getX() + 2);
@@ -160,7 +160,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 	// iterate over the highest blocks in the tile
 	// we use as tile position tile_pos+tile_offset because the offset means that
 	// we treat the tile position as tile_pos, but it's actually tile_pos+tile_offset
-	for (TileTopBlockIterator it(tile_pos, block_size, tile_width, getTileSize());
+	for (TileTopBlockIterator it(tile_pos, block_size, tile_width);
 			!it.end(); it.next()) {
 		// water render behavior n1:
 		// are we already in a row of water?

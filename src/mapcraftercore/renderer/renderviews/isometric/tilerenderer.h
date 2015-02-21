@@ -35,15 +35,14 @@ namespace renderer {
  */
 class TileTopBlockIterator {
 private:
-	int block_size, tile_size;
+	int block_size;
 
 	bool is_end;
 	int min_row, max_row;
 	int min_col, max_col;
 	mc::BlockPos top;
 public:
-	TileTopBlockIterator(const TilePos& tile, int block_size, int tile_width,
-			int tile_size);
+	TileTopBlockIterator(const TilePos& tile, int block_size, int tile_width);
 	~TileTopBlockIterator();
 
 	void next();

@@ -56,7 +56,7 @@ bool parseTilePosJSON(const picojson::value& value, renderer::TilePos& tile) {
 	if (!value.is<picojson::array>())
 		return false;
 	picojson::array array = value.get<picojson::array>();
-	if (!array.size() == 2)
+	if (array.size() != 2)
 		return false;
 	if (!array[0].is<double>() || !array[1].is<double>())
 		return false;
