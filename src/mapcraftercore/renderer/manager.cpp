@@ -135,229 +135,20 @@ RenderBehaviorMap RenderBehaviorMap::fromRenderOpts(
 	return behaviors;
 }
 
-RenderManager::RenderManager(const RenderOpts& opts)
-	: opts(opts) {
+RenderManager::RenderManager(const config::MapcrafterConfig& config,
+		const RenderOpts& opts)
+	: opts(opts), config(config) {
 }
 
-/**
- * This method copies a file from the template directory to the output directory and
- * replaces the variables from the map.
- */
-bool RenderManager::copyTemplateFile(const std::string& filename,
-		const std::map<std::string, std::string>& vars) const {
-	std::ifstream file(config.getTemplatePath(filename).string().c_str());
-	if (!file)
-		return false;
-	std::stringstream ss;
-	ss << file.rdbuf();
-	file.close();
-	std::string data = ss.str();
-
-	for (std::map<std::string, std::string>::const_iterator it = vars.begin();
-			it != vars.end(); ++it) {
-		data = util::replaceAll(data, "{" + it->first + "}", it->second);
-	}
-
-	std::ofstream out(config.getOutputPath(filename).string().c_str());
-	if (!out)
-		return false;
-	out << data;
-	out.close();
-	return true;
+void RenderManager::setRenderBehaviors(const RenderBehaviorMap& render_behaviors) {
+	this->render_behaviors = render_behaviors;
 }
 
-bool RenderManager::copyTemplateFile(const std::string& filename) const {
-	std::map<std::string, std::string> vars;
-	return copyTemplateFile(filename, vars);
-}
-
-bool RenderManager::writeTemplateIndexHtml() const {
-	std::map<std::string, std::string> vars;
-	vars["version"] = MAPCRAFTER_VERSION;
-	if (strlen(MAPCRAFTER_GITVERSION))
-		vars["version"] += std::string(" (") + MAPCRAFTER_GITVERSION + ")";
-
-	time_t t = std::time(nullptr);
-	char buffer[256];
-	std::strftime(buffer, sizeof(buffer), "%d.%m.%Y, %H:%M:%S", std::localtime(&t));
-	vars["lastUpdate"] = buffer;
-
-	vars["backgroundColor"] = config.getBackgroundColor().hex;
-
-	return copyTemplateFile("index.html", vars);
-}
-
-/**
- * This method copies all template files to the output directory.
- */
-void RenderManager::writeTemplates() const {
-	if (!fs::is_directory(config.getTemplateDir())) {
-		LOG(WARNING) << "The template directory does not exist! Can't copy templates!";
-		return;
-	}
-
-	if (!writeTemplateIndexHtml())
-		LOG(WARNING) << "Warning: Unable to copy template file index.html!";
-	// TODO write config.js also here?
-	confighelper.writeMapSettings();
-
-	if (!fs::exists(config.getOutputPath("markers.js"))
-			&& !util::copyFile(config.getTemplatePath("markers.js"), config.getOutputPath("markers.js")))
-		LOG(WARNING) << "Unable to copy template file markers.js!";
-
-	// copy all other files and directories
-	fs::directory_iterator end;
-	for (fs::directory_iterator it(config.getTemplateDir()); it != end;
-			++it) {
-		std::string filename = BOOST_FS_FILENAME(it->path());
-		// do not copy the index.html
-		if (filename == "index.html")
-			continue;
-		// and do not overwrite markers.js and markers-generated.js
-		if ((filename == "markers.js" || filename == "markers-generated.js")
-				&& fs::exists(config.getOutputPath(filename)))
-			continue;
-		if (fs::is_regular_file(*it)) {
-			if (!util::copyFile(*it, config.getOutputPath(filename)))
-				LOG(WARNING) << "Unable to copy template file " << filename;
-		} else if (fs::is_directory(*it)) {
-			if (!util::copyDirectory(*it, config.getOutputPath(filename)))
-				LOG(WARNING) << "Unable to copy template directory " << filename;
-		}
-	}
-}
-
-/**
- * This method increases the max zoom of a rendered map and makes the necessary changes
- * on the tile tree.
- */
-void RenderManager::increaseMaxZoom(const fs::path& dir,
-		std::string image_format, int jpeg_quality) const {
-	if (fs::exists(dir / "1")) {
-		// at first rename the directories 1 2 3 4 (zoom level 0) and make new directories
-		util::moveFile(dir / "1", dir / "1_");
-		fs::create_directories(dir / "1");
-		// then move the old tile trees one zoom level deeper
-		util::moveFile(dir / "1_", dir / "1/4");
-		// also move the images of the directories
-		util::moveFile(dir / (std::string("1.") + image_format),
-				dir / (std::string("1/4.") + image_format));
-	}
-
-	// do the same for the other directories
-	if (fs::exists(dir / "2")) {
-		util::moveFile(dir / "2", dir / "2_");
-		fs::create_directories(dir / "2");
-		util::moveFile(dir / "2_", dir / "2/3");
-		util::moveFile(dir / (std::string("2.") + image_format),
-				dir / (std::string("2/3.") + image_format));
-	}
-	
-	if (fs::exists(dir / "3")) {
-		util::moveFile(dir / "3", dir / "3_");
-		fs::create_directories(dir / "3");
-		util::moveFile(dir / "3_", dir / "3/2");
-		util::moveFile(dir / (std::string("3.") + image_format),
-				dir / (std::string("3/2.") + image_format));
-	}
-	
-	if (fs::exists(dir / "4")) {
-		util::moveFile(dir / "4", dir / "4_");
-		fs::create_directories(dir / "4");
-		util::moveFile(dir / "4_", dir / "4/1");
-		util::moveFile(dir / (std::string("4.") + image_format),
-				dir / (std::string("4/1.") + image_format));
-	}
-
-	// now read the images, which belong to the new directories
-	RGBAImage img1, img2, img3, img4;
-	if (image_format == "png") {
-		img1.readPNG((dir / "1/4.png").string());
-		img2.readPNG((dir / "2/3.png").string());
-		img3.readPNG((dir / "3/2.png").string());
-		img4.readPNG((dir / "4/1.png").string());
-	} else {
-		img1.readJPEG((dir / "1/4.jpg").string());
-		img2.readJPEG((dir / "2/3.jpg").string());
-		img3.readJPEG((dir / "3/2.jpg").string());
-		img4.readJPEG((dir / "4/1.jpg").string());
-	}
-
-	int s = img1.getWidth();
-	// create images for the new directories
-	RGBAImage new1(s, s), new2(s, s), new3(s, s), new4(s, s);
-	RGBAImage old1, old2, old3, old4;
-	// resize the old images...
-	img1.resizeHalf(old1);
-	img2.resizeHalf(old2);
-	img3.resizeHalf(old3);
-	img4.resizeHalf(old4);
-
-	// ...to blit them to the images of the new directories
-	new1.simpleAlphaBlit(old1, s/2, s/2);
-	new2.simpleAlphaBlit(old2, 0, s/2);
-	new3.simpleAlphaBlit(old3, s/2, 0);
-	new4.simpleAlphaBlit(old4, 0, 0);
-
-	// now save the new images in the output directory
-	if (image_format == "png") {
-		new1.writePNG((dir / "1.png").string());
-		new2.writePNG((dir / "2.png").string());
-		new3.writePNG((dir / "3.png").string());
-		new4.writePNG((dir / "4.png").string());
-	} else {
-		new1.writeJPEG((dir / "1.jpg").string(), jpeg_quality);
-		new2.writeJPEG((dir / "2.jpg").string(), jpeg_quality);
-		new3.writeJPEG((dir / "3.jpg").string(), jpeg_quality);
-		new4.writeJPEG((dir / "4.jpg").string(), jpeg_quality);
-	}
-
-	// don't forget the base.png
-	RGBAImage base_big(2*s, 2*s), base;
-	base_big.simpleAlphaBlit(new1, 0, 0);
-	base_big.simpleAlphaBlit(new2, s, 0);
-	base_big.simpleAlphaBlit(new3, 0, s);
-	base_big.simpleAlphaBlit(new4, s, s);
-	base_big.resizeHalf(base);
-	if (image_format == "png")
-		base.writePNG((dir / "base.png").string());
-	else
-		base.writeJPEG((dir / "base.jpg").string(), jpeg_quality);
-}
-
-/**
- * Starts the whole rendering thing.
- */
-bool RenderManager::run() {
-
-	// ###
-	// ### First big step: Load/parse/validate the configuration file
-	// ###
-
-	config::ValidationMap validation = config.parse(opts.config.string());
-
-	// show infos/warnings/errors if configuration file has something
-	if (!validation.isEmpty()) {
-		if (validation.isCritical())
-			LOG(FATAL) << "Unable to parse configuration file:";
-		else
-			LOG(WARNING) << "There is a problem parsing the configuration file:";
-		validation.log();
-		LOG(WARNING) << "Please have a look at the documentation.";
-	}
-	if (validation.isCritical())
-		return false;
-
-	// parse global logging configuration file and configure logging
-	config::LoggingConfig::configureLogging(opts.logging_config);
-
-	// configure logging from this configuration file
-	config.configureLogging();
-
+void RenderManager::initialize() {
 	// an output directory would be nice -- create one if it does not exist
 	if (!fs::is_directory(config.getOutputDir()) && !fs::create_directories(config.getOutputDir())) {
 		LOG(FATAL) << "Error: Unable to create output directory!";
-		return false;
+		return;/* false;*/
 	}
 
 	// create a helper for the configuration
@@ -365,17 +156,12 @@ bool RenderManager::run() {
 	// read old settings from already rendered maps
 	// TODO fancy description blah blah
 	confighelper.readMapSettings();
-	// set the render behaviors the user specified with the -rsaf flags
-	RenderBehaviorMap render_behaviors = RenderBehaviorMap::fromRenderOpts(config, opts);
+}
 
+void RenderManager::scanWorlds() {
 	// and get the maps and worlds of the configuration
 	auto config_worlds = config.getWorlds();
 	auto config_maps = config.getMaps();
-
-	// maps for world- and tile set objects
-	std::map<std::string, std::array<mc::World, 4> > worlds;
-	// (world, render view, rotation) -> tile set
-	std::map<config::TileSetKey, std::array<std::shared_ptr<TileSet>, 4> > tile_sets;
 
 	// ###
 	// ### Second big step: Scan the worlds
@@ -423,7 +209,7 @@ bool RenderManager::run() {
 				world.setWorldCrop(world_it->second.getWorldCrop());
 				if (!world.load()) {
 					LOG(FATAL) << "Unable to load world " << world_name << "!";
-					return false;
+					return/* false*/;
 				}
 				// create a tileset for this world
 				std::shared_ptr<TileSet> tile_set(render_view->createTileSet(tile_set_it->tile_width));
@@ -456,6 +242,12 @@ bool RenderManager::run() {
 			delete render_view;
 		}
 	}
+}
+
+void RenderManager::renderMaps() {
+	// and get the maps and worlds of the configuration
+	auto config_worlds = config.getWorlds();
+	auto config_maps = config.getMaps();
 
 	// write all template files
 	writeTemplates();
@@ -649,7 +441,193 @@ bool RenderManager::run() {
 	std::time_t took_all = std::time(nullptr) - time_start_all;
 	LOG(INFO) << "Rendering all worlds took " << took_all << " seconds.";
 	LOG(INFO) << "Finished.....aaand it's gone!";
+	return/* true*/;
+}
+
+/**
+ * This method copies a file from the template directory to the output directory and
+ * replaces the variables from the map.
+ */
+bool RenderManager::copyTemplateFile(const std::string& filename,
+		const std::map<std::string, std::string>& vars) const {
+	std::ifstream file(config.getTemplatePath(filename).string().c_str());
+	if (!file)
+		return false;
+	std::stringstream ss;
+	ss << file.rdbuf();
+	file.close();
+	std::string data = ss.str();
+
+	for (std::map<std::string, std::string>::const_iterator it = vars.begin();
+			it != vars.end(); ++it) {
+		data = util::replaceAll(data, "{" + it->first + "}", it->second);
+	}
+
+	std::ofstream out(config.getOutputPath(filename).string().c_str());
+	if (!out)
+		return false;
+	out << data;
+	out.close();
 	return true;
+}
+
+bool RenderManager::copyTemplateFile(const std::string& filename) const {
+	std::map<std::string, std::string> vars;
+	return copyTemplateFile(filename, vars);
+}
+
+bool RenderManager::writeTemplateIndexHtml() const {
+	std::map<std::string, std::string> vars;
+	vars["version"] = MAPCRAFTER_VERSION;
+	if (strlen(MAPCRAFTER_GITVERSION))
+		vars["version"] += std::string(" (") + MAPCRAFTER_GITVERSION + ")";
+
+	time_t t = std::time(nullptr);
+	char buffer[256];
+	std::strftime(buffer, sizeof(buffer), "%d.%m.%Y, %H:%M:%S", std::localtime(&t));
+	vars["lastUpdate"] = buffer;
+
+	vars["backgroundColor"] = config.getBackgroundColor().hex;
+
+	return copyTemplateFile("index.html", vars);
+}
+
+/**
+ * This method copies all template files to the output directory.
+ */
+void RenderManager::writeTemplates() const {
+	if (!fs::is_directory(config.getTemplateDir())) {
+		LOG(WARNING) << "The template directory does not exist! Can't copy templates!";
+		return;
+	}
+
+	if (!writeTemplateIndexHtml())
+		LOG(WARNING) << "Warning: Unable to copy template file index.html!";
+	// TODO write config.js also here?
+	confighelper.writeMapSettings();
+
+	if (!fs::exists(config.getOutputPath("markers.js"))
+			&& !util::copyFile(config.getTemplatePath("markers.js"), config.getOutputPath("markers.js")))
+		LOG(WARNING) << "Unable to copy template file markers.js!";
+
+	// copy all other files and directories
+	fs::directory_iterator end;
+	for (fs::directory_iterator it(config.getTemplateDir()); it != end;
+			++it) {
+		std::string filename = BOOST_FS_FILENAME(it->path());
+		// do not copy the index.html
+		if (filename == "index.html")
+			continue;
+		// and do not overwrite markers.js and markers-generated.js
+		if ((filename == "markers.js" || filename == "markers-generated.js")
+				&& fs::exists(config.getOutputPath(filename)))
+			continue;
+		if (fs::is_regular_file(*it)) {
+			if (!util::copyFile(*it, config.getOutputPath(filename)))
+				LOG(WARNING) << "Unable to copy template file " << filename;
+		} else if (fs::is_directory(*it)) {
+			if (!util::copyDirectory(*it, config.getOutputPath(filename)))
+				LOG(WARNING) << "Unable to copy template directory " << filename;
+		}
+	}
+}
+
+/**
+ * This method increases the max zoom of a rendered map and makes the necessary changes
+ * on the tile tree.
+ */
+void RenderManager::increaseMaxZoom(const fs::path& dir,
+		std::string image_format, int jpeg_quality) const {
+	if (fs::exists(dir / "1")) {
+		// at first rename the directories 1 2 3 4 (zoom level 0) and make new directories
+		util::moveFile(dir / "1", dir / "1_");
+		fs::create_directories(dir / "1");
+		// then move the old tile trees one zoom level deeper
+		util::moveFile(dir / "1_", dir / "1/4");
+		// also move the images of the directories
+		util::moveFile(dir / (std::string("1.") + image_format),
+				dir / (std::string("1/4.") + image_format));
+	}
+
+	// do the same for the other directories
+	if (fs::exists(dir / "2")) {
+		util::moveFile(dir / "2", dir / "2_");
+		fs::create_directories(dir / "2");
+		util::moveFile(dir / "2_", dir / "2/3");
+		util::moveFile(dir / (std::string("2.") + image_format),
+				dir / (std::string("2/3.") + image_format));
+	}
+	
+	if (fs::exists(dir / "3")) {
+		util::moveFile(dir / "3", dir / "3_");
+		fs::create_directories(dir / "3");
+		util::moveFile(dir / "3_", dir / "3/2");
+		util::moveFile(dir / (std::string("3.") + image_format),
+				dir / (std::string("3/2.") + image_format));
+	}
+	
+	if (fs::exists(dir / "4")) {
+		util::moveFile(dir / "4", dir / "4_");
+		fs::create_directories(dir / "4");
+		util::moveFile(dir / "4_", dir / "4/1");
+		util::moveFile(dir / (std::string("4.") + image_format),
+				dir / (std::string("4/1.") + image_format));
+	}
+
+	// now read the images, which belong to the new directories
+	RGBAImage img1, img2, img3, img4;
+	if (image_format == "png") {
+		img1.readPNG((dir / "1/4.png").string());
+		img2.readPNG((dir / "2/3.png").string());
+		img3.readPNG((dir / "3/2.png").string());
+		img4.readPNG((dir / "4/1.png").string());
+	} else {
+		img1.readJPEG((dir / "1/4.jpg").string());
+		img2.readJPEG((dir / "2/3.jpg").string());
+		img3.readJPEG((dir / "3/2.jpg").string());
+		img4.readJPEG((dir / "4/1.jpg").string());
+	}
+
+	int s = img1.getWidth();
+	// create images for the new directories
+	RGBAImage new1(s, s), new2(s, s), new3(s, s), new4(s, s);
+	RGBAImage old1, old2, old3, old4;
+	// resize the old images...
+	img1.resizeHalf(old1);
+	img2.resizeHalf(old2);
+	img3.resizeHalf(old3);
+	img4.resizeHalf(old4);
+
+	// ...to blit them to the images of the new directories
+	new1.simpleAlphaBlit(old1, s/2, s/2);
+	new2.simpleAlphaBlit(old2, 0, s/2);
+	new3.simpleAlphaBlit(old3, s/2, 0);
+	new4.simpleAlphaBlit(old4, 0, 0);
+
+	// now save the new images in the output directory
+	if (image_format == "png") {
+		new1.writePNG((dir / "1.png").string());
+		new2.writePNG((dir / "2.png").string());
+		new3.writePNG((dir / "3.png").string());
+		new4.writePNG((dir / "4.png").string());
+	} else {
+		new1.writeJPEG((dir / "1.jpg").string(), jpeg_quality);
+		new2.writeJPEG((dir / "2.jpg").string(), jpeg_quality);
+		new3.writeJPEG((dir / "3.jpg").string(), jpeg_quality);
+		new4.writeJPEG((dir / "4.jpg").string(), jpeg_quality);
+	}
+
+	// don't forget the base.png
+	RGBAImage base_big(2*s, 2*s), base;
+	base_big.simpleAlphaBlit(new1, 0, 0);
+	base_big.simpleAlphaBlit(new2, s, 0);
+	base_big.simpleAlphaBlit(new3, 0, s);
+	base_big.simpleAlphaBlit(new4, s, s);
+	base_big.resizeHalf(base);
+	if (image_format == "png")
+		base.writePNG((dir / "base.png").string());
+	else
+		base.writeJPEG((dir / "base.jpg").string(), jpeg_quality);
 }
 
 }

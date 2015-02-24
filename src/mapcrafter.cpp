@@ -17,6 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "mapcraftercore/config/loggingconfig.h"
 #include "mapcraftercore/renderer/manager.h"
 #include "mapcraftercore/util.h"
 #include "mapcraftercore/version.h"
@@ -35,7 +36,7 @@ using namespace mapcrafter;
 
 int main(int argc, char** argv) {
 	renderer::RenderOpts opts;
-	std::string color, config;
+	std::string arg_color, arg_config;
 
 	po::options_description general("General options");
 	general.add_options()
@@ -46,14 +47,14 @@ int main(int argc, char** argv) {
 	logging.add_options()
 		("logging-config", po::value<fs::path>(&opts.logging_config),
 			"the path to the global logging configuration file to use (automatically determined if not specified)")
-		("color", po::value<std::string>(&color)->default_value("auto"),
+		("color", po::value<std::string>(&arg_color)->default_value("auto"),
 			"whether terminal output is colored (true, false or auto)")
 		("batch,b", "deactivates the animated progress bar and enables the progress logger instead");
 
 	po::options_description renderer("Renderer options");
 	renderer.add_options()
 		("find-resources", "shows available resource paths, for example template/texture directory and global logging configuration file")
-		("config,c", po::value<std::string>(&config),
+		("config,c", po::value<std::string>(&arg_config),
 			"the path to the configuration file to use (required)")
 		("render-skip,s", po::value<std::vector<std::string>>(&opts.render_skip)->multitoken(),
 			"skips rendering the specified map(s)")
@@ -80,14 +81,14 @@ int main(int argc, char** argv) {
 
 	po::notify(vm);
 
-	if (color == "true")
+	if (arg_color == "true")
 		util::setcolor::setEnabled(util::TerminalColorStates::ENABLED);
-	else if (color == "false")
+	else if (arg_color == "false")
 		util::setcolor::setEnabled(util::TerminalColorStates::DISABLED);
-	else if (color == "auto")
+	else if (arg_color == "auto")
 		util::setcolor::setEnabled(util::TerminalColorStates::AUTO);
 	else {
-		std::cerr << "Invalid argument '" << color << "' for '--color'." << std::endl;
+		std::cerr << "Invalid argument '" << arg_color << "' for '--color'." << std::endl;
 		std::cerr << "Allowed arguments are 'true', 'false' or 'auto'." << std::endl;
 		std::cerr << "Use '" << argv[0] << " --help' for more information." << std::endl;
 		return 1;
@@ -148,14 +149,42 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	opts.config = config;
+	opts.config = arg_config;
 	opts.skip_all = vm.count("render-reset");
 	opts.batch = vm.count("batch");
 	if (!vm.count("logging-config"))
 		opts.logging_config = util::findLoggingConfigFile();
 
-	renderer::RenderManager manager(opts);
-	if (!manager.run())
+	// ###
+	// ### First big step: Load/parse/validate the configuration file
+	// ###
+
+	config::MapcrafterConfig config;
+	config::ValidationMap validation = config.parse(opts.config.string());
+
+	// show infos/warnings/errors if configuration file has something
+	if (!validation.isEmpty()) {
+		if (validation.isCritical())
+			LOG(FATAL) << "Unable to parse configuration file:";
+		else
+			LOG(WARNING) << "There is a problem parsing the configuration file:";
+		validation.log();
+		LOG(WARNING) << "Please have a look at the documentation.";
+	}
+	if (validation.isCritical())
 		return 1;
+
+	// parse global logging configuration file and configure logging
+	config::LoggingConfig::configureLogging(opts.logging_config);
+
+	// configure logging from this configuration file
+	config.configureLogging();
+
+	renderer::RenderManager manager(config, opts);
+	manager.setRenderBehaviors(renderer::RenderBehaviorMap::fromRenderOpts(config, opts));
+	manager.initialize();
+	manager.scanWorlds();
+	manager.renderMaps();
+
 	return 0;
 }

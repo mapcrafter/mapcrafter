@@ -31,8 +31,6 @@
 
 namespace fs = boost::filesystem;
 
-namespace config = mapcrafter::config;
-
 namespace mapcrafter {
 namespace renderer {
 
@@ -79,13 +77,20 @@ private:
  * This does the whole rendering process.
  */
 class RenderManager {
-private:
-	RenderOpts opts;
-	config::MapcrafterConfig config;
-	config::MapcrafterConfigHelper confighelper;
+public:
+	RenderManager(const config::MapcrafterConfig& config, const RenderOpts& opts);
 
+	void setRenderBehaviors(const RenderBehaviorMap& render_behaviors);
+
+	void initialize();
+	void scanWorlds();
+	void renderMaps();
+
+	bool run();
+
+private:
 	bool copyTemplateFile(const std::string& filename,
-	        const std::map<std::string, std::string>& vars) const;
+			const std::map<std::string, std::string>& vars) const;
 	bool copyTemplateFile(const std::string& filename) const;
 
 	bool writeTemplateIndexHtml() const;
@@ -94,10 +99,15 @@ private:
 	void increaseMaxZoom(const fs::path& dir, std::string image_format,
 			int jpeg_quality = 85) const;
 
-public:
-	RenderManager(const RenderOpts& opts);
+	RenderOpts opts;
+	config::MapcrafterConfig config;
+	config::MapcrafterConfigHelper confighelper;
+	RenderBehaviorMap render_behaviors;
 
-	bool run();
+	// maps for world- and tile set objects
+	std::map<std::string, std::array<mc::World, 4> > worlds;
+	// (world, render view, rotation) -> tile set
+	std::map<config::TileSetKey, std::array<std::shared_ptr<TileSet>, 4> > tile_sets;
 };
 
 }
