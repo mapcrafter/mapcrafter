@@ -38,14 +38,14 @@ config::ImageFormat as<config::ImageFormat>(const std::string& from) {
 namespace mapcrafter {
 namespace config {
 
-TileSetKey::TileSetKey(const std::string& map_name, const std::string render_view,
+TileSetKey::TileSetKey(const std::string& world_name, const std::string render_view,
 		int tile_width)
-	: map_name(map_name), render_view(render_view), tile_width(tile_width) {
+	: world_name(world_name), render_view(render_view), tile_width(tile_width) {
 }
 
 bool TileSetKey::operator<(const TileSetKey& other) const {
-	if (map_name != other.map_name)
-		return map_name < other.map_name;
+	if (world_name != other.world_name)
+		return world_name < other.world_name;
 	if (render_view != other.render_view)
 		return render_view < other.render_view;
 	if (tile_width != other.tile_width)

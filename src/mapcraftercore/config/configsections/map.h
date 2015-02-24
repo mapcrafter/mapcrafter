@@ -36,11 +36,11 @@ namespace config {
 
 // TODO is that name appropriate??
 struct TileSetKey {
-	std::string map_name;
+	std::string world_name;
 	std::string render_view;
 	int tile_width;
 
-	TileSetKey(const std::string& map_name, const std::string render_view,
+	TileSetKey(const std::string& world_name, const std::string render_view,
 			int tile_width);
 
 	bool operator<(const TileSetKey& other) const;

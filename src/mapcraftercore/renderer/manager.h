@@ -108,6 +108,10 @@ private:
 	std::map<std::string, std::array<mc::World, 4> > worlds;
 	// (world, render view, rotation) -> tile set
 	std::map<config::TileSetKey, std::array<std::shared_ptr<TileSet>, 4> > tile_sets;
+
+	// all required (= not skipped) maps and rotations
+	// as pair (map name, required rotations)
+	std::vector<std::pair<std::string, std::set<int> > > required_maps;
 };
 
 }
