@@ -160,7 +160,7 @@ int main(int argc, char** argv) {
 	// ###
 
 	config::MapcrafterConfig config;
-	config::ValidationMap validation = config.parse(opts.config.string());
+	config::ValidationMap validation = config.parseFile(opts.config.string());
 
 	// show infos/warnings/errors if configuration file has something
 	if (!validation.isEmpty()) {

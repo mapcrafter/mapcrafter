@@ -177,7 +177,7 @@ int main(int argc, char** argv) {
 	}
 
 	config::MapcrafterConfig config;
-	config::ValidationMap validation = config.parse(config_file);
+	config::ValidationMap validation = config.parseFile(config_file);
 
 	if (!validation.isEmpty()) {
 		if (validation.isCritical())

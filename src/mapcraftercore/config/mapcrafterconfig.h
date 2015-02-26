@@ -20,12 +20,12 @@
 #ifndef MAPCRAFTERCONFIG_H_
 #define MAPCRAFTERCONFIG_H_
 
+#include "validation.h"
 #include "configsections/log.h"
 #include "configsections/map.h"
 #include "configsections/marker.h"
 #include "configsections/world.h"
 
-#include "validation.h"
 #include <iostream>
 #include <map>
 #include <string>
@@ -36,6 +36,9 @@ namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace config {
+
+class INIConfig;
+class INIConfigSection;
 
 struct Color {
 	std::string hex;
@@ -78,7 +81,8 @@ public:
 	MapcrafterConfig();
 	~MapcrafterConfig();
 
-	ValidationMap parse(const std::string& filename);
+	ValidationMap parseFile(const std::string& filename);
+	ValidationMap parseString(const std::string& string, fs::path config_dir = "");
 	void dump(std::ostream& out) const;
 
 	void configureLogging() const;
@@ -105,6 +109,8 @@ public:
 	const std::vector<LogSection>& getLogSections() const;
 
 private:
+	ValidationMap parse(const INIConfig& config, const fs::path& config_dir);
+
 	WorldSection world_global;
 	MapSection map_global;
 	MarkerSection marker_global;

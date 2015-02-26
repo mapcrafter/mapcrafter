@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
 	}
 
 	config::MapcrafterConfig parser;
-	config::ValidationMap validation = parser.parse(argv[1]);
+	config::ValidationMap validation = parser.parseFile(argv[1]);
 
 	if (!validation.isEmpty()) {
 		if (validation.isCritical())
