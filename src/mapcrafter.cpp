@@ -180,11 +180,12 @@ int main(int argc, char** argv) {
 	// configure logging from this configuration file
 	config.configureLogging();
 
-	renderer::RenderManager manager(config, opts);
+	renderer::RenderManager manager(config);
 	manager.setRenderBehaviors(renderer::RenderBehaviorMap::fromRenderOpts(config, opts));
 	manager.initialize();
-	manager.scanWorlds();
-	manager.renderMaps();
+	//manager.scanWorlds();
+	//manager.renderMaps();
+	manager.run(opts.batch);
 
 	return 0;
 }

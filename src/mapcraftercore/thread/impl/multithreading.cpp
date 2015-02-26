@@ -129,8 +129,8 @@ void MultiThreadingDispatcher::dispatch(const renderer::RenderContext& context,
 			jobs++;
 		}
 
-	int render_tiles = context.tile_set->getRequiredRenderTilesCount();
-	LOG(INFO) << thread_count << " threads will render " << render_tiles << " render tiles.";
+	//int render_tiles = context.tile_set->getRequiredRenderTilesCount();
+	//LOG(INFO) << thread_count << " threads will render " << render_tiles << " render tiles.";
 
 	for (int i = 0; i < thread_count; i++) {
 		renderer::RenderContext thread_context = context;

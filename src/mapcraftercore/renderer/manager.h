@@ -32,6 +32,11 @@
 namespace fs = boost::filesystem;
 
 namespace mapcrafter {
+
+namespace util {
+class IProgressHandler;
+}
+
 namespace renderer {
 
 /**
@@ -78,15 +83,20 @@ private:
  */
 class RenderManager {
 public:
-	RenderManager(const config::MapcrafterConfig& config, const RenderOpts& opts);
+	RenderManager(const config::MapcrafterConfig& config);
 
+	void setThreadCount(int thread_count);
 	void setRenderBehaviors(const RenderBehaviorMap& render_behaviors);
 
 	void initialize();
 	void scanWorlds();
-	void renderMaps();
 
-	bool run();
+	void initializeMap(const std::string& map);
+	void renderMap(const std::string& map, int rotation, util::IProgressHandler* progress);
+
+	void run(bool batch);
+
+	const std::vector<std::pair<std::string, std::set<int> > >& getRequiredMaps();
 
 private:
 	bool copyTemplateFile(const std::string& filename,
@@ -99,10 +109,13 @@ private:
 	void increaseMaxZoom(const fs::path& dir, std::string image_format,
 			int jpeg_quality = 85) const;
 
-	RenderOpts opts;
 	config::MapcrafterConfig config;
 	config::MapcrafterConfigHelper confighelper;
+
+	int thread_count;
 	RenderBehaviorMap render_behaviors;
+
+	std::time_t time_started_scanning;
 
 	// maps for world- and tile set objects
 	std::map<std::string, std::array<mc::World, 4> > worlds;
