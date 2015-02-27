@@ -246,6 +246,9 @@ void RenderManager::scanWorlds() {
 		// clean up render view
 		delete render_view;
 	}
+
+	// TODO do it here?
+	writeTemplates();
 }
 
 void RenderManager::initializeMap(const std::string& map) {
