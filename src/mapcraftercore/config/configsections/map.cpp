@@ -19,6 +19,7 @@
 
 #include "../configsections/map.h"
 #include "../iniconfig.h"
+#include "../../util.h"
 
 namespace mapcrafter {
 namespace util {
@@ -32,22 +33,32 @@ config::ImageFormat as<config::ImageFormat>(const std::string& from) {
 	throw std::invalid_argument("Must be 'png' or 'jpeg'!");
 }
 
+template <>
+renderer::RenderViewType as<renderer::RenderViewType>(const std::string& from) {
+	if (from == "isometric")
+		return renderer::RenderViewType::ISOMETRIC;
+	else if (from == "topdown")
+		return renderer::RenderViewType::TOPDOWN;
+	throw std::invalid_argument("Must be 'isometric' or 'topdown'!");
+}
+
 }
 }
 
 namespace mapcrafter {
 namespace config {
 
-TileSetKey::TileSetKey(const std::string& world_name, const std::string render_view,
-		int tile_width)
+TileSetKey::TileSetKey(const std::string& world_name,
+		renderer::RenderViewType render_view, int tile_width)
 	: world_name(world_name), render_view(render_view), tile_width(tile_width) {
 }
 
 bool TileSetKey::operator<(const TileSetKey& other) const {
 	if (world_name != other.world_name)
 		return world_name < other.world_name;
+	// I'm lazy -- enum comparison might not work with the old gcc
 	if (render_view != other.render_view)
-		return render_view < other.render_view;
+		return util::str(render_view) < util::str(other.render_view);
 	if (tile_width != other.tile_width)
 		return tile_width < other.tile_width;
 	return false;
@@ -110,7 +121,7 @@ std::string MapSection::getWorld() const {
 	return world.getValue();
 }
 
-std::string MapSection::getRenderView() const {
+renderer::RenderViewType MapSection::getRenderView() const {
 	return render_view.getValue();
 }
 
@@ -186,7 +197,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	name_long = name_short;
 
 	// set some default configuration values
-	render_view.setDefault("isometric");
+	render_view.setDefault(renderer::RenderViewType::ISOMETRIC);
 	render_mode.setDefault("daylight");
 	rotations.setDefault("top-left");
 

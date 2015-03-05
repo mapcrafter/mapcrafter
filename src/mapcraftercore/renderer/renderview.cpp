@@ -39,7 +39,6 @@ RenderView::~RenderView() {
 void RenderView::configureBlockImages(BlockImages* block_images,
 	const config::WorldSection& world_config,
 	const config::MapSection& map_config) const {
-	// TODO add some handling of NDEBUG assert stuff to cmake files
 	assert(block_images != nullptr);
 	block_images->setRenderSpecialBlocks(map_config.renderUnknownBlocks(),
 			map_config.renderLeavesTransparent());
@@ -52,12 +51,20 @@ void RenderView::configureTileRenderer(TileRenderer* tile_renderer,
 	tile_renderer->setRenderBiomes(map_config.renderBiomes());
 }
 
-RenderView* createRenderView(const std::string& render_view) {
-	if (render_view == "isometric")
-		return new IsometricRenderView();
-	else if (render_view == "topdown")
-		return new TopdownRenderView();
-	return nullptr;
+std::ostream& operator<<(std::ostream& out, RenderViewType render_view) {
+	switch (render_view) {
+	case RenderViewType::ISOMETRIC: return out << "isometric";
+	case RenderViewType::TOPDOWN: return out << "topdown";
+	default: return out << "unknown";
+	}
+}
+
+RenderView* createRenderView(RenderViewType render_view) {
+	switch (render_view) {
+	case RenderViewType::ISOMETRIC: return new IsometricRenderView();
+	case RenderViewType::TOPDOWN: return new TopdownRenderView();
+	default: return nullptr;
+	}
 }
 
 } /* namespace renderer */

@@ -115,7 +115,7 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 	if (name == "cave" || name == "cavelight") {
 		MultiplexingRenderMode* render_mode = new MultiplexingRenderMode();
 		// hide some walls of caves which would cover the view into the caves
-		if (map_config.getRenderView() == "isometric")
+		if (map_config.getRenderView() == RenderViewType::ISOMETRIC)
 			render_mode->addRenderMode(new CaveRenderMode({mc::DIR_SOUTH, mc::DIR_WEST, mc::DIR_TOP}));
 		else
 			render_mode->addRenderMode(new CaveRenderMode({mc::DIR_TOP}));

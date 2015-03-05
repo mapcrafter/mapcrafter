@@ -286,7 +286,7 @@ picojson::value MapcrafterConfigHelper::getConfigJSON() const {
 		map_json["name"] = picojson::value(it->getLongName());
 		map_json["world"] = picojson::value(it->getWorld());
 		map_json["worldName"] = picojson::value(world.getWorldName());
-		map_json["renderView"] = picojson::value(it->getRenderView());
+		map_json["renderView"] = picojson::value(util::str(it->getRenderView()));
 		map_json["textureSize"] = picojson::value((double) it->getTextureSize());
 		map_json["imageFormat"] = picojson::value(it->getImageFormatSuffix());
 		if (world.getDefaultView() != mc::BlockPos(0, 0, 0)) {

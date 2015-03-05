@@ -21,8 +21,8 @@
 #define SECTIONS_MAP_H_
 
 #include "../configsection.h"
-
 #include "../validation.h"
+#include "../../renderer/renderview.h"
 
 #include <iostream>
 #include <set>
@@ -37,10 +37,10 @@ namespace config {
 // TODO is that name appropriate??
 struct TileSetKey {
 	std::string world_name;
-	std::string render_view;
+	renderer::RenderViewType render_view;
 	int tile_width;
 
-	TileSetKey(const std::string& world_name, const std::string render_view,
+	TileSetKey(const std::string& world_name, renderer::RenderViewType render_view,
 			int tile_width);
 
 	bool operator<(const TileSetKey& other) const;
@@ -69,7 +69,7 @@ public:
 	std::string getLongName() const;
 	std::string getWorld() const;
 
-	std::string getRenderView() const;
+	renderer::RenderViewType getRenderView() const;
 	std::string getRenderMode() const;
 	std::set<int> getRotations() const;
 	fs::path getTextureDir() const;
@@ -104,7 +104,8 @@ private:
 	std::string name_short, name_long;
 	Field<std::string> world;
 
-	Field<std::string> render_view, render_mode;
+	Field<renderer::RenderViewType> render_view;
+	Field<std::string> render_mode;
 	Field<std::string> rotations;
 	std::set<int> rotations_set;
 

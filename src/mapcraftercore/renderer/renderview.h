@@ -20,7 +20,7 @@
 #ifndef RENDERVIEW_H_
 #define RENDERVIEW_H_
 
-#include "rendermode.h"
+#include <iostream>
 
 namespace mapcrafter {
 
@@ -37,6 +37,7 @@ class WorldSection;
 namespace renderer {
 
 class BlockImages;
+class RenderMode;
 class TileSet;
 class TileRenderer;
 
@@ -80,7 +81,15 @@ public:
 			const config::MapSection& map_config) const;
 };
 
-RenderView* createRenderView(const std::string& render_view);
+enum class RenderViewType {
+	ISOMETRIC,
+	TOPDOWN
+};
+
+// TODO operator<< here but util::as in the config section file?
+std::ostream& operator<<(std::ostream& out, RenderViewType render_view);
+
+RenderView* createRenderView(RenderViewType render_view);
 
 } /* namespace renderer */
 } /* namespace mapcrafter */
