@@ -27,7 +27,7 @@ namespace mapcrafter {
 namespace renderer {
 
 BlockImages* TopdownRenderView::createBlockImages() const {
-	return new TopdownBlockImages;
+	return new TopdownBlockImages();
 }
 
 TileSet* TopdownRenderView::createTileSet(int tile_width) const {

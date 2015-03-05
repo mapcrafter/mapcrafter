@@ -35,19 +35,23 @@ namespace renderer {
 class Biome;
 
 // extra data starting at the 5. bit
-const int DATA_NORTH = 16;
-const int DATA_EAST = 32;
-const int DATA_SOUTH = 64;
-const int DATA_WEST = 128;
-const int DATA_TOP = 256;
+const int DATA_NORTH = 1 << 4;
+const int DATA_EAST = 1 << 5;
+const int DATA_SOUTH = 1 << 6;
+const int DATA_WEST = 1 << 7;
+const int DATA_TOP = 1 << 8;
 
 // the last three bits of 2 bytes
-const int EDGE_NORTH = 8192;
-const int EDGE_EAST = 16384;
-const int EDGE_BOTTOM = 32768;
+const int EDGE_NORTH = 1 << 13;
+const int EDGE_EAST = 1 << 14;
+const int EDGE_BOTTOM = 1 << 15;
 
 // some data values and stuff for special blocks
 const int GRASS_SNOW = 16;
+
+const int OPAQUE_WATER = 1 << 4;
+const int OPAQUE_WATER_SOUTH = DATA_SOUTH;
+const int OPAQUE_WATER_WEST = DATA_WEST;
 
 const int DOOR_NORTH = 16;
 const int DOOR_SOUTH = 32;
@@ -267,9 +271,15 @@ public:
 	 */
 	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const = 0;
 
-	// TODO keep this here?
-	virtual int getMaxWaterNeededOpaque() const = 0;
-	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const = 0;
+	/**
+	 * Returns how many blocks of water are needed in a row until the water becomes (almost)
+	 * opaque and a preblit water block can be used instead of wasting performance with
+	 * alphablitting. This applies only to the behavior of rendering water in the plain
+	 * render mode.
+	 *
+	 * // TODO maybe move this to AbstractBlockImages and also create an AbstractTileRenderer?
+	 */
+	virtual int getMaxWaterPreblit() const = 0;
 
 	/**
 	 * Returns the used texture size. This should be the texture size of the textures
@@ -316,8 +326,7 @@ public:
 
 	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;
 
-	virtual int getMaxWaterNeededOpaque() const = 0;
-	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const = 0;
+	virtual int getMaxWaterPreblit() const;
 
 	virtual int getTextureSize() const;
 	virtual int getBlockSize() const = 0;
@@ -375,6 +384,8 @@ protected:
 	 */
 	virtual void createBiomeBlocks();
 
+	virtual int createOpaqueWater() = 0;
+
 	/**
 	 * Returns the blocks which should be (in that order) exported by the exportBlocks-method.
 	 * You can overwrite this if you want to export other blocks as well / have other
@@ -417,6 +428,8 @@ protected:
 	// set of blocks (id, data as key again) which contain transparency
 	std::unordered_set<uint32_t> block_transparency;
 	RGBAImage unknown_block;
+
+	int max_water_preblit;
 };
 
 }

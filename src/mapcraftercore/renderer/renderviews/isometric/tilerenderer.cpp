@@ -132,14 +132,10 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 
 IsometricTileRenderer::IsometricTileRenderer(BlockImages* images, int tile_width,
 		mc::WorldCache* world, RenderMode* render_mode)
-	: TileRenderer(images, tile_width, world, render_mode), use_preblit_water(false) {
+	: TileRenderer(images, tile_width, world, render_mode) {
 }
 
 IsometricTileRenderer::~IsometricTileRenderer() {
-}
-
-void IsometricTileRenderer::setUsePreblitWater(bool use_preblit_water) {
-	this->use_preblit_water = use_preblit_water;
 }
 
 void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
@@ -149,7 +145,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 
 	// get the maximum count of water blocks
 	// blitted about each over, until they are nearly opaque
-	int max_water = images->getMaxWaterNeededOpaque();
+	int max_water = images->getMaxWaterPreblit();
 
 	// all visible blocks which are rendered in this tile
 	std::set<RenderBlock> blocks;
@@ -255,16 +251,21 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 								south = getBlock(top.pos + mc::DIR_SOUTH);
 								west = getBlock(top.pos + mc::DIR_WEST);
 
-								bool neighbor_south = (south.id == 8 || south.id == 9);
+								id = 8;
+								data = OPAQUE_WATER;
+								bool neighbor_south = !south.isFullWater();
 								if (neighbor_south)
-									data |= DATA_SOUTH;
-								bool neighbor_west = (west.id == 8 || west.id == 9);
+								//	data |= DATA_SOUTH;
+									data |= OPAQUE_WATER_SOUTH;
+								bool neighbor_west = !west.isFullWater();
 								if (neighbor_west)
-									data |= DATA_WEST;
+								//	data |= DATA_WEST;
+									data |= OPAQUE_WATER_WEST;
 
 								// get image and replace the old render block with this
-								top.image = images->getOpaqueWater(neighbor_south,
-										neighbor_west);
+								//top.image = images->getOpaqueWater(neighbor_south,
+								//		neighbor_west);
+								top.image = images->getBlock(id, data);
 
 								// don't forget the render mode
 								render_mode->draw(top.image, top.pos, id, data);

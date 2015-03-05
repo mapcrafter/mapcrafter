@@ -30,7 +30,7 @@ public:
 	TopdownBlockImages();
 	virtual ~TopdownBlockImages();
 
-	virtual int getMaxWaterNeededOpaque() const;
+	virtual int getMaxWaterPreblit() const;
 	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const;
 
 	virtual int getBlockSize() const;
@@ -43,6 +43,7 @@ protected:
 	virtual RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;
 
 	virtual void createBlocks();
+	virtual int createOpaqueWater();
 };
 
 } /* namespace renderer */

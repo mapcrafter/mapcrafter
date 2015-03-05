@@ -33,7 +33,7 @@ TileRenderer::TileRenderer(BlockImages* images, int tile_width,
 		mc::WorldCache* world, RenderMode* render_mode)
 	: images(images), tile_width(tile_width), world(world), current_chunk(nullptr),
 	  render_mode(render_mode),
-	  render_biomes(true) {
+	  render_biomes(true), use_preblit_water(false) {
 	render_mode->initialize(images, world, &current_chunk);
 }
 
@@ -42,6 +42,10 @@ TileRenderer::~TileRenderer() {
 
 void TileRenderer::setRenderBiomes(bool render_biomes) {
 	this->render_biomes = render_biomes;
+}
+
+void TileRenderer::setUsePreblitWater(bool use_preblit_water) {
+	this->use_preblit_water = use_preblit_water;
 }
 
 mc::Block TileRenderer::getBlock(const mc::BlockPos& pos, int get) {
@@ -131,16 +135,14 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		south = getBlock(pos + mc::DIR_SOUTH);
 		top = getBlock(pos + mc::DIR_TOP);
 
-		// TODO
-		// check if the neighbors on visible faces (top, west, south)
-		// are also full water blocks
-		if (/*!water_preblit &&*/ top.isFullWater())
+		// check if the neighbors on visible faces (top, west, south) are also full water blocks
+		// show water textures on these sides only if there is no water as neighbor too
+		// exception for the top-face and when preblit water is used
+		if (use_preblit_water || !top.isFullWater())
 			data |= DATA_TOP;
-
-		if (west.isFullWater())
+		if (!west.isFullWater())
 			data |= DATA_WEST;
-
-		if (south.isFullWater())
+		if (!south.isFullWater())
 			data |= DATA_SOUTH;
 	} else if (id == 54 || id == 130 || id == 146) { // chests
 		// at first get all neighbor blocks

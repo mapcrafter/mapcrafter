@@ -211,19 +211,14 @@ public:
 	 */
 	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;
 
-	virtual int getMaxWaterNeededOpaque() const;
-	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const;
-
 	virtual int getBlockSize() const;
 
 protected:
-	int max_water;
-	RGBAImage opaque_water[4];
-	RGBAImage shadow_edge_masks[4];
-
 	// factor to darken the side faces
 	// defaults to 0.75 and 0.6
 	double dleft, dright;
+
+	RGBAImage shadow_edge_masks[4];
 
 	virtual uint16_t filterBlockData(uint16_t id, uint16_t data) const;
 	virtual bool isImageTransparent(const RGBAImage& block) const;
@@ -231,8 +226,6 @@ protected:
 
 	void setBlockImage(uint16_t id, uint16_t data, const BlockImage& block);
 	virtual void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
-
-	void testWaterTransparency();
 
 	uint32_t darkenLeft(uint32_t pixel) const;
 	uint32_t darkenRight(uint32_t pixel) const;
@@ -331,6 +324,7 @@ protected:
 	virtual RGBAImage createUnknownBlock() const;
 	virtual RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;
 	virtual void createBlocks();
+	virtual int createOpaqueWater();
 
 	/**
 	 * We overwrite this because we don't want to export all the block variations of every

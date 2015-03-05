@@ -30,7 +30,7 @@ TopdownBlockImages::TopdownBlockImages() {
 TopdownBlockImages::~TopdownBlockImages() {
 }
 
-int TopdownBlockImages::getMaxWaterNeededOpaque() const {
+int TopdownBlockImages::getMaxWaterPreblit() const {
 	return 1;
 }
 
@@ -509,6 +509,48 @@ void TopdownBlockImages::createBlocks() {
 	// id 195 // jungle door
 	// id 196 // acacia door
 	// id 197 // dark oak door
+}
+
+int TopdownBlockImages::createOpaqueWater() {
+	// just use the Ocean biome watercolor
+	RGBAImage water = resources.getBlockTextures().WATER_STILL.colorize(0, 0.39, 0.89);
+
+	RGBAImage opaque_water = water;
+
+	int water_preblit;
+	for (water_preblit = 2; water_preblit < 10; water_preblit++) {
+		RGBAImage tmp = opaque_water;
+		tmp.alphaBlit(tmp, 0, 0);
+
+		// then check alpha
+		uint8_t min_alpha = 255;
+		for (int x = 0; x < tmp.getWidth(); x++) {
+			for (int y = 0; y < tmp.getHeight(); y++) {
+				uint8_t alpha = rgba_alpha(tmp.getPixel(x, y));
+				if (alpha < min_alpha)
+					min_alpha = alpha;
+			}
+		}
+
+		// images are "enough" opaque
+		if (min_alpha == 255) {
+			// do a last blit
+			opaque_water.alphaBlit(water, 0, 0);
+			break;
+		// when image is too transparent, blit it over
+		} else {
+			opaque_water.alphaBlit(water, 0, 0);
+		}
+	}
+
+	uint16_t id = 8;
+	uint16_t data = OPAQUE_WATER;
+	block_images[id | (data) << 16] = opaque_water;
+	block_images[id | (data | OPAQUE_WATER_SOUTH) << 16] = opaque_water;
+	block_images[id | (data | OPAQUE_WATER_WEST) << 16] = opaque_water;
+	block_images[id | (data | OPAQUE_WATER_SOUTH | OPAQUE_WATER_WEST) << 16] = opaque_water;
+
+	return water_preblit;
 }
 
 } /* namespace renderer */

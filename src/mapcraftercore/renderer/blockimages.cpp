@@ -236,7 +236,7 @@ BlockImages::~BlockImages() {
 
 AbstractBlockImages::AbstractBlockImages()
 	: texture_size(12), rotation(0), render_unknown_blocks(false),
-	  render_leaves_transparent(true) {
+	  render_leaves_transparent(true), max_water_preblit(9042) /* it's over 9000! */ {
 }
 
 AbstractBlockImages::~AbstractBlockImages() {
@@ -264,6 +264,7 @@ void AbstractBlockImages::generateBlocks(const TextureResources& resources) {
 		unknown_block = createUnknownBlock();
 	createBlocks();
 	createBiomeBlocks();
+	max_water_preblit = createOpaqueWater();
 }
 
 RGBAImage AbstractBlockImages::exportBlocks() const {
@@ -327,6 +328,10 @@ RGBAImage AbstractBlockImages::getBiomeBlock(uint16_t id, uint16_t data,
 
 	// create the block if not
 	return createBiomeBlock(id, data, biome);
+}
+
+int AbstractBlockImages::getMaxWaterPreblit() const {
+	return max_water_preblit;
 }
 
 int AbstractBlockImages::getTextureSize() const {

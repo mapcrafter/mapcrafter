@@ -65,12 +65,6 @@ void IsometricRenderView::configureTileRenderer(TileRenderer* tile_renderer,
 		const config::MapSection& map_config) const {
 	assert(tile_renderer != nullptr);
 	RenderView::configureTileRenderer(tile_renderer, world_config, map_config);
-
-	IsometricTileRenderer* renderer = dynamic_cast<IsometricTileRenderer*>(tile_renderer);
-	assert(renderer != nullptr);
-
-	// TODO
-	renderer->setUsePreblitWater(false);
 }
 
 } /* namespace renderer */

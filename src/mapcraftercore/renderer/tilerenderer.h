@@ -50,6 +50,7 @@ public:
 	virtual ~TileRenderer();
 
 	void setRenderBiomes(bool render_biomes);
+	void setUsePreblitWater(bool use_preblit_water);
 
 	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile) = 0;
 
@@ -67,6 +68,7 @@ protected:
 	RenderMode* render_mode;
 
 	bool render_biomes;
+	bool use_preblit_water;
 };
 
 }

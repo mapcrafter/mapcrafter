@@ -48,6 +48,8 @@ TopdownTileRenderer::~TopdownTileRenderer() {
 }
 
 void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, int dx, int dy) {
+	// TODO implement preblit water render behavior
+
 	int texture_size = images->getTextureSize();
 
 	for (int x = 0; x < 16; x++)

@@ -334,15 +334,6 @@ RGBAImage IsometricBlockImages::getBiomeBlock(uint16_t id, uint16_t data,
 	return AbstractBlockImages::getBiomeBlock(id, data, biome);
 }
 
-int IsometricBlockImages::getMaxWaterNeededOpaque() const {
-	return max_water;
-}
-
-const RGBAImage& IsometricBlockImages::getOpaqueWater(bool south, bool west) const {
-	int index = ((south ? 0 : 1) | ((west ? 0 : 1) << 1));
-	return opaque_water[index];
-}
-
 int IsometricBlockImages::getBlockSize() const {
 	return texture_size * 2;
 }
@@ -482,66 +473,6 @@ void IsometricBlockImages::setBlockImage(uint16_t id, uint16_t data, const RGBAI
 	// if block is not transparent, add shadow edges
 	if (!isBlockTransparent(id, data))
 		addBlockShadowEdges(id, data, block);
-}
-
-/**
- * This method is very important for the rendering performance. It preblits transparent
- * water blocks until they are nearly opaque.
- */
-void IsometricBlockImages::testWaterTransparency() {
-	// just use the Ocean biome watercolor
-	RGBAImage water = resources.getBlockTextures().WATER_STILL.colorize(0, 0.39, 0.89);
-
-	// opaque_water[0] is water block when water texture is only on the top
-	opaque_water[0].setSize(getBlockSize(), getBlockSize());
-	blitFace(opaque_water[0], FACE_TOP, water, 0, 0, false);
-	// same, water top and south (right)
-	opaque_water[1] = opaque_water[0];
-	// water top and west (left)
-	opaque_water[2] = opaque_water[0];
-	// water top, south and west
-	opaque_water[3] = opaque_water[0];
-
-	// now blit actual faces
-	blitFace(opaque_water[1], FACE_SOUTH, water, 0, 0, false);
-	blitFace(opaque_water[2], FACE_WEST, water, 0, 0, false);
-	blitFace(opaque_water[3], FACE_SOUTH, water, 0, 0, false);
-	blitFace(opaque_water[3], FACE_WEST, water, 0, 0, false);
-
-	for (max_water = 2; max_water < 10; max_water++) {
-		// make a copy of the first images
-		RGBAImage tmp = opaque_water[0];
-		// blit it over
-		tmp.alphaBlit(tmp, 0, 0);
-
-		// then check alpha
-		uint8_t min_alpha = 255;
-		for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
-			uint8_t alpha = rgba_alpha(tmp.getPixel(it.dest_x, it.dest_y));
-			if (alpha < min_alpha)
-				min_alpha = alpha;
-		}
-
-		// images are "enough" opaque
-		if (min_alpha == 255) {
-			// do a last blit
-			blitFace(opaque_water[0], FACE_TOP, water, 0, 0, false);
-			blitFace(opaque_water[1], FACE_TOP, water, 0, 0, false);
-			blitFace(opaque_water[2], FACE_TOP, water, 0, 0, false);
-			blitFace(opaque_water[3], FACE_TOP, water, 0, 0, false);
-
-			blitFace(opaque_water[1], FACE_SOUTH, water, 0, 0, true, dleft, dright);
-			blitFace(opaque_water[2], FACE_WEST, water, 0, 0, true, dleft, dright);
-			blitFace(opaque_water[3], FACE_SOUTH, water, 0, 0, true, dleft, dright);
-			blitFace(opaque_water[3], FACE_WEST, water, 0, 0, true, dleft, dright);
-			break;
-		// when images are too transparent
-		} else {
-			// blit all images over
-			for (int i = 0; i < 4; i++)
-				opaque_water[i].alphaBlit(opaque_water[i], 0, 0);
-		}
-	}
 }
 
 uint32_t IsometricBlockImages::darkenLeft(uint32_t pixel) const {
@@ -894,19 +825,20 @@ void IsometricBlockImages::createWater() { // id 8, 9
 		RGBAImage block(getBlockSize(), getBlockSize());
 		uint16_t extra_data = 0;
 
-		if (top)
+		if (top) {
 			blitFace(block, FACE_TOP, water, 0, 0, true, dleft, dright);
-		else
 			extra_data |= DATA_TOP;
-		if (west)
-			blitFace(block, FACE_WEST, water, 0, 0, true, dleft, dright);
-		else
-			extra_data |= DATA_WEST;
+		}
 
-		if (south)
+		if (west) {
+			blitFace(block, FACE_WEST, water, 0, 0, true, dleft, dright);
+			extra_data |= DATA_WEST;
+		}
+
+		if (south) {
 			blitFace(block, FACE_SOUTH, water, 0, 0, true, dleft, dright);
-		else
 			extra_data |= DATA_SOUTH;
+		}
 
 		setBlockImage(8, extra_data, block);
 		setBlockImage(9, extra_data, block);
@@ -2346,8 +2278,73 @@ void IsometricBlockImages::createBlocks() {
 	createDoor(195, t.DOOR_JUNGLE_LOWER, t.DOOR_JUNGLE_UPPER); // jungle door
 	createDoor(196, t.DOOR_ACACIA_LOWER, t.DOOR_ACACIA_UPPER); // acacia door
 	createDoor(197, t.DOOR_DARK_OAK_LOWER, t.DOOR_DARK_OAK_UPPER); // dark oak door
+}
 
-	testWaterTransparency();
+int IsometricBlockImages::createOpaqueWater() {
+	// just use the Ocean biome watercolor
+	RGBAImage water = resources.getBlockTextures().WATER_STILL.colorize(0, 0.39, 0.89);
+
+	RGBAImage opaque_water[4];
+	// opaque_water[0] is water block when water texture is only on the top
+	opaque_water[0].setSize(getBlockSize(), getBlockSize());
+	blitFace(opaque_water[0], FACE_TOP, water, 0, 0, false);
+	// same, water top and south (right)
+	opaque_water[1] = opaque_water[0];
+	// water top and west (left)
+	opaque_water[2] = opaque_water[0];
+	// water top, south and west
+	opaque_water[3] = opaque_water[0];
+
+	// now blit actual faces
+	blitFace(opaque_water[1], FACE_SOUTH, water, 0, 0, false);
+	blitFace(opaque_water[2], FACE_WEST, water, 0, 0, false);
+	blitFace(opaque_water[3], FACE_SOUTH, water, 0, 0, false);
+	blitFace(opaque_water[3], FACE_WEST, water, 0, 0, false);
+
+	int water_preblit;
+	for (water_preblit = 2; water_preblit < 10; water_preblit++) {
+		// make a copy of the first images
+		RGBAImage tmp = opaque_water[0];
+		// blit it over
+		tmp.alphaBlit(tmp, 0, 0);
+
+		// then check alpha
+		uint8_t min_alpha = 255;
+		for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
+			uint8_t alpha = rgba_alpha(tmp.getPixel(it.dest_x, it.dest_y));
+			if (alpha < min_alpha)
+				min_alpha = alpha;
+		}
+
+		// images are "enough" opaque
+		if (min_alpha == 255) {
+			// do a last blit
+			blitFace(opaque_water[0], FACE_TOP, water, 0, 0, false);
+			blitFace(opaque_water[1], FACE_TOP, water, 0, 0, false);
+			blitFace(opaque_water[2], FACE_TOP, water, 0, 0, false);
+			blitFace(opaque_water[3], FACE_TOP, water, 0, 0, false);
+
+			blitFace(opaque_water[1], FACE_SOUTH, water, 0, 0, true, dleft, dright);
+			blitFace(opaque_water[2], FACE_WEST, water, 0, 0, true, dleft, dright);
+			blitFace(opaque_water[3], FACE_SOUTH, water, 0, 0, true, dleft, dright);
+			blitFace(opaque_water[3], FACE_WEST, water, 0, 0, true, dleft, dright);
+			break;
+		// when images are too transparent
+		} else {
+			// blit all images over
+			for (int i = 0; i < 4; i++)
+				opaque_water[i].alphaBlit(opaque_water[i], 0, 0);
+		}
+	}
+
+	uint16_t id = 8;
+	uint16_t data = OPAQUE_WATER;
+	block_images[id | (data) << 16] = opaque_water[0];
+	block_images[id | (data | OPAQUE_WATER_SOUTH) << 16] = opaque_water[1];
+	block_images[id | (data | OPAQUE_WATER_WEST) << 16] = opaque_water[2];
+	block_images[id | (data | OPAQUE_WATER_SOUTH | OPAQUE_WATER_WEST) << 16] = opaque_water[3];
+
+	return water_preblit;
 }
 
 std::vector<RGBAImage> IsometricBlockImages::getExportBlocks() const {
