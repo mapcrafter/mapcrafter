@@ -105,14 +105,25 @@ void MultiplexingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 		(*it)->draw(image, pos, id, data);
 }
 
-RenderMode* createRenderMode(const config::WorldSection& world_config,
+std::ostream& operator<<(std::ostream& out, RenderModeType render_mode) {
+	switch (render_mode) {
+	case RenderModeType::PLAIN: return out << "plain";
+	case RenderModeType::DAYLIGHT: return out << "daylight";
+	case RenderModeType::NIGHTLIGHT: return out << "nightlight";
+	case RenderModeType::CAVE: return out << "cave";
+	case RenderModeType::CAVELIGHT: return out << "cavelight";
+	default: return out << "unknown";
+	}
+}
+
+RenderMode* createMapRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config) {
-	std::string name = map_config.getRenderMode();
+	RenderModeType type = map_config.getRenderMode();
 	// TODO maybe use a dummy render mode here instead of the empty abstract one?
-	if (name.empty() || name == "plain")
+	if (type == RenderModeType::PLAIN)
 		return new AbstractRenderMode();
 
-	if (name == "cave" || name == "cavelight") {
+	if (type == RenderModeType::CAVE || type == RenderModeType::CAVELIGHT) {
 		MultiplexingRenderMode* render_mode = new MultiplexingRenderMode();
 		// hide some walls of caves which would cover the view into the caves
 		if (map_config.getRenderView() == RenderViewType::ISOMETRIC)
@@ -120,18 +131,19 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 		else
 			render_mode->addRenderMode(new CaveRenderMode({mc::DIR_TOP}));
 		// if we want some shadows, then simulate the sun light because it's dark in caves
-		if (name == "cavelight")
+		if (type == RenderModeType::CAVELIGHT)
 			render_mode->addRenderMode(new LightingRenderMode(true, map_config.getLightingIntensity(), true));
 		render_mode->addRenderMode(new HeightTintingRenderMode(map_config.hasCaveHighContrast()));
 		return render_mode;
 	}
-	else if (name == "daylight")
+	else if (type == RenderModeType::DAYLIGHT)
 		return new LightingRenderMode(true, map_config.getLightingIntensity(),
 				world_config.getDimension() == mc::Dimension::END);
-	else if (name == "nightlight")
+	else if (type == RenderModeType::NIGHTLIGHT)
 		return new LightingRenderMode(false, map_config.getLightingIntensity(),
 				world_config.getDimension() == mc::Dimension::END);
-	// TODO assertion/validation is needed if this returns null!
+	// this shouldn't happen
+	assert(false);
 	return nullptr;
 }
 

@@ -53,8 +53,8 @@ void IsometricRenderView::configureBlockImages(BlockImages* block_images,
 	IsometricBlockImages* images = dynamic_cast<IsometricBlockImages*>(block_images);
 	assert(images != nullptr);
 
-	std::string render_mode = map_config.getRenderMode();
-	if (render_mode == "daylight" || render_mode == "nightlight")
+	RenderModeType render_mode = map_config.getRenderMode();
+	if (render_mode == RenderModeType::DAYLIGHT || render_mode == RenderModeType::NIGHTLIGHT)
 		images->setBlockSideDarkening(0.95, 0.8);
 	else
 		images->setBlockSideDarkening(0.75, 0.6);

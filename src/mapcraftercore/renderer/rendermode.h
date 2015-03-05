@@ -22,6 +22,7 @@
 
 #include "../mc/worldcache.h"
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -109,7 +110,17 @@ protected:
 	std::vector<RenderMode*> render_modes;
 };
 
-RenderMode* createRenderMode(const config::WorldSection& world_config,
+enum class RenderModeType {
+	PLAIN,
+	DAYLIGHT,
+	NIGHTLIGHT,
+	CAVE,
+	CAVELIGHT
+};
+
+std::ostream& operator<<(std::ostream& out, RenderModeType render_mode);
+
+RenderMode* createMapRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config);
 
 } /* namespace render */

@@ -22,6 +22,7 @@
 
 #include "../configsection.h"
 #include "../validation.h"
+#include "../../renderer/rendermode.h"
 #include "../../renderer/renderview.h"
 
 #include <iostream>
@@ -70,7 +71,7 @@ public:
 	std::string getWorld() const;
 
 	renderer::RenderViewType getRenderView() const;
-	std::string getRenderMode() const;
+	renderer::RenderModeType getRenderMode() const;
 	std::set<int> getRotations() const;
 	fs::path getTextureDir() const;
 	int getTextureSize() const;
@@ -105,7 +106,7 @@ private:
 	Field<std::string> world;
 
 	Field<renderer::RenderViewType> render_view;
-	Field<std::string> render_mode;
+	Field<renderer::RenderModeType> render_mode;
 	Field<std::string> rotations;
 	std::set<int> rotations_set;
 

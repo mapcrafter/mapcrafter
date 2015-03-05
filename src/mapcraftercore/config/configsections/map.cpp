@@ -34,6 +34,22 @@ config::ImageFormat as<config::ImageFormat>(const std::string& from) {
 }
 
 template <>
+renderer::RenderModeType as<renderer::RenderModeType>(const std::string& from) {
+	if (from == "plain")
+		return renderer::RenderModeType::PLAIN;
+	else if (from == "daylight")
+		return renderer::RenderModeType::DAYLIGHT;
+	else if (from == "nightlight")
+		return renderer::RenderModeType::NIGHTLIGHT;
+	else if (from == "cave")
+		return renderer::RenderModeType::CAVE;
+	else if (from == "cavelight")
+		return renderer::RenderModeType::CAVELIGHT;
+	throw std::invalid_argument("Must be one of 'plain', 'daylight', 'nightlight', "
+			"'cave' or 'cavelight'!");
+}
+
+template <>
 renderer::RenderViewType as<renderer::RenderViewType>(const std::string& from) {
 	if (from == "isometric")
 		return renderer::RenderViewType::ISOMETRIC;
@@ -125,7 +141,7 @@ renderer::RenderViewType MapSection::getRenderView() const {
 	return render_view.getValue();
 }
 
-std::string MapSection::getRenderMode() const {
+renderer::RenderModeType MapSection::getRenderMode() const {
 	return render_mode.getValue();
 }
 
@@ -198,7 +214,7 @@ void MapSection::preParse(const INIConfigSection& section,
 
 	// set some default configuration values
 	render_view.setDefault(renderer::RenderViewType::ISOMETRIC);
-	render_mode.setDefault("daylight");
+	render_mode.setDefault(renderer::RenderModeType::DAYLIGHT);
 	rotations.setDefault("top-left");
 
 	// check if we can find a default texture directory
@@ -228,17 +244,11 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		world.load(key, value, validation);
 	} else if (key == "render_view") {
 		render_view.load(key, value, validation);
-	// TODO render_mode instead of rendermode, warning if rendermode
 	} else if (key == "render_mode" || key == "rendermode") {
+		render_mode.load(key, value, validation);
 		if (key == "rendermode")
 			validation.warning("Using the option 'rendermode' is deprecated. "
 					"It's called 'render_mode' now.");
-		if (render_mode.load(key, value, validation)) {
-			std::string r = render_mode.getValue();
-			if (r != "plain" && r != "daylight" && r != "nightlight" && r != "cave"
-					&& r != "cavelight")
-				validation.error("'" + key + "' must be one of: 'plain', 'daylight', 'nightlight', 'cave'");
-		}
 	} else if (key == "rotations") {
 		rotations.load(key, value ,validation);
 	} else if (key == "texture_dir") {
