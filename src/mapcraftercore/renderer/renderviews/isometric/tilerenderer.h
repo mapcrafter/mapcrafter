@@ -91,14 +91,9 @@ public:
 			RenderMode* render_mode);
 	virtual ~IsometricTileRenderer();
 
-	void setUsePreblitWater(bool use_preblit_water);
-
 	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile);
 
 	virtual int getTileSize() const;
-
-protected:
-	bool use_preblit_water;
 };
 
 }
