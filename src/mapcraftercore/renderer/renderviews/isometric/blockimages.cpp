@@ -310,7 +310,8 @@ RGBAImage BlockImage::buildImage(double dleft, double dright) const {
 }
 
 IsometricBlockImages::IsometricBlockImages()
-	: AbstractBlockImages(), dleft(1), dright(1) {
+	: AbstractBlockImages(),
+	  dleft(1), dright(1) {
 }
 
 IsometricBlockImages::~IsometricBlockImages() {
@@ -319,6 +320,10 @@ IsometricBlockImages::~IsometricBlockImages() {
 void IsometricBlockImages::setBlockSideDarkening(double left, double right) {
 	this->dleft = left;
 	this->dright = right;
+}
+
+bool IsometricBlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
+	return AbstractBlockImages::isBlockTransparent(id, data & ~(EDGE_NORTH | EDGE_EAST | EDGE_BOTTOM));
 }
 
 RGBAImage IsometricBlockImages::getBiomeBlock(uint16_t id, uint16_t data,
@@ -2343,6 +2348,21 @@ void IsometricBlockImages::createBlocks() {
 	createDoor(197, t.DOOR_DARK_OAK_LOWER, t.DOOR_DARK_OAK_UPPER); // dark oak door
 
 	testWaterTransparency();
+}
+
+std::vector<RGBAImage> IsometricBlockImages::getExportBlocks() const {
+	std::map<uint32_t, RGBAImage, block_images_comparator> blocks_sorted;
+	for (auto it = block_images.begin(); it != block_images.end(); ++it) {
+		uint16_t data = (it->first & 0xffff0000) >> 16;
+		// ignore special variants of the blocks
+		if ((data & (EDGE_NORTH | EDGE_EAST | EDGE_BOTTOM)) == 0)
+			blocks_sorted[it->first] = it->second;
+	}
+
+	std::vector<RGBAImage> blocks;
+	for (auto it = blocks_sorted.begin(); it != blocks_sorted.end(); ++it)
+		blocks.push_back(it->second);
+	return blocks;
 }
 
 }

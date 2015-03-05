@@ -215,22 +215,51 @@ private:
 };
 
 /**
- * Responsible for generating and managing the block images which are required to render
- * a map.
+ * This is an interface for a class responsible for generating and managing the block
+ * images which are required to render a map.
  */
 class BlockImages {
 public:
 	virtual ~BlockImages();
 
+	/**
+	 * Sets the rotation of the world these block images are used for.
+	 * Call this method before you call the loadBlocks-method.
+	 */
 	virtual void setRotation(int rotation) = 0;
+
+	/**
+	 * Sets the options how some special blocks should be rendered.
+	 * Call this method before you call the loadBlocks-method.
+	 */
 	virtual void setRenderSpecialBlocks(bool render_unknown_blocks,
 			bool render_leaves_transparent) = 0;
 
-	virtual void loadBlocks(const TextureResources& resources) = 0;
-	virtual bool saveBlocks(const std::string& filename) = 0;
+	/**
+	 * Generates the block images with the supplied textures.
+	 */
+	virtual void generateBlocks(const TextureResources& resources) = 0;
 
+	/**
+	 * Exports the block images by just blitting all the generated block images together
+	 * to a big image.
+	 */
+	virtual RGBAImage exportBlocks() const = 0;
+
+	/**
+	 * Returns whether a block is transparent, i.e. the block image contains transparent
+	 * pixels.
+	 */
 	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const = 0;
+
+	/**
+	 * Returns whether there is a block image of a specific block.
+	 */
 	virtual bool hasBlock(uint16_t id, uint16_t) const = 0;
+
+	/**
+	 * Returns the block image of a specific block.
+	 */
 	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data) const = 0;
 
 	/**
@@ -238,10 +267,20 @@ public:
 	 */
 	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const = 0;
 
+	// TODO keep this here?
 	virtual int getMaxWaterNeededOpaque() const = 0;
 	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const = 0;
 
+	/**
+	 * Returns the used texture size. This should be the texture size of the textures
+	 * that were used to generate the block images (resources.getTextureSize() when
+	 * generateBlocks-method is called).
+	 */
 	virtual int getTextureSize() const = 0;
+
+	/**
+	 * Returns the size (width/height) of the generated block images.
+	 */
 	virtual int getBlockSize() const = 0;
 };
 
@@ -260,15 +299,16 @@ public:
 			bool render_leaves_transparent);
 
 	/**
-	 * Creates the block images with the supplied textures. Handles the creation of the
-	 * blocks by calling the abstract methods (createBlocks(), createBiomeBlocks(), ...).
+	 * Implements the method of the interface. Handles the creation of the blocks by
+	 * calling the abstract methods (createBlocks(), createBiomeBlocks(), ...).
 	 */
-	virtual void loadBlocks(const TextureResources& resources);
+	virtual void generateBlocks(const TextureResources& resources);
 
 	/**
-	 * Saves an image with all created blocks.
+	 * Implements the method of the interface. Blits all the block images returned by the
+	 * getExportBlocks-method to a big image with 16 block images per row.
 	 */
-	virtual bool saveBlocks(const std::string& filename);
+	virtual RGBAImage exportBlocks() const;
 
 	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const;
 	virtual bool hasBlock(uint16_t id, uint16_t) const;
@@ -335,6 +375,15 @@ protected:
 	 */
 	virtual void createBiomeBlocks();
 
+	/**
+	 * Returns the blocks which should be (in that order) exported by the exportBlocks-method.
+	 * You can overwrite this if you want to export other blocks as well / have other
+	 * things that need special handling. By default this method just returns all the
+	 * blocks in block_images ordered by id and data.
+	 */
+	virtual std::vector<RGBAImage> getExportBlocks() const;
+
+	// some options that were passed to us
 	int texture_size;
 	int rotation;
 	bool render_unknown_blocks;
@@ -347,10 +396,25 @@ protected:
 	// key is a 32 bit integer, first two bytes id, second two bytes data
 	std::unordered_map<uint32_t, RGBAImage> block_images;
 
-	// map of biome block images, first four bytes id+data, next byte is the biome id
+	// comparator to sort block images by their id/data extracted  from the uint32_t keys
+	// used to sort blocks when exporting them
+	struct block_images_comparator {
+		bool operator()(uint32_t key1, uint32_t key2) const {
+			uint16_t id1 = key1 & 0xffff;
+			uint16_t id2 = key2 & 0xffff;
+			if (id1 != id2)
+				return id1 < id2;
+			uint16_t data1 = (key1 & 0xffff0000) >> 16;
+			uint16_t data2 = (key2 & 0xffff0000) >> 16;
+			return data1 < data2;
+		}
+	};
+
+	// map of biome block images
+	// key is a 64 bit integer, first four bytes id, data, next byte is the biome id
 	std::unordered_map<uint64_t, RGBAImage> biome_images;
 
-	// set of id/data block combinations, which contain transparency
+	// set of blocks (id, data as key again) which contain transparency
 	std::unordered_set<uint32_t> block_transparency;
 	RGBAImage unknown_block;
 };

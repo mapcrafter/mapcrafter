@@ -252,7 +252,7 @@ void AbstractBlockImages::setRenderSpecialBlocks(bool render_unknown_blocks,
 	this->render_leaves_transparent = render_leaves_transparent;
 }
 
-void AbstractBlockImages::loadBlocks(const TextureResources& resources) {
+void AbstractBlockImages::generateBlocks(const TextureResources& resources) {
 	this->resources = resources;
 	this->texture_size = resources.getTextureSize();
 
@@ -266,73 +266,28 @@ void AbstractBlockImages::loadBlocks(const TextureResources& resources) {
 	createBiomeBlocks();
 }
 
-namespace {
+RGBAImage AbstractBlockImages::exportBlocks() const {
+	std::vector<RGBAImage> blocks = getExportBlocks();
 
-/**
- * Comparator to sort the block int's with id and data.
- */
-struct block_comparator {
-	bool operator()(uint32_t b1, uint32_t b2) const {
-		uint16_t id1 = b1 & 0xffff;
-		uint16_t id2 = b2 & 0xffff;
-		if (id1 != id2)
-			return id1 < id2;
-		uint16_t data1 = (b1 & 0xffff0000) >> 16;
-		uint16_t data2 = (b2 & 0xffff0000) >> 16;
-		return data1 < data2;
-	}
-};
-
-}
-
-bool AbstractBlockImages::saveBlocks(const std::string& filename) {
-	std::map<uint32_t, RGBAImage, block_comparator> blocks_sorted;
-	for (auto it = block_images.begin(); it != block_images.end(); ++it) {
-		uint16_t data = (it->first & 0xffff0000) >> 16;
-		if ((data & (EDGE_NORTH | EDGE_EAST | EDGE_BOTTOM)) == 0)
-			blocks_sorted[it->first] = it->second;
-	}
-
-	std::vector<RGBAImage> blocks;
-	for (auto it = blocks_sorted.begin(); it != blocks_sorted.end(); ++it)
-		blocks.push_back(it->second);
-
-	/*
-	blocks.push_back(opaque_water[0]);
-	blocks.push_back(opaque_water[1]);
-	blocks.push_back(opaque_water[2]);
-	blocks.push_back(opaque_water[3]);
-	*/
-
-	/*
-	for (std::unordered_map<uint64_t, RGBAImage>::const_iterator it = biome_images.begin();
-			it != biome_images.end(); ++it)
-		blocks.push_back(it->second);
-	*/
-
-	int blocksize = getBlockSize();
 	int width = 16;
-	int height = std::ceil(blocks.size() / (double) width);
-	RGBAImage img(width * blocksize, height * blocksize);
+	int height = std::ceil((double) blocks.size() / width);
+	int block_size = getBlockSize();
+	RGBAImage image(width * block_size, height * block_size);
 
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			int offset = y * width + x;
 			if ((size_t) offset >= blocks.size())
 				break;
-			img.alphaBlit(blocks.at(offset), x * blocksize, y * blocksize);
+			image.alphaBlit(blocks.at(offset), x * block_size, y * block_size);
 		}
 	}
-	std::cout << block_images.size() << " blocks" << std::endl;
-	std::cout << "all: " << blocks.size() << std::endl;
 
-	return img.writePNG(filename);
+	return image;
 }
 
 bool AbstractBlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
 	data = filterBlockData(id, data);
-	// remove edge data
-	data &= ~(EDGE_NORTH | EDGE_EAST | EDGE_BOTTOM);
 
 	// special case for doors because they are only used with special data
 	// and not with the original minecraft data
@@ -408,6 +363,17 @@ void AbstractBlockImages::createBiomeBlocks() {
 					createBiomeBlock(id, data, biome);
 		}
 	}
+}
+
+std::vector<RGBAImage> AbstractBlockImages::getExportBlocks() const {
+	std::map<uint32_t, RGBAImage, block_images_comparator> blocks_sorted;
+	for (auto it = block_images.begin(); it != block_images.end(); ++it)
+			blocks_sorted[it->first] = it->second;
+
+	std::vector<RGBAImage> blocks;
+	for (auto it = blocks_sorted.begin(); it != blocks_sorted.end(); ++it)
+		blocks.push_back(it->second);
+	return blocks;
 }
 
 }

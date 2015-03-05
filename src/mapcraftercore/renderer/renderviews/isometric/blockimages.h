@@ -204,6 +204,8 @@ public:
 
 	void setBlockSideDarkening(double left, double right);
 
+	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const;
+
 	/**
 	 * We need to overwrite this because there is a special case for the snowy grass block.
 	 */
@@ -329,6 +331,12 @@ protected:
 	virtual RGBAImage createUnknownBlock() const;
 	virtual RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;
 	virtual void createBlocks();
+
+	/**
+	 * We overwrite this because we don't want to export all the block variations of every
+	 * block caused by preblitting those dark edges.
+	 */
+	virtual std::vector<RGBAImage> getExportBlocks() const;
 };
 
 }

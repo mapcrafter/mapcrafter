@@ -338,7 +338,7 @@ void RenderManager::renderMap(const std::string& map, int rotation,
 
 	std::shared_ptr<BlockImages> block_images(render_view->createBlockImages());
 	render_view->configureBlockImages(block_images.get(), world_config, map_config);
-	block_images->loadBlocks(resources);
+	block_images->generateBlocks(resources);
 
 	RenderContext context;
 	context.output_dir = output_dir;

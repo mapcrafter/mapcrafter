@@ -19,6 +19,7 @@
 
 #include "../mapcraftercore/renderer/renderviews/isometric/blockimages.h"
 #include "../mapcraftercore/renderer/renderviews/topdown/blockimages.h"
+#include "../mapcraftercore/util.h"
 
 #include <iostream>
 #include <string>
@@ -98,8 +99,9 @@ int main(int argc, char **argv) {
 	}
 	images->setRotation(0);
 	images->setRenderSpecialBlocks(true, true);
-	images->loadBlocks(resources);
-	images->saveBlocks(output_file);
+	images->generateBlocks(resources);
+	if (!images->exportBlocks().writePNG(output_file))
+		LOG(ERROR) << "Unable to write '" << output_file << "'!";
 
 	return 0;
 }
