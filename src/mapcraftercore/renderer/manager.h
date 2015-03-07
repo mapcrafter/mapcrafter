@@ -52,26 +52,55 @@ struct RenderOpts {
 	int jobs;
 };
 
+/**
+ * How to render a map? Skip the map, auto-render it (incremental rendering) or
+ * force-render (complete re-rendering) it.
+ */
 enum class RenderBehavior {
 	SKIP, AUTO, FORCE
 };
 
-// TODO a better name?
-class RenderBehaviorMap {
+/**
+ * Manages how to render each map of a configuration.
+ */
+class RenderBehaviors {
 public:
-	RenderBehaviorMap(RenderBehavior default_behavior = RenderBehavior::AUTO);
-	~RenderBehaviorMap();
+	/**
+	 * Constructor. You can specify a default render behavior which is used if no
+	 * render behavior is specified for a map. The default default render behavior is
+	 * auto.
+	 */
+	RenderBehaviors(RenderBehavior default_behavior = RenderBehavior::AUTO);
+	~RenderBehaviors();
 
+	/**
+	 * Returns the render behavior of a specific map and rotation of it.
+	 */
 	RenderBehavior getRenderBehavior(const std::string& map, int rotation) const;
+
+	/**
+	 * Sets the render behavior of a whole map.
+	 */
 	void setRenderBehavior(const std::string& map, RenderBehavior behavior);
+
+	/**
+	 * Sets the render behavior of a single rotation of a map.
+	 */
 	void setRenderBehavior(const std::string& map, int rotation, RenderBehavior behavior);
 
+	/**
+	 * Checks whether a map is completely to be skipped.
+	 */
 	bool isCompleteRenderSkip(const std::string& map) const;
 
-	static RenderBehaviorMap fromRenderOpts(const config::MapcrafterConfig& config,
+	/**
+	 * Parses the render behaviors of the maps from the command line arguments.
+	 */
+	static RenderBehaviors fromRenderOpts(const config::MapcrafterConfig& config,
 			const RenderOpts& render_opts);
 
 private:
+	// default behavior for maps if nothing specified
 	RenderBehavior default_behavior;
 
 	// render behavior of each map: map -> (rotation -> render behavior)
@@ -86,7 +115,7 @@ public:
 	RenderManager(const config::MapcrafterConfig& config);
 
 	void setThreadCount(int thread_count);
-	void setRenderBehaviors(const RenderBehaviorMap& render_behaviors);
+	void setRenderBehaviors(const RenderBehaviors& render_behaviors);
 
 	void initialize();
 	void scanWorlds();
@@ -113,7 +142,7 @@ private:
 	config::WebConfig web_config;
 
 	int thread_count;
-	RenderBehaviorMap render_behaviors;
+	RenderBehaviors render_behaviors;
 
 	std::time_t time_started_scanning;
 

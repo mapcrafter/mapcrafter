@@ -181,7 +181,7 @@ int main(int argc, char** argv) {
 	config.configureLogging();
 
 	renderer::RenderManager manager(config);
-	manager.setRenderBehaviors(renderer::RenderBehaviorMap::fromRenderOpts(config, opts));
+	manager.setRenderBehaviors(renderer::RenderBehaviors::fromRenderOpts(config, opts));
 	manager.initialize();
 	//manager.scanWorlds();
 	//manager.renderMaps();

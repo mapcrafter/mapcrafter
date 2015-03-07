@@ -39,32 +39,35 @@
 namespace mapcrafter {
 namespace renderer {
 
-RenderBehaviorMap::RenderBehaviorMap(RenderBehavior default_behavior)
+RenderBehaviors::RenderBehaviors(RenderBehavior default_behavior)
 	: default_behavior(default_behavior) {
 }
 
-RenderBehaviorMap::~RenderBehaviorMap() {
+RenderBehaviors::~RenderBehaviors() {
 }
 
-RenderBehavior RenderBehaviorMap::getRenderBehavior(const std::string& map,
+RenderBehavior RenderBehaviors::getRenderBehavior(const std::string& map,
 		int rotation) const {
 	if (!render_behaviors.count(map))
 		return default_behavior;
 	return render_behaviors.at(map).at(rotation);
 }
 
-void RenderBehaviorMap::setRenderBehavior(const std::string& map,
+void RenderBehaviors::setRenderBehavior(const std::string& map,
 		RenderBehavior behavior) {
 	for (int rotation = 0; rotation < 4; rotation++)
 		setRenderBehavior(map, rotation, behavior);
 }
 
-void RenderBehaviorMap::setRenderBehavior(const std::string& map, int rotation,
+void RenderBehaviors::setRenderBehavior(const std::string& map, int rotation,
 		RenderBehavior behavior) {
+	// set whole map to default behavior if setting the first rotation
+	if (!render_behaviors.count(map))
+		setRenderBehavior(map, default_behavior);
 	render_behaviors[map][rotation] = behavior;
 }
 
-bool RenderBehaviorMap::isCompleteRenderSkip(const std::string& map) const {
+bool RenderBehaviors::isCompleteRenderSkip(const std::string& map) const {
 	if (!render_behaviors.count(map))
 		return default_behavior == RenderBehavior::SKIP;
 	for (int rotation = 0; rotation < 4; rotation++)
@@ -76,7 +79,7 @@ bool RenderBehaviorMap::isCompleteRenderSkip(const std::string& map) const {
 namespace {
 
 void parseRenderBehaviorMaps(const std::vector<std::string>& maps,
-		RenderBehavior behavior, RenderBehaviorMap& behaviors,
+		RenderBehavior behavior, RenderBehaviors& behaviors,
 		const config::MapcrafterConfig& config) {
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
 		std::string map = *map_it;
@@ -122,14 +125,14 @@ void parseRenderBehaviorMaps(const std::vector<std::string>& maps,
 
 }
 
-RenderBehaviorMap RenderBehaviorMap::fromRenderOpts(
+RenderBehaviors RenderBehaviors::fromRenderOpts(
 		const config::MapcrafterConfig& config, const RenderOpts& render_opts) {
-	RenderBehaviorMap behaviors;
+	RenderBehaviors behaviors;
 
 	if (!render_opts.skip_all)
 		parseRenderBehaviorMaps(render_opts.render_skip, RenderBehavior::SKIP, behaviors, config);
 	else
-		behaviors = RenderBehaviorMap(RenderBehavior::SKIP);
+		behaviors = RenderBehaviors(RenderBehavior::SKIP);
 	parseRenderBehaviorMaps(render_opts.render_auto, RenderBehavior::AUTO, behaviors, config);
 	parseRenderBehaviorMaps(render_opts.render_force, RenderBehavior::FORCE, behaviors, config);
 	return behaviors;
@@ -143,7 +146,7 @@ void RenderManager::setThreadCount(int thread_count) {
 	this->thread_count = thread_count;
 }
 
-void RenderManager::setRenderBehaviors(const RenderBehaviorMap& render_behaviors) {
+void RenderManager::setRenderBehaviors(const RenderBehaviors& render_behaviors) {
 	this->render_behaviors = render_behaviors;
 }
 
