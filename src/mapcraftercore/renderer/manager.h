@@ -23,11 +23,11 @@
 #include "tilerenderer.h"
 #include "tileset.h"
 #include "../config/mapcrafterconfig.h"
-#include "../config/mapcrafterconfighelper.h"
 #include "../mc/world.h"
 #include "../mc/worldcache.h"
 
 #include <boost/filesystem.hpp>
+#include "../config/webconfig.h"
 
 namespace fs = boost::filesystem;
 
@@ -110,7 +110,7 @@ private:
 			int jpeg_quality = 85) const;
 
 	config::MapcrafterConfig config;
-	config::MapcrafterConfigHelper confighelper;
+	config::WebConfig web_config;
 
 	int thread_count;
 	RenderBehaviorMap render_behaviors;

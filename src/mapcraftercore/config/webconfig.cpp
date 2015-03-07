@@ -17,7 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mapcrafterconfighelper.h"
+#include "webconfig.h"
 
 #include "iniconfig.h"
 #include "../util.h"
@@ -25,10 +25,7 @@
 namespace mapcrafter {
 namespace config {
 
-MapcrafterConfigHelper::MapcrafterConfigHelper() {
-}
-
-MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfig& config)
+WebConfig::WebConfig(const MapcrafterConfig& config)
 	: config(config) {
 	auto maps = config.getMaps();
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
@@ -49,7 +46,7 @@ MapcrafterConfigHelper::MapcrafterConfigHelper(const MapcrafterConfig& config)
 	}
 }
 
-MapcrafterConfigHelper::~MapcrafterConfigHelper() {
+WebConfig::~WebConfig() {
 }
 
 bool parseTilePosJSON(const picojson::value& value, renderer::TilePos& tile) {
@@ -64,7 +61,7 @@ bool parseTilePosJSON(const picojson::value& value, renderer::TilePos& tile) {
 	return true;
 }
 
-void MapcrafterConfigHelper::readMapSettings() {
+void WebConfig::readConfigJS() {
 	// try to read config.js file or migrate old map.settings files
 	if (fs::is_regular_file(config.getOutputPath("config.js"))) {
 		// TODO try to read config.js file
@@ -196,11 +193,11 @@ void MapcrafterConfigHelper::readMapSettings() {
 
 		// write config.js for first time with data from old map.settings files
 		if (map_settings_found)
-			writeMapSettings();
+			writeConfigJS();
 	}
 }
 
-void MapcrafterConfigHelper::writeMapSettings() const {
+void WebConfig::writeConfigJS() const {
 	std::ofstream out(config.getOutputPath("config.js").string());
 	if (!out) {
 		LOG(ERROR) << "Unable to write config.js file!";
@@ -211,67 +208,67 @@ void MapcrafterConfigHelper::writeMapSettings() const {
 	out.close();
 }
 
-std::set<int> MapcrafterConfigHelper::getUsedRotations(
+std::set<int> WebConfig::getUsedRotations(
 		const TileSetKey& tile_set) const {
 	if (!world_rotations.count(tile_set))
 		return std::set<int>();
 	return world_rotations.at(tile_set);
 }
 
-int MapcrafterConfigHelper::getTileSetMaxZoom(const TileSetKey& tile_set) const {
+int WebConfig::getTileSetMaxZoom(const TileSetKey& tile_set) const {
 	if (!world_max_max_zoom.count(tile_set))
 		return 0;
 	return world_max_max_zoom.at(tile_set);
 }
 
-void MapcrafterConfigHelper::setTileSetMaxZoom(const TileSetKey& tile_set,
+void WebConfig::setTileSetMaxZoom(const TileSetKey& tile_set,
 		int max_zoom) {
 	world_max_max_zoom[tile_set] = max_zoom;
 }
 
-renderer::TilePos MapcrafterConfigHelper::getWorldTileOffset(
+renderer::TilePos WebConfig::getWorldTileOffset(
 		const TileSetKey& tile_set, int rotation) const {
 	if (!world_tile_offset.count(tile_set))
 		return renderer::TilePos(0, 0);
 	return world_tile_offset.at(tile_set)[rotation];
 }
 
-void MapcrafterConfigHelper::setWorldTileOffset(const TileSetKey& tile_set,
+void WebConfig::setWorldTileOffset(const TileSetKey& tile_set,
 		int rotation, const renderer::TilePos& tile_offset) {
 	world_tile_offset[tile_set][rotation] = tile_offset;
 }
 
-int MapcrafterConfigHelper::getMapTileSize(const std::string& map) const {
+int WebConfig::getMapTileSize(const std::string& map) const {
 	return map_tile_size.at(map);
 }
 
-void MapcrafterConfigHelper::setMapTileSize(const std::string& map, int tile_size) {
+void WebConfig::setMapTileSize(const std::string& map, int tile_size) {
 	map_tile_size[map] = tile_size;
 }
 
-int MapcrafterConfigHelper::getMapMaxZoom(const std::string& map) const {
+int WebConfig::getMapMaxZoom(const std::string& map) const {
 	if (!map_max_zoom.count(map))
 		return 0;
 	return map_max_zoom.at(map);
 }
 
-void MapcrafterConfigHelper::setMapMaxZoom(const std::string& map, int zoomlevel) {
+void WebConfig::setMapMaxZoom(const std::string& map, int zoomlevel) {
 	map_max_zoom[map] = zoomlevel;
 }
 
-int MapcrafterConfigHelper::getMapLastRendered(const std::string& map,
+int WebConfig::getMapLastRendered(const std::string& map,
 		int rotation) const {
 	if (!map_last_rendered.count(map))
 		return 0;
 	return map_last_rendered.at(map).at(rotation);
 }
 
-void MapcrafterConfigHelper::setMapLastRendered(const std::string& map,
+void WebConfig::setMapLastRendered(const std::string& map,
 		int rotation, int last_rendered) {
 	map_last_rendered[map][rotation] = last_rendered;
 }
 
-picojson::value MapcrafterConfigHelper::getConfigJSON() const {
+picojson::value WebConfig::getConfigJSON() const {
 	picojson::object config_json, maps_json;
 	picojson::array maps_order_json;
 

@@ -38,14 +38,13 @@ namespace config {
 
 class MapcrafterConfig;
 
-class MapcrafterConfigHelper {
+class WebConfig {
 public:
-	MapcrafterConfigHelper();
-	MapcrafterConfigHelper(const MapcrafterConfig& config);
-	~MapcrafterConfigHelper();
+	WebConfig(const MapcrafterConfig& config);
+	~WebConfig();
 
-	void readMapSettings();
-	void writeMapSettings() const;
+	void readConfigJS();
+	void writeConfigJS() const;
 
 	std::set<int> getUsedRotations(const TileSetKey& tile_set) const;
 

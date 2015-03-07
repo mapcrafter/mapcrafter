@@ -136,7 +136,7 @@ RenderBehaviorMap RenderBehaviorMap::fromRenderOpts(
 }
 
 RenderManager::RenderManager(const config::MapcrafterConfig& config)
-	: config(config), thread_count(1), time_started_scanning(0) {
+	: config(config), web_config(config), thread_count(1), time_started_scanning(0) {
 }
 
 void RenderManager::setThreadCount(int thread_count) {
@@ -155,10 +155,10 @@ void RenderManager::initialize() {
 	}
 
 	// create a helper for the configuration
-	confighelper = config::MapcrafterConfigHelper(config);
+	// web_config = config::WebConfig(config); // already done in constructor
 	// read old settings from already rendered maps
 	// TODO fancy description blah blah
-	confighelper.readMapSettings();
+	web_config.readConfigJS();
 }
 
 void RenderManager::scanWorlds() {
@@ -225,7 +225,7 @@ void RenderManager::scanWorlds() {
 			if (world_config.needsWorldCentering()) {
 				TilePos tile_offset;
 				tile_set->scan(world, true, tile_offset);
-				confighelper.setWorldTileOffset(tile_set_key, *rotation_it, tile_offset);
+				web_config.setWorldTileOffset(tile_set_key, *rotation_it, tile_offset);
 			} else {
 				tile_set->scan(world);
 			}
@@ -241,7 +241,7 @@ void RenderManager::scanWorlds() {
 		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it)
 			tile_sets[tile_set_key][*rotation_it]->setDepth(zoomlevels_max);
 		// also give this highest max zoom level to the config helper
-		confighelper.setTileSetMaxZoom(tile_set_key, zoomlevels_max);
+		web_config.setTileSetMaxZoom(tile_set_key, zoomlevels_max);
 
 		// clean up render view
 		delete render_view;
@@ -256,9 +256,9 @@ void RenderManager::initializeMap(const std::string& map) {
 	auto all_rotations = map_config.getRotations();
 
 	// get the max zoom level calculated of the current tile set
-	int max_zoom = confighelper.getTileSetMaxZoom(map_config.getTileSetKey());
+	int max_zoom = web_config.getTileSetMaxZoom(map_config.getTileSetKey());
 	// get the old max zoom level (from config.js), will 0 if not rendered yet
-	int old_max_zoom = confighelper.getMapMaxZoom(map);
+	int old_max_zoom = web_config.getMapMaxZoom(map);
 	// if map already rendered: check if the zoom level of the world has increased
 	if (old_max_zoom != 0 && old_max_zoom < max_zoom) {
 		LOG(INFO) << "The max zoom level was increased from " << old_max_zoom
@@ -276,8 +276,8 @@ void RenderManager::initializeMap(const std::string& map) {
 	}
 
 	// update the template with the max zoom level
-	confighelper.setMapMaxZoom(map, max_zoom);
-	confighelper.writeMapSettings();
+	web_config.setMapMaxZoom(map, max_zoom);
+	web_config.writeConfigJS();
 }
 
 void RenderManager::renderMap(const std::string& map, int rotation,
@@ -294,7 +294,7 @@ void RenderManager::renderMap(const std::string& map, int rotation,
 
 	// output a small notice if we render this map incrementally
 	//if (settings.last_render[rotation] != 0) {
-	int last_rendered = confighelper.getMapLastRendered(map, rotation);
+	int last_rendered = web_config.getMapLastRendered(map, rotation);
 	if (last_rendered != 0) {
 		std::time_t t = last_rendered;
 		char buffer[256];
@@ -317,7 +317,7 @@ void RenderManager::renderMap(const std::string& map, int rotation,
 					map_config.getImageFormatSuffix());
 		else
 			//tile_set->scanRequiredByTimestamp(settings.last_render[rotation]);
-			tile_set->scanRequiredByTimestamp(confighelper.getMapLastRendered(map, rotation));
+			tile_set->scanRequiredByTimestamp(web_config.getMapLastRendered(map, rotation));
 	}
 
 	// render the map
@@ -352,8 +352,8 @@ void RenderManager::renderMap(const std::string& map, int rotation,
 	context.initializeTileRenderer();
 
 	// TODO maybe set only once per map?
-	confighelper.setMapTileSize(map, context.tile_renderer->getTileSize());
-	confighelper.writeMapSettings();
+	web_config.setMapTileSize(map, context.tile_renderer->getTileSize());
+	web_config.writeConfigJS();
 
 	std::shared_ptr<thread::Dispatcher> dispatcher;
 	if (thread_count == 1)
@@ -364,8 +364,8 @@ void RenderManager::renderMap(const std::string& map, int rotation,
 	dispatcher->dispatch(context, progress);
 
 	// update the map settings with last render time
-	confighelper.setMapLastRendered(map, rotation, time_started_scanning);
-	confighelper.writeMapSettings();
+	web_config.setMapLastRendered(map, rotation, time_started_scanning);
+	web_config.writeConfigJS();
 }
 
 void RenderManager::run(bool batch) {
@@ -494,7 +494,7 @@ void RenderManager::writeTemplates() const {
 	if (!writeTemplateIndexHtml())
 		LOG(WARNING) << "Warning: Unable to copy template file index.html!";
 	// TODO write config.js also here?
-	confighelper.writeMapSettings();
+	web_config.writeConfigJS();
 
 	if (!fs::exists(config.getOutputPath("markers.js"))
 			&& !util::copyFile(config.getTemplatePath("markers.js"), config.getOutputPath("markers.js")))
