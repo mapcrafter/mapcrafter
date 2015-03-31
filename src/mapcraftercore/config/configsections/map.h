@@ -40,11 +40,15 @@ struct TileSetKey {
 	std::string world_name;
 	renderer::RenderViewType render_view;
 	int tile_width;
+	int rotation;
 
+	TileSetKey();
 	TileSetKey(const std::string& world_name, renderer::RenderViewType render_view,
-			int tile_width);
+			int tile_width, int rotation);
 
 	bool operator<(const TileSetKey& other) const;
+
+	TileSetKey ignoreRotation() const;
 };
 
 enum class ImageFormat {
@@ -89,7 +93,9 @@ public:
 	bool renderBiomes() const;
 	bool useImageModificationTimes() const;
 
-	TileSetKey getTileSetKey() const;
+	TileSetKey getTileSet(int rotation) const;
+	TileSetKey getDefaultTileSet() const;
+	const std::set<TileSetKey>& getTileSets() const;
 
 protected:
 	virtual void preParse(const INIConfigSection& section,
@@ -119,6 +125,8 @@ private:
 	Field<double> lighting_intensity;
 	Field<bool> cave_high_contrast;
 	Field<bool> render_unknown_blocks, render_leaves_transparent, render_biomes, use_image_mtimes;
+
+	std::set<TileSetKey> tile_sets;
 };
 
 } /* namespace config */

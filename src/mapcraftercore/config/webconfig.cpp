@@ -38,11 +38,9 @@ WebConfig::WebConfig(const MapcrafterConfig& config)
 		for (int i = 0; i < 4; i++)
 			map_last_rendered[map_name][i] = 0;
 
-		auto rotations = map_it->getRotations();
-		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
-			world_rotations[map_it->getTileSetKey()].insert(*rotation_it);
-			world_max_max_zoom[map_it->getTileSetKey()] = 0;
-		}
+		auto tile_sets = map_it->getTileSets();
+		for (auto tile_set_it = tile_sets.begin(); tile_set_it != tile_sets.end(); ++tile_set_it)
+			tile_set_max_zoom[*tile_set_it] = 0;
 	}
 }
 
@@ -105,18 +103,21 @@ void WebConfig::readConfigJS() {
 					|| !maps_json[map_name].is<picojson::object>())
 				continue;
 			picojson::object map_json = maps_json[map_name].get<picojson::object>();
+			auto map_tile_sets = map_it->getTileSets();
 
 			if (map_json.count("tileOffsets") && map_json["tileOffsets"].is<picojson::array>()) {
 				picojson::array array = map_json["tileOffsets"].get<picojson::array>();
 				if (array.size() == 4) {
-					TileSetKey key = map_it->getTileSetKey();
-					for (int rotation = 0; rotation < 4; rotation++)
-						parseTilePosJSON(array[rotation], world_tile_offset[key][rotation]);
+					for (auto tile_set_it = map_tile_sets.begin();
+							tile_set_it != map_tile_sets.end(); ++tile_set_it)
+						parseTilePosJSON(array[tile_set_it->rotation], world_tile_offset[*tile_set_it]);
+					/*
 					LOG(DEBUG) << map_name << " tile_offsets="
 							<< world_tile_offset[key][0] << ","
 							<< world_tile_offset[key][1] << ","
 							<< world_tile_offset[key][2] << ","
 							<< world_tile_offset[key][3];
+					*/
 				}
 			}
 
@@ -153,6 +154,8 @@ void WebConfig::readConfigJS() {
 		auto maps = config.getMaps();
 		for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
 			std::string map_name = map_it->getShortName();
+			auto map_tile_sets = map_it->getTileSets();
+
 			fs::path settings_file = config.getOutputDir() / map_name / "map.settings";
 			if (fs::is_regular_file(settings_file)) {
 				map_settings_found = true;
@@ -171,15 +174,17 @@ void WebConfig::readConfigJS() {
 					map_max_zoom[map_name] = root.get<int>("max_zoom");
 
 					std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
-					for (int i = 0; i < 4; i++) {
-						if (!map_it->getRotations().count(i))
+					for (auto tile_set_it = map_tile_sets.begin();
+							tile_set_it != map_tile_sets.end(); ++tile_set_it) {
+						int rotation = tile_set_it->rotation;
+						if (!map_it->getRotations().count(rotation))
 							continue;
-						auto section = config.getSection("rotation", rotation_names[i]);
+						auto section = config.getSection("rotation", rotation_names[rotation]);
 						int offset_x = section.get<int>("tile_offset_x", 0);
 						int offset_y = section.get<int>("tile_offset_y", 0);
 						renderer::TilePos offset(offset_x, offset_y);
-						world_tile_offset[map_it->getTileSetKey()][i] = offset;
-						map_last_rendered[map_name][i] = section.get<int>("last_render");
+						world_tile_offset[*tile_set_it] = offset;
+						map_last_rendered[map_name][rotation] = section.get<int>("last_render");
 					}
 				} catch (config::INIConfigError& exception) {
 					LOG(WARNING) << "Unable to read map.settings file: " << exception.what();
@@ -208,34 +213,26 @@ void WebConfig::writeConfigJS() const {
 	out.close();
 }
 
-std::set<int> WebConfig::getUsedRotations(
-		const TileSetKey& tile_set) const {
-	if (!world_rotations.count(tile_set))
-		return std::set<int>();
-	return world_rotations.at(tile_set);
-}
-
 int WebConfig::getTileSetMaxZoom(const TileSetKey& tile_set) const {
-	if (!world_max_max_zoom.count(tile_set))
+	if (!tile_set_max_zoom.count(tile_set))
 		return 0;
-	return world_max_max_zoom.at(tile_set);
+	return tile_set_max_zoom.at(tile_set);
 }
 
 void WebConfig::setTileSetMaxZoom(const TileSetKey& tile_set,
 		int max_zoom) {
-	world_max_max_zoom[tile_set] = max_zoom;
+	tile_set_max_zoom[tile_set] = max_zoom;
 }
 
-renderer::TilePos WebConfig::getWorldTileOffset(
-		const TileSetKey& tile_set, int rotation) const {
+renderer::TilePos WebConfig::getTileSetTileOffset(const TileSetKey& tile_set) const {
 	if (!world_tile_offset.count(tile_set))
 		return renderer::TilePos(0, 0);
-	return world_tile_offset.at(tile_set)[rotation];
+	return world_tile_offset.at(tile_set);
 }
 
-void WebConfig::setWorldTileOffset(const TileSetKey& tile_set,
-		int rotation, const renderer::TilePos& tile_offset) {
-	world_tile_offset[tile_set][rotation] = tile_offset;
+void WebConfig::setTileSetTileOffset(const TileSetKey& tile_set,
+		const renderer::TilePos& tile_offset) {
+	world_tile_offset[tile_set] = tile_offset;
 }
 
 int WebConfig::getMapTileSize(const std::string& map) const {
@@ -275,6 +272,7 @@ picojson::value WebConfig::getConfigJSON() const {
 	auto maps = config.getMaps();
 	for (auto it = maps.begin(); it != maps.end(); ++it) {
 		auto world = config.getWorld(it->getWorld());
+		auto tile_sets = it->getTileSets();
 		// TODO also this a bit cleaner maybe?
 
 		maps_order_json.push_back(picojson::value(it->getShortName()));
@@ -313,9 +311,15 @@ picojson::value WebConfig::getConfigJSON() const {
 			last_rendered_json.push_back(picojson::value((double) getMapLastRendered(it->getShortName(), rotation)));
 		map_json["lastRendered"] = picojson::value(last_rendered_json);
 
+		// TODO adapt the format of this config option to the new tile set key stuff?
+		std::array<renderer::TilePos, 4> tile_offsets;
+		for (auto tile_set_it = tile_sets.begin(); tile_set_it != tile_sets.end(); ++tile_set_it) {
+			tile_offsets[tile_set_it->rotation] = getTileSetTileOffset(*tile_set_it);
+		}
+
 		picojson::array tile_offsets_json;
 		for (int rotation = 0; rotation < 4; rotation++) {
-			renderer::TilePos offset = getWorldTileOffset(it->getTileSetKey(), rotation);
+			renderer::TilePos offset = tile_offsets[rotation];
 			picojson::array offset_json;
 			offset_json.push_back(picojson::value((double) offset.getX()));
 			offset_json.push_back(picojson::value((double) offset.getY()));

@@ -64,9 +64,15 @@ renderer::RenderViewType as<renderer::RenderViewType>(const std::string& from) {
 namespace mapcrafter {
 namespace config {
 
+TileSetKey::TileSetKey()
+	: render_view(renderer::RenderViewType::ISOMETRIC) {
+
+}
+
 TileSetKey::TileSetKey(const std::string& world_name,
-		renderer::RenderViewType render_view, int tile_width)
-	: world_name(world_name), render_view(render_view), tile_width(tile_width) {
+		renderer::RenderViewType render_view, int tile_width, int rotation)
+	: world_name(world_name), render_view(render_view), tile_width(tile_width),
+	  rotation(rotation) {
 }
 
 bool TileSetKey::operator<(const TileSetKey& other) const {
@@ -77,7 +83,15 @@ bool TileSetKey::operator<(const TileSetKey& other) const {
 		return util::str(render_view) < util::str(other.render_view);
 	if (tile_width != other.tile_width)
 		return tile_width < other.tile_width;
+	if (rotation != other.rotation)
+		return rotation < other.rotation;
 	return false;
+}
+
+TileSetKey TileSetKey::ignoreRotation() const {
+	TileSetKey copy = *this;
+	copy.rotation = -1;
+	return copy;
 }
 
 std::ostream& operator<<(std::ostream& out, ImageFormat image_format) {
@@ -203,8 +217,16 @@ bool MapSection::useImageModificationTimes() const {
 	return use_image_mtimes.getValue();
 }
 
-TileSetKey MapSection::getTileSetKey() const {
-	return TileSetKey(getWorld(), getRenderView(), getTileWidth());
+TileSetKey MapSection::getTileSet(int rotation) const {
+	return TileSetKey(getWorld(), getRenderView(), getTileWidth(), rotation);
+}
+
+TileSetKey MapSection::getDefaultTileSet() const {
+	return getTileSet(0).ignoreRotation();
+}
+
+const std::set<TileSetKey>& MapSection::getTileSets() const {
+	return tile_sets;
 }
 
 void MapSection::preParse(const INIConfigSection& section,
@@ -300,10 +322,12 @@ void MapSection::postParse(const INIConfigSection& section,
 	std::string elem;
 	while (ss >> elem) {
 		int r = stringToRotation(elem);
-		if (r != -1)
+		if (r != -1) {
 			rotations_set.insert(r);
-		else
+			tile_sets.insert(getTileSet(r));
+		} else {
 			validation.error("Invalid rotation '" + elem + "'!");
+		}
 	}
 
 	// check if required options were specified

@@ -29,6 +29,8 @@ IsometricTileSet::IsometricTileSet(int tile_width)
 	: TileSet(tile_width) {
 }
 
+namespace {
+
 /**
  * Calculates the tiles a row and column covers.
  */
@@ -52,6 +54,8 @@ void addRowColTiles(int row, int col, int tile_width, std::set<TilePos>& tiles) 
 		tiles.insert(TilePos(x, y-1));
 	if (edge_col && edge_row)
 		tiles.insert(TilePos(x-1, y-1));
+}
+
 }
 
 void IsometricTileSet::mapChunkToTiles(const mc::ChunkPos& chunk,
