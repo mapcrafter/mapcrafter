@@ -75,6 +75,15 @@ TileSetKey::TileSetKey(const std::string& world_name,
 	  rotation(rotation) {
 }
 
+std::string TileSetKey::toString() const {
+	std::string repr = "";
+	repr += world_name + "_";
+	repr += util::str(render_view) + "_";
+	repr += "t" + util::str(tile_width) + "_";
+	repr += "r" + util::str(rotation);
+	return repr;
+}
+
 bool TileSetKey::operator<(const TileSetKey& other) const {
 	if (world_name != other.world_name)
 		return world_name < other.world_name;

@@ -46,6 +46,8 @@ struct TileSetKey {
 	TileSetKey(const std::string& world_name, renderer::RenderViewType render_view,
 			int tile_width, int rotation);
 
+	std::string toString() const;
+
 	bool operator<(const TileSetKey& other) const;
 
 	TileSetKey ignoreRotation() const;
