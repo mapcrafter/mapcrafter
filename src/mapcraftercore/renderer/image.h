@@ -22,6 +22,7 @@
 
 #include <png.h>
 #include <cstdint>
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -73,6 +74,39 @@ const int ROTATE_90 = 1;
 const int ROTATE_180 = 2;
 const int ROTATE_270 = 3;
 
+class Palette {
+public:
+	virtual ~Palette() {}
+
+	virtual RGBAPixel getNearestColor(const RGBAPixel& color) const = 0;
+};
+
+class TestPalette : public Palette {
+public:
+	TestPalette(const std::vector<RGBAPixel>& colors) : colors(colors) {};
+	virtual ~TestPalette() {}
+
+	virtual RGBAPixel getNearestColor(const RGBAPixel& color) const {
+		RGBAPixel best_color;
+		int min_distance = -1;
+		for (auto color_it = colors.begin(); color_it != colors.end(); ++color_it) {
+			int distance = getColorDistance(color, *color_it);
+			if (min_distance == -1 || distance < min_distance) {
+				best_color = *color_it;
+				min_distance = distance;
+			}
+		}
+		return best_color;
+	}
+
+protected:
+	std::vector<RGBAPixel> colors;
+
+	int getColorDistance(RGBAPixel color1, RGBAPixel color2) const {
+		return pow(rgba_red(color1) - rgba_red(color2), 2) + pow(rgba_green(color1) - rgba_green(color2), 2) + pow(rgba_blue(color1) - rgba_blue(color2), 2);
+	}
+};
+
 // TODO better documentation...
 class RGBAImage : public Image<RGBAPixel> {
 public:
@@ -118,6 +152,27 @@ public:
 	 * (quadratic) blur effect.
 	 */
 	void blur(RGBAImage& dest, int radius) const;
+
+	void quantize(const Palette& palette, bool dither) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				RGBAPixel old_color = pixel(x, y);
+				RGBAPixel new_color = palette.getNearestColor(old_color);
+				pixel(x, y) = new_color;
+
+				if (dither) {
+					int error_r = rgba_red(old_color) - rgba_red(new_color);
+					int error_g = rgba_green(old_color) - rgba_green(new_color);
+					int error_b = rgba_blue(old_color) - rgba_blue(new_color);
+
+					setPixel(x+1, y, rgba_add_clamp(getPixel(x+1, y), error_r * 7/16, error_g * 7/16, error_b * 7/16));
+					setPixel(x-1, y+1, rgba_add_clamp(getPixel(x-1, y+1), error_r * 3/16, error_g * 3/16, error_b * 3/16));
+					setPixel(x, y+1, rgba_add_clamp(getPixel(x, y+1), error_r * 5/16, error_g * 5/16, error_b * 5/16));
+					setPixel(x+1, y+1, rgba_add_clamp(getPixel(x+1, y+1), error_r / 16, error_g / 16, error_b / 16));
+				}
+			}
+		}
+	}
 
 	bool readPNG(const std::string& filename);
 	bool writePNG(const std::string& filename) const;
