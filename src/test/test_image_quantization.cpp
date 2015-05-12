@@ -52,22 +52,17 @@ void traverseReduceOctree(Octree* octree) {
 		octree->reduceColor();
 }
 
-BOOST_AUTO_TEST_CASE(image_quantization_octree) {
-	std::srand(std::time(0));
-
-	RGBAImage src(1000, 1000);
-	src.readPNG("data/platypus.png");
+void testOctreeForImage(const RGBAImage& image) {
 	std::set<RGBAPixel> colors;
 	int r = 0, g = 0, b = 0, count = 0;
 
 	Octree octree;
 
-	// create a random image and insert all colors into an octree
-	for (int x = 0; x < src.getWidth(); x++) {
-		for (int y = 0; y < src.getHeight(); y++) {
-			RGBAPixel color = rgba(rand() % 256, rand() % 256, rand() % 256, 255);
-			src.setPixel(x, y, color);
-			colors.insert(src.getPixel(x, y));
+	// insert all pixels into an octree
+	for (int x = 0; x < image.getWidth(); x++) {
+		for (int y = 0; y < image.getHeight(); y++) {
+			RGBAPixel color = image.getPixel(x, y);
+			colors.insert(color);
 			r += rgba_red(color);
 			g += rgba_green(color);
 			b += rgba_blue(color);
@@ -91,5 +86,28 @@ BOOST_AUTO_TEST_CASE(image_quantization_octree) {
 	RGBAPixel average1 = octree.getColor();
 	RGBAPixel average2 = rgba(r / count, g / count, b / count, 255);
 	BOOST_CHECK_EQUAL(average1, average2);
+
+	BOOST_TEST_MESSAGE("Overall colors: " << colors.size());
+	BOOST_TEST_MESSAGE("Pixels per color: " << (double) (image.getWidth() * image.getHeight()) / colors.size());
+	BOOST_TEST_MESSAGE("Average color: " << (int) rgba_red(average1) << ","
+			<< (int) rgba_green(average1) << "," << (int) rgba_blue(average1));
+}
+
+BOOST_AUTO_TEST_CASE(image_quantization_octree) {
+	std::srand(std::time(0));
+
+	BOOST_MESSAGE("Testing random image.");
+	RGBAImage random(1000, 1000);
+	// create a random image
+	for (int x = 0; x < random.getWidth(); x++)
+		for (int y = 0; y < random.getHeight(); y++)
+			random.setPixel(x, y, rgba(rand() % 256, rand() % 256, rand() % 256, 255));
+	// and test octree with it
+	testOctreeForImage(random);
+
+	BOOST_TEST_MESSAGE("Testing platypus.");
+	RGBAImage platypus;
+	platypus.readPNG("data/platypus.png");
+	testOctreeForImage(platypus);
 }
 
