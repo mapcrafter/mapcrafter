@@ -8,6 +8,7 @@
 #include "../mapcraftercore/renderer/tileset.h"
 #include "../mapcraftercore/renderer/image/dither.h"
 #include "../mapcraftercore/renderer/image/palette.h"
+#include "../mapcraftercore/renderer/image/quantization.h"
 #include "../mapcraftercore/renderer/rendermodes/lighting.h"
 #include "../mapcraftercore/util.h"
 
@@ -16,6 +17,7 @@
 using namespace mapcrafter;
 using namespace mapcrafter::renderer;
 
+/*
 static int magic_count = 0;
 
 class Octree;
@@ -236,6 +238,7 @@ int traverseOctree(Octree* octree) {
 	}
 	return count;
 }
+*/
 
 int main(int argc, char** argv) {
 	//RGBAImage test(200, 200);
@@ -248,10 +251,11 @@ int main(int argc, char** argv) {
 			colors.insert(test.pixel(x, y));
 
 	std::cout << "start" << std::endl;
-	OctreePalette palette(test, 256);
-	std::cout << magic_count << " " << traverseOctree(palette.getOctree()) << " " << colors.size() << std::endl;
+	//OctreePalette palette(test, 256);
+	//std::cout << magic_count << " " << traverseOctree(palette.getOctree()) << " " << colors.size() << std::endl;
 
-	imageDither(test, palette, true);
+	//imageDither(test, palette, true);
+	imageColorQuantize(test, 256);
 	test.writePNG("test_dithered.png");
 
 	return 0;

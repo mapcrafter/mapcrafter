@@ -20,6 +20,7 @@
 #ifndef IMAGE_QUANTIZATION_H_
 #define IMAGE_QUANTIZATION_H_
 
+#include "palette.h"
 #include "../image.h"
 #include "../../util.h"
 
@@ -39,6 +40,7 @@ public:
 	bool isLeaf() const;
 
 	bool hasChildren(int index) const;
+	int getChildrenCount() const;
 	Octree* getChildren(int index);
 	const Octree* getChildren(int index) const;
 
@@ -47,7 +49,7 @@ public:
 	void setColor(RGBAPixel color);
 	void reduceColor();
 
-	static Octree* findOrCreateNode(Octree* tree, RGBAPixel color);
+	static Octree* findOrCreateNode(Octree* octree, RGBAPixel color);
 	static const Octree* findNearestNode(const Octree* octree, RGBAPixel color);
 
 protected:
@@ -57,6 +59,8 @@ protected:
 	int reference;
 	int red, green, blue;
 };
+
+void imageColorQuantize(RGBAImage& image, int max_colors);
 
 }
 }

@@ -19,6 +19,8 @@
 
 #include "quantization.h"
 
+#include <set>
+
 namespace mapcrafter {
 namespace renderer {
 
@@ -52,6 +54,14 @@ bool Octree::isLeaf() const {
 bool Octree::hasChildren(int index) const {
 	assert(index >= 0 && index < 8);
 	return children[index] != nullptr;
+}
+
+int Octree::getChildrenCount() const {
+	int count = 0;
+	for (int i = 0; i < 8; i++)
+		if (children[i])
+			count++;
+	return count;
 }
 
 Octree* Octree::getChildren(int index) {
@@ -143,6 +153,62 @@ const Octree* Octree::findNearestNode(const Octree* octree, RGBAPixel color) {
 
 }
 
-}
+void imageColorQuantize(RGBAImage& image, int max_colors) {
+	Octree octree;
+
+	// add colors to octree
+	std::set<Octree*> parents, next_parents;
+	for (int x = 0; x < image.getWidth(); x++) {
+		for (int y = 0; y < image.getHeight(); y++) {
+			RGBAPixel color = image.pixel(x, y);
+			Octree* node = Octree::findOrCreateNode(&octree, color);
+			node->setColor(color);
+			next_parents.insert(node->getParent());
+		}
+	}
+
+	// color reduce parents of leaves, layer by layer
+	// TODO this is still the simple version, improve it
+	// - better way of managening leaves with their parents
+	// - parents sorted by their children reference sums?
+	size_t leaves_count = 0;
+	for (int level = 7; level >= 0; level--) {
+		parents = next_parents;
+		next_parents.clear();
+
+		leaves_count = 0;
+		for (auto parent_it = parents.begin(); parent_it != parents.end(); ++parent_it)
+			leaves_count += (*parent_it)->getChildrenCount();
+
+		while (parents.size() > 0 && leaves_count > max_colors) {
+			Octree* parent = *parents.begin();
+			assert(!parent->isLeaf());
+			parents.erase(parents.begin());
+			next_parents.insert(parent->getParent());
+			leaves_count -= parent->getChildrenCount() - 1;
+			parent->reduceColor();
+		}
+
+		if (leaves_count <= max_colors)
+			break;
+	}
+
+	// gather reduced colors
+	std::vector<RGBAPixel> palette;
+	for (auto parent_it = parents.begin(); parent_it != parents.end(); ++parent_it)
+		for (int i = 0; i < 8; i++)
+			if ((*parent_it)->hasChildren(i))
+				palette.push_back((*parent_it)->getChildren(i)->getColor());
+	for (auto parent_it = next_parents.begin(); parent_it != next_parents.end(); ++parent_it)
+		for (int i = 0; i < 8; i++)
+			if ((*parent_it)->hasChildren(i)) {
+				Octree* children = (*parent_it)->getChildren(i);
+				if (!parents.count(children))
+					palette.push_back(children->getColor());
+			}
+
+	std::cout << palette.size() << " colors" << std::endl;
 }
 
+}
+}
