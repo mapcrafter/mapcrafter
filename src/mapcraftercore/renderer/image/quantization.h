@@ -47,7 +47,8 @@ public:
 	void setColor(RGBAPixel color);
 	void reduceColor();
 
-	static Octree* traverseToColor(Octree* tree, RGBAPixel color);
+	static Octree* findOrCreateNode(Octree* tree, RGBAPixel color);
+	static const Octree* findNearestNode(const Octree* octree, RGBAPixel color);
 
 protected:
 	Octree* parent;

@@ -108,7 +108,9 @@ int nth_bit(int x, int n) {
 
 }
 
-Octree* Octree::traverseToColor(Octree* octree, RGBAPixel color) {
+Octree* Octree::findOrCreateNode(Octree* octree, RGBAPixel color) {
+	assert(octree != nullptr);
+
 	uint8_t red = rgba_red(color);
 	uint8_t green = rgba_green(color);
 	uint8_t blue = rgba_blue(color);
@@ -117,8 +119,28 @@ Octree* Octree::traverseToColor(Octree* octree, RGBAPixel color) {
 	for (int i = 7; i >= 0; i--) {
 		int index = (nth_bit(red, i) << 2) | (nth_bit(green, i) << 1) | nth_bit(blue, i);
 		node = node->getChildren(index);
+		assert(node != nullptr);
 	}
 	return node;
+}
+
+const Octree* Octree::findNearestNode(const Octree* octree, RGBAPixel color) {
+	assert(octree != nullptr);
+
+	uint8_t red = rgba_red(color);
+	uint8_t green = rgba_green(color);
+	uint8_t blue = rgba_blue(color);
+
+	const Octree* node = octree;
+	for (int i = 7; i >= 0; i--) {
+		if (node->hasColor())
+			return node;
+		int index = (nth_bit(red, i) << 2) | (nth_bit(green, i) << 1) | nth_bit(blue, i);
+		node = node->getChildren(index);
+		assert(node != nullptr);
+	}
+	return node;
+
 }
 
 }

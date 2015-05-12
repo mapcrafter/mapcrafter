@@ -52,7 +52,7 @@ void traverseReduceOctree(Octree* octree) {
 		octree->reduceColor();
 }
 
-void testOctreeForImage(const RGBAImage& image) {
+void testOctreeWithImage(const RGBAImage& image) {
 	std::set<RGBAPixel> colors;
 	int r = 0, g = 0, b = 0, count = 0;
 
@@ -68,9 +68,17 @@ void testOctreeForImage(const RGBAImage& image) {
 			b += rgba_blue(color);
 			count++;
 
-			Octree::traverseToColor(&octree, color)->setColor(color);
+			Octree::findOrCreateNode(&octree, color)->setColor(color);
 		}
 	}
+
+	// test the function that finds the nearest color to a specific color
+	// since there are no reduced leaves yet, the exact colors should be found
+	for (auto color_it = colors.begin(); color_it != colors.end(); ++color_it) {
+		const Octree* node = Octree::findNearestNode(&octree, *color_it);
+		BOOST_CHECK(node->hasColor());
+		BOOST_CHECK_EQUAL(node->getColor(), *color_it);
+    }
 
 	// make sure that all colors are inserted correctly
 	BOOST_CHECK(!octree.isLeaf());
@@ -87,6 +95,15 @@ void testOctreeForImage(const RGBAImage& image) {
 	RGBAPixel average2 = rgba(r / count, g / count, b / count, 255);
 	BOOST_CHECK_EQUAL(average1, average2);
 
+	// also searching for the nearest color of a random color
+	// should result in this average color
+	for (int i = 0; i < 10; i++) {
+		RGBAPixel color = rgba(rand() % 255, rand() % 255, rand() % 255, 255);
+		const Octree* node = Octree::findNearestNode(&octree, color);
+		BOOST_CHECK(node->hasColor());
+		BOOST_CHECK_EQUAL(node->getColor(), average1);
+	}
+
 	BOOST_TEST_MESSAGE("Overall colors: " << colors.size());
 	BOOST_TEST_MESSAGE("Pixels per color: " << (double) (image.getWidth() * image.getHeight()) / colors.size());
 	BOOST_TEST_MESSAGE("Average color: " << (int) rgba_red(average1) << ","
@@ -96,18 +113,18 @@ void testOctreeForImage(const RGBAImage& image) {
 BOOST_AUTO_TEST_CASE(image_quantization_octree) {
 	std::srand(std::time(0));
 
+	// create a random image to test octree with
 	BOOST_MESSAGE("Testing random image.");
 	RGBAImage random(1000, 1000);
-	// create a random image
 	for (int x = 0; x < random.getWidth(); x++)
 		for (int y = 0; y < random.getHeight(); y++)
 			random.setPixel(x, y, rgba(rand() % 256, rand() % 256, rand() % 256, 255));
-	// and test octree with it
-	testOctreeForImage(random);
+	testOctreeWithImage(random);
 
+	// and also check it with this cute platypus
 	BOOST_TEST_MESSAGE("Testing platypus.");
 	RGBAImage platypus;
 	platypus.readPNG("data/platypus.png");
-	testOctreeForImage(platypus);
+	testOctreeWithImage(platypus);
 }
 
