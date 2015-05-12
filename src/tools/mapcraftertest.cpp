@@ -6,6 +6,8 @@
 #include "../mapcraftercore/renderer/renderview.h"
 #include "../mapcraftercore/renderer/tilerenderer.h"
 #include "../mapcraftercore/renderer/tileset.h"
+#include "../mapcraftercore/renderer/image/dither.h"
+#include "../mapcraftercore/renderer/image/palette.h"
 #include "../mapcraftercore/renderer/rendermodes/lighting.h"
 #include "../mapcraftercore/util.h"
 
@@ -139,9 +141,9 @@ struct octree_compare {
 	}
 };
 
-class OctreePalette : public TestPalette {
+class OctreePalette : public SimplePalette {
 public:
-	OctreePalette(const RGBAImage& source, size_t palette_size) : TestPalette() {
+	OctreePalette(const RGBAImage& source, size_t palette_size) : SimplePalette() {
 		constructFromImage(source, palette_size);
 	}
 
@@ -249,7 +251,7 @@ int main(int argc, char** argv) {
 	OctreePalette palette(test, 256);
 	std::cout << magic_count << " " << traverseOctree(palette.getOctree()) << " " << colors.size() << std::endl;
 
-	test.quantize(palette, true);
+	imageDither(test, palette, true);
 	test.writePNG("test_dithered.png");
 
 	return 0;
