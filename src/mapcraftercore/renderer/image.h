@@ -83,6 +83,7 @@ public:
 
 class TestPalette : public Palette {
 public:
+	TestPalette() {};
 	TestPalette(const std::vector<RGBAPixel>& colors) : colors(colors) {};
 	virtual ~TestPalette() {}
 

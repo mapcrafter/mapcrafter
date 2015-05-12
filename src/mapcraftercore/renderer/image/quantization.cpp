@@ -42,6 +42,13 @@ const Octree* Octree::getParent() const {
 	return parent;
 }
 
+bool Octree::isLeaf() const {
+	for (int i = 0; i < 8; i++)
+		if (children[i])
+			return false;
+	return true;
+}
+
 bool Octree::hasChildren(int index) const {
 	assert(index >= 0 && index < 8);
 	return children[index] != nullptr;
@@ -80,15 +87,38 @@ void Octree::setColor(RGBAPixel color) {
 }
 
 void Octree::reduceColor() {
+	assert(!isLeaf());
 	reference = red = green = blue = 0;
 	for (int i = 0; i < 8; i++) {
 		if (!children[i])
 			continue;
+		assert(children[i]->hasColor());
 		reference += children[i]->reference;
 		red += children[i]->red;
 		green += children[i]->green;
 		blue += children[i]->blue;
 	}
+}
+
+namespace {
+
+int nth_bit(int x, int n) {
+	return (x >> n) & 1;
+}
+
+}
+
+Octree* Octree::traverseToColor(Octree* octree, RGBAPixel color) {
+	uint8_t red = rgba_red(color);
+	uint8_t green = rgba_green(color);
+	uint8_t blue = rgba_blue(color);
+
+	Octree* node = octree;
+	for (int i = 7; i >= 0; i--) {
+		int index = (nth_bit(red, i) << 2) | (nth_bit(green, i) << 1) | nth_bit(blue, i);
+		node = node->getChildren(index);
+	}
+	return node;
 }
 
 }

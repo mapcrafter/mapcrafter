@@ -36,6 +36,8 @@ public:
 	Octree* getParent();
 	const Octree* getParent() const;
 
+	bool isLeaf() const;
+
 	bool hasChildren(int index) const;
 	Octree* getChildren(int index);
 	const Octree* getChildren(int index) const;
@@ -44,6 +46,8 @@ public:
 	RGBAPixel getColor() const;
 	void setColor(RGBAPixel color);
 	void reduceColor();
+
+	static Octree* traverseToColor(Octree* tree, RGBAPixel color);
 
 protected:
 	Octree* parent;
