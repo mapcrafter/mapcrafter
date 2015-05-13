@@ -571,6 +571,71 @@ bool RGBAImage::writePNG(const std::string& filename) const {
 	return true;
 }
 
+bool RGBAImage::writeIndexedPNG(const std::string& filename) const {
+	std::ofstream file(filename.c_str(), std::ios::binary);
+	if (!file) {
+		return false;
+	}
+
+	png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	if (png == NULL)
+		return false;
+
+	png_infop info = png_create_info_struct(png);
+	if (info == NULL) {
+		png_destroy_write_struct(&png, NULL);
+		return false;
+	}
+
+	if (setjmp(png_jmpbuf(png))) {
+		png_destroy_write_struct(&png, &info);
+		return false;
+	}
+
+    int palette_size = 256;
+	int bit_depth = 8;
+	png_set_write_fn(png, (png_voidp) &file, pngWriteData, NULL);
+	png_set_IHDR(png, info, width, height, bit_depth, PNG_COLOR_TYPE_PALETTE,
+	        PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+
+	png_color* palette = (png_color*) png_malloc(png, palette_size * sizeof(png_color));
+	if (palette == NULL) {
+		png_destroy_write_struct(&png, &info);
+		return false;
+	}
+
+	for (int i = 0; i < palette_size; i++) {
+		palette[i].red = i;
+		palette[i].green = i;
+		palette[i].blue = i;
+	}
+
+	png_set_PLTE(png, info, palette, palette_size);
+
+	png_bytep* rows = (png_bytep*) png_malloc(png, height * sizeof(png_bytep));;
+	//const uint32_t* p = &data[0];
+	for (int32_t i = 0; i < height; i++/*, p += width*/) {
+		//rows[i] = (png_bytep) p;
+		rows[i] = (png_byte*) png_malloc(png, width * sizeof(png_byte));
+		for (int x = 0; x < width; x++)
+			rows[i][x] = x % palette_size;
+	}
+
+	png_set_rows(png, info, rows);
+
+	//if (mapcrafter::util::isBigEndian())
+	//	png_write_png(png, info, PNG_TRANSFORM_BGR | PNG_TRANSFORM_SWAP_ALPHA, NULL);
+	//else
+		png_write_png(png, info, PNG_TRANSFORM_IDENTITY, NULL);
+
+	file.close();
+	for (int y = 0; y < height; y++)
+		delete[] rows[y];
+	delete[] rows;
+	png_destroy_write_struct(&png, &info);
+	return true;
+}
+
 /*
  * ERROR HANDLING:
  *

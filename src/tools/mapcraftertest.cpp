@@ -257,6 +257,7 @@ int main(int argc, char** argv) {
 	//imageDither(test, palette, true);
 	imageColorQuantize(test, 256);
 	test.writePNG("test_dithered.png");
+	test.writeIndexedPNG("test.png");
 
 	return 0;
 
