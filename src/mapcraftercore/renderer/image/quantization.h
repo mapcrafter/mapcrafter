@@ -49,7 +49,17 @@ public:
 	void setColor(RGBAPixel color);
 	void reduceColor();
 
+	int getColorID() const;
+	void setColorID(int color_id);
+
 	static Octree* findOrCreateNode(Octree* octree, RGBAPixel color);
+
+	/**
+	 * Traverses the octree to the node of a given color and stops and returns it when a node
+	 * with a color is found.
+	 *
+	 * TODO Warning, won't work if path to color doesn't contain a node with color
+	 */
 	static const Octree* findNearestNode(const Octree* octree, RGBAPixel color);
 
 protected:
@@ -58,9 +68,13 @@ protected:
 
 	int reference;
 	int red, green, blue;
+	int color_id;
 };
 
-void imageColorQuantize(RGBAImage& image, int max_colors);
+/**
+ * Quantizes the colors of a given image.
+ */
+void octreeColorQuantize(const RGBAImage& image, size_t max_colors, std::vector<RGBAPixel>& colors, Octree** octree = nullptr);
 
 }
 }

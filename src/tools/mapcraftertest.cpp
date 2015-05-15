@@ -243,7 +243,7 @@ int traverseOctree(Octree* octree) {
 int main(int argc, char** argv) {
 	//RGBAImage test(200, 200);
 	RGBAImage test;
-	test.readPNG("input_rgb.png");
+	test.readPNG("wantyou.png");
 
 	std::set<RGBAPixel> colors;
 	for (int x = 0; x < test.getWidth(); x++)
@@ -255,7 +255,7 @@ int main(int argc, char** argv) {
 	//std::cout << magic_count << " " << traverseOctree(palette.getOctree()) << " " << colors.size() << std::endl;
 
 	//imageDither(test, palette, true);
-	imageColorQuantize(test, 256);
+	//imageColorQuantize(test, 256);
 	test.writePNG("test_dithered.png");
 	test.writeIndexedPNG("test.png");
 

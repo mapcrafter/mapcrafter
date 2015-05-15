@@ -31,7 +31,8 @@ class Palette {
 public:
 	virtual ~Palette();
 
-	virtual RGBAPixel getNearestColor(const RGBAPixel& color) const = 0;
+	virtual const std::vector<RGBAPixel>& getColors() const = 0;
+	virtual int getNearestColor(const RGBAPixel& color) const = 0;
 };
 
 class SimplePalette : public Palette {
@@ -40,7 +41,8 @@ public:
 	SimplePalette(const std::vector<RGBAPixel>& colors);
 	virtual ~SimplePalette();
 
-	virtual RGBAPixel getNearestColor(const RGBAPixel& color) const;
+	virtual const std::vector<RGBAPixel>& getColors() const;
+	virtual int getNearestColor(const RGBAPixel& color) const;
 
 protected:
 	std::vector<RGBAPixel> colors;

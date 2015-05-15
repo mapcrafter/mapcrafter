@@ -20,13 +20,15 @@
 #ifndef IMAGE_DITHER_H_
 #define IMAGE_DITHER_H_
 
+#include <vector>
+
 namespace mapcrafter {
 namespace renderer {
 
 class RGBAImage;
 class Palette;
 
-void imageDither(RGBAImage& image, const Palette& palette, bool dither);
+void imageDither(RGBAImage& image, const Palette& palette, std::vector<int>& data);
 
 }
 }

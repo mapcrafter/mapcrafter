@@ -23,6 +23,8 @@
 
 #include "image.h"
 
+#include "image/dither.h"
+#include "image/quantization.h"
 #include "../util.h"
 
 #include <jpeglib.h>
@@ -592,11 +594,22 @@ bool RGBAImage::writeIndexedPNG(const std::string& filename) const {
 		return false;
 	}
 
-    int palette_size = 256;
+	int palette_size = 256;
 	int bit_depth = 8;
 	png_set_write_fn(png, (png_voidp) &file, pngWriteData, NULL);
 	png_set_IHDR(png, info, width, height, bit_depth, PNG_COLOR_TYPE_PALETTE,
-	        PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+			PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+
+	//std::cout << "Doing quantization." << std::endl;
+	Octree* octree;
+	std::vector<RGBAPixel> colors;
+	octreeColorQuantize(*this, 256, colors, &octree);
+	palette_size = colors.size();
+	//std::cout << "Finished quantization. " << palette_size << " colors." << std::endl;
+
+	//std::vector<int> data;
+	//RGBAImage copy = *this;
+	//imageDither(copy, SimplePalette(colors), data);
 
 	png_color* palette = (png_color*) png_malloc(png, palette_size * sizeof(png_color));
 	if (palette == NULL) {
@@ -605,20 +618,21 @@ bool RGBAImage::writeIndexedPNG(const std::string& filename) const {
 	}
 
 	for (int i = 0; i < palette_size; i++) {
-		palette[i].red = i;
-		palette[i].green = i;
-		palette[i].blue = i;
+		palette[i].red = rgba_red(colors[i]);
+		palette[i].green = rgba_green(colors[i]);
+		palette[i].blue = rgba_blue(colors[i]);
 	}
 
 	png_set_PLTE(png, info, palette, palette_size);
 
-	png_bytep* rows = (png_bytep*) png_malloc(png, height * sizeof(png_bytep));;
-	//const uint32_t* p = &data[0];
-	for (int32_t i = 0; i < height; i++/*, p += width*/) {
-		//rows[i] = (png_bytep) p;
-		rows[i] = (png_byte*) png_malloc(png, width * sizeof(png_byte));
-		for (int x = 0; x < width; x++)
-			rows[i][x] = x % palette_size;
+	png_bytep* rows = (png_bytep*) png_malloc(png, height * sizeof(png_bytep));
+	for (int y = 0; y < height; y++) {
+		rows[y] = (png_byte*) png_malloc(png, width * sizeof(png_byte));
+		for (int x = 0; x < width; x++) {
+			//rows[y][x] = data[y * width + x];
+			RGBAPixel color = pixel(x, y);
+			rows[y][x] = Octree::findNearestNode(octree, color)->getColorID();
+		}
 	}
 
 	png_set_rows(png, info, rows);

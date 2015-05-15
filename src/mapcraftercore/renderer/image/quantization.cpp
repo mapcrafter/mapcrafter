@@ -25,7 +25,7 @@ namespace mapcrafter {
 namespace renderer {
 
 Octree::Octree(Octree* parent)
-	: parent(parent), reference(0), red(0), green(0), blue(0) {
+	: parent(parent), reference(0), red(0), green(0), blue(0), color_id(-1) {
 	for (int i = 0; i < 8; i++)
 		children[i] = nullptr;
 }
@@ -110,6 +110,15 @@ void Octree::reduceColor() {
 	}
 }
 
+void Octree::setColorID(int color_id) {
+	this->color_id = color_id;
+}
+
+int Octree::getColorID() const {
+	assert(color_id != -1);
+	return color_id;
+}
+
 namespace {
 
 int nth_bit(int x, int n) {
@@ -147,21 +156,21 @@ const Octree* Octree::findNearestNode(const Octree* octree, RGBAPixel color) {
 			return node;
 		int index = (nth_bit(red, i) << 2) | (nth_bit(green, i) << 1) | nth_bit(blue, i);
 		node = node->getChildren(index);
-		assert(node != nullptr);
+		if (node == nullptr)
+			return nullptr;
 	}
 	return node;
-
 }
 
-void imageColorQuantize(RGBAImage& image, int max_colors) {
-	Octree octree;
+void octreeColorQuantize(const RGBAImage& image, size_t max_colors, std::vector<RGBAPixel>& colors, Octree** octree) {
+	Octree* internal_octree = new Octree();
 
 	// add colors to octree
 	std::set<Octree*> parents, next_parents;
 	for (int x = 0; x < image.getWidth(); x++) {
 		for (int y = 0; y < image.getHeight(); y++) {
 			RGBAPixel color = image.pixel(x, y);
-			Octree* node = Octree::findOrCreateNode(&octree, color);
+			Octree* node = Octree::findOrCreateNode(internal_octree, color);
 			node->setColor(color);
 			next_parents.insert(node->getParent());
 		}
@@ -194,20 +203,30 @@ void imageColorQuantize(RGBAImage& image, int max_colors) {
 	}
 
 	// gather reduced colors
-	std::vector<RGBAPixel> palette;
-	for (auto parent_it = parents.begin(); parent_it != parents.end(); ++parent_it)
-		for (int i = 0; i < 8; i++)
-			if ((*parent_it)->hasChildren(i))
-				palette.push_back((*parent_it)->getChildren(i)->getColor());
-	for (auto parent_it = next_parents.begin(); parent_it != next_parents.end(); ++parent_it)
+	for (auto parent_it = parents.begin(); parent_it != parents.end(); ++parent_it) {
 		for (int i = 0; i < 8; i++)
 			if ((*parent_it)->hasChildren(i)) {
-				Octree* children = (*parent_it)->getChildren(i);
-				if (!parents.count(children))
-					palette.push_back(children->getColor());
+				Octree* node = (*parent_it)->getChildren(i);
+				node->setColorID(colors.size());
+				colors.push_back(node->getColor());
 			}
+	}
+	for (auto parent_it = next_parents.begin(); parent_it != next_parents.end(); ++parent_it) {
+		for (int i = 0; i < 8; i++) {
+			if ((*parent_it)->hasChildren(i)) {
+				Octree* children = (*parent_it)->getChildren(i);
+				if (!parents.count(children)) {
+					children->setColorID(colors.size());
+					colors.push_back(children->getColor());
+				}
+			}
+		}
+	}
 
-	std::cout << palette.size() << " colors" << std::endl;
+	if (octree != nullptr)
+		*octree = internal_octree;
+	else
+		delete internal_octree;
 }
 
 }
