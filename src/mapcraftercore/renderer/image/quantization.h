@@ -24,6 +24,8 @@
 #include "../image.h"
 #include "../../util.h"
 
+#include <vector>
+
 namespace mapcrafter {
 namespace renderer {
 
@@ -52,6 +54,8 @@ public:
 	int getColorID() const;
 	void setColorID(int color_id);
 
+	void updateParents();
+
 	static Octree* findOrCreateNode(Octree* octree, RGBAPixel color);
 
 	/**
@@ -61,6 +65,8 @@ public:
 	 * TODO Warning, won't work if path to color doesn't contain a node with color
 	 */
 	static const Octree* findNearestNode(const Octree* octree, RGBAPixel color);
+	
+	static int findNearestColor(const Octree* octree, RGBAPixel color);
 
 protected:
 	Octree* parent;
@@ -69,6 +75,22 @@ protected:
 	int reference;
 	int red, green, blue;
 	int color_id;
+
+	std::vector<std::pair<int, RGBAPixel>> subtree_colors;
+};
+
+class OctreePalette : public Palette {
+public:
+	OctreePalette(const std::vector<RGBAPixel>& colors);
+	virtual ~OctreePalette();
+
+	virtual const std::vector<RGBAPixel>& getColors() const;
+	virtual int getNearestColor(const RGBAPixel& color) const;
+
+protected:
+	std::vector<RGBAPixel> colors;
+
+	Octree octree;
 };
 
 /**

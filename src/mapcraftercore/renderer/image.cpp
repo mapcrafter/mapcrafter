@@ -649,7 +649,8 @@ bool RGBAImage::writeIndexedPNG(const std::string& filename, int palette_bits, b
 	if (dithered) {
 		RGBAImage copy = *this;
 		// TODO need a proper color palette with fast access
-		imageDither(copy, SimplePalette(colors), data_dithered);
+		//imageDither(copy, SimplePalette(colors), data_dithered);
+		imageDither(copy, OctreePalette(colors), data_dithered);
 	}
 
 	png_bytep* rows = (png_bytep*) png_malloc(png, height * sizeof(png_bytep));
