@@ -122,7 +122,7 @@ public:
 
 	bool readPNG(const std::string& filename);
 	bool writePNG(const std::string& filename) const;
-	bool writeIndexedPNG(const std::string& filename) const;
+	bool writeIndexedPNG(const std::string& filename, int palette_bits = 8, bool dithered = true) const;
 
 	bool readJPEG(const std::string& filename);
 	bool writeJPEG(const std::string& filename, int quality,
