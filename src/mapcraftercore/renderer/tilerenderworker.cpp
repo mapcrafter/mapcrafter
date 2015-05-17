@@ -66,6 +66,7 @@ void TileRenderWorker::setProgressHandler(util::IProgressHandler* progress) {
 
 void TileRenderWorker::saveTile(const TilePath& tile, const RGBAImage& image) {
 	bool png = render_context.map_config.getImageFormat() == config::ImageFormat::PNG;
+	bool png_indexed = render_context.map_config.isPNGIndexed();
 	std::string suffix = std::string(".") + render_context.map_config.getImageFormatSuffix();
 	std::string filename = tile.toString() + suffix;
 	if (tile.getDepth() == 0)
@@ -74,7 +75,10 @@ void TileRenderWorker::saveTile(const TilePath& tile, const RGBAImage& image) {
 	if (!fs::exists(file.branch_path()))
 		fs::create_directories(file.branch_path());
 
-	if (png && !image.writePNG(file.string()))
+	if ((png && !png_indexed) && !image.writePNG(file.string()))
+		LOG(WARNING) << "Unable to write '" << file.string() << "'.";
+
+	if ((png && png_indexed) && !image.writeIndexedPNG(file.string()))
 		LOG(WARNING) << "Unable to write '" << file.string() << "'.";
 
 	config::Color bg = render_context.background_color;
