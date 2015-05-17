@@ -586,7 +586,7 @@ void setRowPixel(png_byte* line, int bit_depth, int x, uint8_t index) {
 			line[x/2] = (line[x/2] & 0xf0) | index;
 	} else if (bit_depth == 2) {
 		index &= 0x3;
-		int mod = x % 4;
+		int mod = 3 - (x % 4);
 		line[x/4] = (line[x/4] & ~(0x3 << mod*2)) | (index << mod*2);
 	} else if (bit_depth == 1) {
 		if (index)
