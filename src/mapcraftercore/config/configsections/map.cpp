@@ -325,6 +325,7 @@ void MapSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	// parse rotations
 	rotations_set.clear();
+	tile_sets.clear();
 	std::string str = rotations.getValue();
 	std::stringstream ss;
 	ss << str;

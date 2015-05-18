@@ -181,6 +181,7 @@ int main(int argc, char** argv) {
 	config.configureLogging();
 
 	renderer::RenderManager manager(config);
+	manager.setThreadCount(opts.jobs);
 	manager.setRenderBehaviors(renderer::RenderBehaviors::fromRenderOpts(config, opts));
 	manager.initialize();
 	//manager.scanWorlds();
