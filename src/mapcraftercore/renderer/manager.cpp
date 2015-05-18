@@ -356,7 +356,7 @@ void RenderManager::renderMap(const std::string& map, int rotation,
 	context.initializeTileRenderer();
 
 	// TODO maybe set only once per map?
-	// web_config.setMapMaxZoom(map, context.tile_set->getDepth());
+	web_config.setMapMaxZoom(map, context.tile_set->getDepth());
 	web_config.setMapTileSize(map, context.tile_renderer->getTileSize());
 	web_config.writeConfigJS();
 
