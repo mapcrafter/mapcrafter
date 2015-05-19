@@ -513,7 +513,7 @@ bool RGBAImage::readPNG(const std::string& filename) {
 	png_set_interlace_handling(png);
 	png_read_update_info(png, info);
 
-	png_bytep* rows = new png_bytep[height];
+	png_bytep* rows = (png_bytep*) png_malloc(png, height * sizeof(png_bytep));
 	uint32_t* p = &data[0];
 	for (int32_t i = 0; i < height; i++, p += width)
 		rows[i] = (png_bytep) p;
@@ -524,8 +524,9 @@ bool RGBAImage::readPNG(const std::string& filename) {
 	}
 	png_read_image(png, rows);
 	png_read_end(png, NULL);
+	
+	png_free(png, rows);
 	png_destroy_read_struct(&png, &info, NULL);
-	delete[] rows;
 
 	return true;
 }
@@ -555,7 +556,7 @@ bool RGBAImage::writePNG(const std::string& filename) const {
 	png_set_IHDR(png, info, width, height, 8, PNG_COLOR_TYPE_RGB_ALPHA,
 	        PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
-	png_bytep* rows = new png_bytep[height];
+	png_bytep* rows = (png_bytep*) png_malloc(png, height * sizeof(png_bytep));
 	const uint32_t* p = &data[0];
 	for (int32_t i = 0; i < height; i++, p += width)
 		rows[i] = (png_bytep) p;
@@ -568,7 +569,7 @@ bool RGBAImage::writePNG(const std::string& filename) const {
 		png_write_png(png, info, PNG_TRANSFORM_IDENTITY, NULL);
 
 	file.close();
-	delete[] rows;
+	png_free(png, rows);
 	png_destroy_write_struct(&png, &info);
 	return true;
 }
@@ -677,8 +678,10 @@ bool RGBAImage::writeIndexedPNG(const std::string& filename, int palette_bits, b
 
 	file.close();
 	for (int y = 0; y < height; y++)
-		delete[] rows[y];
-	delete[] rows;
+		png_free(png, rows[y]);
+	png_free(png, rows);
+	png_free(png, palette);
+	delete octree;
 	png_destroy_write_struct(&png, &info);
 	return true;
 }
