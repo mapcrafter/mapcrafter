@@ -664,7 +664,7 @@ bool RGBAImage::writeIndexedPNG(const std::string& filename, int palette_bits, b
 				setRowPixel(rows[y], palette_bits, x, data_dithered[y * width + x]);
 			} else {
 				RGBAPixel color = pixel(x, y);
-				setRowPixel(rows[y], palette_bits, x, Octree::findNearestNode(octree, color)->getColorID());
+				setRowPixel(rows[y], palette_bits, x, Octree::findNearestColor(octree, color));
 			}
 		}
 	}

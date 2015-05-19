@@ -72,14 +72,6 @@ void testOctreeWithImage(const RGBAImage& image) {
 		}
 	}
 
-	// test the function that finds the nearest color to a specific color
-	// since there are no reduced leaves yet, the exact colors should be found
-	for (auto color_it = colors.begin(); color_it != colors.end(); ++color_it) {
-		const Octree* node = Octree::findNearestNode(&octree, *color_it);
-		BOOST_CHECK(node->hasColor());
-		BOOST_CHECK_EQUAL(node->getColor(), *color_it);
-    }
-
 	// make sure that all colors are inserted correctly
 	BOOST_CHECK(!octree.isLeaf());
 	BOOST_CHECK(!octree.hasColor());
@@ -95,19 +87,14 @@ void testOctreeWithImage(const RGBAImage& image) {
 	RGBAPixel average2 = rgba(r / count, g / count, b / count, 255);
 	BOOST_CHECK_EQUAL(average1, average2);
 
-	// also searching for the nearest color of a random color
-	// should result in this average color
-	for (int i = 0; i < 10; i++) {
-		RGBAPixel color = rgba(rand() % 255, rand() % 255, rand() % 255, 255);
-		const Octree* node = Octree::findNearestNode(&octree, color);
-		BOOST_CHECK(node->hasColor());
-		BOOST_CHECK_EQUAL(node->getColor(), average1);
-	}
-
 	BOOST_TEST_MESSAGE("Overall colors: " << colors.size());
 	BOOST_TEST_MESSAGE("Pixels per color: " << (double) (image.getWidth() * image.getHeight()) / colors.size());
 	BOOST_TEST_MESSAGE("Average color: " << (int) rgba_red(average1) << ","
 			<< (int) rgba_green(average1) << "," << (int) rgba_blue(average1));
+}
+
+BOOST_AUTO_TEST_CASE(image_palette) {
+	// TODO
 }
 
 BOOST_AUTO_TEST_CASE(image_quantization_octree) {

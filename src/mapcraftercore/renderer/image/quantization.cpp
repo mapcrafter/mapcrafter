@@ -151,25 +151,6 @@ Octree* Octree::findOrCreateNode(Octree* octree, RGBAPixel color) {
 	return node;
 }
 
-const Octree* Octree::findNearestNode(const Octree* octree, RGBAPixel color) {
-	assert(octree != nullptr);
-
-	uint8_t red = rgba_red(color);
-	uint8_t green = rgba_green(color);
-	uint8_t blue = rgba_blue(color);
-
-	const Octree* node = octree;
-	for (int i = 7; i >= 0; i--) {
-		if (node->hasColor())
-			return node;
-		int index = (nth_bit(red, i) << 2) | (nth_bit(green, i) << 1) | nth_bit(blue, i);
-		node = node->getChildren(index);
-		if (node == nullptr)
-			return nullptr;
-	}
-	return node;
-}
-
 namespace {
 
 int colorDistanceSquare(RGBAPixel color1, RGBAPixel color2) {
@@ -210,11 +191,14 @@ int Octree::findNearestColor(const Octree* octree, RGBAPixel color) {
 			best_color = it->first;
 		}
 	}
+	// this shouldn't happen if all the colors are cached
+	assert(best_color != -1);
 	return best_color;
 }
 
 OctreePalette::OctreePalette(const std::vector<RGBAPixel>& colors)
 	: colors(colors) {
+	// add each color to the octree, assign a palette index and update parents
 	for (size_t i = 0; i < colors.size(); i++) {
 		RGBAPixel color = colors[i];
 		Octree* node = Octree::findOrCreateNode(&octree, color);
@@ -232,13 +216,16 @@ const std::vector<RGBAPixel>& OctreePalette::getColors() const {
 }
 
 int OctreePalette::getNearestColor(const RGBAPixel& color) const {
+	// now just automagically find the best color
 	return Octree::findNearestColor(&octree, color);
 }
 
-void octreeColorQuantize(const RGBAImage& image, size_t max_colors, std::vector<RGBAPixel>& colors, Octree** octree) {
+void octreeColorQuantize(const RGBAImage& image, size_t max_colors,
+		std::vector<RGBAPixel>& colors, Octree** octree) {
 	Octree* internal_octree = new Octree();
 
-	// add colors to octree
+	// add all pixels of the image to octree
+	// and already remember which nodes are parents of leaf nodes
 	std::set<Octree*> parents, next_parents;
 	for (int x = 0; x < image.getWidth(); x++) {
 		for (int y = 0; y < image.getHeight(); y++) {
@@ -253,7 +240,7 @@ void octreeColorQuantize(const RGBAImage& image, size_t max_colors, std::vector<
 	// TODO this is still the simple version, improve it
 	// - better way of managening leaves with their parents
 	// - parents sorted by their children reference sums?
-	size_t leaves_count = 0;
+	unsigned int leaves_count = 0;
 	for (int level = 7; level >= 0; level--) {
 		parents = next_parents;
 		next_parents.clear();
@@ -277,13 +264,15 @@ void octreeColorQuantize(const RGBAImage& image, size_t max_colors, std::vector<
 
 	// gather reduced colors
 	for (auto parent_it = parents.begin(); parent_it != parents.end(); ++parent_it) {
-		for (int i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++) {
 			if ((*parent_it)->hasChildren(i)) {
 				Octree* node = (*parent_it)->getChildren(i);
 				node->setColorID(colors.size());
 				colors.push_back(node->getColor());
 			}
+		}
 	}
+	
 	for (auto parent_it = next_parents.begin(); parent_it != next_parents.end(); ++parent_it) {
 		for (int i = 0; i < 8; i++) {
 			if ((*parent_it)->hasChildren(i)) {
