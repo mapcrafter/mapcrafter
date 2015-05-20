@@ -17,8 +17,8 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IMAGE_DITHER_H_
-#define IMAGE_DITHER_H_
+#ifndef IMAGE_DITHERING_H_
+#define IMAGE_DITHERING_H_
 
 #include <vector>
 
@@ -28,9 +28,17 @@ namespace renderer {
 class RGBAImage;
 class Palette;
 
+/**
+ * Applies a Floyd-Steinberg dithering to an image with a given palette.
+ *
+ * The dithering is performened in-place, so the dithered colors are saved to the image
+ * object. Also the dithered image data (indices of palette colors as pixels) is saved to
+ * the supplied vector. You can supply a reference to an empty int vector, it will be
+ * resized and all the image pixels are saved as data[y * width + x].
+ */ 
 void imageDither(RGBAImage& image, const Palette& palette, std::vector<int>& data);
 
 }
 }
 
-#endif /* IMAGE_DITHER_H_ */
+#endif /* IMAGE_DITHERING_H_ */

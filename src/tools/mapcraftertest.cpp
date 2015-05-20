@@ -6,7 +6,7 @@
 #include "../mapcraftercore/renderer/renderview.h"
 #include "../mapcraftercore/renderer/tilerenderer.h"
 #include "../mapcraftercore/renderer/tileset.h"
-#include "../mapcraftercore/renderer/image/dither.h"
+#include "../mapcraftercore/renderer/image/dithering.h"
 #include "../mapcraftercore/renderer/image/palette.h"
 #include "../mapcraftercore/renderer/image/quantization.h"
 #include "../mapcraftercore/renderer/rendermodes/lighting.h"

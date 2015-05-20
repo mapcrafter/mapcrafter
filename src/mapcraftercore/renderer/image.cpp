@@ -23,7 +23,7 @@
 
 #include "image.h"
 
-#include "image/dither.h"
+#include "image/dithering.h"
 #include "image/quantization.h"
 #include "../util.h"
 
