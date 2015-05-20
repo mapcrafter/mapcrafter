@@ -110,6 +110,12 @@ protected:
 	std::vector<RenderMode*> render_modes;
 };
 
+enum class RenderModePrimitiveType {
+	CAVE,
+	HEIGHTTINTING,
+	LIGHTING,
+};
+
 enum class RenderModeType {
 	PLAIN,
 	DAYLIGHT,
@@ -120,7 +126,7 @@ enum class RenderModeType {
 
 std::ostream& operator<<(std::ostream& out, RenderModeType render_mode);
 
-RenderMode* createMapRenderMode(const config::WorldSection& world_config,
+RenderMode* createRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config);
 
 } /* namespace render */

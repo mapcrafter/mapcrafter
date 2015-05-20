@@ -177,7 +177,7 @@ void RenderManager::scanWorlds() {
 
 	// at first check which maps/rotations are required
 	// and which tile sets (world, render view, tile width) in which rotations are needed
-	std::set<config::TileSetKey> used_tile_sets;
+	std::set<config::TileSetID> used_tile_sets;
 	for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
 		std::string map = map_it->getShortName();
 		if (render_behaviors.isCompleteRenderSkip(map))
@@ -190,13 +190,14 @@ void RenderManager::scanWorlds() {
 			if (render_behaviors.getRenderBehavior(map, rotation) != RenderBehavior::SKIP) {
 				required_rotations.insert(rotation);
 				used_tile_sets.insert(*tile_set_it);
+
 			}
 		}
 
 		required_maps.push_back(std::make_pair(map, required_rotations));
 	}
 
-	std::map<config::TileSetKey, int> worlds_max_zoom;
+	std::map<config::TileSetGroupID, int> worlds_max_zoom;
 
 	// iterate through all tile sets that are needed
 	for (auto tile_set_it = used_tile_sets.begin();
@@ -234,7 +235,7 @@ void RenderManager::scanWorlds() {
 		}
 
 		// TODO hmmm
-		int& max_zoom = worlds_max_zoom[tile_set_it->ignoreRotation()];
+		int& max_zoom = worlds_max_zoom[*tile_set_it];
 		max_zoom = std::max(max_zoom, tile_set->getDepth());
 
 		// set world- and tileset object in the map
@@ -246,7 +247,7 @@ void RenderManager::scanWorlds() {
 	}
 
 	for (auto tile_set_it = used_tile_sets.begin(); tile_set_it != used_tile_sets.end(); ++tile_set_it) {
-		int max_zoom = worlds_max_zoom[tile_set_it->ignoreRotation()];
+		int max_zoom = worlds_max_zoom[*tile_set_it];
 		tile_sets[*tile_set_it]->setDepth(max_zoom);
 		web_config.setTileSetMaxZoom(*tile_set_it, max_zoom);
 	}
@@ -260,7 +261,7 @@ void RenderManager::initializeMap(const std::string& map) {
 	auto all_rotations = map_config.getRotations();
 
 	// get the max zoom level calculated of the current tile set
-	int max_zoom = web_config.getTileSetMaxZoom(map_config.getDefaultTileSet());
+	int max_zoom = web_config.getTileSetMaxZoom(map_config.getTileSetGroup());
 	// get the old max zoom level (from config.js), will 0 if not rendered yet
 	int old_max_zoom = web_config.getMapMaxZoom(map);
 	// if map already rendered: check if the zoom level of the world has increased

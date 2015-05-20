@@ -35,22 +35,42 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace config {
 
-// TODO is that name appropriate??
-struct TileSetKey {
+/**
+ * Represents all tile sets which are using the same world (as specified in the world
+ * config section, with a specific world crop eventually), render view and tile width,
+ * independent of the rotation of the used world.
+ */
+class TileSetGroupID {
+public:
+	TileSetGroupID();
+	TileSetGroupID(const std::string& world_name, renderer::RenderViewType render_view,
+			int tile_width);
+
+	std::string toString() const;
+	bool operator<(const TileSetGroupID& other) const;
+
 	std::string world_name;
 	renderer::RenderViewType render_view;
 	int tile_width;
-	int rotation;
+};
 
-	TileSetKey();
-	TileSetKey(const std::string& world_name, renderer::RenderViewType render_view,
+/**
+ * Represents a single tile set (like a unique id) by storing the tile sets world,
+ * render view, tile width and world rotation.
+ *
+ * Just like the TileSetGroupID, but with the rotation additionally. This is because
+ * some attributes of the tile sets need to be stored across different rotations.
+ */
+class TileSetID : public TileSetGroupID {
+public:
+	TileSetID();
+	TileSetID(const std::string& world_name, renderer::RenderViewType render_view,
 			int tile_width, int rotation);
 
 	std::string toString() const;
+	bool operator<(const TileSetID& other) const;
 
-	bool operator<(const TileSetKey& other) const;
-
-	TileSetKey ignoreRotation() const;
+	int rotation;
 };
 
 enum class ImageFormat {
@@ -95,9 +115,9 @@ public:
 	bool renderBiomes() const;
 	bool useImageModificationTimes() const;
 
-	TileSetKey getTileSet(int rotation) const;
-	TileSetKey getDefaultTileSet() const;
-	const std::set<TileSetKey>& getTileSets() const;
+	TileSetGroupID getTileSetGroup() const;
+	TileSetID getTileSet(int rotation) const;
+	const std::set<TileSetID>& getTileSets() const;
 
 protected:
 	virtual void preParse(const INIConfigSection& section,
@@ -128,7 +148,7 @@ private:
 	Field<bool> cave_high_contrast;
 	Field<bool> render_unknown_blocks, render_leaves_transparent, render_biomes, use_image_mtimes;
 
-	std::set<TileSetKey> tile_sets;
+	std::set<TileSetID> tile_sets;
 };
 
 } /* namespace config */

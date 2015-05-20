@@ -28,7 +28,7 @@
 namespace fs = boost::filesystem;
 
 /**
- * The renderer renders the world to tiles, which are arranged in a quadtree. Every node
+ * The renderer renders the world to tiles which are arranged in a quadtree. Every node
  * is a tile with 2x2 (maximal 4) children. These children have numbers, depending on
  * their position:
  *   1: children is on the top left,
@@ -46,8 +46,8 @@ namespace fs = boost::filesystem;
  *
  * The TileSet class manages the tiles for the rendering process. The render tiles are
  * stored as tile positions, all other composite tiles as tile paths. The tile set scans
- * the world and all chunks, calculates the maximum needed zoom level and finds out, which
- * tiles exist and which tiles need to get rendered (useful for incremental rendering,
+ * the world and all chunks, calculates the maximum needed zoom level and finds out which
+ * tiles exist and which tiles need to get rendered (useful for incremental rendering
  * when only a few chunks where changed).
  *
  * The tile renderer can then render the render tiles and compose the composite tiles
@@ -75,9 +75,13 @@ public:
 	TilePos(int x = 0, int y = 0);
 
 	/**
-	 * Returns x/y tile coordinate.
+	 * Returns x tile coordinate.
 	 */
 	int getX() const;
+
+	/**
+	 * Returns the y tile coordinate.
+	 */
 	int getY() const;
 
 	// some operations with tile positions
@@ -89,20 +93,22 @@ public:
 	bool operator==(const TilePos& other) const;
 	bool operator!=(const TilePos& other) const;
 	bool operator<(const TilePos& other) const;
+
 private:
 	// actual coordinates
 	int x, y;
 };
 
+std::ostream& operator<<(std::ostream& stream, const TilePos& tile);
+
 /**
- * This class represents the path of a tile in the quadtree.
+ * This class represents the path to a tile in the quadtree.
  * Every part in the path is a 1, 2, 3 or 4.
  * The length of the path is the zoom level of the tile.
  */
 class TilePath {
 public:
 	TilePath();
-	TilePath(const std::vector<int>& path);
 	~TilePath();
 
 	/**
@@ -127,12 +133,6 @@ public:
 	TilePos getTilePos() const;
 
 	/**
-	 * Calculates the path (with a specified zoom level) of a tile position.
-	 * Opposite of getTilePos-method.
-	 */
-	static TilePath byTilePos(const TilePos& tile, int depth);
-
-	/**
 	 * Adds a node to the path.
 	 */
 	TilePath& operator+=(int node);
@@ -146,12 +146,18 @@ public:
 	 * Returns the string representation of the path, for example "1/2/3/4".
 	 */
 	std::string toString() const;
+
+	/**
+	 * Constructs a path (with a specified zoom level) to a tile position.
+	 * Opposite of getTilePos-method.
+	 */
+	static TilePath byTilePos(const TilePos& tile, int depth);
+
 private:
 	std::vector<int> path;
 };
 
 std::ostream& operator<<(std::ostream& stream, const TilePath& path);
-std::ostream& operator<<(std::ostream& stream, const TilePos& tile);
 
 /**
  * This class manages all tiles required to render a world.

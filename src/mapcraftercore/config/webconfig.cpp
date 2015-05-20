@@ -213,24 +213,23 @@ void WebConfig::writeConfigJS() const {
 	out.close();
 }
 
-int WebConfig::getTileSetMaxZoom(const TileSetKey& tile_set) const {
+int WebConfig::getTileSetMaxZoom(const TileSetGroupID& tile_set) const {
 	if (!tile_set_max_zoom.count(tile_set))
 		return 0;
 	return tile_set_max_zoom.at(tile_set);
 }
 
-void WebConfig::setTileSetMaxZoom(const TileSetKey& tile_set,
-		int max_zoom) {
+void WebConfig::setTileSetMaxZoom(const TileSetGroupID& tile_set, int max_zoom) {
 	tile_set_max_zoom[tile_set] = max_zoom;
 }
 
-renderer::TilePos WebConfig::getTileSetTileOffset(const TileSetKey& tile_set) const {
+renderer::TilePos WebConfig::getTileSetTileOffset(const TileSetID& tile_set) const {
 	if (!world_tile_offset.count(tile_set))
 		return renderer::TilePos(0, 0);
 	return world_tile_offset.at(tile_set);
 }
 
-void WebConfig::setTileSetTileOffset(const TileSetKey& tile_set,
+void WebConfig::setTileSetTileOffset(const TileSetID& tile_set,
 		const renderer::TilePos& tile_offset) {
 	world_tile_offset[tile_set] = tile_offset;
 }

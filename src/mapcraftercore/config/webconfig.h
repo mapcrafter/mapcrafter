@@ -46,11 +46,11 @@ public:
 	void readConfigJS();
 	void writeConfigJS() const;
 
-	int getTileSetMaxZoom(const TileSetKey& tile_set) const;
-	void setTileSetMaxZoom(const TileSetKey& tile_set, int zoomlevel);
+	int getTileSetMaxZoom(const TileSetGroupID& tile_set) const;
+	void setTileSetMaxZoom(const TileSetGroupID& tile_set, int zoomlevel);
 
-	renderer::TilePos getTileSetTileOffset(const TileSetKey& tile_set) const;
-	void setTileSetTileOffset(const TileSetKey& tile_set,
+	renderer::TilePos getTileSetTileOffset(const TileSetID& tile_set) const;
+	void setTileSetTileOffset(const TileSetID& tile_set,
 			const renderer::TilePos& tile_offset);
 
 	int getMapTileSize(const std::string& map) const;
@@ -66,11 +66,11 @@ private:
 	MapcrafterConfig config;
 
 	// tile offset of world/view/tile_width/rotation
-	std::map<TileSetKey, renderer::TilePos> world_tile_offset;
+	std::map<TileSetID, renderer::TilePos> world_tile_offset;
 	// used rotations of world/view/tile_width
 	//std::map<TileSetKey, std::set<int> > world_rotations;
 	// max max zoom of world/view/tile_width (iterate over rotations to calculate)
-	std::map<TileSetKey, int> tile_set_max_zoom;
+	std::map<TileSetGroupID, int> tile_set_max_zoom;
 
 	// tile size of map
 	std::map<std::string, int> map_tile_size;

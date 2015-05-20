@@ -149,7 +149,7 @@ private:
 	// maps for world- and tile set objects
 	std::map<std::string, std::array<mc::World, 4> > worlds;
 	// (world, render view, rotation) -> tile set
-	std::map<config::TileSetKey, std::shared_ptr<TileSet> > tile_sets;
+	std::map<config::TileSetID, std::shared_ptr<TileSet> > tile_sets;
 
 	// all required (= not skipped) maps and rotations
 	// as pair (map name, required rotations)

@@ -64,43 +64,42 @@ renderer::RenderViewType as<renderer::RenderViewType>(const std::string& from) {
 namespace mapcrafter {
 namespace config {
 
-TileSetKey::TileSetKey()
-	: render_view(renderer::RenderViewType::ISOMETRIC) {
-
+TileSetGroupID::TileSetGroupID()
+	: render_view(renderer::RenderViewType::ISOMETRIC), tile_width(1) {
 }
 
-TileSetKey::TileSetKey(const std::string& world_name,
-		renderer::RenderViewType render_view, int tile_width, int rotation)
-	: world_name(world_name), render_view(render_view), tile_width(tile_width),
-	  rotation(rotation) {
+TileSetGroupID::TileSetGroupID(const std::string& world_name,
+		renderer::RenderViewType render_view, int tile_width)
+	: world_name(world_name), render_view(render_view), tile_width(tile_width) {
 }
 
-std::string TileSetKey::toString() const {
+std::string TileSetGroupID::toString() const {
 	std::string repr = "";
 	repr += world_name + "_";
 	repr += util::str(render_view) + "_";
-	repr += "t" + util::str(tile_width) + "_";
-	repr += "r" + util::str(rotation);
+	repr += "t" + util::str(tile_width);
 	return repr;
 }
 
-bool TileSetKey::operator<(const TileSetKey& other) const {
-	if (world_name != other.world_name)
-		return world_name < other.world_name;
-	// I'm lazy -- enum comparison might not work with the old gcc
-	if (render_view != other.render_view)
-		return util::str(render_view) < util::str(other.render_view);
-	if (tile_width != other.tile_width)
-		return tile_width < other.tile_width;
-	if (rotation != other.rotation)
-		return rotation < other.rotation;
-	return false;
+bool TileSetGroupID::operator<(const TileSetGroupID& other) const {
+	return toString() < other.toString();
 }
 
-TileSetKey TileSetKey::ignoreRotation() const {
-	TileSetKey copy = *this;
-	copy.rotation = -1;
-	return copy;
+TileSetID::TileSetID()
+	: TileSetGroupID(), rotation(0) {
+}
+
+TileSetID::TileSetID(const std::string& world_name,
+		renderer::RenderViewType render_view, int tile_width, int rotation)
+	: TileSetGroupID(world_name, render_view, tile_width), rotation(rotation) {
+}
+
+std::string TileSetID::toString() const {
+	return TileSetGroupID::toString() + "_r" + util::str(rotation);
+}
+
+bool TileSetID::operator<(const TileSetID& other) const {
+	return toString() < other.toString();
 }
 
 std::ostream& operator<<(std::ostream& out, ImageFormat image_format) {
@@ -226,15 +225,15 @@ bool MapSection::useImageModificationTimes() const {
 	return use_image_mtimes.getValue();
 }
 
-TileSetKey MapSection::getTileSet(int rotation) const {
-	return TileSetKey(getWorld(), getRenderView(), getTileWidth(), rotation);
+TileSetGroupID MapSection::getTileSetGroup() const {
+	return TileSetGroupID(getWorld(), getRenderView(), getTileWidth());
 }
 
-TileSetKey MapSection::getDefaultTileSet() const {
-	return getTileSet(0).ignoreRotation();
+TileSetID MapSection::getTileSet(int rotation) const {
+	return TileSetID(getWorld(), getRenderView(), getTileWidth(), rotation);
 }
 
-const std::set<TileSetKey>& MapSection::getTileSets() const {
+const std::set<TileSetID>& MapSection::getTileSets() const {
 	return tile_sets;
 }
 
