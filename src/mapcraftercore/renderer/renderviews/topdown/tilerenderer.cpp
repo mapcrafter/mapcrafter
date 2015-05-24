@@ -39,9 +39,10 @@
 namespace mapcrafter {
 namespace renderer {
 
-TopdownTileRenderer::TopdownTileRenderer(BlockImages* images, int tile_width,
-		mc::WorldCache* world, RenderMode* render_mode)
-	: TileRenderer(images, tile_width, world, render_mode) {
+TopdownTileRenderer::TopdownTileRenderer(const RenderView* render_view,
+		BlockImages* images, int tile_width, mc::WorldCache* world,
+		RenderMode* render_mode)
+	: TileRenderer(render_view, images, tile_width, world, render_mode) {
 }
 
 TopdownTileRenderer::~TopdownTileRenderer() {
@@ -125,19 +126,14 @@ void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 	int texture_size = images->getTextureSize();
 	tile.setSize(getTileSize(), getTileSize());
 
-	// call start method of the render mode
-	render_mode->start();
-
-	for (int x = 0; x < tile_width; x++)
+	for (int x = 0; x < tile_width; x++) {
 		for (int z = 0; z < tile_width; z++) {
 			mc::ChunkPos chunkpos(tile_pos.getX() * tile_width + x, tile_pos.getY() * tile_width + z);
 			current_chunk = world->getChunk(chunkpos);
 			if (current_chunk != nullptr)
 				renderChunk(*current_chunk, tile, texture_size*16*x, texture_size*16*z);
 		}
-
-	// call the end method of the render mode
-	render_mode->end();
+	}
 }
 
 int TopdownTileRenderer::getTileSize() const {

@@ -22,6 +22,7 @@
 #include "blockimages.h"
 #include "tileset.h"
 #include "tilerenderer.h"
+#include "../../rendermodes/heighttinting.h"
 
 namespace mapcrafter {
 namespace renderer {
@@ -36,7 +37,14 @@ TileSet* TopdownRenderView::createTileSet(int tile_width) const {
 
 TileRenderer* TopdownRenderView::createTileRenderer(BlockImages* images,
 		int tile_width, mc::WorldCache* world, RenderMode* render_mode) const {
-	return new TopdownTileRenderer(images, tile_width, world, render_mode);
+	return new TopdownTileRenderer(this, images, tile_width, world, render_mode);
+}
+
+RenderModeRenderer* TopdownRenderView::createRenderModeRenderer(
+		BaseRenderModeType render_mode) const {
+	if (render_mode == BaseRenderModeType::HEIGHTTINTING)
+		return new HeightTintingRenderer();
+	return nullptr;
 }
 
 } /* namespace renderer */

@@ -32,6 +32,8 @@ public:
 	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderMode* render_mode) const;
 
+	virtual RenderModeRenderer* createRenderModeRenderer(BaseRenderModeType render_mode) const;
+
 	virtual void configureBlockImages(BlockImages* images,
 			const config::WorldSection& world_config,
 			const config::MapSection& map_config) const;

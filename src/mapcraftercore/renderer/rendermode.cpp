@@ -21,6 +21,7 @@
 
 #include "blockimages.h"
 #include "image.h"
+#include "renderview.h"
 #include "rendermodes/cave.h"
 #include "rendermodes/lighting.h"
 #include "rendermodes/heighttinting.h"
@@ -33,36 +34,39 @@
 namespace mapcrafter {
 namespace renderer {
 
-AbstractRenderMode::AbstractRenderMode()
-	: images(nullptr), world(nullptr), current_chunk(nullptr) {
+RenderModeRenderer::~RenderModeRenderer() {
 }
 
-AbstractRenderMode::~AbstractRenderMode() {
+BaseRenderMode::BaseRenderMode()
+	: renderer_ptr(nullptr), images(nullptr), world(nullptr), current_chunk(nullptr) {
 }
 
-void AbstractRenderMode::initialize(BlockImages* images, mc::WorldCache* world,
-		mc::Chunk** current_chunk) {
+BaseRenderMode::~BaseRenderMode() {
+	if (renderer_ptr != nullptr)
+		delete renderer_ptr;
+}
+
+void BaseRenderMode::initialize(const RenderView* render_view, 
+		BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk) {
+	// create the render mode renderer by calling the render view factory method
+	// for this base render mode type
+	// TODO automatically cast this to the right subclass? check if != nullptr?
+	this->renderer_ptr = render_view->createRenderModeRenderer(getType());
 	this->images = images;
 	this->world = world;
 	this->current_chunk = current_chunk;
 }
 
-void AbstractRenderMode::start() {
-}
-
-void AbstractRenderMode::end() {
-}
-
-bool AbstractRenderMode::isHidden(const mc::BlockPos& pos, uint16_t id,
+bool BaseRenderMode::isHidden(const mc::BlockPos& pos, uint16_t id,
 		uint16_t data) {
 	return false;
 }
 
-void AbstractRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id,
+void BaseRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id,
 		uint16_t data) {
 }
 
-mc::Block AbstractRenderMode::getBlock(const mc::BlockPos& pos, int get) {
+mc::Block BaseRenderMode::getBlock(const mc::BlockPos& pos, int get) {
 	return world->getBlock(pos, *current_chunk, get);
 }
 
@@ -75,20 +79,10 @@ void MultiplexingRenderMode::addRenderMode(RenderMode* render_mode) {
 	render_modes.push_back(render_mode);
 }
 
-void MultiplexingRenderMode::initialize(BlockImages* images, mc::WorldCache* world,
-		mc::Chunk** current_chunk) {
+void MultiplexingRenderMode::initialize(const RenderView* render_view, 
+		BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk) {
 	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
-		(*it)->initialize(images, world, current_chunk);
-}
-
-void MultiplexingRenderMode::start() {
-	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
-		(*it)->start();
-}
-
-void MultiplexingRenderMode::end() {
-	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
-		(*it)->end();
+		(*it)->initialize(render_view, images, world, current_chunk);
 }
 
 bool MultiplexingRenderMode::isHidden(const mc::BlockPos& pos, uint16_t id,
@@ -121,7 +115,7 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 	RenderModeType type = map_config.getRenderMode();
 	// TODO maybe use a dummy render mode here instead of the empty abstract one?
 	if (type == RenderModeType::PLAIN)
-		return new AbstractRenderMode();
+		return new MultiplexingRenderMode();
 
 	if (type == RenderModeType::CAVE || type == RenderModeType::CAVELIGHT) {
 		MultiplexingRenderMode* render_mode = new MultiplexingRenderMode();

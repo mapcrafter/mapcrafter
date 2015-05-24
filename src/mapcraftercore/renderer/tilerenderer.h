@@ -41,11 +41,12 @@ namespace renderer {
 class BlockImages;
 class TilePos;
 class RenderMode;
+class RenderView;
 class RGBAImage;
 
 class TileRenderer {
 public:
-	TileRenderer(BlockImages* images, int tile_width,
+	TileRenderer(const RenderView* render_view, BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderMode* render_mode);
 	virtual ~TileRenderer();
 

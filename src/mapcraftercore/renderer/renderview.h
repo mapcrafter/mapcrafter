@@ -20,6 +20,8 @@
 #ifndef RENDERVIEW_H_
 #define RENDERVIEW_H_
 
+#include "rendermode.h"
+
 #include <iostream>
 
 namespace mapcrafter {
@@ -45,10 +47,32 @@ class RenderView {
 public:
 	virtual ~RenderView();
 
+	/**
+	 * Creates an instance of the render view specific block image class.
+	 */
 	virtual BlockImages* createBlockImages() const = 0;
+
+	/**
+	 * Creates an instance of the render view specific tile set class.
+	 */
 	virtual TileSet* createTileSet(int tile_width) const = 0;
+
+	/**
+	 * Creates an instance of the render view specific tile renderer class.
+	 */
 	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderMode* render_mode) const = 0;
+
+	/**
+	 * Creates an instance of the render view specific render mode renderer class for a
+	 * specific base render mode.
+	 *
+	 * Have a look at each base render mode: There is an abstract class / interface
+	 * (like HeightTintingRenderer or LightingRenderer) that you have to implement for
+	 * the render view.
+	 */
+	virtual RenderModeRenderer* createRenderModeRenderer(
+			BaseRenderModeType render_mode) const = 0;
 
 	/**
 	 * Configures a block images object by calling some (eventually per render view

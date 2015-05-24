@@ -130,9 +130,10 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 	return pos < other.pos;
 }
 
-IsometricTileRenderer::IsometricTileRenderer(BlockImages* images, int tile_width,
-		mc::WorldCache* world, RenderMode* render_mode)
-	: TileRenderer(images, tile_width, world, render_mode) {
+IsometricTileRenderer::IsometricTileRenderer(const RenderView* render_view,
+		BlockImages* images, int tile_width, mc::WorldCache* world,
+		RenderMode* render_mode)
+	: TileRenderer(render_view, images, tile_width, world, render_mode) {
 }
 
 IsometricTileRenderer::~IsometricTileRenderer() {
@@ -149,9 +150,6 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 
 	// all visible blocks which are rendered in this tile
 	std::set<RenderBlock> blocks;
-
-	// call start method of the render mode
-	render_mode->start();
 
 	// iterate over the highest blocks in the tile
 	// we use as tile position tile_pos+tile_offset because the offset means that
@@ -339,9 +337,6 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 			++it) {
 		tile.alphaBlit(it->image, it->x, it->y);
 	}
-
-	// call the end method of the render mode
-	render_mode->end();
 }
 
 int IsometricTileRenderer::getTileSize() const {

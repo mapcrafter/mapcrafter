@@ -25,12 +25,21 @@
 namespace mapcrafter {
 namespace renderer {
 
-class HeightTintingRenderMode : public AbstractRenderMode {
+class HeightTintingRenderer : public RenderModeRenderer {
+public:
+	virtual ~HeightTintingRenderer();
+
+	void draw(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b, bool high_contrast);
+};
+
+class HeightTintingRenderMode : public BaseRenderMode {
 public:
 	HeightTintingRenderMode(bool high_contrast);
 	virtual ~HeightTintingRenderMode();
 
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+	virtual BaseRenderModeType getType() const;
 
 protected:
 	bool high_contrast;

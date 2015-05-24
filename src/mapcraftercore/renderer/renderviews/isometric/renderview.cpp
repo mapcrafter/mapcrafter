@@ -22,6 +22,7 @@
 #include "blockimages.h"
 #include "tileset.h"
 #include "tilerenderer.h"
+#include "../../rendermodes/heighttinting.h"
 #include "../../../config/configsections/map.h"
 #include "../../../config/configsections/world.h"
 #include "../../../util.h"
@@ -41,7 +42,14 @@ TileSet* IsometricRenderView::createTileSet(int tile_width) const {
 
 TileRenderer* IsometricRenderView::createTileRenderer(BlockImages* images,
 		int tile_width, mc::WorldCache* world, RenderMode* render_mode) const {
-	return new IsometricTileRenderer(images, tile_width, world, render_mode);
+	return new IsometricTileRenderer(this, images, tile_width, world, render_mode);
+}
+
+RenderModeRenderer* IsometricRenderView::createRenderModeRenderer(
+		BaseRenderModeType render_mode) const {
+	if (render_mode == BaseRenderModeType::HEIGHTTINTING)
+		return new HeightTintingRenderer();
+	return nullptr;
 }
 
 void IsometricRenderView::configureBlockImages(BlockImages* block_images,

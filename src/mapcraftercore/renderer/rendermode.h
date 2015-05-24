@@ -44,78 +44,142 @@ class Chunk;
 namespace renderer {
 
 class BlockImages;
+class RenderView;
 class RGBAImage;
 
 /**
- * A simple interface to implement different rendermodes.
+ * A simple interface to implement different render modes.
  */
 class RenderMode {
 public:
 	virtual ~RenderMode() {}
 
-	virtual void initialize(BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk) = 0;
+	/**
+	 * Sets stuff (block images and world cache) that is required for the render mode
+	 * to operate. There is a pointer to the current chunk that is used by the tile
+	 * renderer, that way you (mostly) don't need to access the world cache.
+	 *
+	 * The render view is required because some render modes need render view specific
+	 * methods to modify the block images.
+	 */
+	virtual void initialize(const RenderView* render_view, BlockImages* images,
+			mc::WorldCache* world, mc::Chunk** current_chunk) = 0;
 
-	// is called when the tile renderer starts rendering a tile
-	virtual void start() = 0;
-	// is called when the tile renderer finished rendering a tile
-	virtual void end() = 0;
-
-	// is called to allow the rendermode to hide specific blocks
+	/**
+	 * This method is called by the tile renderer to check if a block should be hidden.
+	 */
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
-	// is called to allow the rendermode to change a block image
-	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
+
+	/**
+	 * This method is called by the tile renderer so you can modify block images that
+	 * are about to be rendered.
+	 */
+	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id,
+			uint16_t data) = 0;
 };
 
-class AbstractRenderMode : public RenderMode {
+/**
+ * Types of basic render modes that are combined to the available render modes.
+ */
+enum class BaseRenderModeType {
+	CAVE,
+	HEIGHTTINTING,
+	LIGHTING,
+};
+
+/**
+ * Empty class just to have a base class for the rendering part of each render mode.
+ */
+class RenderModeRenderer {
 public:
-	AbstractRenderMode();
-	virtual ~AbstractRenderMode();
+	virtual ~RenderModeRenderer();
+};
 
-	virtual void initialize(BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk);
+/**
+ * The base render mode class already implements handling of the initialize-method and
+ * some other stuff (a comfortable getBlock-method that takes the current_chunk into
+ * account).
+ *
+ * Also there is a per-render-view-specific block renderer for each render mode that
+ * wants to modify the block images. This is achieved by calling the
+ * createRenderModeRenderer(RenderModeType)-method of the render view in the
+ * initialize-method which will then return an instance of the render view specific
+ * renderer for this render mode.
+ */
+class BaseRenderMode : public RenderMode {
+public:
+	BaseRenderMode();
+	virtual ~BaseRenderMode();
 
-	virtual void start();
-	virtual void end();
+	/**
+	 * Stores the supplied stuff from the tile renderer and creates the render mode
+	 * renderer with the render view.
+	 */
+	virtual void initialize(const RenderView* render_view, BlockImages* images,
+			mc::WorldCache* world, mc::Chunk** current_chunk);
 
+	/**
+	 * Dummy implementation of interface method. Returns false as default.
+	 */
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+	/**
+	 * Dummy implementation of interface method.
+	 */
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+	/**
+	 * You have to implement which base render mode this is.
+	 */
+	virtual BaseRenderModeType getType() const = 0;
 
 protected:
 	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
 
+	RenderModeRenderer* renderer_ptr;
 	BlockImages* images;
 	mc::WorldCache* world;
 	mc::Chunk** current_chunk;
 };
 
 /**
- * A render mode which combines multiple render modes into one.
- *
- * TODO comments blah blah
+ * This is a class for a render mode that combines multiple render modes into one.
  */
 class MultiplexingRenderMode : public RenderMode {
 public:
 	virtual ~MultiplexingRenderMode();
 
+	/**
+	 * Adds a render mode. The supplied render mode is destroyed when this multiplexing
+	 * render mode is destroyed.
+	 */
 	void addRenderMode(RenderMode* render_mode);
 
-	virtual void initialize(BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk);
+	/**
+	 * Passes the supplied render data to the render modes.
+	 */
+	virtual void initialize(const RenderView* render_view, BlockImages* images,
+			mc::WorldCache* world, mc::Chunk** current_chunk);
 
-	virtual void start();
-	virtual void end();
-
+	/**
+	 * Calls this method of each render mode and returns true if one render mode returns
+	 * true (= false is default).
+	 */
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+	/**
+	 * Calls this method of each render mode.
+	 */
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 protected:
 	std::vector<RenderMode*> render_modes;
 };
 
-enum class RenderModePrimitiveType {
-	CAVE,
-	HEIGHTTINTING,
-	LIGHTING,
-};
-
+/**
+ * Types of (of other base render modes composed) render modes that are available for
+ * the user.
+ */
 enum class RenderModeType {
 	PLAIN,
 	DAYLIGHT,
@@ -126,6 +190,9 @@ enum class RenderModeType {
 
 std::ostream& operator<<(std::ostream& out, RenderModeType render_mode);
 
+/**
+ * Creates the render mode for a map config section.
+ */
 RenderMode* createRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config);
 

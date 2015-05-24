@@ -28,13 +28,15 @@
 namespace mapcrafter {
 namespace renderer {
 
-class CaveRenderMode: public AbstractRenderMode {
+class CaveRenderMode: public BaseRenderMode {
 public:
 	CaveRenderMode(const std::vector<mc::BlockPos>& hidden_dirs);
 	virtual ~CaveRenderMode();
 
 	virtual bool isHidden(const mc::BlockPos& pos,
 			uint16_t id, uint16_t data);
+
+	virtual BaseRenderModeType getType() const;
 
 protected:
 	bool isLight(const mc::BlockPos& pos);
