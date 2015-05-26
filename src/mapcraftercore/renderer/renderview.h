@@ -67,7 +67,7 @@ public:
 	 * Creates an instance of the render view specific render mode renderer class.
 	 *
 	 * Have a look at each base render mode: There is an abstract class / interface
-	 * (like TintingRenderer or LightingRenderer) that you have to implement for
+	 * (like OverlayRenderer or LightingRenderer) that you have to implement for
 	 * the render view.
 	 *
 	 * Sorry for the ugly "const RenderModeRendererType& renderer" reference thingy.

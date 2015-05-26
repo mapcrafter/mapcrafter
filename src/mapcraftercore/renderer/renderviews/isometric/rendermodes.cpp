@@ -19,20 +19,32 @@
 
 #include "rendermodes.h"
 
+#include "blockimages.h"
+#include "../../image.h"
+
 namespace mapcrafter {
 namespace renderer {
 
-void IsometricTintingRenderer::tintLeft(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) {
+void IsometricOverlayRenderer::tintLeft(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) {
     // TODO implement
 }
 
-void IsometricTintingRenderer::tintRight(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) {
+void IsometricOverlayRenderer::tintRight(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) {
     // TODO implement
 }
 
-void IsometricTintingRenderer::tintTop(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b,
+void IsometricOverlayRenderer::tintTop(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b,
 		int offset) {
-    // TODO implement
+	int luminance = (10*r + 3*g + b) / 14;
+	int nr = (r - luminance) / 3; // /3 is similar to alpha=85
+	int ng = (g - luminance) / 3;
+	int nb = (b - luminance) / 3;
+
+	int texture_size = image.getWidth() / 2;
+	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
+		RGBAPixel& pixel = image.pixel(it.dest_x, it.dest_y);
+		pixel = rgba_add_clamp(pixel, nr, ng, nb);
+	}
 }
 
 }

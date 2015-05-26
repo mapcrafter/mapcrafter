@@ -20,13 +20,13 @@
 #ifndef RENDERMODES_HEIGHTTINTING_H_
 #define RENDERMODES_HEIGHTTINTING_H_
 
-#include "tinting.h"
+#include "overlay.h"
 #include "../rendermode.h"
 
 namespace mapcrafter {
 namespace renderer {
 
-class HeightTintingRenderMode : public BaseRenderMode<TintingRenderer> {
+class HeightTintingRenderMode : public BaseRenderMode<OverlayRenderer> {
 public:
 	HeightTintingRenderMode(bool high_contrast);
 	virtual ~HeightTintingRenderMode();

@@ -18,20 +18,22 @@
  */
 
 
-#ifndef RENDERMODES_TINTING_H_
-#define RENDERMODES_TINTING_H_
+#ifndef RENDERMODES_OVERLAY_H_
+#define RENDERMODES_OVERLAY_H_
 
 #include "../rendermode.h"
+
+#include "../image.h"
 
 namespace mapcrafter {
 namespace renderer {
 
 class RGBAImage;
 
-class TintingRenderer : public RenderModeRenderer {
+class OverlayRenderer : public RenderModeRenderer {
 public:
-	TintingRenderer();
-	virtual ~TintingRenderer();
+	OverlayRenderer();
+	virtual ~OverlayRenderer();
 
 	void setHighContrast(bool high_contrast);
 
@@ -47,8 +49,23 @@ protected:
 	bool high_contrast;
 };
 
+/**
+ * A render mode that renders an overlay on top of the blocks. You just have to implement
+ * the function that returns the color for each block. Return something with alpha == 0
+ * if there should be no color (alpha values are ignored, except the alpha == 0 thing).
+ */
+class OverlayRenderMode : public BaseRenderMode<OverlayRenderer> {
+public:
+	virtual ~OverlayRenderMode();
+	
+	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+protected:
+	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
+};
+
 }
 }
 
-#endif /* RENDERMODES_TINTING_H_ */
+#endif /* RENDERMODES_OVERLAY_H_ */
 

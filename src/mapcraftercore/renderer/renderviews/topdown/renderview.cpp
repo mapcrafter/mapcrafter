@@ -24,7 +24,7 @@
 #include "tilerenderer.h"
 #include "rendermodes.h"
 #include "../../rendermode.h"
-#include "../../rendermodes/tinting.h"
+#include "../../rendermodes/overlay.h"
 
 namespace mapcrafter {
 namespace renderer {
@@ -44,8 +44,8 @@ TileRenderer* TopdownRenderView::createTileRenderer(BlockImages* images,
 
 RenderModeRenderer* TopdownRenderView::createRenderModeRenderer(
 		const RenderModeRendererType& renderer) const {
-	if (renderer == RenderModeRendererType::TINTING)
-		return new TopdownTintingRenderer();
+	if (renderer == RenderModeRendererType::OVERLAY)
+		return new TopdownOverlayRenderer();
 	return nullptr;
 }
 

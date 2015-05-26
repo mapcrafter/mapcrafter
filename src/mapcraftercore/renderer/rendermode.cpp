@@ -84,7 +84,6 @@ std::ostream& operator<<(std::ostream& out, RenderModeType render_mode) {
 RenderMode* createRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config) {
 	RenderModeType type = map_config.getRenderMode();
-	// TODO maybe use a dummy render mode here instead of the empty abstract one?
 	if (type == RenderModeType::PLAIN)
 		return new MultiplexingRenderMode();
 

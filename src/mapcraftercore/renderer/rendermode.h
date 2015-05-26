@@ -83,8 +83,8 @@ public:
  */
 enum class RenderModeRendererType {
 	DUMMY,
-	TINTING,
 	LIGHTING,
+    OVERLAY,
 };
 
 /**

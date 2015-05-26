@@ -22,15 +22,15 @@
 namespace mapcrafter {
 namespace renderer {
 
-void TopdownTintingRenderer::tintLeft(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) {
+void TopdownOverlayRenderer::tintLeft(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) {
 	// not available in topdown render view
 }
 
-void TopdownTintingRenderer::tintRight(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) {
+void TopdownOverlayRenderer::tintRight(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) {
 	// not available in topdown render view
 }
 
-void TopdownTintingRenderer::tintTop(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b,
+void TopdownOverlayRenderer::tintTop(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b,
 		int offset) {
 	// topdown = just tint the whole image
 	tintBlock(image, r, g, b);

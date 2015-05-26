@@ -17,25 +17,27 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "tinting.h"
+#include "overlay.h"
 
+#include "../blockimages.h"
 #include "../image.h"
+#include "../../mc/pos.h"
 
 namespace mapcrafter {
 namespace renderer {
 
-TintingRenderer::TintingRenderer()
+OverlayRenderer::OverlayRenderer()
 	: high_contrast(true) {
 }
 
-TintingRenderer::~TintingRenderer() {
+OverlayRenderer::~OverlayRenderer() {
 }
 
-void TintingRenderer::setHighContrast(bool high_contrast) {
+void OverlayRenderer::setHighContrast(bool high_contrast) {
 	this->high_contrast = high_contrast;
 }
 
-void TintingRenderer::tintBlock(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) {
+void OverlayRenderer::tintBlock(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) {
 	if (high_contrast) {
 		// if high contrast mode is enabled, then do some magic here
 
@@ -72,7 +74,27 @@ void TintingRenderer::tintBlock(RGBAImage& image, uint8_t r, uint8_t g, uint8_t 
 	}
 }
 
-const RenderModeRendererType TintingRenderer::TYPE = RenderModeRendererType::TINTING;
+const RenderModeRendererType OverlayRenderer::TYPE = RenderModeRendererType::OVERLAY;
+
+OverlayRenderMode::~OverlayRenderMode() {
+}
+
+void OverlayRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id,
+		uint16_t data) {
+	RGBAPixel color = getBlockColor(pos, id, data);
+	if (rgba_alpha(color) == 0)
+		return;
+
+	uint8_t r = rgba_red(color);
+	uint8_t g = rgba_green(color);
+	uint8_t b = rgba_blue(color);
+	// tint top face of solid blocks and everything of transparent blocks for now
+	if (images->isBlockTransparent(id, data)) {
+		renderer->tintBlock(image, r, g, b);
+	} else {
+		renderer->tintTop(image, r, g, b, 0);
+	}
+}
 
 }
 }

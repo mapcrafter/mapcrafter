@@ -17,7 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../../rendermodes/tinting.h"
+#include "../../rendermodes/overlay.h"
 
 #ifndef ISOMETRIC_RENDERMODES_H_
 #define ISOMETRIC_RENDERMODES_H_
@@ -25,7 +25,7 @@
 namespace mapcrafter {
 namespace renderer {
 
-class IsometricTintingRenderer : public TintingRenderer {
+class IsometricOverlayRenderer : public OverlayRenderer {
 public:
 	virtual void tintLeft(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b);
 	virtual void tintRight(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b);
