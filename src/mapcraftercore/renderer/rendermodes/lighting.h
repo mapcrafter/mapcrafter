@@ -81,15 +81,13 @@ typedef std::array<LightingColor, 4> CornerColors;
 void drawBottomTriangle(RGBAImage& image, int size, double c1, double c2, double c3);
 void drawTopTriangle(RGBAImage& image, int size, double c1, double c2, double c3);
 
-class LightingRenderMode : public BaseRenderMode {
+class LightingRenderMode : public BaseRenderMode<> {
 public:
 	LightingRenderMode(bool day, double lighting_intensity, bool simulate_sun_light);
 	virtual ~LightingRenderMode();
 
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
-
-	virtual BaseRenderModeType getType() const;
 
 private:
 	bool day;

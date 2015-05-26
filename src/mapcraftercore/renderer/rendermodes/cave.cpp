@@ -81,9 +81,5 @@ bool CaveRenderMode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t dat
 	return true;
 }
 
-BaseRenderModeType CaveRenderMode::getType() const {
-	return BaseRenderModeType::CAVE;
-}
-
 } /* namespace render */
 } /* namespace mapcrafter */

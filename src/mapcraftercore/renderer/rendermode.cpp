@@ -21,7 +21,6 @@
 
 #include "blockimages.h"
 #include "image.h"
-#include "renderview.h"
 #include "rendermodes/cave.h"
 #include "rendermodes/lighting.h"
 #include "rendermodes/heighttinting.h"
@@ -37,38 +36,10 @@ namespace renderer {
 RenderModeRenderer::~RenderModeRenderer() {
 }
 
-BaseRenderMode::BaseRenderMode()
-	: renderer_ptr(nullptr), images(nullptr), world(nullptr), current_chunk(nullptr) {
+DummyRenderer::~DummyRenderer() {
 }
 
-BaseRenderMode::~BaseRenderMode() {
-	if (renderer_ptr != nullptr)
-		delete renderer_ptr;
-}
-
-void BaseRenderMode::initialize(const RenderView* render_view, 
-		BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk) {
-	// create the render mode renderer by calling the render view factory method
-	// for this base render mode type
-	// TODO automatically cast this to the right subclass? check if != nullptr?
-	this->renderer_ptr = render_view->createRenderModeRenderer(getType());
-	this->images = images;
-	this->world = world;
-	this->current_chunk = current_chunk;
-}
-
-bool BaseRenderMode::isHidden(const mc::BlockPos& pos, uint16_t id,
-		uint16_t data) {
-	return false;
-}
-
-void BaseRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id,
-		uint16_t data) {
-}
-
-mc::Block BaseRenderMode::getBlock(const mc::BlockPos& pos, int get) {
-	return world->getBlock(pos, *current_chunk, get);
-}
+const RenderModeRendererType DummyRenderer::TYPE = RenderModeRendererType::DUMMY;
 
 MultiplexingRenderMode::~MultiplexingRenderMode() {
 	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)

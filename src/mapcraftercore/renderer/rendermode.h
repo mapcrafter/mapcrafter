@@ -20,6 +20,7 @@
 #ifndef RENDERMODE_H_
 #define RENDERMODE_H_
 
+#include "renderview.h"
 #include "../mc/worldcache.h"
 
 #include <iostream>
@@ -44,7 +45,6 @@ class Chunk;
 namespace renderer {
 
 class BlockImages;
-class RenderView;
 class RGBAImage;
 
 /**
@@ -79,11 +79,11 @@ public:
 };
 
 /**
- * Types of basic render modes that are combined to the available render modes.
+ * Types of render mode renderers that are available for render modes.
  */
-enum class BaseRenderModeType {
-	CAVE,
-	HEIGHTTINTING,
+enum class RenderModeRendererType {
+	DUMMY,
+	TINTING,
 	LIGHTING,
 };
 
@@ -93,6 +93,19 @@ enum class BaseRenderModeType {
 class RenderModeRenderer {
 public:
 	virtual ~RenderModeRenderer();
+
+	// every render mode renderer needs a ...
+	// static const RenderModeRendererType TYPE;
+};
+
+/**
+ * An empty dummy render mode renderer for render modes that don't have a rendering part.
+ */
+class DummyRenderer : public RenderModeRenderer {
+public:
+	virtual ~DummyRenderer();
+
+	static const RenderModeRendererType TYPE;
 };
 
 /**
@@ -100,12 +113,16 @@ public:
  * some other stuff (a comfortable getBlock-method that takes the current_chunk into
  * account).
  *
- * Also there is a per-render-view-specific block renderer for each render mode that
- * wants to modify the block images. This is achieved by calling the
- * createRenderModeRenderer(RenderModeType)-method of the render view in the
- * initialize-method which will then return an instance of the render view specific
- * renderer for this render mode.
+ * Also there is a per render view specific renderer for each render mode that wants to
+ * modify the block images that are about to be rendered. The base render mode class is
+ * a template class with the abstract renderer class as template argument. Each render
+ * view has to provide an implementation of this renderer class. The base render mode
+ * class calls the createRenderModeRenderer-method of the render view, casts the
+ * obtained renderer to the specified template class and stores it in the 'renderer'
+ * variable. If a base render mode doesn't need a renderer, just specify the
+ * DummyRenderer class as renderer in the template.
  */
+template <typename Renderer = DummyRenderer>
 class BaseRenderMode : public RenderMode {
 public:
 	BaseRenderMode();
@@ -128,15 +145,12 @@ public:
 	 */
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
-	/**
-	 * You have to implement which base render mode this is.
-	 */
-	virtual BaseRenderModeType getType() const = 0;
-
 protected:
 	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
 
 	RenderModeRenderer* renderer_ptr;
+	Renderer* renderer;
+
 	BlockImages* images;
 	mc::WorldCache* world;
 	mc::Chunk** current_chunk;
@@ -195,6 +209,48 @@ std::ostream& operator<<(std::ostream& out, RenderModeType render_mode);
  */
 RenderMode* createRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config);
+
+template <typename Renderer>
+BaseRenderMode<Renderer>::BaseRenderMode()
+	: renderer_ptr(nullptr), images(nullptr), world(nullptr), current_chunk(nullptr) {
+}
+
+template <typename Renderer>
+BaseRenderMode<Renderer>::~BaseRenderMode() {
+	if (renderer_ptr != nullptr)
+		delete renderer_ptr;
+}
+
+template <typename Renderer>
+void BaseRenderMode<Renderer>::initialize(const RenderView* render_view, 
+		BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk) {
+	// create the render mode renderer by calling the render view factory method
+	// for this renderer type
+	this->renderer_ptr = render_view->createRenderModeRenderer(Renderer::TYPE);
+	// try to cast it to the right subclass, make sure that works if there is a renderer
+	this->renderer = dynamic_cast<Renderer*>(renderer_ptr);
+	if (Renderer::TYPE != RenderModeRendererType::DUMMY)
+		assert(renderer);
+	this->images = images;
+	this->world = world;
+	this->current_chunk = current_chunk;
+}
+
+template <typename Renderer>
+bool BaseRenderMode<Renderer>::isHidden(const mc::BlockPos& pos, uint16_t id,
+		uint16_t data) {
+	return false;
+}
+
+template <typename Renderer>
+void BaseRenderMode<Renderer>::draw(RGBAImage& image, const mc::BlockPos& pos,
+		uint16_t id, uint16_t data) {
+}
+
+template <typename Renderer>
+mc::Block BaseRenderMode<Renderer>::getBlock(const mc::BlockPos& pos, int get) {
+	return world->getBlock(pos, *current_chunk, get);
+}
 
 } /* namespace render */
 } /* namespace mapcrafter */

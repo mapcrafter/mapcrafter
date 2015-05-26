@@ -20,8 +20,6 @@
 #ifndef RENDERVIEW_H_
 #define RENDERVIEW_H_
 
-#include "rendermode.h"
-
 #include <iostream>
 
 namespace mapcrafter {
@@ -40,6 +38,8 @@ namespace renderer {
 
 class BlockImages;
 class RenderMode;
+class RenderModeRenderer;
+enum class RenderModeRendererType;
 class TileSet;
 class TileRenderer;
 
@@ -64,15 +64,17 @@ public:
 			mc::WorldCache* world, RenderMode* render_mode) const = 0;
 
 	/**
-	 * Creates an instance of the render view specific render mode renderer class for a
-	 * specific base render mode.
+	 * Creates an instance of the render view specific render mode renderer class.
 	 *
 	 * Have a look at each base render mode: There is an abstract class / interface
-	 * (like HeightTintingRenderer or LightingRenderer) that you have to implement for
+	 * (like TintingRenderer or LightingRenderer) that you have to implement for
 	 * the render view.
+	 *
+	 * Sorry for the ugly "const RenderModeRendererType& renderer" reference thingy.
+	 * Ähm, ya know, circular dependencies and forward declarations and stuff.
 	 */
 	virtual RenderModeRenderer* createRenderModeRenderer(
-			BaseRenderModeType render_mode) const = 0;
+			const RenderModeRendererType& renderer) const = 0;
 
 	/**
 	 * Configures a block images object by calling some (eventually per render view

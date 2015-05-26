@@ -142,10 +142,6 @@ void LightingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 	}
 }
 
-BaseRenderModeType LightingRenderMode::getType() const {
-	return BaseRenderModeType::LIGHTING;
-}
-
 /**
  * Draws the bottom triangle.
  * This is the triangle with corners top left, bottom left and bottom right.

@@ -32,7 +32,8 @@ public:
 	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderMode* render_mode) const;
 
-	virtual RenderModeRenderer* createRenderModeRenderer(BaseRenderModeType render_mode) const;
+	virtual RenderModeRenderer* createRenderModeRenderer(
+			const RenderModeRendererType& renderer) const;
 };
 
 } /* namespace renderer */

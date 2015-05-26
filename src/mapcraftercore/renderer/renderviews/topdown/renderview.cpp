@@ -22,7 +22,9 @@
 #include "blockimages.h"
 #include "tileset.h"
 #include "tilerenderer.h"
-#include "../../rendermodes/heighttinting.h"
+#include "rendermodes.h"
+#include "../../rendermode.h"
+#include "../../rendermodes/tinting.h"
 
 namespace mapcrafter {
 namespace renderer {
@@ -41,9 +43,9 @@ TileRenderer* TopdownRenderView::createTileRenderer(BlockImages* images,
 }
 
 RenderModeRenderer* TopdownRenderView::createRenderModeRenderer(
-		BaseRenderModeType render_mode) const {
-	if (render_mode == BaseRenderModeType::HEIGHTTINTING)
-		return new HeightTintingRenderer();
+		const RenderModeRendererType& renderer) const {
+	if (renderer == RenderModeRendererType::TINTING)
+		return new TopdownTintingRenderer();
 	return nullptr;
 }
 

@@ -20,26 +20,18 @@
 #ifndef RENDERMODES_HEIGHTTINTING_H_
 #define RENDERMODES_HEIGHTTINTING_H_
 
+#include "tinting.h"
 #include "../rendermode.h"
 
 namespace mapcrafter {
 namespace renderer {
 
-class HeightTintingRenderer : public RenderModeRenderer {
-public:
-	virtual ~HeightTintingRenderer();
-
-	void draw(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b, bool high_contrast);
-};
-
-class HeightTintingRenderMode : public BaseRenderMode {
+class HeightTintingRenderMode : public BaseRenderMode<TintingRenderer> {
 public:
 	HeightTintingRenderMode(bool high_contrast);
 	virtual ~HeightTintingRenderMode();
 
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
-
-	virtual BaseRenderModeType getType() const;
 
 protected:
 	bool high_contrast;

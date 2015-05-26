@@ -25,47 +25,6 @@
 namespace mapcrafter {
 namespace renderer {
 
-HeightTintingRenderer::~HeightTintingRenderer() {
-}
-
-void HeightTintingRenderer::draw(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b,
-		bool high_contrast) {
-	if (high_contrast) {
-		// if high contrast mode is enabled, then do some magic here
-
-		// get luminance of recolor
-		int luminance = (10*r + 3*g + b) / 14;
-
-		// try to do luminance-neutral additive/subtractive color
-		// instead of alpha blending (for better contrast)
-		// so first subtract luminance from each component
-		int nr = (r - luminance) / 3; // /3 is similar to alpha=85
-		int ng = (g - luminance) / 3;
-		int nb = (b - luminance) / 3;
-
-		int size = image.getWidth();
-		for (int y = 0; y < size; y++) {
-			for (int x = 0; x < size; x++) {
-				uint32_t pixel = image.getPixel(x, y);
-				if (pixel != 0)
-					image.setPixel(x, y, rgba_add_clamp(pixel, nr, ng, nb));
-			}
-		}
-	} else {
-		// otherwise just simple alphablending
-		uint32_t color = rgba(r, g, b, 128);
-
-		int size = image.getWidth();
-		for (int y = 0; y < size; y++) {
-			for (int x = 0; x < size; x++) {
-				uint32_t pixel = image.getPixel(x, y);
-				if (pixel != 0)
-					image.setPixel(x, y, color);
-			}
-		}
-	}
-}
-
 HeightTintingRenderMode::HeightTintingRenderMode(bool high_contrast)
 	: high_contrast(high_contrast) {
 }
@@ -94,13 +53,9 @@ void HeightTintingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 	int g = h2 * 255.0;
 	int b = h3 * 255.0;
 
-	HeightTintingRenderer* renderer = dynamic_cast<HeightTintingRenderer*>(renderer_ptr);
-	assert(renderer != nullptr);
-	renderer->draw(image, r, g, b, high_contrast);
-}
-
-BaseRenderModeType HeightTintingRenderMode::getType() const {
-	return BaseRenderModeType::HEIGHTTINTING;
+	// TODO set earlier
+	renderer->setHighContrast(high_contrast);
+	renderer->tintBlock(image, r, g, b);
 }
 
 } /* namespace renderer */
