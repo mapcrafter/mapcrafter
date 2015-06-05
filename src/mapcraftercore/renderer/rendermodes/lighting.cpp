@@ -403,7 +403,7 @@ void LightingRenderMode::doSmoothLight(RGBAImage& image, const mc::BlockPos& pos
 	bool light_left = true, light_right = true, light_top = true;
 	bool water = (id == 8 || id == 9) && (data & util::binary<1111>::value) == 0;
 
-	if (water || id == 79) {
+	if (water) {
 		// DATA_{WEST,SOUTH,TOP} means for non-opaque water that there are water faces
 		// on these sides, e.g. we need lighting on those sides
 		if (!(data & DATA_WEST))
@@ -412,6 +412,14 @@ void LightingRenderMode::doSmoothLight(RGBAImage& image, const mc::BlockPos& pos
 			light_right = false;
 		if (!(data & DATA_TOP))
 			light_top = false;
+	}
+
+	if (id == 79) {
+		// DATA_{WEST,SOUTH} means for ice blocks that there are no faces on this side
+		if (data & DATA_WEST)
+			light_left = false;
+		if (data & DATA_SOUTH)
+			light_right = false;
 	}
 
 	mc::Block block;
