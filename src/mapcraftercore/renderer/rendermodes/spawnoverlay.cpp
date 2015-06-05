@@ -17,22 +17,29 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rendermodes.h"
+#include "spawnoverlay.h"
 
 namespace mapcrafter {
 namespace renderer {
 
-void TopdownOverlayRenderer::tintLeft(RGBAImage& image, RGBAPixel color) {
-	// not available in topdown render view
+SpawnOverlay::SpawnOverlay()
+	: OverlayRenderMode(OverlayMode::PER_FACE) {
 }
 
-void TopdownOverlayRenderer::tintRight(RGBAImage& image, RGBAPixel color) {
-	// not available in topdown render view
+SpawnOverlay::~SpawnOverlay() {
 }
 
-void TopdownOverlayRenderer::tintTop(RGBAImage& image, RGBAPixel color, int offset) {
-	// topdown = just tint the whole image
-	tintBlock(image, color);
+RGBAPixel SpawnOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+	// just shows where mobs can spawn during the day (light level < 8)
+	// TODO more options
+	// TODO estimate lighting of special blocks (slabs...), like lighting render mode
+	// TODO also mobs can't spawn on specific blocks?
+	mc::Block block = getBlock(pos, mc::GET_LIGHT);
+	uint8_t day = std::max(block.sky_light, block.block_light);
+	// uint8_t night = std::max(block.sky_light - 11, block.block_light + 0);
+	if (day < 8)
+		return rgba(255, 0, 0, 255);
+	return rgba(0, 0, 0, 0);
 }
 
 }

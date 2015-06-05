@@ -58,6 +58,17 @@ renderer::RenderViewType as<renderer::RenderViewType>(const std::string& from) {
 	throw std::invalid_argument("Must be 'isometric' or 'topdown'!");
 }
 
+template <>
+renderer::OverlayType as<renderer::OverlayType>(const std::string& from) {
+	if (from == "none")
+		return renderer::OverlayType::NONE;
+	else if (from == "slime")
+		return renderer::OverlayType::SLIME;
+	else if (from == "spawn")
+		return renderer::OverlayType::SPAWN;
+	throw std::invalid_argument("Must be 'none', 'slime' or 'spawn'!");
+}
+
 }
 }
 
@@ -130,6 +141,7 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  world = " << world << std::endl;
 	out << "  render_view" << render_view << std::endl;
 	out << "  render_mode = " << render_mode << std::endl;
+	out << "  overlay = " << overlay << std::endl;
 	out << "  rotations = " << rotations << std::endl;
 	out << "  texture_dir = " << texture_dir << std::endl;
 	out << "  texture_size = " << texture_size << std::endl;
@@ -165,6 +177,10 @@ renderer::RenderViewType MapSection::getRenderView() const {
 
 renderer::RenderModeType MapSection::getRenderMode() const {
 	return render_mode.getValue();
+}
+
+renderer::OverlayType MapSection::getOverlay() const {
+	return overlay.getValue();
 }
 
 std::set<int> MapSection::getRotations() const {
@@ -245,6 +261,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	// set some default configuration values
 	render_view.setDefault(renderer::RenderViewType::ISOMETRIC);
 	render_mode.setDefault(renderer::RenderModeType::DAYLIGHT);
+	overlay.setDefault(renderer::OverlayType::NONE);
 	rotations.setDefault("top-left");
 
 	// check if we can find a default texture directory
@@ -279,6 +296,8 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		if (key == "rendermode")
 			validation.warning("Using the option 'rendermode' is deprecated. "
 					"It's called 'render_mode' now.");
+	} else if (key == "overlay") {
+		overlay.load(key, value, validation);
 	} else if (key == "rotations") {
 		rotations.load(key, value ,validation);
 	} else if (key == "texture_dir") {

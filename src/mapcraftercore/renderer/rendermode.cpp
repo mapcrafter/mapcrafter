@@ -24,6 +24,8 @@
 #include "rendermodes/cave.h"
 #include "rendermodes/lighting.h"
 #include "rendermodes/heighttinting.h"
+#include "rendermodes/slimeoverlay.h"
+#include "rendermodes/spawnoverlay.h"
 #include "../config/configsections/map.h"
 #include "../config/configsections/world.h"
 #include "../mc/chunk.h"
@@ -81,14 +83,24 @@ std::ostream& operator<<(std::ostream& out, RenderModeType render_mode) {
 	}
 }
 
+std::ostream& operator<<(std::ostream& out, OverlayType overlay) {
+	switch (overlay) {
+	case OverlayType::SLIME: return out << "slime";
+	case OverlayType::SPAWN: return out << "spawn";
+	default: return out << "unknown";
+	}
+}
+
 RenderMode* createRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config) {
 	RenderModeType type = map_config.getRenderMode();
-	if (type == RenderModeType::PLAIN)
-		return new MultiplexingRenderMode();
-
-	if (type == RenderModeType::CAVE || type == RenderModeType::CAVELIGHT) {
-		MultiplexingRenderMode* render_mode = new MultiplexingRenderMode();
+	OverlayType overlay = map_config.getOverlay();
+	MultiplexingRenderMode* render_mode = new MultiplexingRenderMode();
+	
+	// create render mode
+	if (type == RenderModeType::PLAIN) {
+		// nothing
+	} else if (type == RenderModeType::CAVE || type == RenderModeType::CAVELIGHT) {
 		// hide some walls of caves which would cover the view into the caves
 		if (map_config.getRenderView() == RenderViewType::ISOMETRIC)
 			render_mode->addRenderMode(new CaveRenderMode({mc::DIR_SOUTH, mc::DIR_WEST, mc::DIR_TOP}));
@@ -98,17 +110,35 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 		if (type == RenderModeType::CAVELIGHT)
 			render_mode->addRenderMode(new LightingRenderMode(true, map_config.getLightingIntensity(), true));
 		render_mode->addRenderMode(new HeightTintingRenderMode(map_config.hasCaveHighContrast()));
-		return render_mode;
 	}
-	else if (type == RenderModeType::DAYLIGHT)
-		return new LightingRenderMode(true, map_config.getLightingIntensity(),
-				world_config.getDimension() == mc::Dimension::END);
-	else if (type == RenderModeType::NIGHTLIGHT)
-		return new LightingRenderMode(false, map_config.getLightingIntensity(),
-				world_config.getDimension() == mc::Dimension::END);
-	// this shouldn't happen
-	assert(false);
-	return nullptr;
+	else if (type == RenderModeType::DAYLIGHT) {
+		render_mode->addRenderMode(new LightingRenderMode(true,
+					map_config.getLightingIntensity(),
+					world_config.getDimension() == mc::Dimension::END));
+	} else if (type == RenderModeType::NIGHTLIGHT) {
+		render_mode->addRenderMode(new LightingRenderMode(false,
+					map_config.getLightingIntensity(),
+					world_config.getDimension() == mc::Dimension::END));
+	} else {
+		// this shouldn't happen
+		assert(false);
+		return nullptr;
+	}
+	
+	// create overlay
+	if (overlay == OverlayType::NONE) {
+		// nothing
+	} else if (overlay == OverlayType::SLIME) {
+		render_mode->addRenderMode(new SlimeOverlay());
+	} else if (overlay == OverlayType::SPAWN) {
+		render_mode->addRenderMode(new SpawnOverlay());
+	} else {
+		// this shouldn't happen
+		assert(false);
+		return nullptr;
+	}
+
+	return render_mode;
 }
 
 } /* namespace render */

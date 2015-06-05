@@ -52,10 +52,11 @@ void HeightTintingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 	int r = h1 * 128.0 + 128.0;
 	int g = h2 * 255.0;
 	int b = h3 * 255.0;
+	RGBAPixel color = rgba(r, g, b, 85);
 
 	// TODO set earlier
 	renderer->setHighContrast(high_contrast);
-	renderer->tintBlock(image, r, g, b);
+	renderer->tintBlock(image, color);
 }
 
 } /* namespace renderer */

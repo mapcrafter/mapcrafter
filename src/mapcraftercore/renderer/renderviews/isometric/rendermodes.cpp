@@ -25,25 +25,42 @@
 namespace mapcrafter {
 namespace renderer {
 
-void IsometricOverlayRenderer::tintLeft(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) {
-    // TODO implement
-}
-
-void IsometricOverlayRenderer::tintRight(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) {
-    // TODO implement
-}
-
-void IsometricOverlayRenderer::tintTop(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b,
-		int offset) {
-	int luminance = (10*r + 3*g + b) / 14;
-	int nr = (r - luminance) / 3; // /3 is similar to alpha=85
-	int ng = (g - luminance) / 3;
-	int nb = (b - luminance) / 3;
-
+void IsometricOverlayRenderer::tintLeft(RGBAImage& image, RGBAPixel color) {
 	int texture_size = image.getWidth() / 2;
+	
+	auto overlay = getLuminanceNeutralOverlay(color);
+	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end(); it.next()) {
+		RGBAPixel& pixel = image.pixel(it.dest_x, it.dest_y + texture_size/2);
+		if (high_contrast)
+			pixel = rgba_add_clamp(pixel, overlay);
+		else
+			blend(pixel, color);
+	}
+}
+
+void IsometricOverlayRenderer::tintRight(RGBAImage& image, RGBAPixel color) {
+	int texture_size = image.getWidth() / 2;
+	
+	auto overlay = getLuminanceNeutralOverlay(color);
+	for (SideFaceIterator it(texture_size, SideFaceIterator::RIGHT); !it.end(); it.next()) {
+		RGBAPixel& pixel = image.pixel(it.dest_x + texture_size, it.dest_y + texture_size/2);
+		if (high_contrast)
+			pixel = rgba_add_clamp(pixel, overlay);
+		else
+			blend(pixel, color);
+	}
+}
+
+void IsometricOverlayRenderer::tintTop(RGBAImage& image, RGBAPixel color, int offset) {
+	int texture_size = image.getWidth() / 2;
+
+	auto overlay = getLuminanceNeutralOverlay(color);
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
 		RGBAPixel& pixel = image.pixel(it.dest_x, it.dest_y);
-		pixel = rgba_add_clamp(pixel, nr, ng, nb);
+		if (high_contrast)
+			pixel = rgba_add_clamp(pixel, overlay);
+		else
+			blend(pixel, color);
 	}
 }
 

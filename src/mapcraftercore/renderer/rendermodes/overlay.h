@@ -25,6 +25,8 @@
 
 #include "../image.h"
 
+#include <tuple>
+
 namespace mapcrafter {
 namespace renderer {
 
@@ -37,31 +39,42 @@ public:
 
 	void setHighContrast(bool high_contrast);
 
-	virtual void tintBlock(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b);
+	virtual void tintBlock(RGBAImage& image, RGBAPixel color);
 
-	virtual void tintLeft(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) = 0;
-	virtual void tintRight(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) = 0;
-	virtual void tintTop(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b, int offset) = 0;
+	virtual void tintLeft(RGBAImage& image, RGBAPixel color) = 0;
+	virtual void tintRight(RGBAImage& image, RGBAPixel color) = 0;
+	virtual void tintTop(RGBAImage& image, RGBAPixel color, int offset) = 0;
 
 	static const RenderModeRendererType TYPE;
 
 protected:
+	std::tuple<int, int, int> getLuminanceNeutralOverlay(RGBAPixel color) const;
+
 	bool high_contrast;
+};
+
+enum class OverlayMode {
+	PER_BLOCK,
+	PER_FACE,
 };
 
 /**
  * A render mode that renders an overlay on top of the blocks. You just have to implement
  * the function that returns the color for each block. Return something with alpha == 0
- * if there should be no color (alpha values are ignored, except the alpha == 0 thing).
+ * if there should be no color.
  */
 class OverlayRenderMode : public BaseRenderMode<OverlayRenderer> {
 public:
+	OverlayRenderMode(OverlayMode overlay_mode);
 	virtual ~OverlayRenderMode();
-	
+
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 protected:
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
+
+private:
+	OverlayMode overlay_mode;
 };
 
 }

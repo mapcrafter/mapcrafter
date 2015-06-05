@@ -37,62 +37,93 @@ void OverlayRenderer::setHighContrast(bool high_contrast) {
 	this->high_contrast = high_contrast;
 }
 
-void OverlayRenderer::tintBlock(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b) {
+void OverlayRenderer::tintBlock(RGBAImage& image, RGBAPixel color) {
 	if (high_contrast) {
-		// if high contrast mode is enabled, then do some magic here
-
-		// get luminance of recolor
-		int luminance = (10*r + 3*g + b) / 14;
-
-		// try to do luminance-neutral additive/subtractive color
-		// instead of alpha blending (for better contrast)
-		// so first subtract luminance from each component
-		int nr = (r - luminance) / 3; // /3 is similar to alpha=85
-		int ng = (g - luminance) / 3;
-		int nb = (b - luminance) / 3;
-
-		int size = image.getWidth();
-		for (int y = 0; y < size; y++) {
-			for (int x = 0; x < size; x++) {
-				uint32_t pixel = image.getPixel(x, y);
+		// do the high contrast mode magic
+		auto overlay = getLuminanceNeutralOverlay(color);
+		for (int y = 0; y < image.getWidth(); y++) {
+			for (int x = 0; x < image.getHeight(); x++) {
+				RGBAPixel& pixel = image.pixel(x, y);
 				if (pixel != 0)
-					image.setPixel(x, y, rgba_add_clamp(pixel, nr, ng, nb));
+					pixel = rgba_add_clamp(pixel, overlay);
 			}
 		}
 	} else {
 		// otherwise just simple alphablending
-		uint32_t color = rgba(r, g, b, 128);
-
-		int size = image.getWidth();
-		for (int y = 0; y < size; y++) {
-			for (int x = 0; x < size; x++) {
-				uint32_t pixel = image.getPixel(x, y);
+		for (int y = 0; y < image.getWidth(); y++) {
+			for (int x = 0; x < image.getHeight(); x++) {
+				RGBAPixel& pixel = image.pixel(x, y);
 				if (pixel != 0)
-					image.setPixel(x, y, color);
+					blend(pixel, color);
 			}
 		}
 	}
 }
 
+std::tuple<int, int, int> OverlayRenderer::getLuminanceNeutralOverlay(RGBAPixel color) const {
+	// get luminance of recolor:
+	// "10*r + 3*g + b" should actually be "3*r + 10*g + b"
+	// it was a typo, but doesn't look bad either
+	int luminance = (10 * rgba_red(color) + 3 * rgba_green(color) + rgba_blue(color)) / 14;
+
+	float alpha_factor = 3; // 3 is similar to alpha=85
+	// something like that would be possible too, but overlays won't look exactly like
+	// overlays with that alpha value, so don't use it for now
+	// alpha_factor = (float) 255.0 / rgba_alpha(color);
+
+	// try to do luminance-neutral additive/subtractive color
+	// instead of alpha blending (for better contrast)
+	// so first subtract luminance from each component
+	int nr = (rgba_red(color) - luminance) / alpha_factor;
+	int ng = (rgba_green(color) - luminance) / alpha_factor;
+	int nb = (rgba_blue(color) - luminance) / alpha_factor;
+	return std::make_tuple(nr, ng, nb);
+}
+
 const RenderModeRendererType OverlayRenderer::TYPE = RenderModeRendererType::OVERLAY;
+
+OverlayRenderMode::OverlayRenderMode(OverlayMode overlay_mode)
+	: overlay_mode(overlay_mode) {
+}
 
 OverlayRenderMode::~OverlayRenderMode() {
 }
 
 void OverlayRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id,
 		uint16_t data) {
-	RGBAPixel color = getBlockColor(pos, id, data);
-	if (rgba_alpha(color) == 0)
-		return;
-
-	uint8_t r = rgba_red(color);
-	uint8_t g = rgba_green(color);
-	uint8_t b = rgba_blue(color);
-	// tint top face of solid blocks and everything of transparent blocks for now
-	if (images->isBlockTransparent(id, data)) {
-		renderer->tintBlock(image, r, g, b);
+	// TODO handle some special cases, for example: colorize blocks under water?
+	if (overlay_mode == OverlayMode::PER_BLOCK) {
+		// simple mode where we just tint whole blocks
+		RGBAPixel color = getBlockColor(pos, id, data);
+		if (rgba_alpha(color) == 0)
+			return;
+		renderer->tintBlock(image, color);
 	} else {
-		renderer->tintTop(image, r, g, b, 0);
+		// "advanced" mode where each block/position has a color,
+		// and adjacent faces are tinted / or the transparent blocks themselves
+		// TODO potential for optimization, maybe cache colors of blocks?
+		if (images->isBlockTransparent(id, data)) {
+			RGBAPixel color = getBlockColor(pos, id, data);
+			if (rgba_alpha(color) == 0)
+				return;
+			renderer->tintBlock(image, color);
+		} else {
+			mc::Block top, left, right;
+			RGBAPixel color_top, color_left, color_right;
+			top = getBlock(pos + mc::DIR_TOP, mc::GET_ID | mc::GET_DATA);
+			left = getBlock(pos + mc::DIR_WEST, mc::GET_ID | mc::GET_DATA);
+			right = getBlock(pos + mc::DIR_SOUTH, mc::GET_ID | mc::GET_DATA);
+			color_top = getBlockColor(pos + mc::DIR_TOP, top.id, top.data);
+			color_left = getBlockColor(pos + mc::DIR_WEST, left.id, left.data);
+			color_right = getBlockColor(pos + mc::DIR_SOUTH, right.id, right.data);
+			
+			if (rgba_alpha(color_top) != 0)
+				renderer->tintTop(image, color_top, 0);
+			if (rgba_alpha(color_left) != 0)
+				renderer->tintLeft(image, color_left);
+			if (rgba_alpha(color_right) != 0)
+				renderer->tintRight(image, color_right);
+		}
 	}
 }
 

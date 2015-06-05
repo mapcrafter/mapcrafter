@@ -27,9 +27,9 @@ namespace renderer {
 
 class TopdownOverlayRenderer : public OverlayRenderer {
 public:
-	virtual void tintLeft(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b);
-	virtual void tintRight(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b);
-	virtual void tintTop(RGBAImage& image, uint8_t r, uint8_t g, uint8_t b, int offset);
+	virtual void tintLeft(RGBAImage& image, RGBAPixel color);
+	virtual void tintRight(RGBAImage& image, RGBAPixel color);
+	virtual void tintTop(RGBAImage& image, RGBAPixel color, int offset);
 };
 
 }

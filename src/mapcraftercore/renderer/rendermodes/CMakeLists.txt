@@ -4,6 +4,8 @@ set(SOURCE
     "${CMAKE_CURRENT_SOURCE_DIR}/heighttinting.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/lighting.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/overlay.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/slimeoverlay.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/spawnoverlay.cpp"
     PARENT_SCOPE
 )
 set(HEADERS
@@ -12,5 +14,7 @@ set(HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/heighttinting.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/lighting.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/overlay.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/slimeoverlay.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/spawnoverlay.h"
     PARENT_SCOPE
 )

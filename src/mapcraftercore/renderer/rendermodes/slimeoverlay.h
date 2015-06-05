@@ -17,24 +17,38 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rendermodes.h"
+
+#ifndef RENDERMODES_SLIMEOVERLAY_H_
+#define RENDERMODES_SLIMEOVERLAY_H_
+
+#include "overlay.h"
 
 namespace mapcrafter {
 namespace renderer {
 
-void TopdownOverlayRenderer::tintLeft(RGBAImage& image, RGBAPixel color) {
-	// not available in topdown render view
+class JavaRandom {
+public:
+	JavaRandom();
+	~JavaRandom();
+
+	void setSeed(long long seed);
+	int next(int bits);
+	int nextInt(int max);
+
+protected:
+	long long seed;
+};
+
+class SlimeOverlay : public OverlayRenderMode {
+public:
+	SlimeOverlay();
+	virtual ~SlimeOverlay();
+
+protected:
+	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+};
+
+}
 }
 
-void TopdownOverlayRenderer::tintRight(RGBAImage& image, RGBAPixel color) {
-	// not available in topdown render view
-}
-
-void TopdownOverlayRenderer::tintTop(RGBAImage& image, RGBAPixel color, int offset) {
-	// topdown = just tint the whole image
-	tintBlock(image, color);
-}
-
-}
-}
-
+#endif /* RENDERMODES_SLIMEOVERLAY_H_ */

@@ -17,24 +17,25 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rendermodes.h"
+
+#ifndef RENDERMODES_SPAWNOVERLAY_H_
+#define RENDERMODES_SPAWNOVERLAY_H_
+
+#include "overlay.h"
 
 namespace mapcrafter {
 namespace renderer {
 
-void TopdownOverlayRenderer::tintLeft(RGBAImage& image, RGBAPixel color) {
-	// not available in topdown render view
-}
+class SpawnOverlay : public OverlayRenderMode {
+public:
+	SpawnOverlay();
+	virtual ~SpawnOverlay();
 
-void TopdownOverlayRenderer::tintRight(RGBAImage& image, RGBAPixel color) {
-	// not available in topdown render view
-}
-
-void TopdownOverlayRenderer::tintTop(RGBAImage& image, RGBAPixel color, int offset) {
-	// topdown = just tint the whole image
-	tintBlock(image, color);
-}
+protected:
+	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+};
 
 }
 }
 
+#endif /* RENDERMODES_SPAWNOVERLAY_H_ */

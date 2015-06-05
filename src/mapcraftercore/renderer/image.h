@@ -23,6 +23,7 @@
 #include <png.h>
 #include <cstdint>
 #include <string>
+#include <tuple>
 #include <vector>
 
 namespace mapcrafter {
@@ -37,6 +38,7 @@ uint8_t rgba_blue(RGBAPixel value);
 uint8_t rgba_alpha(RGBAPixel value);
 
 RGBAPixel rgba_add_clamp(RGBAPixel value, int r, int g, int b);
+RGBAPixel rgba_add_clamp(RGBAPixel value, const std::tuple<int, int, int>& values);
 RGBAPixel rgba_multiply(RGBAPixel value, double r, double g, double b, double a = 1);
 RGBAPixel rgba_multiply(RGBAPixel value, uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
 

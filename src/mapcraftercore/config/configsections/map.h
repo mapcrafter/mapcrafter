@@ -98,6 +98,7 @@ public:
 
 	renderer::RenderViewType getRenderView() const;
 	renderer::RenderModeType getRenderMode() const;
+	renderer::OverlayType getOverlay() const;
 	std::set<int> getRotations() const;
 	fs::path getTextureDir() const;
 	int getTextureSize() const;
@@ -135,6 +136,7 @@ private:
 
 	Field<renderer::RenderViewType> render_view;
 	Field<renderer::RenderModeType> render_mode;
+	Field<renderer::OverlayType> overlay;
 	Field<std::string> rotations;
 	std::set<int> rotations_set;
 
