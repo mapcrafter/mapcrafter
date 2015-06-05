@@ -271,10 +271,11 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		south = getBlock(pos + mc::DIR_SOUTH);
 
 		// check if west and south neighbors are also ice blocks
-		if (west.id == 79)
+		if (west.id != 79)
 			data |= DATA_WEST;
-		if (south.id == 79)
+		if (south.id != 79)
 			data |= DATA_SOUTH;
+		data |= DATA_TOP;
 
 	} else if (id == 85 || id == 101 || id == 102 || id == 139 || id == 113 || id == 160
 			|| (id >= 188 && id <= 192)) {

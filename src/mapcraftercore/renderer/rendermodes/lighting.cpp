@@ -368,6 +368,8 @@ void LightingRenderMode::lightRight(RGBAImage& image, const CornerColors& colors
 
 void LightingRenderMode::lightTop(RGBAImage& image, const CornerColors& colors,
 		int yoff) {
+	// TODO there is a problem with ice: somehow ice at night becomes very transparent
+	// and the blocks under it are not dark...
 	if (isometric_render_view) {
 		int size = image.getWidth() / 2;
 		RGBAImage tex(size, size);
@@ -404,7 +406,7 @@ void LightingRenderMode::doSmoothLight(RGBAImage& image, const mc::BlockPos& pos
 	bool water = (id == 8 || id == 9) && (data & util::binary<1111>::value) == 0;
 
 	if (water || id == 79) {
-		// DATA_{WEST,SOUTH,TOP} means for non-opaque water that there are water faces
+		// DATA_{WEST,SOUTH,TOP} means for non-opaque water/ice that there are water/ice faces
 		// on these sides, e.g. we need lighting on those sides
 		if (!(data & DATA_WEST))
 			light_left = false;

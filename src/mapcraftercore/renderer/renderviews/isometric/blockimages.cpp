@@ -1306,16 +1306,17 @@ void IsometricBlockImages::createIce(uint8_t id) { // id 79
 		for (int s = 0; s <= 1; s++) {
 			RGBAImage block(getBlockSize(), getBlockSize());
 			uint16_t extra_data = 0;
-			if (w == 1)
+			if (w == 1) {
 				blitFace(block, FACE_WEST, texture, 0, 0, true, dleft, dright);
-			else
 				extra_data |= DATA_WEST;
+			}
 
-			if (s == 1)
+			if (s == 1) {
 				blitFace(block, FACE_SOUTH, texture, 0, 0, true, dleft, dright);
-			else
 				extra_data |= DATA_SOUTH;
+			}
 			blitFace(block, FACE_TOP, texture, 0, 0, true, dleft, dright);
+			extra_data |= DATA_TOP;
 			setBlockImage(id, extra_data, block);
 		}
 }
