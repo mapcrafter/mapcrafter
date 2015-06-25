@@ -23,11 +23,15 @@
 #include "tilerenderer.h"
 #include "tileset.h"
 #include "../config/mapcrafterconfig.h"
+#include "../config/webconfig.h"
 #include "../mc/world.h"
 #include "../mc/worldcache.h"
 
+#include <ctime>
+#include <map>
+#include <set>
+#include <vector>
 #include <boost/filesystem.hpp>
-#include "../config/webconfig.h"
 
 namespace fs = boost::filesystem;
 
@@ -114,16 +118,15 @@ class RenderManager {
 public:
 	RenderManager(const config::MapcrafterConfig& config);
 
-	void setThreadCount(int thread_count);
 	void setRenderBehaviors(const RenderBehaviors& render_behaviors);
 
+	// either call those three or just run(threads, batch)...
 	bool initialize();
-	void scanWorlds();
+	bool scanWorlds();
+	void renderMap(const std::string& map, int rotation, int threads,
+			util::IProgressHandler* progress);
 
-	void initializeMap(const std::string& map);
-	void renderMap(const std::string& map, int rotation, util::IProgressHandler* progress);
-
-	void run(bool batch);
+	bool run(int threads, bool batch);
 
 	const std::vector<std::pair<std::string, std::set<int> > >& getRequiredMaps();
 
@@ -135,16 +138,20 @@ private:
 	bool writeTemplateIndexHtml() const;
 	void writeTemplates() const;
 
+	void initializeMap(const std::string& map);
 	void increaseMaxZoom(const fs::path& dir, std::string image_format,
 			int jpeg_quality = 85) const;
 
 	config::MapcrafterConfig config;
 	config::WebConfig web_config;
 
-	int thread_count;
 	RenderBehaviors render_behaviors;
 
+	// time when we started scanning the worlds, used as last last render time of the maps
 	std::time_t time_started_scanning;
+	// set of initialized maps, initializeMap-method must be called for each map,
+	// this is automatically done by the renderMap-method
+	std::set<std::string> map_initialized;
 
 	// maps for world- and tile set objects
 	std::map<std::string, std::array<mc::World, 4> > worlds;
