@@ -303,10 +303,8 @@ renderer::TilePos parseTilePosJSON(const picojson::value& value) {
 	if (!value.is<picojson::array>())
 		throw util::JSONError(error);
 	picojson::array array = value.get<picojson::array>();
-	if (array.size() != 2)
+	if (array.size() != 2 || !array[0].is<double>() || !array[1].is<double>())
 		throw util::JSONError(error);
-	if (!array[0].is<double>() || !array[1].is<double>())
-		return false;
 	return renderer::TilePos(array[0].get<double>(), array[1].get<double>());
 }
 
