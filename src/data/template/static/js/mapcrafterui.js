@@ -426,8 +426,6 @@ MapcrafterUI.prototype.addHandler = function(handler) {
 MapcrafterUI.prototype.mcToLatLng = function(x, z, y) {
 	var mapConfig = this.getCurrentMapConfig();
 	var tileOffset = this.getTileSetGroupConfig(mapConfig.tileSetGroup).tileOffsets[this.currentRotation];
-	tileOffset = [0, 0];
-	console.log(tileOffset);
 	
 	// rotate the position to the map rotation
 	for(var i = 0; i < this.currentRotation; i++) {
@@ -450,8 +448,6 @@ MapcrafterUI.prototype.mcToLatLng = function(x, z, y) {
 MapcrafterUI.prototype.latLngToMC = function(latLng, y) {
 	var mapConfig = this.getCurrentMapConfig();
 	var tileOffset = this.getTileSetGroupConfig(mapConfig.tileSetGroup).tileOffsets[this.currentRotation];
-	tileOffset = [0, 0];
-	console.log(tileOffset);
 
 	// do the conversion depending on the current render view
 	var mc;
