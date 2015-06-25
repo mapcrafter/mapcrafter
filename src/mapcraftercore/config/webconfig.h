@@ -46,8 +46,8 @@ public:
 	void readConfigJS();
 	void writeConfigJS() const;
 
-	int getTileSetMaxZoom(const TileSetGroupID& tile_set) const;
-	void setTileSetMaxZoom(const TileSetGroupID& tile_set, int zoomlevel);
+	int getTileSetsMaxZoom(const TileSetGroupID& tile_set) const;
+	void setTileSetsMaxZoom(const TileSetGroupID& tile_set, int max_zoom);
 
 	renderer::TilePos getTileSetTileOffset(const TileSetID& tile_set) const;
 	void setTileSetTileOffset(const TileSetID& tile_set,
@@ -65,12 +65,10 @@ public:
 private:
 	MapcrafterConfig config;
 
+	// max max zoom of world/view/tile_width (= max(max zoom of each rotation))
+	std::map<TileSetGroupID, int> tile_sets_max_zoom;
 	// tile offset of world/view/tile_width/rotation
-	std::map<TileSetID, renderer::TilePos> world_tile_offset;
-	// used rotations of world/view/tile_width
-	//std::map<TileSetKey, std::set<int> > world_rotations;
-	// max max zoom of world/view/tile_width (iterate over rotations to calculate)
-	std::map<TileSetGroupID, int> tile_set_max_zoom;
+	std::map<TileSetID, renderer::TilePos> tile_set_tile_offset;
 
 	// tile size of map
 	std::map<std::string, int> map_tile_size;
@@ -80,6 +78,7 @@ private:
 	std::map<std::string, std::array<int, 4> > map_last_rendered;
 
 	picojson::value getConfigJSON() const;
+	void parseConfigJSON(const picojson::object& object);
 };
 
 } /* namespace config */

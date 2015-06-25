@@ -32,6 +32,7 @@
 #include "compat/nullptr.h"
 
 #include "util/filesystem.h"
+#include "util/json.h"
 #include "util/logging.h"
 #include "util/progress.h"
 #include "util/math.h"
