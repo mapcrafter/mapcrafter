@@ -34,7 +34,7 @@ WebConfig::WebConfig(const MapcrafterConfig& config)
 		// set tile size to something != 0 for now,
 		// because Leaflet is sad if the tile size is 0
 		// EDIT: apparently it's also sad now if the tile size is 1 or something small
-		// seems like it's stuck in a while(1) loop trying to loading tiles
+		// seems like it's stuck in a loop trying to loading (many? tile size 1?) tiles
 		// -> greater values seem to work
 		map_tile_size[map_name] = 420;
 		map_max_zoom[map_name] = 0;
@@ -101,7 +101,7 @@ bool WebConfig::readConfigJS() {
 		auto maps = config.getMaps();
 		for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
 			std::string map_name = map_it->getShortName();
-			auto map_tile_sets = map_it->getTileSets();
+			auto tile_sets = map_it->getTileSets();
 
 			fs::path settings_file = config.getOutputDir() / map_name / "map.settings";
 			if (!fs::is_regular_file(settings_file))
@@ -123,8 +123,8 @@ bool WebConfig::readConfigJS() {
 				map_max_zoom[map_name] = root.get<int>("max_zoom");
 
 				std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
-				for (auto tile_set_it = map_tile_sets.begin();
-						tile_set_it != map_tile_sets.end(); ++tile_set_it) {
+				for (auto tile_set_it = tile_sets.begin();
+						tile_set_it != tile_sets.end(); ++tile_set_it) {
 					int rotation = tile_set_it->rotation;
 					auto section = config.getSection("rotation", rotation_names[rotation]);
 					int offset_x = section.get<int>("tile_offset_x", 0);
@@ -215,6 +215,8 @@ void WebConfig::setMapLastRendered(const std::string& map,
 }
 
 picojson::value WebConfig::getConfigJSON() const {
+	// we'll just call all the tile set group things tile sets here
+	// it would be too long otherwise
 	picojson::object config_json, maps_json, tile_sets_json;
 	picojson::array maps_order_json;
 
@@ -246,8 +248,6 @@ picojson::value WebConfig::getConfigJSON() const {
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
 		auto world = config.getWorld(map_it->getWorld());
 		auto tile_sets = map_it->getTileSets();
-		// TODO also this a bit cleaner maybe?
-
 		maps_order_json.push_back(picojson::value(map_it->getShortName()));
 
 		picojson::object map_json;
@@ -311,14 +311,18 @@ renderer::TilePos parseTilePosJSON(const picojson::value& value) {
 }
 
 void WebConfig::parseConfigJSON(const picojson::object& object) {
+	// we'll just call all the tile set group things tile sets here too
+	// it would be too long otherwise
 	picojson::object tile_sets_json = util::json_get<picojson::object>(object, "tileSetGroups");
 	picojson::object maps_json = util::json_get<picojson::object>(object, "maps");
 
+	// get used tile set groups
 	std::set<TileSetGroupID> tile_sets;
 	auto maps = config.getMaps();
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it)
 		tile_sets.insert(map_it->getTileSetGroup());
 
+	// parse the tile set group objects
 	for (auto it = tile_sets.begin(); it != tile_sets.end(); ++it) {
 		TileSetGroupID tile_set = *it;
 		if (!tile_sets_json.count(tile_set.toString()))
@@ -330,8 +334,8 @@ void WebConfig::parseConfigJSON(const picojson::object& object) {
 		picojson::array array = util::json_get<picojson::array>(tile_set_json, "tileOffsets");
 		if (array.size() != 4)
 			throw util::JSONError("Invalid 'tileOffsets' array!");
-		for (int rotation = 0; rotation < 4; rotation++)
-			tile_set_tile_offset[TileSetID(tile_set, rotation)] = parseTilePosJSON(array[rotation]);
+		for (int r = 0; r < 4; r++)
+			tile_set_tile_offset[TileSetID(tile_set, r)] = parseTilePosJSON(array[r]);
 		LOG(DEBUG) << "ts " << tile_set.toString() << " tile_offsets="
 			<< tile_set_tile_offset[TileSetID(tile_set, 0)] << ","
 			<< tile_set_tile_offset[TileSetID(tile_set, 1)] << ","
@@ -339,6 +343,7 @@ void WebConfig::parseConfigJSON(const picojson::object& object) {
 			<< tile_set_tile_offset[TileSetID(tile_set, 3)];
 	}
 
+	// parse the map objects
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
 		std::string map_name = map_it->getShortName();
 		picojson::object map_json = util::json_get<picojson::object>(maps_json, map_name);
@@ -350,19 +355,19 @@ void WebConfig::parseConfigJSON(const picojson::object& object) {
 		LOG(DEBUG) << "map " << map_name << " max_zoom=" << map_max_zoom[map_name];
 
 		auto last_rendered_json = util::json_get<picojson::array>(map_json, "lastRendered");
-		if (last_rendered_json.size() == 4
-				&& last_rendered_json[0].is<double>()
-				&& last_rendered_json[1].is<double>()
-				&& last_rendered_json[2].is<double>()
-				&& last_rendered_json[3].is<double>()) {
-			for (size_t i = 0; i < 4; i++)
-				map_last_rendered[map_name][i] = last_rendered_json[i].get<double>();
-			LOG(DEBUG) << "map " << map_name << " last_rendered=["
-					<< map_last_rendered[map_name][0] << ", "
-					<< map_last_rendered[map_name][1] << ", "
-					<< map_last_rendered[map_name][2] << ", "
-					<< map_last_rendered[map_name][3] << "]";
-		}
+		if (last_rendered_json.size() != 4
+				|| !last_rendered_json[0].is<double>()
+				|| !last_rendered_json[1].is<double>()
+				|| !last_rendered_json[2].is<double>()
+				|| !last_rendered_json[3].is<double>())
+			throw util::JSONError("Invalid 'lastRendered' array!");
+		for (int r = 0; r < 4; r++)
+			map_last_rendered[map_name][r] = last_rendered_json[r].get<double>();
+		LOG(DEBUG) << "map " << map_name << " last_rendered=["
+			<< map_last_rendered[map_name][0] << ", "
+			<< map_last_rendered[map_name][1] << ", "
+			<< map_last_rendered[map_name][2] << ", "
+			<< map_last_rendered[map_name][3] << "]";
 	}
 }
 
