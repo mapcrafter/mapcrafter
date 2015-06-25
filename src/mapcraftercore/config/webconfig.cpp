@@ -323,6 +323,8 @@ void WebConfig::parseConfigJSON(const picojson::object& object) {
 	// parse the tile set group objects
 	for (auto it = tile_sets.begin(); it != tile_sets.end(); ++it) {
 		TileSetGroupID tile_set = *it;
+		// it's okay if we can't find a specific tile set group object
+		// -> probably rendering it for the first time
 		if (!tile_sets_json.count(tile_set.toString()))
 			continue;
 		picojson::object tile_set_json = util::json_get<picojson::object>(tile_sets_json, tile_set.toString());
@@ -344,6 +346,10 @@ void WebConfig::parseConfigJSON(const picojson::object& object) {
 	// parse the map objects
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
 		std::string map_name = map_it->getShortName();
+		// it's okay if we can't find a specific map object
+		// -> probably rendering it for the first time
+		if (!maps_json.count(map_name))
+			continue;
 		picojson::object map_json = util::json_get<picojson::object>(maps_json, map_name);
 
 		map_tile_size[map_name] = util::json_get<double>(map_json, "tileSize");
