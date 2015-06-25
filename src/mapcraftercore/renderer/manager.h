@@ -117,7 +117,7 @@ public:
 	void setThreadCount(int thread_count);
 	void setRenderBehaviors(const RenderBehaviors& render_behaviors);
 
-	void initialize();
+	bool initialize();
 	void scanWorlds();
 
 	void initializeMap(const std::string& map);

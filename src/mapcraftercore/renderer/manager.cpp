@@ -150,18 +150,20 @@ void RenderManager::setRenderBehaviors(const RenderBehaviors& render_behaviors) 
 	this->render_behaviors = render_behaviors;
 }
 
-void RenderManager::initialize() {
+bool RenderManager::initialize() {
 	// an output directory would be nice -- create one if it does not exist
 	if (!fs::is_directory(config.getOutputDir()) && !fs::create_directories(config.getOutputDir())) {
 		LOG(FATAL) << "Error: Unable to create output directory!";
-		return;/* false;*/
+		return false;
 	}
 
 	// create a helper for the configuration
 	// web_config = config::WebConfig(config); // already done in constructor
 	// read old settings from already rendered maps
 	// TODO fancy description blah blah
-	web_config.readConfigJS();
+	if (!web_config.readConfigJS())
+		return false;
+	return true;
 }
 
 void RenderManager::scanWorlds() {

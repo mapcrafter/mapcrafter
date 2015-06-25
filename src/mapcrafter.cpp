@@ -183,7 +183,8 @@ int main(int argc, char** argv) {
 	renderer::RenderManager manager(config);
 	manager.setThreadCount(opts.jobs);
 	manager.setRenderBehaviors(renderer::RenderBehaviors::fromRenderOpts(config, opts));
-	manager.initialize();
+	if (!manager.initialize())
+		return 1;
 	//manager.scanWorlds();
 	//manager.renderMaps();
 	manager.run(opts.batch);
