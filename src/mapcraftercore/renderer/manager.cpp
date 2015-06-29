@@ -152,28 +152,18 @@ bool RenderManager::initialize() {
 		return false;
 	}
 
-	// create a helper for the configuration
-	// web_config = config::WebConfig(config); // already done in constructor
-	// read old settings from already rendered maps
-	// TODO fancy description blah blah
-	if (!web_config.readConfigJS())
-		return false;
-	return true;
+	// read parameters of already rendered maps
+	return web_config.readConfigJS();
 }
 
 bool RenderManager::scanWorlds() {
-	// and get the maps and worlds of the configuration
 	auto config_worlds = config.getWorlds();
 	auto config_maps = config.getMaps();
 
 	time_started_scanning = std::time(nullptr);
 
-	// ###
-	// ### Second big step: Scan the worlds
-	// ###
-
-	// at first check which maps/rotations are required
-	// and which tile sets (world, render view, tile width) in which rotations are needed
+	// first of all check which maps/rotations are required
+	// and which tile sets (world, render view, tile width) with which rotations are needed
 	std::set<config::TileSetID> used_tile_sets;
 	for (auto map_it = config_maps.begin(); map_it != config_maps.end(); ++map_it) {
 		std::string map = map_it->getShortName();
@@ -182,7 +172,8 @@ bool RenderManager::scanWorlds() {
 
 		std::set<int> required_rotations;
 		auto map_tile_sets = map_it->getTileSets();
-		for (auto tile_set_it = map_tile_sets.begin(); tile_set_it != map_tile_sets.end(); ++tile_set_it) {
+		for (auto tile_set_it = map_tile_sets.begin(); tile_set_it != map_tile_sets.end();
+				++tile_set_it) {
 			int rotation = tile_set_it->rotation;
 			if (render_behaviors.getRenderBehavior(map, rotation) != RenderBehavior::SKIP) {
 				required_rotations.insert(rotation);
@@ -193,19 +184,14 @@ bool RenderManager::scanWorlds() {
 		required_maps.push_back(std::make_pair(map, required_rotations));
 	}
 
+	// store the maximum max zoom level of every tile set with its rotations
 	std::map<config::TileSetGroupID, int> tile_sets_max_zoom;
 
 	// iterate through all tile sets that are needed
 	for (auto tile_set_it = used_tile_sets.begin();
 			tile_set_it != used_tile_sets.end(); ++tile_set_it) {
 		config::WorldSection world_config = config.getWorld(tile_set_it->world_name);
-		// TODO also validation
 		RenderView* render_view = createRenderView(tile_set_it->render_view);
-		// scan the different rotated versions of the world
-		// -> the rotations which are used by maps, so not necessarily all rotations
-		// find the highest max zoom level of these tilesets to use this for all rotations
-		// -> all rotations should have the same max zoom level
-		//    to allow a nice interactively rotatable map
 
 		// load the world
 		mc::World world(world_config.getInputDir().string(),
@@ -216,12 +202,13 @@ bool RenderManager::scanWorlds() {
 			LOG(FATAL) << "Unable to load world " << tile_set_it->world_name << "!";
 			return false;
 		}
-		// create a tileset for this world
+
+		// create a tile set for this world
 		std::shared_ptr<TileSet> tile_set(render_view->createTileSet(tile_set_it->tile_width));
-		// and scan for tiles of this world,
+		// and scan the tiles of this world,
 		// we automatically center the tiles for cropped worlds, but only...
 		//  - the circular cropped ones and
-		//  - the ones with complete specified x- AND z-bounds
+		//  - the ones with completely specified x- AND z-bounds
 		if (world_config.needsWorldCentering()) {
 			TilePos tile_offset;
 			tile_set->scan(world, true, tile_offset);
@@ -244,6 +231,7 @@ bool RenderManager::scanWorlds() {
 		delete render_view;
 	}
 
+	// set calculated max zoom of tile sets
 	for (auto tile_set_it = used_tile_sets.begin();
 			tile_set_it != used_tile_sets.end(); ++tile_set_it) {
 		// same here like above, C++ magic
@@ -252,7 +240,6 @@ bool RenderManager::scanWorlds() {
 		web_config.setTileSetsMaxZoom(*tile_set_it, max_zoom);
 	}
 
-	// TODO do it here?
 	writeTemplates();
 	return true;
 }
@@ -264,6 +251,7 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 			|| render_behaviors.getRenderBehavior(map, rotation) == RenderBehavior::SKIP)
 		return;
 
+	// do some initialization stuff for every map once
 	if (!map_initialized.count(map)) {
 		initializeMap(map);
 		map_initialized.insert(map);
@@ -272,13 +260,8 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 	config::MapSection map_config = config.getMap(map);
 	config::WorldSection world_config = config.getWorld(map_config.getWorld());
 	std::shared_ptr<RenderView> render_view(createRenderView(map_config.getRenderView()));
-	if (!render_view) {
-		LOG(ERROR) << "Invalid render view '" << map_config.getRenderView() << "'!";
-		return;
-	}
 
 	// output a small notice if we render this map incrementally
-	//if (settings.last_render[rotation] != 0) {
 	int last_rendered = web_config.getMapLastRendered(map, rotation);
 	if (last_rendered != 0) {
 		std::time_t t = last_rendered;
@@ -287,25 +270,25 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 		LOG(INFO) << "Last rendering was on " << buffer << ".";
 	}
 
-	fs::path output_dir = config.getOutputPath(map + "/"
-			+ config::ROTATION_NAMES_SHORT[rotation]);
-	// if incremental render scan which tiles might have changed
-	std::shared_ptr<TileSet> tile_set(render_view->createTileSet(map_config.getTileWidth()));
-	// TODO ewwwwwwww
-	tile_set->operator=(*tile_sets[map_config.getTileSet(rotation)]);
-	if (render_behaviors.getRenderBehavior(map, rotation)
-			== RenderBehavior::AUTO) {
+	fs::path output_dir = config.getOutputPath(map + "/" + config::ROTATION_NAMES_SHORT[rotation]);
+	// get the tile set
+	TileSet* tile_set = tile_sets[map_config.getTileSet(rotation)].get();
+	if (render_behaviors.getRenderBehavior(map, rotation) == RenderBehavior::AUTO) {
+		// if incremental render, scan which tiles might have changed
 		LOG(INFO) << "Scanning required tiles...";
-		// use the incremental check specified in the config
+		// use the incremental check method specified in the config
 		if (map_config.useImageModificationTimes())
-			tile_set->scanRequiredByFiletimes(output_dir,
-					map_config.getImageFormatSuffix());
+			tile_set->scanRequiredByFiletimes(output_dir, map_config.getImageFormatSuffix());
 		else
 			//tile_set->scanRequiredByTimestamp(settings.last_render[rotation]);
 			tile_set->scanRequiredByTimestamp(web_config.getMapLastRendered(map, rotation));
+	} else {
+		// or just set all tiles required if force-rendering
+		// TODO make sure this works (at home)
+		tile_set->resetRequired();
 	}
 
-	// render the map
+	// maybe we don't have to render anything at all
 	if (tile_set->getRequiredRenderTilesCount() == 0) {
 		LOG(INFO) << "No tiles need to get rendered.";
 		return;
@@ -314,13 +297,14 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 	// create block images
 	TextureResources resources;
 	// if textures do not work, it does not make much sense
-	// to try the other all_rotations with the same textures
+	// to try the other rotations with the same broken textures
 	if (!resources.loadTextures(map_config.getTextureDir().string(),
 			map_config.getTextureSize(), map_config.getTextureBlur())) {
 		LOG(ERROR) << "Skipping remaining rotations.";
 		return;
 	}
 
+	// create other stuff for the render dispatcher
 	std::shared_ptr<BlockImages> block_images(render_view->createBlockImages());
 	render_view->configureBlockImages(block_images.get(), world_config, map_config);
 	block_images->generateBlocks(resources);
@@ -332,11 +316,11 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 	context.map_config = map_config;
 	context.render_view = render_view.get();
 	context.block_images = block_images.get();
-	context.tile_set = tile_set.get();
+	context.tile_set = tile_set;
 	context.world = worlds[map_config.getWorld()][rotation];
 	context.initializeTileRenderer();
 
-	// TODO maybe set only once per map?
+	// update map parameters in web config
 	web_config.setMapMaxZoom(map, context.tile_set->getDepth());
 	web_config.setMapTileSize(map, context.tile_renderer->getTileSize());
 	web_config.writeConfigJS();
@@ -347,6 +331,7 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 	else
 		dispatcher = std::make_shared<thread::MultiThreadingDispatcher>(threads);
 
+	// do the dance
 	dispatcher->dispatch(context, progress);
 
 	// update the map settings with last render time
@@ -366,6 +351,7 @@ bool RenderManager::run(int threads, bool batch) {
 	int progress_maps_all = required_maps.size();
 	int time_start_all = std::time(nullptr);
 
+	// go through all required maps
 	for (auto map_it = required_maps.begin(); map_it != required_maps.end(); ++map_it) {
 		progress_maps++;
 		config::MapSection map_config = config.getMap(map_it->first);
@@ -378,7 +364,7 @@ bool RenderManager::run(int threads, bool batch) {
 		int progress_rotations = 0;
 		int progress_rotations_all = required_rotations.size();
 
-		// now go through the all_rotations and render them
+		// now go through the all required rotations of this map and render them
 		for (auto rotation_it = required_rotations.begin();
 				rotation_it != required_rotations.end(); ++rotation_it) {
 			progress_rotations++;
@@ -418,14 +404,10 @@ bool RenderManager::run(int threads, bool batch) {
 	return true;
 }
 
-const std::vector<std::pair<std::string, std::set<int> > >& RenderManager::getRequiredMaps() {
+const std::vector<std::pair<std::string, std::set<int> > >& RenderManager::getRequiredMaps() const {
 	return required_maps;
 }
 
-/**
- * This method copies a file from the template directory to the output directory and
- * replaces the variables from the map.
- */
 bool RenderManager::copyTemplateFile(const std::string& filename,
 		const std::map<std::string, std::string>& vars) const {
 	std::ifstream file(config.getTemplatePath(filename).string().c_str());
@@ -436,10 +418,8 @@ bool RenderManager::copyTemplateFile(const std::string& filename,
 	file.close();
 	std::string data = ss.str();
 
-	for (std::map<std::string, std::string>::const_iterator it = vars.begin();
-			it != vars.end(); ++it) {
+	for (auto it = vars.begin(); it != vars.end(); ++it)
 		data = util::replaceAll(data, "{" + it->first + "}", it->second);
-	}
 
 	std::ofstream out(config.getOutputPath(filename).string().c_str());
 	if (!out)
@@ -470,18 +450,14 @@ bool RenderManager::writeTemplateIndexHtml() const {
 	return copyTemplateFile("index.html", vars);
 }
 
-/**
- * This method copies all template files to the output directory.
- */
 void RenderManager::writeTemplates() const {
 	if (!fs::is_directory(config.getTemplateDir())) {
-		LOG(WARNING) << "The template directory does not exist! Can't copy templates!";
+		LOG(ERROR) << "The template directory does not exist! Can't copy templates!";
 		return;
 	}
 
 	if (!writeTemplateIndexHtml())
-		LOG(WARNING) << "Warning: Unable to copy template file index.html!";
-	// TODO write config.js also here?
+		LOG(ERROR) << "Warning: Unable to copy template file index.html!";
 	web_config.writeConfigJS();
 
 	if (!fs::exists(config.getOutputPath("markers.js"))
@@ -512,11 +488,10 @@ void RenderManager::writeTemplates() const {
 
 void RenderManager::initializeMap(const std::string& map) {
 	config::MapSection map_config = config.getMap(map);
-	auto all_rotations = map_config.getRotations();
 
 	// get the max zoom level calculated of the current tile set
 	int max_zoom = web_config.getTileSetsMaxZoom(map_config.getTileSetGroup());
-	// get the old max zoom level (from config.js), will 0 if not rendered yet
+	// get the old max zoom level (from config.js), will be 0 if not rendered yet
 	int old_max_zoom = web_config.getMapMaxZoom(map);
 	// if map already rendered: check if the zoom level of the world has increased
 	if (old_max_zoom != 0 && old_max_zoom < max_zoom) {
@@ -525,8 +500,8 @@ void RenderManager::initializeMap(const std::string& map) {
 		LOG(INFO) << "I will move some files around...";
 
 		// if zoom level has increased, increase zoom levels of tile sets
-		for (auto rotation_it = all_rotations.begin(); rotation_it != all_rotations.end();
-				++rotation_it) {
+		auto rotations = map_config.getRotations();
+		for (auto rotation_it = rotations.begin(); rotation_it != rotations.end(); ++rotation_it) {
 			fs::path output_dir = config.getOutputPath(map + "/"
 					+ config::ROTATION_NAMES_SHORT[*rotation_it]);
 			for (int i = old_max_zoom; i < max_zoom; i++)
@@ -535,6 +510,7 @@ void RenderManager::initializeMap(const std::string& map) {
 	}
 
 	// update the template with the max zoom level
+	// (calculated with tile set in scanWorlds-method)
 	web_config.setMapMaxZoom(map, max_zoom);
 	web_config.writeConfigJS();
 }

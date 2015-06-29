@@ -183,6 +183,11 @@ public:
 	void scan(const mc::World& world, bool auto_center, TilePos& tile_offset);
 
 	/**
+	 * Resets which tiles are required / not required. All tiles will be required.
+	 */
+	void resetRequired();
+
+	/**
 	 * Scans which tiles are required by testing which tiles were probably changed since
 	 * the timestamp last_change.
 	 */

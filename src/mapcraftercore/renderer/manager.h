@@ -118,27 +118,82 @@ class RenderManager {
 public:
 	RenderManager(const config::MapcrafterConfig& config);
 
+	/**
+	 * Sets how each map should be rendered (auto, force-render, skip).
+	 */
 	void setRenderBehaviors(const RenderBehaviors& render_behaviors);
 
-	// either call those three or just run(threads, batch)...
+	/**
+	 * Some basic initialization things. blah.
+	 * 
+	 * Returns false if a fatal error occured (for example unable to create the output
+	 * directory) and scanning the worlds and rendering them won't work.
+	 */
 	bool initialize();
+
+	/**
+	 * Scans the worlds and create the tile sets.
+	 * 
+	 * Returns false if a fatal error occured (for example unable to read a world)
+	 * and rendering the maps won't work.
+	 */
 	bool scanWorlds();
+
+	/**
+	 * Renders a map/rotation with a specified count of threads and logs the progress to
+	 * the progress handler. It renders the map only if it is specified as auto-render or
+	 * force-render in the render behaviors.
+	 */
 	void renderMap(const std::string& map, int rotation, int threads,
 			util::IProgressHandler* progress);
 
+	/**
+	 * Does the whole rendering work by calling initialize, scanWorlds and renderMap
+	 * for every map/rotation and outputs some additional progress information.
+	 * 
+	 * You should either call this method or initialize, scanWorlds and renderMap on your
+	 * own.
+	 */
 	bool run(int threads, bool batch);
 
-	const std::vector<std::pair<std::string, std::set<int> > >& getRequiredMaps();
+	/**
+	 * Returns which maps with which rotations need to get rendered.
+	 */
+	const std::vector<std::pair<std::string, std::set<int> > >& getRequiredMaps() const;
 
 private:
+	/**
+	 * Copies a file from the template directory to the output directory and replaces the
+	 * variables from the map (every "{key}" in the file becomes "value").
+	 */
 	bool copyTemplateFile(const std::string& filename,
 			const std::map<std::string, std::string>& vars) const;
+
+	/**
+	 * Copes a file from the template directory to the output directory.
+	 */
 	bool copyTemplateFile(const std::string& filename) const;
 
+	/**
+	 * Writes the index.html template file (replaces some template special variables).
+	 */
 	bool writeTemplateIndexHtml() const;
+
+	/**
+	 * Copies all template files to the output directory (including special handling for
+	 * index.html, markers-generated.js, etc.).
+	 */
 	void writeTemplates() const;
 
+	/**
+	 * Does some basic initialization work of a map (check if max zoom level of already
+	 * rendered map has increased for now).
+	 */
 	void initializeMap(const std::string& map);
+
+	/**
+	 * Increases the max zoom level of a map (given as directory, the one with base.png).
+	 */
 	void increaseMaxZoom(const fs::path& dir, std::string image_format,
 			int jpeg_quality = 85) const;
 

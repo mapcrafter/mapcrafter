@@ -115,6 +115,9 @@ enum class RenderViewType {
 // TODO operator<< here but util::as in the config section file?
 std::ostream& operator<<(std::ostream& out, RenderViewType render_view);
 
+/**
+ * Creates a render view of the specified type. Won't return a nullptr.
+ */
 RenderView* createRenderView(RenderViewType render_view);
 
 } /* namespace renderer */

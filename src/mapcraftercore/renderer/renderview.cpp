@@ -64,7 +64,8 @@ RenderView* createRenderView(RenderViewType render_view) {
 	switch (render_view) {
 	case RenderViewType::ISOMETRIC: return new IsometricRenderView();
 	case RenderViewType::TOPDOWN: return new TopdownRenderView();
-	default: return nullptr;
+	// thou shalt not return nullptr!
+	default: assert(false); return nullptr;
 	}
 }
 
