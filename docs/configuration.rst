@@ -430,6 +430,10 @@ Map Options
     JPEGs are faster to write and need less disk space. Also consider
     the ``jpeg_quality`` option when using JPEGs.
 
+``png_indexed = true|false``
+
+    TODO
+
 ``jpeg_quality = <number between 0 and 100>``
 
     **Default:** ``85``

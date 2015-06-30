@@ -1683,13 +1683,13 @@ RGBAImage IsometricBlockImages::buildCocoa(int stage) {
 	// however, the size of the third stage is not 8px, it's 7px. why?
 	// just resize it to 8px...
 	if (stage == 2)
-		texture.clip(0, 0, size-1, size-1).resizeSimple(top, size, size);
+		texture.clip(0, 0, size-1, size-1).resize(top, size, size, InterpolationType::NEAREST);
 
 	// now size according to the texture size the renderer should use
 	r = (double) texture_size / 16;
 	size = 2 * (stage+2) * r;
 	// resize the texture to this size
-	RGBAImage(top).resizeSimple(top, size, size);
+	RGBAImage(top).resize(top, size, size, InterpolationType::NEAREST);
 
 	// and create a simple cubic cocoa bean
 	RGBAImage cocoa(size*2, size*2);
@@ -1733,7 +1733,7 @@ void IsometricBlockImages::createBeacon() { // id 138
 
 	// at first create this little block in the middle
 	RGBAImage beacon_texture;
-	textures.BEACON.resizeAuto(beacon_texture, texture_size * 0.75, texture_size * 0.75);
+	textures.BEACON.resize(beacon_texture, texture_size * 0.75, texture_size * 0.75);
 	RGBAImage smallblock(texture_size * 2, texture_size * 2);
 	blitFace(smallblock, FACE_WEST, beacon_texture, 0, 0, true, dleft, dright);
 	blitFace(smallblock, FACE_SOUTH, beacon_texture, 0, 0, true, dleft, dright);
@@ -1760,11 +1760,9 @@ void IsometricBlockImages::createBeacon() { // id 138
 void IsometricBlockImages::createFlowerPot() { // id 140
 	const BlockTextures& textures = resources.getBlockTextures();
 	double s = (double) textures.FLOWER_POT.getOriginal().getWidth() / 16;
-	RGBAImage tmptex = textures.FLOWER_POT.getOriginal().clip(s*5, s*10, s*6, s*6);
-	RGBAImage pot_texture;
-
+	RGBAImage pot_texture = textures.FLOWER_POT.getOriginal().clip(s*5, s*10, s*6, s*6);
 	s = (double) texture_size / 16;
-	tmptex.resizeAuto(pot_texture, s*6, s*6);
+	pot_texture = pot_texture.resize(s*6, s*6);
 
 	int xoff = std::ceil(s*10);
 	int yoff = std::ceil(s*16);
@@ -1795,7 +1793,7 @@ void IsometricBlockImages::createFlowerPot() { // id 140
 		if (i == 9) {
 			RGBAImage cactus = getBlock(81, 0);
 			RGBAImage content;
-			cactus.resizeSimple(content, s*16, s*16);
+			cactus.resize(content, s*16, s*16, InterpolationType::NEAREST);
 			block.alphaBlit(content, s*8, s*8);
 		} else if (i != 0) {
 			RGBAImage content(texture_size*2, texture_size*2);

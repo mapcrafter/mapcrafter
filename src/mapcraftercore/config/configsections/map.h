@@ -108,6 +108,7 @@ public:
 
 	ImageFormat getImageFormat() const;
 	std::string getImageFormatSuffix() const;
+	bool isPNGIndexed() const;
 	int getJPEGQuality() const;
 
 	double getLightingIntensity() const;
@@ -145,6 +146,7 @@ private:
 	Field<int> texture_size, texture_blur, tile_width;
 
 	Field<ImageFormat> image_format;
+    Field<bool> png_indexed;
 	Field<int> jpeg_quality;
 
 	Field<double> lighting_intensity;

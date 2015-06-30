@@ -22,6 +22,7 @@
 
 #include <png.h>
 #include <cstdint>
+#include <cmath>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -75,6 +76,17 @@ const int ROTATE_90 = 1;
 const int ROTATE_180 = 2;
 const int ROTATE_270 = 3;
 
+enum class InterpolationType {
+	// nearest-neighbor interpolation, simple one
+	NEAREST,
+	// bilinear interpolation, fancy one
+	BILINEAR,
+	// special interpolation tweaked for resizing to (width/2, height/2)
+	HALF,
+	// automatically choose an interpolation type
+	AUTO
+};
+
 // TODO better documentation...
 class RGBAImage : public Image<RGBAPixel> {
 public:
@@ -108,12 +120,12 @@ public:
 	RGBAImage rotate(int rotation) const;
 	RGBAImage flip(bool flip_x, bool flip_y) const;
 	RGBAImage move(int x_off, int y_off) const;
+	
+	void resize(RGBAImage& dest, int width, int height,
+			InterpolationType interpolation = InterpolationType::AUTO) const;
 
-	void resizeInterpolated(RGBAImage& dest, int new_width, int new_height) const;
-	void resizeSimple(RGBAImage& dest, int new_width, int new_height) const;
-	// automatically chooses an image resize interpolation
-	void resizeAuto(RGBAImage& dest, int new_width, int new_height) const;
-	void resizeHalf(RGBAImage& dest) const;
+	RGBAImage resize(int width, int height,
+			InterpolationType interpolation = InterpolationType::AUTO) const;
 
 	/**
 	 * Applies a simple blur filter to the image. Uses the specified radius for the
@@ -123,6 +135,7 @@ public:
 
 	bool readPNG(const std::string& filename);
 	bool writePNG(const std::string& filename) const;
+	bool writeIndexedPNG(const std::string& filename, int palette_bits = 8, bool dithered = true) const;
 
 	bool readJPEG(const std::string& filename);
 	bool writeJPEG(const std::string& filename, int quality,

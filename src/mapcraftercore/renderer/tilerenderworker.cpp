@@ -66,6 +66,7 @@ void TileRenderWorker::setProgressHandler(util::IProgressHandler* progress) {
 
 void TileRenderWorker::saveTile(const TilePath& tile, const RGBAImage& image) {
 	bool png = render_context.map_config.getImageFormat() == config::ImageFormat::PNG;
+	bool png_indexed = render_context.map_config.isPNGIndexed();
 	std::string suffix = std::string(".") + render_context.map_config.getImageFormatSuffix();
 	std::string filename = tile.toString() + suffix;
 	if (tile.getDepth() == 0)
@@ -74,7 +75,10 @@ void TileRenderWorker::saveTile(const TilePath& tile, const RGBAImage& image) {
 	if (!fs::exists(file.branch_path()))
 		fs::create_directories(file.branch_path());
 
-	if (png && !image.writePNG(file.string()))
+	if ((png && !png_indexed) && !image.writePNG(file.string()))
+		LOG(WARNING) << "Unable to write '" << file.string() << "'.";
+
+	if ((png && png_indexed) && !image.writeIndexedPNG(file.string()))
 		LOG(WARNING) << "Unable to write '" << file.string() << "'.";
 
 	config::Color bg = render_context.background_color;
@@ -139,25 +143,25 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 		RGBAImage resized;
 		if (render_context.tile_set->hasTile(tile + 1)) {
 			renderRecursive(tile + 1, other);
-			other.resizeHalf(resized);
+			other.resize(resized, 0, 0, InterpolationType::HALF);
 			image.simpleAlphaBlit(resized, 0, 0);
 			other.clear();
 		}
 		if (render_context.tile_set->hasTile(tile + 2)) {
 			renderRecursive(tile + 2, other);
-			other.resizeHalf(resized);
+			other.resize(resized, 0, 0, InterpolationType::HALF);
 			image.simpleAlphaBlit(resized, size / 2, 0);
 			other.clear();
 		}
 		if (render_context.tile_set->hasTile(tile + 3)) {
 			renderRecursive(tile + 3, other);
-			other.resizeHalf(resized);
+			other.resize(resized, 0, 0, InterpolationType::HALF);
 			image.simpleAlphaBlit(resized, 0, size / 2);
 			other.clear();
 		}
 		if (render_context.tile_set->hasTile(tile + 4)) {
 			renderRecursive(tile + 4, other);
-			other.resizeHalf(resized);
+			other.resize(resized, 0, 0, InterpolationType::HALF);
 			image.simpleAlphaBlit(resized, size / 2, size / 2);
 		}
 

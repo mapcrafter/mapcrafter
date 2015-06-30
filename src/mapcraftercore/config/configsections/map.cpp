@@ -150,6 +150,7 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  texture_dir = " << texture_dir << std::endl;
 	out << "  texture_size = " << texture_size << std::endl;
 	out << "  image_format = " << image_format << std::endl;
+	out << "  png_indexed = " << png_indexed << std::endl;
 	out << "  jpeg_quality = " << jpeg_quality << std::endl;
 	out << "  lighting_intensity = " << lighting_intensity << std::endl;
 	out << "  cave_high_contrast = " << cave_high_contrast << std::endl;
@@ -217,6 +218,10 @@ std::string MapSection::getImageFormatSuffix() const {
 	return "jpg";
 }
 
+bool MapSection::isPNGIndexed() const {
+	return png_indexed.getValue();
+}
+
 int MapSection::getJPEGQuality() const {
 	return jpeg_quality.getValue();
 }
@@ -277,6 +282,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	tile_width.setDefault(1);
 
 	image_format.setDefault(ImageFormat::PNG);
+	png_indexed.setDefault(false);
 	jpeg_quality.setDefault(85);
 
 	lighting_intensity.setDefault(1.0);
@@ -322,6 +328,8 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		tile_width.load(key, value, validation);
 	} else if (key == "image_format") {
 		image_format.load(key, value, validation);
+	} else if (key == "png_indexed") {
+		png_indexed.load(key, value, validation);
 	} else if (key == "jpeg_quality") {
 		if (jpeg_quality.load(key, value, validation)
 				&& (jpeg_quality.getValue() < 0 || jpeg_quality.getValue() > 100))

@@ -23,6 +23,9 @@
 
 #include "image.h"
 
+#include "image/dithering.h"
+#include "image/quantization.h"
+#include "image/scaling.h"
 #include "../util.h"
 
 #include <jpeglib.h>
@@ -340,94 +343,37 @@ RGBAImage RGBAImage::move(int xOffset, int yOffset) const {
 	return img;
 }
 
-inline uint8_t interpolate(uint8_t a, uint8_t b, uint8_t c, uint8_t d, double w,
-        double h) {
-	double aa = (double) a / 255.0;
-	double bb = (double) b / 255.0;
-	double cc = (double) c / 255.0;
-	double dd = (double) d / 255.0;
-	double result = aa * (1 - w) * (1 - h) + bb * w * (1 - h) + cc * h * (1 - w)
-	        + dd * (w * h);
-	return result * 255.0;
-}
-
-void RGBAImage::resizeInterpolated(RGBAImage& dest, int new_width, int new_height) const {
-	if (new_width == width && new_height == height) {
+void RGBAImage::resize(RGBAImage& dest, int width, int height, InterpolationType interpolation) const {
+	if (width == getWidth() && height == getHeight()) {
 		dest = *this;
 		return;
 	}
-	dest.setSize(new_width, new_height);
+	if (interpolation == InterpolationType::AUTO) {
+		interpolation = InterpolationType::BILINEAR;
+		if (width > getWidth() || height > getWidth())
+			interpolation = InterpolationType::NEAREST;
+		if (width == getWidth() / 2 && height == getHeight() / 2)
+			interpolation = InterpolationType::HALF;
+	}
 
-	double x_ratio = (double) width / new_width;
-	double y_ratio = (double) height / new_height;
-	if(width < new_width)
-		x_ratio = (double) (width - 1) / new_width;
-	if(height < new_height)
-		y_ratio = (double) (height - 1) / new_height;
-
-	for (int x = 0; x < new_width; x++) {
-		for (int y = 0; y < new_height; y++) {
-			int sx = x_ratio * x;
-			int sy = y_ratio * y;
-			double x_diff = (x_ratio * x) - sx;
-			double y_diff = (y_ratio * y) - sy;
-			RGBAPixel a = getPixel(sx, sy);
-			RGBAPixel b = getPixel(sx + 1, sy);
-			RGBAPixel c = getPixel(sx, sy + 1);
-			RGBAPixel d = getPixel(sx + 1, sy + 1);
-
-			uint8_t red = interpolate(rgba_red(a), rgba_red(b), rgba_red(c), rgba_red(d),
-					x_diff, y_diff);
-			uint8_t green = interpolate(rgba_green(a), rgba_green(b), rgba_green(c), rgba_green(d),
-					x_diff, y_diff);
-			uint8_t blue = interpolate(rgba_blue(a), rgba_blue(b), rgba_blue(c), rgba_blue(d),
-					x_diff, y_diff);
-			uint8_t alpha = interpolate(rgba_alpha(a), rgba_alpha(b), rgba_alpha(c), rgba_alpha(d),
-					x_diff, y_diff);
-
-			dest.setPixel(x, y, rgba(red, green, blue, alpha));
-		}
+	if (interpolation == InterpolationType::NEAREST) {
+		imageResizeSimple(*this, dest, width, height);
+	} else if (interpolation == InterpolationType::BILINEAR) {
+		imageResizeBilinear(*this, dest, width, height);
+	} else if (interpolation == InterpolationType::HALF) {
+		imageResizeHalf(*this, dest);
+	} else {
+		// should not happen
+		assert(false);
 	}
 }
 
-void RGBAImage::resizeSimple(RGBAImage& dest, int new_width, int new_height) const {
-	if (new_width == width && new_height == height) {
-		dest = *this;
-		return;
-	}
-	dest.setSize(new_width, new_height);
-
-	for (int x = 0; x < new_width; x++) {
-		for (int y = 0; y < new_height; y++) {
-			dest.setPixel(x, y,
-			        getPixel(x / ((double) new_width / width),
-			                y / ((double) new_height / height)));
-		}
-	}
-}
-
-void RGBAImage::resizeAuto(RGBAImage& dest, int new_width, int new_height) const {
-	// for increasing an image resolution the nearest neighbor interpolation is the best
-	// for Minecraft textures because it preserves the pixelated style of the textures
-	// and prevents the textures becoming blurry
-	if (width < new_width)
-		resizeSimple(dest, new_width, new_height);
-	else
-		resizeInterpolated(dest, new_width, new_height);
-}
-
-void RGBAImage::resizeHalf(RGBAImage& dest) const {
-	dest.setSize(width / 2, height / 2);
-
-	for (int x = 0; x < width - 1; x += 2) {
-		for (int y = 0; y < height - 1; y += 2) {
-			RGBAPixel p1 = (data[y * width + x] >> 2) & 0x3f3f3f3f;
-			RGBAPixel p2 = (data[y * width + x + 1] >> 2) & 0x3f3f3f3f;
-			RGBAPixel p3 = (data[(y + 1) * width + x] >> 2) & 0x3f3f3f3f;
-			RGBAPixel p4 = (data[(y + 1) * width + x + 1] >> 2) & 0x3f3f3f3f;
-			dest.data[(y / 2) * dest.width + (x / 2)] = p1 + p2 + p3 + p4;
-		}
-	}
+RGBAImage RGBAImage::resize(int width, int height, InterpolationType interpolation) const {
+	if (width == getWidth() && height == getHeight())
+		return *this;
+	RGBAImage temp;
+	resize(temp, width, height, interpolation);
+	return temp;
 }
 
 RGBAPixel blurKernel(const RGBAImage& image, int x, int y, int radius) {
@@ -515,7 +461,7 @@ bool RGBAImage::readPNG(const std::string& filename) {
 	png_set_interlace_handling(png);
 	png_read_update_info(png, info);
 
-	png_bytep* rows = new png_bytep[height];
+	png_bytep* rows = (png_bytep*) png_malloc(png, height * sizeof(png_bytep));
 	uint32_t* p = &data[0];
 	for (int32_t i = 0; i < height; i++, p += width)
 		rows[i] = (png_bytep) p;
@@ -526,8 +472,9 @@ bool RGBAImage::readPNG(const std::string& filename) {
 	}
 	png_read_image(png, rows);
 	png_read_end(png, NULL);
+	
+	png_free(png, rows);
 	png_destroy_read_struct(&png, &info, NULL);
-	delete[] rows;
 
 	return true;
 }
@@ -557,7 +504,7 @@ bool RGBAImage::writePNG(const std::string& filename) const {
 	png_set_IHDR(png, info, width, height, 8, PNG_COLOR_TYPE_RGB_ALPHA,
 	        PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
-	png_bytep* rows = new png_bytep[height];
+	png_bytep* rows = (png_bytep*) png_malloc(png, height * sizeof(png_bytep));
 	const uint32_t* p = &data[0];
 	for (int32_t i = 0; i < height; i++, p += width)
 		rows[i] = (png_bytep) p;
@@ -570,7 +517,119 @@ bool RGBAImage::writePNG(const std::string& filename) const {
 		png_write_png(png, info, PNG_TRANSFORM_IDENTITY, NULL);
 
 	file.close();
-	delete[] rows;
+	png_free(png, rows);
+	png_destroy_write_struct(&png, &info);
+	return true;
+}
+
+namespace {
+
+void setRowPixel(png_byte* line, int bit_depth, int x, uint8_t index) {
+	if (bit_depth == 8) {
+		line[x] = index;
+	} else if (bit_depth == 4) {
+		index &= 0xf;
+		if ((x % 2) == 0)
+			line[x/2] = (line[x/2] & 0x0f) | (index << 4);
+		else
+			line[x/2] = (line[x/2] & 0xf0) | index;
+	} else if (bit_depth == 2) {
+		index &= 0x3;
+		int mod = 3 - (x % 4);
+		line[x/4] = (line[x/4] & ~(0x3 << mod*2)) | (index << mod*2);
+	} else if (bit_depth == 1) {
+		if (index)
+			line[x/8] |= (1 << (7 - (x % 8)));
+		else
+			line[x/8] &= ~(1 << (7 - (x % 8)));
+	}
+}
+
+}
+
+bool RGBAImage::writeIndexedPNG(const std::string& filename, int palette_bits, bool dithered) const {
+	std::ofstream file(filename.c_str(), std::ios::binary);
+	if (!file) {
+		return false;
+	}
+
+	png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	if (png == NULL)
+		return false;
+
+	png_infop info = png_create_info_struct(png);
+	if (info == NULL) {
+		png_destroy_write_struct(&png, NULL);
+		return false;
+	}
+
+	if (setjmp(png_jmpbuf(png))) {
+		png_destroy_write_struct(&png, &info);
+		return false;
+	}
+
+	int palette_size = 1 << palette_bits;
+	png_set_write_fn(png, (png_voidp) &file, pngWriteData, NULL);
+	png_set_IHDR(png, info, width, height, palette_bits, PNG_COLOR_TYPE_PALETTE,
+			PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+
+	//std::cout << "Doing quantization." << std::endl;
+	Octree* octree;
+	std::vector<RGBAPixel> colors;
+	octreeColorQuantize(*this, palette_size, colors, &octree);
+	palette_size = colors.size();
+	//std::cout << "Finished quantization. " << palette_size << " colors." << std::endl;
+
+	png_color* palette = (png_color*) png_malloc(png, palette_size * sizeof(png_color));
+	if (palette == NULL) {
+		png_destroy_write_struct(&png, &info);
+		return false;
+	}
+
+	for (int i = 0; i < palette_size; i++) {
+		palette[i].red = rgba_red(colors[i]);
+		palette[i].green = rgba_green(colors[i]);
+		palette[i].blue = rgba_blue(colors[i]);
+	}
+
+	png_set_PLTE(png, info, palette, palette_size);
+
+	std::vector<int> data_dithered;
+	if (dithered) {
+		RGBAImage copy = *this;
+		// TODO need a proper color palette with fast access
+		//imageDither(copy, SimplePalette(colors), data_dithered);
+		imageDither(copy, OctreePalette(colors), data_dithered);
+	}
+
+	png_bytep* rows = (png_bytep*) png_malloc(png, height * sizeof(png_bytep));
+	for (int y = 0; y < height; y++) {
+		rows[y] = (png_byte*) png_malloc(png, width * sizeof(png_byte));
+		for (int x = 0; x < width; x++)
+			rows[y][x] = 0;
+		for (int x = 0; x < width; x++) {
+			if (dithered) {
+				setRowPixel(rows[y], palette_bits, x, data_dithered[y * width + x]);
+			} else {
+				RGBAPixel color = pixel(x, y);
+				setRowPixel(rows[y], palette_bits, x, Octree::findNearestColor(octree, color));
+			}
+		}
+	}
+
+	png_set_rows(png, info, rows);
+
+	//if (mapcrafter::util::isBigEndian())
+	//	png_write_png(png, info, PNG_TRANSFORM_BGR | PNG_TRANSFORM_SWAP_ALPHA, NULL);
+	//else
+		png_write_png(png, info, PNG_TRANSFORM_IDENTITY, NULL);
+
+	file.close();
+	for (int y = 0; y < height; y++)
+		png_free(png, rows[y]);
+	png_free(png, rows);
+	png_free(png, palette);
+	delete octree;
 	png_destroy_write_struct(&png, &info);
 	return true;
 }
