@@ -19,6 +19,11 @@
 
 #include "slimeoverlay.h"
 
+#include "../../mc/nbt.h"
+#include "../../util.h"
+
+namespace nbt = mapcrafter::mc::nbt;
+
 namespace mapcrafter {
 namespace renderer {
 
@@ -30,11 +35,11 @@ JavaRandom::~JavaRandom() {
 }
 
 void JavaRandom::setSeed(long long seed) {
-	this->seed = (seed ^ 0x5DEECE66DL) & ((1L << 48) - 1);
+	this->seed = (seed ^ 0x5DEECE66DLL) & ((1LL << 48) - 1);
 }
 
 int JavaRandom::next(int bits) {
-	seed = (seed * 0x5DEECE66DL + 0xBL) & ((1L << 48) - 1);
+	seed = (seed * 0x5DEECE66DLL + 0xBLL) & ((1LL << 48) - 1);
 	return (int) (seed >> (48 - bits));
 }
 
@@ -43,7 +48,7 @@ int JavaRandom::nextInt(int max) {
 	if (max <= 0)
 		return -1;
 	if ((max & -max) == max) // i.e., n is a power of 2
-		return (int) ((max * (long) next(31)) >> 31);
+		return (int) ((max * (long long) next(31)) >> 31);
 	int bits, val;
 	do {
 		bits = next(31);
@@ -52,8 +57,15 @@ int JavaRandom::nextInt(int max) {
 	return val;
 }
 
-SlimeOverlay::SlimeOverlay()
-	: OverlayRenderMode(OverlayMode::PER_BLOCK) {
+SlimeOverlay::SlimeOverlay(fs::path world_dir)
+	: OverlayRenderMode(OverlayMode::PER_BLOCK), world_dir(world_dir), world_seed(0) {
+	// TODO error handling!
+	nbt::NBTFile level_dat;
+	level_dat.readNBT((world_dir / "level.dat").string().c_str());
+
+	nbt::TagCompound data = level_dat.findTag<nbt::TagCompound>("Data");
+	nbt::TagLong random_seed = data.findTag<nbt::TagLong>("RandomSeed");
+	world_seed = random_seed.payload;
 }
 
 SlimeOverlay::~SlimeOverlay() {
@@ -61,18 +73,17 @@ SlimeOverlay::~SlimeOverlay() {
 
 RGBAPixel SlimeOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	mc::ChunkPos chunk(pos);
-	// TODO we need the actual world seed!
-	// TODO make sure that overlay is correct
-	long long world_seed = 0;
-	long long seed = world_seed;
-	seed += (long) chunk.x * chunk.x * 0x4c1906;
-	seed += (long) chunk.x * 0x5ac0db;
-	seed += (long) chunk.z * chunk.z * 0x4307a7L;
-	seed += (long) (chunk.z * 0x5f24f) ^ 0x3ad8025f;
+	// TODO not sure yet if that's really right
+	long long seed = world_seed
+		+ chunk.x * chunk.x * 0x4c1906LL
+		+ chunk.x * 0x5ac0dbLL
+		+ chunk.z * chunk.z * 0x4307a7LL
+		+ (chunk.z * 0x5f24fLL) ^ 0x3ad8025fLL;
 
 	JavaRandom random;
 	random.setSeed(seed);
 	if (random.nextInt(10) == 0)
+	//if (is_slime(world_seed, chunk.x, chunk.z))
 		return rgba(60, 200, 20, 255);
 	return rgba(0, 0, 0, 0);
 }

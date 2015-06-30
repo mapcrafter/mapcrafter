@@ -30,7 +30,12 @@
 #include "../config/configsections/world.h"
 #include "../mc/chunk.h"
 #include "../mc/pos.h"
+#include "../mc/world.h"
 #include "../util.h"
+
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace renderer {
@@ -129,7 +134,8 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 	if (overlay == OverlayType::NONE) {
 		// nothing
 	} else if (overlay == OverlayType::SLIME) {
-		render_mode->addRenderMode(new SlimeOverlay());
+		mc::World world(world_config.getInputDir().string(), world_config.getDimension());
+		render_mode->addRenderMode(new SlimeOverlay(world.getWorldDir()));
 	} else if (overlay == OverlayType::SPAWN) {
 		render_mode->addRenderMode(new SpawnOverlay());
 	} else {

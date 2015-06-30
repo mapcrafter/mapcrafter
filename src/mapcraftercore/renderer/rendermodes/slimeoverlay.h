@@ -23,6 +23,10 @@
 
 #include "overlay.h"
 
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
+
 namespace mapcrafter {
 namespace renderer {
 
@@ -41,11 +45,14 @@ protected:
 
 class SlimeOverlay : public OverlayRenderMode {
 public:
-	SlimeOverlay();
+	SlimeOverlay(fs::path world_dir);
 	virtual ~SlimeOverlay();
 
 protected:
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+	fs::path world_dir;
+	long long world_seed;
 };
 
 }
