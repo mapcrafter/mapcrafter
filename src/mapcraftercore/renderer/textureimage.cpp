@@ -63,9 +63,9 @@ bool TextureImage::load(const std::string& path, int size, int blur) {
 	// style of the textures and prevents fuzziness when resizing
 	if ((util::startswith(name, "leaves") && !util::endswith(name, "opaque"))
 		|| util::startswith(name, "redstone_dust"))
-		original.resizeSimple(original_resized, size, size * frame_count);
+		original.resize(original_resized, size, size * frame_count, InterpolationType::NEAREST);
 	else
-		original.resizeAuto(original_resized, size, size * frame_count);
+		original.resize(original_resized, size, size * frame_count);
 
 	// apply a blur to the texture if wanted
 	// this is useful if you use small texture sizes (< 6 maybe) to prevent grainy textures

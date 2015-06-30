@@ -52,9 +52,9 @@ bool ChestTextures::load(const std::string& filename, int texture_size) {
 	RGBAImage top = image.clip(size, 0, size, size);
 
 	// resize the chest images to texture size
-	front.resizeAuto((*this)[ChestTextures::FRONT], texture_size, texture_size);
-	side.resizeAuto((*this)[ChestTextures::SIDE], texture_size, texture_size);
-	top.resizeAuto((*this)[ChestTextures::TOP], texture_size, texture_size);
+	front.resize((*this)[ChestTextures::FRONT], texture_size, texture_size);
+	side.resize((*this)[ChestTextures::SIDE], texture_size, texture_size);
+	top.resize((*this)[ChestTextures::TOP], texture_size, texture_size);
 
 	return true;
 }
@@ -98,13 +98,13 @@ bool DoubleChestTextures::load(const std::string& filename, int texture_size) {
 	back_right.alphaBlit(image.clip(5 * size + 4, size, size, 4 * ratio), 0, 0);
 
 	// resize the chest images to texture size
-	front_left.resizeAuto((*this)[DoubleChestTextures::FRONT_LEFT], texture_size, texture_size);
-	front_right.resizeAuto((*this)[DoubleChestTextures::FRONT_RIGHT], texture_size, texture_size);
-	side.resizeAuto((*this)[DoubleChestTextures::SIDE], texture_size, texture_size);
-	top_left.resizeAuto((*this)[DoubleChestTextures::TOP_LEFT], texture_size, texture_size);
-	top_right.resizeAuto((*this)[DoubleChestTextures::TOP_RIGHT], texture_size, texture_size);
-	back_left.resizeAuto((*this)[DoubleChestTextures::BACK_LEFT], texture_size, texture_size);
-	back_right.resizeAuto((*this)[DoubleChestTextures::BACK_RIGHT], texture_size, texture_size);
+	front_left.resize((*this)[DoubleChestTextures::FRONT_LEFT], texture_size, texture_size);
+	front_right.resize((*this)[DoubleChestTextures::FRONT_RIGHT], texture_size, texture_size);
+	side.resize((*this)[DoubleChestTextures::SIDE], texture_size, texture_size);
+	top_left.resize((*this)[DoubleChestTextures::TOP_LEFT], texture_size, texture_size);
+	top_right.resize((*this)[DoubleChestTextures::TOP_RIGHT], texture_size, texture_size);
+	back_left.resize((*this)[DoubleChestTextures::BACK_LEFT], texture_size, texture_size);
+	back_right.resize((*this)[DoubleChestTextures::BACK_RIGHT], texture_size, texture_size);
 
 	return true;
 }
@@ -226,7 +226,7 @@ bool TextureResources::loadBlocks(const std::string& block_dir,
 		LOG(ERROR) << "Unable to read '" << endportal_png << "'.";
 		return false;
 	}
-	endportal.resizeAuto(endportal_texture, texture_size, texture_size);
+	endportal.resize(endportal_texture, texture_size, texture_size);
 
 	return true;
 }

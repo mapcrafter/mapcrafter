@@ -25,6 +25,7 @@
 
 #include "image/dithering.h"
 #include "image/quantization.h"
+#include "image/scaling.h"
 #include "../util.h"
 
 #include <jpeglib.h>
@@ -338,94 +339,37 @@ RGBAImage RGBAImage::move(int xOffset, int yOffset) const {
 	return img;
 }
 
-inline uint8_t interpolate(uint8_t a, uint8_t b, uint8_t c, uint8_t d, double w,
-        double h) {
-	double aa = (double) a / 255.0;
-	double bb = (double) b / 255.0;
-	double cc = (double) c / 255.0;
-	double dd = (double) d / 255.0;
-	double result = aa * (1 - w) * (1 - h) + bb * w * (1 - h) + cc * h * (1 - w)
-	        + dd * (w * h);
-	return result * 255.0;
-}
-
-void RGBAImage::resizeInterpolated(RGBAImage& dest, int new_width, int new_height) const {
-	if (new_width == width && new_height == height) {
+void RGBAImage::resize(RGBAImage& dest, int width, int height, InterpolationType interpolation) const {
+	if (width == getWidth() && height == getHeight()) {
 		dest = *this;
 		return;
 	}
-	dest.setSize(new_width, new_height);
+	if (interpolation == InterpolationType::AUTO) {
+		interpolation = InterpolationType::BILINEAR;
+		if (width > getWidth() || height > getWidth())
+			interpolation = InterpolationType::NEAREST;
+		if (width == getWidth() / 2 && height == getHeight() / 2)
+			interpolation = InterpolationType::HALF;
+	}
 
-	double x_ratio = (double) width / new_width;
-	double y_ratio = (double) height / new_height;
-	if(width < new_width)
-		x_ratio = (double) (width - 1) / new_width;
-	if(height < new_height)
-		y_ratio = (double) (height - 1) / new_height;
-
-	for (int x = 0; x < new_width; x++) {
-		for (int y = 0; y < new_height; y++) {
-			int sx = x_ratio * x;
-			int sy = y_ratio * y;
-			double x_diff = (x_ratio * x) - sx;
-			double y_diff = (y_ratio * y) - sy;
-			RGBAPixel a = getPixel(sx, sy);
-			RGBAPixel b = getPixel(sx + 1, sy);
-			RGBAPixel c = getPixel(sx, sy + 1);
-			RGBAPixel d = getPixel(sx + 1, sy + 1);
-
-			uint8_t red = interpolate(rgba_red(a), rgba_red(b), rgba_red(c), rgba_red(d),
-					x_diff, y_diff);
-			uint8_t green = interpolate(rgba_green(a), rgba_green(b), rgba_green(c), rgba_green(d),
-					x_diff, y_diff);
-			uint8_t blue = interpolate(rgba_blue(a), rgba_blue(b), rgba_blue(c), rgba_blue(d),
-					x_diff, y_diff);
-			uint8_t alpha = interpolate(rgba_alpha(a), rgba_alpha(b), rgba_alpha(c), rgba_alpha(d),
-					x_diff, y_diff);
-
-			dest.setPixel(x, y, rgba(red, green, blue, alpha));
-		}
+	if (interpolation == InterpolationType::NEAREST) {
+		imageResizeSimple(*this, dest, width, height);
+	} else if (interpolation == InterpolationType::BILINEAR) {
+		imageResizeBilinear(*this, dest, width, height);
+	} else if (interpolation == InterpolationType::HALF) {
+		imageResizeHalf(*this, dest);
+	} else {
+		// should not happen
+		assert(false);
 	}
 }
 
-void RGBAImage::resizeSimple(RGBAImage& dest, int new_width, int new_height) const {
-	if (new_width == width && new_height == height) {
-		dest = *this;
-		return;
-	}
-	dest.setSize(new_width, new_height);
-
-	for (int x = 0; x < new_width; x++) {
-		for (int y = 0; y < new_height; y++) {
-			dest.setPixel(x, y,
-			        getPixel(x / ((double) new_width / width),
-			                y / ((double) new_height / height)));
-		}
-	}
-}
-
-void RGBAImage::resizeAuto(RGBAImage& dest, int new_width, int new_height) const {
-	// for increasing an image resolution the nearest neighbor interpolation is the best
-	// for Minecraft textures because it preserves the pixelated style of the textures
-	// and prevents the textures becoming blurry
-	if (width < new_width)
-		resizeSimple(dest, new_width, new_height);
-	else
-		resizeInterpolated(dest, new_width, new_height);
-}
-
-void RGBAImage::resizeHalf(RGBAImage& dest) const {
-	dest.setSize(width / 2, height / 2);
-
-	for (int x = 0; x < width - 1; x += 2) {
-		for (int y = 0; y < height - 1; y += 2) {
-			RGBAPixel p1 = (data[y * width + x] >> 2) & 0x3f3f3f3f;
-			RGBAPixel p2 = (data[y * width + x + 1] >> 2) & 0x3f3f3f3f;
-			RGBAPixel p3 = (data[(y + 1) * width + x] >> 2) & 0x3f3f3f3f;
-			RGBAPixel p4 = (data[(y + 1) * width + x + 1] >> 2) & 0x3f3f3f3f;
-			dest.data[(y / 2) * dest.width + (x / 2)] = p1 + p2 + p3 + p4;
-		}
-	}
+RGBAImage RGBAImage::resize(int width, int height, InterpolationType interpolation) const {
+	if (width == getWidth() && height == getHeight())
+		return *this;
+	RGBAImage temp;
+	resize(temp, width, height, interpolation);
+	return temp;
 }
 
 RGBAPixel blurKernel(const RGBAImage& image, int x, int y, int radius) {
