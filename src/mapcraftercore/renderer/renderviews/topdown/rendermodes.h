@@ -17,6 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "../../rendermodes/lighting.h"
 #include "../../rendermodes/overlay.h"
 
 #ifndef TOPDOWN_RENDERMODES_H_
@@ -24,6 +25,21 @@
 
 namespace mapcrafter {
 namespace renderer {
+
+class TopdownLightingRenderer : public LightingRenderer {
+public:
+	virtual ~TopdownLightingRenderer();
+
+	virtual void lightLeft(RGBAImage& image, const CornerColors& colors,
+			int y_start, int y_end) const;
+	virtual void lightLeft(RGBAImage& image, const CornerColors& colors) const;
+
+	virtual void lightRight(RGBAImage& image, const CornerColors& colors,
+			int y_start, int y_end) const;
+	virtual void lightRight(RGBAImage& image, const CornerColors& colors) const;
+
+	virtual void lightTop(RGBAImage& image, const CornerColors& colors, int yoff = 0) const;
+};
 
 class TopdownOverlayRenderer : public OverlayRenderer {
 public:

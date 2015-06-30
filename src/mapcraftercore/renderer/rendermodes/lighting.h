@@ -78,10 +78,67 @@ typedef double LightingColor;
 // - defined as array with corners top left / top right / bottom left / bottom right
 typedef std::array<LightingColor, 4> CornerColors;
 
-void drawBottomTriangle(RGBAImage& image, int size, double c1, double c2, double c3);
-void drawTopTriangle(RGBAImage& image, int size, double c1, double c2, double c3);
+class LightingRenderer : public RenderModeRenderer {
+public:
+	virtual ~LightingRenderer();
 
-class LightingRenderMode : public BaseRenderMode<> {
+	/**
+	 * Adds smooth lighting to the left face of a block image, but only a part of the
+	 * face (specify y_start, y_end, used for slab lighting for example).
+	 */
+	virtual void lightLeft(RGBAImage& image, const CornerColors& colors,
+			int y_start, int y_end) const = 0;
+
+	/**
+	 * Adds smooth lighting to the left face of a block image.
+	 */
+	virtual void lightLeft(RGBAImage& image, const CornerColors& colors) const = 0;
+
+	/**
+	 * Adds smooth lighting to the right face of a block image, but only a part of the
+	 * face (specify y_start, y_end, used for slab lighting for example).
+	 */
+	virtual void lightRight(RGBAImage& image, const CornerColors& colors,
+			int y_start, int y_end) const = 0;
+
+	/**
+	 * Adds smooth lighting to the right face of a block image.
+	 */
+	virtual void lightRight(RGBAImage& image, const CornerColors& colors) const = 0;
+
+	/**
+	 * Adds smooth lighting to the top face of a block image.
+	 */
+	virtual void lightTop(RGBAImage& image, const CornerColors& colors, int yoff = 0) const = 0;
+
+	/**
+	 * Adds "simple" lighting to a block by just tinting all pixels. This is used for
+	 * transparent pixels for example.
+	 */
+	virtual void lightAllSimple(RGBAImage& image, LightingColor color) const;
+
+	static const RenderModeRendererType TYPE;
+
+protected:
+	/**
+	 * Draws the bottom triangle with the given colors.
+	 * This is the triangle with corners top left, bottom left and bottom right.
+	 */
+	void drawBottomTriangle(RGBAImage& image, int size, double c1, double c2, double c3) const;
+	
+	/**
+	 * Draws the top triangle with the given colors.
+	 * This is the triangle with corners top left, top right and bottom right.
+	 */
+	void drawTopTriangle(RGBAImage& image, int size, double c1, double c2, double c3) const;
+	
+	/**
+	 * Draws the shade of the corners by drawing two triangles with the supplied colors.
+	 */
+	void createShade(RGBAImage& image, const CornerColors& corners) const;
+};
+
+class LightingRenderMode : public BaseRenderMode<LightingRenderer> {
 public:
 	LightingRenderMode(bool day, double lighting_intensity, bool simulate_sun_light);
 	virtual ~LightingRenderMode();
@@ -94,14 +151,6 @@ private:
 	double lighting_intensity;
 	bool simulate_sun_light;
 
-	bool render_view_initialized;
-	bool isometric_render_view;
-
-	/**
-	 * Draws the shade of the corners by drawing two triangles with the supplied colors.
-	 */
-	void createShade(RGBAImage& image, const CornerColors& corners) const;
-	
 	/**
 	 * Calculates the color of the light of a block.
 	 *
@@ -137,33 +186,6 @@ private:
 	 */
 	CornerColors getCornerColors(const mc::BlockPos& pos, const FaceCorners& corners);
 
-	/**
-	 * Adds smooth lighting to the left face of a block image, but only a part of the
-	 * face (specify y_start, y_end, used for slab lighting for example).
-	 */
-	void lightLeft(RGBAImage& image, const CornerColors& colors, int y_start, int y_end);
-
-	/**
-	 * Adds smooth lighting to the left face of a block image.
-	 */
-	void lightLeft(RGBAImage& image, const CornerColors& colors);
-
-	/**
-	 * Adds smooth lighting to the right face of a block image, but only a part of the
-	 * face (specify y_start, y_end, used for slab lighting for example).
-	 */
-	void lightRight(RGBAImage& image, const CornerColors& colors, int y_start, int y_end);
-
-	/**
-	 * Adds smooth lighting to the right face of a block image.
-	 */
-	void lightRight(RGBAImage& image, const CornerColors& colors);
-
-	/**
-	 * Adds smooth lighting to the top face of a block image.
-	 */
-	void lightTop(RGBAImage& image, const CornerColors& colors, int yoff = 0);
-	
 	/**
 	 * Applies the smooth lighting to a block by adding lighting to the top, left and
 	 * right face (if not covered by another, not transparent, block).

@@ -48,7 +48,9 @@ TileRenderer* IsometricRenderView::createTileRenderer(BlockImages* images,
 
 RenderModeRenderer* IsometricRenderView::createRenderModeRenderer(
 		const RenderModeRendererType& renderer) const {
-	if (renderer == RenderModeRendererType::OVERLAY)
+	if (renderer == RenderModeRendererType::LIGHTING)
+		return new IsometricLightingRenderer();
+	else if (renderer == RenderModeRendererType::OVERLAY)
 		return new IsometricOverlayRenderer();
 	return nullptr;
 }

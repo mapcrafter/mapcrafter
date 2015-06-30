@@ -25,6 +25,68 @@
 namespace mapcrafter {
 namespace renderer {
 
+IsometricLightingRenderer::~IsometricLightingRenderer() {
+}
+
+void IsometricLightingRenderer::lightLeft(RGBAImage& image, const CornerColors& colors,
+		int y_start, int y_end) const {
+	int size = image.getWidth() / 2;
+	RGBAImage shade(size, size);
+	createShade(shade, colors);
+
+	for (SideFaceIterator it(size, SideFaceIterator::LEFT); !it.end(); it.next()) {
+		if (it.src_y < y_start || it.src_y > y_end)
+			continue;
+		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + size/2);
+		if (pixel != 0) {
+			uint8_t d = rgba_alpha(shade.pixel(it.src_x, it.src_y));
+			pixel = rgba_multiply(pixel, d, d, d);
+		}
+	}
+}
+
+void IsometricLightingRenderer::lightLeft(RGBAImage& image, const CornerColors& colors) const {
+	lightLeft(image, colors, 0, image.getHeight() / 2);
+}
+
+void IsometricLightingRenderer::lightRight(RGBAImage& image, const CornerColors& colors,
+		int y_start, int y_end) const {
+	int size = image.getWidth() / 2;
+	RGBAImage shade(size, size);
+	createShade(shade, colors);
+
+	for (SideFaceIterator it(size, SideFaceIterator::RIGHT); !it.end(); it.next()) {
+		if (it.src_y < y_start || it.src_y > y_end)
+			continue;
+		uint32_t& pixel = image.pixel(it.dest_x + size, it.dest_y + size/2);
+		if (pixel != 0) {
+			uint8_t d = rgba_alpha(shade.pixel(it.src_x, it.src_y));
+			pixel = rgba_multiply(pixel, d, d, d);
+		}
+	}
+}
+
+void IsometricLightingRenderer::lightRight(RGBAImage& image, const CornerColors& colors) const {
+	lightRight(image, colors, 0, image.getHeight() / 2);
+}
+
+void IsometricLightingRenderer::lightTop(RGBAImage& image, const CornerColors& colors,
+		int yoff) const {
+		int size = image.getWidth() / 2;
+	RGBAImage shade(size, size);
+	// we need to rotate the corners a bit to make them suitable for the TopFaceIterator
+	CornerColors rotated = {{colors[1], colors[3], colors[0], colors[2]}};
+	createShade(shade, rotated);
+
+	for (TopFaceIterator it(size); !it.end(); it.next()) {
+		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + yoff);
+		if (pixel != 0) {
+			uint8_t d = rgba_alpha(shade.pixel(it.src_x, it.src_y));
+			pixel = rgba_multiply(pixel, d, d, d);
+		}
+	}
+}
+
 void IsometricOverlayRenderer::tintLeft(RGBAImage& image, RGBAPixel color) {
 	int texture_size = image.getWidth() / 2;
 	

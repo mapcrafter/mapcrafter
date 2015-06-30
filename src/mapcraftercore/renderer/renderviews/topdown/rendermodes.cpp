@@ -22,6 +22,44 @@
 namespace mapcrafter {
 namespace renderer {
 
+TopdownLightingRenderer::~TopdownLightingRenderer() {
+}
+
+void TopdownLightingRenderer::lightLeft(RGBAImage& image, const CornerColors& colors,
+		int y_start, int y_end) const {
+	// not available in topdown render view
+}
+
+void TopdownLightingRenderer::lightLeft(RGBAImage& image, const CornerColors& colors) const {
+	// not available in topdown render view
+}
+
+void TopdownLightingRenderer::lightRight(RGBAImage& image, const CornerColors& colors,
+		int y_start, int y_end) const {
+	// not available in topdown render view
+}
+
+void TopdownLightingRenderer::lightRight(RGBAImage& image, const CornerColors& colors) const {
+	// not available in topdown render view
+}
+
+void TopdownLightingRenderer::lightTop(RGBAImage& image, const CornerColors& colors,
+		int yoff) const {
+	assert(image.getWidth() == image.getHeight());
+	int size = image.getWidth();
+	RGBAImage shade(size, size);
+	createShade(shade, colors);
+	for (int x = 0; x < size; x++) {
+		for (int y = 0; y < size; y++) {
+			uint32_t& pixel = image.pixel(x, y);
+			if (pixel != 0) {
+				uint8_t d = rgba_alpha(shade.pixel(x, y));
+				pixel = rgba_multiply(pixel, d, d, d);
+			}
+		}
+	}
+}
+
 void TopdownOverlayRenderer::tintLeft(RGBAImage& image, RGBAPixel color) {
 	// not available in topdown render view
 }

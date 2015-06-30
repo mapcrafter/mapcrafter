@@ -44,7 +44,9 @@ TileRenderer* TopdownRenderView::createTileRenderer(BlockImages* images,
 
 RenderModeRenderer* TopdownRenderView::createRenderModeRenderer(
 		const RenderModeRendererType& renderer) const {
-	if (renderer == RenderModeRendererType::OVERLAY)
+	if (renderer == RenderModeRendererType::LIGHTING)
+		return new TopdownLightingRenderer();
+	else if (renderer == RenderModeRendererType::OVERLAY)
 		return new TopdownOverlayRenderer();
 	return nullptr;
 }
