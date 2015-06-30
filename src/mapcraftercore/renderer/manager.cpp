@@ -284,7 +284,6 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 			tile_set->scanRequiredByTimestamp(web_config.getMapLastRendered(map, rotation));
 	} else {
 		// or just set all tiles required if force-rendering
-		// TODO make sure this works (at home)
 		tile_set->resetRequired();
 	}
 
