@@ -87,7 +87,7 @@ void IsometricLightingRenderer::lightTop(RGBAImage& image, const CornerColors& c
 	}
 }
 
-void IsometricOverlayRenderer::tintLeft(RGBAImage& image, RGBAPixel color) {
+void IsometricOverlayRenderer::tintLeft(RGBAImage& image, RGBAPixel color) const {
 	int texture_size = image.getWidth() / 2;
 	
 	auto overlay = getLuminanceNeutralOverlay(color);
@@ -100,7 +100,7 @@ void IsometricOverlayRenderer::tintLeft(RGBAImage& image, RGBAPixel color) {
 	}
 }
 
-void IsometricOverlayRenderer::tintRight(RGBAImage& image, RGBAPixel color) {
+void IsometricOverlayRenderer::tintRight(RGBAImage& image, RGBAPixel color) const {
 	int texture_size = image.getWidth() / 2;
 	
 	auto overlay = getLuminanceNeutralOverlay(color);
@@ -113,7 +113,7 @@ void IsometricOverlayRenderer::tintRight(RGBAImage& image, RGBAPixel color) {
 	}
 }
 
-void IsometricOverlayRenderer::tintTop(RGBAImage& image, RGBAPixel color, int offset) {
+void IsometricOverlayRenderer::tintTop(RGBAImage& image, RGBAPixel color, int offset) const {
 	int texture_size = image.getWidth() / 2;
 
 	auto overlay = getLuminanceNeutralOverlay(color);

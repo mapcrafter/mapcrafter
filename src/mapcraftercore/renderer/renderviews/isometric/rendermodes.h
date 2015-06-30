@@ -38,17 +38,17 @@ public:
 			int y_start, int y_end) const;
 	virtual void lightRight(RGBAImage& image, const CornerColors& colors) const;
 
-	virtual void lightTop(RGBAImage& image, const CornerColors& colors, int yoff = 0) const;
+	virtual void lightTop(RGBAImage& image, const CornerColors& colors, int yoff) const;
 };
 
 class IsometricOverlayRenderer : public OverlayRenderer {
 public:
-	virtual void tintLeft(RGBAImage& image, RGBAPixel color);
-	virtual void tintRight(RGBAImage& image, RGBAPixel color);
-	virtual void tintTop(RGBAImage& image, RGBAPixel color, int offset);
+	virtual void tintLeft(RGBAImage& image, RGBAPixel color) const;
+	virtual void tintRight(RGBAImage& image, RGBAPixel color) const;
+	virtual void tintTop(RGBAImage& image, RGBAPixel color, int offset) const;
 };
 
 }
 }
 
-#endif /* ISOMETRIC_RENDERVIEWS_H_ */
+#endif /* ISOMETRIC_RENDERMODES_H_ */

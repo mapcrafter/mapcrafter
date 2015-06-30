@@ -39,11 +39,11 @@ public:
 
 	void setHighContrast(bool high_contrast);
 
-	virtual void tintBlock(RGBAImage& image, RGBAPixel color);
+	virtual void tintBlock(RGBAImage& image, RGBAPixel color) const;
 
-	virtual void tintLeft(RGBAImage& image, RGBAPixel color) = 0;
-	virtual void tintRight(RGBAImage& image, RGBAPixel color) = 0;
-	virtual void tintTop(RGBAImage& image, RGBAPixel color, int offset) = 0;
+	virtual void tintLeft(RGBAImage& image, RGBAPixel color) const = 0;
+	virtual void tintRight(RGBAImage& image, RGBAPixel color) const = 0;
+	virtual void tintTop(RGBAImage& image, RGBAPixel color, int offset) const = 0;
 
 	static const RenderModeRendererType TYPE;
 

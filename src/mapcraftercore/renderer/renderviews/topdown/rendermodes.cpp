@@ -60,15 +60,15 @@ void TopdownLightingRenderer::lightTop(RGBAImage& image, const CornerColors& col
 	}
 }
 
-void TopdownOverlayRenderer::tintLeft(RGBAImage& image, RGBAPixel color) {
+void TopdownOverlayRenderer::tintLeft(RGBAImage& image, RGBAPixel color) const {
 	// not available in topdown render view
 }
 
-void TopdownOverlayRenderer::tintRight(RGBAImage& image, RGBAPixel color) {
+void TopdownOverlayRenderer::tintRight(RGBAImage& image, RGBAPixel color) const {
 	// not available in topdown render view
 }
 
-void TopdownOverlayRenderer::tintTop(RGBAImage& image, RGBAPixel color, int offset) {
+void TopdownOverlayRenderer::tintTop(RGBAImage& image, RGBAPixel color, int offset) const {
 	// topdown = just tint the whole image
 	tintBlock(image, color);
 }

@@ -37,7 +37,7 @@ void OverlayRenderer::setHighContrast(bool high_contrast) {
 	this->high_contrast = high_contrast;
 }
 
-void OverlayRenderer::tintBlock(RGBAImage& image, RGBAPixel color) {
+void OverlayRenderer::tintBlock(RGBAImage& image, RGBAPixel color) const {
 	if (high_contrast) {
 		// do the high contrast mode magic
 		auto overlay = getLuminanceNeutralOverlay(color);
