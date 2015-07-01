@@ -57,8 +57,9 @@ int JavaRandom::nextInt(int max) {
 	return val;
 }
 
-SlimeOverlay::SlimeOverlay(fs::path world_dir)
-	: OverlayRenderMode(OverlayMode::PER_BLOCK), world_dir(world_dir), world_seed(0) {
+SlimeOverlay::SlimeOverlay(fs::path world_dir, int rotation)
+	: OverlayRenderMode(OverlayMode::PER_BLOCK), world_dir(world_dir),
+	  rotation(rotation), world_seed(0) {
 	// TODO error handling!
 	nbt::NBTFile level_dat;
 	level_dat.readNBT((world_dir / "level.dat").string().c_str());
@@ -72,6 +73,7 @@ SlimeOverlay::~SlimeOverlay() {
 }
 
 bool SlimeOverlay::isSlimeChunk(const mc::ChunkPos& chunk, long long world_seed) {
+	// this seems to work partly, 
 	long chunkx = chunk.x, chunkz = chunk.z;
 	long long seed = world_seed
 		+ (chunkx * chunkx * 0x4c1906LL)
@@ -85,18 +87,14 @@ bool SlimeOverlay::isSlimeChunk(const mc::ChunkPos& chunk, long long world_seed)
 }
 
 RGBAPixel SlimeOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+	// get original (not rotated) chunk position
 	mc::ChunkPos chunk(pos);
-	// TODO not sure yet if that's really right
-	long long seed = world_seed
-		+ chunk.x * chunk.x * 0x4c1906LL
-		+ chunk.x * 0x5ac0dbLL
-		+ chunk.z * chunk.z * 0x4307a7LL
-		+ ((chunk.z * 0x5f24fLL) ^ 0x3ad8025fLL);
+	if (rotation) {
+		// -rotation = -rotation + 4 (mod 4), rotate accepts only positive numbers
+		chunk.rotate(-rotation + 4);
+	}
 
-	JavaRandom random;
-	random.setSeed(seed);
-	if (random.nextInt(10) == 0)
-	//if (is_slime(world_seed, chunk.x, chunk.z))
+	if (isSlimeChunk(chunk, world_seed))
 		return rgba(60, 200, 20, 255);
 	return rgba(0, 0, 0, 0);
 }

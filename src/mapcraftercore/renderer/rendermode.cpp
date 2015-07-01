@@ -97,7 +97,7 @@ std::ostream& operator<<(std::ostream& out, OverlayType overlay) {
 }
 
 RenderMode* createRenderMode(const config::WorldSection& world_config,
-		const config::MapSection& map_config) {
+		const config::MapSection& map_config, int rotation) {
 	RenderModeType type = map_config.getRenderMode();
 	OverlayType overlay = map_config.getOverlay();
 	MultiplexingRenderMode* render_mode = new MultiplexingRenderMode();
@@ -135,7 +135,7 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 		// nothing
 	} else if (overlay == OverlayType::SLIME) {
 		mc::World world(world_config.getInputDir().string(), world_config.getDimension());
-		render_mode->addRenderMode(new SlimeOverlay(world.getWorldDir()));
+		render_mode->addRenderMode(new SlimeOverlay(world.getWorldDir(), rotation));
 	} else if (overlay == OverlayType::SPAWN) {
 		render_mode->addRenderMode(new SpawnOverlay());
 	} else {
