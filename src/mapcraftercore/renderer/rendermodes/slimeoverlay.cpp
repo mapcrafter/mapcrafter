@@ -60,20 +60,25 @@ int JavaRandom::nextInt(int max) {
 SlimeOverlay::SlimeOverlay(fs::path world_dir, int rotation)
 	: OverlayRenderMode(OverlayMode::PER_BLOCK), world_dir(world_dir),
 	  rotation(rotation), world_seed(0) {
-	// TODO error handling!
-	nbt::NBTFile level_dat;
-	level_dat.readNBT((world_dir / "level.dat").string().c_str());
+	try {
+		nbt::NBTFile level_dat;
+		level_dat.readNBT((world_dir / "level.dat").string().c_str());
 
-	nbt::TagCompound data = level_dat.findTag<nbt::TagCompound>("Data");
-	nbt::TagLong random_seed = data.findTag<nbt::TagLong>("RandomSeed");
-	world_seed = random_seed.payload;
+		nbt::TagCompound data = level_dat.findTag<nbt::TagCompound>("Data");
+		nbt::TagLong random_seed = data.findTag<nbt::TagLong>("RandomSeed");
+		world_seed = random_seed.payload;
+	} catch (nbt::NBTError& e) {
+		LOG(ERROR) << "Unable to read world seed from level.dat file for slime overlay: " << e.what();
+	}
 }
 
 SlimeOverlay::~SlimeOverlay() {
 }
 
 bool SlimeOverlay::isSlimeChunk(const mc::ChunkPos& chunk, long long world_seed) {
-	// this seems to work partly, 
+	// this seems to work partly
+	// the same as Minecraft Overviewer and that test java code
+	// but sometimes with chunks far away it doesn't work like the online tools?!
 	long chunkx = chunk.x, chunkz = chunk.z;
 	long long seed = world_seed
 		+ (chunkx * chunkx * 0x4c1906LL)
