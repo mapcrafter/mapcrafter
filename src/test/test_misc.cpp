@@ -25,6 +25,10 @@
 using namespace mapcrafter::renderer;
 namespace mc = mapcrafter::mc;
 
+/**
+ * Test data generated with: https://gist.github.com/m0r13/6b25673ca85790d4dcf2
+ */
+
 BOOST_AUTO_TEST_CASE(misc_testSlimeOverlay1) {
 	long long world_seed = 42;
 	
