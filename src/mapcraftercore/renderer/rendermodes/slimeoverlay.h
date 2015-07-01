@@ -48,6 +48,8 @@ public:
 	SlimeOverlay(fs::path world_dir);
 	virtual ~SlimeOverlay();
 
+	static bool isSlimeChunk(const mc::ChunkPos& chunk, long long world_seed);
+
 protected:
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 

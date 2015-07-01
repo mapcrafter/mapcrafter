@@ -71,6 +71,19 @@ SlimeOverlay::SlimeOverlay(fs::path world_dir)
 SlimeOverlay::~SlimeOverlay() {
 }
 
+bool SlimeOverlay::isSlimeChunk(const mc::ChunkPos& chunk, long long world_seed) {
+	long chunkx = chunk.x, chunkz = chunk.z;
+	long long seed = world_seed
+		+ (chunkx * chunkx * 0x4c1906LL)
+		+ (chunkx * 0x5ac0dbLL)
+		+ (chunkz * chunkz * 0x4307a7LL)
+		+ (chunkz * 0x5f24fLL) ^ 0x3ad8025fLL;
+
+	JavaRandom random;
+	random.setSeed(seed);
+	return random.nextInt(10) == 0;
+}
+
 RGBAPixel SlimeOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	mc::ChunkPos chunk(pos);
 	// TODO not sure yet if that's really right
@@ -78,7 +91,7 @@ RGBAPixel SlimeOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint
 		+ chunk.x * chunk.x * 0x4c1906LL
 		+ chunk.x * 0x5ac0dbLL
 		+ chunk.z * chunk.z * 0x4307a7LL
-		+ (chunk.z * 0x5f24fLL) ^ 0x3ad8025fLL;
+		+ ((chunk.z * 0x5f24fLL) ^ 0x3ad8025fLL);
 
 	JavaRandom random;
 	random.setSeed(seed);
