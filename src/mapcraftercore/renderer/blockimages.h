@@ -334,9 +334,11 @@ public:
 protected:
 	/**
 	 * Filters out unnecessary parts of the block data since of some blocks not everything
-	 * of the block data is relevant.
+	 * of the block data is relevant. This base class already implements some general
+	 * block data filtering, that's why you should call this parent method in every child
+	 * class.
 	 */
-	virtual uint16_t filterBlockData(uint16_t id, uint16_t data) const = 0;
+	virtual uint16_t filterBlockData(uint16_t id, uint16_t data) const;
 
 	/**
 	 * Checks whether a block image contains transparent pixels. This is method is called

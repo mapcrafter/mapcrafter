@@ -43,6 +43,12 @@ int TopdownBlockImages::getBlockSize() const {
 }
 
 uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
+	// call super method
+	data = AbstractBlockImages::filterBlockData(id, data);
+	// for now we don't use the edge data provided by the tile renderer
+	// TODO?
+	data &= ~(EDGE_EAST | EDGE_NORTH | EDGE_BOTTOM);
+
 	// of some blocks we don't need any data at all
 	if ((id >= 8 && id <= 11) // water
 			|| id == 24 // sandstone

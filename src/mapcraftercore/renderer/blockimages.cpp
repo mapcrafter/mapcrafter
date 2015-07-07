@@ -338,6 +338,38 @@ int AbstractBlockImages::getTextureSize() const {
 	return texture_size;
 }
 
+uint16_t AbstractBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
+	if (id == 54 || id == 130 || id == 146) { // chests
+		// at first get the direction of the chest and rotate if needed
+		uint16_t dir_rotate = (data >> 4) & 0xf;
+		uint16_t dir = util::rotateShiftLeft(dir_rotate, rotation, 4) << 4;
+		// then get the neighbor chests
+		uint16_t neighbors = (data >> 4) & 0xf0;
+
+		// if no neighbors, this is a small chest
+		// the data contains only the direction
+		if (neighbors == 0 || id == 130)
+			return dir;
+
+		// this is a double chest
+		// the data contains the direction and a bit, which shows that this is a large chest
+		// check also if this is the left part of the large chest
+		uint16_t new_data = dir | LARGECHEST_DATA_LARGE;
+		if ((dir == DATA_NORTH && neighbors == DATA_WEST)
+				|| (dir == DATA_SOUTH && neighbors == DATA_EAST)
+				|| (dir == DATA_EAST && neighbors == DATA_NORTH)
+				|| (dir == DATA_WEST && neighbors == DATA_SOUTH))
+			new_data |= LARGECHEST_DATA_LEFT;
+		return new_data;
+	} else if (id == 55) { // redstone wire, tripwire
+		// check if powered
+		if ((data & util::binary<1111>::value) != 0)
+			return (data & ~(util::binary<1111>::value)) | REDSTONE_POWERED;
+		return data & ~(util::binary<1111>::value);
+	}
+	return data;
+}
+
 void AbstractBlockImages::setBlockImage(uint16_t id, uint16_t data,
 		const RGBAImage& block) {
 	block_images[id | (data << 16)] = block;

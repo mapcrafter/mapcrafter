@@ -342,6 +342,9 @@ int IsometricBlockImages::getBlockSize() const {
  * This method filters unnecessary block data, for example the leaves decay counter.
  */
 uint16_t IsometricBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
+	// call super method
+	data = AbstractBlockImages::filterBlockData(id, data);
+
 	if (id == 6)
 		return data & (0xff00 | util::binary<11>::value);
 	else if (id == 8 || id == 9) // water
@@ -358,34 +361,7 @@ uint16_t IsometricBlockImages::filterBlockData(uint16_t id, uint16_t data) const
 		return data & (0xff00 | util::binary<1011>::value);
 	else if (id == 51) // fire
 		return 0;
-	else if (id == 54 || id == 130 || id == 146) { // chests
-		// at first get the direction of the chest and rotate if needed
-		uint16_t dir_rotate = (data >> 4) & 0xf;
-		uint16_t dir = util::rotateShiftLeft(dir_rotate, rotation, 4) << 4;
-		// then get the neighbor chests
-		uint16_t neighbors = (data >> 4) & 0xf0;
-
-		// if no neighbors, this is a small chest
-		// the data contains only the direction
-		if (neighbors == 0 || id == 130)
-			return dir;
-
-		// this is a double chest
-		// the data contains the direction and a bit, which shows that this is a large chest
-		// check also if this is the left part of the large chest
-		uint16_t new_data = dir | LARGECHEST_DATA_LARGE;
-		if ((dir == DATA_NORTH && neighbors == DATA_WEST)
-				|| (dir == DATA_SOUTH && neighbors == DATA_EAST)
-				|| (dir == DATA_EAST && neighbors == DATA_NORTH)
-				|| (dir == DATA_WEST && neighbors == DATA_SOUTH))
-			new_data |= LARGECHEST_DATA_LEFT;
-		return new_data;
-	} else if (id == 55) { // redstone wire, tripwire
-		// check if powered
-		if ((data & util::binary<1111>::value) != 0)
-			return (data & ~(util::binary<1111>::value)) | REDSTONE_POWERED;
-		return data & ~(util::binary<1111>::value);
-	} else if (id == 60) // farmland
+	else if (id == 60) // farmland
 		return data & 0xff00;
 	else if (id == 64 || id == 71 || (id >= 193 && id <= 197)) // doors
 		return data & util::binary<1111110000>::value;

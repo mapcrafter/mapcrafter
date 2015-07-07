@@ -100,9 +100,8 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 					in_water = is_water;
 				}
 
-				// TODO fix this
 				data = checkNeighbors(globalpos, id, data);
-				data &= ~(EDGE_NORTH | EDGE_EAST | EDGE_BOTTOM);
+				
 				RGBAImage block = images->getBlock(id, data);
 				if (Biome::isBiomeBlock(id, data)) {
 					block = images->getBiomeBlock(id, data, getBiomeOfBlock(globalpos, &chunk));
