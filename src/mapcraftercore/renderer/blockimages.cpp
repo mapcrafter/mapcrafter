@@ -595,7 +595,11 @@ uint16_t BlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		if (data & 0x8)
 			return 0;
 		return data;
-	} else if (id == 18 || id == 161) // leaves
+	} else if (id == 13) // gravel
+		// TODO fix in isometric/topdown
+		// shouldn't have any block data, but I had problems with it
+		return 0;
+	else if (id == 18 || id == 161) // leaves
 		return data & (0xff00 | util::binary<11>::value);
 	else if (id == 26) // bed
 		return data & (0xff00 | util::binary<1011>::value);
