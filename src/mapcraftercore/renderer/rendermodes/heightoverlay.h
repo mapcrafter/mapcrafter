@@ -17,8 +17,8 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RENDERMODES_HEIGHTTINTING_H_
-#define RENDERMODES_HEIGHTTINTING_H_
+#ifndef RENDERMODES_HEIGHTOVERLAY_H_
+#define RENDERMODES_HEIGHTOVERLAY_H_
 
 #include "overlay.h"
 #include "../rendermode.h"
@@ -26,18 +26,15 @@
 namespace mapcrafter {
 namespace renderer {
 
-class HeightTintingRenderMode : public BaseRenderMode<OverlayRenderer> {
+class HeightOverlay : public OverlayRenderMode {
 public:
-	HeightTintingRenderMode(bool high_contrast);
-	virtual ~HeightTintingRenderMode();
-
-	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	HeightOverlay();
 
 protected:
-	bool high_contrast;
+	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 };
 
 } /* namespace renderer */
 } /* namespace mapcrafter */
 
-#endif /* RENDERMODES_HEIGHTTINTING_H_ */
+#endif /* RENDERMODES_HEIGHTOVERLAY_H_ */

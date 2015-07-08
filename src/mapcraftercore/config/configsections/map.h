@@ -112,7 +112,6 @@ public:
 	int getJPEGQuality() const;
 
 	double getLightingIntensity() const;
-	bool hasCaveHighContrast() const;
 	bool renderUnknownBlocks() const;
 	bool renderLeavesTransparent() const;
 	bool renderBiomes() const;

@@ -40,7 +40,7 @@ void OverlayRenderer::setHighContrast(bool high_contrast) {
 void OverlayRenderer::tintBlock(RGBAImage& image, RGBAPixel color) const {
 	if (high_contrast) {
 		// do the high contrast mode magic
-		auto overlay = getLuminanceNeutralOverlay(color);
+		auto overlay = getRecolor(color);
 		for (int y = 0; y < image.getWidth(); y++) {
 			for (int x = 0; x < image.getHeight(); x++) {
 				RGBAPixel& pixel = image.pixel(x, y);
@@ -60,7 +60,7 @@ void OverlayRenderer::tintBlock(RGBAImage& image, RGBAPixel color) const {
 	}
 }
 
-std::tuple<int, int, int> OverlayRenderer::getLuminanceNeutralOverlay(RGBAPixel color) const {
+std::tuple<int, int, int> OverlayRenderer::getRecolor(RGBAPixel color) const {
 	// get luminance of recolor:
 	// "10*r + 3*g + b" should actually be "3*r + 10*g + b"
 	// it was a typo, but doesn't look bad either

@@ -17,7 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "heighttinting.h"
+#include "heightoverlay.h"
 
 #include "../image.h"
 #include "../../mc/pos.h"
@@ -25,15 +25,11 @@
 namespace mapcrafter {
 namespace renderer {
 
-HeightTintingRenderMode::HeightTintingRenderMode(bool high_contrast)
-	: high_contrast(high_contrast) {
+HeightOverlay::HeightOverlay()
+	: OverlayRenderMode(OverlayMode::PER_BLOCK) {
 }
 
-HeightTintingRenderMode::~HeightTintingRenderMode() {
-}
-
-void HeightTintingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
-		uint16_t id, uint16_t data) {
+RGBAPixel HeightOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	// TODO make the gradient configurable
 	double h1 = (double) (64 - pos.y) / 64;
 	if (pos.y > 64)
@@ -52,11 +48,7 @@ void HeightTintingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 	int r = h1 * 128.0 + 128.0;
 	int g = h2 * 255.0;
 	int b = h3 * 255.0;
-	RGBAPixel color = rgba(r, g, b, 85);
-
-	// TODO set earlier
-	renderer->setHighContrast(high_contrast);
-	renderer->tintBlock(image, color);
+	return rgba(r, g, b, 85);
 }
 
 } /* namespace renderer */

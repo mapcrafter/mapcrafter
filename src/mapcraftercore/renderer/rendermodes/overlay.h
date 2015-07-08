@@ -37,6 +37,8 @@ public:
 	OverlayRenderer();
 	virtual ~OverlayRenderer();
 
+	// TODO
+	// DEPRECATED
 	void setHighContrast(bool high_contrast);
 
 	virtual void tintBlock(RGBAImage& image, RGBAPixel color) const;
@@ -48,7 +50,7 @@ public:
 	static const RenderModeRendererType TYPE;
 
 protected:
-	std::tuple<int, int, int> getLuminanceNeutralOverlay(RGBAPixel color) const;
+	std::tuple<int, int, int> getRecolor(RGBAPixel color) const;
 
 	bool high_contrast;
 };

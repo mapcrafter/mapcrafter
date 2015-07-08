@@ -23,7 +23,7 @@
 #include "image.h"
 #include "rendermodes/cave.h"
 #include "rendermodes/lighting.h"
-#include "rendermodes/heighttinting.h"
+#include "rendermodes/heightoverlay.h"
 #include "rendermodes/slimeoverlay.h"
 #include "rendermodes/spawnoverlay.h"
 #include "../config/configsections/map.h"
@@ -114,7 +114,7 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 		// if we want some shadows, then simulate the sun light because it's dark in caves
 		if (type == RenderModeType::CAVELIGHT)
 			render_mode->addRenderMode(new LightingRenderMode(true, map_config.getLightingIntensity(), true));
-		render_mode->addRenderMode(new HeightTintingRenderMode(map_config.hasCaveHighContrast()));
+		render_mode->addRenderMode(new HeightOverlay());
 	}
 	else if (type == RenderModeType::DAYLIGHT) {
 		render_mode->addRenderMode(new LightingRenderMode(true,
@@ -126,6 +126,7 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 					world_config.getDimension() == mc::Dimension::END));
 	} else {
 		// this shouldn't happen
+		delete render_mode;
 		assert(false);
 		return nullptr;
 	}
@@ -140,6 +141,7 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 		render_mode->addRenderMode(new SpawnOverlay());
 	} else {
 		// this shouldn't happen
+		delete render_mode;
 		assert(false);
 		return nullptr;
 	}

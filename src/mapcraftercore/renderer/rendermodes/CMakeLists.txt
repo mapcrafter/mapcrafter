@@ -1,7 +1,7 @@
 set(SOURCE
     ${SOURCE}
     "${CMAKE_CURRENT_SOURCE_DIR}/cave.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/heighttinting.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/heightoverlay.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/lighting.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/overlay.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/slimeoverlay.cpp"
@@ -11,7 +11,7 @@ set(SOURCE
 set(HEADERS
     ${HEADERS}
     "${CMAKE_CURRENT_SOURCE_DIR}/cave.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/heighttinting.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/heightoverlay.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/lighting.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/overlay.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/slimeoverlay.h"
