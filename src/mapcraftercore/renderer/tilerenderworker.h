@@ -58,7 +58,6 @@ struct RenderContext {
 	TileSet* tile_set;
 	mc::World world;
 
-	// TODO really do it like this?
 	std::shared_ptr<mc::WorldCache> world_cache;
 	std::shared_ptr<RenderMode> render_mode;
 	std::shared_ptr<TileRenderer> tile_renderer;

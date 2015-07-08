@@ -324,8 +324,9 @@ bool MapSection::parseField(const std::string key, const std::string value,
 				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 32))
 				validation.error("'texture_size' must a number between 1 and 32!");
 	} else if (key == "tile_width") {
-		// TODO validation
 		tile_width.load(key, value, validation);
+		if (tile_width.getValue() < 1)
+			validation.error("'tile_width' must be a positive number!");
 	} else if (key == "image_format") {
 		image_format.load(key, value, validation);
 	} else if (key == "png_indexed") {

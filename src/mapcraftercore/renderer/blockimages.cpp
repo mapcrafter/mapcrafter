@@ -377,10 +377,6 @@ void AbstractBlockImages::setBlockImage(uint16_t id, uint16_t data,
 	// check if block contains transparency
 	if (isImageTransparent(block))
 		block_transparency.insert(id | (data << 16));
-	// TODO in IsometricBlockImages
-	// if block is not transparent, add shadow edges
-	//else
-	//	addBlockShadowEdges(id, data, block);
 }
 
 void AbstractBlockImages::createBiomeBlocks() {

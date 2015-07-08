@@ -80,6 +80,10 @@ bool TopdownBlockImages::isImageTransparent(const RGBAImage& block) const {
 	return false;
 }
 
+void TopdownBlockImages::setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block) {
+	AbstractBlockImages::setBlockImage(id, data, block.rotate(rotation));
+}
+
 RGBAImage TopdownBlockImages::createUnknownBlock() const {
 	RGBAImage unknown_block(texture_size, texture_size);
 	unknown_block.fill(rgba(255, 0, 0, 255), 0, 0, texture_size, texture_size);

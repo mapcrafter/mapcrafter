@@ -76,7 +76,6 @@ bool moveFile(const fs::path& from, const fs::path& to) {
 	return true;
 }
 
-// TODO make sure this works on different OSes
 fs::path findHomeDir() {
 	char* path;
 #if defined(OS_WINDOWS)

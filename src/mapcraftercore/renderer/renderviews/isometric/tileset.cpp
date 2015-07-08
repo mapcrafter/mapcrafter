@@ -35,7 +35,7 @@ namespace {
  * Calculates the tiles a row and column covers.
  */
 void addRowColTiles(int row, int col, int tile_width, std::set<TilePos>& tiles) {
-	// the tiles have are 2 * TILE_WIDTH columns wide
+	// the tiles are 2 * TILE_WIDTH columns wide
 	// and 4 * TILE_WIDTH row tall
 	// calculate the approximate position of the tile
 	int x = col / (2 * tile_width);
@@ -63,8 +63,6 @@ void IsometricTileSet::mapChunkToTiles(const mc::ChunkPos& chunk,
 	// at first get row and column of the top of the chunk
 	int row = chunk.getRow();
 	int col = chunk.getCol();
-
-	// TODO fix this for different TILE_WIDTH
 
 	// then we go through all sections of the chunk plus one on the bottom side
 	// and add the tiles the individual sections cover,
