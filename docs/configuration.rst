@@ -360,6 +360,10 @@ Map Options
     Since the name of the section is used for internal representation, the name
     of the section should be unique and you should only use alphanumeric chars.
 
+``render_view = isometric|topdown``
+
+    TODO
+
 ``render_mode = plain|daylight|nightlight|cave``
 	
     **Default:** ``daylight``
@@ -382,6 +386,10 @@ Map Options
     The old option name ``rendermode`` is still available, but deprecated.
     Therefore you can still use it in old configuration files, but Mapcrafter
     will show a warning.
+
+``overlay = ``
+
+    TODO
 
 ``rotations = [top-left] [top-right] [bottom-right] [bottom-left]``
 
@@ -420,6 +428,14 @@ Map Options
     size, the more image data the renderer has to process. If you want a high
     detail, use texture size 16, but texture size 12 looks still good and is
     faster to render.
+
+``texture_blur = <number>``
+
+    TODO
+
+``tile_width = <number>``
+
+    TODO
 
 ``image_format = png|jpeg``
 
