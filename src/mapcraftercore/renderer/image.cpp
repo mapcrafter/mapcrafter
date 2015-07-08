@@ -303,6 +303,9 @@ RGBAImage RGBAImage::colorize(uint8_t r, uint8_t g, uint8_t b, uint8_t a) const 
 }
 
 RGBAImage RGBAImage::rotate(int rotation) const {
+	// TODO rotate by rotation % 4?
+	if (rotation == 0)
+		return *this;
 	int newWidth = rotation == ROTATE_90 || rotation == ROTATE_270 ? height : width;
 	int newHeight = rotation == ROTATE_90 || rotation == ROTATE_270 ? width : height;
 	RGBAImage copy(newWidth, newHeight);
