@@ -80,11 +80,25 @@ public:
 
 /**
  * Types of render mode renderers that are available for render modes.
+ *
+ * Sorry, I would use an enum class, but gcc 4.4 doesn't allow enum class forward
+ * declaration (needed in renderview.h <-> rendermode.h).
  */
-enum class RenderModeRendererType {
-	DUMMY,
-	LIGHTING,
-    OVERLAY,
+class RenderModeRendererType {
+public:
+	RenderModeRendererType(const RenderModeRendererType& type) : type(type.type) {}
+
+	bool operator!=(const RenderModeRendererType other) const { return type != other.type; }
+	bool operator==(const RenderModeRendererType other) const { return type == other.type; }
+
+	static const RenderModeRendererType DUMMY;
+	static const RenderModeRendererType LIGHTING;
+	static const RenderModeRendererType OVERLAY;
+
+private:
+	RenderModeRendererType(int type) : type(type) {}
+	
+	int type;
 };
 
 /**

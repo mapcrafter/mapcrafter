@@ -39,7 +39,7 @@ namespace renderer {
 class BlockImages;
 class RenderMode;
 class RenderModeRenderer;
-enum class RenderModeRendererType;
+class RenderModeRendererType;
 class TileSet;
 class TileRenderer;
 

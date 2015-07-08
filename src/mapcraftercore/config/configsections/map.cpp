@@ -106,7 +106,7 @@ TileSetID::TileSetID(const std::string& world_name,
 }
 
 TileSetID::TileSetID(const TileSetGroupID& group, int rotation)
-	: TileSetID(group.world_name, group.render_view, group.tile_width, rotation) {
+	: TileSetGroupID(group.world_name, group.render_view, group.tile_width), rotation(rotation) {
 }
 
 std::string TileSetID::toString() const {
