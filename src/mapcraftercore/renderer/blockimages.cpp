@@ -2372,6 +2372,9 @@ void BlockImages::loadBlocks() {
 	createBlock(97, 0, t.STONE); // stone
 	createBlock(97, 1, t.COBBLESTONE); // cobblestone
 	createBlock(97, 2, t.STONEBRICK); // stone brick
+	createBlock(97, 3, t.STONEBRICK_MOSSY); // mossy stone brick
+	createBlock(97, 4, t.STONEBRICK_CRACKED); // cracked stone brick
+	createBlock(97, 5, t.STONEBRICK_CARVED); // chiseled stone brick
 	// --
 	// -- stone bricks
 	createBlock(98, 0, t.STONEBRICK); // normal
