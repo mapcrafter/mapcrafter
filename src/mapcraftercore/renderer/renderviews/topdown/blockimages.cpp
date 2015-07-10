@@ -20,6 +20,7 @@
 #include "blockimages.h"
 
 #include "../../biomes.h"
+#include "../../../util.h"
 
 namespace mapcrafter {
 namespace renderer {
@@ -28,10 +29,6 @@ TopdownBlockImages::TopdownBlockImages() {
 }
 
 TopdownBlockImages::~TopdownBlockImages() {
-}
-
-int TopdownBlockImages::getMaxWaterPreblit() const {
-	return 1;
 }
 
 const RGBAImage& TopdownBlockImages::getOpaqueWater(bool south, bool west) const {
@@ -50,7 +47,7 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	data &= ~(EDGE_EAST | EDGE_NORTH | EDGE_BOTTOM);
 
 	// of some blocks we don't need any data at all
-	if ((id >= 8 && id <= 11) // water
+	if ((id >= 10 && id <= 11) // lava
 			|| id == 24 // sandstone
 			|| id == 50 // torch
 			|| id == 51 // fire
@@ -61,6 +58,8 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 			)
 		return 0;
 
+	if (id == 8 || id == 9) // water
+		return data & OPAQUE_WATER; // we just need that one bit
 	if (id == 18 || id == 161) // leaves
 		return data & (0xff00 | 0b00000011);
 	else if (id == 60) // farmland
@@ -524,33 +523,25 @@ void TopdownBlockImages::createBlocks() {
 int TopdownBlockImages::createOpaqueWater() {
 	// just use the Ocean biome watercolor
 	RGBAImage water = resources.getBlockTextures().WATER_STILL.colorize(0, 0.39, 0.89);
-
 	RGBAImage opaque_water = water;
 
 	int water_preblit;
 	for (water_preblit = 2; water_preblit < 10; water_preblit++) {
-		RGBAImage tmp = opaque_water;
-		tmp.alphaBlit(tmp, 0, 0);
+		opaque_water.alphaBlit(water, 0, 0);
 
 		// then check alpha
 		uint8_t min_alpha = 255;
-		for (int x = 0; x < tmp.getWidth(); x++) {
-			for (int y = 0; y < tmp.getHeight(); y++) {
-				uint8_t alpha = rgba_alpha(tmp.getPixel(x, y));
+		for (int x = 0; x < opaque_water.getWidth(); x++) {
+			for (int y = 0; y < opaque_water.getHeight(); y++) {
+				uint8_t alpha = rgba_alpha(opaque_water.getPixel(x, y));
 				if (alpha < min_alpha)
 					min_alpha = alpha;
 			}
 		}
 
 		// images are "enough" opaque
-		if (min_alpha == 255) {
-			// do a last blit
-			opaque_water.alphaBlit(water, 0, 0);
+		if (min_alpha == 255)
 			break;
-		// when image is too transparent, blit it over
-		} else {
-			opaque_water.alphaBlit(water, 0, 0);
-		}
 	}
 
 	uint16_t id = 8;

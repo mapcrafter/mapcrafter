@@ -30,7 +30,6 @@ public:
 	TopdownBlockImages();
 	virtual ~TopdownBlockImages();
 
-	virtual int getMaxWaterPreblit() const;
 	virtual const RGBAImage& getOpaqueWater(bool south, bool west) const;
 
 	virtual int getBlockSize() const;

@@ -48,17 +48,28 @@ TopdownTileRenderer::TopdownTileRenderer(const RenderView* render_view,
 TopdownTileRenderer::~TopdownTileRenderer() {
 }
 
+namespace {
+
+struct RenderBlock {
+	RGBAImage block;
+	uint16_t id, data;
+	mc::BlockPos pos;
+};
+
+}
+
 void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, int dx, int dy) {
 	// TODO implement preblit water render behavior
 
 	int texture_size = images->getTextureSize();
 
-	for (int x = 0; x < 16; x++)
+	for (int x = 0; x < 16; x++) {
 		for (int z = 0; z < 16; z++) {
-			std::deque<RGBAImage> blocks;
+			std::deque<RenderBlock> blocks;
 
 			// TODO make this water thing a bit nicer
 			bool in_water = false;
+			int water = 0;
 
 			mc::LocalBlockPos localpos(x, z, 0);
 			//int height = chunk.getHeightAt(localpos);
@@ -92,12 +103,38 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 					continue;
 				}
 
-				if (is_water) {
+				if (is_water && !use_preblit_water) {
 					if (is_water == in_water) {
 						localpos.y--;
 						continue;
 					}
 					in_water = is_water;
+				} else if (use_preblit_water) {
+					if (!is_water)
+						water = 0;
+					else {
+						water++;
+						if (water > images->getMaxWaterPreblit()) {
+							auto it = blocks.begin();
+							while (it != blocks.end()) {
+								auto current = it++;
+								if (it == blocks.end() || (it->id != 8 && it->id != 9)) {
+									RenderBlock& top = *current;
+									// blocks.erase(current);
+
+									top.id = 8;
+									top.data = OPAQUE_WATER;
+									top.block = images->getBlock(top.id, top.data);
+									render_mode->draw(top.block, top.pos, top.id, top.data);
+									// blocks.insert(current, top);
+									break;
+								} else {
+									blocks.erase(current);
+								}
+							}
+							break;
+						}
+					}
 				}
 
 				data = checkNeighbors(globalpos, id, data);
@@ -108,20 +145,20 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 				}
 
 				render_mode->draw(block, globalpos, id, data);
+				blocks.push_back({block, id, data, globalpos});
 
-				blocks.push_back(block);
-				if (!images->isBlockTransparent(id, data)) {
+				if (!images->isBlockTransparent(id, data))
 					break;
-				}
 				localpos.y--;
 			}
 
 			while (blocks.size() > 0) {
-				RGBAImage block = blocks.back();
-				tile.alphaBlit(block, dx + x*texture_size, dy + z*texture_size);
+				RenderBlock render_block = blocks.back();
+				tile.alphaBlit(render_block.block, dx + x*texture_size, dy + z*texture_size);
 				blocks.pop_back();
 			}
 		}
+	}
 }
 
 void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
