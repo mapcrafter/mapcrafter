@@ -2255,6 +2255,8 @@ void IsometricBlockImages::createBlocks() {
 }
 
 int IsometricBlockImages::createOpaqueWater() {
+	// TODO see TopdownBlockImages::createOpaqueWater()
+	
 	// just use the Ocean biome watercolor
 	RGBAImage water = resources.getBlockTextures().WATER_STILL.colorize(0, 0.39, 0.89);
 
@@ -2269,47 +2271,44 @@ int IsometricBlockImages::createOpaqueWater() {
 	// water top, south and west
 	opaque_water[3] = opaque_water[0];
 
-	// now blit actual faces
-	blitFace(opaque_water[1], FACE_SOUTH, water, 0, 0, false);
-	blitFace(opaque_water[2], FACE_WEST, water, 0, 0, false);
-	blitFace(opaque_water[3], FACE_SOUTH, water, 0, 0, false);
-	blitFace(opaque_water[3], FACE_WEST, water, 0, 0, false);
+	// create sides of water blocks that don't have water neighbors on those sides
+	blitFace(opaque_water[1], FACE_SOUTH, water, 0, 0, true, dleft, dright);
+	blitFace(opaque_water[2], FACE_WEST, water, 0, 0, true, dleft, dright);
+	blitFace(opaque_water[3], FACE_SOUTH, water, 0, 0, true, dleft, dright);
+	blitFace(opaque_water[3], FACE_WEST, water, 0, 0, true, dleft, dright);
 
+	// int last_alpha = -1;
 	int water_preblit;
-	for (water_preblit = 2; water_preblit < 10; water_preblit++) {
-		// make a copy of the first images
-		RGBAImage tmp = opaque_water[0];
-		// blit it over
-		tmp.alphaBlit(tmp, 0, 0);
+	for (water_preblit = 2; water_preblit < 100; water_preblit++) {
+		// blit another layer of water
+		blitFace(opaque_water[0], FACE_TOP, water, 0, 0, false);
+		blitFace(opaque_water[1], FACE_TOP, water, 0, 0, false);
+		blitFace(opaque_water[2], FACE_TOP, water, 0, 0, false);
+		blitFace(opaque_water[3], FACE_TOP, water, 0, 0, false);
 
 		// then check alpha
 		uint8_t min_alpha = 255;
 		for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
-			uint8_t alpha = rgba_alpha(tmp.getPixel(it.dest_x, it.dest_y));
+			uint8_t alpha = rgba_alpha(opaque_water[0].getPixel(it.dest_x, it.dest_y));
 			if (alpha < min_alpha)
 				min_alpha = alpha;
 		}
 
-		// images are "enough" opaque
-		if (min_alpha == 255) {
-			// do a last blit
-			blitFace(opaque_water[0], FACE_TOP, water, 0, 0, false);
-			blitFace(opaque_water[1], FACE_TOP, water, 0, 0, false);
-			blitFace(opaque_water[2], FACE_TOP, water, 0, 0, false);
-			blitFace(opaque_water[3], FACE_TOP, water, 0, 0, false);
-
-			blitFace(opaque_water[1], FACE_SOUTH, water, 0, 0, true, dleft, dright);
-			blitFace(opaque_water[2], FACE_WEST, water, 0, 0, true, dleft, dright);
-			blitFace(opaque_water[3], FACE_SOUTH, water, 0, 0, true, dleft, dright);
-			blitFace(opaque_water[3], FACE_WEST, water, 0, 0, true, dleft, dright);
+		/*
+		LOG(DEBUG) << water_preblit << ": " << (int) min_alpha;
+		if (last_alpha == min_alpha) {
+			LOG(DEBUG) << "min alpha converges!";
 			break;
-		// when images are too transparent
-		} else {
-			// blit all images over
-			for (int i = 0; i < 4; i++)
-				opaque_water[i].alphaBlit(opaque_water[i], 0, 0);
 		}
+		*/
+		
+		// images are "enough" opaque
+		if (min_alpha >= 250)
+			break;
+		//last_alpha = min_alpha;
 	}
+
+	LOG(DEBUG) << "pre-blit water (isometric): " << water_preblit;
 
 	uint16_t id = 8;
 	uint16_t data = OPAQUE_WATER;
