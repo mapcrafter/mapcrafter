@@ -153,8 +153,8 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(6, 5, t.SAPLING_ROOFED_OAK); // dark oak
 	// --
 	setBlockImage(7, 0, t.BEDROCK); // bedrock
-	setBlockImage(8, 0, t.WATER_STILL);
-	setBlockImage(9, 0, t.WATER_STILL);
+	setBlockImage(8, 0, t.WATER_STILL.colorize(0, 0.39, 0.89));
+	setBlockImage(9, 0, t.WATER_STILL.colorize(0, 0.39, 0.89));
 	setBlockImage(10, 0, t.LAVA_STILL);
 	setBlockImage(11, 0, t.LAVA_STILL);
 	setBlockImage(12, 0, t.SAND); // sand
