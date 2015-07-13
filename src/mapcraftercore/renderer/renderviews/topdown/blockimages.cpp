@@ -52,9 +52,11 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 			|| id == 50 // torch
 			|| id == 51 // fire
 			|| id == 78 // snow
+			|| id == 79 // ice
 			|| id == 84 // jukebox
 			|| id == 90 // nether portal
 			|| id == 151 || id == 178 // lighting sensor
+			|| id == 174 // packed ice
 			)
 		return 0;
 
