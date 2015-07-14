@@ -439,6 +439,12 @@ Map Options
     ``spawn``
       Shows the light conditions where different kinds mobs can spawn at day/night.
 
+    At the moment there is only one overlay per map section allowed because the overlay
+    is rendered just like a render mode on top of the world. If you want to render
+    multiple overlays, you need multiple map sections. This behavior might change in
+    future Mapcrafter versions so you will be able to dynamically switch multiple
+    overlays on and off in the web interface.
+
 ``rotations = [top-left] [top-right] [bottom-right] [bottom-left]``
 
     **Default:** ``top-left``
