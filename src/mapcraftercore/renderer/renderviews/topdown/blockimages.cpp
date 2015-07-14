@@ -52,9 +52,11 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 			|| id == 50 // torch
 			|| id == 51 // fire
 			|| id == 78 // snow
+			|| id == 79 // ice
 			|| id == 84 // jukebox
 			|| id == 90 // nether portal
 			|| id == 151 || id == 178 // lighting sensor
+			|| id == 174 // packed ice
 			)
 		return 0;
 
@@ -521,12 +523,16 @@ void TopdownBlockImages::createBlocks() {
 }
 
 int TopdownBlockImages::createOpaqueWater() {
+	// TODO pre-blit each water block of water depth x ?
+	// TODO min_alpha >= 250 ?
+	
 	// just use the Ocean biome watercolor
 	RGBAImage water = resources.getBlockTextures().WATER_STILL.colorize(0, 0.39, 0.89);
 	RGBAImage opaque_water = water;
 
 	int water_preblit;
-	for (water_preblit = 2; water_preblit < 10; water_preblit++) {
+	for (water_preblit = 2; water_preblit < 100; water_preblit++) {
+		// blit another layer of water
 		opaque_water.alphaBlit(water, 0, 0);
 
 		// then check alpha
@@ -540,9 +546,11 @@ int TopdownBlockImages::createOpaqueWater() {
 		}
 
 		// images are "enough" opaque
-		if (min_alpha == 255)
+		if (min_alpha >= 250)
 			break;
 	}
+
+	LOG(DEBUG) << "pre-blit water (topdown): " << water_preblit;
 
 	uint16_t id = 8;
 	uint16_t data = OPAQUE_WATER;
