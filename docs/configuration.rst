@@ -9,17 +9,16 @@ multiple rotations and render modes into one output file.
 A First Example
 ===============
 
-Here is a simple example of a configuration file (let's call it
-``render.conf``):
+Here is a simple example of a configuration file (let's call it ``render.conf``):
 
 .. code-block:: ini
 
-    output_dir = output
+    output_dir = myworld_mapcrafter
 
     [world:myworld]
     input_dir = worlds/myworld
 
-    [map:map_myworld]
+    [map:myworld_isometric_day]
     world = myworld
 
 As you can see the configuration files consist of different types of sections
@@ -37,19 +36,24 @@ Every world section represents a Minecraft world you want to render and needs a
 directory where it can find the Minecraft world (``input_dir`` of the world
 section ``myworld`` in the example above).
 
-Every map section represents a rendered Minecraft world. You can specify
-things like rotation of the world, render mode, texture pack and texture size
-for each map.
+Every map section represents an actual rendered map of a Minecraft world. You
+can specify things like rotation of the world, render view, render mode, texture
+pack, texture size, etc. for each map.
 
 In this example you can see that we have a world ``myworld`` in the directory
-``worlds/myworld/`` which is rendered as the map ``map_myworld``.  The
-directory ``output/`` is set as output directory. After rendering you can open
-the ``index.html`` file in this directory and view your rendered map.
+``worlds/myworld/`` which is rendered as the map ``myworld_isometric_day``.  The
+directory ``output/`` is set as output directory. After the rendering you can
+open the ``index.html`` file in this directory and view your rendered map.
 
 As you can see the configuration option ``output_dir`` is not contained in any
 section - it's in the so called *root section*. That's because all maps are
 rendered into this directory and viewable via one ``index.html`` file, so the
 ``output_dir`` option is the same for all maps in this configuration file.
+
+Also keep in mind that you can choose the section names (but not the section
+types!) on your own, though it is recommended to use some kind of a fixed
+format (for example ``<world name>_<render view>_<render mode>`` for maps) to
+keep things consistent.
 
 Let's have a look at a more advanced configuration file.
 
@@ -61,8 +65,11 @@ A More Advanced Example
     output_dir = output
     
     [global:map]
+    world = world
+    render_view = isometric
     render_mode = daylight
     rotations = top-left bottom-right
+    texture_size = 12
     
     [world:world]
     input_dir = worlds/world
@@ -70,28 +77,33 @@ A More Advanced Example
     [world:creative]
     input_dir = worlds/creative
     
-    [map:map_world_day]
+    [map:world_isometric_day]
     name = Normal World - Day
-    world = world
     
-    [map:map_world_night]
+    [map:world_isometric_night]
     name = Normal World - Night
-    world = world
     render_mode = nightlight
     
-    [map:map_world_cave]
+    [map:world_isometric_cave]
     name = Normal World - Cave
-    world = world
     render_mode = cave
+
+    [map:world_topdown_day]
+    name = Normal World - Topdown overview
+    render_view = topdown
+    texture_size = 6
+    texture_blur = 2
+    tile_width = 3
     
-    [map:map_creative_day]
+    [map:creative_isometric_day]
     name = Creative World - Day
     world = creative
+    render_mode = daylight
     rotations = top-left top-right bottom-right bottom-left
     texture_dir = textures/special_textures
     texture_size = 16
     
-    [map:map_creative_night]
+    [map:creative_isometric_night]
     name = Creative World - Night
     world = creative
     render_mode = nightlight
@@ -100,20 +112,22 @@ A More Advanced Example
     texture_size = 16
 
 Here we have some more worlds and maps defined. We have a "normal" world which
-is rendered with the day, night and cave render mode and we have a "creative"
-world which is rendered super fancy with a special texture pack, higher texture
-size and all available world rotations with the day and night render mode.
+is rendered with the day, night, cave render mode, and also with the top view
+and a lower texture size as overview map. Also we have a "creative" world which
+is rendered with a special texture pack, higher texture size and all available
+world rotations with the day and night render mode (super fancy!).
 
 As you can see there is a new section ``global:map``. This section is used to
 set default values for all map sections. Because of this in this example every
-map has the daylight render mode and the world rotations top-left and top-right
-as default. Of course you can overwrite these settings in every map section.
-There is also a global section ``global:world`` for worlds, but at the moment
-there is only one configuration option for worlds (``input_dir``), so it
-doesn't make much sense setting a default value here.
+map has the world ``world``, the 3D isometric render view, the daylight render
+mode, the world rotations top-left and top-right and the 12px texture size as
+default. Of course you can overwrite these settings in every map section.  There
+is also a global section ``global:world`` for worlds, but at the moment there is
+only one configuration option for worlds (``input_dir``), so it doesn't make
+much sense setting a default value here.
 
-Furthermore every map has as option ``name`` a name which is used in the
-webinterface of the output HTML-File. This can be anything suitable to identify
+Furthermore every map has as option ``name`` a name which is used in the web
+interface of the output HTML-File. This can be anything suitable to identify
 this map. In contrast to that the world and map names in the sections are used
 for internal representation and therefore should be unique and contain only
 alphanumeric chars and underscores.
@@ -122,6 +136,19 @@ When you have now your configuration file you can render your worlds with (see
 :ref:`command_line_options` for more options and usage)::
 
     mapcrafter -c render.conf
+
+There are tons of other options to customize your rendered maps. Before a
+reference of all available options, here is a quick overview of interesting
+things you can do:
+
+* Default view / zoom level / rotation in web interface
+* World cropping (only render specific parts of your world)
+* Block mask (skip rendering / render only specific types blocks)
+* Different render views, render modes, overlays
+* Use custom texture packs, texture sizes, apply a blur effect to textures
+* Custom tile widths
+* Different image formats
+* Custom lighting intensity
 
 Available Options
 =================
@@ -322,7 +349,7 @@ with the next two options:
       
       * ``[blockid1]-[blockid2]``
     
-    * All block with a specific id and ``(block data & bitmask) == specified data``:
+    * All blocks with a specific id and ``(block data & bitmask) == specified data``:
       
       * ``[blockid]:[blockdata]b[bitmask]``
     
@@ -362,7 +389,16 @@ Map Options
 
 ``render_view = isometric|topdown``
 
-    TODO
+    **Default:** ``isometric``
+
+    This is the view that your world is rendered from. You can choose from
+    different render views:
+
+    ``isometric``
+      A 3D isometric view looking at north-east, north-west, south-west or 
+      south-east (depending on the rotation of the world).
+    ``topdown``
+      A simple 2D top view.
 
 ``render_mode = plain|daylight|nightlight|cave``
 	
@@ -387,9 +423,21 @@ Map Options
     Therefore you can still use it in old configuration files, but Mapcrafter
     will show a warning.
 
-``overlay = ``
+``overlay = slime|spawn``
 
-    TODO
+    **Default:** ``none``
+
+    Additionally to a render mode, you can specify an overlay. An overlay is a
+    special render mode that is rendered on top of your map and the selected
+    render mode. The following overlays are used to show some interesting
+    additional data extracted from the Minecraft world data:
+
+    ``none``
+      Empty overlay.
+    ``slime``
+      Highlights the chunks where slimes can spawn.
+    ``spawn``
+      Shows the light conditions where different kinds mobs can spawn at day/night.
 
 ``rotations = [top-left] [top-right] [bottom-right] [bottom-left]``
 
@@ -431,11 +479,22 @@ Map Options
 
 ``texture_blur = <number>``
 
-    TODO
+    **Default:** ``0``
+
+    You can apply a simple blur filter with a radius of ``<number>`` pixels to
+    the texture images. This might be useful if you are using a very low texture
+    size because areas with their blocks sometimes look a bit "tiled".
 
 ``tile_width = <number>``
 
-    TODO
+    **Default:** ``1``
+
+    This is a factor that is applied to the tile size. Every (square) tile is
+    usually one chunk wide, but you can increase that size. The wider a tile
+    is, the more blocks it contains and the longer it takes to render a tile,
+    but the less tiles are to render overall and the less overhead there is
+    when writing the tile images. Use this if your texture size is small and
+    you want to prevent that a lot of very small tiles are rendered.
 
 ``image_format = png|jpeg``
 
@@ -444,11 +503,17 @@ Map Options
     This is the image format the renderer uses for the tile images.
     You can render your maps to PNGs or to JPEGs. PNGs are losless, 
     JPEGs are faster to write and need less disk space. Also consider
-    the ``jpeg_quality`` option when using JPEGs.
+    the ``png_indexed`` and ``jpqg_quality`` options.
 
 ``png_indexed = true|false``
 
-    TODO
+    **Default:** ``false``
+
+    With this option you can make the renderer write indexed PNGs. Indexed PNGs
+    are using a color table with 256 colors (which is usually enough for this
+    kind of images) instead of writing the RGBA values for every pixel. Like
+    using JPEGs, this is another way of drastically reducing the needed disk
+    space of the rendered images.
 
 ``jpeg_quality = <number between 0 and 100>``
 
