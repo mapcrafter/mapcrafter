@@ -67,7 +67,7 @@ The following options are relevant for all log sink types.
     **Default:** ``INFO``
     
     This is the verbosity of the log sink, i.e. the minimum log level a message must
-    have to be handled by the log sink. Available log levels are (according to syslog):
+    have to be handled by the log sink. Available log levels are (according to RFC 5424):
     
     * ``DEBUG``, ``INFO``, ``NOTICE``, ``WARNING``, ``ERROR``, ``FATAL``, ``ALERT``,
       ``EMERGENCY``
