@@ -503,7 +503,7 @@ Map Options
     This is the image format the renderer uses for the tile images.
     You can render your maps to PNGs or to JPEGs. PNGs are losless, 
     JPEGs are faster to write and need less disk space. Also consider
-    the ``png_indexed`` and ``jpqg_quality`` options.
+    the ``png_indexed`` and ``jpeg_quality`` options.
 
 ``png_indexed = true|false``
 
