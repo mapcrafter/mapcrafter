@@ -27,6 +27,8 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
+#include <locale.h>
+
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
@@ -34,9 +36,17 @@ namespace fs = boost::filesystem;
 using namespace mapcrafter;
 
 int main(int argc, char** argv) {
+    //locale runtime error check
+    try {
+	    std::string locale = std::locale("").name();
+	} catch (const std::runtime_error& error) {
+	    std::cout << "locale error!\nneed set locale!\ne.g. export LC_CTYPE=en_US.UTF-8\n";
+	    return 0;
+	}
+
 	renderer::RenderOpts opts;
 	std::string color, config;
-
+	
 	po::options_description general("General options");
 	general.add_options()
 		("help,h", "shows this help message")
