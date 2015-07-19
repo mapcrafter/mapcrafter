@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
 	} catch (std::runtime_error& ex) {
 		std::cerr << "There seems to be an issue with your locale, please verify your environment:"
 			<< ex.what() << std::endl;
-		throw;
+		throw ex;
 	}
 
 	renderer::RenderOpts opts;
