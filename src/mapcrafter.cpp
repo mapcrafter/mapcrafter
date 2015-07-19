@@ -36,17 +36,18 @@ namespace fs = boost::filesystem;
 using namespace mapcrafter;
 
 int main(int argc, char** argv) {
-    //locale runtime error check
-    try {
-	    std::string locale = std::locale("").name();
-	} catch (const std::runtime_error& error) {
-	    std::cout << "locale error!\nneed set locale!\ne.g. export LC_CTYPE=en_US.UTF-8\n";
-	    return 0;
+
+	try {
+		std::string locale = std::locale("").name();
+	} catch (std::runtime_error& ex) {
+		std::cerr << "There seems to be an issue with your locale, please verify your environment:"
+			<< ex.what() << std::endl;
+		throw;
 	}
 
 	renderer::RenderOpts opts;
 	std::string color, config;
-	
+
 	po::options_description general("General options");
 	general.add_options()
 		("help,h", "shows this help message")
@@ -121,7 +122,7 @@ int main(int argc, char** argv) {
 		fs::path mapcrafter_bin = util::findExecutablePath();
 		std::cout << "Your home directory: " << util::findHomeDir().string() << std::endl;
 		std::cout << "Mapcrafter binary: " << mapcrafter_bin.string() << std::endl;
-		
+
 		util::PathList resources = util::findResourceDirs(mapcrafter_bin);
 		std::cout << "Resource directories:" << std::endl;
 		for (size_t i = 0; i < resources.size(); i++)
