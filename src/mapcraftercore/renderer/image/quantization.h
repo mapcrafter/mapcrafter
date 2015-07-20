@@ -31,6 +31,11 @@ namespace renderer {
 
 class Octree;
 
+// number of significant bits to use of the color components
+// determines the count of leaves in the octree
+// -> more bits, more leaves, more memory/time needed
+const int COLOR_BITS = 5;
+
 /**
  * Represents an octree which is used for color quantization.
  *
@@ -46,7 +51,7 @@ public:
 	/**
 	 * Constructor.
 	 */
-	Octree(Octree* parent = nullptr);
+	Octree(Octree* parent = nullptr, int level = 0);
 
 	/**
 	 * Yeah, destructor.
@@ -62,6 +67,11 @@ public:
 	 * Returns the (const) parent of this node.
 	 */
 	const Octree* getParent() const;
+
+	/**
+	 * Returns the level of the node (distance to root node).
+	 */
+	int getLevel() const;
 
 	/**
 	 * Returns whether this node is a leaf.
@@ -99,6 +109,11 @@ public:
 	RGBAPixel getColor() const;
 
 	/**
+	 * Returns how many color this node represents.
+	 */
+	int getReference() const;
+
+	/**
 	 * Adds a color to this node.
 	 */
 	void setColor(RGBAPixel color);
@@ -107,6 +122,12 @@ public:
 	 * Resets the own color and adds the reference/red/green/blue to its own color.
 	 */
 	void reduceColor();
+
+	/**
+	 * Reduces the colors of this node to the parent node and automatically removes the
+	 * node from the parent. You have to delete the node after that on your own.
+	 */
+	void reduceToParent();
 
 	/**
 	 * Returns the color palette index of the color associated with this node (if any).
@@ -144,15 +165,17 @@ protected:
 	// parent and children of this node
 	Octree* parent;
 	Octree* children[8];
+	int level;
 
 	// how many colors this node represents
 	// only leaves or reduced nodes have a reference != 0
 	int reference;
 	// sum of represented colors -> average is color of this node
 	int red, green, blue;
+	
+	
 	// index of the belonging color in the color palette (if any)
 	int color_id;
-
 	// TODO link with color palette?
 	// array of palette colors (color index, color) in subtrees of this node
 	std::vector<std::pair<int, RGBAPixel>> subtree_colors;
@@ -192,6 +215,10 @@ protected:
  */
 void octreeColorQuantize(const RGBAImage& image, size_t max_colors,
 		std::vector<RGBAPixel>& colors, Octree** octree = nullptr);
+
+void octreeColorQuantize2(const RGBAImage& image, size_t max_colors,
+		std::vector<RGBAPixel>& colors, Octree** octree = nullptr);
+
 
 }
 }

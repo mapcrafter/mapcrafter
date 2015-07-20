@@ -579,7 +579,7 @@ bool RGBAImage::writeIndexedPNG(const std::string& filename, int palette_bits, b
 	//std::cout << "Doing quantization." << std::endl;
 	Octree* octree;
 	std::vector<RGBAPixel> colors;
-	octreeColorQuantize(*this, palette_size, colors, &octree);
+	octreeColorQuantize2(*this, palette_size, colors, &octree);
 	palette_size = colors.size();
 	//std::cout << "Finished quantization. " << palette_size << " colors." << std::endl;
 

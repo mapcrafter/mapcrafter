@@ -20,12 +20,13 @@
 #include "quantization.h"
 
 #include <set>
+#include <queue>
 
 namespace mapcrafter {
 namespace renderer {
 
-Octree::Octree(Octree* parent)
-	: parent(parent), reference(0), red(0), green(0), blue(0), color_id(-1) {
+Octree::Octree(Octree* parent, int level)
+	: parent(parent), level(level), reference(0), red(0), green(0), blue(0), color_id(-1) {
 	for (int i = 0; i < 8; i++)
 		children[i] = nullptr;
 }
@@ -42,6 +43,10 @@ Octree* Octree::getParent() {
 
 const Octree* Octree::getParent() const {
 	return parent;
+}
+
+int Octree::getLevel() const {
+	return level;
 }
 
 bool Octree::isLeaf() const {
@@ -67,7 +72,7 @@ int Octree::getChildrenCount() const {
 Octree* Octree::getChildren(int index) {
 	assert(index >= 0 && index < 8);
 	if (!children[index])
-		children[index] = new Octree(this);
+		children[index] = new Octree(this, level + 1);
 	return children[index];
 }
 
@@ -86,6 +91,10 @@ RGBAPixel Octree::getColor() const {
 	assert(hasColor());
 	// TODO how to handle alpha values?
 	return rgba(red / reference, green / reference, blue / reference, 255);
+}
+
+int Octree::getReference() const {
+	return reference;
 }
 
 void Octree::setColor(RGBAPixel color) {
@@ -107,6 +116,22 @@ void Octree::reduceColor() {
 		red += children[i]->red;
 		green += children[i]->green;
 		blue += children[i]->blue;
+	}
+}
+
+void Octree::reduceToParent() {
+	assert(isLeaf());
+	
+	parent->reference += reference;
+	parent->red += red;
+	parent->green += green;
+	parent->blue += blue;
+	
+	for (int i = 0; i < 8; i++) {
+		if (parent->children[i] == this) {
+			parent->children[i] = nullptr;
+			break;
+		}
 	}
 }
 
@@ -143,7 +168,7 @@ Octree* Octree::findOrCreateNode(Octree* octree, RGBAPixel color) {
 	uint8_t blue = rgba_blue(color);
 
 	Octree* node = octree;
-	for (int i = 7; i >= 0; i--) {
+	for (int i = 7; i >= 8 - COLOR_BITS; i--) {
 		int index = (nth_bit(red, i) << 2) | (nth_bit(green, i) << 1) | nth_bit(blue, i);
 		node = node->getChildren(index);
 		assert(node != nullptr);
@@ -169,7 +194,7 @@ int Octree::findNearestColor(const Octree* octree, RGBAPixel color) {
 	uint8_t blue = rgba_blue(color);
 
 	const Octree* node = octree;
-	for (int i = 7; i >= 0; i--) {
+	for (int i = 7; i >= 8 - COLOR_BITS; i--) {
 		if (node->hasColor())
 			break;
 		int index = (nth_bit(red, i) << 2) | (nth_bit(green, i) << 1) | nth_bit(blue, i);
@@ -283,6 +308,76 @@ void octreeColorQuantize(const RGBAImage& image, size_t max_colors,
 				}
 			}
 		}
+	}
+
+	if (octree != nullptr)
+		*octree = internal_octree;
+	else
+		delete internal_octree;
+}
+
+namespace {
+
+struct NodeComparator {
+	bool operator()(const Octree* node1, const Octree* node2) const {
+		// reduce nodes on higher levels first
+		if (node1->getLevel() != node2->getLevel())
+			return node1->getLevel() < node2->getLevel();
+		// reduce nodes with fewer colors first
+		if (node1->getReference() != node2->getReference())
+			return node1->getReference() > node2->getReference();
+		return node1 < node2;
+	};
+};
+
+}
+
+/**
+ * Simple octree color quantization: Similar to http://rosettacode.org/wiki/Color_quantization#C
+ */
+void octreeColorQuantize2(const RGBAImage& image, size_t max_colors,
+		std::vector<RGBAPixel>& colors, Octree** octree) {
+	assert(max_colors > 0);
+
+	// have an octree with the colors as leaves
+	Octree* internal_octree = new Octree();
+	// and a priority queue of leaves to be processed
+	// the order of leaves is very important, see NodeComparator
+	std::priority_queue<Octree*, std::vector<Octree*>, NodeComparator> queue;
+
+	// insert the colors into the octree
+	for (int x = 0; x < image.getWidth(); x++) {
+		for (int y = 0; y < image.getHeight(); y++) {
+			RGBAPixel color = image.pixel(x, y);
+			Octree* node = Octree::findOrCreateNode(internal_octree, color);
+			node->setColor(color);
+			// add the leaf only once to the queue
+			if (node->getReference() == 1)
+				queue.push(node);
+		}
+	}
+
+	// now: reduce the leaves until we have less colors than maximum
+	while (queue.size() > max_colors) {
+		Octree* node = queue.top();
+		queue.pop();
+		
+		// add the color value of the leaf to the parent
+		node->reduceToParent();
+		Octree* parent = node->getParent();
+		// delete the leaf (leaf is automatically removed from parent in reduceToParent())
+		delete node;
+
+		// add parent to queue if it is a leaf now
+		if (parent->isLeaf())
+			queue.push(parent);
+	}
+
+	// gather the quantized colors
+	while (queue.size()) {
+		queue.top()->setColorID(colors.size());
+		colors.push_back(queue.top()->getColor());
+		queue.pop();
 	}
 
 	if (octree != nullptr)
