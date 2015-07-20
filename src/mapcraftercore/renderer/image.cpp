@@ -641,6 +641,7 @@ bool RGBAImage::writeIndexedPNG(const std::string& filename, int palette_bits, b
 		png_free(png, rows[y]);
 	png_free(png, rows);
 	png_free(png, palette);
+	png_free(png, palette_alpha);
 	delete octree;
 	png_destroy_write_struct(&png, &info);
 	return true;
