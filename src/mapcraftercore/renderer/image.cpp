@@ -588,14 +588,23 @@ bool RGBAImage::writeIndexedPNG(const std::string& filename, int palette_bits, b
 		png_destroy_write_struct(&png, &info);
 		return false;
 	}
+	
+	png_byte* palette_alpha = (png_byte*) png_malloc(png, palette_size * sizeof(png_byte));
+	if (palette == NULL) {
+		png_free(png, palette);
+		png_destroy_write_struct(&png, &info);
+		return false;
+	}
 
 	for (int i = 0; i < palette_size; i++) {
 		palette[i].red = rgba_red(colors[i]);
 		palette[i].green = rgba_green(colors[i]);
 		palette[i].blue = rgba_blue(colors[i]);
+		palette_alpha[i] = rgba_alpha(colors[i]);
 	}
 
 	png_set_PLTE(png, info, palette, palette_size);
+	png_set_tRNS(png, info, palette_alpha, palette_size, NULL);
 
 	std::vector<int> data_dithered;
 	if (dithered) {

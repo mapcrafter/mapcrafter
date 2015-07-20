@@ -164,14 +164,14 @@ public:
 protected:
 	// parent and children of this node
 	Octree* parent;
-	Octree* children[8];
+	Octree* children[16];
 	int level;
 
 	// how many colors this node represents
 	// only leaves or reduced nodes have a reference != 0
 	int reference;
 	// sum of represented colors -> average is color of this node
-	int red, green, blue;
+	int red, green, blue, alpha;
 	
 	
 	// index of the belonging color in the color palette (if any)

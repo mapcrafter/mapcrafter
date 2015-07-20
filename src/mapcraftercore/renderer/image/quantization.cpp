@@ -26,13 +26,13 @@ namespace mapcrafter {
 namespace renderer {
 
 Octree::Octree(Octree* parent, int level)
-	: parent(parent), level(level), reference(0), red(0), green(0), blue(0), color_id(-1) {
-	for (int i = 0; i < 8; i++)
+	: parent(parent), level(level), reference(0), red(0), green(0), blue(0), alpha(0), color_id(-1) {
+	for (int i = 0; i < 16; i++)
 		children[i] = nullptr;
 }
 
 Octree::~Octree() {
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 16; i++)
 		if (children[i])
 			delete children[i];
 }
@@ -50,34 +50,34 @@ int Octree::getLevel() const {
 }
 
 bool Octree::isLeaf() const {
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 16; i++)
 		if (children[i])
 			return false;
 	return true;
 }
 
 bool Octree::hasChildren(int index) const {
-	assert(index >= 0 && index < 8);
+	assert(index >= 0 && index < 16);
 	return children[index] != nullptr;
 }
 
 int Octree::getChildrenCount() const {
 	int count = 0;
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 16; i++)
 		if (children[i])
 			count++;
 	return count;
 }
 
 Octree* Octree::getChildren(int index) {
-	assert(index >= 0 && index < 8);
+	assert(index >= 0 && index < 16);
 	if (!children[index])
 		children[index] = new Octree(this, level + 1);
 	return children[index];
 }
 
 const Octree* Octree::getChildren(int index) const {
-	assert(index >= 0 && index < 8);
+	assert(index >= 0 && index < 16);
 	if (!children[index])
 		return nullptr;
 	return children[index];
@@ -90,7 +90,7 @@ bool Octree::hasColor() const {
 RGBAPixel Octree::getColor() const {
 	assert(hasColor());
 	// TODO how to handle alpha values?
-	return rgba(red / reference, green / reference, blue / reference, 255);
+	return rgba(red / reference, green / reference, blue / reference, alpha / reference);
 }
 
 int Octree::getReference() const {
@@ -103,12 +103,13 @@ void Octree::setColor(RGBAPixel color) {
 	red += rgba_red(color);
 	green += rgba_green(color);
 	blue += rgba_blue(color);
+	alpha += rgba_alpha(color);
 }
 
 void Octree::reduceColor() {
 	assert(!isLeaf());
 	reference = red = green = blue = 0;
-	for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < 16; i++) {
 		if (!children[i])
 			continue;
 		assert(children[i]->hasColor());
@@ -116,6 +117,7 @@ void Octree::reduceColor() {
 		red += children[i]->red;
 		green += children[i]->green;
 		blue += children[i]->blue;
+		alpha += children[i]->alpha;
 	}
 }
 
@@ -126,8 +128,9 @@ void Octree::reduceToParent() {
 	parent->red += red;
 	parent->green += green;
 	parent->blue += blue;
+	parent->alpha += alpha;
 	
-	for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < 16; i++) {
 		if (parent->children[i] == this) {
 			parent->children[i] = nullptr;
 			break;
@@ -166,10 +169,11 @@ Octree* Octree::findOrCreateNode(Octree* octree, RGBAPixel color) {
 	uint8_t red = rgba_red(color);
 	uint8_t green = rgba_green(color);
 	uint8_t blue = rgba_blue(color);
+	uint8_t alpha = rgba_alpha(color);
 
 	Octree* node = octree;
 	for (int i = 7; i >= 8 - COLOR_BITS; i--) {
-		int index = (nth_bit(red, i) << 2) | (nth_bit(green, i) << 1) | nth_bit(blue, i);
+		int index = (nth_bit(red, i) << 3) | (nth_bit(green, i) << 2) | nth_bit(blue, i) << 1 | nth_bit(alpha, i);
 		node = node->getChildren(index);
 		assert(node != nullptr);
 	}
@@ -181,7 +185,8 @@ namespace {
 int colorDistanceSquare(RGBAPixel color1, RGBAPixel color2) {
 	return std::pow(rgba_red(color1) - rgba_red(color2), 2)
 			+ std::pow(rgba_green(color1) - rgba_green(color2), 2)
-			+ std::pow(rgba_blue(color1) - rgba_blue(color2), 2);
+			+ std::pow(rgba_blue(color1) - rgba_blue(color2), 2)
+			+ std::pow(rgba_alpha(color1) - rgba_alpha(color2), 2);
 }
 
 }
@@ -192,12 +197,13 @@ int Octree::findNearestColor(const Octree* octree, RGBAPixel color) {
 	uint8_t red = rgba_red(color);
 	uint8_t green = rgba_green(color);
 	uint8_t blue = rgba_blue(color);
+	uint8_t alpha = rgba_alpha(color);
 
 	const Octree* node = octree;
 	for (int i = 7; i >= 8 - COLOR_BITS; i--) {
 		if (node->hasColor())
 			break;
-		int index = (nth_bit(red, i) << 2) | (nth_bit(green, i) << 1) | nth_bit(blue, i);
+		int index = (nth_bit(red, i) << 3) | (nth_bit(green, i) << 2) | nth_bit(blue, i) << 1 | nth_bit(alpha, i);
 		if (node->hasChildren(index))
 			node = node->getChildren(index);
 		else
@@ -289,7 +295,7 @@ void octreeColorQuantize(const RGBAImage& image, size_t max_colors,
 
 	// gather reduced colors
 	for (auto parent_it = parents.begin(); parent_it != parents.end(); ++parent_it) {
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 16; i++) {
 			if ((*parent_it)->hasChildren(i)) {
 				Octree* node = (*parent_it)->getChildren(i);
 				node->setColorID(colors.size());
@@ -299,7 +305,7 @@ void octreeColorQuantize(const RGBAImage& image, size_t max_colors,
 	}
 	
 	for (auto parent_it = next_parents.begin(); parent_it != next_parents.end(); ++parent_it) {
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 16; i++) {
 			if ((*parent_it)->hasChildren(i)) {
 				Octree* children = (*parent_it)->getChildren(i);
 				if (!parents.count(children)) {
