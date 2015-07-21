@@ -27,29 +27,27 @@
 namespace renderer = mapcrafter::renderer;
 using namespace renderer;
 
-int traverseCountOctree(const Octree* octree, const std::set<RGBAPixel>& colors) {
-	int leaves = 0;
-	if (octree->hasColor()) {
-		leaves++;
-		BOOST_CHECK(colors.count(octree->getColor()));
-	}
-
-	for (int i = 0; i < 8; i++) {
+void traverseCheckOctree(const Octree* octree) {
+	// root <-> level = 0
+	BOOST_CHECK(!octree->isRoot() == (octree->getLevel() == 0));
+	BOOST_CHECK(octree->isRoot() == !octree->isLeaf());
+	BOOST_CHECK(octree->hasColor() == octree->isLeaf());
+	for (int i = 0; i < 16; i++) {
 		if (octree->hasChildren(i))
-			leaves += traverseCountOctree(octree->getChildren(i), colors);
+			traverseCheckOctree(octree->getChildren(i));
 	}
-	return leaves;
 }
 
 void traverseReduceOctree(Octree* octree) {
-	for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < 16; i++) {
 		if (!octree->hasChildren(i))
 			continue;
-		Octree* children = octree->getChildren(i);
-		traverseReduceOctree(children);
+		traverseReduceOctree(octree->getChildren(i));
 	}
-	if (!octree->isLeaf())
-		octree->reduceColor();
+	if (octree->isLeaf() && !octree->isRoot()) {
+		octree->reduceToParent();
+		delete octree;
+	}
 }
 
 void testOctreeWithImage(const RGBAImage& image) {
@@ -73,10 +71,8 @@ void testOctreeWithImage(const RGBAImage& image) {
 	}
 
 	// make sure that all colors are inserted correctly
-	BOOST_CHECK(!octree.isLeaf());
+	BOOST_CHECK(octree.isRoot() && !octree.isLeaf());
 	BOOST_CHECK(!octree.hasColor());
-	int color_count = traverseCountOctree(&octree, colors);
-	BOOST_CHECK_EQUAL(color_count, colors.size());
 
 	// reduce all colors up to the root of the tree
 	// the color should be the overall average color

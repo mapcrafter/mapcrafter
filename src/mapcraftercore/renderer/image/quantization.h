@@ -37,14 +37,13 @@ class Octree;
 const int COLOR_BITS = 5;
 
 /**
- * Represents an octree which is used for color quantization.
+ * Represents an octree (actually a hextree) which is used for color quantization.
  *
- * Have a look at this: http://www.cubic.org/docs/octree.htm
+ * Have a look at this: 
+ *  - http://www.cubic.org/docs/octree.htm
+ *  - http://rosettacode.org/wiki/Color_quantization#C
+ * 
  * Octrees are cool! \o/
- *
- * TODO delete children after reducing nodes?
- * TODO use only the first few X bits of color component Y?
- * TODO alpha? -> Hextree!
  */
 class Octree {
 public:
@@ -72,6 +71,11 @@ public:
 	 * Returns the level of the node (distance to root node).
 	 */
 	int getLevel() const;
+
+	/**
+	 * Returns whether this node is the root of the tree.
+	 */
+	bool isRoot() const;
 
 	/**
 	 * Returns whether this node is a leaf.
@@ -111,17 +115,12 @@ public:
 	/**
 	 * Returns how many color this node represents.
 	 */
-	int getReference() const;
+	int getCount() const;
 
 	/**
 	 * Adds a color to this node.
 	 */
 	void setColor(RGBAPixel color);
-
-	/**
-	 * Resets the own color and adds the reference/red/green/blue to its own color.
-	 */
-	void reduceColor();
 
 	/**
 	 * Reduces the colors of this node to the parent node and automatically removes the
@@ -215,10 +214,6 @@ protected:
  */
 void octreeColorQuantize(const RGBAImage& image, size_t max_colors,
 		std::vector<RGBAPixel>& colors, Octree** octree = nullptr);
-
-void octreeColorQuantize2(const RGBAImage& image, size_t max_colors,
-		std::vector<RGBAPixel>& colors, Octree** octree = nullptr);
-
 
 }
 }
