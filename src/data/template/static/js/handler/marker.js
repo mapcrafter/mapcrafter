@@ -19,10 +19,18 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 		var marker = new L.Marker(ui.mcToLatLng(pos[0], pos[1], pos[2]), {
 			title: markerInfo.title,
 		});
-		if(groupInfo.icon) {
+
+		// The icon may be specified on either a marker or group level, with
+		// preference for the marker-specific icon.
+		var icon = markerInfo.icon ? markerInfo.icon : groupInfo.icon;
+		var iconSize = markerInfo.iconSize ? markerInfo.iconSize : groupInfo.iconSize;
+
+		if(icon) {
 			marker.setIcon(new L.Icon({
-				iconUrl: groupInfo.icon != "" ? "static/markers/" + groupInfo.icon : null,
-				iconSize: (groupInfo.iconSize ? groupInfo.iconSize : [24, 24]),
+				// The icon URL itself may be given relative to "static/markers"
+				// or as an absolute URL (perhaps to a resource on a CDN).
+				iconUrl: icon.match(/^\w+:\/\//) ? icon : "static/markers/" + icon,
+				iconSize: (iconSize ? iconSize : [24, 24]),
 			}));
 		}
 		marker.bindPopup(markerInfo.text ? markerInfo.text : markerInfo.title);
