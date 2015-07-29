@@ -156,8 +156,9 @@ void LightingRenderer::createShade(RGBAImage& image, const CornerColors& corners
 }
 
 LightingRenderMode::LightingRenderMode(bool day, double lighting_intensity,
-		bool simulate_sun_light)
+		double lighting_water_intensity, bool simulate_sun_light)
 	: day(day), lighting_intensity(lighting_intensity),
+	  lighting_water_intensity(lighting_water_intensity),
 	  simulate_sun_light(simulate_sun_light) {
 }
 
@@ -291,29 +292,31 @@ LightingData LightingRenderMode::getBlockLight(const mc::BlockPos& pos) {
 	return light;
 }
 
-LightingColor LightingRenderMode::getLightingColor(const mc::BlockPos& pos) {
+LightingColor LightingRenderMode::getLightingColor(const mc::BlockPos& pos, double intensity) {
 	LightingData lighting = getBlockLight(pos);
 	LightingColor color = calculateLightingColor(lighting);
-	return color + (1-color)*(1-lighting_intensity);
+	return color + (1-color)*(1-intensity);
 }
 
 LightingColor LightingRenderMode::getCornerColor(const mc::BlockPos& pos,
-		const CornerNeighbors& corner) {
+		const CornerNeighbors& corner, double intensity) {
 	LightingColor color = 0;
-	color += getLightingColor(pos + corner.pos1) * 0.25;
-	color += getLightingColor(pos + corner.pos2) * 0.25;
-	color += getLightingColor(pos + corner.pos3) * 0.25;
-	color += getLightingColor(pos + corner.pos4) * 0.25;
+	color += getLightingColor(pos + corner.pos1, intensity) * 0.25;
+	color += getLightingColor(pos + corner.pos2, intensity) * 0.25;
+	color += getLightingColor(pos + corner.pos3, intensity) * 0.25;
+	color += getLightingColor(pos + corner.pos4, intensity) * 0.25;
 	return color;
 }
 
 CornerColors LightingRenderMode::getCornerColors(const mc::BlockPos& pos,
-		const FaceCorners& corners) {
+		const FaceCorners& corners, double intensity) {
+	if (intensity < 0)
+		intensity = lighting_intensity;
 	CornerColors colors = {{
-		getCornerColor(pos, corners.corner1),
-		getCornerColor(pos, corners.corner2),
-		getCornerColor(pos, corners.corner3),
-		getCornerColor(pos, corners.corner4),
+		getCornerColor(pos, corners.corner1, intensity),
+		getCornerColor(pos, corners.corner2, intensity),
+		getCornerColor(pos, corners.corner3, intensity),
+		getCornerColor(pos, corners.corner4, intensity),
 	}};
 	return colors;
 }
@@ -323,6 +326,7 @@ void LightingRenderMode::doSmoothLight(RGBAImage& image, const mc::BlockPos& pos
 	// check if lighting faces are visible
 	bool light_left = true, light_right = true, light_top = true;
 	bool water = (id == 8 || id == 9) && (data & util::binary<1111>::value) == 0;
+	bool under_water[3] = {false, false, false};
 
 	if (water) {
 		// DATA_{WEST,SOUTH,TOP} means for non-opaque water that there are water faces
@@ -346,26 +350,32 @@ void LightingRenderMode::doSmoothLight(RGBAImage& image, const mc::BlockPos& pos
 	mc::Block block;
 	if (light_left) {
 		block = getBlock(pos + mc::DIR_WEST);
+		under_water[0] = block.id == 8 || block.id == 9;
 		light_left = block.id == 0 || images->isBlockTransparent(block.id, block.data);
 	}
 	if (light_right) {
 		block = getBlock(pos + mc::DIR_SOUTH);
+		under_water[1] = block.id == 8 || block.id == 9;
 		light_right = block.id == 0 || images->isBlockTransparent(block.id, block.data);
 	}
 	if (light_top) {
 		block = getBlock(pos + mc::DIR_TOP);
+		under_water[2] = block.id == 8 || block.id == 9;
 		light_top = block.id == 0 || images->isBlockTransparent(block.id, block.data);
 	}
 
+	double intensity = lighting_intensity;
+	double water_intensity = lighting_water_intensity; // 0.65* lighting_intensity;
+
 	// do the lighting
 	if (light_left)
-		renderer->lightLeft(image, getCornerColors(pos, CORNERS_LEFT));
+		renderer->lightLeft(image, getCornerColors(pos, CORNERS_LEFT, under_water[0] ? water_intensity : intensity));
 
 	if (light_right)
-		renderer->lightRight(image, getCornerColors(pos, CORNERS_RIGHT));
+		renderer->lightRight(image, getCornerColors(pos, CORNERS_RIGHT, under_water[1] ? water_intensity : intensity));
 
 	if (light_top)
-		renderer->lightTop(image, getCornerColors(pos, CORNERS_TOP));
+		renderer->lightTop(image, getCornerColors(pos, CORNERS_TOP, under_water[2] ? water_intensity : intensity));
 }
 
 void LightingRenderMode::doSlabLight(RGBAImage& image, const mc::BlockPos& pos,
@@ -399,7 +409,7 @@ void LightingRenderMode::doSlabLight(RGBAImage& image, const mc::BlockPos& pos,
 
 void LightingRenderMode::doSimpleLight(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
-	uint8_t factor = getLightingColor(pos) * 255;
+	uint8_t factor = getLightingColor(pos, lighting_intensity) * 255;
 
 	int size = image.getWidth();
 	for (int x = 0; x < size; x++) {

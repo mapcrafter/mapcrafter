@@ -32,6 +32,7 @@ using namespace mapcrafter::renderer;
 int main(int argc, char **argv) {
 	std::string texture_dir, output_file, render_view;
 	int texture_size, texture_blur;
+	double water_opacity;
 
 	po::options_description all("Allowed options");
 	all.add_options()
@@ -46,7 +47,9 @@ int main(int argc, char **argv) {
 		("texture-size,t", po::value<int>(&texture_size),
 			"the texture size used to generate the blocks (default: 16)")
 		("texture-blur,b", po::value<int>(&texture_blur),
-			"the texture blur used to generate the blocks (default: 0)");
+			"the texture blur used to generate the blocks (default: 0)")
+		("water-opacity,w", po::value<double>(&water_opacity),
+			"have a look on the docs on your own! I'm too lazy right now!");
 
 	po::variables_map vm;
 	try {
@@ -84,9 +87,11 @@ int main(int argc, char **argv) {
 		texture_size = 16;
 	if (!vm.count("texture-blur"))
 		texture_blur = 0;
+	if (!vm.count("water-opacity"))
+		water_opacity = 1.0;
 
 	TextureResources resources;
-	if (!resources.loadTextures(texture_dir, texture_size, texture_blur))
+	if (!resources.loadTextures(texture_dir, texture_size, texture_blur, water_opacity))
 		return 1;
 
 	BlockImages* images;

@@ -149,10 +149,12 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  rotations = " << rotations << std::endl;
 	out << "  texture_dir = " << texture_dir << std::endl;
 	out << "  texture_size = " << texture_size << std::endl;
+	out << "  water_opacity = " << water_opacity << std::endl;
 	out << "  image_format = " << image_format << std::endl;
 	out << "  png_indexed = " << png_indexed << std::endl;
 	out << "  jpeg_quality = " << jpeg_quality << std::endl;
 	out << "  lighting_intensity = " << lighting_intensity << std::endl;
+	out << "  lighting_water_intensity = " << water_opacity << std::endl;
 	out << "  render_unknown_blocks = " << render_unknown_blocks << std::endl;
 	out << "  render_leaves_transparent = " << render_leaves_transparent << std::endl;
 	out << "  render_biomes = " << render_biomes << std::endl;
@@ -203,6 +205,10 @@ int MapSection::getTextureBlur() const {
 	return texture_blur.getValue();
 }
 
+double MapSection::getWaterOpacity() const {
+	return water_opacity.getValue();
+}
+
 int MapSection::getTileWidth() const {
 	return tile_width.getValue();
 }
@@ -227,6 +233,10 @@ int MapSection::getJPEGQuality() const {
 
 double MapSection::getLightingIntensity() const {
 	return lighting_intensity.getValue();
+}
+
+double MapSection::getLightingWaterIntensity() const {
+	return lighting_water_intensity.getValue();
 }
 
 bool MapSection::renderUnknownBlocks() const {
@@ -274,6 +284,7 @@ void MapSection::preParse(const INIConfigSection& section,
 		texture_dir.setDefault(texture_dir_found);
 	texture_size.setDefault(12);
 	texture_blur.setDefault(0);
+	water_opacity.setDefault(0.0);
 	tile_width.setDefault(1);
 
 	image_format.setDefault(ImageFormat::PNG);
@@ -281,6 +292,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	jpeg_quality.setDefault(85);
 
 	lighting_intensity.setDefault(1.0);
+	lighting_water_intensity.setDefault(1.0);
 	render_unknown_blocks.setDefault(false);
 	render_leaves_transparent.setDefault(true);
 	render_biomes.setDefault(true);
@@ -316,7 +328,11 @@ bool MapSection::parseField(const std::string key, const std::string value,
 	} else if (key == "texture_size") {
 		if (texture_size.load(key, value, validation)
 				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 32))
-				validation.error("'texture_size' must a number between 1 and 32!");
+			validation.error("'texture_size' must be a number between 1 and 32!");
+	} else if (key == "water_opacity") {
+		if (water_opacity.load(key, value, validation)
+				&& (water_opacity.getValue() < 0 || water_opacity.getValue() >= 1.0))
+			validation.error("'water_opacity' must be a number between 0.0 and 1.0!");
 	} else if (key == "tile_width") {
 		tile_width.load(key, value, validation);
 		if (tile_width.getValue() < 1)
@@ -331,6 +347,8 @@ bool MapSection::parseField(const std::string key, const std::string value,
 			validation.error("'jpeg_quality' must be a number between 0 and 100!");
 	} else if (key == "lighting_intensity") {
 		lighting_intensity.load(key, value, validation);
+	} else if (key == "lighting_water_intensity") {
+		lighting_water_intensity.load(key, value, validation);
 	} else if (key == "render_unknown_blocks") {
 		render_unknown_blocks.load(key, value, validation);
 	} else if (key == "render_leaves_transparent") {

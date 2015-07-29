@@ -134,12 +134,15 @@ public:
 	 * Error/warning messages will be logged with the logging facility if there is
 	 * something wrong with the textures.
 	 *
-	 * You can also specify a texture size and a texture blur radius to apply to the
-	 * texture files. A texture size of 12px and a texture blur radius of 0px is used
-	 * per default.
+	 * You can also specify a texture size, a texture blur radius to apply to
+	 * the texture files and a custom water opacity. A texture size of 12px and
+	 * a texture blur radius of 0px is used per default. The water opacity must be within
+	 * range [0; 1] (Default 1) and is a factor which is applied to the opacity of the
+	 * water texture. With 1.0 the alpha channel of the texture is not changed, with 0.0
+	 * the texture will be completely transparent.
 	 */
 	bool loadTextures(const std::string& texture_dir, int texture_size = 12,
-			int texture_blur = 0);
+			int texture_blur = 0, double water_opacity = 1.0);
 
 	/**
 	 * Returns the loaded block texture files.
@@ -206,6 +209,7 @@ private:
 
 	// used texture size, blur
 	int texture_size, texture_blur;
+	double water_opacity;
 
 	// all the loaded texture images
 	BlockTextures block_textures;

@@ -104,6 +104,7 @@ public:
 	fs::path getTextureDir() const;
 	int getTextureSize() const;
 	int getTextureBlur() const;
+	double getWaterOpacity() const;
 	int getTileWidth() const;
 
 	ImageFormat getImageFormat() const;
@@ -112,6 +113,7 @@ public:
 	int getJPEGQuality() const;
 
 	double getLightingIntensity() const;
+	double getLightingWaterIntensity() const;
 	bool renderUnknownBlocks() const;
 	bool renderLeavesTransparent() const;
 	bool renderBiomes() const;
@@ -143,12 +145,13 @@ private:
 
 	Field<fs::path> texture_dir;
 	Field<int> texture_size, texture_blur, tile_width;
+	Field<double> water_opacity;
 
 	Field<ImageFormat> image_format;
     Field<bool> png_indexed;
 	Field<int> jpeg_quality;
 
-	Field<double> lighting_intensity;
+	Field<double> lighting_intensity, lighting_water_intensity;
 	Field<bool> cave_high_contrast;
 	Field<bool> render_unknown_blocks, render_leaves_transparent, render_biomes, use_image_mtimes;
 

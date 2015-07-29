@@ -35,7 +35,7 @@ TextureImage::TextureImage(const std::string& name)
 TextureImage::~TextureImage() {
 }
 
-bool TextureImage::load(const std::string& path, int size, int blur) {
+bool TextureImage::load(const std::string& path, int size, int blur, double water_opacity) {
 	// at first try to load the texture file
 	if (!original.readPNG(path + "/" + name + ".png")) {
 		// make sure the texture image does not have zero dimension
@@ -67,15 +67,27 @@ bool TextureImage::load(const std::string& path, int size, int blur) {
 	else
 		original.resize(original_resized, size, size * frame_count);
 
+	int width = original_resized.getWidth();
+	int height = original_resized.getHeight();
 	// apply a blur to the texture if wanted
 	// this is useful if you use small texture sizes (< 6 maybe) to prevent grainy textures
 	if (blur != 0) {
-		int width = original_resized.getWidth();
 		for (int i = 0; i < frame_count; i++) {
 			RGBAImage frame;
 			// process every frame individually
 			original_resized.clip(0, width * i, width, width).blur(frame, blur);
 			original_resized.simpleBlit(frame, 0, width * i);
+		}
+	}
+
+	// apply opacity factor to water textures
+	if (util::startswith(name, "water_") && water_opacity != 1.0) {
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				RGBAPixel& pixel = original_resized.pixel(x, y);
+				uint8_t alpha = std::min(255.0, rgba_alpha(pixel) * water_opacity);
+				pixel = rgba(rgba_red(pixel), rgba_green(pixel), rgba_blue(pixel), alpha);
+			}
 		}
 	}
 

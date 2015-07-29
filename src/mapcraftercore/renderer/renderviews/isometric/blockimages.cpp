@@ -2286,6 +2286,11 @@ int IsometricBlockImages::createOpaqueWater() {
 		blitFace(opaque_water[2], FACE_TOP, water, 0, 0, false);
 		blitFace(opaque_water[3], FACE_TOP, water, 0, 0, false);
 
+		blitFace(opaque_water[1], FACE_SOUTH, water, 0, 0, true, dleft, dright);
+		blitFace(opaque_water[2], FACE_WEST, water, 0, 0, true, dleft, dright);
+		blitFace(opaque_water[3], FACE_SOUTH, water, 0, 0, true, dleft, dright);
+		blitFace(opaque_water[3], FACE_WEST, water, 0, 0, true, dleft, dright);
+
 		// then check alpha
 		uint8_t min_alpha = 255;
 		for (TopFaceIterator it(texture_size); !it.end(); it.next()) {

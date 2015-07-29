@@ -125,10 +125,11 @@ int TextureResources::getTextureBlur() const {
 }
 
 bool TextureResources::loadTextures(const std::string& texture_dir,
-		int texture_size, int texture_blur) {
+		int texture_size, int texture_blur, double water_opacity) {
 	// set texture size and blur
 	this->texture_size = texture_size;
 	this->texture_blur = texture_blur;
+	this->water_opacity = water_opacity;
 
 	// add a slash to the path if it's not already there
 	std::string dir = texture_dir;
@@ -217,7 +218,7 @@ bool TextureResources::loadColors(const std::string& foliage_png,
 
 bool TextureResources::loadBlocks(const std::string& block_dir,
 		const std::string& endportal_png) {
-	if (!block_textures.load(block_dir, texture_size, texture_blur))
+	if (!block_textures.load(block_dir, texture_size, texture_blur, water_opacity))
 		return false;
 	empty_texture.setSize(texture_size, texture_size);
 
