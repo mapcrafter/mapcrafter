@@ -284,7 +284,7 @@ void MapSection::preParse(const INIConfigSection& section,
 		texture_dir.setDefault(texture_dir_found);
 	texture_size.setDefault(12);
 	texture_blur.setDefault(0);
-	water_opacity.setDefault(0.0);
+	water_opacity.setDefault(1.0);
 	tile_width.setDefault(1);
 
 	image_format.setDefault(ImageFormat::PNG);
