@@ -36,7 +36,7 @@ class Palette;
  * the supplied vector. You can supply a reference to an empty int vector, it will be
  * resized and all the image pixels are saved as data[y * width + x].
  */ 
-void imageDither(RGBAImage& image, const Palette& palette, std::vector<int>& data);
+void imageDither(RGBAImage& image, Palette& palette, std::vector<int>& data);
 
 }
 }

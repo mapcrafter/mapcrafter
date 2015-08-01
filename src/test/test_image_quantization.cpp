@@ -89,8 +89,43 @@ void testOctreeWithImage(const RGBAImage& image) {
 			<< (int) rgba_green(average1) << "," << (int) rgba_blue(average1));
 }
 
+RGBAPixel randomColor() {
+	return rgba(rand() % 256, rand() % 256, rand() % 256, rand() % 256);
+}
+
+void testPalette(Palette& palette, bool extended) {
+	auto colors = palette.getColors();
+	for (size_t i = 0; i < colors.size(); i++) {
+		int j = palette.getNearestColor(colors[i]);
+		// same color might be multiple times in the palette, that's why not i == j
+		BOOST_CHECK_EQUAL(colors[i], colors[j]);
+	}
+
+	if (!extended)
+		return;
+
+	SimplePalette palette2(colors);
+	for (size_t i = 0; i < colors.size() * 5; i++) {
+		RGBAPixel color = randomColor();
+		int found1 = palette.getNearestColor(color);
+		int found2 = palette2.getNearestColor(color);
+		BOOST_CHECK_EQUAL(colors[found1], colors[found2]);
+	}
+}
+
 BOOST_AUTO_TEST_CASE(image_palette) {
-	// TODO
+	std::vector<RGBAPixel> colors = { randomColor() };
+	OctreePalette palette1(colors);
+	OctreePalette2 palette2(colors);
+	testPalette(palette1, false);
+	testPalette(palette2, true);
+
+	for (int i = 0; i < 255; i++)
+		colors.push_back(randomColor());
+	OctreePalette palette3(colors);
+	OctreePalette2 palette4(colors);
+	testPalette(palette3, false);
+	testPalette(palette4, true);
 }
 
 BOOST_AUTO_TEST_CASE(image_quantization_octree) {

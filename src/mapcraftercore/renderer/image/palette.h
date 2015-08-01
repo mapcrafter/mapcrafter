@@ -32,9 +32,14 @@ public:
 	virtual ~Palette();
 
 	virtual const std::vector<RGBAPixel>& getColors() const = 0;
-	virtual int getNearestColor(const RGBAPixel& color) const = 0;
+	virtual int getNearestColor(const RGBAPixel& color) = 0;
 };
 
+/**
+ * Trivial color palette implementation.
+ *
+ * Very bad O(n^2) color lookup performance! Just used in the test cases.
+ */
 class SimplePalette : public Palette {
 public:
 	SimplePalette();
@@ -42,12 +47,10 @@ public:
 	virtual ~SimplePalette();
 
 	virtual const std::vector<RGBAPixel>& getColors() const;
-	virtual int getNearestColor(const RGBAPixel& color) const;
+	virtual int getNearestColor(const RGBAPixel& color);
 
 protected:
 	std::vector<RGBAPixel> colors;
-
-	int getColorDistance(RGBAPixel color1, RGBAPixel color2) const;
 };
 
 }

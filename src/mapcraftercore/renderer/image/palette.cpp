@@ -39,21 +39,17 @@ const std::vector<RGBAPixel>& SimplePalette::getColors() const {
 	return colors;
 }
 
-int SimplePalette::getNearestColor(const RGBAPixel& color) const {
+int SimplePalette::getNearestColor(const RGBAPixel& color) {
 	int best_color = 0;
 	int min_distance = -1;
 	for (size_t i = 0; i < colors.size(); i++) {
-		int distance = getColorDistance(color, colors[i]);
+		int distance = rgba_distance2(color, colors[i]);
 		if (min_distance == -1 || distance < min_distance) {
 			best_color = i;
 			min_distance = distance;
 		}
 	}
 	return best_color;
-}
-
-int SimplePalette::getColorDistance(RGBAPixel color1, RGBAPixel color2) const {
-	return pow(rgba_red(color1) - rgba_red(color2), 2) + pow(rgba_green(color1) - rgba_green(color2), 2) + pow(rgba_blue(color1) - rgba_blue(color2), 2);
 }
 
 }

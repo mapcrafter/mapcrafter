@@ -38,10 +38,12 @@ uint8_t rgba_green(RGBAPixel value);
 uint8_t rgba_blue(RGBAPixel value);
 uint8_t rgba_alpha(RGBAPixel value);
 
-RGBAPixel rgba_add_clamp(RGBAPixel value, int r, int g, int b);
+RGBAPixel rgba_add_clamp(RGBAPixel value, int r, int g, int b, int a = 0);
 RGBAPixel rgba_add_clamp(RGBAPixel value, const std::tuple<int, int, int>& values);
 RGBAPixel rgba_multiply(RGBAPixel value, double r, double g, double b, double a = 1);
 RGBAPixel rgba_multiply(RGBAPixel value, uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
+
+int rgba_distance2(RGBAPixel value1, RGBAPixel value2);
 
 void blend(RGBAPixel& dest, const RGBAPixel& source);
 

@@ -34,7 +34,7 @@ class Octree;
 // number of significant bits to use of the color components
 // determines the count of leaves in the octree
 // -> more bits, more leaves, more memory/time needed
-const int COLOR_BITS = 5;
+const int OCTREE_COLOR_BITS = 5;
 
 /**
  * Represents an octree (actually a hextree) which is used for color quantization.
@@ -181,6 +181,26 @@ protected:
 };
 
 /**
+ * Sub palette for OctreePalette2 implementation.
+ *
+ * Also part of agrifs original implementation.
+ */
+class SubPalette {
+public:
+	SubPalette(const std::vector<RGBAPixel>& palette_colors);
+
+	int getNearestColor(const RGBAPixel& color);
+
+protected:
+	void initialize(const RGBAPixel& search_color);
+
+	bool initialized;
+
+	const std::vector<RGBAPixel>& palette_colors;
+	std::vector<int> colors;
+};
+
+/**
  * Implements a color palette with fast (almost-)nearest-color-access using a octree.
  *
  * "almost" because every node stores which colors are available in the subtrees.
@@ -198,13 +218,43 @@ public:
 	virtual ~OctreePalette();
 
 	virtual const std::vector<RGBAPixel>& getColors() const;
-	virtual int getNearestColor(const RGBAPixel& color) const;
+	virtual int getNearestColor(const RGBAPixel& color);
 
 protected:
 	// available colors
 	std::vector<RGBAPixel> colors;
 	// octree used to efficiently find nearest colors
 	Octree octree;
+};
+
+/**
+ * "Octree"-like color palette implementation. Only the nodes (a specific amount of)
+ * with relevant colors are saved.
+ *
+ * It's not used that because it's not very fast yet, and the first OctreePalette seems
+ * to be fine too.
+ *
+ * Original implementation by agrif in Minecraft Overviewer (thanks!):
+ * https://github.com/overviewer/Minecraft-Overviewer/blob/oil/overviewer/oil/oil-dither.c
+ */
+class OctreePalette2 : public Palette {
+public:
+	OctreePalette2(const std::vector<RGBAPixel>& colors);
+	virtual ~OctreePalette2();
+
+	virtual const std::vector<RGBAPixel>& getColors() const;
+	virtual int getNearestColor(const RGBAPixel& color);
+
+	static const int SPLITS = 3;
+	static const int BINS = 1 << SPLITS;
+	static const int BINS_ALL = BINS * BINS * BINS * BINS;
+	static int BIN_FOR_COLOR(int c) {
+		return c >> (8 - SPLITS);
+	}
+
+protected:
+	std::vector<RGBAPixel> colors;
+	std::array<SubPalette*, OctreePalette2::BINS_ALL> sub_palettes;
 };
 
 /**
