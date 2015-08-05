@@ -17,7 +17,6 @@
 using namespace mapcrafter;
 using namespace mapcrafter::renderer;
 
-
 /*
 static int magic_count = 0;
 
