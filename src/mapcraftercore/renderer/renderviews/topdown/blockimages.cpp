@@ -39,6 +39,41 @@ int TopdownBlockImages::getBlockSize() const {
 	return texture_size;
 }
 
+void TopdownBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
+		const RGBAImage& texture) { // id 27, 28
+	RGBAImage north_south = texture;
+	RGBAImage east_west = texture.rotate(1);
+	setBlockImage(id, 0 | extra_data, north_south);
+	setBlockImage(id, 1 | extra_data, east_west);
+	setBlockImage(id, 2 | extra_data, east_west);
+	setBlockImage(id, 3 | extra_data, east_west);
+	setBlockImage(id, 4 | extra_data, north_south);
+	setBlockImage(id, 5 | extra_data, north_south);
+}
+
+void TopdownBlockImages::createRails() { // id 66
+	const BlockTextures& t = resources.getBlockTextures();
+	RGBAImage straight = t.RAIL_NORMAL, curved = t.RAIL_NORMAL_TURNED;
+
+	createStraightRails(66, 0, straight);
+	setBlockImage(66, 6, curved.flip(false, false)); // south-east
+	setBlockImage(66, 7, curved.flip(true, false)); // south-west
+	setBlockImage(66, 8, curved.flip(true, true)); // north-west
+	setBlockImage(66, 9, curved.flip(false, true)); // north-east
+}
+
+void TopdownBlockImages::createVines() { // id 106
+	RGBAImage texture = resources.getBlockTextures().VINE;
+	setBlockImage(106, 0, texture);
+	setBlockImage(106, 42, empty_texture);
+}
+
+void TopdownBlockImages::createLargePlant(uint16_t data, const RGBAImage& texture,
+		const RGBAImage& top_texture) { // id 175
+	setBlockImage(175, data, texture);
+	setBlockImage(175, data | LARGEPLANT_TOP, top_texture);
+}
+
 uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	// call super method
 	data = AbstractBlockImages::filterBlockData(id, data);
@@ -64,11 +99,17 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & OPAQUE_WATER; // we just need that one bit
 	if (id == 18 || id == 161) // leaves
 		return data & (0xff00 | 0b00000011);
+	else if (id == 43 || id == 44 || id == 125 || id == 126 || id == 181 || id == 182)
+		return data & ~8;
 	else if (id == 60) // farmland
 		return data & 0xff00;
 	else if (id == 81 || id == 83 || id == 92) // cactus, sugar cane, cake
 		return data & 0xff00;
-	else if (id == 119 || id == 120) // end portal, end portal frame
+	else if (id == 106) { // vines
+		// data must be 0 or vine won't be visible
+		if ((data & 0xff) != 0)
+			return (data & ~0xff) | 42;
+	} else if (id == 119 || id == 120) // end portal, end portal frame
 		return data & 0xff00;
 	return data;
 }
@@ -182,8 +223,9 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(24, 0, t.SANDSTONE_TOP); // sandstone
 	setBlockImage(25, 0, t.NOTEBLOCK); // noteblock
 	// id 26 // bed
-	// id 27 // powered rail
-	// id 28 // detector rail
+	createStraightRails(27, 0, t.RAIL_GOLDEN); // powered rail (unpowered)
+	createStraightRails(27, 8, t.RAIL_GOLDEN_POWERED); // powered rail (powered);
+	createStraightRails(28, 0, t.RAIL_ACTIVATOR); // detector rail
 	// id 29 // sticky piston
 	setBlockImage(30, 0, t.WEB); // cobweb
 	// -- tall grass
@@ -229,8 +271,26 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(40, 0, t.MUSHROOM_RED); // red mushroom
 	setBlockImage(41, 0, t.GOLD_BLOCK); // block of gold
 	setBlockImage(42, 0, t.IRON_BLOCK); // block of iron
-	// id 43 // double stone slabs
-	// id 44 // normal stone slabs
+	// double stone slabs --
+	setBlockImage(43, 0, t.STONE_SLAB_TOP);
+	setBlockImage(43, 1, t.SANDSTONE_TOP);
+	setBlockImage(43, 2, t.PLANKS_OAK);
+	setBlockImage(43, 3, t.COBBLESTONE);
+	setBlockImage(43, 4, t.BRICK);
+	setBlockImage(43, 5, t.STONEBRICK);
+	setBlockImage(43, 6, t.NETHER_BRICK);
+	setBlockImage(43, 7, t.QUARTZ_BLOCK_SIDE);
+	// --
+	// normal stone slabs --
+	setBlockImage(44, 0, t.STONE_SLAB_TOP);
+	setBlockImage(44, 1, t.SANDSTONE_TOP);
+	setBlockImage(44, 2, t.PLANKS_OAK);
+	setBlockImage(44, 3, t.COBBLESTONE);
+	setBlockImage(44, 4, t.BRICK);
+	setBlockImage(44, 5, t.STONEBRICK);
+	setBlockImage(44, 6, t.NETHER_BRICK);
+	setBlockImage(44, 7, t.QUARTZ_BLOCK_SIDE);
+	// --
 	setBlockImage(45, 0, t.BRICK); // bricks
 	setBlockImage(46, 0, t.TNT_TOP); // tnt
 	setBlockImage(47, 0, t.PLANKS_OAK); // bookshelf
@@ -261,7 +321,7 @@ void TopdownBlockImages::createBlocks() {
 	// id 63 // sign post
 	// id 64 // wooden door
 	// id 65 // ladders
-	// id 66 // rails
+	createRails(); // id 66
 	// id 67 // cobblestone stairs
 	// id 68 // wall sign
 	// id 69 // lever
@@ -338,6 +398,7 @@ void TopdownBlockImages::createBlocks() {
 	// id 104 // pumpkin stem
 	// id 105 // melon stem
 	// id 106 // vines
+	createVines(); // id 106
 	// id 107 // oak fence gate
 	// id 108 // brick stairs
 	// id 109 // stone brick stairs
@@ -361,8 +422,22 @@ void TopdownBlockImages::createBlocks() {
 	// id 122 // dragon egg
 	setBlockImage(123, 0, t.REDSTONE_LAMP_OFF); // redstone lamp inactive
 	setBlockImage(124, 0, t.REDSTONE_LAMP_OFF); // redstone lamp active
-	// id 125 // double wooden slabs
-	// id 126 // normal wooden slabs
+	// // double wooden slabs
+	setBlockImage(125, 0, t.PLANKS_OAK);
+	setBlockImage(125, 1, t.PLANKS_SPRUCE);
+	setBlockImage(125, 2, t.PLANKS_BIRCH);
+	setBlockImage(125, 3, t.PLANKS_JUNGLE);
+	setBlockImage(125, 4, t.PLANKS_ACACIA);
+	setBlockImage(125, 5, t.PLANKS_BIG_OAK);
+	// --
+	// normal wooden slabs --
+	setBlockImage(126, 0, t.PLANKS_OAK);
+	setBlockImage(126, 1, t.PLANKS_SPRUCE);
+	setBlockImage(126, 2, t.PLANKS_BIRCH);
+	setBlockImage(126, 3, t.PLANKS_JUNGLE);
+	setBlockImage(126, 4, t.PLANKS_ACACIA);
+	setBlockImage(126, 5, t.PLANKS_BIG_OAK);
+	// --
 	// id 127 // cocoas
 	// id 128 // sanstone stairs
 	setBlockImage(129, 0, t.EMERALD_ORE);
@@ -493,7 +568,17 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(172, 0, t.HARDENED_CLAY); // hardened clay
 	setBlockImage(173, 0, t.COAL_BLOCK); // block of coal
 	setBlockImage(174, 0, t.ICE_PACKED); // packed ice
-	// id 175 // large plants
+	// large plants, id 175 --
+	// the top texture of the sunflower is a bit modified
+	RGBAImage sunflower_top = t.DOUBLE_PLANT_SUNFLOWER_TOP;
+	sunflower_top.alphaBlit(t.DOUBLE_PLANT_SUNFLOWER_FRONT, 0, -texture_size * 0.25);
+	createLargePlant(0, t.DOUBLE_PLANT_SUNFLOWER_BOTTOM, sunflower_top);
+	createLargePlant(1, t.DOUBLE_PLANT_SYRINGA_BOTTOM, t.DOUBLE_PLANT_SYRINGA_TOP);
+	createLargePlant(2, t.DOUBLE_PLANT_GRASS_BOTTOM, t.DOUBLE_PLANT_GRASS_TOP);
+	createLargePlant(3, t.DOUBLE_PLANT_FERN_BOTTOM, t.DOUBLE_PLANT_FERN_TOP);
+	createLargePlant(4, t.DOUBLE_PLANT_ROSE_BOTTOM, t.DOUBLE_PLANT_ROSE_TOP);
+	createLargePlant(5, t.DOUBLE_PLANT_PAEONIA_BOTTOM, t.DOUBLE_PLANT_PAEONIA_TOP);
+	// --
 	// id 176 // standing banner
 	// id 177 // wall banner
 	setBlockImage(178, 0, t.DAYLIGHT_DETECTOR_INVERTED_TOP); // inverted daylight sensor
@@ -503,8 +588,12 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(179, 2, t.RED_SANDSTONE_TOP); // smooth
 	// --
 	// id 180 // red sandstone stairs
-	// id 181 // double red sandstone slabs
-	// id 182 // normal red sandstone slabs
+	// double red sandstone slabs --
+	setBlockImage(181, 0, t.RED_SANDSTONE_TOP);
+	// --
+	// normal red sandstone slabs --
+	setBlockImage(181, 0, t.RED_SANDSTONE_TOP);
+	// --
 	// id 183 // spruce fence gate
 	// id 184 // birch fence gate
 	// id 185 // jungle fence gate
