@@ -283,8 +283,7 @@ int OctreePalette::getNearestColor(const RGBAPixel& color) {
 
 OctreePalette2::OctreePalette2(const std::vector<RGBAPixel>& colors)
 	: colors(colors) {
-	for (size_t i = 0; i < sub_palettes.size(); i++)
-		sub_palettes[i] = nullptr;
+	sub_palettes.resize(OctreePalette2::BINS_ALL, nullptr);
 }
 
 OctreePalette2::~OctreePalette2() {

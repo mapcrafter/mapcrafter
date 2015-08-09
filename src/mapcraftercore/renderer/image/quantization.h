@@ -254,7 +254,7 @@ public:
 
 protected:
 	std::vector<RGBAPixel> colors;
-	std::array<SubPalette*, OctreePalette2::BINS_ALL> sub_palettes;
+	std::vector<SubPalette*> sub_palettes;
 };
 
 /**
