@@ -75,12 +75,22 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
-**v.1.5.4 (in progress)**
+**v.2.0 (coming soon™!)**
+* Huge internal code refactoring
+* New render view: A 2D topdown and the usual 3D isometric render view will be available
+* Support for indexed png images, reducing size of output images a lot
+* New overlay render modes (slime chunks, monster spawn areas according to the light levels)
+* Configurable tile sizes (to improve performance for small texture sizes)
+* Restructured internal render management components to allow a graphical user interface
+
+**v.1.5.4**
 
 * Added a detection in the CMake files which compiler C++11 flag to use (for newer
   compilers which do not support the older ``-std=c++0x`` flag)
 * Fixed bug with the marker tool (new json sign text format was not parsed properly)
 * Fixed bug in texture extraction script (convert command was not properly detected)
+* Fixed bug with some textures (#122) by making Mapcrafter able to read indexed PNG images
+  and PNG images with different other color formats
 
 **v.1.5.3**
 

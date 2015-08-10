@@ -130,8 +130,10 @@ WorldEntitiesCache::~WorldEntitiesCache() {
 }
 
 unsigned int WorldEntitiesCache::readCacheFile() {
-	if (!fs::exists(cache_file))
+	if (!fs::exists(cache_file)) {
+		LOG(DEBUG) << "Cache file " << cache_file << " does not exist.";
 		return 0;
+	}
 
 	nbt::NBTFile nbt_file;
 	nbt_file.readNBT(cache_file.string().c_str(), nbt::Compression::GZIP);
@@ -161,6 +163,8 @@ unsigned int WorldEntitiesCache::readCacheFile() {
 		}
 	}
 
+	LOG(DEBUG) << "Read cache file " << cache_file << ". Last modification time was "
+			<< fs::last_write_time(cache_file) << ".";
 	return fs::last_write_time(cache_file);
 }
 
@@ -194,23 +198,28 @@ void WorldEntitiesCache::writeCacheFile() const {
 	nbt_file.writeNBT(cache_file.string().c_str(), nbt::Compression::GZIP);
 }
 
-void WorldEntitiesCache::update(bool verbose) {
+void WorldEntitiesCache::update(util::IProgressHandler* progress) {
 	unsigned int timestamp = readCacheFile();
 
-	if (verbose)
-		std::cout << "World '" << world.getRegionDir().string() << "':" << std::endl;
-
 	auto regions = world.getAvailableRegions();
-	int i = 0;
+	if (progress != nullptr)
+		progress->setMax(regions.size());
 	for (auto region_it = regions.begin(); region_it != regions.end(); ++region_it) {
-		i++;
-		if (verbose) {
-			std::cout << "(" << i << "/" << regions.size() << ") ";
-			std::cout << "Region " << *region_it << std::endl;
+
+		fs::path region_path = world.getRegionPath(*region_it);
+		if (fs::last_write_time(region_path) < timestamp) {
+			LOG(DEBUG) << "Entities of region " << region_path.filename()
+					<< " are cached (mtime region " << fs::last_write_time(region_path)
+					<< " < mtime cache " << timestamp << ").";
+			if (progress != nullptr)
+				progress->setValue(progress->getValue() + 1);
+			continue;
+		} else {
+			LOG(DEBUG) << "Entities of region " << region_path.filename()
+					<< " are outdated. (mtime region file " << fs::last_write_time(region_path)
+					<< " >= mtime cache " << timestamp << "). Updating.";
 		}
 
-		if (fs::last_write_time(world.getRegionPath(*region_it)) < timestamp)
-			continue;
 		RegionFile region;
 		world.getRegion(*region_it, region);
 		region.read();
@@ -235,8 +244,11 @@ void WorldEntitiesCache::update(bool verbose) {
 				this->entities[*region_it][*chunk_it].push_back(entity);
 			}
 		}
+		if (progress != nullptr)
+			progress->setValue(progress->getValue() + 1);
 	}
 
+	LOG(DEBUG) << "Writing cache file " << cache_file << " at " << std::time(nullptr) << ".";
 	writeCacheFile();
 }
 

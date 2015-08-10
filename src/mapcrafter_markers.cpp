@@ -17,6 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "accumulator.h"
 #include "mapcraftercore/util.h"
 #include "mapcraftercore/config/mapcrafterconfig.h"
 #include "mapcraftercore/mc/world.h"
@@ -50,25 +51,33 @@ struct Marker {
 	}
 };
 
+typedef std::map<std::string, std::vector<Marker>> MarkerGroup;
 // map (marker group name -> map ( world name -> array of markers) )
-typedef std::map<std::string, std::map<std::string, std::vector<Marker> > > Markers;
+typedef std::map<std::string, MarkerGroup > Markers;
 
-void findMarkers(const config::MapcrafterConfig& config, Markers& markers_found,
-		bool verbose = false) {
-	auto worlds = config.getWorlds();
-	auto markers = config.getMarkers();
-	for (auto world_it = worlds.begin(); world_it != worlds.end(); ++world_it) {
+Markers findMarkers(const config::MapcrafterConfig& config) {
+	Markers markers;
+	auto groups = config.getMarkers();
+	for (auto group_it = groups.begin(); group_it != groups.end(); ++group_it)
+		markers[group_it->getShortName()];
+
+	auto config_worlds = config.getWorlds();
+	auto config_markers = config.getMarkers();
+	for (auto world_it = config_worlds.begin(); world_it != config_worlds.end();
+			++world_it) {
 		mc::WorldCrop world_crop = world_it->second.getWorldCrop();
 		mc::World world(world_it->second.getInputDir().string(),
 				world_it->second.getDimension());
 		world.setWorldCrop(world_crop);
 		if (!world.load()) {
-			std::cerr << "Error: Unable to load world " << world_it->first << "!" << std::endl;
+			LOG(ERROR) << "Unable to load world " << world_it->first << "!";
 			continue;
 		}
 
+		LOGN(INFO, "progress") << "Loading entities of world '" << world_it->first << "' ...";
 		mc::WorldEntitiesCache entities(world);
-		entities.update(verbose);
+		util::LogOutputProgressHandler progress;
+		entities.update(&progress);
 
 		// use name of the world section as world name, not the world_name
 		std::string world_name = world_it->second.getShortName();
@@ -78,18 +87,23 @@ void findMarkers(const config::MapcrafterConfig& config, Markers& markers_found,
 			if (!world_crop.isBlockContainedXZ(sign_it->getPos())
 					&& !world_crop.isBlockContainedY(sign_it->getPos()))
 				continue;
-			for (auto marker_it = markers.begin(); marker_it != markers.end(); ++marker_it) {
+			for (auto marker_it = config_markers.begin();
+					marker_it != config_markers.end(); ++marker_it) {
 				if (!marker_it->matchesSign(*sign_it))
 					continue;
 				Marker marker;
 				marker.pos = sign_it->getPos();
 				marker.title = marker_it->formatTitle(*sign_it);
 				marker.text = marker_it->formatText(*sign_it);
-				markers_found[marker_it->getShortName()][world_name].push_back(marker);
+				markers[marker_it->getShortName()][world_name].push_back(marker);
+				LOG(DEBUG) << "Found marker (prefix '" << marker_it->getPrefix()
+						<< "'): '" << marker.title << "' at '" << world_it->first
+						<< "':" << marker.pos;
 				break;
 			}
 		}
 	}
+	return markers;
 }
 
 std::string createMarkersJSON(const config::MapcrafterConfig& config,
@@ -142,11 +156,13 @@ std::string createMarkersJSON(const config::MapcrafterConfig& config,
 int main(int argc, char** argv) {
 	std::string config_file;
 	std::string output_file;
+	int verbosity = 0;
  
 	po::options_description all("Allowed options");
 	all.add_options()
 		("help,h", "shows this help message")
-		("verbose,v", "verbose blah blah")
+		("verbose,v", accumulator<int>(&verbosity),
+				"verbose blah blah")
 
 		("config,c", po::value<std::string>(&config_file),
 			"the path to the configuration file (required)")
@@ -176,6 +192,15 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+	// TODO add this to an automatic logging configuration?
+	util::LogLevel log_level = util::LogLevel::WARNING;
+	if (verbosity == 1)
+		log_level = util::LogLevel::INFO;
+	else if (verbosity > 1)
+		log_level = util::LogLevel::DEBUG;
+	util::Logging::getInstance().setSinkVerbosity("__output__", log_level);
+	util::Logging::getInstance().setSinkLogProgress("__output__", true);
+
 	config::MapcrafterConfig config;
 	config::ValidationMap validation = config.parseFile(config_file);
 
@@ -188,20 +213,43 @@ int main(int argc, char** argv) {
 		LOG(WARNING) << "Please read the documentation about the new configuration file format.";
 	}
 
-	Markers markers_found;
-	findMarkers(config, markers_found, vm.count("verbose"));
-	std::string markers_json = createMarkersJSON(config, markers_found);
+	Markers markers = findMarkers(config);
+
+	// count how many markers / markers of which group were found
+	int markers_count = 0;
+	std::map<std::string, int> groups_count;
+
+	auto worlds = config.getWorlds();
+	auto groups = config.getMarkers();
+	for (auto group_it = groups.begin(); group_it != groups.end(); ++group_it) {
+		std::string group = group_it->getShortName();
+		groups_count[group] = 0;
+		for (auto world_it = worlds.begin(); world_it != worlds.end(); ++world_it)
+			groups_count[group] += markers[group][world_it->first].size();
+		markers_count += groups_count[group];
+	}
+
+	// and log some stats about that
+	LOG(INFO) << "Found " << markers_count << " markers in " << markers.size() << " categories:";
+	for (auto group_it = groups.begin(); group_it != groups.end(); ++group_it) {
+		std::string group = group_it->getShortName();
+		LOG(INFO) << "  Markers with prefix '" << config.getMarker(group).getPrefix()
+				<< "': " << groups_count[group];
+		for (auto world_it = worlds.begin(); world_it != worlds.end(); ++world_it)
+			LOG(INFO) << "    in world '" << world_it->first << "': "
+					<< markers[group][world_it->first].size();
+	}
 
 	if (output_file == "-")
-		std::cout << markers_json;
+		std::cout << createMarkersJSON(config, markers);
 	else {
 		if (output_file == "")
 			output_file = config.getOutputPath("markers-generated.js").string();
 		std::ofstream out(output_file);
-		out << markers_json;
+		out << createMarkersJSON(config, markers);
 		out.close();
 		if (!out) {
-			std::cerr << "Error: Unable to write to file '" << output_file << "'!" << std::endl;
+			LOG(ERROR) << "Unable to write to file '" << output_file << "'!";
 			return 1;
 		}
 	}

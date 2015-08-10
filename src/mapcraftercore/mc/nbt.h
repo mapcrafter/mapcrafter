@@ -260,9 +260,9 @@ public:
 	static const int8_t TAG_TYPE = (int8_t) TagType::TAG_STRING;
 };
 
-// use shared_ptr in gcc == 4.4.* instead of unique_ptr,
-// because there are problems with moving to containers
-#if __GNUC__ == 4 && __GNUC_MINOR__ == 4
+// use shared_ptr in gcc <= 4.5.* instead of unique_ptr,
+// because there are problems with smart pointers in containers
+#if __GNUC__ == 4 && __GNUC_MINOR__ <= 5
 # define TagPtrType std::shared_ptr
 #else
 # define TagPtrType std::unique_ptr

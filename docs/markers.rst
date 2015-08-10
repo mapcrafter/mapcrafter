@@ -85,6 +85,10 @@ Here is an example ``markers.js`` file:
                         "title" : "Sign1",
                         // text in the marker popup window
                         "text" : "Hello."
+                        // override the icon of a single marker (optional)
+                        "icon" : "player.png",
+                        // override the size of the marker icon (optional)
+                        "iconSize" : [16, 32]
                     },
                     // more markers:
                     {"pos" : [100, 100, 64], "title" : "Test1"},
@@ -156,8 +160,28 @@ Here are the available options for the markers:
 
 	**Default:** *Title of the marker*
 
-	This is the text of the marker popup window. 
-	If you do not specifiy a text, the title of the marker is used as text.
+	This is the text of the marker popup window.
+	If you do not specify a text, the title of the marker is used as text.
+
+``icon``
+
+    **Default:** *Group icon*
+
+    An override for the icon for this specific marker.
+    If you do not specify an icon, the icon set at the group level is used. Or,
+    if there is no group-level icon, the default icon is used.
+
+    This option may be used independently of the marker icon size override.
+
+``iconSize``
+
+    **Default:** *Group icon size*
+
+    An override for the size of the icon for this specific marker.
+    If you do not specify a size, the icon size set at the group level is used.
+    Or, if there is no group-level icon size, the default icon size is used.
+
+    This option may be used independently of the marker icon override.
 
 Furthermore you can customize your markers by specifying a function which
 creates the actual Leaflet marker objects with the marker data. This function

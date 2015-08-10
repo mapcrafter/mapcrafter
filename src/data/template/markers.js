@@ -25,7 +25,11 @@ var MAPCRAFTER_MARKERS = [
 					// title when you hover over the marker
 					"title" : "Sign1",
 					// text in the marker popup window
-					"text" : "Hello."
+					"text" : "Hello.",
+					// override the icon of a single marker (optional)
+					"icon" : "player.png",
+					// override the size of the marker icon (optional)
+					"iconSize" : [32, 32]
 				},
 				// more markers:
 				{"pos" : [100, 100, 64], "title" : "Test1"},

@@ -177,10 +177,11 @@ void LogOutputProgressHandler::update(double percentage, double average_speed,
 		return;
 	last_step = percentage;
 
+	// TODO maybe make it possible to specify a format?
 	auto log = LOGN(INFO, "progress");
 	log << std::floor(percentage) << "% complete. ";
-	log << "Rendered " << value << "/" << max << " tiles ";
-	log << "with average " << std::setprecision(1) << std::fixed << average_speed << "t/s.";
+	log << "Processed " << value << "/" << max << " items ";
+	log << "with average " << std::setprecision(1) << std::fixed << average_speed << "/s.";
 	if (eta != -1)
 		log << " ETA " << util::format_eta(eta) << ".";
 }
