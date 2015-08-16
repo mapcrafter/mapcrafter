@@ -83,6 +83,104 @@ FaceCorners::FaceCorners(const CornerNeighbors& corner1)
 	  corner4(corner1.addPos(corner1.dir1 + corner1.dir2)) {
 }
 
+LightingData::LightingData(uint8_t block_light, uint8_t sky_light)
+	: block_light(block_light), sky_light(sky_light) {
+}
+
+LightingData::~LightingData() {
+}
+
+uint8_t LightingData::getBlockLight() const {
+	return block_light;
+}
+
+uint8_t LightingData::getSkyLight() const {
+	return sky_light;
+}
+
+uint8_t LightingData::getLightLevel(bool day) const {
+	if (day)
+		return std::max(block_light, sky_light);
+	return std::max(block_light + 0, sky_light - 11);
+}
+
+namespace {
+
+bool isSpecialTransparent(uint16_t id) {
+	// blocks which are transparent but don't have correct lighting data
+
+	// they need skylight from the block above
+	// (or the block above above, if the block above is also one of this blocks)
+
+	// they need an average blocklight from near blocks
+	return id == 44     // stone slabs
+			|| id == 53  // oak wood stairs
+			|| id == 64 || id == 71 // doors
+			|| id == 67  // cobble stairs
+			|| id == 108 // brick stairs
+			|| id == 109 // stone brick stairs
+			|| id == 114 // nether brick stairs
+			|| id == 126 // wooden slabs
+			|| id == 128 // sandstone stairs
+			|| id == 134 // spruce wood stairs
+			|| id == 135 // birch wood stairs
+			|| id == 136 // jungle wood stairs
+			|| id == 145 // anvil
+			|| id == 156 // quartz stairs
+			|| id == 163 // acacia wood stairs
+			|| id == 164 // dark oak wood stairs
+			|| id == 180 // red sandstone stairs
+			|| id == 182 // stone2 slabs
+			;
+}
+
+}
+
+LightingData LightingData::estimate(const mc::Block& block,
+		BlockImages* images, mc::WorldCache* world, mc::Chunk* current_chunk) {
+	// estimate the light if this is a special block
+	if (!isSpecialTransparent(block.id))
+		return LightingData(block.block_light, block.sky_light);
+
+	uint8_t block_light = 0, sky_light = 0;
+
+	// get the sky light from the block above
+	mc::BlockPos off(0, 0, 0);
+	mc::Block above;
+	while (++off.y) {
+		above = world->getBlock(block.pos + off, current_chunk,
+				mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
+		if (isSpecialTransparent(above.id))
+			continue;
+		if (above.id == 0 || images->isBlockTransparent(above.id, above.data))
+			sky_light = above.sky_light;
+		else
+			sky_light = 15;
+		break;
+	}
+
+	// get the block light from the neighbor blocks
+	int block_lights = 0;
+	int block_lights_count = 0;
+	for (int dx = -1; dx <= 1; dx++)
+		for (int dz = -1; dz <= 1; dz++)
+			for (int dy = -1; dy <= 1; dy++) {
+				mc::Block other = world->getBlock(block.pos + mc::BlockPos(dx, dz, dy),
+						current_chunk, mc::GET_ID | mc::GET_DATA | mc::GET_BLOCK_LIGHT);
+				if ((other.id == 0
+						|| images->isBlockTransparent(other.id, other.data))
+						&& !isSpecialTransparent(other.id)) {
+					block_lights += other.block_light;
+					block_lights_count++;
+				}
+			}
+
+	if (block_lights_count > 0)
+		block_light = block_lights / block_lights_count;
+	return LightingData(block_light, sky_light);
+}
+
+
 LightingRenderer::~LightingRenderer() {
 }
 
@@ -199,95 +297,23 @@ void LightingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 	}
 }
 
-LightingColor LightingRenderMode::calculateLightingColor(
-		const LightingData& light) const {
-	if (day)
-		return pow(0.8, 15 - std::max(light.block, light.sky));
-	return pow(0.8, 15 - std::max(light.block+0, light.sky - 11));
-}
-
-bool isSpecialTransparent(uint16_t id) {
-	// blocks which are transparent but don't have correct lighting data
-
-	// they need skylight from the block above
-	// (or the block above above, if the block above is also one of this blocks)
-
-	// they need an average blocklight from near blocks
-	return id == 44     // stone slabs
-			|| id == 53  // oak wood stairs
-			|| id == 64 || id == 71 // doors
-			|| id == 67  // cobble stairs
-			|| id == 108 // brick stairs
-			|| id == 109 // stone brick stairs
-			|| id == 114 // nether brick stairs
-			|| id == 126 // wooden slabs
-			|| id == 128 // sandstone stairs
-			|| id == 134 // spruce wood stairs
-			|| id == 135 // birch wood stairs
-			|| id == 136 // jungle wood stairs
-			|| id == 145 // anvil
-			|| id == 156 // quartz stairs
-			|| id == 163 // acacia wood stairs
-			|| id == 164 // dark oak wood stairs
-			|| id == 180 // red sandstone stairs
-			|| id == 182 // stone2 slabs
-			;
-}
-
-LightingData LightingRenderMode::estimateLight(const mc::BlockPos& pos) {
-	LightingData light;
-	// get the sky light from the block above
-	mc::BlockPos off(0, 0, 0);
-	mc::Block above;
-	while (++off.y) {
-		above = getBlock(pos + off, mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
-		if (isSpecialTransparent(above.id))
-			continue;
-		if (above.id == 0 || images->isBlockTransparent(above.id, above.data))
-			light.sky = above.sky_light;
-		else
-			light.sky = 15;
-		break;
-	}
-
-	// get the block light from the neighbor blocks
-	int block_lights = 0;
-	int block_lights_count = 0;
-	for (int dx = -1; dx <= 1; dx++)
-		for (int dz = -1; dz <= 1; dz++)
-			for (int dy = -1; dy <= 1; dy++) {
-				mc::Block other = getBlock(pos + mc::BlockPos(dx, dz, dy),
-						mc::GET_ID | mc::GET_DATA | mc::GET_BLOCK_LIGHT);
-				if ((other.id == 0
-						|| images->isBlockTransparent(other.id, other.data))
-						&& !isSpecialTransparent(other.id)) {
-					block_lights += other.block_light;
-					block_lights_count++;
-				}
-			}
-
-	if (block_lights_count > 0)
-		light.block = block_lights / block_lights_count;
-	return light;
+LightingColor LightingRenderMode::calculateLightingColor(const LightingData& light) const {
+	return pow(0.8, 15 - light.getLightLevel(day));
 }
 
 LightingData LightingRenderMode::getBlockLight(const mc::BlockPos& pos) {
-	LightingData light;
 	mc::Block block = getBlock(pos, mc::GET_ID | mc::GET_DATA | mc::GET_LIGHT);
-	if (isSpecialTransparent(block.id)) {
-		light = estimateLight(pos);
-	} else {
-		light.block = block.block_light,
-		light.sky = block.sky_light;
-	}
+	LightingData light = LightingData::estimate(block, images, world, *current_chunk);
 
+	// TODO also move this to LightingData class?
 	// lighting fix for The End
 	// The End has no sun light set -> lighting looks ugly
 	// just emulate the sun light for transparent blocks
 	if (simulate_sun_light) {
-		light.sky = 15;
+		uint8_t sky = 15;
 		if (block.id != 0 && !images->isBlockTransparent(block.id, block.data))
-			light.sky = 0;
+			sky = 0;
+		return LightingData(sky, light.getBlockLight());
 	}
 	return light;
 }

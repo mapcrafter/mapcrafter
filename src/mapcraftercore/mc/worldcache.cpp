@@ -24,8 +24,8 @@ namespace mc {
 
 Block::Block(uint16_t id, uint16_t data, uint8_t biome,
 		uint8_t block_light, uint8_t sky_light)
-		: id(id), data(data), biome(biome),
-		  block_light(block_light), sky_light(sky_light) {
+	: pos(mc::BlockPos(0, 0, 0)), id(id), data(data), biome(biome),
+	  block_light(block_light), sky_light(sky_light), fields_set(0) {
 }
 
 bool Block::isFullWater() const {
@@ -150,16 +150,23 @@ Block WorldCache::getBlock(const mc::BlockPos& pos, const mc::Chunk* chunk, int 
 	} else {
 		mc::LocalBlockPos local(pos);
 		Block block;
-		if (get & GET_ID)
+		block.pos = pos;
+		if (get & GET_ID) {
 			block.id = mychunk->getBlockID(local);
-		if (get & GET_DATA)
+			block.fields_set |= GET_ID;
+		} if (get & GET_DATA) {
 			block.data = mychunk->getBlockData(local);
-		if (get & GET_BIOME)
+			block.fields_set |= GET_DATA;
+		} if (get & GET_BIOME) {
 			block.biome = mychunk->getBiomeAt(local);
-		if (get & GET_BLOCK_LIGHT)
+			block.fields_set |= GET_BIOME;
+		} if (get & GET_BLOCK_LIGHT) {
 			block.block_light = mychunk->getBlockLight(local);
-		if (get & GET_SKY_LIGHT)
+			block.fields_set |= GET_BLOCK_LIGHT;
+		} if (get & GET_SKY_LIGHT) {
 			block.sky_light = mychunk->getSkyLight(local);
+			block.fields_set |= GET_SKY_LIGHT;
+		}
 		return block;
 	}
 }

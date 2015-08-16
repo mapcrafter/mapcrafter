@@ -68,8 +68,20 @@ struct FaceCorners {
 
 extern const FaceCorners CORNERS_LEFT, CORNERS_RIGHT, CORNERS_TOP, CORNERS_BOTTOM;
 
-struct LightingData {
-	uint8_t block, sky;
+class LightingData {
+public:
+	LightingData(uint8_t block_light = 0, uint8_t sky_light = 15);
+	~LightingData();
+
+	uint8_t getBlockLight() const;
+	uint8_t getSkyLight() const;
+	uint8_t getLightLevel(bool day) const;
+
+	static LightingData estimate(const mc::Block& block, BlockImages* images,
+			mc::WorldCache* world, mc::Chunk* current_chunk);
+
+protected:
+	uint8_t block_light, sky_light;
 };
 
 typedef double LightingColor;
@@ -159,11 +171,6 @@ private:
 	 * When calculating nightlight, the skylight is reduced by 11.
 	 */
 	LightingColor calculateLightingColor(const LightingData& light) const;
-
-	/**
-	 * Estimates the light of a block from its neighbors.
-	 */
-	LightingData estimateLight(const mc::BlockPos& pos);
 
 	/**
 	 * Returns the light of a block (sky/block light). This also means that the light is
