@@ -95,7 +95,8 @@ std::ostream& operator<<(std::ostream& out, RenderModeType render_mode) {
 std::ostream& operator<<(std::ostream& out, OverlayType overlay) {
 	switch (overlay) {
 	case OverlayType::SLIME: return out << "slime";
-	case OverlayType::SPAWN: return out << "spawn";
+	case OverlayType::SPAWNDAY: return out << "spawnday";
+	case OverlayType::SPAWNNIGHT: return out << "spawnnight";
 	default: return out << "unknown";
 	}
 }
@@ -142,8 +143,10 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 	} else if (overlay == OverlayType::SLIME) {
 		mc::World world(world_config.getInputDir().string(), world_config.getDimension());
 		render_mode->addRenderMode(new SlimeOverlay(world.getWorldDir(), rotation));
-	} else if (overlay == OverlayType::SPAWN) {
-		render_mode->addRenderMode(new SpawnOverlay());
+	} else if (overlay == OverlayType::SPAWNDAY) {
+		render_mode->addRenderMode(new SpawnOverlay(true));
+	} else if (overlay == OverlayType::SPAWNNIGHT) {
+		render_mode->addRenderMode(new SpawnOverlay(false));
 	} else {
 		// this shouldn't happen
 		delete render_mode;

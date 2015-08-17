@@ -436,8 +436,10 @@ Map Options
       Empty overlay.
     ``slime``
       Highlights the chunks where slimes can spawn.
-    ``spawn``
-      Shows the light conditions where different kinds mobs can spawn at day/night.
+    ``spawnday``
+      Shows where monsters can spawn at day.
+    ``spawnnight``
+      Shows where monsters can spawn at night.
 
     At the moment there is only one overlay per map section allowed because the overlay
     is rendered just like a render mode on top of the world. If you want to render

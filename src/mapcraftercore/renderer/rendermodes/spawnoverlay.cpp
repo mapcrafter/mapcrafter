@@ -19,26 +19,26 @@
 
 #include "spawnoverlay.h"
 
+#include "lighting.h"
+
 namespace mapcrafter {
 namespace renderer {
 
-SpawnOverlay::SpawnOverlay()
-	: OverlayRenderMode(OverlayMode::PER_FACE) {
+SpawnOverlay::SpawnOverlay(bool day)
+	: OverlayRenderMode(OverlayMode::PER_FACE), day(day) {
 }
 
 SpawnOverlay::~SpawnOverlay() {
 }
 
 RGBAPixel SpawnOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
-	// just shows where mobs can spawn during the day (light level < 8)
 	// TODO more options
-	// TODO estimate lighting of special blocks (slabs...), like lighting render mode
 	// TODO also mobs can't spawn on specific blocks?
-	mc::Block block = getBlock(pos, mc::GET_LIGHT);
-	uint8_t day = std::max(block.sky_light, block.block_light);
-	// uint8_t night = std::max(block.sky_light - 11, block.block_light + 0);
-	if (day < 8)
-		return rgba(255, 0, 0, 255);
+	mc::Block block = getBlock(pos, mc::GET_ID | mc::GET_DATA | mc::GET_LIGHT);
+	LightingData light = LightingData::estimate(block, images, world, *current_chunk);
+	uint8_t light_level = light.getLightLevel(day);
+	if (light_level < 8)
+		return rgba(255, 0, 0, 85);
 	return rgba(0, 0, 0, 0);
 }
 

@@ -28,11 +28,13 @@ namespace renderer {
 
 class SpawnOverlay : public OverlayRenderMode {
 public:
-	SpawnOverlay();
+	SpawnOverlay(bool day);
 	virtual ~SpawnOverlay();
 
 protected:
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+	bool day;
 };
 
 }
