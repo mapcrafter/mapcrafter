@@ -35,6 +35,8 @@ public:
 	virtual int getBlockSize() const;
 
 protected:
+	void createItemStyleBlock(uint16_t id, uint16_t data, const RGBAImage& texture);
+
 	void createStraightRails(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 27, 28
 	void createRails(); // id 66
 	void createVines(); // id 106

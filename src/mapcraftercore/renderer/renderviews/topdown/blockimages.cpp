@@ -39,6 +39,12 @@ int TopdownBlockImages::getBlockSize() const {
 	return texture_size;
 }
 
+void TopdownBlockImages::createItemStyleBlock(uint16_t id, uint16_t data,
+		const RGBAImage& texture) {
+	// call parent method because we don't want to rotate the texture
+	AbstractBlockImages::setBlockImage(id, data, texture);
+}
+
 void TopdownBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
 		const RGBAImage& texture) { // id 27, 28
 	RGBAImage north_south = texture;
@@ -70,8 +76,8 @@ void TopdownBlockImages::createVines() { // id 106
 
 void TopdownBlockImages::createLargePlant(uint16_t data, const RGBAImage& texture,
 		const RGBAImage& top_texture) { // id 175
-	setBlockImage(175, data, texture);
-	setBlockImage(175, data | LARGEPLANT_TOP, top_texture);
+	createItemStyleBlock(175, data, texture);
+	createItemStyleBlock(175, data | LARGEPLANT_TOP, top_texture);
 }
 
 uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
@@ -123,6 +129,7 @@ bool TopdownBlockImages::isImageTransparent(const RGBAImage& block) const {
 }
 
 void TopdownBlockImages::setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block) {
+	// LOG(INFO) << id << " " << data << " " << rotation;
 	AbstractBlockImages::setBlockImage(id, data, block.rotate(rotation));
 }
 
@@ -188,12 +195,12 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(5, 5, t.PLANKS_BIG_OAK); // dark oak
 	// --
 	// -- saplings
-	setBlockImage(6, 0, t.SAPLING_OAK); // oak
-	setBlockImage(6, 1, t.SAPLING_SPRUCE); // spruce
-	setBlockImage(6, 2, t.SAPLING_BIRCH); // birch
-	setBlockImage(6, 3, t.SAPLING_JUNGLE); // jungle
-	setBlockImage(6, 4, t.SAPLING_ACACIA); // acacia
-	setBlockImage(6, 5, t.SAPLING_ROOFED_OAK); // dark oak
+	createItemStyleBlock(6, 0, t.SAPLING_OAK); // oak
+	createItemStyleBlock(6, 1, t.SAPLING_SPRUCE); // spruce
+	createItemStyleBlock(6, 2, t.SAPLING_BIRCH); // birch
+	createItemStyleBlock(6, 3, t.SAPLING_JUNGLE); // jungle
+	createItemStyleBlock(6, 4, t.SAPLING_ACACIA); // acacia
+	createItemStyleBlock(6, 5, t.SAPLING_ROOFED_OAK); // dark oak
 	// --
 	setBlockImage(7, 0, t.BEDROCK); // bedrock
 	setBlockImage(8, 0, t.WATER_STILL.colorize(0, 0.39, 0.89));
@@ -227,13 +234,13 @@ void TopdownBlockImages::createBlocks() {
 	createStraightRails(27, 8, t.RAIL_GOLDEN_POWERED); // powered rail (powered);
 	createStraightRails(28, 0, t.RAIL_ACTIVATOR); // detector rail
 	// id 29 // sticky piston
-	setBlockImage(30, 0, t.WEB); // cobweb
+	createItemStyleBlock(30, 0, t.WEB); // cobweb
 	// -- tall grass
-	setBlockImage(31, 0, t.DEADBUSH); // dead bush style
-	setBlockImage(31, 1, t.TALLGRASS); // tall grass
-	setBlockImage(31, 2, t.FERN); // fern
+	createItemStyleBlock(31, 0, t.DEADBUSH); // dead bush style
+	createItemStyleBlock(31, 1, t.TALLGRASS); // tall grass
+	createItemStyleBlock(31, 2, t.FERN); // fern
 	// --
-	setBlockImage(32, 0, t.DEADBUSH); // dead bush
+	createItemStyleBlock(32, 0, t.DEADBUSH); // dead bush
 	// id 33 // piston
 	// id 34 // piston extension
 	// -- wool
@@ -255,17 +262,17 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(35, 15, t.WOOL_COLORED_BLACK); // black
 	// --
 	setBlockImage(36, 0, empty_texture); // block moved by piston aka 'block 36'
-	setBlockImage(37, 0, t.FLOWER_DANDELION); // dandelion
+	createItemStyleBlock(37, 0, t.FLOWER_DANDELION); // dandelion
 	// -- poppy -- different flowers
-	setBlockImage(38, 0, t.FLOWER_ROSE); // poppy
-	setBlockImage(38, 1, t.FLOWER_BLUE_ORCHID); // blue orchid
-	setBlockImage(38, 2, t.FLOWER_ALLIUM); // azure bluet
-	setBlockImage(38, 3, t.FLOWER_HOUSTONIA); //
-	setBlockImage(38, 4, t.FLOWER_TULIP_RED); // red tulip
-	setBlockImage(38, 5, t.FLOWER_TULIP_ORANGE); // orange tulip
-	setBlockImage(38, 6, t.FLOWER_TULIP_WHITE); // white tulip
-	setBlockImage(38, 7, t.FLOWER_TULIP_PINK); // pink tulip
-	setBlockImage(38, 8, t.FLOWER_OXEYE_DAISY); // oxeye daisy
+	createItemStyleBlock(38, 0, t.FLOWER_ROSE); // poppy
+	createItemStyleBlock(38, 1, t.FLOWER_BLUE_ORCHID); // blue orchid
+	createItemStyleBlock(38, 2, t.FLOWER_ALLIUM); // azure bluet
+	createItemStyleBlock(38, 3, t.FLOWER_HOUSTONIA); //
+	createItemStyleBlock(38, 4, t.FLOWER_TULIP_RED); // red tulip
+	createItemStyleBlock(38, 5, t.FLOWER_TULIP_ORANGE); // orange tulip
+	createItemStyleBlock(38, 6, t.FLOWER_TULIP_WHITE); // white tulip
+	createItemStyleBlock(38, 7, t.FLOWER_TULIP_PINK); // pink tulip
+	createItemStyleBlock(38, 8, t.FLOWER_OXEYE_DAISY); // oxeye daisy
 	// --
 	setBlockImage(39, 0, t.MUSHROOM_BROWN); // brown mushroom
 	setBlockImage(40, 0, t.MUSHROOM_RED); // red mushroom
@@ -296,8 +303,8 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(47, 0, t.PLANKS_OAK); // bookshelf
 	setBlockImage(48, 0, t.COBBLESTONE_MOSSY); // moss stone
 	setBlockImage(49, 0, t.OBSIDIAN); // obsidian
-	setBlockImage(50, 0, t.TORCH_ON); // torch
-	setBlockImage(51, 0, t.FIRE_LAYER_0); // fire
+	createItemStyleBlock(50, 0, t.TORCH_ON); // torch
+	createItemStyleBlock(51, 0, t.FIRE_LAYER_0); // fire
 	setBlockImage(52, 0, t.MOB_SPAWNER); // monster spawner
 	// id 53 // oak wood stairs
 	// id 54 // chest
@@ -306,14 +313,14 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(57, 0, t.DIAMOND_BLOCK); // block of diamond
 	setBlockImage(58, 0, t.CRAFTING_TABLE_TOP); // crafting table
 	// -- wheat
-	setBlockImage(59, 0, t.WHEAT_STAGE_0); //
-	setBlockImage(59, 1, t.WHEAT_STAGE_1); //
-	setBlockImage(59, 2, t.WHEAT_STAGE_2); //
-	setBlockImage(59, 3, t.WHEAT_STAGE_3); //
-	setBlockImage(59, 4, t.WHEAT_STAGE_4); //
-	setBlockImage(59, 5, t.WHEAT_STAGE_5); //
-	setBlockImage(59, 6, t.WHEAT_STAGE_6); //
-	setBlockImage(59, 7, t.WHEAT_STAGE_7); //
+	createItemStyleBlock(59, 0, t.WHEAT_STAGE_0); //
+	createItemStyleBlock(59, 1, t.WHEAT_STAGE_1); //
+	createItemStyleBlock(59, 2, t.WHEAT_STAGE_2); //
+	createItemStyleBlock(59, 3, t.WHEAT_STAGE_3); //
+	createItemStyleBlock(59, 4, t.WHEAT_STAGE_4); //
+	createItemStyleBlock(59, 5, t.WHEAT_STAGE_5); //
+	createItemStyleBlock(59, 6, t.WHEAT_STAGE_6); //
+	createItemStyleBlock(59, 7, t.WHEAT_STAGE_7); //
 	// --
 	setBlockImage(60, 0, t.FARMLAND_WET); // farmland
 	setBlockImage(61, 0, t.FURNACE_TOP); // furnace
@@ -338,7 +345,7 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(80, 0, t.SNOW); // snow block
 	setBlockImage(81, 0, t.CACTUS_TOP); // cactus
 	setBlockImage(82, 0, t.CLAY); // clay block
-	setBlockImage(83, 0, t.REEDS); // sugar cane
+	createItemStyleBlock(83, 0, t.REEDS); // sugar cane
 	setBlockImage(84, 0, t.JUKEBOX_TOP.rotate(1)); // jukebox
 	// id 85 // oak fence
 	setBlockImage(86, 0, t.PUMPKIN_TOP); // pumpkin
@@ -408,10 +415,10 @@ void TopdownBlockImages::createBlocks() {
 	// id 113 // nether brick fence
 	// id 114 // nether brick stairs
 	// -- nether wart
-	setBlockImage(115, 0, t.NETHER_WART_STAGE_0);
-	setBlockImage(115, 1, t.NETHER_WART_STAGE_1);
-	setBlockImage(115, 2, t.NETHER_WART_STAGE_1);
-	setBlockImage(115, 3, t.NETHER_WART_STAGE_2);
+	createItemStyleBlock(115, 0, t.NETHER_WART_STAGE_0);
+	createItemStyleBlock(115, 1, t.NETHER_WART_STAGE_1);
+	createItemStyleBlock(115, 2, t.NETHER_WART_STAGE_1);
+	createItemStyleBlock(115, 3, t.NETHER_WART_STAGE_2);
 	// --
 	setBlockImage(116, 0, t.ENCHANTING_TABLE_TOP); // enchantment table
 	// id 117 // brewing stand
@@ -420,8 +427,8 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(120, 0, t.ENDFRAME_TOP); // end portal frame
 	setBlockImage(121, 0, t.END_STONE); // end stone
 	// id 122 // dragon egg
-	setBlockImage(123, 0, t.REDSTONE_LAMP_OFF); // redstone lamp inactive
-	setBlockImage(124, 0, t.REDSTONE_LAMP_OFF); // redstone lamp active
+	createItemStyleBlock(123, 0, t.REDSTONE_LAMP_OFF); // redstone lamp inactive
+	createItemStyleBlock(124, 0, t.REDSTONE_LAMP_OFF); // redstone lamp active
 	// // double wooden slabs
 	setBlockImage(125, 0, t.PLANKS_OAK);
 	setBlockImage(125, 1, t.PLANKS_SPRUCE);
@@ -453,24 +460,24 @@ void TopdownBlockImages::createBlocks() {
 	// id 139 // cobblestone wall
 	// id 140 // flower pot
 	// carrots --
-	setBlockImage(141, 0, t.CARROTS_STAGE_0);
-	setBlockImage(141, 1, t.CARROTS_STAGE_0);
-	setBlockImage(141, 2, t.CARROTS_STAGE_1);
-	setBlockImage(141, 3, t.CARROTS_STAGE_1);
-	setBlockImage(141, 4, t.CARROTS_STAGE_2);
-	setBlockImage(141, 5, t.CARROTS_STAGE_2);
-	setBlockImage(141, 6, t.CARROTS_STAGE_2);
-	setBlockImage(141, 7, t.CARROTS_STAGE_3);
+	createItemStyleBlock(141, 0, t.CARROTS_STAGE_0);
+	createItemStyleBlock(141, 1, t.CARROTS_STAGE_0);
+	createItemStyleBlock(141, 2, t.CARROTS_STAGE_1);
+	createItemStyleBlock(141, 3, t.CARROTS_STAGE_1);
+	createItemStyleBlock(141, 4, t.CARROTS_STAGE_2);
+	createItemStyleBlock(141, 5, t.CARROTS_STAGE_2);
+	createItemStyleBlock(141, 6, t.CARROTS_STAGE_2);
+	createItemStyleBlock(141, 7, t.CARROTS_STAGE_3);
 	// --
 	// potatoes --
-	setBlockImage(142, 0, t.POTATOES_STAGE_0);
-	setBlockImage(142, 1, t.POTATOES_STAGE_0);
-	setBlockImage(142, 2, t.POTATOES_STAGE_1);
-	setBlockImage(142, 3, t.POTATOES_STAGE_1);
-	setBlockImage(142, 4, t.POTATOES_STAGE_2);
-	setBlockImage(142, 5, t.POTATOES_STAGE_2);
-	setBlockImage(142, 6, t.POTATOES_STAGE_2);
-	setBlockImage(142, 7, t.POTATOES_STAGE_3);
+	createItemStyleBlock(142, 0, t.POTATOES_STAGE_0);
+	createItemStyleBlock(142, 1, t.POTATOES_STAGE_0);
+	createItemStyleBlock(142, 2, t.POTATOES_STAGE_1);
+	createItemStyleBlock(142, 3, t.POTATOES_STAGE_1);
+	createItemStyleBlock(142, 4, t.POTATOES_STAGE_2);
+	createItemStyleBlock(142, 5, t.POTATOES_STAGE_2);
+	createItemStyleBlock(142, 6, t.POTATOES_STAGE_2);
+	createItemStyleBlock(142, 7, t.POTATOES_STAGE_3);
 	// --
 	// id 143 // wooden button
 	// id 144 // head
