@@ -313,6 +313,7 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 	// create other stuff for the render dispatcher
 	std::shared_ptr<BlockImages> block_images(render_view->createBlockImages());
 	render_view->configureBlockImages(block_images.get(), world_config, map_config);
+	block_images->setRotation(rotation);
 	block_images->generateBlocks(resources);
 
 	RenderContext context;
