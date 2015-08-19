@@ -45,6 +45,14 @@ void TopdownBlockImages::createItemStyleBlock(uint16_t id, uint16_t data,
 	AbstractBlockImages::setBlockImage(id, data, texture);
 }
 
+void TopdownBlockImages::createWood(uint16_t id, uint16_t extra_data,
+		const RGBAImage& side, const RGBAImage& top) { // id 17, 162
+	setBlockImage(id, extra_data | 4, side.rotate(1));
+	setBlockImage(id, extra_data | 8, side);
+	setBlockImage(id, extra_data, top.rotate(1)); // old format
+	setBlockImage(id, extra_data | 4 | 8, top.rotate(1));
+}
+
 void TopdownBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
 		const RGBAImage& texture) { // id 27, 28
 	RGBAImage north_south = texture;
@@ -213,10 +221,12 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(14, 0, t.GOLD_ORE); // gold ore
 	setBlockImage(15, 0, t.IRON_ORE); // iron ore
 	setBlockImage(16, 0, t.COAL_ORE); // coal ore
-	setBlockImage(17, 0, t.LOG_OAK_TOP); // oak
-	setBlockImage(17, 1, t.LOG_SPRUCE_TOP); // pine/spruce
-	setBlockImage(17, 2, t.LOG_BIRCH_TOP); // birch
-	setBlockImage(17, 3, t.LOG_JUNGLE_TOP); // jungle
+	// -- wood
+	createWood(17, 0, t.LOG_OAK, t.LOG_OAK_TOP); // oak
+	createWood(17, 1, t.LOG_SPRUCE, t.LOG_SPRUCE_TOP); // pine/spruce
+	createWood(17, 2, t.LOG_BIRCH, t.LOG_BIRCH_TOP); // birch
+	createWood(17, 3, t.LOG_JUNGLE, t.LOG_JUNGLE_TOP); // jungle
+	// --
 	setBlockImage(18, 0, t.LEAVES_OAK); // oak
 	setBlockImage(18, 1, t.LEAVES_SPRUCE); // pine/spruce
 	setBlockImage(18, 2, t.LEAVES_OAK); // birch
@@ -532,11 +542,11 @@ void TopdownBlockImages::createBlocks() {
 	// id 160 // stained glass pane
 	setBlockImage(161, 0, t.LEAVES_ACACIA); // acacia leaves
 	setBlockImage(161, 1, t.LEAVES_BIG_OAK); // dark oak leaves
-	// some more wood ---
-	setBlockImage(162, 0, t.LOG_ACACIA_TOP); // acacia
-	setBlockImage(162, 1, t.LOG_BIG_OAK_TOP); // acacia (placeholder)
-	setBlockImage(162, 2, t.LOG_ACACIA_TOP); // dark wood
-	setBlockImage(162, 3, t.LOG_BIG_OAK_TOP); // dark wood (placeholder)
+	// some more wood --
+	createWood(162, 0, t.LOG_ACACIA, t.LOG_ACACIA_TOP); // acacia
+	createWood(162, 1, t.LOG_BIG_OAK, t.LOG_BIG_OAK_TOP); // acacia (placeholder)
+	createWood(162, 2, t.LOG_ACACIA, t.LOG_ACACIA_TOP); // dark wood
+	createWood(162, 3, t.LOG_BIG_OAK, t.LOG_BIG_OAK_TOP); // dark wood (placeholder)
 	// --
 	// id 163 // acacia wood stairs
 	// id 164 // dark oak wood stairs
