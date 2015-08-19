@@ -836,8 +836,8 @@ void IsometricBlockImages::createLava() { // id 10, 11
 }
 
 void IsometricBlockImages::createWood(uint16_t id, uint16_t data, const RGBAImage& side, const RGBAImage& top) { // id 17
-	createBlock(id, data | 4, top, side, side);
-	createBlock(id, data | 8, side, top, side);
+	createBlock(id, data | 4, top, side.rotate(1), side);
+	createBlock(id, data | 8, side.rotate(1), top, side.rotate(1));
 	createBlock(id, data, side, side, top); // old format
 	createBlock(id, data | 4 | 8, side, side, top);
 }
