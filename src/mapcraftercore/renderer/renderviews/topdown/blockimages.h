@@ -36,9 +36,14 @@ public:
 
 protected:
 	void createItemStyleBlock(uint16_t id, uint16_t data, const RGBAImage& texture);
+	void createRotatedBlock(uint16_t id, uint16_t extra_data, const RGBAImage& texture);
 
 	void createWood(uint16_t id, uint16_t extra_data, const RGBAImage& side, const RGBAImage& top); // id 17, 162
+	void createDispenserDropper(uint16_t id, const RGBAImage& front); // id 23, 158
+	void createBed(); // id 26
 	void createStraightRails(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 27, 28
+	void createChest(uint16_t id, const ChestTextures& textures); // 54, 130
+	void createDoubleChest(uint16_t id, const DoubleChestTextures& textures); // 54
 	void createRails(); // id 66
 	void createVines(); // id 106
 	void createLargePlant(uint16_t data, const RGBAImage& texture, const RGBAImage& top_texture); // id 175

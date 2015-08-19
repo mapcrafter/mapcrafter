@@ -45,12 +45,43 @@ void TopdownBlockImages::createItemStyleBlock(uint16_t id, uint16_t data,
 	AbstractBlockImages::setBlockImage(id, data, texture);
 }
 
+void TopdownBlockImages::createRotatedBlock(uint16_t id, uint16_t extra_data,
+		const RGBAImage& texture) {
+	setBlockImage(id, 2 | extra_data, texture);
+	setBlockImage(id, 3 | extra_data, texture.rotate(2));
+	setBlockImage(id, 4 | extra_data, texture.rotate(3));
+	setBlockImage(id, 5 | extra_data, texture.rotate(1));
+}
+
 void TopdownBlockImages::createWood(uint16_t id, uint16_t extra_data,
 		const RGBAImage& side, const RGBAImage& top) { // id 17, 162
 	setBlockImage(id, extra_data | 4, side.rotate(1));
 	setBlockImage(id, extra_data | 8, side);
 	setBlockImage(id, extra_data, top.rotate(1)); // old format
 	setBlockImage(id, extra_data | 4 | 8, top.rotate(1));
+}
+
+void TopdownBlockImages::createDispenserDropper(uint16_t id, const RGBAImage& front) { // id 23, 158
+	RGBAImage side = resources.getBlockTextures().FURNACE_SIDE;
+	RGBAImage top = resources.getBlockTextures().FURNACE_TOP;
+
+	createRotatedBlock(id, 0, top);
+	setBlockImage(id, 0, top);
+	setBlockImage(id, 1, front);
+}
+
+void TopdownBlockImages::createBed() { // id 26
+	RGBAImage top = resources.getBlockTextures().BED_FEET_TOP;
+	setBlockImage(26, 0, top.rotate(2));
+	setBlockImage(26, 1, top.rotate(3));
+	setBlockImage(26, 2, top);
+	setBlockImage(26, 3, top.rotate(1));
+
+	top = resources.getBlockTextures().BED_HEAD_TOP;
+	setBlockImage(26, 8, top.rotate(1));
+	setBlockImage(26, 1 | 8, top.rotate(2));
+	setBlockImage(26, 2 | 8, top.rotate(3));
+	setBlockImage(26, 3 | 8, top);
 }
 
 void TopdownBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
@@ -63,6 +94,27 @@ void TopdownBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
 	setBlockImage(id, 3 | extra_data, east_west);
 	setBlockImage(id, 4 | extra_data, north_south);
 	setBlockImage(id, 5 | extra_data, north_south);
+}
+
+void TopdownBlockImages::createChest(uint16_t id, const ChestTextures& textures) { // 54, 130
+	RGBAImage top = textures[ChestTextures::TOP];
+	setBlockImage(id, DATA_NORTH, top.rotate(3));
+	setBlockImage(id, DATA_SOUTH, top.rotate(1));
+	setBlockImage(id, DATA_EAST, top);
+	setBlockImage(id, DATA_WEST, top.rotate(2));
+}
+
+void TopdownBlockImages::createDoubleChest(uint16_t id, const DoubleChestTextures& textures) { // 54
+	int l = LARGECHEST_DATA_LARGE;
+	setBlockImage(id, DATA_NORTH | l | LARGECHEST_DATA_LEFT, textures[DoubleChestTextures::TOP_LEFT].rotate(2));
+	setBlockImage(id, DATA_SOUTH | l | LARGECHEST_DATA_LEFT, textures[DoubleChestTextures::TOP_LEFT]);
+	setBlockImage(id, DATA_EAST | l | LARGECHEST_DATA_LEFT, textures[DoubleChestTextures::TOP_LEFT].rotate(3));
+	setBlockImage(id, DATA_WEST | l | LARGECHEST_DATA_LEFT, textures[DoubleChestTextures::TOP_LEFT].rotate(1));
+
+	setBlockImage(id, DATA_NORTH | l, textures[DoubleChestTextures::TOP_RIGHT].rotate(2));
+	setBlockImage(id, DATA_SOUTH | l, textures[DoubleChestTextures::TOP_RIGHT]);
+	setBlockImage(id, DATA_EAST | l, textures[DoubleChestTextures::TOP_RIGHT].rotate(3));
+	setBlockImage(id, DATA_WEST | l, textures[DoubleChestTextures::TOP_RIGHT].rotate(1));
 }
 
 void TopdownBlockImages::createRails() { // id 66
@@ -113,6 +165,8 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & OPAQUE_WATER; // we just need that one bit
 	if (id == 18 || id == 161) // leaves
 		return data & (0xff00 | 0b00000011);
+	else if (id == 26) // bed
+		return data & (0xff00 | util::binary<1011>::value);
 	else if (id == 43 || id == 44 || id == 125 || id == 126 || id == 181 || id == 182)
 		return data & ~8;
 	else if (id == 60) // farmland
@@ -236,10 +290,10 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(20, 0, t.GLASS);
 	setBlockImage(21, 0, t.LAPIS_ORE); // lapis lazuli ore
 	setBlockImage(22, 0, t.LAPIS_BLOCK); // lapis lazuli block
-	// id 23 // dispenser
+	createDispenserDropper(23, t.DISPENSER_FRONT_HORIZONTAL); // dispenser
 	setBlockImage(24, 0, t.SANDSTONE_TOP); // sandstone
 	setBlockImage(25, 0, t.NOTEBLOCK); // noteblock
-	// id 26 // bed
+	createBed(); // id 26 // bed
 	createStraightRails(27, 0, t.RAIL_GOLDEN); // powered rail (unpowered)
 	createStraightRails(27, 8, t.RAIL_GOLDEN_POWERED); // powered rail (powered);
 	createStraightRails(28, 0, t.RAIL_ACTIVATOR); // detector rail
@@ -317,7 +371,8 @@ void TopdownBlockImages::createBlocks() {
 	createItemStyleBlock(51, 0, t.FIRE_LAYER_0); // fire
 	setBlockImage(52, 0, t.MOB_SPAWNER); // monster spawner
 	// id 53 // oak wood stairs
-	// id 54 // chest
+	createChest(54, resources.getNormalChest()); // chest
+	createDoubleChest(54, resources.getNormalDoubleChest()); // chest
 	// id 55 // redstone wire
 	setBlockImage(56, 0, t.DIAMOND_ORE); // diamond ore
 	setBlockImage(57, 0, t.DIAMOND_BLOCK); // block of diamond
@@ -458,7 +513,7 @@ void TopdownBlockImages::createBlocks() {
 	// id 127 // cocoas
 	// id 128 // sanstone stairs
 	setBlockImage(129, 0, t.EMERALD_ORE);
-	// id 130 // ender chest
+	createChest(130, resources.getEnderChest()); // ender chest
 	// id 131 // tripwire hook
 	// id 132 // tripwire
 	setBlockImage(133, 0, t.EMERALD_BLOCK); // block of emerald
@@ -492,7 +547,8 @@ void TopdownBlockImages::createBlocks() {
 	// id 143 // wooden button
 	// id 144 // head
 	// id 145 // anvil
-	// id 146 // trapped chest
+	createChest(146, resources.getTrappedChest()); // trapped chest
+	createDoubleChest(146, resources.getTrappedDoubleChest()); // double trapped chest
 	setBlockImage(147, 0, t.GOLD_BLOCK); // weighted pressure plate (light) // TODO
 	setBlockImage(148, 0, t.GOLD_BLOCK); // weighted pressure plate (heavy) // TODO
 	// redstone comparator (inactive) --
@@ -520,7 +576,7 @@ void TopdownBlockImages::createBlocks() {
 	// --
 	// id 156 // quartz stairs
 	// id 157 // activator rail
-	// id 158 // dropper
+	createDispenserDropper(158, t.DROPPER_FRONT_HORIZONTAL); // dropper
 	// stained clay --
 	setBlockImage(159, 0, t.HARDENED_CLAY_STAINED_WHITE);
 	setBlockImage(159, 1, t.HARDENED_CLAY_STAINED_ORANGE);
