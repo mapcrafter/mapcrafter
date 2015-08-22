@@ -42,10 +42,14 @@ protected:
 	void createDispenserDropper(uint16_t id, const RGBAImage& front); // id 23, 158
 	void createBed(); // id 26
 	void createStraightRails(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 27, 28
+	void createTorch(uint16_t id, const RGBAImage& texture); // id 50, 75, 76
 	void createChest(uint16_t id, const ChestTextures& textures); // 54, 130
 	void createDoubleChest(uint16_t id, const DoubleChestTextures& textures); // 54
+	void createRedstoneWire(uint16_t id, uint16_t extra_data, uint8_t r, uint8_t g, uint8_t b); // id 55
 	void createRails(); // id 66
+	void createFence(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 85, 113, 188-192
 	void createVines(); // id 106
+	void createFenceGate(uint8_t id, RGBAImage texture); // id 107, 183-187
 	void createLargePlant(uint16_t data, const RGBAImage& texture, const RGBAImage& top_texture); // id 175
 
 	virtual uint16_t filterBlockData(uint16_t id, uint16_t data) const;

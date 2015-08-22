@@ -96,6 +96,11 @@ void TopdownBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
 	setBlockImage(id, 5 | extra_data, north_south);
 }
 
+void TopdownBlockImages::createTorch(uint16_t id, const RGBAImage& texture) { // id 50, 75, 76
+	// TODO also display the torches on walls?
+	createItemStyleBlock(id, 5, texture);
+}
+
 void TopdownBlockImages::createChest(uint16_t id, const ChestTextures& textures) { // 54, 130
 	RGBAImage top = textures[ChestTextures::TOP];
 	setBlockImage(id, DATA_NORTH, top.rotate(3));
@@ -117,6 +122,55 @@ void TopdownBlockImages::createDoubleChest(uint16_t id, const DoubleChestTexture
 	setBlockImage(id, DATA_WEST | l, textures[DoubleChestTextures::TOP_RIGHT].rotate(1));
 }
 
+void TopdownBlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data, uint8_t r,
+		uint8_t g, uint8_t b) { // id 55
+	RGBAImage redstone_cross = resources.getBlockTextures().REDSTONE_DUST_CROSS;
+	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE;
+
+	//uint8_t color = powered ? 50 : 255;
+	redstone_cross = redstone_cross.colorize(r, g, b);
+	redstone_line = redstone_line.colorize(r, g, b);
+
+	// 1/16 of the texture size
+	double s = (double) texture_size / 16;
+
+	// go through all redstone combinations
+	for (uint16_t i = 0; i <= 0xff; i++) {
+		// the redstone extra data starts at the fifth byte
+		// so shift the data to the right
+		uint16_t data = i << 4;
+
+		// ignore neighbors a block higher
+		if ((data & REDSTONE_TOPNORTH) || (data & REDSTONE_TOPSOUTH)
+				|| (data & REDSTONE_TOPEAST) || (data & REDSTONE_TOPWEST))
+			continue;
+
+		RGBAImage texture = redstone_cross;
+		// remove the connections from the cross image
+		// if there is no connection
+		if (!(data & REDSTONE_NORTH))
+			texture.fill(rgba(0, 0, 0, 0), 0, 0, s*16, s*4);
+		if (!(data & REDSTONE_SOUTH))
+			texture.fill(rgba(0, 0, 0, 0), 0, s*12, s*16, s*4);
+
+		if (!(data & REDSTONE_EAST))
+			texture.fill(rgba(0, 0, 0, 0), s*12, 0, s*4, s*16);
+		if (!(data & REDSTONE_WEST))
+			texture.fill(rgba(0, 0, 0, 0), 0, 0, s*4, s*16);
+
+		// check if we have a line of restone
+		if (data == (REDSTONE_NORTH | REDSTONE_SOUTH))
+			texture = redstone_line.rotate(ROTATE_90);
+		else if (data == (REDSTONE_EAST | REDSTONE_WEST))
+			texture = redstone_line;
+
+		// we can add the block like this without rotation
+		// because we calculate the neighbors on our own,
+		// it does not depend on the rotation of the map
+		AbstractBlockImages::setBlockImage(id, data | extra_data, texture);
+	}
+}
+
 void TopdownBlockImages::createRails() { // id 66
 	const BlockTextures& t = resources.getBlockTextures();
 	RGBAImage straight = t.RAIL_NORMAL, curved = t.RAIL_NORMAL_TURNED;
@@ -128,10 +182,89 @@ void TopdownBlockImages::createRails() { // id 66
 	setBlockImage(66, 9, curved.flip(false, true)); // north-east
 }
 
+namespace {
+
+RGBAImage buildFenceLike(const RGBAImage& texture, bool north, bool south, bool east, bool west,
+		int post_factor = 6, int conn_factor = 2) {
+	int size = texture.getWidth();
+	double ratio = (double) size / 16;
+	int post = std::max(ratio * post_factor, 2.0);
+	int post_start = (size - post) / 2;
+	int conn = std::max(ratio * conn_factor, 2.0);
+	int conn_start = (size - conn) / 2;
+
+	RGBAPixel invisible = rgba(0, 0, 0, 0);
+	RGBAPixel visible = rgba(0, 0, 0, 255);
+	RGBAImage mask(size, size);
+	mask.fill(invisible, 0, 0, size, size);
+	mask.fill(visible, post_start, post_start, post, post);
+
+	if (north)
+		mask.fill(visible, conn_start, 0, conn, size / 2);
+	if (south)
+		mask.fill(visible, conn_start, size / 2, conn, size / 2 + 1);
+	if (east)
+		mask.fill(visible, size / 2, conn_start, size / 2 + 1, conn);
+	if (west)
+		mask.fill(visible, 0, conn_start, size / 2, conn);
+
+	RGBAImage fence = texture;
+	for (int x = 0; x < size; x++)
+		for (int y = 0; y < size; y++)
+			if (mask.pixel(x, y) == invisible)
+				fence.pixel(x, y) = invisible;
+	return fence;
+}
+
+}
+
+void TopdownBlockImages::createFence(uint16_t id, uint16_t extra_data, const RGBAImage& texture) { // id 85, 113, 188-192
+	for (uint8_t i = 0; i < 16; i++) {
+		uint16_t data = i << 4;
+		// special data set by the tile renderer
+		bool north = data & DATA_NORTH;
+		bool south = data & DATA_SOUTH;
+		bool east = data & DATA_EAST;
+		bool west = data & DATA_WEST;
+
+		RGBAImage fence = buildFenceLike(texture, north, south, east, west);
+		AbstractBlockImages::setBlockImage(id, data | extra_data, fence);
+	}
+}
+
 void TopdownBlockImages::createVines() { // id 106
 	RGBAImage texture = resources.getBlockTextures().VINE;
 	setBlockImage(106, 0, texture);
 	setBlockImage(106, 42, empty_texture);
+}
+
+void TopdownBlockImages::createFenceGate(uint8_t id, RGBAImage texture) { // id 107, 183-187
+	// go through states opened and closed
+	for(int open = 0; open <= 1; open++) {
+		// north/south, east/west block images are same
+		// (because we ignore the direction of opened fence gates)
+		RGBAImage north = buildFenceLike(texture, false, false, true, true, 2, 2);
+		RGBAImage east = buildFenceLike(texture, true, true, false, false, 2, 2);
+		// create the opening-part if it's open
+		if (open) {
+			double ratio = (double) texture_size / 16;
+			north.fill(0, ratio * 4, ratio * 4, ratio * 8, ratio * 8);
+			east.fill(0, ratio * 4, ratio * 4, ratio * 8, ratio * 8);
+		}
+
+		uint8_t extra = open ? 4 : 0;
+		if (rotation == 0 || rotation == 2) {
+			setBlockImage(id, 0 | extra, north);
+			setBlockImage(id, 1 | extra, east);
+			setBlockImage(id, 2 | extra, north);
+			setBlockImage(id, 3 | extra, east);
+		} else {
+			setBlockImage(id, 0 | extra, east);
+			setBlockImage(id, 1 | extra, north);
+			setBlockImage(id, 2 | extra, east);
+			setBlockImage(id, 3 | extra, north);
+		}
+	}
 }
 
 void TopdownBlockImages::createLargePlant(uint16_t data, const RGBAImage& texture,
@@ -150,7 +283,7 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	// of some blocks we don't need any data at all
 	if ((id >= 10 && id <= 11) // lava
 			|| id == 24 // sandstone
-			|| id == 50 // torch
+			//|| id == 50 || id == 75 || id == 76 // torch // TODO
 			|| id == 51 // fire
 			|| id == 78 // snow
 			|| id == 79 // ice
@@ -169,8 +302,13 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & (0xff00 | util::binary<1011>::value);
 	else if (id == 43 || id == 44 || id == 125 || id == 126 || id == 181 || id == 182)
 		return data & ~8;
+	else if (id == 55)
+		// unset unnecessary neighbor information for this render view
+		return data & ~(REDSTONE_TOPNORTH | REDSTONE_TOPSOUTH | REDSTONE_TOPEAST | REDSTONE_TOPWEST);
 	else if (id == 60) // farmland
 		return data & 0xff00;
+	else if (id == 93 || id == 94) // redstone repeater
+		return data & (0xff00 | util::binary<11>::value);
 	else if (id == 81 || id == 83 || id == 92) // cactus, sugar cane, cake
 		return data & 0xff00;
 	else if (id == 106) { // vines
@@ -367,13 +505,14 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(47, 0, t.PLANKS_OAK); // bookshelf
 	setBlockImage(48, 0, t.COBBLESTONE_MOSSY); // moss stone
 	setBlockImage(49, 0, t.OBSIDIAN); // obsidian
-	createItemStyleBlock(50, 0, t.TORCH_ON); // torch
+	createTorch(50, t.TORCH_ON); // torch
 	createItemStyleBlock(51, 0, t.FIRE_LAYER_0); // fire
 	setBlockImage(52, 0, t.MOB_SPAWNER); // monster spawner
 	// id 53 // oak wood stairs
 	createChest(54, resources.getNormalChest()); // chest
 	createDoubleChest(54, resources.getNormalDoubleChest()); // chest
-	// id 55 // redstone wire
+	createRedstoneWire(55, 0, 48, 0, 0); // redstone wire not powered
+	createRedstoneWire(55, REDSTONE_POWERED, 192, 0, 0); // redstone wire powered
 	setBlockImage(56, 0, t.DIAMOND_ORE); // diamond ore
 	setBlockImage(57, 0, t.DIAMOND_BLOCK); // block of diamond
 	setBlockImage(58, 0, t.CRAFTING_TABLE_TOP); // crafting table
@@ -388,8 +527,8 @@ void TopdownBlockImages::createBlocks() {
 	createItemStyleBlock(59, 7, t.WHEAT_STAGE_7); //
 	// --
 	setBlockImage(60, 0, t.FARMLAND_WET); // farmland
-	setBlockImage(61, 0, t.FURNACE_TOP); // furnace
-	setBlockImage(62, 0, t.FURNACE_TOP); // burning furnace
+	createRotatedBlock(61, 0, t.FURNACE_TOP); // furnace
+	createRotatedBlock(62, 0, t.FURNACE_TOP); // burning furnace
 	// id 63 // sign post
 	// id 64 // wooden door
 	// id 65 // ladders
@@ -402,8 +541,8 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(72, 0, t.PLANKS_OAK); // wooden pressure plate // TODO
 	setBlockImage(73, 0, t.REDSTONE_ORE); // redstone ore
 	setBlockImage(74, 0, t.REDSTONE_ORE); // glowing redstone ore
-	setBlockImage(75, 0, t.REDSTONE_TORCH_OFF); // redstone torch off // TODO
-	setBlockImage(76, 0, t.REDSTONE_TORCH_OFF); // redstone torch on // TODO
+	createTorch(75, t.REDSTONE_TORCH_OFF); // redstone torch off
+	createTorch(76, t.REDSTONE_TORCH_ON); // redstone torch on
 	// id 77 // stone button
 	setBlockImage(78, 0, t.SNOW); // snow
 	setBlockImage(79, 0, t.ICE); // ice
@@ -412,7 +551,7 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(82, 0, t.CLAY); // clay block
 	createItemStyleBlock(83, 0, t.REEDS); // sugar cane
 	setBlockImage(84, 0, t.JUKEBOX_TOP.rotate(1)); // jukebox
-	// id 85 // oak fence
+	createFence(85, 0, t.PLANKS_OAK); // oak fence
 	setBlockImage(86, 0, t.PUMPKIN_TOP); // pumpkin
 	setBlockImage(87, 0, t.NETHERRACK); // netherrack
 	setBlockImage(88, 0, t.SOUL_SAND); // soul sand
@@ -471,13 +610,13 @@ void TopdownBlockImages::createBlocks() {
 	// id 105 // melon stem
 	// id 106 // vines
 	createVines(); // id 106
-	// id 107 // oak fence gate
+	createFenceGate(107, t.PLANKS_OAK); // oak fence gate
 	// id 108 // brick stairs
 	// id 109 // stone brick stairs
 	setBlockImage(110, 0, t.MYCELIUM_TOP); // mycelium
 	setBlockImage(111, 0, t.WATERLILY); // lily pad
 	setBlockImage(112, 0, t.NETHER_BRICK); // nether brick
-	// id 113 // nether brick fence
+	createFence(113, 0, t.NETHER_BRICK); // nether brick fence
 	// id 114 // nether brick stairs
 	// -- nether wart
 	createItemStyleBlock(115, 0, t.NETHER_WART_STAGE_0);
@@ -493,7 +632,7 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(121, 0, t.END_STONE); // end stone
 	// id 122 // dragon egg
 	createItemStyleBlock(123, 0, t.REDSTONE_LAMP_OFF); // redstone lamp inactive
-	createItemStyleBlock(124, 0, t.REDSTONE_LAMP_OFF); // redstone lamp active
+	createItemStyleBlock(124, 0, t.REDSTONE_LAMP_ON); // redstone lamp active
 	// // double wooden slabs
 	setBlockImage(125, 0, t.PLANKS_OAK);
 	setBlockImage(125, 1, t.PLANKS_SPRUCE);
@@ -522,7 +661,8 @@ void TopdownBlockImages::createBlocks() {
 	// id 136 // jungle wood stairs
 	setBlockImage(137, 0, t.COMMAND_BLOCK);
 	// id 138 // beacon
-	// id 139 // cobblestone wall
+	createFence(139, 0, t.COBBLESTONE); // cobblestone wall
+	createFence(139, 1, t.COBBLESTONE_MOSSY); // cobblestone wall mossy
 	// id 140 // flower pot
 	// carrots --
 	createItemStyleBlock(141, 0, t.CARROTS_STAGE_0);
@@ -667,16 +807,16 @@ void TopdownBlockImages::createBlocks() {
 	// normal red sandstone slabs --
 	setBlockImage(181, 0, t.RED_SANDSTONE_TOP);
 	// --
-	// id 183 // spruce fence gate
-	// id 184 // birch fence gate
-	// id 185 // jungle fence gate
-	// id 186 // dark oak fence gate
-	// id 186 // acacia fence gate
-	// id 188 // spruce fence
-	// id 189 // birch fence
-	// id 190 // jungle fence
-	// id 191 // dark oak fence
-	// id 192 // acacia fence
+	createFenceGate(183, t.PLANKS_SPRUCE); // spruce fence gate
+	createFenceGate(184, t.PLANKS_BIRCH); // birch fence gate
+	createFenceGate(185, t.PLANKS_JUNGLE); // jungle fence gate
+	createFenceGate(186, t.PLANKS_BIG_OAK); // dark oak fence gate
+	createFenceGate(187, t.PLANKS_ACACIA); // acacia fence gate
+	createFence(188, 0, t.PLANKS_SPRUCE); // spruce fence
+	createFence(189, 0, t.PLANKS_BIRCH); // birch fence
+	createFence(190, 0, t.PLANKS_JUNGLE); // jungle fence
+	createFence(191, 0, t.PLANKS_BIG_OAK); // dark oak fence
+	createFence(192, 0, t.PLANKS_ACACIA); // acacia fence
 	// id 193 // spruce door
 	// id 194 // birch door
 	// id 195 // jungle door

@@ -1553,7 +1553,7 @@ RGBAImage createFenceGateTexture(bool opened, RGBAImage texture) {
 	return texture;
 }
 
-void IsometricBlockImages::createFenceGate(uint8_t id, RGBAImage texture) { // id 107
+void IsometricBlockImages::createFenceGate(uint8_t id, RGBAImage texture) { // id 107, 183-187
 	RGBAImage opened = createFenceGateTexture(true, texture);
 	RGBAImage closed = createFenceGateTexture(false, texture);
 
