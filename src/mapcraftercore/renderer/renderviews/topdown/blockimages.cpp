@@ -45,6 +45,21 @@ void TopdownBlockImages::createItemStyleBlock(uint16_t id, uint16_t data,
 	AbstractBlockImages::setBlockImage(id, data, texture);
 }
 
+namespace {
+
+void blitSideFace(RGBAImage& block, int face, const RGBAImage& texture) {
+	// do nothing? // TODO
+}
+
+}
+
+void TopdownBlockImages::createSideFaceBlock(uint16_t id, uint16_t data,
+		const RGBAImage& texture, int face) {
+	RGBAImage block(texture_size, texture_size);
+	blitSideFace(block, face, texture);
+	setBlockImage(id, data, block);
+}
+
 void TopdownBlockImages::createRotatedBlock(uint16_t id, uint16_t extra_data,
 		const RGBAImage& texture) {
 	setBlockImage(id, 2 | extra_data, texture);
@@ -302,10 +317,38 @@ void TopdownBlockImages::createHugeMushroom(uint16_t id, const RGBAImage& cap) {
 	setBlockImage(id, 15, stem);
 }
 
+void TopdownBlockImages::createStem(uint16_t id) { // id 104, 105
+	// build here only growing normal stem
+	RGBAImage texture = resources.getBlockTextures().PUMPKIN_STEM_DISCONNECTED;
+
+	for (int i = 0; i <= 7; i++) {
+		double percentage = 1 - ((double) i / 7);
+		int move = percentage * texture_size;
+
+		if (i == 7)
+			createItemStyleBlock(id, i, texture.move(0, move).colorize(0.6, 0.7, 0.01));
+		else
+			createItemStyleBlock(id, i, texture.move(0, move).colorize(0.3, 0.7, 0.01));
+	}
+}
+
 void TopdownBlockImages::createVines() { // id 106
 	RGBAImage texture = resources.getBlockTextures().VINE;
-	setBlockImage(106, 0, texture);
-	setBlockImage(106, 42, empty_texture);
+
+	for (int i = 0; i <= 15; i++) {
+		RGBAImage block(texture_size, texture_size);
+		if (i == 0)
+			block = texture;
+		if (i & 1)
+			blitSideFace(block, FACE_SOUTH, texture);
+		if (i & 2)
+			blitSideFace(block, FACE_WEST, texture);
+		if (i & 4)
+			blitSideFace(block, FACE_NORTH, texture);
+		if (i & 8)
+			blitSideFace(block, FACE_EAST, texture);
+		setBlockImage(106, i, block);
+	}
 }
 
 void TopdownBlockImages::createFenceGate(uint8_t id, RGBAImage texture) { // id 107, 183-187
@@ -423,15 +466,13 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & ~(REDSTONE_TOPNORTH | REDSTONE_TOPSOUTH | REDSTONE_TOPEAST | REDSTONE_TOPWEST);
 	else if (id == 60) // farmland
 		return data & 0xff00;
+	else if (id == 86 || id == 91) // pumpkin, jack-o-lantern
+		return data & ~0x4;
 	else if (id == 93 || id == 94) // redstone repeater
 		return data & (0xff00 | util::binary<11>::value);
 	else if (id == 81 || id == 83) // cactus, sugar cane
 		return data & 0xff00;
-	else if (id == 106) { // vines
-		// data must be 0 or vine won't be visible
-		if ((data & 0xff) != 0)
-			return (data & ~0xff) | 42;
-	} else if (id == 119 || id == 120) // end portal, end portal frame
+	else if (id == 119 || id == 120) // end portal, end portal frame
 		return data & 0xff00;
 	else if (id == 131) // trip wire hook
 		return data & util::binary<11>::value;
@@ -673,12 +714,22 @@ void TopdownBlockImages::createBlocks() {
 	createItemStyleBlock(83, 0, t.REEDS); // sugar cane
 	setBlockImage(84, 0, t.JUKEBOX_TOP.rotate(1)); // jukebox
 	createFence(85, 0, t.PLANKS_OAK); // oak fence
-	setBlockImage(86, 0, t.PUMPKIN_TOP); // pumpkin
+	// -- pumpkin
+	setBlockImage(86, 0, t.PUMPKIN_TOP.rotate(2)); // south
+	setBlockImage(86, 1, t.PUMPKIN_TOP.rotate(1)); // west
+	setBlockImage(86, 2, t.PUMPKIN_TOP); // north
+	setBlockImage(86, 3, t.PUMPKIN_TOP.rotate(3)); // east
+	// --
 	setBlockImage(87, 0, t.NETHERRACK); // netherrack
 	setBlockImage(88, 0, t.SOUL_SAND); // soul sand
 	setBlockImage(89, 0, t.GLOWSTONE); // glowstone block
 	setBlockImage(90, 0, t.PORTAL); // nether portal block // TODO?
-	setBlockImage(91, 0, t.PUMPKIN_TOP); // jack-o-lantern
+	// -- jack-o-lantern
+	setBlockImage(91, 0, t.PUMPKIN_TOP.rotate(2)); // south
+	setBlockImage(91, 1, t.PUMPKIN_TOP.rotate(1)); // west
+	setBlockImage(91, 2, t.PUMPKIN_TOP); // north
+	setBlockImage(91, 3, t.PUMPKIN_TOP.rotate(3)); // east
+	// --
 	createCake(); // id 92 // cake
 	// redstone repeater off --
 	setBlockImage(93, 0, t.REPEATER_OFF.rotate(ROTATE_270));
@@ -727,9 +778,8 @@ void TopdownBlockImages::createBlocks() {
 	// id 101 // iron bars
 	// id 102 // glas pane
 	setBlockImage(103, 0, t.MELON_TOP); // melon
-	// id 104 // pumpkin stem
-	// id 105 // melon stem
-	// id 106 // vines
+	createStem(104); // pumpkin stem
+	createStem(105); // melon stem
 	createVines(); // id 106
 	createFenceGate(107, t.PLANKS_OAK); // oak fence gate
 	createStairs(108, t.BRICK); // brick stairs

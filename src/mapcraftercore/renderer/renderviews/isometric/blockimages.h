@@ -93,14 +93,6 @@ const int NORTH_TOP_RIGHT = 1;
 const int NORTH_BOTTOM_RIGHT = 2;
 const int NORTH_BOTTOM_LEFT = 3;
 
-const int FACE_NORTH = 1;
-const int FACE_EAST = 2;
-const int FACE_SOUTH = 4;
-const int FACE_WEST = 8;
-
-const int FACE_TOP = 16;
-const int FACE_BOTTOM = 32;
-
 enum class SlabType {
 	STONE, STONE2, WOOD
 };

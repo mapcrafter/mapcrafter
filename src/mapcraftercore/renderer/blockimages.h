@@ -34,6 +34,14 @@ namespace renderer {
 
 class Biome;
 
+// general stuff both render views can use
+const int FACE_NORTH = 1;
+const int FACE_EAST = 2;
+const int FACE_SOUTH = 4;
+const int FACE_WEST = 8;
+const int FACE_TOP = 16;
+const int FACE_BOTTOM = 32;
+
 // extra data starting at the 5. bit
 const int DATA_NORTH = 1 << 4;
 const int DATA_EAST = 1 << 5;
