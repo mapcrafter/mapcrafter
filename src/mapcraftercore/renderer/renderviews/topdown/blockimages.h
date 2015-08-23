@@ -48,8 +48,12 @@ protected:
 	void createRedstoneWire(uint16_t id, uint16_t extra_data, uint8_t r, uint8_t g, uint8_t b); // id 55
 	void createRails(); // id 66
 	void createFence(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 85, 113, 188-192
+	void createCake(); // id 92
+	void createHugeMushroom(uint16_t id, const RGBAImage& cap); // id 99, 100
 	void createVines(); // id 106
 	void createFenceGate(uint8_t id, RGBAImage texture); // id 107, 183-187
+	void createCocoas(); // id 127
+	void createTripwireHook(); // id 131
 	void createLargePlant(uint16_t data, const RGBAImage& texture, const RGBAImage& top_texture); // id 175
 
 	virtual uint16_t filterBlockData(uint16_t id, uint16_t data) const;

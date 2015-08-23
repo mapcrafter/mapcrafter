@@ -232,6 +232,36 @@ void TopdownBlockImages::createFence(uint16_t id, uint16_t extra_data, const RGB
 	}
 }
 
+void TopdownBlockImages::createCake() {
+	RGBAImage texture = resources.getBlockTextures().CAKE_TOP;
+
+	for (int data = 0; data <= 6; data++) {
+		int eaten = (double) data / 7 * texture_size;
+		RGBAImage cake = texture;
+		cake.fill(0, 0, 0, eaten, texture_size);
+		setBlockImage(92, data, cake);
+	}
+}
+
+void TopdownBlockImages::createHugeMushroom(uint16_t id, const RGBAImage& cap) { // id 99, 100
+	RGBAImage pores = resources.getBlockTextures().MUSHROOM_BLOCK_INSIDE;
+	RGBAImage stem = resources.getBlockTextures().MUSHROOM_BLOCK_SKIN_STEM;
+
+	setBlockImage(id, 0, pores);
+	setBlockImage(id, 1, cap);
+	setBlockImage(id, 2, cap);
+	setBlockImage(id, 3, cap);
+	setBlockImage(id, 4, cap);
+	setBlockImage(id, 5, cap);
+	setBlockImage(id, 6, cap);
+	setBlockImage(id, 7, cap);
+	setBlockImage(id, 8, cap);
+	setBlockImage(id, 9, cap);
+	setBlockImage(id, 10, pores);
+	setBlockImage(id, 14, cap);
+	setBlockImage(id, 15, stem);
+}
+
 void TopdownBlockImages::createVines() { // id 106
 	RGBAImage texture = resources.getBlockTextures().VINE;
 	setBlockImage(106, 0, texture);
@@ -240,7 +270,7 @@ void TopdownBlockImages::createVines() { // id 106
 
 void TopdownBlockImages::createFenceGate(uint8_t id, RGBAImage texture) { // id 107, 183-187
 	// go through states opened and closed
-	for(int open = 0; open <= 1; open++) {
+	for (int open = 0; open <= 1; open++) {
 		// north/south, east/west block images are same
 		// (because we ignore the direction of opened fence gates)
 		RGBAImage north = buildFenceLike(texture, false, false, true, true, 2, 2);
@@ -267,6 +297,50 @@ void TopdownBlockImages::createFenceGate(uint8_t id, RGBAImage texture) { // id 
 	}
 }
 
+void TopdownBlockImages::createCocoas() { // id 127
+	const BlockTextures& t = resources.getBlockTextures();
+	double ratio = (double) texture_size / 16;
+
+	for (int stage = 0; stage <= 2; stage++) {
+		RGBAImage cocoa;
+		if (stage == 0)
+			cocoa = t.COCOA_STAGE_0.clip(0, 0, ratio*4, ratio*4);
+		else if (stage == 1)
+			cocoa = t.COCOA_STAGE_1.clip(0, 0, ratio*6, ratio*6);
+		else
+			cocoa = t.COCOA_STAGE_2.clip(0, 0, ratio*7, ratio*7);
+		int cocoa_size = cocoa.getWidth();
+
+		for (int dir = 0; dir <= 3; dir++) {
+			bool north = (dir == 2), south = (dir == 0), east = (dir == 3), west = (dir == 1);
+			int x = 0;
+			int y = 0;
+			if (north || south)
+				x = (texture_size - cocoa_size) / 2;
+			if (east || west)
+				y = (texture_size - cocoa_size) / 2;
+			if (south)
+				y = texture_size - cocoa_size;
+			if (east)
+				x = texture_size - cocoa_size;
+
+			RGBAImage block(texture_size, texture_size);
+			block.alphaBlit(cocoa, x, y);
+			setBlockImage(127, dir | (stage << 2), block);
+		}
+	}
+}
+
+void TopdownBlockImages::createTripwireHook() { // id 131
+	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE.colorize((uint8_t) 192, 192, 192);
+
+	// TODO also render that part on the wall?
+	setBlockImage(131, 0, tripwire.rotate(1)); // trip wire hook on the north side
+	setBlockImage(131, 1, tripwire.rotate(2)); // on the east side
+	setBlockImage(131, 2, tripwire.rotate(3)); // on the south side
+	setBlockImage(131, 3, tripwire); // on the west side
+}
+
 void TopdownBlockImages::createLargePlant(uint16_t data, const RGBAImage& texture,
 		const RGBAImage& top_texture) { // id 175
 	createItemStyleBlock(175, data, texture);
@@ -289,6 +363,7 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 			|| id == 79 // ice
 			|| id == 84 // jukebox
 			|| id == 90 // nether portal
+			|| id == 117 // brewing stand
 			|| id == 151 || id == 178 // lighting sensor
 			|| id == 174 // packed ice
 			)
@@ -309,7 +384,7 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & 0xff00;
 	else if (id == 93 || id == 94) // redstone repeater
 		return data & (0xff00 | util::binary<11>::value);
-	else if (id == 81 || id == 83 || id == 92) // cactus, sugar cane, cake
+	else if (id == 81 || id == 83) // cactus, sugar cane
 		return data & 0xff00;
 	else if (id == 106) { // vines
 		// data must be 0 or vine won't be visible
@@ -317,6 +392,10 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 			return (data & ~0xff) | 42;
 	} else if (id == 119 || id == 120) // end portal, end portal frame
 		return data & 0xff00;
+	else if (id == 131) // trip wire hook
+		return data & util::binary<11>::value;
+	else if (id == 132) // trip wire
+		return data & ~0xf;
 	return data;
 }
 
@@ -379,6 +458,7 @@ RGBAImage TopdownBlockImages::createBiomeBlock(uint16_t id, uint16_t data,
 
 void TopdownBlockImages::createBlocks() {
 	const BlockTextures& t = resources.getBlockTextures();
+	RGBAImage water = t.WATER_STILL.colorize(0, 0.39, 0.89);
 
 	setBlockImage(1, 0, t.STONE);
 	setBlockImage(2, 0, t.GRASS_TOP);
@@ -403,8 +483,8 @@ void TopdownBlockImages::createBlocks() {
 	createItemStyleBlock(6, 5, t.SAPLING_ROOFED_OAK); // dark oak
 	// --
 	setBlockImage(7, 0, t.BEDROCK); // bedrock
-	setBlockImage(8, 0, t.WATER_STILL.colorize(0, 0.39, 0.89));
-	setBlockImage(9, 0, t.WATER_STILL.colorize(0, 0.39, 0.89));
+	setBlockImage(8, 0, water);
+	setBlockImage(9, 0, water);
 	setBlockImage(10, 0, t.LAVA_STILL);
 	setBlockImage(11, 0, t.LAVA_STILL);
 	setBlockImage(12, 0, t.SAND); // sand
@@ -558,7 +638,7 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(89, 0, t.GLOWSTONE); // glowstone block
 	setBlockImage(90, 0, t.PORTAL); // nether portal block // TODO?
 	setBlockImage(91, 0, t.PUMPKIN_TOP); // jack-o-lantern
-	// id 92 // cake
+	createCake(); // id 92 // cake
 	// redstone repeater off --
 	setBlockImage(93, 0, t.REPEATER_OFF.rotate(ROTATE_270));
 	setBlockImage(93, 1, t.REPEATER_OFF);
@@ -601,8 +681,8 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(98, 2, t.STONEBRICK_CRACKED); // cracked
 	setBlockImage(98, 3, t.STONEBRICK_CARVED); // chiseled
 	// --
-	// id 99 // huge brown mushroom
-	// id 100 // huge red mushroom
+	createHugeMushroom(99, t.MUSHROOM_BLOCK_SKIN_BROWN); // huge brown mushroom
+	createHugeMushroom(100, t.MUSHROOM_BLOCK_SKIN_RED); // huge red mushroom
 	// id 101 // iron bars
 	// id 102 // glas pane
 	setBlockImage(103, 0, t.MELON_TOP); // melon
@@ -625,12 +705,25 @@ void TopdownBlockImages::createBlocks() {
 	createItemStyleBlock(115, 3, t.NETHER_WART_STAGE_2);
 	// --
 	setBlockImage(116, 0, t.ENCHANTING_TABLE_TOP); // enchantment table
-	// id 117 // brewing stand
-	// id 118 // cauldron
+	// -- brewing stand
+	RGBAImage brewing_stand = t.BREWING_STAND_BASE;
+	brewing_stand.alphaBlit(t.BREWING_STAND, 0, 0);
+	AbstractBlockImages::setBlockImage(117, 0, brewing_stand);
+	// --
+	// -- cauldron
+	RGBAImage cauldron = t.CAULDRON_INNER, cauldron_water = cauldron;
+	cauldron.alphaBlit(t.CAULDRON_TOP, 0, 0);
+	cauldron_water.alphaBlit(water, 0, 0);
+	cauldron_water.alphaBlit(t.CAULDRON_TOP, 0, 0);
+	setBlockImage(118, 0, cauldron);
+	setBlockImage(118, 1, cauldron_water);
+	setBlockImage(118, 2, cauldron_water);
+	setBlockImage(118, 3, cauldron_water);
+	// --
 	setBlockImage(119, 0, resources.getEndportalTexture()); // end portal
 	setBlockImage(120, 0, t.ENDFRAME_TOP); // end portal frame
 	setBlockImage(121, 0, t.END_STONE); // end stone
-	// id 122 // dragon egg
+	setBlockImage(122, 0, t.DRAGON_EGG); // dragon egg
 	createItemStyleBlock(123, 0, t.REDSTONE_LAMP_OFF); // redstone lamp inactive
 	createItemStyleBlock(124, 0, t.REDSTONE_LAMP_ON); // redstone lamp active
 	// // double wooden slabs
@@ -649,18 +742,27 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(126, 4, t.PLANKS_ACACIA);
 	setBlockImage(126, 5, t.PLANKS_BIG_OAK);
 	// --
-	// id 127 // cocoas
+	createCocoas(); // id 127 // cocoas
 	// id 128 // sanstone stairs
 	setBlockImage(129, 0, t.EMERALD_ORE);
 	createChest(130, resources.getEnderChest()); // ender chest
-	// id 131 // tripwire hook
-	// id 132 // tripwire
+	createTripwireHook(); // id 131 // tripwire hook
+	createRedstoneWire(132, 0, 192, 192, 192); // tripwire
 	setBlockImage(133, 0, t.EMERALD_BLOCK); // block of emerald
 	// id 134 // spruce wood stairs
 	// id 135 // birch wood stairs
 	// id 136 // jungle wood stairs
 	setBlockImage(137, 0, t.COMMAND_BLOCK);
-	// id 138 // beacon
+	// -- beacon
+	RGBAImage beacon = t.OBSIDIAN, beacon_block;
+	int beacon_size = texture_size / 16.0 * 10;
+	if (beacon_size % 2)
+		beacon_size--; // odd sizes suck
+	t.BEACON.clip(1, 1, texture_size - 2, texture_size - 2).resize(beacon_block, beacon_size, beacon_size);
+	beacon.alphaBlit(beacon_block, (texture_size - beacon_size) / 2, (texture_size - beacon_size) / 2);
+	beacon.alphaBlit(t.GLASS, 0, 0);
+	setBlockImage(138, 0, beacon);
+	// --
 	createFence(139, 0, t.COBBLESTONE); // cobblestone wall
 	createFence(139, 1, t.COBBLESTONE_MOSSY); // cobblestone wall mossy
 	// id 140 // flower pot
