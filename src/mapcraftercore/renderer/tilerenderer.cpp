@@ -310,6 +310,14 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			if (west.id == 107)
 				data |= DATA_WEST;
 		}
+	} else if (id == 111) {
+		// direction of lily pad
+		// http://llbit.se/?p=1537
+		// TODO this seems to work only partially
+		long pr = (pos.x * 3129871) ^ (pos.z * 116129781) ^ (pos.y);
+		pr = pr * pr * 42317861 + pr * 11;
+		int rotation = (pr >> 16) & 3;
+		data = rotation;
 	} else if (id == 175) {
 		// large plants
 		if (data >= 8) {

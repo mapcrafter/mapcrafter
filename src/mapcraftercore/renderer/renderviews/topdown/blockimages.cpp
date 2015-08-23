@@ -695,7 +695,12 @@ void TopdownBlockImages::createBlocks() {
 	// id 108 // brick stairs
 	// id 109 // stone brick stairs
 	setBlockImage(110, 0, t.MYCELIUM_TOP); // mycelium
-	setBlockImage(111, 0, t.WATERLILY); // lily pad
+	// -- lily pad
+	setBlockImage(111, 0, t.WATERLILY);
+	setBlockImage(111, 1, t.WATERLILY.rotate(3));
+	setBlockImage(111, 2, t.WATERLILY.rotate(2));
+	setBlockImage(111, 3, t.WATERLILY.rotate(1));
+	// --
 	setBlockImage(112, 0, t.NETHER_BRICK); // nether brick
 	createFence(113, 0, t.NETHER_BRICK); // nether brick fence
 	// id 114 // nether brick stairs

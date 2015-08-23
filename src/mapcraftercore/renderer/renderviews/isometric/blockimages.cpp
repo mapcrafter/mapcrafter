@@ -2053,7 +2053,12 @@ void IsometricBlockImages::createBlocks() {
 	createStairs(108, t.BRICK); // brick stairs
 	createStairs(109, t.STONEBRICK); // stone brick stairs
 	createBlock(110, 0, t.MYCELIUM_SIDE, t.MYCELIUM_TOP); // mycelium
-	createSingleFaceBlock(111, 0, FACE_BOTTOM, t.WATERLILY); // lily pad
+	// -- lily pad
+	createSingleFaceBlock(111, 0, FACE_BOTTOM, t.WATERLILY.rotate(3));
+	createSingleFaceBlock(111, 1, FACE_BOTTOM, t.WATERLILY.rotate(2));
+	createSingleFaceBlock(111, 2, FACE_BOTTOM, t.WATERLILY.rotate(1));
+	createSingleFaceBlock(111, 3, FACE_BOTTOM, t.WATERLILY);
+	// --
 	createBlock(112, 0, t.NETHER_BRICK); // nether brick
 	createFence(113, 0, t.NETHER_BRICK); // nether brick fence
 	createStairs(114, t.NETHER_BRICK); // nether brick stairs
