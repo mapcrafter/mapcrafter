@@ -2252,6 +2252,21 @@ void IsometricBlockImages::createBlocks() {
 	createDoor(195, t.DOOR_JUNGLE_LOWER, t.DOOR_JUNGLE_UPPER); // jungle door
 	createDoor(196, t.DOOR_ACACIA_LOWER, t.DOOR_ACACIA_UPPER); // acacia door
 	createDoor(197, t.DOOR_DARK_OAK_LOWER, t.DOOR_DARK_OAK_UPPER); // dark oak door
+	// id 198 // end rod
+	// id 199 // chrous plant
+	// id 200 // chorus flower
+	// id 201 // purpur block
+	// id 202 // purpur pillar
+	// id 203 // purpur stairs
+	// id 204 // purpur double slab
+	// id 205 // purpur slab
+	// id 206 // end stone bricks
+	// id 207 // beetroot seeds
+	// id 208 // grass path
+	// id 209 // end gateway
+	// id 210 // repeating command block
+	// id 211 // chain command block
+	// id 255 // structure block
 }
 
 int IsometricBlockImages::createOpaqueWater() {

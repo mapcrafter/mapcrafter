@@ -365,6 +365,7 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 			|| id == 90 // nether portal
 			|| id == 117 // brewing stand
 			|| id == 151 || id == 178 // lighting sensor
+			|| id == 154 // hopper
 			|| id == 174 // packed ice
 			)
 		return 0;
@@ -788,7 +789,20 @@ void TopdownBlockImages::createBlocks() {
 	// --
 	// id 143 // wooden button
 	// id 144 // head
-	// id 145 // anvil
+	// -- anvil
+	setBlockImage(145, 0, t.ANVIL_TOP_DAMAGED_0);
+	setBlockImage(145, 1, t.ANVIL_TOP_DAMAGED_0.rotate(1));
+	setBlockImage(145, 2, t.ANVIL_TOP_DAMAGED_0);
+	setBlockImage(145, 3, t.ANVIL_TOP_DAMAGED_0.rotate(1));
+	setBlockImage(145, 4, t.ANVIL_TOP_DAMAGED_1);
+	setBlockImage(145, 5, t.ANVIL_TOP_DAMAGED_1.rotate(1));
+	setBlockImage(145, 6, t.ANVIL_TOP_DAMAGED_1);
+	setBlockImage(145, 7, t.ANVIL_TOP_DAMAGED_1.rotate(1));
+	setBlockImage(145, 8, t.ANVIL_TOP_DAMAGED_2);
+	setBlockImage(145, 9, t.ANVIL_TOP_DAMAGED_2.rotate(1));
+	setBlockImage(145, 10, t.ANVIL_TOP_DAMAGED_2);
+	setBlockImage(145, 11, t.ANVIL_TOP_DAMAGED_2.rotate(1));
+	// --
 	createChest(146, resources.getTrappedChest()); // trapped chest
 	createDoubleChest(146, resources.getTrappedDoubleChest()); // double trapped chest
 	setBlockImage(147, 0, t.GOLD_BLOCK); // weighted pressure plate (light) // TODO
@@ -808,7 +822,11 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(151, 0, t.DAYLIGHT_DETECTOR_TOP); // daylight sensor
 	setBlockImage(152, 0, t.REDSTONE_BLOCK); // block of redstone
 	setBlockImage(153, 0, t.QUARTZ_ORE); // quartz ore
-	// id 154 // hopper
+	// -- hopper
+	RGBAImage hopper = t.HOPPER_INSIDE;
+	hopper.alphaBlit(t.HOPPER_TOP, 0, 0);
+	setBlockImage(154, 0, hopper);
+	// --
 	// block of quartz --
 	setBlockImage(155, 0, t.QUARTZ_BLOCK_TOP);
 	setBlockImage(155, 1, t.QUARTZ_BLOCK_CHISELED_TOP);
@@ -817,7 +835,7 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(155, 4, t.QUARTZ_BLOCK_LINES.rotate(ROTATE_90));
 	// --
 	// id 156 // quartz stairs
-	// id 157 // activator rail
+	createStraightRails(157, 0, t.RAIL_ACTIVATOR); // activator rail
 	createDispenserDropper(158, t.DROPPER_FRONT_HORIZONTAL); // dropper
 	// stained clay --
 	setBlockImage(159, 0, t.HARDENED_CLAY_STAINED_WHITE);
@@ -924,6 +942,21 @@ void TopdownBlockImages::createBlocks() {
 	// id 195 // jungle door
 	// id 196 // acacia door
 	// id 197 // dark oak door
+	// id 198 // end rod
+	// id 199 // chrous plant
+	// id 200 // chorus flower
+	// id 201 // purpur block
+	// id 202 // purpur pillar
+	// id 203 // purpur stairs
+	// id 204 // purpur double slab
+	// id 205 // purpur slab
+	// id 206 // end stone bricks
+	// id 207 // beetroot seeds
+	// id 208 // grass path
+	// id 209 // end gateway
+	// id 210 // repeating command block
+	// id 211 // chain command block
+	// id 255 // structure block
 }
 
 int TopdownBlockImages::createOpaqueWater() {
