@@ -43,6 +43,8 @@ protected:
 	void createBed(); // id 26
 	void createStraightRails(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 27, 28
 	void createTorch(uint16_t id, const RGBAImage& texture); // id 50, 75, 76
+	void createStairs(uint16_t id, const RGBAImage& texture, const RGBAImage& texture_top); // id 53, 67, 108, 109, 114, 128, 134, 135, 136, 180
+	void createStairs(uint16_t id, const RGBAImage& texture);
 	void createChest(uint16_t id, const ChestTextures& textures); // 54, 130
 	void createDoubleChest(uint16_t id, const DoubleChestTextures& textures); // 54
 	void createRedstoneWire(uint16_t id, uint16_t extra_data, uint8_t r, uint8_t g, uint8_t b); // id 55

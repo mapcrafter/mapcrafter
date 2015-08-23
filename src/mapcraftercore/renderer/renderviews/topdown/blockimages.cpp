@@ -101,6 +101,46 @@ void TopdownBlockImages::createTorch(uint16_t id, const RGBAImage& texture) { //
 	createItemStyleBlock(id, 5, texture);
 }
 
+namespace {
+
+RGBAImage buildStairs(const RGBAImage& texture, bool dir_x, int start, int dir) {
+	RGBAImage stairs = texture;
+	double ratio = (double) texture.getWidth() / 16;
+	int shadow_width = ratio * 6;
+	// apply a little shadow to the lower side of the stairs
+	for (int i = 0; i <= shadow_width; i++) {
+		// lerp
+		double t = (double) i / shadow_width;
+		double intensity = (1-t)*0.7 + t*1.0;
+		for (int j = 0; j < texture.getWidth(); j++) {
+			int x = dir_x ? start + i*dir : j;
+			int y = !dir_x ? start + i*dir : j;
+			stairs.setPixel(x, y, rgba_multiply(stairs.getPixel(x, y), intensity, intensity, intensity));
+		}
+	}
+	return stairs;
+}
+
+}
+
+void TopdownBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
+		const RGBAImage& texture_top) { // id 53, 67, 108, 109, 114, 128, 134, 135, 136, 180
+	// stairs
+	setBlockImage(id, 0, buildStairs(texture_top, true, texture_size / 2 - 1, -1));
+	setBlockImage(id, 1, buildStairs(texture_top, true, texture_size / 2, 1));
+	setBlockImage(id, 2, buildStairs(texture_top, false, texture_size / 2 - 1, -1));
+	setBlockImage(id, 3, buildStairs(texture_top, false, texture_size / 2, 1));
+	// upside-down stairs
+	setBlockImage(id, 4 | 0, texture);
+	setBlockImage(id, 4 | 1, texture);
+	setBlockImage(id, 4 | 2, texture);
+	setBlockImage(id, 4 | 3, texture);
+}
+
+void TopdownBlockImages::createStairs(uint16_t id, const RGBAImage& texture) {
+	createStairs(id, texture, texture);
+}
+
 void TopdownBlockImages::createChest(uint16_t id, const ChestTextures& textures) { // 54, 130
 	RGBAImage top = textures[ChestTextures::TOP];
 	setBlockImage(id, DATA_NORTH, top.rotate(3));
@@ -589,7 +629,7 @@ void TopdownBlockImages::createBlocks() {
 	createTorch(50, t.TORCH_ON); // torch
 	createItemStyleBlock(51, 0, t.FIRE_LAYER_0); // fire
 	setBlockImage(52, 0, t.MOB_SPAWNER); // monster spawner
-	// id 53 // oak wood stairs
+	createStairs(53, t.PLANKS_OAK); // oak wood stairs
 	createChest(54, resources.getNormalChest()); // chest
 	createDoubleChest(54, resources.getNormalDoubleChest()); // chest
 	createRedstoneWire(55, 0, 48, 0, 0); // redstone wire not powered
@@ -614,7 +654,7 @@ void TopdownBlockImages::createBlocks() {
 	// id 64 // wooden door
 	// id 65 // ladders
 	createRails(); // id 66
-	// id 67 // cobblestone stairs
+	createStairs(67, t.COBBLESTONE); // cobblestone stairs
 	// id 68 // wall sign
 	// id 69 // lever
 	setBlockImage(70, 0, t.STONE); // stone pressure plate // TODO
@@ -692,8 +732,8 @@ void TopdownBlockImages::createBlocks() {
 	// id 106 // vines
 	createVines(); // id 106
 	createFenceGate(107, t.PLANKS_OAK); // oak fence gate
-	// id 108 // brick stairs
-	// id 109 // stone brick stairs
+	createStairs(108, t.BRICK); // brick stairs
+	createStairs(109, t.STONEBRICK); // stone brick stairs
 	setBlockImage(110, 0, t.MYCELIUM_TOP); // mycelium
 	// -- lily pad
 	setBlockImage(111, 0, t.WATERLILY);
@@ -703,7 +743,7 @@ void TopdownBlockImages::createBlocks() {
 	// --
 	setBlockImage(112, 0, t.NETHER_BRICK); // nether brick
 	createFence(113, 0, t.NETHER_BRICK); // nether brick fence
-	// id 114 // nether brick stairs
+	createStairs(114, t.NETHER_BRICK); // nether brick stairs
 	// -- nether wart
 	createItemStyleBlock(115, 0, t.NETHER_WART_STAGE_0);
 	createItemStyleBlock(115, 1, t.NETHER_WART_STAGE_1);
@@ -749,15 +789,15 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(126, 5, t.PLANKS_BIG_OAK);
 	// --
 	createCocoas(); // id 127 // cocoas
-	// id 128 // sanstone stairs
+	createStairs(128, t.SANDSTONE_NORMAL, t.SANDSTONE_TOP); // sandstone stairs
 	setBlockImage(129, 0, t.EMERALD_ORE);
 	createChest(130, resources.getEnderChest()); // ender chest
 	createTripwireHook(); // id 131 // tripwire hook
 	createRedstoneWire(132, 0, 192, 192, 192); // tripwire
 	setBlockImage(133, 0, t.EMERALD_BLOCK); // block of emerald
-	// id 134 // spruce wood stairs
-	// id 135 // birch wood stairs
-	// id 136 // jungle wood stairs
+	createStairs(134, t.PLANKS_SPRUCE); // spruce wood stairs
+	createStairs(135, t.PLANKS_BIRCH); // birch wood stairs
+	createStairs(136, t.PLANKS_JUNGLE); // jungle wood stairs
 	setBlockImage(137, 0, t.COMMAND_BLOCK);
 	// -- beacon
 	RGBAImage beacon = t.OBSIDIAN, beacon_block;
@@ -869,8 +909,8 @@ void TopdownBlockImages::createBlocks() {
 	createWood(162, 2, t.LOG_ACACIA, t.LOG_ACACIA_TOP); // dark wood
 	createWood(162, 3, t.LOG_BIG_OAK, t.LOG_BIG_OAK_TOP); // dark wood (placeholder)
 	// --
-	// id 163 // acacia wood stairs
-	// id 164 // dark oak wood stairs
+	createStairs(163, t.PLANKS_ACACIA); // acacia wood stairs
+	createStairs(164, t.PLANKS_BIG_OAK); // dark oak wood stairs
 	setBlockImage(165, 0, t.SLIME); // slime block
 	setBlockImage(166, 0, empty_texture); // barrier
 	// id 167 // iron trapdoor
@@ -925,7 +965,7 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(179, 1, t.RED_SANDSTONE_TOP); // chiseled
 	setBlockImage(179, 2, t.RED_SANDSTONE_TOP); // smooth
 	// --
-	// id 180 // red sandstone stairs
+	createStairs(180, t.RED_SANDSTONE_NORMAL, t.RED_SANDSTONE_TOP); // red sandstone stairs
 	// double red sandstone slabs --
 	setBlockImage(181, 0, t.RED_SANDSTONE_TOP);
 	// --
