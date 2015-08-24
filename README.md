@@ -88,7 +88,7 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 * Restructured internal render management components to allow integration of Mapcrafter
   rendering core into different applications
 * Further integration of Mapcrafter into a graphical user interface
-  ([mapcrafter-gui](https://github.com/mapcrafter/mapcrafter-gui)
+  ([mapcrafter-gui](https://github.com/mapcrafter/mapcrafter-gui))
 
 **v.1.5.4**
 
