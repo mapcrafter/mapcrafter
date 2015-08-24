@@ -31,6 +31,7 @@ stuff of the template from Minecraft Overviewer.
 * **Configuration files:** Highly-customizable which worlds are rendered with which render
   view and other render parameters!
 * **Markers:** Automatically generated markers from your Minecraft world data!
+* **Other stuff:** Biome colors, incremental rendering, multithreading
 
 ## Requirements ##
 
