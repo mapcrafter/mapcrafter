@@ -111,6 +111,79 @@ void TopdownBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
 	setBlockImage(id, 5 | extra_data, north_south);
 }
 
+namespace {
+
+RGBAImage getPistonHead(const RGBAImage& texture) {
+	int texture_size = texture.getWidth();
+	// head is the side texture, without the stone part, just the piston head
+	RGBAImage head = texture;
+	head.fill(0, 0, texture_size / 4, texture_size, texture_size);
+	return head;
+}
+
+RGBAImage getPistonConnection(const RGBAImage& texture) {
+	int texture_size = texture.getWidth();
+	// connection is the rotated and centered head
+	RGBAImage connection = getPistonHead(texture);
+	return connection.rotate(3).move((texture_size - texture_size/4) / 2, 0);
+}
+
+}
+
+void TopdownBlockImages::createPiston(uint16_t id, bool sticky) { // id 29, 33
+	const BlockTextures& textures = resources.getBlockTextures();
+	RGBAImage top = textures.PISTON_TOP_NORMAL;
+	RGBAImage top_sticky = textures.PISTON_TOP_STICKY;
+	RGBAImage front = sticky ? top : top_sticky;
+	RGBAImage back = textures.PISTON_BOTTOM;
+
+	// side is the normale piston side
+	RGBAImage side = textures.PISTON_SIDE;
+	// side_pushed is the piston side without the head, but a part of that piston connection
+	RGBAImage side_pushed = getPistonConnection(side).move(0, -3 * texture_size / 4);
+	RGBAImage side_tmp = side;
+	side_tmp.fill(0, 0, 0, texture_size, texture_size / 4);
+	side_pushed.alphaBlit(side_tmp, 0, 0);
+
+	setBlockImage(id, 0, back);
+	setBlockImage(id, 1, front);
+	setBlockImage(id, 2, side);
+	setBlockImage(id, 3, side.rotate(2));
+	setBlockImage(id, 4, side.rotate(3));
+	setBlockImage(id, 5, side.rotate(1));
+	setBlockImage(id, 8 | 0, back);
+	setBlockImage(id, 8 | 1, front);
+	setBlockImage(id, 8 | 2, side_pushed);
+	setBlockImage(id, 8 | 3, side_pushed.rotate(2));
+	setBlockImage(id, 8 | 4, side_pushed.rotate(3));
+	setBlockImage(id, 8 | 5, side_pushed.rotate(1));
+}
+
+void TopdownBlockImages::createPistonExtension() { // id 34
+	const BlockTextures& textures = resources.getBlockTextures();
+	RGBAImage front = textures.PISTON_TOP_NORMAL;
+	RGBAImage front_sticky = textures.PISTON_TOP_STICKY;
+	RGBAImage back = textures.PISTON_BOTTOM;
+	
+	// the extension is the connection moved a little + the piston side head
+	RGBAImage extension = getPistonConnection(textures.PISTON_SIDE);
+	extension = extension.move(0, texture_size / 4);
+	extension.alphaBlit(getPistonHead(textures.PISTON_SIDE), 0, 0);
+
+	setBlockImage(34, 0, front);
+	setBlockImage(34, 1, front);
+	setBlockImage(34, 2, extension);
+	setBlockImage(34, 3, extension.rotate(2));
+	setBlockImage(34, 4, extension.rotate(3));
+	setBlockImage(34, 5, extension.rotate(1));
+	setBlockImage(34, 8 | 0, front);
+	setBlockImage(34, 8 | 1, front_sticky);
+	setBlockImage(34, 8 | 2, extension);
+	setBlockImage(34, 8 | 3, extension.rotate(2));
+	setBlockImage(34, 8 | 4, extension.rotate(3));
+	setBlockImage(34, 8 | 5, extension.rotate(1));
+}
+
 void TopdownBlockImages::createTorch(uint16_t id, const RGBAImage& texture) { // id 50, 75, 76
 	// TODO also display the torches on walls?
 	createItemStyleBlock(id, 5, texture);
@@ -597,7 +670,7 @@ void TopdownBlockImages::createBlocks() {
 	createStraightRails(27, 0, t.RAIL_GOLDEN); // powered rail (unpowered)
 	createStraightRails(27, 8, t.RAIL_GOLDEN_POWERED); // powered rail (powered);
 	createStraightRails(28, 0, t.RAIL_ACTIVATOR); // detector rail
-	// id 29 // sticky piston
+	createPiston(29, true); // sticky piston
 	createItemStyleBlock(30, 0, t.WEB); // cobweb
 	// -- tall grass
 	createItemStyleBlock(31, 0, t.DEADBUSH); // dead bush style
@@ -605,8 +678,8 @@ void TopdownBlockImages::createBlocks() {
 	createItemStyleBlock(31, 2, t.FERN); // fern
 	// --
 	createItemStyleBlock(32, 0, t.DEADBUSH); // dead bush
-	// id 33 // piston
-	// id 34 // piston extension
+	createPiston(33, false); // piston
+	createPistonExtension(); // id 34 // piston extension
 	// -- wool
 	setBlockImage(35, 0, t.WOOL_COLORED_WHITE); // white
 	setBlockImage(35, 1, t.WOOL_COLORED_ORANGE); // orange

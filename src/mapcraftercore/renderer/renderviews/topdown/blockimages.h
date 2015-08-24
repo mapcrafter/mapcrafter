@@ -43,6 +43,8 @@ protected:
 	void createDispenserDropper(uint16_t id, const RGBAImage& front); // id 23, 158
 	void createBed(); // id 26
 	void createStraightRails(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 27, 28
+	void createPiston(uint16_t id, bool sticky); // id 29, 33
+	void createPistonExtension(); // id 34
 	void createTorch(uint16_t id, const RGBAImage& texture); // id 50, 75, 76
 	void createStairs(uint16_t id, const RGBAImage& texture, const RGBAImage& texture_top); // id 53, 67, 108, 109, 114, 128, 134, 135, 136, 180
 	void createStairs(uint16_t id, const RGBAImage& texture);
