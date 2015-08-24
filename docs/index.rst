@@ -30,16 +30,20 @@ add your own map to this list.
 Features
 ========
 
-* **Web output**: Render your Minecraft worlds to maps with an isometric 
-  3D perspective viewable in any webbrowser!
-* **Different directions**: Choose from four different directions to 
-  render your worlds!
-* **Different render modes**: Choose between different render modes like 
-  day, night and cave for your maps!
-* **Configuration files**: Control which worlds are rendered from which 
-  direction and with which render modes!
-* **Markers**: Automatically generated markers from your Minecraft world data!
-* **Other stuff**: Biome colors, incremental rendering, multithreading
+* **Web output:** Render your Minecraft worlds to maps viewable in any webbrowser!
+* **Different render views:** Choose between different perspectives to render your world
+  from! A 2D topdown and a 3D isometric render view are available!
+* **Different rotations:** Choose from four different rotations to render your worlds from!
+* **Different render modes:** Choose between different render modes like day, night and cave 
+  for your maps!
+* **Different overlays:** Show additional information on your map! For example: Where can
+  slimes spawn? Where can monsters spawn at night?
+* **Configuration files:** Highly-customizable which worlds are rendered with which render
+  view and other render parameters!
+* **Markers:** Automatically generated markers from your Minecraft world data!
+* **Other stuff:** Biome colors, incremental rendering, multithreading
+
+
 
 Help
 ====
