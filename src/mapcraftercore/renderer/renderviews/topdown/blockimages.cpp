@@ -49,12 +49,22 @@ namespace {
 
 void blitSideFace(RGBAImage& block, int face, const RGBAImage& texture) {
 	// do nothing? // TODO
+	int w = std::max(1.0, std::ceil((double) texture.getWidth() / 8.0)); // 2px in 16px texture size
+	RGBAImage top = texture;
+	top.fill(0, 0, w, texture.getWidth(), texture.getWidth());
+	if (face == FACE_SOUTH)
+		top = top.rotate(2);
+	else if (face == FACE_EAST)
+		top = top.rotate(1);
+	else if (face == FACE_WEST)
+		top = top.rotate(3);
+	block.alphaBlit(top, 0, 0);
 }
 
 }
 
-void TopdownBlockImages::createSideFaceBlock(uint16_t id, uint16_t data,
-		const RGBAImage& texture, int face) {
+void TopdownBlockImages::createSideFaceBlock(uint16_t id, uint16_t data, int face,
+		const RGBAImage& texture) {
 	RGBAImage block(texture_size, texture_size);
 	blitSideFace(block, face, texture);
 	setBlockImage(id, data, block);
@@ -299,6 +309,38 @@ void TopdownBlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data, ui
 	}
 }
 
+void TopdownBlockImages::createDoor(uint16_t id, const RGBAImage& texture_bottom,
+        const RGBAImage& texture_top) { // id 64, 71
+	// TODO sometimes the texture needs to get x flipped when door is opened
+	for (int top = 0; top <= 1; top++) {
+		for (int flip_x = 0; flip_x <= 1; flip_x++) {
+			for (int d = 0; d < 4; d++) {
+				RGBAImage texture = (top ? texture_top : texture_bottom);
+				if (flip_x)
+					texture = texture.flip(true, false);
+
+				uint16_t direction = 0;
+				int face = 0;
+				if (d == 0) {
+					direction = DOOR_NORTH;
+					face = FACE_NORTH;
+				} else if (d == 1) {
+					direction = DOOR_SOUTH;
+					face = FACE_SOUTH;
+				} else if (d == 2) {
+					direction = DOOR_EAST;
+					face = FACE_EAST;
+				} else if (d == 3) {
+					direction = DOOR_WEST;
+					face = FACE_WEST;
+				}
+				uint16_t data = (top ? DOOR_TOP : 0) | (flip_x ? DOOR_FLIP_X : 0) | direction;
+				createSideFaceBlock(id, data, face, texture);
+			}
+		}
+	}
+}
+
 void TopdownBlockImages::createRails() { // id 66
 	const BlockTextures& t = resources.getBlockTextures();
 	RGBAImage straight = t.RAIL_NORMAL, curved = t.RAIL_NORMAL_TURNED;
@@ -308,6 +350,26 @@ void TopdownBlockImages::createRails() { // id 66
 	setBlockImage(66, 7, curved.flip(true, false)); // south-west
 	setBlockImage(66, 8, curved.flip(true, true)); // north-west
 	setBlockImage(66, 9, curved.flip(false, true)); // north-east
+}
+
+void TopdownBlockImages::createButton(uint16_t id, const RGBAImage& texture) { // id 77, 143
+	RGBAImage button_side(texture.getWidth(), texture.getWidth()), button_top = button_side;
+	int t = std::max(1.0, std::ceil((double) texture.getWidth() / 8.0)); // 2px
+	int w = std::max(2.0, std::ceil((double) texture.getWidth() / 16.0*6.0)); // 6px
+	if (w % 2)
+		w--;
+	int h = std::max(4.0, std::ceil((double) texture.getWidth() / 4.0)); // 4px
+	button_side.alphaBlit(texture.clip(0, 0, w, t), (texture.getWidth() - w) / 2, 0);
+	button_side = button_side.colorize(1.1, 1.1, 1.1);
+	button_top.alphaBlit(texture.clip(0, 0, w, h), (texture.getWidth() - w) / 2, (texture.getHeight() - h) / 2);
+	button_top = button_top.colorize(1.1, 1.1, 1.1);
+	
+	setBlockImage(id, 0, button_top);
+	setBlockImage(id, 1, button_side.rotate(3));
+	setBlockImage(id, 2, button_side.rotate(1));
+	setBlockImage(id, 3, button_side);
+	setBlockImage(id, 4, button_side.rotate(2));
+	setBlockImage(id, 5, button_top);
 }
 
 namespace {
@@ -369,6 +431,17 @@ void TopdownBlockImages::createCake() {
 		cake.fill(0, 0, 0, eaten, texture_size);
 		setBlockImage(92, data, cake);
 	}
+}
+
+void TopdownBlockImages::createTrapdoor(uint16_t id, const RGBAImage& texture) { // id 96, 167
+	setBlockImage(id, 0, texture);
+	setBlockImage(id, 1, texture);
+	setBlockImage(id, 2, texture);
+	setBlockImage(id, 3, texture);
+	createSideFaceBlock(id, 4 | 0, FACE_EAST, texture);
+	createSideFaceBlock(id, 4 | 1, FACE_NORTH, texture);
+	createSideFaceBlock(id, 4 | 2, FACE_WEST, texture);
+	createSideFaceBlock(id, 4 | 3, FACE_SOUTH, texture);
 }
 
 void TopdownBlockImages::createHugeMushroom(uint16_t id, const RGBAImage& cap) { // id 99, 100
@@ -539,10 +612,16 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & ~(REDSTONE_TOPNORTH | REDSTONE_TOPSOUTH | REDSTONE_TOPEAST | REDSTONE_TOPWEST);
 	else if (id == 60) // farmland
 		return data & 0xff00;
+	else if (id == 64 || id == 71 || (id >= 193 && id <= 197)) // doors
+		return data & util::binary<1111110000>::value;
+	else if (id == 77 || id == 143) // button
+		return data & ~8;
 	else if (id == 86 || id == 91) // pumpkin, jack-o-lantern
 		return data & ~0x4;
 	else if (id == 93 || id == 94) // redstone repeater
 		return data & (0xff00 | util::binary<11>::value);
+	else if (id == 96 || id == 197) // trapdoors
+		return data & ~8;
 	else if (id == 81 || id == 83) // cactus, sugar cane
 		return data & 0xff00;
 	else if (id == 119 || id == 120) // end portal, end portal frame
@@ -765,20 +844,20 @@ void TopdownBlockImages::createBlocks() {
 	createRotatedBlock(61, 0, t.FURNACE_TOP); // furnace
 	createRotatedBlock(62, 0, t.FURNACE_TOP); // burning furnace
 	// id 63 // sign post
-	// id 64 // wooden door
+	createDoor(64, t.DOOR_WOOD_LOWER, t.DOOR_WOOD_UPPER); // wooden door
 	// id 65 // ladders
 	createRails(); // id 66
 	createStairs(67, t.COBBLESTONE); // cobblestone stairs
 	// id 68 // wall sign
 	// id 69 // lever
 	setBlockImage(70, 0, t.STONE); // stone pressure plate // TODO
-	// id 71 // iron door
+	createDoor(71, t.DOOR_IRON_LOWER, t.DOOR_IRON_UPPER); // iron door
 	setBlockImage(72, 0, t.PLANKS_OAK); // wooden pressure plate // TODO
 	setBlockImage(73, 0, t.REDSTONE_ORE); // redstone ore
 	setBlockImage(74, 0, t.REDSTONE_ORE); // glowing redstone ore
 	createTorch(75, t.REDSTONE_TORCH_OFF); // redstone torch off
 	createTorch(76, t.REDSTONE_TORCH_ON); // redstone torch on
-	// id 77 // stone button
+	createButton(77, t.STONE); // stone button
 	setBlockImage(78, 0, t.SNOW); // snow
 	setBlockImage(79, 0, t.ICE); // ice
 	setBlockImage(80, 0, t.SNOW); // snow block
@@ -834,7 +913,7 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(95, 14, t.GLASS_RED);
 	setBlockImage(95, 15, t.GLASS_BLACK);
 	// --
-	// id 96 // trapdoor
+	createTrapdoor(96, t.TRAPDOOR); // trapdoor
 	// -- monster egg
 	setBlockImage(97, 0, t.STONE); // stone
 	setBlockImage(97, 1, t.COBBLESTONE); // cobblestone
@@ -955,7 +1034,7 @@ void TopdownBlockImages::createBlocks() {
 	createItemStyleBlock(142, 6, t.POTATOES_STAGE_2);
 	createItemStyleBlock(142, 7, t.POTATOES_STAGE_3);
 	// --
-	// id 143 // wooden button
+	createButton(143, t.PLANKS_OAK); // wooden button
 	// id 144 // head
 	// -- anvil
 	setBlockImage(145, 0, t.ANVIL_TOP_DAMAGED_0);
@@ -1002,7 +1081,7 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(155, 3, t.QUARTZ_BLOCK_LINES);
 	setBlockImage(155, 4, t.QUARTZ_BLOCK_LINES.rotate(ROTATE_90));
 	// --
-	// id 156 // quartz stairs
+	createStairs(156, t.QUARTZ_BLOCK_SIDE); // quartz stairs
 	createStraightRails(157, 0, t.RAIL_ACTIVATOR); // activator rail
 	createDispenserDropper(158, t.DROPPER_FRONT_HORIZONTAL); // dropper
 	// stained clay --
@@ -1036,7 +1115,7 @@ void TopdownBlockImages::createBlocks() {
 	createStairs(164, t.PLANKS_BIG_OAK); // dark oak wood stairs
 	setBlockImage(165, 0, t.SLIME); // slime block
 	setBlockImage(166, 0, empty_texture); // barrier
-	// id 167 // iron trapdoor
+	createTrapdoor(167, t.IRON_TRAPDOOR); // iron trapdoor
 	// prismarine --
 	setBlockImage(168, 0, t.PRISMARINE_ROUGH);
 	setBlockImage(168, 1, t.PRISMARINE_BRICKS);
@@ -1105,11 +1184,11 @@ void TopdownBlockImages::createBlocks() {
 	createFence(190, 0, t.PLANKS_JUNGLE); // jungle fence
 	createFence(191, 0, t.PLANKS_BIG_OAK); // dark oak fence
 	createFence(192, 0, t.PLANKS_ACACIA); // acacia fence
-	// id 193 // spruce door
-	// id 194 // birch door
-	// id 195 // jungle door
-	// id 196 // acacia door
-	// id 197 // dark oak door
+	createDoor(193, t.DOOR_SPRUCE_LOWER, t.DOOR_SPRUCE_UPPER); // spruce door
+	createDoor(194, t.DOOR_BIRCH_LOWER, t.DOOR_BIRCH_UPPER); // birch door
+	createDoor(195, t.DOOR_JUNGLE_LOWER, t.DOOR_JUNGLE_UPPER); // jungle door
+	createDoor(196, t.DOOR_ACACIA_LOWER, t.DOOR_ACACIA_UPPER); // acacia door
+	createDoor(197, t.DOOR_DARK_OAK_LOWER, t.DOOR_DARK_OAK_UPPER); // dark oak door
 	// id 198 // end rod
 	// id 199 // chrous plant
 	// id 200 // chorus flower

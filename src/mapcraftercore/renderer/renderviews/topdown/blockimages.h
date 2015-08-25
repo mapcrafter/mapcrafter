@@ -36,7 +36,7 @@ public:
 
 protected:
 	void createItemStyleBlock(uint16_t id, uint16_t data, const RGBAImage& texture);
-	void createSideFaceBlock(uint16_t id, uint16_t data, const RGBAImage& texture, int face);
+	void createSideFaceBlock(uint16_t id, uint16_t data, int face, const RGBAImage& texture);
 	void createRotatedBlock(uint16_t id, uint16_t extra_data, const RGBAImage& texture);
 
 	void createWood(uint16_t id, uint16_t extra_data, const RGBAImage& side, const RGBAImage& top); // id 17, 162
@@ -51,9 +51,12 @@ protected:
 	void createChest(uint16_t id, const ChestTextures& textures); // 54, 130
 	void createDoubleChest(uint16_t id, const DoubleChestTextures& textures); // 54
 	void createRedstoneWire(uint16_t id, uint16_t extra_data, uint8_t r, uint8_t g, uint8_t b); // id 55
+	void createDoor(uint16_t id, const RGBAImage& bottom, const RGBAImage& top); // id 64, 71, 193-197
 	void createRails(); // id 66
+	void createButton(uint16_t id, const RGBAImage& texture); // id 77, 143
 	void createFence(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 85, 113, 188-192
 	void createCake(); // id 92
+	void createTrapdoor(uint16_t id, const RGBAImage& texture); // id 96, 167
 	void createHugeMushroom(uint16_t id, const RGBAImage& cap); // id 99, 100
 	void createStem(uint16_t id); // id 104, 105
 	void createVines(); // id 106
