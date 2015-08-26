@@ -54,7 +54,8 @@ protected:
 	void createDoor(uint16_t id, const RGBAImage& bottom, const RGBAImage& top); // id 64, 71, 193-197
 	void createRails(); // id 66
 	void createButton(uint16_t id, const RGBAImage& texture); // id 77, 143
-	void createFence(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 85, 113, 188-192
+	void createFence(uint16_t id, uint16_t extra_data, const RGBAImage& texture,
+			int post_factor = 6, int conn_factor = 2); // id 85, 113, 188-192
 	void createCake(); // id 92
 	void createTrapdoor(uint16_t id, const RGBAImage& texture); // id 96, 167
 	void createHugeMushroom(uint16_t id, const RGBAImage& cap); // id 99, 100

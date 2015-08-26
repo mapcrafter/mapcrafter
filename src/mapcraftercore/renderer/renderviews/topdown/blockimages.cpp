@@ -375,12 +375,16 @@ void TopdownBlockImages::createButton(uint16_t id, const RGBAImage& texture) { /
 namespace {
 
 RGBAImage buildFenceLike(const RGBAImage& texture, bool north, bool south, bool east, bool west,
-		int post_factor = 6, int conn_factor = 2) {
+		int post_factor, int conn_factor) {
 	int size = texture.getWidth();
 	double ratio = (double) size / 16;
-	int post = std::max(ratio * post_factor, 2.0);
+	int post = std::max(std::ceil(ratio * post_factor), 2.0);
+	if (post % 2)
+		post--;
 	int post_start = (size - post) / 2;
-	int conn = std::max(ratio * conn_factor, 2.0);
+	int conn = std::max(std::ceil(ratio * conn_factor), 2.0);
+	if (conn % 2)
+		conn--;
 	int conn_start = (size - conn) / 2;
 
 	RGBAPixel invisible = rgba(0, 0, 0, 0);
@@ -408,7 +412,8 @@ RGBAImage buildFenceLike(const RGBAImage& texture, bool north, bool south, bool 
 
 }
 
-void TopdownBlockImages::createFence(uint16_t id, uint16_t extra_data, const RGBAImage& texture) { // id 85, 113, 188-192
+void TopdownBlockImages::createFence(uint16_t id, uint16_t extra_data,
+		const RGBAImage& texture, int post_factor, int conn_factor) { // id 85, 113, 188-192
 	for (uint8_t i = 0; i < 16; i++) {
 		uint16_t data = i << 4;
 		// special data set by the tile renderer
@@ -417,7 +422,7 @@ void TopdownBlockImages::createFence(uint16_t id, uint16_t extra_data, const RGB
 		bool east = data & DATA_EAST;
 		bool west = data & DATA_WEST;
 
-		RGBAImage fence = buildFenceLike(texture, north, south, east, west);
+		RGBAImage fence = buildFenceLike(texture, north, south, east, west, post_factor, conn_factor);
 		AbstractBlockImages::setBlockImage(id, data | extra_data, fence);
 	}
 }
@@ -918,6 +923,9 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(97, 0, t.STONE); // stone
 	setBlockImage(97, 1, t.COBBLESTONE); // cobblestone
 	setBlockImage(97, 2, t.STONEBRICK); // stone brick
+	setBlockImage(97, 3, t.STONEBRICK_MOSSY); // mossy stone brick
+	setBlockImage(97, 4, t.STONEBRICK_CRACKED); // cracked stone brick
+	setBlockImage(97, 5, t.STONEBRICK_CARVED); // chiseled stone brick
 	// --
 	// -- stone bricks
 	setBlockImage(98, 0, t.STONEBRICK); // normal
@@ -1011,8 +1019,8 @@ void TopdownBlockImages::createBlocks() {
 	beacon.alphaBlit(t.GLASS, 0, 0);
 	setBlockImage(138, 0, beacon);
 	// --
-	createFence(139, 0, t.COBBLESTONE); // cobblestone wall
-	createFence(139, 1, t.COBBLESTONE_MOSSY); // cobblestone wall mossy
+	createFence(139, 0, t.COBBLESTONE, 8, 6); // cobblestone wall
+	createFence(139, 1, t.COBBLESTONE_MOSSY, 8, 6); // cobblestone wall mossy
 	// id 140 // flower pot
 	// carrots --
 	createItemStyleBlock(141, 0, t.CARROTS_STAGE_0);
