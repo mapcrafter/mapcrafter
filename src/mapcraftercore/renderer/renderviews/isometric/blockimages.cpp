@@ -383,6 +383,8 @@ uint16_t IsometricBlockImages::filterBlockData(uint16_t id, uint16_t data) const
 		return data & util::binary<11>::value;
 	else if (id == 132) // trip wire
 		return data & ~0xf;
+	else if (id == 149 || id == 150) // comparator // TODO!
+		return data & ~(4 | 8);
 	// the light sensor shouldn't have any data, but I had problems with it...
 	else if (id == 151 || id == 178)
 		return 0;
@@ -1457,7 +1459,7 @@ void IsometricBlockImages::createHugeMushroom(uint16_t id, const RGBAImage& cap)
 }
 
 void IsometricBlockImages::createBarsPane(uint16_t id, uint16_t extra_data,
-		const RGBAImage& texture_left_right) { // id 101, 102
+		const RGBAImage& texture_left_right) { // id 101, 102, 160
 	RGBAImage texture_left = texture_left_right;
 	RGBAImage texture_right = texture_left_right;
 	texture_left.fill(0, texture_size / 2, 0, texture_size / 2, texture_size);
@@ -2124,8 +2126,8 @@ void IsometricBlockImages::createBlocks() {
 	createDoubleChest(146, resources.getTrappedDoubleChest()); // double trapped chest
 	createSmallerBlock(147, 0, t.GOLD_BLOCK, t.GOLD_BLOCK, 0, 1); // weighted pressure plate (light)
 	createSmallerBlock(148, 0, t.QUARTZ_BLOCK_LINES, t.QUARTZ_BLOCK_LINES, 0, 1); // weighted pressure plate (heavy)
-	createRedstoneRepeater(149, t.COMPARATOR_OFF); // redstone comparator (inactive)
-	createRedstoneRepeater(150, t.COMPARATOR_ON); // redstone comparator (active)
+	createRedstoneRepeater(149, t.COMPARATOR_OFF); // redstone comparator (inactive) // TODO
+	createRedstoneRepeater(150, t.COMPARATOR_ON); // redstone comparator (active) // TODO
 	createSmallerBlock(151, 0, t.DAYLIGHT_DETECTOR_SIDE, t.DAYLIGHT_DETECTOR_TOP, 0, 8); // daylight sensor
 	createBlock(152, 0, t.REDSTONE_BLOCK); // block of redstone
 	createBlock(153, 0, t.QUARTZ_ORE); // nether quartz ore

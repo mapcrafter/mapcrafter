@@ -196,6 +196,10 @@ void TopdownBlockImages::createPistonExtension() { // id 34
 
 void TopdownBlockImages::createTorch(uint16_t id, const RGBAImage& texture) { // id 50, 75, 76
 	// TODO also display the torches on walls?
+	createItemStyleBlock(id, 1, empty_texture);
+	createItemStyleBlock(id, 2, empty_texture);
+	createItemStyleBlock(id, 3, empty_texture);
+	createItemStyleBlock(id, 4, empty_texture);
 	createItemStyleBlock(id, 5, texture);
 }
 
@@ -352,16 +356,53 @@ void TopdownBlockImages::createRails() { // id 66
 	setBlockImage(66, 9, curved.flip(false, true)); // north-east
 }
 
-void TopdownBlockImages::createButton(uint16_t id, const RGBAImage& texture) { // id 77, 143
-	RGBAImage button_side(texture.getWidth(), texture.getWidth()), button_top = button_side;
-	int t = std::max(1.0, std::ceil((double) texture.getWidth() / 8.0)); // 2px
-	int w = std::max(2.0, std::ceil((double) texture.getWidth() / 16.0*6.0)); // 6px
+void TopdownBlockImages::createLever() { // id 69
+	const BlockTextures& textures = resources.getBlockTextures();
+	
+	int t = std::max(1.0, std::ceil((double) texture_size / 16.0*3.0)); // 3px
+	int w = std::max(2.0, std::ceil((double) texture_size / 16.0*6.0)); // 6px
 	if (w % 2)
 		w--;
-	int h = std::max(4.0, std::ceil((double) texture.getWidth() / 4.0)); // 4px
-	button_side.alphaBlit(texture.clip(0, 0, w, t), (texture.getWidth() - w) / 2, 0);
+	int h = std::max(4.0, std::ceil((double) texture_size / 2.0)); // 8px
+
+	RGBAImage cobble = textures.COBBLESTONE;
+	RGBAImage lever_side(texture_size, texture_size), lever_top = lever_side, lever_bottom = lever_side;
+	lever_side.alphaBlit(textures.LEVER.rotate(2).move(0, -texture_size / 16.0*3.0), 0, 0);
+	lever_side.alphaBlit(cobble.clip(0, 0, w, t), (texture_size - w) / 2, 0);
+	lever_top.alphaBlit(cobble.clip(0, 0, w, h), (texture_size - w) / 2, (texture_size - h) / 2);
+	lever_top.alphaBlit(textures.LEVER.move(0, -texture_size / 16.0*6.0), 0, 0);
+	lever_bottom.alphaBlit(textures.LEVER.move(0, -texture_size / 16.0*6.0), 0, 0);
+	lever_bottom.alphaBlit(cobble.clip(0, 0, w, h), (texture_size - w) / 2, (texture_size - h) / 2);
+
+	setBlockImage(69, 0, lever_bottom.rotate(1));
+	setBlockImage(69, 1, lever_side.rotate(3));
+	setBlockImage(69, 2, lever_side.rotate(1));
+	setBlockImage(69, 3, lever_side);
+	setBlockImage(69, 4, lever_side.rotate(2));
+	setBlockImage(69, 5, lever_top.rotate(2));
+	setBlockImage(69, 6, lever_top.rotate(1));
+	setBlockImage(69, 7, lever_bottom.rotate(2));
+	setBlockImage(69, 8 | 0, lever_bottom.rotate(3));
+	setBlockImage(69, 8 | 1, lever_side.rotate(3));
+	setBlockImage(69, 8 | 2, lever_side.rotate(1));
+	setBlockImage(69, 8 | 3, lever_side);
+	setBlockImage(69, 8 | 4, lever_side.rotate(2));
+	setBlockImage(69, 8 | 5, lever_top);
+	setBlockImage(69, 8 | 6, lever_top.rotate(3));
+	setBlockImage(69, 8 | 7, lever_bottom);
+}
+
+void TopdownBlockImages::createButton(uint16_t id, const RGBAImage& texture) { // id 77, 143
+	int t = std::max(1.0, std::ceil((double) texture_size / 8.0)); // 2px
+	int w = std::max(2.0, std::ceil((double) texture_size / 16.0*6.0)); // 6px
+	if (w % 2)
+		w--;
+	int h = std::max(4.0, std::ceil((double) texture_size / 4.0)); // 4px
+
+	RGBAImage button_side(texture_size, texture_size), button_top = button_side;
+	button_side.alphaBlit(texture.clip(0, 0, w, t), (texture_size - w) / 2, 0);
 	button_side = button_side.colorize(1.1, 1.1, 1.1);
-	button_top.alphaBlit(texture.clip(0, 0, w, h), (texture.getWidth() - w) / 2, (texture.getHeight() - h) / 2);
+	button_top.alphaBlit(texture.clip(0, 0, w, h), (texture_size - w) / 2, (texture_size - h) / 2);
 	button_top = button_top.colorize(1.1, 1.1, 1.1);
 	
 	setBlockImage(id, 0, button_top);
@@ -466,6 +507,24 @@ void TopdownBlockImages::createHugeMushroom(uint16_t id, const RGBAImage& cap) {
 	setBlockImage(id, 10, pores);
 	setBlockImage(id, 14, cap);
 	setBlockImage(id, 15, stem);
+}
+
+void TopdownBlockImages::createBarsPane(uint16_t id, uint16_t extra_data,
+		const RGBAImage& texture) { // id 101, 102, 160
+	for (uint8_t i = 0; i < 16; i++) {
+		RGBAImage left = empty_texture, right = empty_texture;
+
+		uint16_t data = i << 4;
+		bool north = data & DATA_NORTH;
+		bool south = data & DATA_SOUTH;
+		bool east = data & DATA_EAST;
+		bool west = data & DATA_WEST;
+		if (i == 0)
+			north = south = east = west = true;
+
+		RGBAImage block = buildFenceLike(texture, north, south, east, west, 2, 2);
+		setBlockImage(id, data | extra_data, block);
+	}
 }
 
 void TopdownBlockImages::createStem(uint16_t id) { // id 104, 105
@@ -575,6 +634,47 @@ void TopdownBlockImages::createTripwireHook() { // id 131
 	setBlockImage(131, 3, tripwire); // on the west side
 }
 
+void TopdownBlockImages::createFlowerPot() { // id 140
+	const BlockTextures& textures = resources.getBlockTextures();
+	double s = (double) textures.FLOWER_POT.getOriginal().getWidth() / 16;
+	RGBAImage pot_texture = textures.FLOWER_POT.getOriginal().clip(s*5, s*5, s*6, s*6);
+	s = (double) texture_size / 16;
+	pot_texture = pot_texture.resize(s*6, s*6);
+
+	RGBAImage pot(texture_size, texture_size);
+	pot.alphaBlit(textures.DIRT.clip(0, 0, s*6, s*6), (texture_size - s*6) / 2, (texture_size - s*6) / 2);
+	pot.alphaBlit(pot_texture, (texture_size - s*6) / 2, (texture_size - s*6) / 2);
+
+	RGBAImage contents[] = {
+		RGBAImage(),
+		textures.FLOWER_ROSE,
+		textures.FLOWER_DANDELION,
+		textures.SAPLING_OAK,
+		textures.SAPLING_SPRUCE,
+		textures.SAPLING_BIRCH,
+		textures.SAPLING_JUNGLE,
+		textures.MUSHROOM_RED,
+		textures.MUSHROOM_BROWN,
+		textures.CACTUS_TOP,
+		textures.DEADBUSH,
+		textures.FERN,
+	};
+
+	for (int16_t i = 0; i < 11; i++) {
+		RGBAImage block = pot;
+
+		RGBAImage content = contents[i];
+		RGBAImage tmp;
+		content.resize(tmp, s*10, s*10, InterpolationType::NEAREST);
+		content = tmp;
+	
+		if (i != 0)
+			block.alphaBlit(content, (texture_size - content.getWidth()) / 2, (texture_size - content.getHeight()) / 2);
+
+		setBlockImage(140, i, block);
+	}
+}
+
 void TopdownBlockImages::createLargePlant(uint16_t data, const RGBAImage& texture,
 		const RGBAImage& top_texture) { // id 175
 	createItemStyleBlock(175, data, texture);
@@ -635,6 +735,8 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & util::binary<11>::value;
 	else if (id == 132) // trip wire
 		return data & ~0xf;
+	else if (id == 149 || id == 150) // comparator // TODO!
+		return data & ~(4 | 8);
 	return data;
 }
 
@@ -850,11 +952,16 @@ void TopdownBlockImages::createBlocks() {
 	createRotatedBlock(62, 0, t.FURNACE_TOP); // burning furnace
 	// id 63 // sign post
 	createDoor(64, t.DOOR_WOOD_LOWER, t.DOOR_WOOD_UPPER); // wooden door
-	// id 65 // ladders
+	// -- ladders
+	createSideFaceBlock(65, 2, FACE_SOUTH, t.LADDER);
+	createSideFaceBlock(65, 3, FACE_NORTH, t.LADDER);
+	createSideFaceBlock(65, 4, FACE_EAST, t.LADDER);
+	createSideFaceBlock(65, 5, FACE_WEST, t.LADDER);
+	// --
 	createRails(); // id 66
 	createStairs(67, t.COBBLESTONE); // cobblestone stairs
 	// id 68 // wall sign
-	// id 69 // lever
+	createLever(); // id 69 // lever
 	setBlockImage(70, 0, t.STONE); // stone pressure plate // TODO
 	createDoor(71, t.DOOR_IRON_LOWER, t.DOOR_IRON_UPPER); // iron door
 	setBlockImage(72, 0, t.PLANKS_OAK); // wooden pressure plate // TODO
@@ -889,16 +996,16 @@ void TopdownBlockImages::createBlocks() {
 	// --
 	createCake(); // id 92 // cake
 	// redstone repeater off --
-	setBlockImage(93, 0, t.REPEATER_OFF.rotate(ROTATE_270));
-	setBlockImage(93, 1, t.REPEATER_OFF);
-	setBlockImage(93, 2, t.REPEATER_OFF.rotate(ROTATE_90));
-	setBlockImage(93, 3, t.REPEATER_OFF.rotate(ROTATE_180));
+	setBlockImage(93, 0, t.REPEATER_OFF);
+	setBlockImage(93, 1, t.REPEATER_OFF.rotate(1));
+	setBlockImage(93, 2, t.REPEATER_OFF.rotate(2));
+	setBlockImage(93, 3, t.REPEATER_OFF.rotate(3));
 	// --
-	// redstone repeater off --
-	setBlockImage(94, 0, t.REPEATER_ON.rotate(ROTATE_270));
-	setBlockImage(94, 1, t.REPEATER_ON);
-	setBlockImage(94, 2, t.REPEATER_ON.rotate(ROTATE_90));
-	setBlockImage(94, 3, t.REPEATER_ON.rotate(ROTATE_180));
+	// redstone repeater on --
+	setBlockImage(94, 0, t.REPEATER_ON);
+	setBlockImage(94, 1, t.REPEATER_ON.rotate(1));
+	setBlockImage(94, 2, t.REPEATER_ON.rotate(2));
+	setBlockImage(94, 3, t.REPEATER_ON.rotate(3));
 	// --
 	// stained glass --
 	setBlockImage(95, 0, t.GLASS_WHITE);
@@ -935,8 +1042,8 @@ void TopdownBlockImages::createBlocks() {
 	// --
 	createHugeMushroom(99, t.MUSHROOM_BLOCK_SKIN_BROWN); // huge brown mushroom
 	createHugeMushroom(100, t.MUSHROOM_BLOCK_SKIN_RED); // huge red mushroom
-	// id 101 // iron bars
-	// id 102 // glas pane
+	createBarsPane(101, 0, t.IRON_BARS); // iron bars
+	createBarsPane(102, 0, t.GLASS); // glass pane
 	setBlockImage(103, 0, t.MELON_TOP); // melon
 	createStem(104); // pumpkin stem
 	createStem(105); // melon stem
@@ -1021,7 +1128,7 @@ void TopdownBlockImages::createBlocks() {
 	// --
 	createFence(139, 0, t.COBBLESTONE, 8, 6); // cobblestone wall
 	createFence(139, 1, t.COBBLESTONE_MOSSY, 8, 6); // cobblestone wall mossy
-	// id 140 // flower pot
+	createFlowerPot(); // id 140 // flower pot
 	// carrots --
 	createItemStyleBlock(141, 0, t.CARROTS_STAGE_0);
 	createItemStyleBlock(141, 1, t.CARROTS_STAGE_0);
@@ -1063,16 +1170,16 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(147, 0, t.GOLD_BLOCK); // weighted pressure plate (light) // TODO
 	setBlockImage(148, 0, t.GOLD_BLOCK); // weighted pressure plate (heavy) // TODO
 	// redstone comparator (inactive) --
-	setBlockImage(149, 0, t.COMPARATOR_OFF.rotate(ROTATE_270));
-	setBlockImage(149, 1, t.COMPARATOR_OFF);
-	setBlockImage(149, 2, t.COMPARATOR_OFF.rotate(ROTATE_90));
-	setBlockImage(149, 3, t.COMPARATOR_OFF.rotate(ROTATE_180));
+	setBlockImage(149, 0, t.COMPARATOR_OFF);
+	setBlockImage(149, 1, t.COMPARATOR_OFF.rotate(1));
+	setBlockImage(149, 2, t.COMPARATOR_OFF.rotate(2));
+	setBlockImage(149, 3, t.COMPARATOR_OFF.rotate(3));
 	// --
 	// redstone comparator (active)
-	setBlockImage(150, 0, t.COMPARATOR_ON.rotate(ROTATE_270));
-	setBlockImage(150, 1, t.COMPARATOR_ON);
-	setBlockImage(150, 2, t.COMPARATOR_ON.rotate(ROTATE_90));
-	setBlockImage(150, 3, t.COMPARATOR_ON.rotate(ROTATE_180));
+	setBlockImage(150, 0, t.COMPARATOR_ON);
+	setBlockImage(150, 1, t.COMPARATOR_ON.rotate(1));
+	setBlockImage(150, 2, t.COMPARATOR_ON.rotate(2));
+	setBlockImage(150, 3, t.COMPARATOR_ON.rotate(3));
 	// --
 	setBlockImage(151, 0, t.DAYLIGHT_DETECTOR_TOP); // daylight sensor
 	setBlockImage(152, 0, t.REDSTONE_BLOCK); // block of redstone
@@ -1110,7 +1217,24 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(159, 14, t.HARDENED_CLAY_STAINED_RED);
 	setBlockImage(159, 15, t.HARDENED_CLAY_STAINED_BLACK);
 	// --
-	// id 160 // stained glass pane
+	// stained glass pane --
+	createBarsPane(160, 0, t.GLASS_WHITE);
+	createBarsPane(160, 1, t.GLASS_ORANGE);
+	createBarsPane(160, 2, t.GLASS_MAGENTA);
+	createBarsPane(160, 3, t.GLASS_LIGHT_BLUE);
+	createBarsPane(160, 4, t.GLASS_YELLOW);
+	createBarsPane(160, 5, t.GLASS_LIME);
+	createBarsPane(160, 6, t.GLASS_PINK);
+	createBarsPane(160, 7, t.GLASS_GRAY);
+	createBarsPane(160, 8, t.GLASS_SILVER);
+	createBarsPane(160, 9, t.GLASS_CYAN);
+	createBarsPane(160, 10, t.GLASS_PURPLE);
+	createBarsPane(160, 11, t.GLASS_BLUE);
+	createBarsPane(160, 12, t.GLASS_BROWN);
+	createBarsPane(160, 13, t.GLASS_GREEN);
+	createBarsPane(160, 14, t.GLASS_RED);
+	createBarsPane(160, 15, t.GLASS_BLACK);
+	// --
 	setBlockImage(161, 0, t.LEAVES_ACACIA); // acacia leaves
 	setBlockImage(161, 1, t.LEAVES_BIG_OAK); // dark oak leaves
 	// some more wood --

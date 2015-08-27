@@ -299,7 +299,7 @@ protected:
 	void createRedstoneRepeater(uint16_t id, const RGBAImage& texture); // id 93, 94
 	void createTrapdoor(uint16_t id, const RGBAImage& texture); // id 96, 167
 	void createHugeMushroom(uint16_t id, const RGBAImage& cap); // id 99, 100
-	void createBarsPane(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 101, 102
+	void createBarsPane(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 101, 102, 160
 	void createStem(uint16_t id); // id 104, 105
 	void createVines(); // id 106
 	void createFenceGate(uint8_t id, RGBAImage texture); // id 107, 183-187
