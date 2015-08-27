@@ -51,8 +51,10 @@ protected:
 	void createChest(uint16_t id, const ChestTextures& textures); // 54, 130
 	void createDoubleChest(uint16_t id, const DoubleChestTextures& textures); // 54
 	void createRedstoneWire(uint16_t id, uint16_t extra_data, uint8_t r, uint8_t g, uint8_t b); // id 55
+	void createStandingSign(); // id 63
 	void createDoor(uint16_t id, const RGBAImage& bottom, const RGBAImage& top); // id 64, 71, 193-197
 	void createRails(); // id 66
+	void createWallSign(); // id 68
 	void createLever(); // id 69
 	void createButton(uint16_t id, const RGBAImage& texture); // id 77, 143
 	void createFence(uint16_t id, uint16_t extra_data, const RGBAImage& texture,

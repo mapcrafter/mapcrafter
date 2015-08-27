@@ -313,6 +313,31 @@ void TopdownBlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data, ui
 	}
 }
 
+void TopdownBlockImages::createStandingSign() { // id 63
+	int w = std::max(1.0, std::ceil((double) texture_size / 8.0)); // 2px
+	RGBAImage texture = resources.getBlockTextures().PLANKS_OAK.clip(0, 0, texture_size, w);
+	RGBAImage sign (texture_size, texture_size);
+	sign.alphaBlit(texture, 0, (texture_size - w) / 2);
+
+	// TODO proper rotation!
+	setBlockImage(63, 0, sign.rotate(2)); // south
+	setBlockImage(63, 1, sign.rotate(2)); // south-southwest
+	setBlockImage(63, 2, sign.rotate(2)); // southwest
+	setBlockImage(63, 3, sign.rotate(3)); // west-southwest
+	setBlockImage(63, 4, sign.rotate(3)); // west
+	setBlockImage(63, 5, sign.rotate(3)); // west-northwest
+	setBlockImage(63, 6, sign); // northwest
+	setBlockImage(63, 7, sign); // north-northwest
+	setBlockImage(63, 8, sign); // north
+	setBlockImage(63, 9, sign); // north-northeast
+	setBlockImage(63, 10, sign); // northeast
+	setBlockImage(63, 11, sign.rotate(1)); // east-northeast
+	setBlockImage(63, 12, sign.rotate(1)); // east
+	setBlockImage(63, 13, sign.rotate(1)); // east-southeast
+	setBlockImage(63, 14, sign.rotate(2)); // southeast
+	setBlockImage(63, 15, sign.rotate(2)); // south-southeast
+}
+
 void TopdownBlockImages::createDoor(uint16_t id, const RGBAImage& texture_bottom,
         const RGBAImage& texture_top) { // id 64, 71
 	// TODO sometimes the texture needs to get x flipped when door is opened
@@ -354,6 +379,15 @@ void TopdownBlockImages::createRails() { // id 66
 	setBlockImage(66, 7, curved.flip(true, false)); // south-west
 	setBlockImage(66, 8, curved.flip(true, true)); // north-west
 	setBlockImage(66, 9, curved.flip(false, true)); // north-east
+}
+
+void TopdownBlockImages::createWallSign() { // id 86
+	RGBAImage texture = resources.getBlockTextures().PLANKS_OAK;
+
+	createSideFaceBlock(68, 2, FACE_SOUTH, texture);
+	createSideFaceBlock(68, 3, FACE_NORTH, texture);
+	createSideFaceBlock(68, 4, FACE_EAST, texture);
+	createSideFaceBlock(68, 5, FACE_WEST, texture);
 }
 
 void TopdownBlockImages::createLever() { // id 69
@@ -950,7 +984,7 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(60, 0, t.FARMLAND_WET); // farmland
 	createRotatedBlock(61, 0, t.FURNACE_TOP); // furnace
 	createRotatedBlock(62, 0, t.FURNACE_TOP); // burning furnace
-	// id 63 // sign post
+	createStandingSign(); // id 63 // sign post
 	createDoor(64, t.DOOR_WOOD_LOWER, t.DOOR_WOOD_UPPER); // wooden door
 	// -- ladders
 	createSideFaceBlock(65, 2, FACE_SOUTH, t.LADDER);
@@ -960,7 +994,7 @@ void TopdownBlockImages::createBlocks() {
 	// --
 	createRails(); // id 66
 	createStairs(67, t.COBBLESTONE); // cobblestone stairs
-	// id 68 // wall sign
+	createWallSign(); // id 68 // wall sign
 	createLever(); // id 69 // lever
 	setBlockImage(70, 0, t.STONE); // stone pressure plate // TODO
 	createDoor(71, t.DOOR_IRON_LOWER, t.DOOR_IRON_UPPER); // iron door
