@@ -78,17 +78,20 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
-**v.2.0 (coming soon™!)**
-* Huge internal code refactoring
-* New render view: A 2D topdown and the usual 3D isometric render view are available
+**v.2.0**
+* Huge internal code refactoring™
+* Support for multiple rendering engines: A 2D topdown and the usual 3D isometric render
+  view are available
 * Support for indexed png images, reducing size of output images drastically
 * New overlay render modes (slime chunks, show where monsters can spawn at day/night)
 * Configurable tile sizes (to improve performance for small texture sizes)
-* Configurable water opacity
+* Configurable water opacity/transparency
 * Restructured internal render management components to allow integration of Mapcrafter
   rendering core into different applications
 * Further integration of Mapcrafter into a graphical user interface
   ([mapcrafter-gui](https://github.com/mapcrafter/mapcrafter-gui))
+* **There is a new repository for Debian/Ubuntu packages. Please have a look at the
+    documentation and update your apt source listings!**
 
 **v.1.5.4**
 
