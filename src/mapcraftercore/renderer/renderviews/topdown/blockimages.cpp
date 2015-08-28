@@ -836,6 +836,12 @@ void TopdownBlockImages::createBlocks() {
 	RGBAImage water = t.WATER_STILL.colorize(0, 0.39, 0.89);
 
 	setBlockImage(1, 0, t.STONE);
+	setBlockImage(1, 1, t.STONE_GRANITE); // granite
+	setBlockImage(1, 2, t.STONE_GRANITE_SMOOTH); // polished granite
+	setBlockImage(1, 3, t.STONE_DIORITE); // diorite
+	setBlockImage(1, 4, t.STONE_DIORITE_SMOOTH); // polished diorite
+	setBlockImage(1, 5, t.STONE_ANDESITE); // andesite
+	setBlockImage(1, 6, t.STONE_ANDESITE_SMOOTH); // polished andesite
 	setBlockImage(2, 0, t.GRASS_TOP);
 	setBlockImage(3, 0, t.DIRT);
 	setBlockImage(3, 1, t.DIRT);
