@@ -493,6 +493,20 @@ Map Options
     the texture images. This might be useful if you are using a very low texture
     size because areas with their blocks sometimes look a bit "tiled".
 
+``water_opacity = <number>``
+
+    **Default:** ``1.0``
+
+    With a factor from 0.0 to 1.0 you can modify the opacity of the used water texture
+    before your map is rendered. 0 means that it is completely transparent and 1 means
+    that the original opacity of the texture is kept. Also have a look at the
+    ``lighting_water_intensity`` option.
+
+.. note::
+
+    Don't actually set the water opacity to 0.0, that's a bad idea regarding performance.
+    If you don't want to render water, have a look at the ``block_mask`` option.
+
 ``tile_width = <number>``
 
     **Default:** ``1``
@@ -538,6 +552,18 @@ Map Options
     This is the lighting intensity, i.e. the strength the renderer applies the
     lighting to the rendered map. You can specify a value from 0.0 to 1.0, 
     where 1.0 means full lighting and 0.0 means no lighting.
+
+``lighting_water_intensity = <number>``
+
+    **Default:** ``1.0``
+
+    This is like the normal lighting intensity option, but used for blocks that are under
+    water. Usually the effect of opaque looking deep water is created by rendering just
+    the top water layer and then applying the lighting effect on the (dark) floor of the
+    water. By decreasing the lighting intensity for blocks under water you can make the
+    water look "more transparent". Use this option together with the ``water_opacity``
+    option. You might have to play around with this to find a configuration that you like.
+    For me ``water_opacity=0.75`` and ``lighting_water_intensity=0.6`` didn't look bad.
 
 ``render_unknown_blocks = true|false``
 
