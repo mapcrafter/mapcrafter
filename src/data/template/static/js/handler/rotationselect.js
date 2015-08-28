@@ -8,7 +8,7 @@ function RotationSelectHandler(control) {
 }
 
 RotationSelectHandler.prototype.create = function() {
-}
+};
 
 RotationSelectHandler.prototype.onMapChange = function(name, rotation) {
 	this.update();
@@ -33,4 +33,4 @@ RotationSelectHandler.prototype.update = function(text) {
 			}
 		}
 	}
-}
+};

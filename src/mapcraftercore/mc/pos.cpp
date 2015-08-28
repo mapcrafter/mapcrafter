@@ -19,8 +19,8 @@
 
 #include "pos.h"
 
-#include "../util.h"
 #include "chunk.h"
+#include "../util.h"
 
 #include <cmath>
 #include <cstdio>
@@ -166,6 +166,14 @@ BlockPos BlockPos::operator+(const BlockPos& p2) const {
 BlockPos BlockPos::operator-(const BlockPos& p2) const {
 	BlockPos p = *this;
 	return p -= p2;
+}
+
+bool BlockPos::operator==(const BlockPos& other) const {
+	return x == other.x && z == other.z && y == other.y;
+}
+
+bool BlockPos::operator!=(const BlockPos& other) const {
+	return !operator==(other);
 }
 
 bool BlockPos::operator<(const BlockPos& other) const {

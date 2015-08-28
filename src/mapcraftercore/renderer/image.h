@@ -22,7 +22,9 @@
 
 #include <png.h>
 #include <cstdint>
+#include <cmath>
 #include <string>
+#include <tuple>
 #include <vector>
 
 namespace mapcrafter {
@@ -36,9 +38,12 @@ uint8_t rgba_green(RGBAPixel value);
 uint8_t rgba_blue(RGBAPixel value);
 uint8_t rgba_alpha(RGBAPixel value);
 
-RGBAPixel rgba_add_clamp(RGBAPixel value, int r, int g, int b);
+RGBAPixel rgba_add_clamp(RGBAPixel value, int r, int g, int b, int a = 0);
+RGBAPixel rgba_add_clamp(RGBAPixel value, const std::tuple<int, int, int>& values);
 RGBAPixel rgba_multiply(RGBAPixel value, double r, double g, double b, double a = 1);
 RGBAPixel rgba_multiply(RGBAPixel value, uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
+
+int rgba_distance2(RGBAPixel value1, RGBAPixel value2);
 
 void blend(RGBAPixel& dest, const RGBAPixel& source);
 
@@ -73,14 +78,41 @@ const int ROTATE_90 = 1;
 const int ROTATE_180 = 2;
 const int ROTATE_270 = 3;
 
+enum class InterpolationType {
+	// nearest-neighbor interpolation, simple one
+	NEAREST,
+	// bilinear interpolation, fancy one
+	BILINEAR,
+	// special interpolation tweaked for resizing to (width/2, height/2)
+	HALF,
+	// automatically choose an interpolation type
+	AUTO
+};
+
+// TODO better documentation...
 class RGBAImage : public Image<RGBAPixel> {
 public:
 	RGBAImage(int width = 0, int height = 0);
 	~RGBAImage();
 
-	void simpleblit(const RGBAImage& image, int x, int y);
-	void alphablit(const RGBAImage& image, int x, int y);
+	/**
+	 * Blits one image to another one. Just copies the pixels over without any processing.
+	 */
+	void simpleBlit(const RGBAImage& image, int x, int y);
+
+	/**
+	 * Blits one image to another one. Just copies the pixels over, but skips completely
+	 * transparent pixels (alpha(pixel) == 0).
+	 */
+	void simpleAlphaBlit(const RGBAImage& image, int x, int y);
+
+	/**
+	 * Blits one image to another one. Also Alphablends transparent pixels of the source
+	 * image with the pixels of the destination image.
+	 */
+	void alphaBlit(const RGBAImage& image, int x, int y);
 	void blendPixel(RGBAPixel color, int x, int y);
+
 	void fill(RGBAPixel color, int x1, int y1, int w, int h);
 	void clear();
 
@@ -90,15 +122,22 @@ public:
 	RGBAImage rotate(int rotation) const;
 	RGBAImage flip(bool flip_x, bool flip_y) const;
 	RGBAImage move(int x_off, int y_off) const;
+	
+	void resize(RGBAImage& dest, int width, int height,
+			InterpolationType interpolation = InterpolationType::AUTO) const;
 
-	void resizeInterpolated(int new_width, int new_height, RGBAImage& dest) const;
-	void resizeSimple(int new_width, int new_height, RGBAImage& dest) const;
-	// automatically chooses an image resize interpolation
-	void resizeAuto(int new_width, int new_height, RGBAImage& dest) const;
-	void resizeHalf(RGBAImage& dest) const;
+	RGBAImage resize(int width, int height,
+			InterpolationType interpolation = InterpolationType::AUTO) const;
+
+	/**
+	 * Applies a simple blur filter to the image. Uses the specified radius for the
+	 * (quadratic) blur effect.
+	 */
+	void blur(RGBAImage& dest, int radius) const;
 
 	bool readPNG(const std::string& filename);
 	bool writePNG(const std::string& filename) const;
+	bool writeIndexedPNG(const std::string& filename, int palette_bits = 8, bool dithered = true) const;
 
 	bool readJPEG(const std::string& filename);
 	bool writeJPEG(const std::string& filename, int quality,

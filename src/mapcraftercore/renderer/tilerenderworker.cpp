@@ -19,11 +19,28 @@
 
 #include "tilerenderworker.h"
 
+#include "blockimages.h"
+#include "image.h"
+#include "rendermode.h"
+#include "renderview.h"
+#include "tilerenderer.h"
+#include "tileset.h"
+#include "../mc/worldcache.h"
+#include "../util.h"
+
 namespace mapcrafter {
 namespace renderer {
 
+void RenderContext::initializeTileRenderer() {
+	world_cache.reset(new mc::WorldCache(world));
+	render_mode.reset(createRenderMode(world_config, map_config, world.getRotation()));
+	tile_renderer.reset(render_view->createTileRenderer(block_images,
+			map_config.getTileWidth(), world_cache.get(), render_mode.get()));
+	render_view->configureTileRenderer(tile_renderer.get(), world_config, map_config);
+}
+
 TileRenderWorker::TileRenderWorker()
-	: progress(new util::DummyProgressHandler), finished(new bool) {
+	: progress(nullptr) {
 }
 
 TileRenderWorker::~TileRenderWorker() {
@@ -43,15 +60,13 @@ const RenderWorkResult& TileRenderWorker::getRenderWorkResult() const {
 	return render_work_result;
 }
 
-void TileRenderWorker::setProgressHandler(
-		std::shared_ptr<util::IProgressHandler> progress,
-		std::shared_ptr<bool> finished) {
+void TileRenderWorker::setProgressHandler(util::IProgressHandler* progress) {
 	this->progress = progress;
-	this->finished = finished;
 }
 
 void TileRenderWorker::saveTile(const TilePath& tile, const RGBAImage& image) {
 	bool png = render_context.map_config.getImageFormat() == config::ImageFormat::PNG;
+	bool png_indexed = render_context.map_config.isPNGIndexed();
 	std::string suffix = std::string(".") + render_context.map_config.getImageFormatSuffix();
 	std::string filename = tile.toString() + suffix;
 	if (tile.getDepth() == 0)
@@ -60,7 +75,10 @@ void TileRenderWorker::saveTile(const TilePath& tile, const RGBAImage& image) {
 	if (!fs::exists(file.branch_path()))
 		fs::create_directories(file.branch_path());
 
-	if (png && !image.writePNG(file.string()))
+	if ((png && !png_indexed) && !image.writePNG(file.string()))
+		LOG(WARNING) << "Unable to write '" << file.string() << "'.";
+
+	if ((png && png_indexed) && !image.writeIndexedPNG(file.string()))
 		LOG(WARNING) << "Unable to write '" << file.string() << "'.";
 
 	config::Color bg = render_context.background_color;
@@ -78,7 +96,7 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 				/ (tile.toString() + "." + render_context.map_config.getImageFormatSuffix());
 		if ((png && image.readPNG(file.string()))
 				|| (!png && image.readJPEG(file.string()))) {
-			if (render_work.tiles_skip.count(tile))
+			if (render_work.tiles_skip.count(tile) && progress != nullptr)
 				progress->setValue(progress->getValue()
 						+ render_context.tile_set->getContainingRenderTiles(tile));
 			return;
@@ -90,8 +108,8 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 
 	if (tile.getDepth() == render_context.tile_set->getDepth()) {
 		// this tile is a render tile, render it
-		renderer.renderTile(tile.getTilePos(),
-				render_context.tile_set->getTileOffset(), image);
+		render_context.tile_renderer->renderTile(tile.getTilePos()
+				+ render_context.tile_set->getTileOffset(), image);
 		render_work_result.tiles_rendered++;
 
 		/*
@@ -110,38 +128,41 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 		saveTile(tile, image);
 
 		// update progress
-		progress->setValue(progress->getValue() + 1);
+		if (progress != nullptr)
+			progress->setValue(progress->getValue() + 1);
 	} else {
 		// this tile is a composite tile, we need to compose it from its children
 		// just check, if children 1, 2, 3, 4 exists, render it, resize it to the half size
 		// and blit it to the properly position
-		int size = render_context.map_config.getTextureSize() * 32 * TILE_WIDTH;
+		//int size = render_context.map_config.getTextureSize() * 32 * TILE_WIDTH;
+		// TODO
+		int size = render_context.tile_renderer->getTileSize();
 		image.setSize(size, size);
 
 		RGBAImage other;
 		RGBAImage resized;
 		if (render_context.tile_set->hasTile(tile + 1)) {
 			renderRecursive(tile + 1, other);
-			other.resizeHalf(resized);
-			image.simpleblit(resized, 0, 0);
+			other.resize(resized, 0, 0, InterpolationType::HALF);
+			image.simpleAlphaBlit(resized, 0, 0);
 			other.clear();
 		}
 		if (render_context.tile_set->hasTile(tile + 2)) {
 			renderRecursive(tile + 2, other);
-			other.resizeHalf(resized);
-			image.simpleblit(resized, size / 2, 0);
+			other.resize(resized, 0, 0, InterpolationType::HALF);
+			image.simpleAlphaBlit(resized, size / 2, 0);
 			other.clear();
 		}
 		if (render_context.tile_set->hasTile(tile + 3)) {
 			renderRecursive(tile + 3, other);
-			other.resizeHalf(resized);
-			image.simpleblit(resized, 0, size / 2);
+			other.resize(resized, 0, 0, InterpolationType::HALF);
+			image.simpleAlphaBlit(resized, 0, size / 2);
 			other.clear();
 		}
 		if (render_context.tile_set->hasTile(tile + 4)) {
 			renderRecursive(tile + 4, other);
-			other.resizeHalf(resized);
-			image.simpleblit(resized, size / 2, size / 2);
+			other.resize(resized, 0, 0, InterpolationType::HALF);
+			image.simpleAlphaBlit(resized, size / 2, size / 2);
 		}
 
 		/*
@@ -161,18 +182,13 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 }
 
 void TileRenderWorker::operator()() {
-	// TODO
-	// really create world cache here?
-	std::shared_ptr<mc::WorldCache> world_cache(new mc::WorldCache(render_context.world));
-	renderer = TileRenderer(world_cache, render_context.block_images,
-			render_context.world_config, render_context.map_config);
-	
 	int work = 0;
 	for (auto it = render_work.tiles.begin(); it != render_work.tiles.end(); ++it)
 		work += render_context.tile_set->getContainingRenderTiles(*it);
-	progress->setMax(work);
-	progress->setValue(0);
-	*finished = false;
+	if (progress != nullptr) {
+		progress->setMax(work);
+		progress->setValue(0);
+	}
 	
 	RGBAImage image;
 	// iterate through the start composite tiles
@@ -183,8 +199,6 @@ void TileRenderWorker::operator()() {
 		// clear image
 		image.clear();
 	}
-
-	*finished = true;
 }
 
 } /* namespace render */

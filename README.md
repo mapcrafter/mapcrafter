@@ -20,13 +20,16 @@ stuff of the template from Minecraft Overviewer.
 
 ## Features ##
 
-* **Web output:** Render your Minecraft worlds to maps with an isometric 3D perspective 
-      viewable in any webbrowser!
-* **Different directions:** Choose from four different directions to render your worlds!
-* **Different rendermodes:** Choose between different rendermodes like day, night and cave 
-     for your maps!
-* **Configuration files:** Control which worlds are rendered from which direction and with 
-     which rendermodes!
+* **Web output:** Render your Minecraft worlds to maps viewable in any webbrowser!
+* **Different render views:** Choose between different perspectives to render your world
+  from! A 2D topdown and a 3D isometric render view are available!
+* **Different rotations:** Choose from four different rotations to render your worlds from!
+* **Different render modes:** Choose between different render modes like day, night and cave 
+  for your maps!
+* **Different overlays:** Show additional information on your map! For example: Where can
+  slimes spawn? Where can monsters spawn at night?
+* **Configuration files:** Highly-customizable which worlds are rendered with which render
+  view and other render parameters!
 * **Markers:** Automatically generated markers from your Minecraft world data!
 * **Other stuff:** Biome colors, incremental rendering, multithreading
 
@@ -75,13 +78,20 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
-**v.2.0 (coming soon™!)**
-* Huge internal code refactoring
-* New render view: A 2D topdown and the usual 3D isometric render view will be available
-* Support for indexed png images, reducing size of output images a lot
-* New overlay render modes (slime chunks, monster spawn areas according to the light levels)
+**v.2.0**
+* Huge internal code refactoring™
+* Support for multiple rendering engines: A 2D topdown and the usual 3D isometric render
+  view are available
+* Support for indexed png images, reducing size of output images drastically
+* New overlay render modes (slime chunks, show where monsters can spawn at day/night)
 * Configurable tile sizes (to improve performance for small texture sizes)
-* Restructured internal render management components to allow a graphical user interface
+* Configurable water opacity/transparency
+* Restructured internal render management components to allow integration of Mapcrafter
+  rendering core into different applications
+* Further integration of Mapcrafter into a graphical user interface
+  ([mapcrafter-gui](https://github.com/mapcrafter/mapcrafter-gui))
+* **There is a new repository for Debian/Ubuntu packages. Please have a look at the
+    documentation and update your apt source listings!**
 
 **v.1.5.4**
 

@@ -1,6 +1,7 @@
 set(HEADERS
     ${HEADERS}
     "${CMAKE_CURRENT_SOURCE_DIR}/boost.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/nullptr.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/thread.h"
     PARENT_SCOPE
 )

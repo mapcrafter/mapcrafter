@@ -57,7 +57,7 @@ PosHashHandler.prototype.gotoHash = function(hash) {
 	if(!hash)
 		return;
 	
-	if(!(hash[0] in this.ui.getConfig()) 
+	if(!(hash[0] in this.ui.getMapConfigs()) 
 			|| this.ui.getMapConfig(hash[0]).rotations.indexOf(hash[1]) < 0)
 		return null;
 		

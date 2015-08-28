@@ -37,9 +37,13 @@ struct Block {
 	Block(uint16_t id = 0, uint16_t data = 0, uint8_t biome = 0,
 			uint8_t block_light = 0, uint8_t sky_light = 15);
 
+	// which block does this data belong to (set by getBlock-method)
+	mc::BlockPos pos;
 	uint16_t id, data;
 	uint8_t biome;
 	uint8_t block_light, sky_light;
+	// which of the fields above are set? (set by getBlock-method)
+	int fields_set;
 
 	bool isFullWater() const;
 };
@@ -138,7 +142,8 @@ private:
 	int getChunkCacheIndex(const ChunkPos& pos) const;
 
 public:
-	WorldCache(const World& world = World());
+	WorldCache();
+	WorldCache(const World& world);
 
 	RegionFile* getRegion(const RegionPos& pos);
 	Chunk* getChunk(const ChunkPos& pos);

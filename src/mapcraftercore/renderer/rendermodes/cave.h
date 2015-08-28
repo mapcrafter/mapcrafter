@@ -20,26 +20,33 @@
 #ifndef RENDERMODES_CAVE_H_
 #define RENDERMODES_CAVE_H_
 
-#include "base.h"
+#include "../rendermode.h"
+#include "../../mc/pos.h"
+
+#include <vector>
 
 namespace mapcrafter {
 namespace renderer {
 
-class CaveRendermode: public Rendermode {
+class CaveRenderMode : public BaseRenderMode<> {
 public:
-	CaveRendermode(const RenderState& state, bool high_contrast);
-	virtual ~CaveRendermode();
+	CaveRenderMode(const std::vector<mc::BlockPos>& hidden_dirs);
+	virtual ~CaveRenderMode();
 
 	virtual bool isHidden(const mc::BlockPos& pos,
-			uint16_t id, uint16_t data);
-	virtual void draw(RGBAImage& image, const mc::BlockPos& pos,
 			uint16_t id, uint16_t data);
 
 protected:
 	bool isLight(const mc::BlockPos& pos);
 	bool isTransparentBlock(const mc::Block& block) const;
 
-	bool high_contrast;
+	// we want to hide some additional cave blocks to be able to look "inside" the caves,
+	// so it's possible to specify directions where cave blocks must touch transparent
+	// blocks (or air), there must be a transparent block in at least one directions
+	// for example, for the isometric render view this would be: south, west and top
+	// (because you are looking from the south-west-top at the map and don't want your
+	// view into the cave covered by the southern, western, and top walls)
+	std::vector<mc::BlockPos> hidden_dirs;
 };
 
 } /* namespace render */

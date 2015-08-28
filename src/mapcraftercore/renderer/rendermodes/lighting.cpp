@@ -20,6 +20,11 @@
 #include "lighting.h"
 
 #include "../blockimages.h"
+#include "../image.h"
+#include "../renderviews/isometric/blockimages.h"
+#include "../renderviews/topdown/blockimages.h"
+#include "../../mc/chunk.h"
+#include "../../mc/pos.h"
 #include "../../util.h"
 
 #include <cmath>
@@ -78,93 +83,28 @@ FaceCorners::FaceCorners(const CornerNeighbors& corner1)
 	  corner4(corner1.addPos(corner1.dir1 + corner1.dir2)) {
 }
 
-/**
- * Draws the bottom triangle.
- * This is the triangle with corners top left, bottom left and bottom right.
- */
-void drawBottomTriangle(RGBAImage& image, int size, double c1, double c2,
-		double c3) {
-	double e1diff = c2 - c1;
-	double e2diff = c3 - c1;
-	double fy = 0;
-	double fyStep = (double) 1 / (size-1);
-	for (int y = 0; y < size; y++, fy+=fyStep) {
-		double color1 = c1 + e1diff*fy;
-		double color2 = c1 + e2diff*fy;
-		double colordiff = color2 - color1;
-		double fx = 0;
-		double fxStep = 0;
-		if (y != 0)
-			fxStep = (double) 1 / y;
-		else
-			fx = 1;
-		for (int x = 0; x <= y; x++, fx+=fxStep) {
-			double color = color1 + colordiff*fx;
-			//color += (1-color)*(1-LIGHTNING_INTENSITY);
-			image.pixel(x, y) = rgba(0, 0, 0, color * 255);
-		}
-	}
+LightingData::LightingData(uint8_t block_light, uint8_t sky_light)
+	: block_light(block_light), sky_light(sky_light) {
 }
 
-/**
- * Draws the top triangle.
- * This is the triangle with corners top left, top right and bottom right.
- */
-void drawTopTriangle(RGBAImage& image, int size, double c1, double c2, double c3) {
-	double e1diff = c2 - c1;
-	double e2diff = c3 - c1;
-	double fy = 0;
-	double fyStep = (double) 1 / (size-1);
-	for (int y = 0; y < size; y++, fy+=fyStep) {
-		double color1 = c1 + e1diff*fy;
-		double color2 = c1 + e2diff*fy;
-		double colordiff = color2 - color1;
-		double fx = 0;
-		double fxStep = 0;
-		if (y != 0)
-			fxStep = (double) 1 / y;
-		else
-			fx = 1;
-		for (int x = 0; x <= y; x++, fx+=fxStep) {
-			double color = color1 + colordiff*fx;
-			//color += (1-color)*(1-LIGHTNING_INTENSITY);
-			image.pixel(size-1-x, size-1-y) = rgba(0, 0, 0, color * 255);
-		}
-	}
+LightingData::~LightingData() {
 }
 
-LightingRendermode::LightingRendermode(const RenderState& state, bool day,
-		double lighting_intensity, bool dimension_end)
-	: Rendermode(state), day(day), lighting_intensity(lighting_intensity),
-	  dimension_end(dimension_end) {
+uint8_t LightingData::getBlockLight() const {
+	return block_light;
 }
 
-LightingRendermode::~LightingRendermode() {
-
+uint8_t LightingData::getSkyLight() const {
+	return sky_light;
 }
 
-/**
- * Draws the shade of the corners by drawing two triangles with the supplied colors.
- */
-void LightingRendermode::createShade(RGBAImage& image,
-		const CornerColors& corners) const {
-	int size = image.getWidth();
-	drawBottomTriangle(image, size, corners[0], corners[2], corners[3]);
-	drawTopTriangle(image, size, corners[3], corners[1], corners[0]);
-}
-
-/**
- * Calculates the color of the light of a block.
- *
- * This uses the formula 0.8**(15 - max(block_light, sky_light))
- * When calculating nightlight, the skylight is reduced by 11.
- */
-LightingColor LightingRendermode::calculateLightingColor(uint8_t block_light,
-		uint8_t sky_light) const {
+uint8_t LightingData::getLightLevel(bool day) const {
 	if (day)
-		return pow(0.8, 15 - std::max(block_light, sky_light));
-	return pow(0.8, 15 - std::max(block_light+0, sky_light - 11));
+		return std::max(block_light, sky_light);
+	return std::max(block_light + 0, sky_light - 11);
 }
+
+namespace {
 
 bool isSpecialTransparent(uint16_t id) {
 	// blocks which are transparent but don't have correct lighting data
@@ -194,22 +134,28 @@ bool isSpecialTransparent(uint16_t id) {
 			;
 }
 
-/**
- * Estimates the light of a block from its neighbors.
- */
-void LightingRendermode::estimateBlockLight(mc::Block& block,
-		const mc::BlockPos& pos) {
+}
+
+LightingData LightingData::estimate(const mc::Block& block,
+		BlockImages* images, mc::WorldCache* world, mc::Chunk* current_chunk) {
+	// estimate the light if this is a special block
+	if (!isSpecialTransparent(block.id))
+		return LightingData(block.block_light, block.sky_light);
+
+	uint8_t block_light = 0, sky_light = 0;
+
 	// get the sky light from the block above
 	mc::BlockPos off(0, 0, 0);
 	mc::Block above;
 	while (++off.y) {
-		above = state.getBlock(pos + off, mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
+		above = world->getBlock(block.pos + off, current_chunk,
+				mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
 		if (isSpecialTransparent(above.id))
 			continue;
-		if (above.id == 0 || state.images->isBlockTransparent(above.id, above.data))
-			block.sky_light = above.sky_light;
+		if (above.id == 0 || images->isBlockTransparent(above.id, above.data))
+			sky_light = above.sky_light;
 		else
-			block.sky_light = 15;
+			sky_light = 15;
 		break;
 	}
 
@@ -219,10 +165,10 @@ void LightingRendermode::estimateBlockLight(mc::Block& block,
 	for (int dx = -1; dx <= 1; dx++)
 		for (int dz = -1; dz <= 1; dz++)
 			for (int dy = -1; dy <= 1; dy++) {
-				mc::Block other = state.getBlock(pos + mc::BlockPos(dx, dz, dy),
-						mc::GET_ID | mc::GET_DATA | mc::GET_BLOCK_LIGHT);
+				mc::Block other = world->getBlock(block.pos + mc::BlockPos(dx, dz, dy),
+						current_chunk, mc::GET_ID | mc::GET_DATA | mc::GET_BLOCK_LIGHT);
 				if ((other.id == 0
-						|| state.images->isBlockTransparent(other.id, other.data))
+						|| images->isBlockTransparent(other.id, other.data))
 						&& !isSpecialTransparent(other.id)) {
 					block_lights += other.block_light;
 					block_lights_count++;
@@ -230,162 +176,235 @@ void LightingRendermode::estimateBlockLight(mc::Block& block,
 			}
 
 	if (block_lights_count > 0)
-		block.block_light = block_lights / block_lights_count;
+		block_light = block_lights / block_lights_count;
+	return LightingData(block_light, sky_light);
 }
 
-/**
- * Returns the light of a block (sky/block light). This also means that the light is
- * estimated if this is a special transparent block.
- */
-LightingData LightingRendermode::getBlockLight(const mc::BlockPos& pos) {
-	mc::Block block = state.getBlock(pos, mc::GET_ID | mc::GET_DATA | mc::GET_LIGHT);
-	if (isSpecialTransparent(block.id))
-		estimateBlockLight(block, pos);
-	
-	LightingData light;
-	light.block = block.block_light,
-	light.sky = block.sky_light;
 
+LightingRenderer::~LightingRenderer() {
+}
+
+void LightingRenderer::lightAllSimple(RGBAImage& image, LightingColor color) const {
+	uint8_t factor = color * 255;
+
+	int size = image.getWidth();
+	for (int x = 0; x < size; x++) {
+		for (int y = 0; y < size; y++) {
+			uint32_t& pixel = image.pixel(x, y);
+			if (pixel != 0)
+				pixel = rgba_multiply(pixel, factor, factor, factor, 255);
+		}
+	}
+}
+
+const RenderModeRendererType LightingRenderer::TYPE = RenderModeRendererType::LIGHTING;
+
+void LightingRenderer::drawBottomTriangle(RGBAImage& image, int size, double c1,
+		double c2, double c3) const {
+	double e1diff = c2 - c1;
+	double e2diff = c3 - c1;
+	double fy = 0;
+	double fyStep = (double) 1 / (size-1);
+	for (int y = 0; y < size; y++, fy+=fyStep) {
+		double color1 = c1 + e1diff*fy;
+		double color2 = c1 + e2diff*fy;
+		double colordiff = color2 - color1;
+		double fx = 0;
+		double fxStep = 0;
+		if (y != 0)
+			fxStep = (double) 1 / y;
+		else
+			fx = 1;
+		for (int x = 0; x <= y; x++, fx+=fxStep) {
+			double color = color1 + colordiff*fx;
+			//color += (1-color)*(1-LIGHTNING_INTENSITY);
+			image.pixel(x, y) = rgba(0, 0, 0, color * 255);
+		}
+	}
+}
+
+void LightingRenderer::drawTopTriangle(RGBAImage& image, int size, double c1,
+		double c2, double c3) const {
+	double e1diff = c2 - c1;
+	double e2diff = c3 - c1;
+	double fy = 0;
+	double fyStep = (double) 1 / (size-1);
+	for (int y = 0; y < size; y++, fy+=fyStep) {
+		double color1 = c1 + e1diff*fy;
+		double color2 = c1 + e2diff*fy;
+		double colordiff = color2 - color1;
+		double fx = 0;
+		double fxStep = 0;
+		if (y != 0)
+			fxStep = (double) 1 / y;
+		else
+			fx = 1;
+		for (int x = 0; x <= y; x++, fx+=fxStep) {
+			double color = color1 + colordiff*fx;
+			//color += (1-color)*(1-LIGHTNING_INTENSITY);
+			image.pixel(size-1-x, size-1-y) = rgba(0, 0, 0, color * 255);
+		}
+	}
+}
+
+void LightingRenderer::createShade(RGBAImage& image, const CornerColors& corners) const {
+	int size = image.getWidth();
+	drawBottomTriangle(image, size, corners[0], corners[2], corners[3]);
+	drawTopTriangle(image, size, corners[3], corners[1], corners[0]);
+}
+
+LightingRenderMode::LightingRenderMode(bool day, double lighting_intensity,
+		double lighting_water_intensity, bool simulate_sun_light)
+	: day(day), lighting_intensity(lighting_intensity),
+	  lighting_water_intensity(lighting_water_intensity),
+	  simulate_sun_light(simulate_sun_light) {
+}
+
+LightingRenderMode::~LightingRenderMode() {
+}
+
+bool LightingRenderMode::isHidden(const mc::BlockPos& pos,
+		uint16_t id, uint16_t data) {
+	return false;
+}
+
+void LightingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
+		uint16_t id, uint16_t data) {
+	bool transparent = images->isBlockTransparent(id, data);
+
+	bool water = (id == 8 || id == 9) && (data & util::binary<1111>::value) == 0;
+	int texture_size = image.getHeight() / 2;
+
+	if (id == 78 && (data & util::binary<1111>::value) == 0) {
+		// flat snow gets also smooth lighting
+		int height = ((data & util::binary<1111>::value) + 1) / 8.0 * texture_size;
+		renderer->lightTop(image, getCornerColors(pos, CORNERS_BOTTOM),
+				texture_size - height);
+		renderer->lightLeft(image, getCornerColors(pos, CORNERS_LEFT),
+				texture_size - height, texture_size);
+		renderer->lightRight(image, getCornerColors(pos, CORNERS_RIGHT),
+				texture_size - height, texture_size);
+	} else if (id == 44 || id == 126) {
+		// slabs and wooden slabs
+		doSlabLight(image, pos, id, data);
+	} else if (transparent && !water && id != 79) {
+		// transparent blocks (except full water blocks and ice)
+		// get simple lighting, they are completely lighted, not per face
+		doSimpleLight(image, pos, id, data);
+	} else {
+		// do smooth lighting for all other blocks
+		doSmoothLight(image, pos, id, data);
+	}
+}
+
+LightingColor LightingRenderMode::calculateLightingColor(const LightingData& light) const {
+	return pow(0.8, 15 - light.getLightLevel(day));
+}
+
+LightingData LightingRenderMode::getBlockLight(const mc::BlockPos& pos) {
+	mc::Block block = getBlock(pos, mc::GET_ID | mc::GET_DATA | mc::GET_LIGHT);
+	LightingData light = LightingData::estimate(block, images, world, *current_chunk);
+
+	// TODO also move this to LightingData class?
 	// lighting fix for The End
 	// The End has no sun light set -> lighting looks ugly
 	// just emulate the sun light for transparent blocks
-	if (dimension_end) {
-		light.sky = 15;
-		if (block.id != 0 && !state.images->isBlockTransparent(block.id, block.data))
-			light.sky = 0;
+	if (simulate_sun_light) {
+		uint8_t sky = 15;
+		if (block.id != 0 && !images->isBlockTransparent(block.id, block.data))
+			sky = 0;
+		return LightingData(sky, light.getBlockLight());
 	}
 	return light;
 }
 
-/**
- * Returns the lighting color of a block.
- */
-LightingColor LightingRendermode::getLightingColor(const mc::BlockPos& pos) {
+LightingColor LightingRenderMode::getLightingColor(const mc::BlockPos& pos, double intensity) {
 	LightingData lighting = getBlockLight(pos);
-	LightingColor color = calculateLightingColor(lighting.block, lighting.sky);
-	return color + (1-color)*(1-lighting_intensity);
+	LightingColor color = calculateLightingColor(lighting);
+	return color + (1-color)*(1-intensity);
 }
 
-/**
- * Returns the lighting color of a corner by calculating the average lighting color of
- * the four neighbor blocks.
- */
-LightingColor LightingRendermode::getCornerColor(const mc::BlockPos& pos,
-		const CornerNeighbors& corner) {
+LightingColor LightingRenderMode::getCornerColor(const mc::BlockPos& pos,
+		const CornerNeighbors& corner, double intensity) {
 	LightingColor color = 0;
-	color += getLightingColor(pos + corner.pos1) * 0.25;
-	color += getLightingColor(pos + corner.pos2) * 0.25;
-	color += getLightingColor(pos + corner.pos3) * 0.25;
-	color += getLightingColor(pos + corner.pos4) * 0.25;
+	color += getLightingColor(pos + corner.pos1, intensity) * 0.25;
+	color += getLightingColor(pos + corner.pos2, intensity) * 0.25;
+	color += getLightingColor(pos + corner.pos3, intensity) * 0.25;
+	color += getLightingColor(pos + corner.pos4, intensity) * 0.25;
 	return color;
 }
 
-/**
- * Returns the corner lighting colors of a block face.
- */
-CornerColors LightingRendermode::getCornerColors(const mc::BlockPos& pos,
-		const FaceCorners& corners) {
+CornerColors LightingRenderMode::getCornerColors(const mc::BlockPos& pos,
+		const FaceCorners& corners, double intensity) {
+	if (intensity < 0)
+		intensity = lighting_intensity;
 	CornerColors colors = {{
-		getCornerColor(pos, corners.corner1),
-		getCornerColor(pos, corners.corner2),
-		getCornerColor(pos, corners.corner3),
-		getCornerColor(pos, corners.corner4),
+		getCornerColor(pos, corners.corner1, intensity),
+		getCornerColor(pos, corners.corner2, intensity),
+		getCornerColor(pos, corners.corner3, intensity),
+		getCornerColor(pos, corners.corner4, intensity),
 	}};
 	return colors;
 }
 
-/**
- * Adds smooth lighting to the left face of a block image.
- */
-void LightingRendermode::lightLeft(RGBAImage& image, const CornerColors& colors) {
-	int size = image.getWidth() / 2;
-	RGBAImage tex(size, size);
-	createShade(tex, colors);
+void LightingRenderMode::doSmoothLight(RGBAImage& image, const mc::BlockPos& pos,
+		uint16_t id, uint16_t data) {
+	// check if lighting faces are visible
+	bool light_left = true, light_right = true, light_top = true;
+	bool water = (id == 8 || id == 9) && (data & util::binary<1111>::value) == 0;
+	bool under_water[3] = {false, false, false};
 
-	for (SideFaceIterator it(size, SideFaceIterator::LEFT); !it.end(); it.next()) {
-		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + size/2);
-		if (pixel != 0) {
-			uint8_t d = rgba_alpha(tex.pixel(it.src_x, it.src_y));
-			pixel = rgba_multiply(pixel, d, d, d);
-		}
+	if (water) {
+		// DATA_{WEST,SOUTH,TOP} means for non-opaque water that there are water faces
+		// on these sides, e.g. we need lighting on those sides
+		if (!(data & DATA_WEST))
+			light_left = false;
+		if (!(data & DATA_SOUTH))
+			light_right = false;
+		if (!(data & DATA_TOP))
+			light_top = false;
 	}
+
+	if (id == 79) {
+		// DATA_{WEST,SOUTH} means for ice blocks that there are no faces on this side
+		if (data & DATA_WEST)
+			light_left = false;
+		if (data & DATA_SOUTH)
+			light_right = false;
+	}
+
+	mc::Block block;
+	if (light_left) {
+		block = getBlock(pos + mc::DIR_WEST);
+		under_water[0] = block.id == 8 || block.id == 9;
+		light_left = block.id == 0 || images->isBlockTransparent(block.id, block.data);
+	}
+	if (light_right) {
+		block = getBlock(pos + mc::DIR_SOUTH);
+		under_water[1] = block.id == 8 || block.id == 9;
+		light_right = block.id == 0 || images->isBlockTransparent(block.id, block.data);
+	}
+	if (light_top) {
+		block = getBlock(pos + mc::DIR_TOP);
+		under_water[2] = block.id == 8 || block.id == 9;
+		light_top = block.id == 0 || images->isBlockTransparent(block.id, block.data);
+	}
+
+	double intensity = lighting_intensity;
+	double water_intensity = lighting_water_intensity; // 0.65* lighting_intensity;
+
+	// do the lighting
+	if (light_left)
+		renderer->lightLeft(image, getCornerColors(pos, CORNERS_LEFT, under_water[0] ? water_intensity : intensity));
+
+	if (light_right)
+		renderer->lightRight(image, getCornerColors(pos, CORNERS_RIGHT, under_water[1] ? water_intensity : intensity));
+
+	if (light_top)
+		renderer->lightTop(image, getCornerColors(pos, CORNERS_TOP, under_water[2] ? water_intensity : intensity));
 }
 
-void LightingRendermode::lightLeft(RGBAImage& image, const CornerColors& colors,
-		int ystart, int yend) {
-	int size = image.getWidth() / 2;
-	RGBAImage tex(size, size);
-	createShade(tex, colors);
-
-	for (SideFaceIterator it(size, SideFaceIterator::LEFT); !it.end(); it.next()) {
-		if (it.src_y < ystart || it.src_y > yend)
-			continue;
-		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + size/2);
-		if (pixel != 0) {
-			uint8_t d = rgba_alpha(tex.pixel(it.src_x, it.src_y));
-			pixel = rgba_multiply(pixel, d, d, d);
-		}
-	}
-}
-
-/**
- * Adds smooth lighting to the right face of a block image.
- */
-void LightingRendermode::lightRight(RGBAImage& image, const CornerColors& colors) {
-	int size = image.getWidth() / 2;
-	RGBAImage tex(size, size);
-	createShade(tex, colors);
-
-	for (SideFaceIterator it(size, SideFaceIterator::RIGHT); !it.end(); it.next()) {
-		uint32_t& pixel = image.pixel(it.dest_x + size, it.dest_y + size/2);
-		if (pixel != 0) {
-			uint8_t d = rgba_alpha(tex.pixel(it.src_x, it.src_y));
-			pixel = rgba_multiply(pixel, d, d, d);
-		}
-	}
-}
-
-void LightingRendermode::lightRight(RGBAImage& image, const CornerColors& colors,
-		int ystart, int yend) {
-	int size = image.getWidth() / 2;
-	RGBAImage tex(size, size);
-	createShade(tex, colors);
-
-	for (SideFaceIterator it(size, SideFaceIterator::RIGHT); !it.end(); it.next()) {
-		if (it.src_y < ystart || it.src_y > yend)
-			continue;
-		uint32_t& pixel = image.pixel(it.dest_x + size, it.dest_y + size/2);
-		if (pixel != 0) {
-			uint8_t d = rgba_alpha(tex.pixel(it.src_x, it.src_y));
-			pixel = rgba_multiply(pixel, d, d, d);
-		}
-	}
-}
-
-/**
- * Adds smooth lighting to the top face of a block image.
- */
-void LightingRendermode::lightTop(RGBAImage& image, const CornerColors& colors,
-		int yoff) {
-	int size = image.getWidth() / 2;
-	RGBAImage tex(size, size);
-	// we need to rotate the corners a bit to make them suitable for the TopFaceIterator
-	CornerColors rotated = {{colors[1], colors[3], colors[0], colors[2]}};
-	createShade(tex, rotated);
-
-	for (TopFaceIterator it(size); !it.end(); it.next()) {
-		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + yoff);
-		if (pixel != 0) {
-			uint8_t d = rgba_alpha(tex.pixel(it.src_x, it.src_y));
-			pixel = rgba_multiply(pixel, d, d, d);
-		}
-	}
-}
-
-/**
- * Applies the smooth lighting to a slab (not double slabs).
- */
-void LightingRendermode::doSlabLight(RGBAImage& image, const mc::BlockPos& pos,
+void LightingRenderMode::doSlabLight(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
 	// to apply smooth lighting to a slab,
 	// we move the top shadow down if this is the bottom slab
@@ -401,26 +420,22 @@ void LightingRendermode::doSlabLight(RGBAImage& image, const mc::BlockPos& pos,
 
 	// light the faces
 	mc::Block block;
-	block = state.getBlock(pos + mc::DIR_WEST);
-	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
-		lightLeft(image, getCornerColors(pos, CORNERS_LEFT), ystart, yend);
+	block = getBlock(pos + mc::DIR_WEST);
+	if (block.id == 0 || images->isBlockTransparent(block.id, block.data))
+		renderer->lightLeft(image, getCornerColors(pos, CORNERS_LEFT), ystart, yend);
 
-	block = state.getBlock(pos + mc::DIR_SOUTH);
-	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
-		lightRight(image, getCornerColors(pos, CORNERS_RIGHT), ystart, yend);
+	block = getBlock(pos + mc::DIR_SOUTH);
+	if (block.id == 0 || images->isBlockTransparent(block.id, block.data))
+		renderer->lightRight(image, getCornerColors(pos, CORNERS_RIGHT), ystart, yend);
 
-	block = state.getBlock(pos + mc::DIR_TOP);
-	if (block.id == 0 || state.images->isBlockTransparent(block.id, block.data))
-		lightTop(image, getCornerColors(pos, CORNERS_TOP), yoff);
+	block = getBlock(pos + mc::DIR_TOP);
+	if (block.id == 0 || images->isBlockTransparent(block.id, block.data))
+		renderer->lightTop(image, getCornerColors(pos, CORNERS_TOP), yoff);
 }
 
-/**
- * Applies a simple lighting to a block. This colors the whole block with the lighting
- * color of the block.
- */
-void LightingRendermode::doSimpleLight(RGBAImage& image, const mc::BlockPos& pos,
+void LightingRenderMode::doSimpleLight(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
-	uint8_t factor = getLightingColor(pos) * 255;
+	uint8_t factor = getLightingColor(pos, lighting_intensity) * 255;
 
 	int size = image.getWidth();
 	for (int x = 0; x < size; x++) {
@@ -429,85 +444,6 @@ void LightingRendermode::doSimpleLight(RGBAImage& image, const mc::BlockPos& pos
 			if (pixel != 0)
 				pixel = rgba_multiply(pixel, factor, factor, factor, 255);
 		}
-	}
-}
-
-/**
- * Applies the smooth lighting to a block.
- */
-void LightingRendermode::doSmoothLight(RGBAImage& image, const mc::BlockPos& pos,
-		uint16_t id, uint16_t data) {
-	// check if lighting faces are visible
-	bool light_left = true, light_right = true, light_top = true;
-
-
-	bool water = (id == 8 || id == 9) && (data & util::binary<1111>::value) == 0;
-	
-	if (water || id == 79) {
-		if (data & DATA_WEST)
-			light_left = false;
-		if (data & DATA_SOUTH)
-			light_right = false;
-		if (data & DATA_TOP)
-			light_top = false;
-	}
-
-	mc::Block block;
-	if (light_left) {
-		block = state.getBlock(pos + mc::DIR_WEST);
-		light_left = block.id == 0 || state.images->isBlockTransparent(block.id, block.data);
-	}
-	if (light_right) {
-		block = state.getBlock(pos + mc::DIR_SOUTH);
-		light_right = block.id == 0 || state.images->isBlockTransparent(block.id, block.data);
-	}
-	if (light_top) {
-		block = state.getBlock(pos + mc::DIR_TOP);
-		light_top = block.id == 0 || state.images->isBlockTransparent(block.id, block.data);
-	}
-
-	// do the lighting
-	if (light_left)
-		lightLeft(image, getCornerColors(pos, CORNERS_LEFT));
-
-	if (light_right)
-		lightRight(image, getCornerColors(pos, CORNERS_RIGHT));
-
-	if (light_top)
-		lightTop(image, getCornerColors(pos, CORNERS_TOP));
-}
-
-bool LightingRendermode::isHidden(const mc::BlockPos& pos,
-		uint16_t id, uint16_t data) {
-	return false;
-}
-
-void LightingRendermode::draw(RGBAImage& image, const mc::BlockPos& pos,
-		uint16_t id, uint16_t data) {
-	bool transparent = state.images->isBlockTransparent(id, data);
-
-	bool water = (id == 8 || id == 9) && (data & util::binary<1111>::value) == 0;
-	int texture_size = image.getHeight() / 2;
-
-	if (id == 78 && (data & util::binary<1111>::value) == 0) {
-		// flat snow gets also smooth lighting
-		int height = ((data & util::binary<1111>::value) + 1) / 8.0 * texture_size;
-		lightTop(image, getCornerColors(pos, CORNERS_BOTTOM),
-				texture_size - height);
-		lightLeft(image, getCornerColors(pos, CORNERS_LEFT),
-				texture_size - height, texture_size);
-		lightRight(image, getCornerColors(pos, CORNERS_RIGHT),
-				texture_size - height, texture_size);
-	} else if (id == 44 || id == 126) {
-		// slabs and wooden slabs
-		doSlabLight(image, pos, id, data);
-	} else if (transparent && !water && id != 79) {
-		// transparent blocks (except full water blocks and ice)
-		// get simple lighting, they are completely lighted, not per face
-		doSimpleLight(image, pos, id, data);
-	} else {
-		// do smooth lighting for all other blocks
-		doSmoothLight(image, pos, id, data);
 	}
 }
 

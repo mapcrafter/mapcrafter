@@ -20,34 +20,57 @@
 #ifndef TILERENDERWORKER_H_
 #define TILERENDERWORKER_H_
 
-#include "blockimages.h"
-#include "tilerenderer.h"
-#include "tileset.h"
 #include "../config/mapcrafterconfig.h"
+#include "../config/configsections/map.h"
+#include "../config/configsections/world.h"
 #include "../mc/world.h"
-#include "../mc/worldcache.h"
-#include "../renderer/blockimages.h"
-#include "../renderer/tileset.h"
-#include "../util.h"
 
-#include <memory> // shared_ptr
+#include <memory>
 #include <set>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
 
 namespace mapcrafter {
+
+namespace mc {
+class WorldCache;
+}
+
 namespace renderer {
+
+class BlockImages;
+class RenderMode;
+class RenderView;
+class RGBAImage;
+class TilePath;
+class TileRenderer;
+class TileSet;
 
 struct RenderContext {
 	fs::path output_dir;
 	config::Color background_color;
 	config::WorldSection world_config;
 	config::MapSection map_config;
-	std::shared_ptr<renderer::BlockImages> block_images;
 
+	RenderView* render_view;
+	BlockImages* block_images;
+	TileSet* tile_set;
 	mc::World world;
-	std::shared_ptr<renderer::TileSet> tile_set;
+
+	std::shared_ptr<mc::WorldCache> world_cache;
+	std::shared_ptr<RenderMode> render_mode;
+	std::shared_ptr<TileRenderer> tile_renderer;
+
+	/**
+	 * Creates/initializes the world cache and tile renderer with the render view and
+	 * other supplied objects (block images, tile set, world).
+	 *
+	 * This is method is already called in the render management code, but you can copy
+	 * the render context and call this method again if you need multiple tile renderers
+	 * (for multithreading for example).
+	 */
+	void initializeTileRenderer();
 };
 
 struct RenderWork {
@@ -71,8 +94,7 @@ public:
 	void setRenderWork(const RenderWork& work);
 	const RenderWorkResult& getRenderWorkResult() const;
 
-	void setProgressHandler(std::shared_ptr<util::IProgressHandler> progress,
-			std::shared_ptr<bool> finished = std::shared_ptr<bool>(new bool));
+	void setProgressHandler(util::IProgressHandler* progress);
 
 	void saveTile(const TilePath& tile, const RGBAImage& image);
 	void renderRecursive(const TilePath& path, RGBAImage& image);
@@ -85,10 +107,7 @@ private:
 	RenderWorkResult render_work_result;
 
 	// progress handler
-	std::shared_ptr<util::IProgressHandler> progress;
-	std::shared_ptr<bool> finished;
-
-	TileRenderer renderer;
+	util::IProgressHandler* progress;
 };
 
 } /* namespace render */

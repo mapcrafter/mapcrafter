@@ -21,7 +21,6 @@
 #define SINGLETHREAD_H_
 
 #include "../dispatcher.h"
-#include "../../renderer/tilerenderworker.h"
 
 namespace mapcrafter {
 namespace thread {
@@ -32,7 +31,7 @@ public:
 	virtual ~SingleThreadDispatcher();
 
 	virtual void dispatch(const renderer::RenderContext& context,
-			std::shared_ptr<util::IProgressHandler> progress);
+			util::IProgressHandler* progress);
 };
 
 } /* namespace thread */

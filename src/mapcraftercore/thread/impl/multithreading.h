@@ -25,7 +25,6 @@
 #include "../workermanager.h"
 #include "../../compat/thread.h"
 #include "../../renderer/tilerenderworker.h"
-#include "../../util.h"
 
 #include <set>
 #include <thread>
@@ -76,7 +75,7 @@ public:
 	virtual ~MultiThreadingDispatcher();
 
 	virtual void dispatch(const renderer::RenderContext& context,
-			std::shared_ptr<util::IProgressHandler> progress);
+			util::IProgressHandler* progress);
 private:
 	int thread_count;
 

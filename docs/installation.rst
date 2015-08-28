@@ -152,25 +152,38 @@ from the `AUR <https://aur.archlinux.org/packages/mapcrafter-git/>`_.
 Debian Packages
 ===============
 
-If you are running Debian, Ubuntu or another Debian-like operating system you
-can use the already built Mapcrafter Debian packages.  This is the recommended
-practice though you can easily upgrade Mapcrafter everytime to the newest
-stable version.
+If you are running Debian or Ubuntu, you can use the already built Mapcrafter
+Debian packages.
 
-Create the file ``/etc/apt/sources.list.d/mapcrafter.list`` with the 
-following content::
+If you are using Debian, run the following commands in a shell::
 
-    deb http://mapcrafter.org/debian ./
+    echo "deb http://packages.mapcrafter.org/debian $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/mapcrafter.list
+    sudo wget -O /etc/apt/trusted.gpg.d/mapcrafter.gpg http://packages.mapcrafter.org/debian/keyring.gpg
 
-Run ``sudo apt-get update`` to update your sources. If you get an error
-concerning GPG keys, you have to import the GPG key of the Mapcrafter project
-manually::
 
-    gpg --keyserver pgp.mit.edu --recv 0xb6f77e28fe4f4eac && gpg --export --armor 0xb6f77e28fe4f4eac | sudo apt-key add -
+If you are using Ubuntu, run the following commands in a shell::
 
-Now you can run ``sudo apt-get install mapcrafter`` to install Mapcrafter.
-During this process it will automatically download a temporary Minecraft Jar
-file and unpack required texture files.
+    echo "deb http://packages.mapcrafter.org/ubuntu $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/mapcrafter.list
+    sudo wget -O /etc/apt/trusted.gpg.d/mapcrafter.gpg http://packages.mapcrafter.org/ubuntu/keyring.gpg
+
+The commands above add the Mapcrafter Debian package repository to your package
+manager and import the public key which was used to sign the packages.
+
+Now you can run ``sudo apt-get update`` to tell your package manager about the
+sources and ``sudo apt-get install mapcrafter`` to install Mapcrafter.  During
+this process it will automatically download a temporary Minecraft Jar file and
+unpack required texture files.
+
+Ubuntu Vivid Vervet (15.04), Trusty Tahr (14.04 LTS), Precise Pangolin (12.04
+LTS), Debian Jessie (stable) and Wheezy (oldstable) i386/amd64 are supported at
+the moment. You have to build Mapcrafter from source if you are using another
+distribution / version. If you think that there is an important distribution /
+version missing, please contact me.
+
+There is also a "nightly channel" of packages built every night from the newest
+source code (``nightly`` instead of ``main`` sources list file). Those packages
+are primarily built to make sure that no build problems on the different
+platforms arise while doing development work on Mapcrafter.
 
 .. _installation_windows:
 

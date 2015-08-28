@@ -53,6 +53,7 @@ std::ostream& operator<<(std::ostream& out, Dimension dimension);
  * This just assumes that there are maximal 8096 regions on x/z axis, this are
  * all in all 8096^2=67108864 regions. I think this should be enough for now.
  */
+// TODO maybe a better, not so trivial hash function?
 struct hash_function {
 	long operator()(const RegionPos& region) const {
 		return (region.x+4096) * 2048 + region.z + 4096;

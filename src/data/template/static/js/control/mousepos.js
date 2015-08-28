@@ -22,4 +22,4 @@ MousePosControl.prototype.create = function(wrapper) {
 	this.ui.lmap.on("mousedown", updatePos);
 	
 	wrapper.appendChild(text);
-}
+};

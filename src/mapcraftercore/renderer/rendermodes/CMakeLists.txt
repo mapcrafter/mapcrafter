@@ -1,14 +1,20 @@
 set(SOURCE
     ${SOURCE}
-    "${CMAKE_CURRENT_SOURCE_DIR}/base.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/cave.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/heightoverlay.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/lighting.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/overlay.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/slimeoverlay.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/spawnoverlay.cpp"
     PARENT_SCOPE
 )
 set(HEADERS
     ${HEADERS}
-    "${CMAKE_CURRENT_SOURCE_DIR}/base.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/cave.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/heightoverlay.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/lighting.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/overlay.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/slimeoverlay.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/spawnoverlay.h"
     PARENT_SCOPE
 )

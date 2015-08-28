@@ -19,10 +19,13 @@
 
 #include "progress.h"
 
-#include "../util.h"
+#include "logging.h"
+#include "other.h"
+#include "../compat/nullptr.h"
 
 #include <iomanip>
 #include <iostream>
+#include <cmath>
 #include <cstdio>
 #include <ctime>
 #if defined(HAVE_SYS_IOCTL_H) && defined(HAVE_UNISTD_H)
@@ -75,7 +78,7 @@ MultiplexingProgressHandler::~MultiplexingProgressHandler() {
 }
 
 void MultiplexingProgressHandler::addHandler(IProgressHandler* handler) {
-	handlers.push_back(std::shared_ptr<IProgressHandler>(handler));
+	handlers.push_back(handler);
 }
 
 int MultiplexingProgressHandler::getMax() const {

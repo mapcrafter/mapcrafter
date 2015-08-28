@@ -18,6 +18,8 @@
  */
 
 #include "biomes.h"
+
+#include "image.h"
 #include "../util.h"
 
 #include <cmath>

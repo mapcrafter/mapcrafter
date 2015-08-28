@@ -10,7 +10,8 @@ MapSelectControl.prototype.create = function(wrapper) {
 	var select = document.createElement("select");
 	select.setAttribute("id", "map-select");
 	
-	for(var type in this.ui.getConfig()) {
+	for(var i in this.ui.getMapConfigsOrder()) {
+		var type = this.ui.getMapConfigsOrder()[i];
 		var option = document.createElement("option");
 		option.innerHTML = this.ui.getMapConfig(type).name;
 		option.setAttribute("value", type);

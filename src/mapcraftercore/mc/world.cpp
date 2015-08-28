@@ -19,8 +19,6 @@
 
 #include "world.h"
 
-#include "../util.h"
-
 #include <cmath>
 #include <cstdio>
 #include <fstream>

@@ -10,6 +10,7 @@ set(SOURCE
 set(HEADERS
     ${HEADERS}
     "${CMAKE_CURRENT_SOURCE_DIR}/filesystem.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/json.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/logging.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/math.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/other.h"

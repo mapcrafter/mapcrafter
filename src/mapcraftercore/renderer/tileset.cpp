@@ -19,8 +19,9 @@
 
 #include "tileset.h"
 
+#include "../mc/chunk.h"
 #include "../mc/pos.h"
-#include "../util.h"
+#include "../mc/world.h"
 
 #include <algorithm>
 #include <cmath>
@@ -82,11 +83,12 @@ bool TilePos::operator<(const TilePos& other) const {
 	return x < other.x;
 }
 
-TilePath::TilePath() {
+std::ostream& operator<<(std::ostream& stream, const TilePos& tile) {
+	stream << tile.getX() << ":" << tile.getY();
+	return stream;
 }
 
-TilePath::TilePath(const std::vector<int>& path)
-	: path(path) {
+TilePath::TilePath() {
 }
 
 TilePath::~TilePath() {
@@ -101,7 +103,7 @@ const std::vector<int>& TilePath::getPath() const {
 }
 
 TilePath TilePath::parent() const {
-	TilePath copy(path);
+	TilePath copy(*this);
 	copy.path.pop_back();
 	return copy;
 }
@@ -126,6 +128,38 @@ TilePos TilePath::getTilePos() const {
 		radius /= 2;
 	}
 	return TilePos(x, y);
+}
+
+TilePath& TilePath::operator+=(int node) {
+	path.push_back(node);
+	return *this;
+}
+
+TilePath TilePath::operator+(int node) const {
+	return TilePath(*this) += node;
+}
+
+bool TilePath::operator==(const TilePath& other) const {
+	return path == other.path;
+}
+
+bool TilePath::operator<(const TilePath& other) const {
+	return path < other.path;
+}
+
+std::ostream& operator<<(std::ostream& stream, const TilePath& path) {
+	stream << path.toString();
+	return stream;
+}
+
+std::string TilePath::toString() const {
+	std::stringstream ss;
+	for (size_t i = 0; i < path.size(); i++) {
+		ss << path[i];
+		if (i != path.size() - 1)
+			ss << "/";
+	}
+	return ss.str();
 }
 
 TilePath TilePath::byTilePos(const TilePos& tile, int depth) {
@@ -185,99 +219,11 @@ TilePath TilePath::byTilePos(const TilePos& tile, int depth) {
 	return path;
 }
 
-TilePath& TilePath::operator+=(int node) {
-	path.push_back(node);
-	return *this;
-}
-
-TilePath TilePath::operator+(int node) const {
-	TilePath copy(path);
-	copy.path.push_back(node);
-	return copy;
-}
-
-bool TilePath::operator==(const TilePath& other) const {
-	return path == other.path;
-}
-
-bool TilePath::operator<(const TilePath& other) const {
-	return path < other.path;
-}
-
-std::ostream& operator<<(std::ostream& stream, const TilePos& tile) {
-	stream << tile.getX() << ":" << tile.getY();
-	return stream;
-}
-
-std::ostream& operator<<(std::ostream& stream, const TilePath& path) {
-	stream << path.toString();
-	return stream;
-}
-
-std::string TilePath::toString() const {
-	std::stringstream ss;
-	for (size_t i = 0; i < path.size(); i++) {
-		ss << path[i];
-		if (i != path.size() - 1)
-			ss << "/";
-	}
-	return ss.str();
-}
-
-TileSet::TileSet()
-	: min_depth(0), depth(0) {
-}
-
-TileSet::TileSet(const mc::World& world)
-	: min_depth(0), depth(0) {
-	scan(world);
+TileSet::TileSet(int tile_width)
+	: tile_width(tile_width), min_depth(0), depth(0) {
 }
 
 TileSet::~TileSet() {
-}
-
-/**
- * Calculates the tiles a row and column covers.
- */
-void addRowColTiles(int row, int col, std::set<TilePos>& tiles) {
-	// the tiles have are 2 * TILE_WIDTH columns wide
-	// and 4 * TILE_WIDTH row tall
-	// calculate the approximate position of the tile
-	int x = col / (2 * TILE_WIDTH);
-	int y = row / (4 * TILE_WIDTH);
-
-	// add this tile
-	tiles.insert(TilePos(x, y));
-
-	// check if this row/col is on the border of two tiles
-	bool edge_col = col % (2 * TILE_WIDTH) == 0;
-	bool edge_row = row % (4 * TILE_WIDTH) == 0;
-	// if yes, we have to add the neighbor tiles
-	if (edge_col)
-		tiles.insert(TilePos(x-1, y));
-	if (edge_row)
-		tiles.insert(TilePos(x, y-1));
-	if (edge_col && edge_row)
-		tiles.insert(TilePos(x-1, y-1));
-}
-
-/**
- * This function calculates the tiles a chunk covers.
- */
-void getChunkTiles(const mc::ChunkPos& chunk, std::set<TilePos>& tiles) {
-	// at first get row and column of the top of the chunk
-	int row = chunk.getRow();
-	int col = chunk.getCol();
-
-	// TODO fix this for different TILE_WIDTH
-
-	// then we go through all sections of the chunk plus one on the bottom side
-	// and add the tiles the individual sections cover,
-
-	// plus one on the bottom side because with chunk section is here
-	// only the top of a chunk section meant
-	for (int i = 0; i <= mc::CHUNK_HEIGHT; i++)
-		addRowColTiles(row + 2*i, col, tiles);
 }
 
 void TileSet::findRenderTiles(const mc::World& world, bool auto_center,
@@ -305,7 +251,7 @@ void TileSet::findRenderTiles(const mc::World& world, bool auto_center,
 
 			// now get all tiles of the chunk
 			std::set<TilePos> tiles;
-			getChunkTiles(*chunk_it, tiles);
+			mapChunkToTiles(*chunk_it, tiles);
 			for (std::set<TilePos>::const_iterator tile_it = tiles.begin();
 			        tile_it != tiles.end(); ++tile_it) {
 
@@ -415,6 +361,18 @@ void TileSet::scan(const mc::World& world, bool auto_center, TilePos& tile_offse
 	setDepth(min_depth);
 }
 
+void TileSet::resetRequired() {
+	required_render_tiles.clear();
+
+	for (auto it = tile_timestamps.begin(); it != tile_timestamps.end(); ++it)
+		required_render_tiles.insert(it->first);
+
+	required_composite_tiles.clear();
+	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
+
+	updateContainingRenderTiles();
+}
+
 void TileSet::scanRequiredByTimestamp(int last_change) {
 	required_render_tiles.clear();
 
@@ -446,6 +404,10 @@ void TileSet::scanRequiredByFiletimes(const fs::path& output_dir,
 	findRequiredCompositeTiles(required_render_tiles, required_composite_tiles);
 
 	updateContainingRenderTiles();
+}
+
+int TileSet::getTileWidth() const {
+	return tile_width;
 }
 
 int TileSet::getMinDepth() const {

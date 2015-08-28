@@ -183,6 +183,9 @@ Here are the available options for the markers:
 
     This option may be used independently of the marker icon override.
 
+Custom Leaflet Marker Objects
+=============================
+
 Furthermore you can customize your markers by specifying a function which
 creates the actual Leaflet marker objects with the marker data. This function
 is called for every marker in the marker group and should return a marker-like

@@ -20,9 +20,8 @@
 #ifndef CONFIGPARSER_H_
 #define CONFIGPARSER_H_
 
+#include "iniconfig.h"
 #include "validation.h"
-#include "sections/base.h"
-#include "../util.h"
 
 #include <map>
 #include <set>
@@ -31,6 +30,19 @@
 
 namespace mapcrafter {
 namespace config {
+
+/**
+ * Generic section object factory. Just creates an instance of the specified type
+ * without any special options.
+ *
+ * All section factories must have a constant operator() that returns a new instance of
+ * the section type.
+ */
+template <typename T>
+class GenericSectionFactory {
+public:
+	T operator()() const;
+};
 
 /**
  * A class to parse and validate arbitrary configuration files.
@@ -92,6 +104,11 @@ private:
 	// set of parsed section types
 	std::set<std::string> parsed_section_types;
 };
+
+template <typename T>
+T GenericSectionFactory<T>::operator()() const {
+	return T();
+}
 
 template <typename T>
 void ConfigParser::parseRootSection(T& section) {

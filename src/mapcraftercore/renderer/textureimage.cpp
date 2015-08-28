@@ -24,17 +24,18 @@
 namespace mapcrafter {
 namespace renderer {
 
-TextureImage::TextureImage() {
+TextureImage::TextureImage()
+	: frame_count(1) {
 }
 
 TextureImage::TextureImage(const std::string& name)
-	: name(name) {
+	: name(name), frame_count(1) {
 }
 
 TextureImage::~TextureImage() {
 }
 
-bool TextureImage::load(const std::string& path, int size) {
+bool TextureImage::load(const std::string& path, int size, int blur, double water_opacity) {
 	// at first try to load the texture file
 	if (!original.readPNG(path + "/" + name + ".png")) {
 		// make sure the texture image does not have zero dimension
@@ -50,7 +51,7 @@ bool TextureImage::load(const std::string& path, int size) {
 		LOG(WARNING) << "Texture '" << name << "' has odd size: " << original.getWidth()
 				<< "x" << original.getHeight();
 	}
-	int frames = original.getHeight() / original.getWidth();
+	frame_count = original.getHeight() / original.getWidth();
 
 	// now resize the texture image
 	// resize some textures with the nearest neighbor interpolation:
@@ -62,14 +63,38 @@ bool TextureImage::load(const std::string& path, int size) {
 	// style of the textures and prevents fuzziness when resizing
 	if ((util::startswith(name, "leaves") && !util::endswith(name, "opaque"))
 		|| util::startswith(name, "redstone_dust"))
-		original.resizeSimple(size, size * frames, original_resized);
+		original.resize(original_resized, size, size * frame_count, InterpolationType::NEAREST);
 	else
-		original.resizeAuto(size, size * frames, original_resized);
+		original.resize(original_resized, size, size * frame_count);
+
+	int width = original_resized.getWidth();
+	int height = original_resized.getHeight();
+	// apply a blur to the texture if wanted
+	// this is useful if you use small texture sizes (< 6 maybe) to prevent grainy textures
+	if (blur != 0) {
+		for (int i = 0; i < frame_count; i++) {
+			RGBAImage frame;
+			// process every frame individually
+			original_resized.clip(0, width * i, width, width).blur(frame, blur);
+			original_resized.simpleBlit(frame, 0, width * i);
+		}
+	}
+
+	// apply opacity factor to water textures
+	if (util::startswith(name, "water_") && water_opacity != 1.0) {
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				RGBAPixel& pixel = original_resized.pixel(x, y);
+				uint8_t alpha = std::min(255.0, rgba_alpha(pixel) * water_opacity);
+				pixel = rgba(rgba_red(pixel), rgba_green(pixel), rgba_blue(pixel), alpha);
+			}
+		}
+	}
 
 	// assign actual texture to parent RGBAImage object
 	// uses first frame if this is an animated texture
 	this->setSize(size, size);
-	this->simpleblit(getFrame(0), 0, 0);
+	this->simpleAlphaBlit(getFrame(0), 0, 0);
 	return true;
 }
 
@@ -83,6 +108,10 @@ const RGBAImage& TextureImage::getOriginal() const {
 
 bool TextureImage::isAnimated() const {
 	return original.getWidth() < original.getHeight();
+}
+
+int TextureImage::getFrameCount() const {
+	return frame_count;
 }
 
 RGBAImage TextureImage::getFrame(int frame) const {

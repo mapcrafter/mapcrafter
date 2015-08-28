@@ -17,7 +17,9 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../mapcraftercore/renderer/blockimages.h"
+#include "../mapcraftercore/renderer/renderviews/isometric/blockimages.h"
+#include "../mapcraftercore/renderer/renderviews/topdown/blockimages.h"
+#include "../mapcraftercore/util.h"
 
 #include <iostream>
 #include <string>
@@ -28,9 +30,9 @@ namespace po = boost::program_options;
 using namespace mapcrafter::renderer;
 
 int main(int argc, char **argv) {
-	std::string texture_dir;
-	std::string output_file;
-	int texture_size;
+	std::string texture_dir, output_file, render_view;
+	int texture_size, texture_blur;
+	double water_opacity;
 
 	po::options_description all("Allowed options");
 	all.add_options()
@@ -40,8 +42,14 @@ int main(int argc, char **argv) {
 			"the path to the textures (required)")
 		("output-image,o", po::value<std::string>(&output_file),
 			"the path to the output image (default: blocks.png)")
+		("render-view,r", po::value<std::string>(&render_view),
+			"the render view to generate block images for (default: 'isometric')")
 		("texture-size,t", po::value<int>(&texture_size),
-			"the texture size used to generate the blocks (default: 16)");
+			"the texture size used to generate the blocks (default: 16)")
+		("texture-blur,b", po::value<int>(&texture_blur),
+			"the texture blur used to generate the blocks (default: 0)")
+		("water-opacity,w", po::value<double>(&water_opacity),
+			"have a look on the docs on your own! I'm too lazy right now!");
 
 	po::variables_map vm;
 	try {
@@ -68,15 +76,37 @@ int main(int argc, char **argv) {
 
 	if (!vm.count("output-image"))
 		output_file = "blocks.png";
+	if (!vm.count("render-view"))
+		render_view = "isometric";
+	else if (render_view != "isometric" && render_view != "topdown") {
+		std::cerr << "Invalid render view '" << render_view << "'!" << std::endl;
+		std::cerr << "Render view must be 'isometric' or 'topdown'!" << std::endl;
+		return 1;
+	}
 	if (!vm.count("texture-size"))
 		texture_size = 16;
+	if (!vm.count("texture-blur"))
+		texture_blur = 0;
+	if (!vm.count("water-opacity"))
+		water_opacity = 1.0;
 
-	BlockImages images;
-	images.setSettings(texture_size, 0, true, true, "");
-	if(images.loadAll(texture_dir)) {
-		images.saveBlocks(output_file);
-		return 0;
+	TextureResources resources;
+	if (!resources.loadTextures(texture_dir, texture_size, texture_blur, water_opacity))
+		return 1;
+
+	BlockImages* images;
+	if (render_view == "isometric") {
+		IsometricBlockImages* isometric_images = new IsometricBlockImages();
+		isometric_images->setBlockSideDarkening(0.75, 0.6);
+		images = isometric_images;
+	} else {
+		images = new TopdownBlockImages();
 	}
+	images->setRotation(0);
+	images->setRenderSpecialBlocks(true, true);
+	images->generateBlocks(resources);
+	if (!images->exportBlocks().writePNG(output_file))
+		LOG(ERROR) << "Unable to write '" << output_file << "'!";
 
-	return 1;
+	return 0;
 }

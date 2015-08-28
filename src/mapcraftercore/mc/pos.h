@@ -90,12 +90,14 @@ public:
 	int getRow() const;
 	int getCol() const;
 
+	bool operator==(const BlockPos& other) const;
+	bool operator!=(const BlockPos& other) const;
+	bool operator<(const BlockPos& other) const;
+
 	BlockPos& operator+=(const BlockPos& p);
 	BlockPos& operator-=(const BlockPos& p);
 	BlockPos operator+(const BlockPos& p2) const;
 	BlockPos operator-(const BlockPos& p2) const;
-
-	bool operator<(const BlockPos& other) const;
 };
 
 extern const mc::BlockPos DIR_NORTH, DIR_SOUTH, DIR_EAST, DIR_WEST, DIR_TOP, DIR_BOTTOM;
