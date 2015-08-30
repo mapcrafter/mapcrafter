@@ -319,23 +319,22 @@ void TopdownBlockImages::createStandingSign() { // id 63
 	RGBAImage sign (texture_size, texture_size);
 	sign.alphaBlit(texture, 0, (texture_size - w) / 2);
 
-	// TODO proper rotation!
-	setBlockImage(63, 0, sign.rotate(2)); // south
-	setBlockImage(63, 1, sign.rotate(2)); // south-southwest
-	setBlockImage(63, 2, sign.rotate(2)); // southwest
-	setBlockImage(63, 3, sign.rotate(3)); // west-southwest
-	setBlockImage(63, 4, sign.rotate(3)); // west
-	setBlockImage(63, 5, sign.rotate(3)); // west-northwest
-	setBlockImage(63, 6, sign); // northwest
-	setBlockImage(63, 7, sign); // north-northwest
-	setBlockImage(63, 8, sign); // north
-	setBlockImage(63, 9, sign); // north-northeast
-	setBlockImage(63, 10, sign); // northeast
-	setBlockImage(63, 11, sign.rotate(1)); // east-northeast
-	setBlockImage(63, 12, sign.rotate(1)); // east
-	setBlockImage(63, 13, sign.rotate(1)); // east-southeast
-	setBlockImage(63, 14, sign.rotate(2)); // southeast
-	setBlockImage(63, 15, sign.rotate(2)); // south-southeast
+	setBlockImage(63, 0, RGBAImage(sign).rotateByShear(180)); // south
+	setBlockImage(63, 1, RGBAImage(sign).rotateByShear(157.5)); // south-southwest
+	setBlockImage(63, 2, RGBAImage(sign).rotateByShear(135)); // southwest
+	setBlockImage(63, 3, RGBAImage(sign).rotateByShear(112.5)); // west-southwest
+	setBlockImage(63, 4, RGBAImage(sign).rotateByShear(90)); // west
+	setBlockImage(63, 5, RGBAImage(sign).rotateByShear(67.5)); // west-northwest
+	setBlockImage(63, 6, RGBAImage(sign).rotateByShear(45)); // northwest
+	setBlockImage(63, 7, RGBAImage(sign).rotateByShear(22.5)); // north-northwest
+	setBlockImage(63, 8, RGBAImage(sign).rotateByShear(0)); // north
+	setBlockImage(63, 9, RGBAImage(sign).rotateByShear(-22.5)); // north-northeast
+	setBlockImage(63, 10, RGBAImage(sign).rotateByShear(-45)); // northeast
+	setBlockImage(63, 11, RGBAImage(sign).rotateByShear(-67.5)); // east-northeast
+	setBlockImage(63, 12, RGBAImage(sign).rotateByShear(-90)); // east
+	setBlockImage(63, 13, RGBAImage(sign).rotateByShear(-112.5)); // east-southeast
+	setBlockImage(63, 14, RGBAImage(sign).rotateByShear(-135)); // southeast
+	setBlockImage(63, 15, RGBAImage(sign).rotateByShear(-157.5)); // south-southeast
 }
 
 void TopdownBlockImages::createDoor(uint16_t id, const RGBAImage& texture_bottom,

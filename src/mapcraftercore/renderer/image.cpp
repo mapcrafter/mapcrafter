@@ -386,6 +386,49 @@ RGBAImage RGBAImage::resize(int width, int height, InterpolationType interpolati
 	return temp;
 }
 
+
+RGBAImage& RGBAImage::shearX(double factor) {
+	for (int y = 0; y < height; y++) {
+		int shear = -(y - height/2) * factor;
+		int start = shear > 0 ? width-1 : 0;
+		int dir = shear > 0 ? -1 : 1;
+		for (int x = start; x >= 0 && x < width; x += dir)
+			setPixel(x, y, getPixel(x - shear, y));
+	}
+	return *this;
+}
+
+RGBAImage& RGBAImage::shearY(double factor) {
+	for (int x = 0; x < width; x++) {
+		int shear = -(x - width/2) * factor;
+		int start = shear > 0 ? height-1 : 0;
+		int dir = shear > 0 ? -1 : 1;
+		for (int y = start; y >= 0 && y < height; y += dir)
+			setPixel(x, y, getPixel(x, y - shear));
+	}
+	return *this;
+}
+
+RGBAImage& RGBAImage::rotateByShear(double degrees) {
+	// some tricks to minimize the broken parts of the image caused by the shearing
+	while (degrees < 0)
+		degrees += 360;
+	while (degrees > 360)
+		degrees -= 360;
+	if (degrees > 90) {
+		int n = degrees / 90;
+		// unfortunately this is not in-place // TODO ?
+		*this = rotate(n);
+		degrees -= n*90;
+	}
+
+	double radians = degrees / 180.0 * M_PI;
+	shearX(-std::tan(radians/2));
+	shearY(std::sin(radians));
+	shearX(-std::tan(radians/2));
+	return *this;
+}
+
 RGBAPixel blurKernel(const RGBAImage& image, int x, int y, int radius) {
 	int r = 0, g = 0, b = 0, a = 0;
 	int count = 0;

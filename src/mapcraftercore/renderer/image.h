@@ -130,6 +130,22 @@ public:
 			InterpolationType interpolation = InterpolationType::AUTO) const;
 
 	/**
+	 * (In-place) Shearing along the x-axis by a specific factor.
+	 */
+	RGBAImage& shearX(double factor);
+
+	/**
+	 * (In-place) Shearing along the y-axis by a specific factor.
+	 */
+	RGBAImage& shearY(double factor);
+
+	/**
+	 * (In-place) Rotation by shearing:
+	 * https://www.ocf.berkeley.edu/~fricke/projects/israel/paeth/rotation_by_shearing.html
+	 */
+	RGBAImage& rotateByShear(double degrees);
+
+	/**
 	 * Applies a simple blur filter to the image. Uses the specified radius for the
 	 * (quadratic) blur effect.
 	 */
