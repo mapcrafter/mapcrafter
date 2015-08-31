@@ -20,10 +20,12 @@
 #ifndef IMAGE_H_
 #define IMAGE_H_
 
-#include <png.h>
-#include <cstdint>
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <math.h> // to be sure M_PI is defined
+
+#include <png.h>
+#include <cstdint>
 #include <string>
 #include <tuple>
 #include <vector>
