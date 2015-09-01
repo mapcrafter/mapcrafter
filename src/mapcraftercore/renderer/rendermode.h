@@ -99,6 +99,7 @@ private:
 	RenderModeRendererType(int type) : type(type) {}
 	
 	int type;
+	std::string name;
 };
 
 /**
@@ -246,13 +247,16 @@ BaseRenderMode<Renderer>::~BaseRenderMode() {
 template <typename Renderer>
 void BaseRenderMode<Renderer>::initialize(const RenderView* render_view, 
 		BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk) {
+	RenderModeRendererType type = Renderer::TYPE;
 	// create the render mode renderer by calling the render view factory method
 	// for this renderer type
-	this->renderer_ptr = render_view->createRenderModeRenderer(Renderer::TYPE);
+	this->renderer_ptr = render_view->createRenderModeRenderer(type);
 	// try to cast it to the right subclass, make sure that works if there is a renderer
 	this->renderer = dynamic_cast<Renderer*>(renderer_ptr);
-	if (Renderer::TYPE != RenderModeRendererType::DUMMY)
+	if (type != RenderModeRendererType::DUMMY) {
+		assert(renderer_ptr);
 		assert(renderer);
+	}
 	this->images = images;
 	this->world = world;
 	this->current_chunk = current_chunk;
