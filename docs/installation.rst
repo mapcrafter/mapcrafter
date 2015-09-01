@@ -190,16 +190,17 @@ platforms arise while doing development work on Mapcrafter.
 Windows
 =======
 
-Mapcrafter on Windows is still a bit experimental, but there are pre-built
-packages on mapcrafter.org:
+You can download prebuilt packages for Windows from mapcrafter.org:
 
 `http://mapcrafter.org/downloads <http://mapcrafter.org/downloads>`_
 
-If you are as crazy as experimental Mapcrafter is on Windows, you can build Mapcrafter
-on Windows on your own. There is a build package for Windows with instructions 
-on GitHub in the mapcrafter-buildfiles repository:
+Mapcrafter for Windows is cross-compiled on Linux using mingw-w64. You can find the
+CMake toolchain files on GitHub if you want to build it on your own:
 
-`https://github.com/mapcrafter/mapcrafter-buildfiles/tree/master/windows <https://github.com/mapcrafter/mapcrafter-buildfiles/tree/master/windows>`_
+`https://github.com/mapcrafter/mapcrafter-buildfiles/tree/master/windows-cross <https://github.com/mapcrafter/mapcrafter-buildfiles/tree/master/windows-cross>`_
+
+Having all the depedencies ready is a bit complicated, that's why I'm using Arch Linux
+which has AUR packages for mingw-w64 and all the required libraries.
 
 .. _resources_textures:
 
