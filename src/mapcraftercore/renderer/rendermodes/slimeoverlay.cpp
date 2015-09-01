@@ -77,12 +77,11 @@ SlimeOverlay::~SlimeOverlay() {
 
 bool SlimeOverlay::isSlimeChunk(const mc::ChunkPos& chunk, long long world_seed) {
 	int32_t chunkx = chunk.x, chunkz = chunk.z;
-	int32_t chunkx = chunk.x, chunkz = chunk.z;
-    long long seed = (world_seed
-        + (long long) (chunkx * chunkx * 0x4c1906)
-        + (long long) (chunkx * 0x5ac0db)
-        + (long long) (chunkz * chunkz) * 0x4307a7LL
-        + (long long) (chunkz * 0x5f24f)) ^ 0x3ad8025f;
+	long long seed = (world_seed
+		+ (long long) (chunkx * chunkx * 0x4c1906)
+		+ (long long) (chunkx * 0x5ac0db)
+		+ (long long) (chunkz * chunkz) * 0x4307a7LL
+		+ (long long) (chunkz * 0x5f24f)) ^ 0x3ad8025f;
 
 	JavaRandom random;
 	random.setSeed(seed);
