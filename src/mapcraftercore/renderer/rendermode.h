@@ -78,11 +78,25 @@ public:
 			uint16_t data) = 0;
 };
 
+#ifdef HAVE_ENUM_CLASS_FORWARD_DECLARATION
+
+enum class RenderModeRendererType {
+	DUMMY,
+	LIGHTING,
+	OVERLAY
+};
+
+#else
+
 /**
  * Types of render mode renderers that are available for render modes.
  *
- * Sorry, I would use an enum class, but gcc 4.4 doesn't allow enum class forward
- * declaration (needed in renderview.h <-> rendermode.h).
+ * THIS IS A TERRIBLE, TERRIBLE WORKAROUND:
+ * 
+ * - Sorry, I would use an enum class, but gcc 4.4 (Ubuntu 12.04) doesn't allow enum
+ *   class forward declaration (needed in renderview.h <-> rendermode.h).
+ * - Also mingw-w64 has a problem with those extern static members, that's why I'm
+ *   using an enum class like usual for other platforms.
  */
 class RenderModeRendererType {
 public:
@@ -100,6 +114,8 @@ private:
 	
 	int type;
 };
+
+#endif
 
 /**
  * Empty class just to have a base class for the rendering part of each render mode.

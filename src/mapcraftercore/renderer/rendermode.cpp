@@ -40,9 +40,13 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace renderer {
 
+#ifndef HAVE_ENUM_CLASS_FORWARD_DECLARATION
+
 const RenderModeRendererType RenderModeRendererType::DUMMY(0);
 const RenderModeRendererType RenderModeRendererType::LIGHTING(1);
 const RenderModeRendererType RenderModeRendererType::OVERLAY(2);
+
+#endif
 
 RenderModeRenderer::~RenderModeRenderer() {
 }

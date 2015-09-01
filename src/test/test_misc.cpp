@@ -17,6 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "../mapcraftercore/renderer/rendermode.h"
 #include "../mapcraftercore/renderer/rendermodes/slimeoverlay.h"
 
 #include <set>
@@ -97,5 +98,18 @@ BOOST_AUTO_TEST_CASE(misc_testSlimeOverlay2) {
 		BOOST_CHECK_MESSAGE(SlimeOverlay::isSlimeChunk(*it, world_seed), *it << " must be a slime chunk!");
 	for (auto it = not_slimes.begin(); it != not_slimes.end(); ++it)
 		BOOST_CHECK_MESSAGE(!SlimeOverlay::isSlimeChunk(*it, world_seed), *it << " must not be a slime chunk!");
+}
+
+BOOST_AUTO_TEST_CASE(misc_renderModeRendererTypeEnum) {
+	BOOST_CHECK(RenderModeRendererType::DUMMY == RenderModeRendererType::DUMMY);
+	BOOST_CHECK(RenderModeRendererType::LIGHTING == RenderModeRendererType::LIGHTING);
+	BOOST_CHECK(RenderModeRendererType::OVERLAY == RenderModeRendererType::OVERLAY);
+
+	BOOST_CHECK(RenderModeRendererType::DUMMY != RenderModeRendererType::LIGHTING);
+	BOOST_CHECK(RenderModeRendererType::DUMMY != RenderModeRendererType::OVERLAY);
+	BOOST_CHECK(RenderModeRendererType::LIGHTING != RenderModeRendererType::DUMMY);
+	BOOST_CHECK(RenderModeRendererType::LIGHTING != RenderModeRendererType::OVERLAY);
+	BOOST_CHECK(RenderModeRendererType::OVERLAY != RenderModeRendererType::DUMMY);
+	BOOST_CHECK(RenderModeRendererType::OVERLAY != RenderModeRendererType::LIGHTING);
 }
 
