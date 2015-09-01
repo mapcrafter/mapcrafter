@@ -84,6 +84,7 @@ public:
  * Sorry, I would use an enum class, but gcc 4.4 doesn't allow enum class forward
  * declaration (needed in renderview.h <-> rendermode.h).
  */
+/*
 class RenderModeRendererType {
 public:
 	RenderModeRendererType(const RenderModeRendererType& type) : type(type.type) {}
@@ -100,6 +101,13 @@ private:
 	
 	int type;
 	std::string name;
+};
+*/
+
+enum class RenderModeRendererType {
+	DUMMY,
+	LIGHTING,
+	OVERLAY
 };
 
 /**

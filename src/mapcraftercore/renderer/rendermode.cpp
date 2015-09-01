@@ -40,9 +40,11 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace renderer {
 
+/*
 const RenderModeRendererType RenderModeRendererType::DUMMY(0);
 const RenderModeRendererType RenderModeRendererType::LIGHTING(1);
 const RenderModeRendererType RenderModeRendererType::OVERLAY(2);
+*/
 
 RenderModeRenderer::~RenderModeRenderer() {
 }
