@@ -76,15 +76,12 @@ SlimeOverlay::~SlimeOverlay() {
 }
 
 bool SlimeOverlay::isSlimeChunk(const mc::ChunkPos& chunk, long long world_seed) {
-	// this seems to work partly
-	// the same as Minecraft Overviewer and that test java code
-	// but sometimes with chunks far away it doesn't work like the online tools?!
-	long chunkx = chunk.x, chunkz = chunk.z;
+	int32_t chunkx = chunk.x, chunkz = chunk.z;
 	long long seed = world_seed
-		+ (chunkx * chunkx * 0x4c1906LL)
-		+ (chunkx * 0x5ac0dbLL)
-		+ (chunkz * chunkz * 0x4307a7LL)
-		+ (chunkz * 0x5f24fLL) ^ 0x3ad8025fLL;
+		+ (long long) (chunkx * chunkx * 0x4c1906)
+		+ (long long) (chunkx * 0x5ac0db)
+		+ (long long) (chunkz * chunkz * 0x4307a7LL)
+		+ (long long)((chunkz * 0x5f24f) ^ 0x3ad8025f);
 
 	JavaRandom random;
 	random.setSeed(seed);
