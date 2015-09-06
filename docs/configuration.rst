@@ -423,7 +423,7 @@ Map Options
     Therefore you can still use it in old configuration files, but Mapcrafter
     will show a warning.
 
-``overlay = slime|spawn``
+``overlay = slime|spawnday|spawnnight``
 
     **Default:** ``none``
 

@@ -68,7 +68,8 @@ renderer::OverlayType as<renderer::OverlayType>(const std::string& from) {
 		return renderer::OverlayType::SPAWNDAY;
 	else if (from == "spawnnight")
 		return renderer::OverlayType::SPAWNNIGHT;
-	throw std::invalid_argument("Must be 'none', 'slime' or 'spawn'!");
+	throw std::invalid_argument("Must be 'none', 'slime', 'spawnday', or "
+			"'spawnnight'!");
 }
 
 }
