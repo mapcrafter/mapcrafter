@@ -145,7 +145,12 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 				}
 
 				render_mode->draw(block, globalpos, id, data);
-				blocks.push_back({block, id, data, globalpos});
+				RenderBlock render_block;
+				render_block.block = block;
+				render_block.id = id;
+				render_block.data = data;
+				render_block.pos = globalpos;
+				blocks.push_back(render_block);
 
 				if (!images->isBlockTransparent(id, data))
 					break;

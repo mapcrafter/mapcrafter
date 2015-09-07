@@ -20,6 +20,8 @@
 #ifndef RENDERVIEW_H_
 #define RENDERVIEW_H_
 
+#include "../config.h"
+
 #include <iostream>
 
 namespace mapcrafter {
@@ -39,7 +41,11 @@ namespace renderer {
 class BlockImages;
 class RenderMode;
 class RenderModeRenderer;
+#ifdef HAVE_ENUM_CLASS_FORWARD_DECLARATION
+enum class RenderModeRendererType;
+#else
 class RenderModeRendererType;
+#endif
 class TileSet;
 class TileRenderer;
 
