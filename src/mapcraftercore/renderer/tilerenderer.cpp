@@ -196,7 +196,7 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		int northdir;
 		// texrot = PyObject_GetAttrString(state->textures, "rotation");
 		// northdir = PyInt_AsLong(texrot);
-		northdir = 0;
+		northdir = world->getWorld().getRotation();
 		uint16_t ancilData = data % 0x7;
 
 		/* fix the rotation value for different northdirections */
@@ -459,11 +459,11 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		bottom = getBlock(pos + mc::DIR_BOTTOM);
 
 		// check if neighbors are opaque
-		if (north.id == 0 || images->isBlockTransparent(north.id, north.data))
+		if (north.id == 0 || (images->isBlockTransparent(north.id, north.data) && !north.isStairs()))
 			data |= EDGE_NORTH;
-		if (east.id == 0 || images->isBlockTransparent(east.id, east.data))
+		if (east.id == 0 || (images->isBlockTransparent(east.id, east.data) && !east.isStairs()))
 			data |= EDGE_EAST;
-		if (bottom.id == 0 || images->isBlockTransparent(bottom.id, bottom.data))
+		if (bottom.id == 0 || (images->isBlockTransparent(bottom.id, bottom.data) && !bottom.isStairs()))
 			data |= EDGE_BOTTOM;
 	}
 

@@ -1107,16 +1107,17 @@ void IsometricBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
 	 */
 
 	// TODO use proper quarter texture
-	// TODO rotation
 
 	for (int i = 0; i < 32; i++) {
 		uint16_t data = i << 2;
+		// whether a quarter is a top quarter
 		bool south_west = data & 0x40;
 		bool south_east = data & 0x20;
 		bool north_east = data & 0x10;
 		bool north_west = data & 0x8;
 		bool upside_down = data & 0x4;
 
+		// create an image of just one quarter
 		RGBAImage quarter_texture = texture.clip(0, 0, texture_size/2, texture_size/2);
 		RGBAImage quarter(getBlockSize()/2, getBlockSize()/2);
 		blitFace(quarter, FACE_TOP, quarter_texture);

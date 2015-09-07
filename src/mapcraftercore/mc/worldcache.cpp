@@ -55,6 +55,10 @@ WorldCache::WorldCache(const World& world)
 		chunkcache[i].used = false;
 }
 
+const World& WorldCache::getWorld() const {
+	return world;
+}
+
 /**
  * Calculates the position of a region position in the cache.
  */

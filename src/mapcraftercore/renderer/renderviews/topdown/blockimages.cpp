@@ -205,45 +205,57 @@ void TopdownBlockImages::createTorch(uint16_t id, const RGBAImage& texture) { //
 
 namespace {
 
-void darken(RGBAImage& texture, bool xfirst, bool yfirst) {
+/**
+ * Darkens a quarter. Used for debugging purposes.
+ */
+/*
+void darken(RGBAImage& texture, bool left, bool top) {
 	int size = texture.getWidth();
 	double intensity = 0.8;
 
-	int xstart = xfirst ? 0 : size/2;
-	int xend = xfirst ? size/2 : size;
-	int ystart = yfirst ? 0 : size/2;
-	int yend = yfirst ? size/2 : size;
+	int xstart = left ? 0 : size/2;
+	int xend = left ? size/2 : size;
+	int ystart = top ? 0 : size/2;
+	int yend = top ? size/2 : size;
 	for (int x = xstart; x < xend; x++) {
 		for (int y = ystart; y < yend; y++) {
 			texture.setPixel(x, y, rgba_multiply(texture.getPixel(x, y), intensity, intensity, intensity));
 		}
 	}
 }
+*/
 
-void darkenStraightH(RGBAImage& block, bool x_first, bool y_first) {
+/**
+ * Draws the shade for a top stair texture you need when you have two of four top quarters.
+ * Horizontal version (shade gradient goes horizontal).
+ */
+void darkenStraightH(RGBAImage& block, bool left, bool top) {
 	int size = block.getWidth();
 	int size_mid = block.getWidth() / 2;
 	double ratio = (double) size / 16;
 	int shadow_width = ratio * 6;
-	// apply a little shadow to the lower side of the stairs
 	for (int i = 0; i <= shadow_width; i++) {
-		// lerp
+		// lerp between 0.7 and 1.0
 		double t = (double) i / shadow_width;
 		double intensity = (1-t)*0.7 + t*1.0;
 		for (int y = 0; y < size; y++) {
-			if (!y_first && y < size_mid)
+			if (!top && y < size_mid)
 				continue;
-			if (y_first && y >= size_mid)
+			if (top && y >= size_mid)
 				break;
-			if (!x_first)
+			if (!left)
 				block.setPixel(size_mid + i, y, rgba_multiply(block.getPixel(size_mid + i, y), intensity, intensity, intensity));
-			if (x_first)
+			if (left)
 				block.setPixel(size_mid - 1 - i, y, rgba_multiply(block.getPixel(size_mid - 1 - i, y), intensity, intensity, intensity));
 		}
 	}
 }
 
-void darkenStraightV(RGBAImage& block, bool x_first, bool y_first) {
+/**
+ * Draws the shade for a top stair texture you need when you have two of four top quarters.
+ * Vertical version (shade gradient goes vertical).
+ */
+void darkenStraightV(RGBAImage& block, bool left, bool top) {
 	int size = block.getWidth();
 	int size_mid = block.getWidth() / 2;
 	double ratio = (double) size / 16;
@@ -254,37 +266,44 @@ void darkenStraightV(RGBAImage& block, bool x_first, bool y_first) {
 		double t = (double) i / shadow_width;
 		double intensity = (1-t)*0.7 + t*1.0;
 		for (int x = 0; x < size; x++) {
-			if (!x_first && x < size_mid)
+			if (!left && x < size_mid)
 				continue;
-			if (x_first && x >= size_mid)
+			if (left && x >= size_mid)
 				break;
-			if (!y_first)
+			if (!top)
 				block.setPixel(x, size_mid + i, rgba_multiply(block.getPixel(x, size_mid + i), intensity, intensity, intensity));
-			if (y_first)
+			if (top)
 				block.setPixel(x, size_mid - 1 - i, rgba_multiply(block.getPixel(x, size_mid - 1 - i), intensity, intensity, intensity));
 		}
 	}
 }
 
-void darkenCircle(RGBAImage& block, bool x_first, bool y_first) {
-	darkenStraightH(block, x_first, y_first);
-	darkenStraightV(block, x_first, y_first);
+
+/**
+ * Draws that circle shadow thing when you have three of four top quarters.
+ */
+void darkenCircle(RGBAImage& block, bool left, bool top) {
+	darkenStraightH(block, left, top);
+	darkenStraightV(block, left, top);
 }
 
-void darkenCircleInverted(RGBAImage& block, bool x_first, bool y_first) {
+/**
+ * Draws that circle shadow thing when you have one of four top quarters.
+ */
+void darkenCircleInverted(RGBAImage& block, bool left, bool top) {
 	int size = block.getWidth();
 	int size_mid = size / 2;
 	double ratio = (double) size / 16;
 	int shadow_width = ratio * 6;
 	for (int x = 0; x < size; x++) {
-		if (!x_first && x < size_mid)
+		if (!left && x < size_mid)
 			continue;
-		if (x_first && x >= size_mid)
+		if (left && x >= size_mid)
 			break;
 		for (int y = 0; y < size; y++) {
-			if (!y_first && y < size_mid)
+			if (!top && y < size_mid)
 				continue;
-			if (y_first && y >= size_mid)
+			if (top && y >= size_mid)
 				break;
 			double d = std::sqrt(std::pow(x - size_mid, 2) + std::pow(y - size_mid, 2));
 			if (d > shadow_width)
@@ -295,24 +314,6 @@ void darkenCircleInverted(RGBAImage& block, bool x_first, bool y_first) {
 			block.setPixel(x, y, rgba_multiply(block.getPixel(x, y), intensity, intensity, intensity));
 		}
 	}
-}
-
-RGBAImage buildStairs(const RGBAImage& texture, bool dir_x, int start, int dir) {
-	RGBAImage stairs = texture;
-	double ratio = (double) texture.getWidth() / 16;
-	int shadow_width = ratio * 6;
-	// apply a little shadow to the lower side of the stairs
-	for (int i = 0; i <= shadow_width; i++) {
-		// lerp
-		double t = (double) i / shadow_width;
-		double intensity = (1-t)*0.7 + t*1.0;
-		for (int j = 0; j < texture.getWidth(); j++) {
-			int x = dir_x ? start + i*dir : j;
-			int y = !dir_x ? start + i*dir : j;
-			stairs.setPixel(x, y, rgba_multiply(stairs.getPixel(x, y), intensity, intensity, intensity));
-		}
-	}
-	return stairs;
 }
 
 }
@@ -336,54 +337,57 @@ void TopdownBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
 	// upside-down stairs
 	setBlockImage(id, 0x4, texture);
 
+	// normal stairs
 	for (int i = 0; i < 16; i++) {
 		uint16_t data = i << 3;
-		bool southwest = data & 0x40;
-		bool southeast = data & 0x20;
-		bool northeast = data & 0x10;
-		bool northwest = data & 0x08;
-		int bottom = ((int) !southwest) + ((int) !southeast) + ((int) !northeast) + ((int) !northwest);
+		// whether a quarter is a top quarter
+		bool south_west = data & 0x40;
+		bool south_east = data & 0x20;
+		bool north_east = data & 0x10;
+		bool north_west = data & 0x8;
+		int bottom_quarters = !south_west + !south_east + !north_east + !north_west;
 
 		RGBAImage block = texture;
-		if (bottom == 1) {
+		// add some simple shadows to show where the top/bottom quarters are
+		if (bottom_quarters == 1) {
 			/*
-			if (!northwest)
+			if (!north_west)
 				darkenCircle(block, true, true);
-			else if (!northeast)
+			else if (!north_east)
 				darkenCircle(block, false, true);
-			else if (!southwest)
+			else if (!south_west)
 				darkenCircle(block, true, false);
 			else
 				darkenCircle(block, false, false);
 			*/
-			darkenCircle(block, !northwest || !southwest, !northwest || !northeast);
-		} else if (bottom == 2) {
-			if (!northwest && !southwest) {
+			darkenCircle(block, !north_west || !south_west, !north_west || !north_east);
+		} else if (bottom_quarters == 2) {
+			if (!north_west && !south_west) {
 				darkenStraightH(block, true, true);
 				darkenStraightH(block, true, false);
-			} else if (!northeast && !southeast) {
+			} else if (!north_east && !south_east) {
 				darkenStraightH(block, false, true);
 				darkenStraightH(block, false, false);
-			} else if (!northwest && !northeast) {
+			} else if (!north_west && !north_east) {
 				darkenStraightV(block, true, true);
 				darkenStraightV(block, false, true);
-			} else if (!southwest && !southwest) {
+			} else if (!south_west && !south_west) {
 				darkenStraightV(block, true, false);
 				darkenStraightV(block, false, false);
 			}
-		} else if (bottom == 3) {
-			if (!southwest && !northeast) {
-				darkenCircleInverted(block, !northwest, !northwest);
-				if (!northwest) {
+		} else /*if (bottom_quarters == 3)*/ {
+			if (!south_west && !north_east) {
+				darkenCircleInverted(block, !north_west, !north_west);
+				if (!north_west) {
 					darkenStraightH(block, true, false);
 					darkenStraightV(block, false, true);
 				} else {
 					darkenStraightV(block, true, false);
 					darkenStraightH(block, false, true);
 				}
-			} else if (!northwest && !southeast) {
-				darkenCircleInverted(block, !southwest, !northeast);
-				if (!southwest) {
+			} else if (!north_west && !south_east) {
+				darkenCircleInverted(block, !south_west, !north_east);
+				if (!south_west) {
 					darkenStraightH(block, true, true);
 					darkenStraightV(block, false, false);
 				} else {
@@ -392,21 +396,9 @@ void TopdownBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
 				}
 			}
 		}
-		setBlockImage(id, data, block);
+		// rotation things are handled by corner stair detection code in tilerenderer.cpp
+		AbstractBlockImages::setBlockImage(id, data, block);
 	}
-	
-	/*
-	// stairs
-	setBlockImage(id, 0, buildStairs(texture_top, true, texture_size / 2 - 1, -1));
-	setBlockImage(id, 1, buildStairs(texture_top, true, texture_size / 2, 1));
-	setBlockImage(id, 2, buildStairs(texture_top, false, texture_size / 2 - 1, -1));
-	setBlockImage(id, 3, buildStairs(texture_top, false, texture_size / 2, 1));
-	// upside-down stairs
-	setBlockImage(id, 4 | 0, texture);
-	setBlockImage(id, 4 | 1, texture);
-	setBlockImage(id, 4 | 2, texture);
-	setBlockImage(id, 4 | 3, texture);
-	*/
 }
 
 void TopdownBlockImages::createStairs(uint16_t id, const RGBAImage& texture) {
