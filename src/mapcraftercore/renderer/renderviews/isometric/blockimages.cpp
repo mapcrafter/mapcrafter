@@ -361,7 +361,12 @@ uint16_t IsometricBlockImages::filterBlockData(uint16_t id, uint16_t data) const
 		return data & (0xff00 | util::binary<1011>::value);
 	else if (id == 51) // fire
 		return 0;
-	else if (id == 60) // farmland
+	else if (id == 53 || id == 67 || id == 108 || id == 109 || id == 114 || id == 128 || id == 134 || id == 135 || id == 136 || id == 156 || id == 163 || id == 164 || id == 180 || id == 203) {
+		// stairs: ignore lower two bits, and if third bit set, then ignore all the remaining bits
+		if (data & 0x4)
+			return 0x4;
+		return data & ~0x3;
+	} else if (id == 60) // farmland
 		return data & 0xff00;
 	else if (id == 64 || id == 71 || (id >= 193 && id <= 197)) // doors
 		return data & util::binary<1111110000>::value;
@@ -1067,29 +1072,82 @@ void IsometricBlockImages::createTorch(uint16_t id, const RGBAImage& texture) { 
 	createItemStyleBlock(id, 6, texture);
 }
 
+namespace {
+
+RGBAImage cutStairTexture(RGBAImage texture, bool topleft, bool topright,
+		bool bottomleft, bool bottomright) {
+	int mid_size = texture.getWidth() / 2;
+	if (topleft)
+		texture.fill(0, 0, 0, mid_size, mid_size);
+	if (topright)
+		texture.fill(0, mid_size, 0, mid_size, mid_size);
+	if (bottomleft)
+		texture.fill(0, 0, mid_size, mid_size, mid_size);
+	if (bottomright)
+		texture.fill(0, mid_size, mid_size, mid_size, mid_size);
+	return texture;
+}
+
+}
+
 void IsometricBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
 		const RGBAImage& texture_top) { // id 53, 67, 108, 109, 114, 128, 134, 135, 136, 180
-	RGBAImage north = buildStairsNorth(texture, texture_top);
-	RGBAImage south = buildStairsSouth(texture, texture_top);
-	RGBAImage east = buildStairsEast(texture, texture_top);
-	RGBAImage west = buildStairsWest(texture, texture_top);
-	rotateImages(north, south, east, west, rotation);
+	// https://github.com/overviewer/Minecraft-Overviewer/blob/master/overviewer_core/src/iterate.c#L454
+	/* 4 ancillary bits will be added to indicate which quarters of the block contain the 
+	 * upper step. Regular stairs will have 2 bits set & corner stairs will have 1 or 3.
+	 *     Southwest quarter is part of the upper step - 0x40
+	 *    / Southeast " - 0x20
+	 *    |/ Northeast " - 0x10
+	 *    ||/ Northwest " - 0x8
+	 *    |||/ flip upside down (Minecraft)
+	 *    ||||/ has North/South alignment (Minecraft)
+	 *    |||||/ ascends North or West, not South or East (Minecraft)
+	 *    ||||||/
+	 *  0b0011011 = Stair ascending north, upside up, with both north quarters filled
+	 */
 
-	setBlockImage(id, 0, east);
-	setBlockImage(id, 1, west);
-	setBlockImage(id, 2, south);
-	setBlockImage(id, 3, north);
+	// TODO use proper quarter texture
+	// TODO rotation
 
-	north = buildUpsideDownStairsNorth(texture, texture_top);
-	south = buildUpsideDownStairsSouth(texture, texture_top);
-	east = buildUpsideDownStairsEast(texture, texture_top);
-	west = buildUpsideDownStairsWest(texture, texture_top);
-	rotateImages(north, south, east, west, rotation);
+	for (int i = 0; i < 32; i++) {
+		uint16_t data = i << 2;
+		bool south_west = data & 0x40;
+		bool south_east = data & 0x20;
+		bool north_east = data & 0x10;
+		bool north_west = data & 0x8;
+		bool upside_down = data & 0x4;
 
-	setBlockImage(id, 0 | 4, east);
-	setBlockImage(id, 1 | 4, west);
-	setBlockImage(id, 2 | 4, south);
-	setBlockImage(id, 3 | 4, north);
+		RGBAImage quarter_texture = texture.clip(0, 0, texture_size/2, texture_size/2);
+		RGBAImage quarter(getBlockSize()/2, getBlockSize()/2);
+		blitFace(quarter, FACE_TOP, quarter_texture);
+		blitFace(quarter, FACE_WEST, quarter_texture, 0, 0, true, dleft, dright);
+		blitFace(quarter, FACE_SOUTH, quarter_texture, 0, 0, true, dleft, dright);
+
+		RGBAImage block(getBlockSize(), getBlockSize());
+		// draw bottom quarters
+		int yoff = texture_size / 2;
+		if (!upside_down || north_east)
+			block.simpleAlphaBlit(quarter, texture_size/2, yoff);
+		if (!upside_down || north_west)
+			block.simpleAlphaBlit(quarter, 0, texture_size/4 + yoff);
+		if (!upside_down || south_east)
+			block.simpleAlphaBlit(quarter, texture_size, texture_size/4 + yoff);
+		if (!upside_down || south_west)
+			block.simpleAlphaBlit(quarter, texture_size/2, texture_size/2 + yoff);
+
+		// draw top quarters
+		yoff = 0;
+		if (upside_down || north_east)
+			block.simpleAlphaBlit(quarter, texture_size/2, 0 + yoff);
+		if (upside_down || north_west)
+			block.simpleAlphaBlit(quarter, 0, texture_size/4 + yoff);
+		if (upside_down || south_east)
+			block.simpleAlphaBlit(quarter, texture_size, texture_size/4 + yoff);
+		if (upside_down || south_west)
+			block.simpleAlphaBlit(quarter, texture_size/2, texture_size/2 + yoff);
+
+		setBlockImage(id, data, block);
+	}
 }
 
 void IsometricBlockImages::createStairs(uint16_t id, const RGBAImage& texture) {
