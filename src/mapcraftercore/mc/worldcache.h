@@ -34,8 +34,8 @@ namespace mc {
  * A block with id/data/biome/lighting data.
  */
 struct Block {
-	Block(uint16_t id = 0, uint16_t data = 0, uint8_t biome = 0,
-			uint8_t block_light = 0, uint8_t sky_light = 15);
+	Block();
+	Block(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 	// which block does this data belong to (set by getBlock-method)
 	mc::BlockPos pos;
@@ -46,6 +46,7 @@ struct Block {
 	int fields_set;
 
 	bool isFullWater() const;
+	bool isStairs() const;
 };
 
 const int GET_ID = 1;

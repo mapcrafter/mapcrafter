@@ -123,6 +123,7 @@ uint16_t getDoorDirectionClosed(uint16_t direction, bool flip) {
  * Checks for a specific block the neighbors and sets extra block data if necessary.
  */
 uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+	mc::Block block(pos, id, data);
 	mc::Block north, south, east, west, top, bottom;
 
 	if (id == 2) { // grass blocks
@@ -131,7 +132,7 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		if (top.id == 78 || top.id == 80)
 			data |= GRASS_SNOW;
 
-	} else if ((id == 8 || id == 9) && data == 0) { // full water blocks
+	} else if (block.isFullWater()) { // full water blocks
 		west = getBlock(pos + mc::DIR_WEST);
 		south = getBlock(pos + mc::DIR_SOUTH);
 		top = getBlock(pos + mc::DIR_TOP);
@@ -145,6 +146,128 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			data |= DATA_WEST;
 		if (!south.isFullWater())
 			data |= DATA_SOUTH;
+	} else if (block.isStairs()) { // stairs
+		// corner stairs... wtf
+		// using corner stair detection code of Minecraft Overviewer for now:
+		// https://github.com/overviewer/Minecraft-Overviewer/blob/master/overviewer_core/src/iterate.c#L454
+		/* 4 ancillary bits will be added to indicate which quarters of the block contain the 
+		 * upper step. Regular stairs will have 2 bits set & corner stairs will have 1 or 3.
+		 *     Southwest quarter is part of the upper step - 0x40
+		 *    / Southeast " - 0x20
+		 *    |/ Northeast " - 0x10
+		 *    ||/ Northwest " - 0x8
+		 *    |||/ flip upside down (Minecraft)
+		 *    ||||/ has North/South alignment (Minecraft)
+		 *    |||||/ ascends North or West, not South or East (Minecraft)
+		 *    ||||||/
+		 *  0b0011011 = Stair ascending north, upside up, with both north quarters filled
+		 */
+
+		/* keep track of whether neighbors are stairs, and their data */
+		unsigned char stairs_base[8];
+		unsigned char neigh_base[8];
+		unsigned char *stairs = stairs_base;
+		unsigned char *neigh = neigh_base;
+
+		/* amount to rotate/roll to get to east, west, south, north */
+		size_t rotations[] = {0,2,3,1};
+
+		/* masks for the filled (ridge) stair quarters: */
+		/* Example: the ridge for an east-ascending stair are the two east quarters */
+		/*                  ascending: east  west south north */
+		unsigned char ridge_mask[] = { 0x30, 0x48, 0x60, 0x18 };
+
+		/* masks for the open (trench) stair quarters: */
+		unsigned char trench_mask[] = { 0x48, 0x30, 0x18, 0x60 };
+
+		/* boat analogy! up the stairs is toward the bow of the boat */
+		/* masks for port and starboard, i.e. left and right sides while ascending: */
+		unsigned char port_mask[] = { 0x18, 0x60, 0x30, 0x48 };
+		unsigned char starboard_mask[] = { 0x60, 0x18, 0x48, 0x30 };
+
+		/* we may need to lock some quarters into place depending on neighbors */
+		unsigned char lock_mask = 0;
+
+		unsigned char repair_rot[] = { 0, 1, 2, 3,  2, 3, 1, 0,  1, 0, 3, 2,  3, 2, 0, 1 };
+
+		/* need to get northdirection of the render */
+		/* TODO: get this just once? store in state? */
+		// PyObject *texrot;
+		int northdir;
+		// texrot = PyObject_GetAttrString(state->textures, "rotation");
+		// northdir = PyInt_AsLong(texrot);
+		northdir = 0;
+		uint16_t ancilData = data % 0x7;
+
+		/* fix the rotation value for different northdirections */
+		#define FIX_ROT(x) (((x) & ~0x3) | repair_rot[((x) & 0x3) | (northdir << 2)])
+		ancilData = FIX_ROT(ancilData);
+
+		/* fill the ancillary bits assuming normal stairs with no corner yet */
+		ancilData |= ridge_mask[ancilData & 0x3];
+
+		/* get block & data for neighbors in this order: east, north, west, south */
+		/* so we can rotate things easily */
+		/*
+		stairs[0] = stairs[4] = is_stairs(get_data(state, BLOCKS, x+1, y, z));
+		stairs[1] = stairs[5] = is_stairs(get_data(state, BLOCKS, x, y, z-1));
+		stairs[2] = stairs[6] = is_stairs(get_data(state, BLOCKS, x-1, y, z));
+		stairs[3] = stairs[7] = is_stairs(get_data(state, BLOCKS, x, y, z+1));
+		neigh[0] = neigh[4] = FIX_ROT(get_data(state, DATA, x+1, y, z));
+		neigh[1] = neigh[5] = FIX_ROT(get_data(state, DATA, x, y, z-1));
+		neigh[2] = neigh[6] = FIX_ROT(get_data(state, DATA, x-1, y, z));
+		neigh[3] = neigh[7] = FIX_ROT(get_data(state, DATA, x, y, z+1));
+		*/
+		int x = pos.x, y = pos.y, z = pos.z;
+		stairs[0] = stairs[4] = getBlock(mc::BlockPos(x+1, z, y)).isStairs();
+		stairs[1] = stairs[5] = getBlock(mc::BlockPos(x, z-1, y)).isStairs();
+		stairs[2] = stairs[6] = getBlock(mc::BlockPos(x-1, z, y)).isStairs();
+		stairs[3] = stairs[7] = getBlock(mc::BlockPos(x, z+1, y)).isStairs();
+		neigh[0] = neigh[4] = FIX_ROT(getBlock(mc::BlockPos(x+1, z, y)).data);
+		neigh[1] = neigh[5] = FIX_ROT(getBlock(mc::BlockPos(x, z-1, y)).data);
+		neigh[2] = neigh[6] = FIX_ROT(getBlock(mc::BlockPos(x-1, z, y)).data);
+		neigh[3] = neigh[7] = FIX_ROT(getBlock(mc::BlockPos(x, z+1, y)).data);
+
+		#undef FIX_ROT
+
+		/* Rotate the neighbors so we only have to worry about one orientation
+		 * No matter which way the boat is facing, the the neighbors will be:
+		 *   0: bow
+		 *   1: port
+		 *   2: stern
+		 *   3: starboard */
+		stairs += rotations[ancilData & 0x3];
+		neigh += rotations[ancilData & 0x3];
+
+		/* Matching neighbor stairs to the sides should prevent cornering on that side */
+		/* If found, set bits in lock_mask to lock the current quarters as they are */
+		if (stairs[1] && (neigh[1] & 0x7) == (ancilData & 0x7)) {
+			/* Neighbor on port side is stairs of the same orientation as me */
+			/* Do NOT allow changing quarters on the port side */
+			lock_mask |= port_mask[ancilData & 0x3];
+		}
+		if (stairs[3] && (neigh[3] & 0x7) == (ancilData & 0x7)) {
+			/* Neighbor on starboard side is stairs of the same orientation as me */
+			/* Do NOT allow changing quarters on the starboard side */
+			lock_mask |= starboard_mask[ancilData & 0x3];
+		}
+
+		/* Make corner stairs -- prefer outside corners like Minecraft */
+		if (stairs[0] && (neigh[0] & 0x4) == (ancilData & 0x4)) {
+			/* neighbor at bow is stairs with same flip */
+			if ((neigh[0] & 0x2) != (ancilData & 0x2)) {
+				/* neighbor is perpendicular, cut a trench, but not where locked */
+				ancilData &= ~trench_mask[neigh[0] & 0x3] | lock_mask;
+			}
+		} else if (stairs[2] && (neigh[2] & 0x4) == (ancilData & 0x4)) {
+			/* neighbor at stern is stairs with same flip */
+			if ((neigh[2] & 0x2) != (ancilData & 0x2)) {
+				/* neighbor is perpendicular, add a ridge, but not where locked */
+				ancilData |= ridge_mask[neigh[2] & 0x3] & ~lock_mask;
+			}
+		}
+
+		data = ancilData;
 	} else if (id == 54 || id == 130 || id == 146) { // chests
 		// at first get all neighbor blocks
 		north = getBlock(pos + mc::DIR_NORTH);

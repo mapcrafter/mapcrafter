@@ -205,6 +205,98 @@ void TopdownBlockImages::createTorch(uint16_t id, const RGBAImage& texture) { //
 
 namespace {
 
+void darken(RGBAImage& texture, bool xfirst, bool yfirst) {
+	int size = texture.getWidth();
+	double intensity = 0.8;
+
+	int xstart = xfirst ? 0 : size/2;
+	int xend = xfirst ? size/2 : size;
+	int ystart = yfirst ? 0 : size/2;
+	int yend = yfirst ? size/2 : size;
+	for (int x = xstart; x < xend; x++) {
+		for (int y = ystart; y < yend; y++) {
+			texture.setPixel(x, y, rgba_multiply(texture.getPixel(x, y), intensity, intensity, intensity));
+		}
+	}
+}
+
+void darkenStraightH(RGBAImage& block, bool x_first, bool y_first) {
+	int size = block.getWidth();
+	int size_mid = block.getWidth() / 2;
+	double ratio = (double) size / 16;
+	int shadow_width = ratio * 6;
+	// apply a little shadow to the lower side of the stairs
+	for (int i = 0; i <= shadow_width; i++) {
+		// lerp
+		double t = (double) i / shadow_width;
+		double intensity = (1-t)*0.7 + t*1.0;
+		for (int y = 0; y < size; y++) {
+			if (!y_first && y < size_mid)
+				continue;
+			if (y_first && y >= size_mid)
+				break;
+			if (!x_first)
+				block.setPixel(size_mid + i, y, rgba_multiply(block.getPixel(size_mid + i, y), intensity, intensity, intensity));
+			if (x_first)
+				block.setPixel(size_mid - 1 - i, y, rgba_multiply(block.getPixel(size_mid - 1 - i, y), intensity, intensity, intensity));
+		}
+	}
+}
+
+void darkenStraightV(RGBAImage& block, bool x_first, bool y_first) {
+	int size = block.getWidth();
+	int size_mid = block.getWidth() / 2;
+	double ratio = (double) size / 16;
+	int shadow_width = ratio * 6;
+	// apply a little shadow to the lower side of the stairs
+	for (int i = 0; i <= shadow_width; i++) {
+		// lerp
+		double t = (double) i / shadow_width;
+		double intensity = (1-t)*0.7 + t*1.0;
+		for (int x = 0; x < size; x++) {
+			if (!x_first && x < size_mid)
+				continue;
+			if (x_first && x >= size_mid)
+				break;
+			if (!y_first)
+				block.setPixel(x, size_mid + i, rgba_multiply(block.getPixel(x, size_mid + i), intensity, intensity, intensity));
+			if (y_first)
+				block.setPixel(x, size_mid - 1 - i, rgba_multiply(block.getPixel(x, size_mid - 1 - i), intensity, intensity, intensity));
+		}
+	}
+}
+
+void darkenCircle(RGBAImage& block, bool x_first, bool y_first) {
+	darkenStraightH(block, x_first, y_first);
+	darkenStraightV(block, x_first, y_first);
+}
+
+void darkenCircleInverted(RGBAImage& block, bool x_first, bool y_first) {
+	int size = block.getWidth();
+	int size_mid = size / 2;
+	double ratio = (double) size / 16;
+	int shadow_width = ratio * 6;
+	for (int x = 0; x < size; x++) {
+		if (!x_first && x < size_mid)
+			continue;
+		if (x_first && x >= size_mid)
+			break;
+		for (int y = 0; y < size; y++) {
+			if (!y_first && y < size_mid)
+				continue;
+			if (y_first && y >= size_mid)
+				break;
+			double d = std::sqrt(std::pow(x - size_mid, 2) + std::pow(y - size_mid, 2));
+			if (d > shadow_width)
+				continue;
+			// lerp
+			double t = (double) d / shadow_width;
+			double intensity = (1-t)*0.7 + t*1.0;
+			block.setPixel(x, y, rgba_multiply(block.getPixel(x, y), intensity, intensity, intensity));
+		}
+	}
+}
+
 RGBAImage buildStairs(const RGBAImage& texture, bool dir_x, int start, int dir) {
 	RGBAImage stairs = texture;
 	double ratio = (double) texture.getWidth() / 16;
@@ -227,6 +319,83 @@ RGBAImage buildStairs(const RGBAImage& texture, bool dir_x, int start, int dir) 
 
 void TopdownBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
 		const RGBAImage& texture_top) { // id 53, 67, 108, 109, 114, 128, 134, 135, 136, 180
+	// https://github.com/overviewer/Minecraft-Overviewer/blob/master/overviewer_core/src/iterate.c#L454
+	/* 4 ancillary bits will be added to indicate which quarters of the block contain the 
+	 * upper step. Regular stairs will have 2 bits set & corner stairs will have 1 or 3.
+	 *     Southwest quarter is part of the upper step - 0x40
+	 *    / Southeast " - 0x20
+	 *    |/ Northeast " - 0x10
+	 *    ||/ Northwest " - 0x8
+	 *    |||/ flip upside down (Minecraft)
+	 *    ||||/ has North/South alignment (Minecraft)
+	 *    |||||/ ascends North or West, not South or East (Minecraft)
+	 *    ||||||/
+	 *  0b0011011 = Stair ascending north, upside up, with both north quarters filled
+	 */
+
+	// upside-down stairs
+	setBlockImage(id, 0x4, texture);
+
+	for (int i = 0; i < 16; i++) {
+		uint16_t data = i << 3;
+		bool southwest = data & 0x40;
+		bool southeast = data & 0x20;
+		bool northeast = data & 0x10;
+		bool northwest = data & 0x08;
+		int bottom = ((int) !southwest) + ((int) !southeast) + ((int) !northeast) + ((int) !northwest);
+
+		RGBAImage block = texture;
+		if (bottom == 1) {
+			/*
+			if (!northwest)
+				darkenCircle(block, true, true);
+			else if (!northeast)
+				darkenCircle(block, false, true);
+			else if (!southwest)
+				darkenCircle(block, true, false);
+			else
+				darkenCircle(block, false, false);
+			*/
+			darkenCircle(block, !northwest || !southwest, !northwest || !northeast);
+		} else if (bottom == 2) {
+			if (!northwest && !southwest) {
+				darkenStraightH(block, true, true);
+				darkenStraightH(block, true, false);
+			} else if (!northeast && !southeast) {
+				darkenStraightH(block, false, true);
+				darkenStraightH(block, false, false);
+			} else if (!northwest && !northeast) {
+				darkenStraightV(block, true, true);
+				darkenStraightV(block, false, true);
+			} else if (!southwest && !southwest) {
+				darkenStraightV(block, true, false);
+				darkenStraightV(block, false, false);
+			}
+		} else if (bottom == 3) {
+			if (!southwest && !northeast) {
+				darkenCircleInverted(block, !northwest, !northwest);
+				if (!northwest) {
+					darkenStraightH(block, true, false);
+					darkenStraightV(block, false, true);
+				} else {
+					darkenStraightV(block, true, false);
+					darkenStraightH(block, false, true);
+				}
+			} else if (!northwest && !southeast) {
+				darkenCircleInverted(block, !southwest, !northeast);
+				if (!southwest) {
+					darkenStraightH(block, true, true);
+					darkenStraightV(block, false, false);
+				} else {
+					darkenStraightV(block, true, true);
+					darkenStraightH(block, false, false);
+				}
+			}
+		}
+		setBlockImage(id, data, block);
+	}
+	
+	/*
 	// stairs
 	setBlockImage(id, 0, buildStairs(texture_top, true, texture_size / 2 - 1, -1));
 	setBlockImage(id, 1, buildStairs(texture_top, true, texture_size / 2, 1));
@@ -237,6 +406,7 @@ void TopdownBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
 	setBlockImage(id, 4 | 1, texture);
 	setBlockImage(id, 4 | 2, texture);
 	setBlockImage(id, 4 | 3, texture);
+	*/
 }
 
 void TopdownBlockImages::createStairs(uint16_t id, const RGBAImage& texture) {
@@ -745,6 +915,12 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & (0xff00 | util::binary<1011>::value);
 	else if (id == 43 || id == 44 || id == 125 || id == 126 || id == 181 || id == 182)
 		return data & ~8;
+	else if (id == 53 || id == 67 || id == 108 || id == 109 || id == 114 || id == 128 || id == 134 || id == 135 || id == 136 || id == 156 || id == 163 || id == 164 || id == 180 || id == 203) {
+		// stairs: ignore lower two bits, and if third bit set, then ignore all the remaining bits
+		if (data & 0x4)
+			return 0x4;
+		return data & ~0x3;
+	}
 	else if (id == 55)
 		// unset unnecessary neighbor information for this render view
 		return data & ~(REDSTONE_TOPNORTH | REDSTONE_TOPSOUTH | REDSTONE_TOPEAST | REDSTONE_TOPWEST);

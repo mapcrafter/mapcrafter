@@ -22,14 +22,22 @@
 namespace mapcrafter {
 namespace mc {
 
-Block::Block(uint16_t id, uint16_t data, uint8_t biome,
-		uint8_t block_light, uint8_t sky_light)
-	: pos(mc::BlockPos(0, 0, 0)), id(id), data(data), biome(biome),
-	  block_light(block_light), sky_light(sky_light), fields_set(0) {
+Block::Block()
+	: Block(mc::BlockPos(0, 0, 0), 0, 0) {
+	fields_set = 0;
+}
+
+Block::Block(const mc::BlockPos& pos, uint16_t id, uint16_t data)
+	: pos(pos), id(id), data(data), biome(0),
+	  block_light(0), sky_light(15), fields_set(GET_ID | GET_DATA) {
 }
 
 bool Block::isFullWater() const {
 	return (id == 8 || id == 9) && data == 0;
+}
+
+bool Block::isStairs() const {
+	return id == 53 || id == 67 || id == 108 || id == 109 || id == 114 || id == 128 || id == 134 || id == 135 || id == 136 || id == 156 || id == 163 || id == 164 || id == 180 || id == 203;
 }
 
 WorldCache::WorldCache() {
