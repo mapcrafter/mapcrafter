@@ -43,8 +43,8 @@ bool CaveRenderMode::isTransparentBlock(const mc::Block& block) const {
 
 bool CaveRenderMode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	mc::BlockPos directions[6] = {
-			mc::DIR_NORTH, mc::DIR_SOUTH, mc::DIR_EAST, mc::DIR_WEST,
-			mc::DIR_TOP, mc::DIR_BOTTOM
+		mc::DIR_NORTH, mc::DIR_SOUTH, mc::DIR_EAST, mc::DIR_WEST,
+		mc::DIR_TOP, mc::DIR_BOTTOM
 	};
 	// check if this block touches sky light
 	for (int i = 0; i < 6; i++) {
@@ -61,7 +61,8 @@ bool CaveRenderMode::isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t dat
 			mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
 	if (id == 8 || id == 9 || top.id == 8 || top.id == 9) {
 		mc::BlockPos p = pos + mc::DIR_TOP;
-		mc::Block block(top.id, top.data, 0, 0, top.sky_light);
+		mc::Block block(pos + mc::DIR_TOP, top.id, top.data);
+		block.sky_light = top.sky_light;
 
 		while (block.id == 8 || block.id == 9) {
 			block = getBlock(p, mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
