@@ -335,7 +335,7 @@ void TopdownBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
 	 */
 
 	// upside-down stairs
-	setBlockImage(id, 0x4, texture);
+	setBlockImage(id, 0x4, texture_top);
 
 	// normal stairs
 	for (int i = 0; i < 16; i++) {
@@ -347,7 +347,7 @@ void TopdownBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
 		bool north_west = data & 0x8;
 		int bottom_quarters = !south_west + !south_east + !north_east + !north_west;
 
-		RGBAImage block = texture;
+		RGBAImage block = texture_top;
 		// add some simple shadows to show where the top/bottom quarters are
 		if (bottom_quarters == 1) {
 			/*

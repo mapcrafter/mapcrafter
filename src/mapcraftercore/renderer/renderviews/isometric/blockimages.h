@@ -280,6 +280,8 @@ protected:
 	void createPiston(uint16_t id, bool sticky); // id 29, 33
 	void createSlabs(uint16_t id, SlabType type, bool double_slabs); // id 43, 44, 125, 126
 	void createTorch(uint16_t, const RGBAImage& texture); // id 50, 75, 76
+	RGBAImage buildStairsQuarter(const RGBAImage& texture_side, const RGBAImage& texture_top,
+			bool top, bool north, bool east) const;
 	void createStairs(uint16_t id, const RGBAImage& texture,
 			const RGBAImage& texture_top); // id 53, 67, 108, 109, 114, 128, 134, 135, 136, 180
 	void createStairs(uint16_t id, const RGBAImage& texture);

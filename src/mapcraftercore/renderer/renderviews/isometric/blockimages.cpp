@@ -1074,20 +1074,30 @@ void IsometricBlockImages::createTorch(uint16_t id, const RGBAImage& texture) { 
 
 namespace {
 
-RGBAImage cutStairTexture(RGBAImage texture, bool topleft, bool topright,
-		bool bottomleft, bool bottomright) {
-	int mid_size = texture.getWidth() / 2;
-	if (topleft)
-		texture.fill(0, 0, 0, mid_size, mid_size);
-	if (topright)
-		texture.fill(0, mid_size, 0, mid_size, mid_size);
-	if (bottomleft)
-		texture.fill(0, 0, mid_size, mid_size, mid_size);
-	if (bottomright)
-		texture.fill(0, mid_size, mid_size, mid_size, mid_size);
-	return texture;
+/**
+ * Clips the texture for a side of a stairs quarter. You have to specify which part of
+ * the texture this is (topleft/topright/bottomleft/bottomright).
+ */
+RGBAImage clipQuarterTexture(const RGBAImage& texture, bool left, bool top) {
+	int s = texture.getWidth() / 2;
+	int start_x = left ? 0 : s;
+	int start_y = top ? 0 : s;
+	return texture.clip(start_x, start_y, s, s);
 }
 
+}
+
+/**
+ * Builds the image of a stairs quarter. You have to specify which quarter this is, so
+ * the correct textures can be used (top/bottom, north/west, east/west).
+ */
+RGBAImage IsometricBlockImages::buildStairsQuarter(const RGBAImage& texture_side,
+		const RGBAImage& texture_top, bool top, bool north, bool east) const {
+	RGBAImage quarter(getBlockSize() / 2, getBlockSize() / 2);
+	blitFace(quarter, FACE_TOP, clipQuarterTexture(texture_top.rotate(1), !east, north));
+	blitFace(quarter, FACE_WEST, clipQuarterTexture(texture_side, north, top), 0, 0, true, dleft, dright);
+	blitFace(quarter, FACE_SOUTH, clipQuarterTexture(texture_side, !east, top), 0, 0, true, dleft, dright);
+	return quarter;
 }
 
 void IsometricBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
@@ -1106,8 +1116,6 @@ void IsometricBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
 	 *  0b0011011 = Stair ascending north, upside up, with both north quarters filled
 	 */
 
-	// TODO use proper quarter texture
-
 	for (int i = 0; i < 32; i++) {
 		uint16_t data = i << 2;
 		// whether a quarter is a top quarter
@@ -1117,35 +1125,34 @@ void IsometricBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
 		bool north_west = data & 0x8;
 		bool upside_down = data & 0x4;
 
-		// create an image of just one quarter
-		RGBAImage quarter_texture = texture.clip(0, 0, texture_size/2, texture_size/2);
-		RGBAImage quarter(getBlockSize()/2, getBlockSize()/2);
-		blitFace(quarter, FACE_TOP, quarter_texture);
-		blitFace(quarter, FACE_WEST, quarter_texture, 0, 0, true, dleft, dright);
-		blitFace(quarter, FACE_SOUTH, quarter_texture, 0, 0, true, dleft, dright);
-
 		RGBAImage block(getBlockSize(), getBlockSize());
 		// draw bottom quarters
+		// also create the quarters with the right part of the original textures
 		int yoff = texture_size / 2;
+		// north east
 		if (!upside_down || north_east)
-			block.simpleAlphaBlit(quarter, texture_size/2, yoff);
+			block.simpleAlphaBlit(buildStairsQuarter(texture, texture_top, false, true, true), texture_size/2, yoff);
+		// north-west
 		if (!upside_down || north_west)
-			block.simpleAlphaBlit(quarter, 0, texture_size/4 + yoff);
+			block.simpleAlphaBlit(buildStairsQuarter(texture, texture_top, false, true, false), 0, texture_size/4 + yoff);
+		// south east
 		if (!upside_down || south_east)
-			block.simpleAlphaBlit(quarter, texture_size, texture_size/4 + yoff);
+			block.simpleAlphaBlit(buildStairsQuarter(texture, texture_top, false, false, true), texture_size, texture_size/4 + yoff);
+		// south west
 		if (!upside_down || south_west)
-			block.simpleAlphaBlit(quarter, texture_size/2, texture_size/2 + yoff);
+			block.simpleAlphaBlit(buildStairsQuarter(texture, texture_top, false, false, false), texture_size/2, texture_size/2 + yoff);
 
 		// draw top quarters
+		// the same as bottom quarters except that y offset 0
 		yoff = 0;
 		if (upside_down || north_east)
-			block.simpleAlphaBlit(quarter, texture_size/2, 0 + yoff);
+			block.simpleAlphaBlit(buildStairsQuarter(texture, texture_top, true, true, true), texture_size/2, 0 + yoff);
 		if (upside_down || north_west)
-			block.simpleAlphaBlit(quarter, 0, texture_size/4 + yoff);
+			block.simpleAlphaBlit(buildStairsQuarter(texture, texture_top, true, true, false), 0, texture_size/4 + yoff);
 		if (upside_down || south_east)
-			block.simpleAlphaBlit(quarter, texture_size, texture_size/4 + yoff);
+			block.simpleAlphaBlit(buildStairsQuarter(texture, texture_top, true, false, true), texture_size, texture_size/4 + yoff);
 		if (upside_down || south_west)
-			block.simpleAlphaBlit(quarter, texture_size/2, texture_size/2 + yoff);
+			block.simpleAlphaBlit(buildStairsQuarter(texture, texture_top, true, false, false), texture_size/2, texture_size/2 + yoff);
 
 		setBlockImage(id, data, block);
 	}
