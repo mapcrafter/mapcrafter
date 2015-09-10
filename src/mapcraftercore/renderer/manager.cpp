@@ -333,7 +333,7 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 	web_config.writeConfigJS();
 
 	std::shared_ptr<thread::Dispatcher> dispatcher;
-	if (threads == 1)
+	if (threads == 1 || tile_set->getRequiredRenderTilesCount() == 1)
 		dispatcher = std::make_shared<thread::SingleThreadDispatcher>();
 	else
 		dispatcher = std::make_shared<thread::MultiThreadingDispatcher>(threads);
