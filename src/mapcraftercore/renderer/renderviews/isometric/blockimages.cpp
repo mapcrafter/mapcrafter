@@ -909,7 +909,7 @@ RGBAImage clipQuarterTexture(const RGBAImage& texture, bool left, bool top) {
 RGBAImage IsometricBlockImages::buildStairsQuarter(const RGBAImage& texture_side,
 		const RGBAImage& texture_top, bool top, bool north, bool east) const {
 	RGBAImage quarter(getBlockSize() / 2, getBlockSize() / 2);
-	blitFace(quarter, FACE_TOP, clipQuarterTexture(texture_top.rotate(1), !east, north));
+	blitFace(quarter, FACE_TOP, clipQuarterTexture(texture_top, north, east));
 	blitFace(quarter, FACE_WEST, clipQuarterTexture(texture_side, north, top), 0, 0, true, dleft, dright);
 	blitFace(quarter, FACE_SOUTH, clipQuarterTexture(texture_side, !east, top), 0, 0, true, dleft, dright);
 	return quarter;
