@@ -362,9 +362,7 @@ uint16_t IsometricBlockImages::filterBlockData(uint16_t id, uint16_t data) const
 	else if (id == 51) // fire
 		return 0;
 	else if (id == 53 || id == 67 || id == 108 || id == 109 || id == 114 || id == 128 || id == 134 || id == 135 || id == 136 || id == 156 || id == 163 || id == 164 || id == 180 || id == 203) {
-		// stairs: ignore lower two bits, and if third bit set, then ignore all the remaining bits
-		if (data & 0x4)
-			return 0x4;
+		// stairs: ignore lower two bits
 		return data & ~0x3;
 	} else if (id == 60) // farmland
 		return data & 0xff00;
