@@ -197,7 +197,7 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		// texrot = PyObject_GetAttrString(state->textures, "rotation");
 		// northdir = PyInt_AsLong(texrot);
 		northdir = world->getWorld().getRotation();
-		uint16_t ancilData = data % 0x7;
+		uint16_t ancilData = data & 0x7;
 
 		/* fix the rotation value for different northdirections */
 		#define FIX_ROT(x) (((x) & ~0x3) | repair_rot[((x) & 0x3) | (northdir << 2)])
