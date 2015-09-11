@@ -1260,13 +1260,15 @@ void IsometricBlockImages::createFence(uint16_t id, uint16_t extra_data, const R
 }
 
 void IsometricBlockImages::createPumkin(uint16_t id, const RGBAImage& front) { // id 86, 91
-	RGBAImage side = resources.getBlockTextures().PUMPKIN_SIDE;
-	RGBAImage top = resources.getBlockTextures().PUMPKIN_TOP;
-	createBlock(id, 0, side, front, top);
-	createBlock(id, 1, front, side, top);
-	createBlock(id, 2, side, side, top);
-	createBlock(id, 3, side, side, top);
-	createBlock(id, 4, side, side, top);
+	BlockImage pumpkin;
+	pumpkin.setFace(FACE_SOUTH, front);
+	pumpkin.setFace(FACE_NORTH | FACE_EAST | FACE_WEST, resources.getBlockTextures().PUMPKIN_SIDE);
+	pumpkin.setFace(FACE_TOP, resources.getBlockTextures().PUMPKIN_TOP);
+
+	setBlockImage(id, 0 /* S */, pumpkin);
+	setBlockImage(id, 1 /* W */, pumpkin.rotate(1));
+	setBlockImage(id, 2 /* N */, pumpkin.rotate(2));
+	setBlockImage(id, 3 /* E */, pumpkin.rotate(3));
 }
 
 void IsometricBlockImages::createCake() { // id 92
