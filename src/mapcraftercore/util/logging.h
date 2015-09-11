@@ -26,12 +26,24 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <sstream>
 #include <vector>
 
-#define LOG(level) mapcrafter::util::Logging::getInstance().getLogger("default").log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
-#define LOGN(level, logger) mapcrafter::util::Logging::getInstance().getLogger(logger).log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
+#define DEFAULT_LOGGER "default"
+#define DEFAULT_LOGKEY "file__" __FILE__ ":" TOSTRING(__LINE__)
+
+#define LOGN(level, logger) mapcrafter::util::Logging::getInstance().getLogger((logger)).log(mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
+#define LOG(level) LOGN(level, DEFAULT_LOGGER)
+
+#define LOGNK_ONCE(level, logger, key) mapcrafter::util::Logging::getInstance().getLogger((logger)).logOnce((key), mapcrafter::util::LogLevel::level, __FILE__, __LINE__)
+#define LOGN_ONCE(level, logger) LOGNK_ONCE(level, logger, DEFAULT_LOGKEY)
+#define LOGK_ONCE(level, key) LOGNK_ONCE(level, DEFAULT_LOGGER, std::string("key__") + (key))
+#define LOG_ONCE(level) LOGN_ONCE(level, DEFAULT_LOGGER)
 
 namespace mapcrafter {
 namespace util {
@@ -127,11 +139,16 @@ struct LogMessage {
  * It implements the operator<< to write the message parts into an internal string stream.
  * The content of the string stream (the log message) is sent to the Logging object when
  * the LogStream's destructor is called.
+ *
+ * You can use the setFake-method to make the log stream not log the message, this is
+ * used to log messages only once.
  */
 class LogStream {
 public:
 	LogStream(LogLevel level, const std::string& logger, const std::string& file, int line);
 	~LogStream();
+
+	void setFake(bool fake);
 
 	template <typename T>
 	LogStream& operator<<(const T& t) {
@@ -140,6 +157,7 @@ public:
 	}
 
 private:
+	bool fake;
 	LogMessage message;
 
 	std::shared_ptr<std::stringstream> ss;
@@ -164,6 +182,12 @@ public:
 	 * You should not call this method directory, use the LOG and LOGN macros instead.
 	 */
 	LogStream log(LogLevel level, const std::string& file, int line);
+
+	/**
+	 * Same as log, but returns a fake log stream if there was already something logged
+	 * with the specified key.
+	 */
+	LogStream logOnce(const std::string& key, LogLevel level, const std::string& file, int line);
 
 protected:
 	Logger(const std::string& name);
