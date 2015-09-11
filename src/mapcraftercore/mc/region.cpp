@@ -306,7 +306,7 @@ int RegionFile::loadChunk(const ChunkPos& pos, Chunk& chunk) {
 		if (!chunk.readNBT(reinterpret_cast<char*>(&chunk_data[index][0]), size, comp))
 			return CHUNK_DATA_INVALID;
 	} catch (const nbt::NBTError& err) {
-		std::cout << "Error: Unable to read chunk at " << pos << " : " << err.what() << std::endl;
+		LOG(ERROR) << "Unable to read chunk at " << pos << " : " << err.what();
 		return CHUNK_NBT_ERROR;
 	}
 	return CHUNK_OK;
