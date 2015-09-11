@@ -1378,17 +1378,16 @@ void IsometricBlockImages::createFence(uint16_t id, uint16_t extra_data, const R
 	}
 }
 
-#define XFRM(id, image, v) setBlockImage((id), (v), buildImage((image).rotate(((v)+(rotation))&3)))
 void IsometricBlockImages::createPumkin(uint16_t id, const RGBAImage& front) { // id 86, 91
 	BlockImage pumpkin;
 	pumpkin.setFace(FACE_SOUTH, front);
 	pumpkin.setFace(FACE_NORTH | FACE_EAST | FACE_WEST, resources.getBlockTextures().PUMPKIN_SIDE);
 	pumpkin.setFace(FACE_TOP, resources.getBlockTextures().PUMPKIN_TOP);
 
-	XFRM(id, pumpkin, 0 /* S */);
-	XFRM(id, pumpkin, 1 /* W */);
-	XFRM(id, pumpkin, 2 /* N */);
-	XFRM(id, pumpkin, 3 /* E */);
+	setBlockImage(id, 0 /* S */, pumpkin);
+	setBlockImage(id, 1 /* W */, pumpkin.rotate(1));
+	setBlockImage(id, 2 /* N */, pumpkin.rotate(2));
+	setBlockImage(id, 3 /* E */, pumpkin.rotate(3));
 }
 
 void IsometricBlockImages::createCake() { // id 92
