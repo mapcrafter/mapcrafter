@@ -1265,10 +1265,10 @@ void IsometricBlockImages::createPumkin(uint16_t id, const RGBAImage& front) { /
 	pumpkin.setFace(FACE_NORTH | FACE_EAST | FACE_WEST, resources.getBlockTextures().PUMPKIN_SIDE);
 	pumpkin.setFace(FACE_TOP, resources.getBlockTextures().PUMPKIN_TOP);
 
-	setBlockImage(id, 0 /* S */, pumpkin);
-	setBlockImage(id, 1 /* W */, pumpkin.rotate(1));
-	setBlockImage(id, 2 /* N */, pumpkin.rotate(2));
-	setBlockImage(id, 3 /* E */, pumpkin.rotate(3));
+	setBlockImage(id, 0, pumpkin); // south
+	setBlockImage(id, 1, pumpkin.rotate(1)); // west
+	setBlockImage(id, 2, pumpkin.rotate(2)); // north
+	setBlockImage(id, 3, pumpkin.rotate(3)); // east
 }
 
 void IsometricBlockImages::createCake() { // id 92
