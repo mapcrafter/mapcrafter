@@ -1087,6 +1087,7 @@ void IsometricBlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data,
 }
 
 void IsometricBlockImages::createSign() { // id 63
+	// simple version of a standing sign always pointing to south-west // TODO
 	double ratio = (double) texture_size / 16.0;
 	int h1 = 10 * ratio;
 	int h2 = 8 * ratio;
@@ -1146,6 +1147,20 @@ void IsometricBlockImages::createRails() { // id 66
 	createSingleFaceBlock(66, 7, FACE_BOTTOM, corner_texture);
 	createSingleFaceBlock(66, 8, FACE_BOTTOM, corner_texture.flip(true, false));
 	createSingleFaceBlock(66, 9, FACE_BOTTOM, corner_texture.flip(true, true));
+}
+
+void IsometricBlockImages::createWallSign() { // id 68
+	double ratio = (double) texture_size / 16.0;
+	int h = 10 * ratio;
+	
+	RGBAImage texture = resources.getBlockTextures().PLANKS_OAK.clip(0, 0, texture_size, h);
+	RGBAImage sign(texture_size, texture_size);
+	sign.simpleBlit(texture, 0, (texture_size - h) / 2);
+
+	createSingleFaceBlock(68, 2, FACE_SOUTH, sign);
+	createSingleFaceBlock(68, 3, FACE_NORTH, sign);
+	createSingleFaceBlock(68, 4, FACE_EAST, sign);
+	createSingleFaceBlock(68, 5, FACE_WEST, sign);
 }
 
 void IsometricBlockImages::createButton(uint16_t id, const RGBAImage& tex) { // id 77, 143
@@ -1889,7 +1904,7 @@ void IsometricBlockImages::createBlocks() {
 	// --
 	createRails(); // id 66
 	createStairs(67, t.COBBLESTONE); // cobblestone stairs
-	// id 68 // wall sign
+	createWallSign(); // id 68 // wall sign
 	// id 69 // lever
 	createSmallerBlock(70, 0, t.STONE, t.STONE, 0, 1); // stone pressure plate
 	createDoor(71, t.DOOR_IRON_LOWER, t.DOOR_IRON_UPPER); // iron door

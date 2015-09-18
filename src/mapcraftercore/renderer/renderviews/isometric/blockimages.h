@@ -292,6 +292,7 @@ protected:
 	void createSign(); // id 63
 	void createDoor(uint16_t id, const RGBAImage& bottom, const RGBAImage& top); // id 64, 71, 193-197
 	void createRails(); // id 66
+	void createWallSign(); // id 68
 	void createButton(uint16_t id, const RGBAImage& tex); // id 77, 143
 	void createSnow(); // id 78
 	void createIce(uint8_t id); // id 79
