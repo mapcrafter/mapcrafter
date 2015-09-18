@@ -366,6 +366,8 @@ uint16_t IsometricBlockImages::filterBlockData(uint16_t id, uint16_t data) const
 		return data & ~0x3;
 	} else if (id == 60) // farmland
 		return data & 0xff00;
+	else if (id == 63) // signs
+		return 0;
 	else if (id == 64 || id == 71 || (id >= 193 && id <= 197)) // doors
 		return data & util::binary<1111110000>::value;
 	else if (id == 81 || id == 83 || id == 92) // cactus, sugar cane, cake
@@ -1082,6 +1084,24 @@ void IsometricBlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data,
 		// it does not depend on the rotation of the map
 		setBlockImage(id, data | extra_data, buildImage(block));
 	}
+}
+
+void IsometricBlockImages::createSign() { // id 63
+	double ratio = (double) texture_size / 16.0;
+	int h1 = 10 * ratio;
+	int h2 = 8 * ratio;
+	
+	RGBAImage texture = resources.getBlockTextures().PLANKS_OAK;
+	RGBAImage head = texture.clip(0, 0, texture_size, h1);
+	RGBAImage post = texture.clip(0, 0, 2, h2).colorize(0.6, 0.6, 0.6);
+
+	RGBAImage sign(texture_size, h1+h2);
+	sign.simpleAlphaBlit(head, 0, 0);
+	sign.simpleAlphaBlit(post, (texture_size - 2) / 2, h1);
+	RGBAImage block(getBlockSize(), getBlockSize());
+	block.simpleAlphaBlit(sign, (block.getWidth() - sign.getWidth()) / 2, (block.getHeight() - sign.getHeight()) / 2);
+
+	setBlockImage(63, 0, block);
 }
 
 void IsometricBlockImages::createDoor(uint16_t id, const RGBAImage& texture_bottom,
@@ -1859,7 +1879,7 @@ void IsometricBlockImages::createBlocks() {
 	createBlock(60, 0, t.DIRT, t.FARMLAND_WET); // farmland
 	createRotatedBlock(61, 0, t.FURNACE_FRONT_OFF, t.FURNACE_SIDE, t.FURNACE_TOP); // furnace
 	createRotatedBlock(62, 0, t.FURNACE_FRONT_ON, t.FURNACE_SIDE, t.FURNACE_TOP); // burning furnace
-	// id 63 // sign post
+	createSign(); // id 63 // sign post
 	createDoor(64, t.DOOR_WOOD_LOWER, t.DOOR_WOOD_UPPER); // wooden door
 	// -- ladders
 	createSingleFaceBlock(65, 2, FACE_SOUTH, t.LADDER);
