@@ -78,6 +78,14 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.2.1**
+
+* Added support for corner stairs (thanks for some Minecraft Overviewer code!)
+* Added signs to isometric and topdown render view
+* Fixed a lighting bug that appeared using some Debian packages
+* Fixed wrong slime overlay
+* Fixed rotation of pumpkins in isometric render view
+
 **v.2.0**
 * Huge internal code refactoring™
 * Support for multiple rendering engines: A 2D topdown and the usual 3D isometric render
