@@ -93,6 +93,10 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+	LOG(ALERT) << "There is a new Mapcrafter Debian package repository available.";
+	LOG(ALERT) << "The old repository will be shut down soon.";
+	LOG(ALERT) << "Please have a look at http://docs.mapcrafter.org/builds/stable/installation.html#debian-packages and update your apt sources.";
+
 	if (vm.count("help")) {
 		std::cout << all << std::endl;
 		std::cout << "Mapcrafter online documentation: <http://docs.mapcrafter.org>" << std::endl;
