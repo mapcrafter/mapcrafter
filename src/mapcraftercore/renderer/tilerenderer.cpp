@@ -140,12 +140,14 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		// check if the neighbors on visible faces (top, west, south) are also full water blocks
 		// show water textures on these sides only if there is no water as neighbor too
 		// exception for the top-face and when preblit water is used
+		data |= FULL_WATER;
 		if (use_preblit_water || !top.isFullWater())
-			data |= DATA_TOP;
+			data |= FULL_WATER_TOP;
 		if (!west.isFullWater())
-			data |= DATA_WEST;
+			data |= FULL_WATER_WEST;
 		if (!south.isFullWater())
-			data |= DATA_SOUTH;
+			data |= FULL_WATER_SOUTH;
+
 	} else if (block.isStairs()) { // stairs
 		// corner stairs... wtf
 		// using corner stair detection code of Minecraft Overviewer for now:

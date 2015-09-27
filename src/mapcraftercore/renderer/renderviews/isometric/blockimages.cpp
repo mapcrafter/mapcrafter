@@ -347,9 +347,13 @@ uint16_t IsometricBlockImages::filterBlockData(uint16_t id, uint16_t data) const
 
 	if (id == 6)
 		return data & (0xff00 | util::binary<11>::value);
-	else if (id == 8 || id == 9) // water
+	else if (id == 8 || id == 9) { // water
+		// 0x8 bit means that this is a water block spreading downwards
+		// -> return with Minecraft data 0 (full block)
+		if (data & 0x8)
+			data &= ~0x7;
 		return data & (0xff00 | util::binary<11110111>::value);
-	else if (id == 10 || id == 11) { // lava
+	} else if (id == 10 || id == 11) { // lava
 		// 0x8 bit means that this is a lava block spreading downwards
 		// -> return data 0 (full block)
 		if (data & 0x8)
@@ -623,25 +627,27 @@ void IsometricBlockImages::createWater() { // id 8, 9
 		bool top = i & util::binary<1>::value;
 
 		RGBAImage block(getBlockSize(), getBlockSize());
-		uint16_t extra_data = 0;
+		uint16_t extra_data = FULL_WATER;
 
 		if (top) {
 			blitFace(block, FACE_TOP, water, 0, 0, true, dleft, dright);
-			extra_data |= DATA_TOP;
+			extra_data |= FULL_WATER_TOP;
 		}
 
 		if (west) {
 			blitFace(block, FACE_WEST, water, 0, 0, true, dleft, dright);
-			extra_data |= DATA_WEST;
+			extra_data |= FULL_WATER_WEST;
 		}
 
 		if (south) {
 			blitFace(block, FACE_SOUTH, water, 0, 0, true, dleft, dright);
-			extra_data |= DATA_SOUTH;
+			extra_data |= FULL_WATER_SOUTH;
 		}
 
-		setBlockImage(8, extra_data, block);
-		setBlockImage(9, extra_data, block);
+		if (extra_data != 0) {
+			setBlockImage(8, extra_data, block);
+			setBlockImage(9, extra_data, block);
+		}
 	}
 }
 

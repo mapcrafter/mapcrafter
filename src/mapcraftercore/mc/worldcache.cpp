@@ -34,7 +34,7 @@ Block::Block(const mc::BlockPos& pos, uint16_t id, uint16_t data)
 }
 
 bool Block::isFullWater() const {
-	return (id == 8 || id == 9) && data == 0;
+	return (id == 8 || id == 9) && (data & 0x7) == 0;
 }
 
 bool Block::isStairs() const {
