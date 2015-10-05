@@ -149,6 +149,7 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  render_view" << render_view << std::endl;
 	out << "  render_mode = " << render_mode << std::endl;
 	out << "  overlay = " << overlay << std::endl;
+	out << "  overlays = " << overlays << std::endl;
 	out << "  rotations = " << rotations << std::endl;
 	out << "  texture_dir = " << texture_dir << std::endl;
 	out << "  texture_size = " << texture_size << std::endl;
@@ -190,6 +191,10 @@ renderer::RenderModeType MapSection::getRenderMode() const {
 
 renderer::OverlayType MapSection::getOverlay() const {
 	return overlay.getValue();
+}
+
+std::set<renderer::OverlayType> MapSection::getOverlays() const {
+	return overlays_set;
 }
 
 std::set<int> MapSection::getRotations() const {
@@ -279,6 +284,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	render_view.setDefault(renderer::RenderViewType::ISOMETRIC);
 	render_mode.setDefault(renderer::RenderModeType::DAYLIGHT);
 	overlay.setDefault(renderer::OverlayType::NONE);
+	overlays.setValue("");
 	rotations.setDefault("top-left");
 
 	// check if we can find a default texture directory
@@ -317,6 +323,21 @@ bool MapSection::parseField(const std::string key, const std::string value,
 					"It's called 'render_mode' now.");
 	} else if (key == "overlay") {
 		overlay.load(key, value, validation);
+	} else if (key == "overlays") {
+		overlays.load(key, value, validation);
+		overlays_set.clear();
+		std::stringstream ss;
+		ss << overlays.getValue();
+		std::string overlay;
+		while (ss >> overlay) {
+			// TODO make Field::load able to load sets of types?
+			try {
+				overlays_set.insert(util::as<renderer::OverlayType>(overlay));
+			} catch (std::invalid_argument& e) {
+				validation.error("Invalid overlay '" + overlay + "': " + e.what());
+				break;
+			}
+		}
 	} else if (key == "rotations") {
 		rotations.load(key, value ,validation);
 	} else if (key == "texture_dir") {
