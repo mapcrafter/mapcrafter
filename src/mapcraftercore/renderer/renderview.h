@@ -23,6 +23,8 @@
 #include "../config.h"
 
 #include <iostream>
+#include <memory>
+#include <vector>
 
 namespace mapcrafter {
 
@@ -39,6 +41,7 @@ class WorldSection;
 namespace renderer {
 
 class BlockImages;
+class OverlayRenderMode;
 class RenderMode;
 class RenderModeRenderer;
 #ifdef HAVE_ENUM_CLASS_FORWARD_DECLARATION
@@ -67,7 +70,8 @@ public:
 	 * Creates an instance of the render view specific tile renderer class.
 	 */
 	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
-			mc::WorldCache* world, RenderMode* render_mode) const = 0;
+			mc::WorldCache* world, RenderMode* render_mode,
+			const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays) const = 0;
 
 	/**
 	 * Creates an instance of the render view specific render mode renderer class.

@@ -39,6 +39,7 @@ class Chunk;
 namespace renderer {
 
 class BlockImages;
+class OverlayRenderMode;
 class TilePos;
 class RenderMode;
 class RenderView;
@@ -47,7 +48,8 @@ class RGBAImage;
 class TileRenderer {
 public:
 	TileRenderer(const RenderView* render_view, BlockImages* images, int tile_width,
-			mc::WorldCache* world, RenderMode* render_mode);
+			mc::WorldCache* world, RenderMode* render_mode,
+			const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays);
 	virtual ~TileRenderer();
 
 	void setRenderBiomes(bool render_biomes);
@@ -67,6 +69,7 @@ protected:
 	mc::WorldCache* world;
 	mc::Chunk* current_chunk;
 	RenderMode* render_mode;
+	std::vector<std::shared_ptr<OverlayRenderMode>> overlays;
 
 	bool render_biomes;
 	bool use_preblit_water;

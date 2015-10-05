@@ -22,6 +22,7 @@
 #include "blockimages.h"
 #include "tileset.h"
 #include "tilerenderer.h"
+#include "rendermodes/overlay.h"
 #include "renderviews/isometric/renderview.h"
 #include "renderviews/topdown/renderview.h"
 #include "../config/configsections/map.h"

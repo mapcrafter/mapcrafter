@@ -32,7 +32,8 @@ namespace renderer {
 class TopdownTileRenderer : public TileRenderer {
 public:
 	TopdownTileRenderer(const RenderView* render_view, BlockImages* images,
-			int tile_width, mc::WorldCache* world, RenderMode* render_mode);
+			int tile_width, mc::WorldCache* world, RenderMode* render_mode,
+			const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays);
 	~TopdownTileRenderer();
 
 	void renderChunk(const mc::Chunk& chunk, RGBAImage& tile, int dx, int dy);

@@ -93,10 +93,13 @@ void IsometricOverlayRenderer::tintLeft(RGBAImage& image, RGBAPixel color) const
 	auto overlay = getRecolor(color);
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end(); it.next()) {
 		RGBAPixel& pixel = image.pixel(it.dest_x, it.dest_y + texture_size/2);
+		pixel = color;
+		/*
 		if (high_contrast)
 			pixel = rgba_add_clamp(pixel, overlay);
 		else
 			blend(pixel, color);
+		*/
 	}
 }
 
@@ -106,10 +109,13 @@ void IsometricOverlayRenderer::tintRight(RGBAImage& image, RGBAPixel color) cons
 	auto overlay = getRecolor(color);
 	for (SideFaceIterator it(texture_size, SideFaceIterator::RIGHT); !it.end(); it.next()) {
 		RGBAPixel& pixel = image.pixel(it.dest_x + texture_size, it.dest_y + texture_size/2);
+		pixel = color;
+		/*
 		if (high_contrast)
 			pixel = rgba_add_clamp(pixel, overlay);
 		else
 			blend(pixel, color);
+		*/
 	}
 }
 
@@ -119,10 +125,13 @@ void IsometricOverlayRenderer::tintTop(RGBAImage& image, RGBAPixel color, int of
 	auto overlay = getRecolor(color);
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
 		RGBAPixel& pixel = image.pixel(it.dest_x, it.dest_y);
+		pixel = color;
+		/*
 		if (high_contrast)
 			pixel = rgba_add_clamp(pixel, overlay);
 		else
 			blend(pixel, color);
+		*/
 	}
 }
 

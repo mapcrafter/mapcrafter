@@ -24,6 +24,7 @@
 #include "rendermode.h"
 #include "renderview.h"
 #include "tileset.h"
+#include "rendermodes/overlay.h"
 #include "../mc/pos.h"
 #include "../util.h"
 
@@ -31,9 +32,10 @@ namespace mapcrafter {
 namespace renderer {
 
 TileRenderer::TileRenderer(const RenderView* render_view, BlockImages* images,
-		int tile_width, mc::WorldCache* world, RenderMode* render_mode)
+		int tile_width, mc::WorldCache* world, RenderMode* render_mode,
+		const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays)
 	: images(images), tile_width(tile_width), world(world), current_chunk(nullptr),
-	  render_mode(render_mode),
+	  render_mode(render_mode), overlays(overlays),
 	  render_biomes(true), use_preblit_water(false) {
 	render_mode->initialize(render_view, images, world, &current_chunk);
 }

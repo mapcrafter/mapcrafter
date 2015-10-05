@@ -88,7 +88,8 @@ struct RenderBlock {
 class IsometricTileRenderer : public TileRenderer {
 public:
 	IsometricTileRenderer(const RenderView* render_view, BlockImages* images,
-			int tile_width, mc::WorldCache* world, RenderMode* render_mode);
+			int tile_width, mc::WorldCache* world, RenderMode* render_mode,
+			const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays);
 	virtual ~IsometricTileRenderer();
 
 	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile);

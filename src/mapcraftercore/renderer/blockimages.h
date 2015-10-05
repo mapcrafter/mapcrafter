@@ -55,13 +55,13 @@ const int EDGE_EAST = 1 << 14;
 const int EDGE_BOTTOM = 1 << 15;
 
 // some data values and stuff for special blocks
-const int FULL_WATER = DATA_NORTH;
+const int FULL_WATER = DATA_EAST;
 const int FULL_WATER_SOUTH = DATA_SOUTH;
 const int FULL_WATER_WEST = DATA_WEST;
 const int FULL_WATER_TOP = DATA_TOP;
 const int GRASS_SNOW = 16;
 
-const int OPAQUE_WATER = 1 << 4;
+const int OPAQUE_WATER = DATA_NORTH;
 const int OPAQUE_WATER_SOUTH = DATA_SOUTH;
 const int OPAQUE_WATER_WEST = DATA_WEST;
 

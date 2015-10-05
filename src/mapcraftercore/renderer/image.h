@@ -98,6 +98,9 @@ public:
 	RGBAImage(int width = 0, int height = 0);
 	~RGBAImage();
 
+	RGBAImage copy() const;
+	RGBAImage emptyCopy() const;
+
 	/**
 	 * Blits one image to another one. Just copies the pixels over without any processing.
 	 */
@@ -116,7 +119,9 @@ public:
 	void alphaBlit(const RGBAImage& image, int x, int y);
 	void blendPixel(RGBAPixel color, int x, int y);
 
-	void fill(RGBAPixel color, int x1, int y1, int w, int h);
+	void applyMask(const RGBAImage& mask, RGBAPixel color = 0);
+
+	void fill(RGBAPixel color, int x1 = 0, int y1 = 0, int w = -1, int h = -1);
 	void clear();
 
 	RGBAImage clip(int x, int y, int width, int height) const;

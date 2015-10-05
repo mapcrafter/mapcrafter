@@ -20,6 +20,7 @@
 #ifndef TILERENDERWORKER_H_
 #define TILERENDERWORKER_H_
 
+#include "rendermodes/overlay.h"
 #include "../config/mapcrafterconfig.h"
 #include "../config/configsections/map.h"
 #include "../config/configsections/world.h"
@@ -60,6 +61,7 @@ struct RenderContext {
 
 	std::shared_ptr<mc::WorldCache> world_cache;
 	std::shared_ptr<RenderMode> render_mode;
+	std::vector<std::shared_ptr<OverlayRenderMode>> overlays;
 	std::shared_ptr<TileRenderer> tile_renderer;
 
 	/**

@@ -26,8 +26,15 @@
 #include "../image.h"
 
 #include <tuple>
+#include <vector>
 
 namespace mapcrafter {
+
+namespace config {
+class MapSection;
+class WorldSection;
+}
+
 namespace renderer {
 
 class RGBAImage;
@@ -72,12 +79,18 @@ public:
 
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
+	virtual void drawOverlay(RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
 protected:
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
 
 private:
 	OverlayMode overlay_mode;
 };
+
+std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(
+		const config::WorldSection& world_config, const config::MapSection& map_config,
+		int rotation);
 
 }
 }

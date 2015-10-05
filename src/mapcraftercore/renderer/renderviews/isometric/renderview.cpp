@@ -24,6 +24,7 @@
 #include "tilerenderer.h"
 #include "rendermodes.h"
 #include "../../rendermode.h"
+#include "../../rendermodes/overlay.h"
 #include "../../../config/configsections/map.h"
 #include "../../../config/configsections/world.h"
 #include "../../../util.h"
@@ -42,8 +43,9 @@ TileSet* IsometricRenderView::createTileSet(int tile_width) const {
 }
 
 TileRenderer* IsometricRenderView::createTileRenderer(BlockImages* images,
-		int tile_width, mc::WorldCache* world, RenderMode* render_mode) const {
-	return new IsometricTileRenderer(this, images, tile_width, world, render_mode);
+		int tile_width, mc::WorldCache* world, RenderMode* render_mode,
+		const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays) const {
+	return new IsometricTileRenderer(this, images, tile_width, world, render_mode, overlays);
 }
 
 RenderModeRenderer* IsometricRenderView::createRenderModeRenderer(

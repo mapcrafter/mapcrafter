@@ -183,6 +183,14 @@ RGBAImage::RGBAImage(int width, int height)
 RGBAImage::~RGBAImage() {
 }
 
+RGBAImage RGBAImage::copy() const {
+	return *this;
+}
+
+RGBAImage RGBAImage::emptyCopy() const {
+	return RGBAImage(width, height);
+}
+
 void RGBAImage::simpleBlit(const RGBAImage& image, int x, int y) {
 	if (x >= width || y >= height)
 		return;
@@ -260,9 +268,24 @@ void RGBAImage::blendPixel(RGBAPixel color, int x, int y) {
 		blend(data[y * width + x], color);
 }
 
+void RGBAImage::applyMask(const RGBAImage& mask, RGBAPixel color) {
+	assert(width == mask.width && height == mask.height);
+
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			if (rgba_alpha(mask.pixel(x, y)) == 0)
+				pixel(x, y) = color;
+		}
+	}
+}
+
 void RGBAImage::fill(RGBAPixel color, int x, int y, int w, int h) {
 	if (x >= width || y >= height)
 		return;
+	if (w == -1)
+		w = width;
+	if (h == -1)
+		h = height;
 
 	int dx = std::max(x, 0);
 	int sx = std::max(0, -x);
