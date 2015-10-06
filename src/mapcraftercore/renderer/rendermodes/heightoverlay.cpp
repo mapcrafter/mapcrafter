@@ -29,6 +29,10 @@ HeightOverlay::HeightOverlay()
 	: OverlayRenderMode(OverlayMode::PER_BLOCK) {
 }
 
+std::string HeightOverlay::getName() const {
+	return "height";
+}
+
 RGBAPixel HeightOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	// TODO make the gradient configurable
 	double h1 = (double) (64 - pos.y) / 64;

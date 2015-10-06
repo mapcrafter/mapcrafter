@@ -75,6 +75,10 @@ SlimeOverlay::SlimeOverlay(fs::path world_dir, int rotation)
 SlimeOverlay::~SlimeOverlay() {
 }
 
+std::string SlimeOverlay::getName() const {
+	return "slime";
+}
+
 bool SlimeOverlay::isSlimeChunk(const mc::ChunkPos& chunk, long long world_seed) {
 	int32_t chunkx = chunk.x, chunkz = chunk.z;
 	long long seed = (world_seed

@@ -25,6 +25,7 @@
 
 #include "../image.h"
 
+#include <string>
 #include <tuple>
 #include <vector>
 
@@ -80,6 +81,8 @@ public:
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 	virtual void drawOverlay(RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+	virtual std::string getName() const = 0;
 
 protected:
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;

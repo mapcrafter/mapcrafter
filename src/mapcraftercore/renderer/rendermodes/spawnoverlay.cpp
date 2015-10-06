@@ -31,6 +31,10 @@ SpawnOverlay::SpawnOverlay(bool day)
 SpawnOverlay::~SpawnOverlay() {
 }
 
+std::string SpawnOverlay::getName() const {
+	return day ? "spawnday" : "spawnnight";
+}
+
 RGBAPixel SpawnOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	// TODO more options
 	// TODO also mobs can't spawn on specific blocks?
