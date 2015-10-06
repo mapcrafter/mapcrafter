@@ -164,7 +164,8 @@ function MapcrafterUI(config) {
 	
 	// leaflet map object
 	this.lmap = null;
-	// leaflet layers of different maps/rotations, access them with layers[map][rotation]
+	// leaflet layers of different maps/rotations/overlays (no overlay -> "terrain")
+	// access them with layers[map][rotation][overlay]
 	this.layers = {};
 	
 	// array of handlers to be called when map/rotation is changed
@@ -197,12 +198,18 @@ MapcrafterUI.prototype.init = function() {
 		this.layers[map] = {};
 		for(var i2 in mapConfig.rotations) {
 			var rotation = mapConfig.rotations[i2];
-			this.layers[map][rotation] = createMCTileLayer(map, "terrain", mapConfig, rotation);
+			this.layers[map][rotation] = {};
+			this.layers[map][rotation]["terrain"] = createMCTileLayer(map, "terrain", mapConfig, rotation);
+			for(var i3 in mapConfig.overlays) {
+				var overlay = "overlay_" + mapConfig.overlays[i3];
+				this.layers[map][rotation][overlay] = createMCTileLayer(map, overlay, mapConfig, rotation);
+			}
 			if(firstMap === null)
 				firstMap = map;
 		}
 	}
 	
+	//	this.lmap.removeLayer(oldMapLayer);
 	this.setMap(firstMap);
 	this.created = true;
 	
@@ -280,7 +287,7 @@ MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 	var oldView = null;
 	var oldZoom = 0;
 	if(this.currentMap != null && this.currentRotation != null) {
-		oldMapLayer = this.layers[this.currentMap][this.currentRotation];
+		oldMapLayer = this.layers[this.currentMap][this.currentRotation]["terrain"];
 		oldView = this.latLngToMC(this.lmap.getCenter(), 64);
 		oldZoom = this.lmap.getZoom();
 	}
@@ -289,10 +296,12 @@ MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 	this.currentMap = map;
 	this.currentRotation = parseInt(rotation);
 	
-	// remove the old map layer and set the new map layer
-	if(oldMapLayer != null)
-		this.lmap.removeLayer(oldMapLayer);
-	this.lmap.addLayer(this.layers[this.currentMap][this.currentRotation]);
+	// remove old map layers and add the new map terrain layer
+	var self = this;
+	this.lmap.eachLayer(function(layer) {
+		self.lmap.removeLayer(layer);
+	});
+	this.lmap.addLayer(this.layers[this.currentMap][this.currentRotation]["terrain"]);
 	//this.lmap.invalidateSize();
 	
 	// check whether we are switching to a completely different map
