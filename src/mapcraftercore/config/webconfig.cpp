@@ -257,6 +257,7 @@ picojson::value WebConfig::getConfigJSON() const {
 		map_json["renderView"] = picojson::value(util::str(map_it->getRenderView()));
 		map_json["textureSize"] = picojson::value((double) map_it->getTextureSize());
 		map_json["imageFormat"] = picojson::value(map_it->getImageFormatSuffix());
+		
 		if (world.getDefaultView() != mc::BlockPos(0, 0, 0)) {
 			mc::BlockPos default_view = world.getDefaultView();
 			picojson::array default_view_json;
@@ -275,6 +276,12 @@ picojson::value WebConfig::getConfigJSON() const {
 		for (auto it = rotations.begin(); it != rotations.end(); ++it)
 			rotations_json.push_back(picojson::value((double) *it));
 		map_json["rotations"] = picojson::value(rotations_json);
+
+		picojson::array overlays_json;
+		auto overlays = map_it->getOverlays();
+		for (auto it = overlays.begin(); it != overlays.end(); ++it)
+			overlays_json.push_back(picojson::value(util::str(*it)));
+		map_json["overlays"] = picojson::value(overlays_json);
 
 		map_json["tileSize"] = picojson::value((double) getMapTileSize(map_it->getShortName()));
 		map_json["maxZoom"] = picojson::value((double) getMapMaxZoom(map_it->getShortName()));
