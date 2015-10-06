@@ -146,10 +146,36 @@ void RenderManager::setRenderBehaviors(const RenderBehaviors& render_behaviors) 
 }
 
 bool RenderManager::initialize() {
+	fs::path output_dir = config.getOutputDir();
 	// an output directory would be nice -- create one if it does not exist
-	if (!fs::is_directory(config.getOutputDir()) && !fs::create_directories(config.getOutputDir())) {
+	if (!fs::is_directory(output_dir) && !fs::create_directories(output_dir)) {
 		LOG(FATAL) << "Error: Unable to create output directory!";
 		return false;
+	}
+
+	// upgrade directory structure from pre-overlay time
+	auto maps = config.getMaps();
+	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
+		std::string map_name = map_it->getShortName();
+		std::string ext = map_it->getImageFormatSuffix();
+		for (int rotation = 0; rotation < 4; rotation++) {
+			std::string rotation_name = config::ROTATION_NAMES_SHORT[rotation];
+			fs::path path = output_dir / map_name / rotation_name;
+			if (!fs::exists(path / ("base." + ext)))
+				continue;
+			LOG_ONCE(INFO) << "Old output directory structure detected.";
+			LOG_ONCE(INFO) << "Moving some files around...";
+			fs::create_directory(path / "terrain");
+			fs::rename(path / ("base." + ext), path / "terrain" / ("base." + ext));
+			for (int i = 1; i <= 4; i++) {
+				std::string dir = util::str(i);
+				std::string file = dir + "." + ext;
+				if (fs::exists(path / dir))
+					fs::rename(path / dir, path / "terrain" / dir);
+				if (fs::exists(path / file))
+					fs::rename(path / file, path / "terrain" / file);
+			}
+		}
 	}
 
 	// read parameters of already rendered maps
@@ -530,98 +556,105 @@ void RenderManager::initializeMap(const std::string& map) {
  * This method increases the max zoom of a rendered map and makes the necessary changes
  * on the tile tree.
  */
-void RenderManager::increaseMaxZoom(const fs::path& dir,
+void RenderManager::increaseMaxZoom(const fs::path& map_rotation,
 		std::string image_format, int jpeg_quality) const {
-	if (fs::exists(dir / "1")) {
-		// at first rename the directories 1 2 3 4 (zoom level 0) and make new directories
-		util::moveFile(dir / "1", dir / "1_");
-		fs::create_directories(dir / "1");
-		// then move the old tile trees one zoom level deeper
-		util::moveFile(dir / "1_", dir / "1/4");
-		// also move the images of the directories
-		util::moveFile(dir / (std::string("1.") + image_format),
-				dir / (std::string("1/4.") + image_format));
-	}
+	// do that stuff for every subdirectory aka. overlay / the terrain directory
+	fs::directory_iterator end;
+	for (fs::directory_iterator it(map_rotation); it != end; ++it) {
+		fs::path dir = *it;
+		if (!fs::is_directory(dir))
+			continue;
+		if (fs::exists(dir / "1")) {
+			// at first rename the directories 1 2 3 4 (zoom level 0) and make new directories
+			util::moveFile(dir / "1", dir / "1_");
+			fs::create_directories(dir / "1");
+			// then move the old tile trees one zoom level deeper
+			util::moveFile(dir / "1_", dir / "1/4");
+			// also move the images of the directories
+			util::moveFile(dir / (std::string("1.") + image_format),
+					dir / (std::string("1/4.") + image_format));
+		}
 
-	// do the same for the other directories
-	if (fs::exists(dir / "2")) {
-		util::moveFile(dir / "2", dir / "2_");
-		fs::create_directories(dir / "2");
-		util::moveFile(dir / "2_", dir / "2/3");
-		util::moveFile(dir / (std::string("2.") + image_format),
-				dir / (std::string("2/3.") + image_format));
-	}
-	
-	if (fs::exists(dir / "3")) {
-		util::moveFile(dir / "3", dir / "3_");
-		fs::create_directories(dir / "3");
-		util::moveFile(dir / "3_", dir / "3/2");
-		util::moveFile(dir / (std::string("3.") + image_format),
-				dir / (std::string("3/2.") + image_format));
-	}
-	
-	if (fs::exists(dir / "4")) {
-		util::moveFile(dir / "4", dir / "4_");
-		fs::create_directories(dir / "4");
-		util::moveFile(dir / "4_", dir / "4/1");
-		util::moveFile(dir / (std::string("4.") + image_format),
-				dir / (std::string("4/1.") + image_format));
-	}
+		// do the same for the other directories
+		if (fs::exists(dir / "2")) {
+			util::moveFile(dir / "2", dir / "2_");
+			fs::create_directories(dir / "2");
+			util::moveFile(dir / "2_", dir / "2/3");
+			util::moveFile(dir / (std::string("2.") + image_format),
+					dir / (std::string("2/3.") + image_format));
+		}
+		
+		if (fs::exists(dir / "3")) {
+			util::moveFile(dir / "3", dir / "3_");
+			fs::create_directories(dir / "3");
+			util::moveFile(dir / "3_", dir / "3/2");
+			util::moveFile(dir / (std::string("3.") + image_format),
+					dir / (std::string("3/2.") + image_format));
+		}
+		
+		if (fs::exists(dir / "4")) {
+			util::moveFile(dir / "4", dir / "4_");
+			fs::create_directories(dir / "4");
+			util::moveFile(dir / "4_", dir / "4/1");
+			util::moveFile(dir / (std::string("4.") + image_format),
+					dir / (std::string("4/1.") + image_format));
+		}
 
-	// now read the images, which belong to the new directories
-	RGBAImage img1, img2, img3, img4;
-	if (image_format == "png") {
-		img1.readPNG((dir / "1/4.png").string());
-		img2.readPNG((dir / "2/3.png").string());
-		img3.readPNG((dir / "3/2.png").string());
-		img4.readPNG((dir / "4/1.png").string());
-	} else {
-		img1.readJPEG((dir / "1/4.jpg").string());
-		img2.readJPEG((dir / "2/3.jpg").string());
-		img3.readJPEG((dir / "3/2.jpg").string());
-		img4.readJPEG((dir / "4/1.jpg").string());
+		// now read the images, which belong to the new directories
+		RGBAImage img1, img2, img3, img4;
+		if (image_format == "png") {
+			img1.readPNG((dir / "1/4.png").string());
+			img2.readPNG((dir / "2/3.png").string());
+			img3.readPNG((dir / "3/2.png").string());
+			img4.readPNG((dir / "4/1.png").string());
+		} else {
+			img1.readJPEG((dir / "1/4.jpg").string());
+			img2.readJPEG((dir / "2/3.jpg").string());
+			img3.readJPEG((dir / "3/2.jpg").string());
+			img4.readJPEG((dir / "4/1.jpg").string());
+		}
+
+		int s = img1.getWidth();
+		// create images for the new directories
+		RGBAImage new1(s, s), new2(s, s), new3(s, s), new4(s, s);
+		RGBAImage old1, old2, old3, old4;
+		// resize the old images...
+		img1.resize(old1, 0, 0, InterpolationType::HALF);
+		img2.resize(old2, 0, 0, InterpolationType::HALF);	
+		img3.resize(old3, 0, 0, InterpolationType::HALF);
+		img4.resize(old4, 0, 0, InterpolationType::HALF);
+
+		// ...to blit them to the images of the new directories
+		new1.simpleAlphaBlit(old1, s/2, s/2);
+		new2.simpleAlphaBlit(old2, 0, s/2);
+		new3.simpleAlphaBlit(old3, s/2, 0);
+		new4.simpleAlphaBlit(old4, 0, 0);
+
+		// now save the new images in the output directory
+		if (image_format == "png") {
+			new1.writePNG((dir / "1.png").string());
+			new2.writePNG((dir / "2.png").string());
+			new3.writePNG((dir / "3.png").string());
+			new4.writePNG((dir / "4.png").string());
+		} else {
+			new1.writeJPEG((dir / "1.jpg").string(), jpeg_quality);
+			new2.writeJPEG((dir / "2.jpg").string(), jpeg_quality);
+			new3.writeJPEG((dir / "3.jpg").string(), jpeg_quality);
+			new4.writeJPEG((dir / "4.jpg").string(), jpeg_quality);
+		}
+
+		// don't forget the base.png
+		RGBAImage base(2*s, 2*s);
+		base.simpleAlphaBlit(new1, 0, 0);
+		base.simpleAlphaBlit(new2, s, 0);
+		base.simpleAlphaBlit(new3, 0, s);
+		base.simpleAlphaBlit(new4, s, s);
+		base = base.resize(0, 0, InterpolationType::HALF);
+		if (image_format == "png")
+			base.writePNG((dir / "base.png").string());
+		else
+			base.writeJPEG((dir / "base.jpg").string(), jpeg_quality);
 	}
-
-	int s = img1.getWidth();
-	// create images for the new directories
-	RGBAImage new1(s, s), new2(s, s), new3(s, s), new4(s, s);
-	RGBAImage old1, old2, old3, old4;
-	// resize the old images...
-	img1.resize(old1, 0, 0, InterpolationType::HALF);
-	img2.resize(old2, 0, 0, InterpolationType::HALF);	
-	img3.resize(old3, 0, 0, InterpolationType::HALF);
-	img4.resize(old4, 0, 0, InterpolationType::HALF);
-
-	// ...to blit them to the images of the new directories
-	new1.simpleAlphaBlit(old1, s/2, s/2);
-	new2.simpleAlphaBlit(old2, 0, s/2);
-	new3.simpleAlphaBlit(old3, s/2, 0);
-	new4.simpleAlphaBlit(old4, 0, 0);
-
-	// now save the new images in the output directory
-	if (image_format == "png") {
-		new1.writePNG((dir / "1.png").string());
-		new2.writePNG((dir / "2.png").string());
-		new3.writePNG((dir / "3.png").string());
-		new4.writePNG((dir / "4.png").string());
-	} else {
-		new1.writeJPEG((dir / "1.jpg").string(), jpeg_quality);
-		new2.writeJPEG((dir / "2.jpg").string(), jpeg_quality);
-		new3.writeJPEG((dir / "3.jpg").string(), jpeg_quality);
-		new4.writeJPEG((dir / "4.jpg").string(), jpeg_quality);
-	}
-
-	// don't forget the base.png
-	RGBAImage base(2*s, 2*s);
-	base.simpleAlphaBlit(new1, 0, 0);
-	base.simpleAlphaBlit(new2, s, 0);
-	base.simpleAlphaBlit(new3, 0, s);
-	base.simpleAlphaBlit(new4, s, s);
-	base = base.resize(0, 0, InterpolationType::HALF);
-	if (image_format == "png")
-		base.writePNG((dir / "base.png").string());
-	else
-		base.writeJPEG((dir / "base.jpg").string(), jpeg_quality);
 }
 
 }

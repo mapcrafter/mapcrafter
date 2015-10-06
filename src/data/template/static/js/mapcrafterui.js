@@ -31,8 +31,8 @@ var MCTileLayer = L.TileLayer.extend({
 /**
  * Creates a tile layer of a map with a specific rotation
  */
-function createMCTileLayer(mapName, mapConfig, mapRotation) {
-	return new MCTileLayer(mapName + "/" + ["tl", "tr", "br", "bl"][mapRotation], {
+function createMCTileLayer(mapName, type, mapConfig, mapRotation) {
+	return new MCTileLayer(mapName + "/" + ["tl", "tr", "br", "bl"][mapRotation] + "/" + type, {
 		maxZoom: mapConfig.maxZoom,
 		tileSize: mapConfig.tileSize,
 		noWrap: true,
@@ -197,7 +197,7 @@ MapcrafterUI.prototype.init = function() {
 		this.layers[map] = {};
 		for(var i2 in mapConfig.rotations) {
 			var rotation = mapConfig.rotations[i2];
-			this.layers[map][rotation] = createMCTileLayer(map, mapConfig, rotation);
+			this.layers[map][rotation] = createMCTileLayer(map, "terrain", mapConfig, rotation);
 			if(firstMap === null)
 				firstMap = map;
 		}
