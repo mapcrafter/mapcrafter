@@ -26,6 +26,7 @@
 
 #include <png.h>
 #include <cstdint>
+#include <limits>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -119,6 +120,8 @@ public:
 	void alphaBlit(const RGBAImage& image, int x, int y);
 	void blendPixel(RGBAPixel color, int x, int y);
 
+	void blit(const RGBAImage& image, int x, int y, const RGBAImage& mask);
+	void blit(const RGBAImage& image, int x, int y);	
 	void applyMask(const RGBAImage& mask, RGBAPixel color = 0);
 
 	void fill(RGBAPixel color, int x1 = 0, int y1 = 0, int w = -1, int h = -1);
@@ -166,6 +169,12 @@ public:
 	bool readJPEG(const std::string& filename);
 	bool writeJPEG(const std::string& filename, int quality,
 			RGBAPixel background = rgba(255, 255, 255, 255)) const;
+
+	static const int CENTER = std::numeric_limits<int>::min();
+	static const int LEFT = 0;
+	static const int RIGHT = std::numeric_limits<int>::min() + 1;
+	static const int TOP = LEFT;
+	static const int BOTTOM = RIGHT;
 };
 
 template <typename Pixel>

@@ -268,6 +268,33 @@ void RGBAImage::blendPixel(RGBAPixel color, int x, int y) {
 		blend(data[y * width + x], color);
 }
 
+void RGBAImage::blit(const RGBAImage& image, int x, int y, const RGBAImage& mask) {
+	if (x == CENTER)
+		x = (width - image.width) / 2;
+	else if (x == RIGHT)
+		x = width - image.width;
+
+	if (y == CENTER)
+		y = (height - image.height) / 2;
+	else if (y == BOTTOM)
+		y = height - image.height;
+
+	int sx = std::max(0, -x);
+	int sy;
+	for (; sx < image.width && sx+x < width; sx++) {
+		sy = std::max(0, -y);
+		for (; sy < image.height && sy+y < height; sy++) {
+			if (rgba_alpha(mask.pixel(sx, sy)) != 0) {
+				pixel(sx + x, sy + y) = image.pixel(sx, sy);
+			}
+		}
+	}
+}
+
+void RGBAImage::blit(const RGBAImage& image, int x, int y) {
+	blit(image, x, y, image);
+}
+
 void RGBAImage::applyMask(const RGBAImage& mask, RGBAPixel color) {
 	assert(width == mask.width && height == mask.height);
 

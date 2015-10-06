@@ -315,7 +315,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 			for (size_t i = 0; i < overlay_tiles.size(); i++) {
 				RGBAImage block_overlay = image.emptyCopy();
 				overlays[i]->drawOverlay(node.image, block_overlay, node.pos, id, data);
-				block_overlay.applyMask(node.image);
+				// block_overlay.applyMask(node.image);
 				node.block_overlays.push_back(block_overlay);
 			}
 
@@ -349,7 +349,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 			++it) {
 		tile.alphaBlit(it->image, it->x, it->y);
 		for (size_t i = 0; i < overlay_tiles.size(); i++) {
-			overlay_tiles[i].simpleAlphaBlit(it->block_overlays[i], it->x, it->y);
+			overlay_tiles[i].blit(it->block_overlays[i], it->x, it->y, it->image);
 		}
 	}
 }
