@@ -76,6 +76,7 @@ struct RenderBlock {
 	int x, y;
 	bool transparent;
 	RGBAImage image;
+	std::vector<RGBAImage> block_overlays;
 	mc::BlockPos pos;
 	uint8_t id, data;
 

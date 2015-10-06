@@ -24,6 +24,7 @@
 #include "../../image.h"
 #include "../../rendermode.h"
 #include "../../tileset.h"
+#include "../../rendermodes/overlay.h"
 #include "../../../mc/pos.h"
 #include "../../../mc/worldcache.h"
 #include "../../../util.h"
@@ -311,6 +312,13 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 			// let the render mode do their magic with the block image
 			render_mode->draw(node.image, node.pos, id, data);
 
+			for (size_t i = 0; i < overlay_tiles.size(); i++) {
+				RGBAImage block_overlay = image.emptyCopy();
+				overlays[i]->drawOverlay(node.image, block_overlay, node.pos, id, data);
+				block_overlay.applyMask(node.image);
+				node.block_overlays.push_back(block_overlay);
+			}
+
 			// insert into current row
 			row_nodes.insert(node);
 
@@ -340,6 +348,9 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 	for (std::set<RenderBlock>::const_iterator it = blocks.begin(); it != blocks.end();
 			++it) {
 		tile.alphaBlit(it->image, it->x, it->y);
+		for (size_t i = 0; i < overlay_tiles.size(); i++) {
+			overlay_tiles[i].simpleAlphaBlit(it->block_overlays[i], it->x, it->y);
+		}
 	}
 }
 
