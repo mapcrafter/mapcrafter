@@ -38,6 +38,8 @@ TileRenderer::TileRenderer(const RenderView* render_view, BlockImages* images,
 	  render_mode(render_mode), overlays(overlays),
 	  render_biomes(true), use_preblit_water(false) {
 	render_mode->initialize(render_view, images, world, &current_chunk);
+	for (size_t i = 0; i < overlays.size(); i++)
+		overlays[i]->initialize(render_view, images, world, &current_chunk);
 }
 
 TileRenderer::~TileRenderer() {

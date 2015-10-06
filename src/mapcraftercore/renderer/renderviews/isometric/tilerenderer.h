@@ -92,7 +92,7 @@ public:
 			const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays);
 	virtual ~IsometricTileRenderer();
 
-	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile);
+	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile, std::vector<RGBAImage>& overlay_tiles);
 
 	virtual int getTileSize() const;
 };

@@ -36,8 +36,8 @@ public:
 			const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays);
 	~TopdownTileRenderer();
 
-	void renderChunk(const mc::Chunk& chunk, RGBAImage& tile, int dx, int dy);
-	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile);
+	void renderChunk(const mc::Chunk& chunk, RGBAImage& tile, std::vector<RGBAImage>& overlay_tiles, int dx, int dz);
+	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile, std::vector<RGBAImage>& overlay_tiles);
 
 	virtual int getTileSize() const;
 };

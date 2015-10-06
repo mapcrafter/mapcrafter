@@ -24,6 +24,7 @@
 #include "../../image.h"
 #include "../../rendermode.h"
 #include "../../tileset.h"
+#include "../../rendermodes/overlay.h"
 #include "../../../mc/pos.h"
 #include "../../../mc/worldcache.h"
 #include "../../../util.h"
@@ -52,13 +53,14 @@ namespace {
 
 struct RenderBlock {
 	RGBAImage block;
+	std::vector<RGBAImage> block_overlays;
 	uint16_t id, data;
 	mc::BlockPos pos;
 };
 
 }
 
-void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, int dx, int dy) {
+void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, std::vector<RGBAImage>& overlay_tiles, int dx, int dz) {
 	// TODO implement preblit water render behavior
 
 	int texture_size = images->getTextureSize();
@@ -145,11 +147,20 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 				}
 
 				render_mode->draw(block, globalpos, id, data);
+
 				RenderBlock render_block;
 				render_block.block = block;
 				render_block.id = id;
 				render_block.data = data;
 				render_block.pos = globalpos;
+
+				for (size_t i = 0; i < overlays.size(); i++) {
+					RGBAImage block_overlay = block.emptyCopy();
+					overlays[i]->drawOverlay(block, block_overlay, globalpos, id, data);
+					block_overlay.applyMask(block);
+					render_block.block_overlays.push_back(block_overlay);
+				}
+				
 				blocks.push_back(render_block);
 
 				if (!images->isBlockTransparent(id, data))
@@ -159,23 +170,31 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 
 			while (blocks.size() > 0) {
 				RenderBlock render_block = blocks.back();
-				tile.alphaBlit(render_block.block, dx + x*texture_size, dy + z*texture_size);
+				int px = dx + x * texture_size;
+				int pz = dz + z * texture_size;
+				tile.alphaBlit(render_block.block, px, pz);
+				for (size_t i = 0; i < overlays.size(); i++)
+					overlay_tiles[i].simpleAlphaBlit(render_block.block_overlays[i], px, pz);
 				blocks.pop_back();
 			}
 		}
 	}
 }
 
-void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
+void TopdownTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile, std::vector<RGBAImage>& overlay_tiles) {
+	assert(overlays.size() == overlay_tiles.size());
+
 	int texture_size = images->getTextureSize();
 	tile.setSize(getTileSize(), getTileSize());
+	for (size_t i = 0; i < overlays.size(); i++)
+		overlay_tiles[i].setSize(getTileSize(), getTileSize());
 
 	for (int x = 0; x < tile_width; x++) {
 		for (int z = 0; z < tile_width; z++) {
 			mc::ChunkPos chunkpos(tile_pos.getX() * tile_width + x, tile_pos.getY() * tile_width + z);
 			current_chunk = world->getChunk(chunkpos);
 			if (current_chunk != nullptr)
-				renderChunk(*current_chunk, tile, texture_size*16*x, texture_size*16*z);
+				renderChunk(*current_chunk, tile, overlay_tiles, texture_size*16*x, texture_size*16*z);
 		}
 	}
 }

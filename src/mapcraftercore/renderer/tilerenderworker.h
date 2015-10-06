@@ -28,6 +28,7 @@
 
 #include <memory>
 #include <set>
+#include <vector>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
@@ -98,8 +99,8 @@ public:
 
 	void setProgressHandler(util::IProgressHandler* progress);
 
-	void saveTile(const TilePath& tile, const RGBAImage& image);
-	void renderRecursive(const TilePath& path, RGBAImage& image);
+	void saveTile(const TilePath& path, const std::string& type, const RGBAImage& tile);
+	void renderRecursive(const TilePath& path, RGBAImage& tile, std::vector<RGBAImage>& overlay_tiles);
 
 	void operator()();
 

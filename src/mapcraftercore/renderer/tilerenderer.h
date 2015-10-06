@@ -55,7 +55,7 @@ public:
 	void setRenderBiomes(bool render_biomes);
 	void setUsePreblitWater(bool use_preblit_water);
 
-	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile) = 0;
+	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile, std::vector<RGBAImage>& overlay_tiles) = 0;
 
 	virtual int getTileSize() const = 0;
 

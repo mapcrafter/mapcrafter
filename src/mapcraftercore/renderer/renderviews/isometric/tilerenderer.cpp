@@ -139,10 +139,14 @@ IsometricTileRenderer::IsometricTileRenderer(const RenderView* render_view,
 IsometricTileRenderer::~IsometricTileRenderer() {
 }
 
-void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
+void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile, std::vector<RGBAImage>& overlay_tiles) {
+	assert(overlays.size() == overlay_tiles.size());
+
 	// some vars, set correct image size
 	int block_size = images->getBlockSize();
 	tile.setSize(getTileSize(), getTileSize());
+	for (size_t i = 0; i < overlays.size(); i++)
+		overlay_tiles[i].setSize(getTileSize(), getTileSize());
 
 	// get the maximum count of water blocks
 	// blitted about each over, until they are nearly opaque
