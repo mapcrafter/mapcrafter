@@ -29,6 +29,10 @@ PosHashHandler.prototype.onMapChange = function(name, rotation) {
 	this.updateHash();
 };
 
+PosHashHandler.prototype.onOverlayChange = function(overlay, enabled) {
+	this.updateHash();
+};
+
 PosHashHandler.prototype.parseHash = function() {
 	if(!location.hash)
 		return null;
@@ -36,33 +40,52 @@ PosHashHandler.prototype.parseHash = function() {
 	var url = location.hash.substr(1);
 	var split = url.split("/");
 	
-	if(split.length != 6)
+	if(split.length != 7)
 		return null;
-	for(var i = 1; i < 6; i++)
+	for(var i = 2; i < 7; i++)
 		split[i] = parseInt(split[i]);
 	return split;
 };
 
 PosHashHandler.prototype.updateHash = function() {
 	var type = this.ui.getCurrentMap();
+	var overlays = this.ui.getEnabledOverlays().join(",");
+	if(overlays == "")
+		overlays = "-";
 	var rotation = this.ui.getCurrentRotation();
 	var xzy = this.ui.latLngToMC(this.ui.lmap.getCenter(), 64);
 	for(var i = 0; i < 3; i++)
 		xzy[i] = Math.round(xzy[i]);
 	var zoom = this.ui.lmap.getZoom();
-	window.location.replace("#" + type + "/" + rotation + "/" + zoom + "/" + xzy[0] + "/" + xzy[1] + "/" + xzy[2]);
+	window.location.replace("#" + type + "/" + overlays + "/" + rotation + "/" + zoom + "/" + xzy[0] + "/" + xzy[1] + "/" + xzy[2]);
 };
 
 PosHashHandler.prototype.gotoHash = function(hash) {
 	if(!hash)
 		return;
+
+	var map = hash[0];
+	var overlays = hash[1].split(",");
+	var rotation = hash[2];
+	var zoom = hash[3];
+	var x = hash[4];
+	var z = hash[5];
+	var y = hash[6];
 	
-	if(!(hash[0] in this.ui.getMapConfigs()) 
-			|| this.ui.getMapConfig(hash[0]).rotations.indexOf(hash[1]) < 0)
+	if(!(map in this.ui.getMapConfigs()) 
+			|| this.ui.getMapConfig(map).rotations.indexOf(rotation) < 0)
 		return null;
 		
-	this.ui.setMapAndRotation(hash[0], hash[1]);
+	this.ui.setMapAndRotation(map, rotation);
+
+	var availOverlays = this.ui.getCurrentOverlays();
+	for(var i in availOverlays) {
+		var overlay = availOverlays[i].id;
+		var enabled = overlays.indexOf(overlay) != -1;
+		this.ui.enableOverlay(overlays[i], enabled);
+	}
 		
-	var latlng = this.ui.mcToLatLng(hash[3], hash[4], hash[5]);
-	this.ui.lmap.setView(latlng, hash[2]);
+	var latlng = this.ui.mcToLatLng(x, z, y);
+	this.ui.lmap.setView(latlng, zoom);
 };
+

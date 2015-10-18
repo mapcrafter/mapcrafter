@@ -11,3 +11,7 @@ BaseHandler.prototype.create = function() {
 
 BaseHandler.prototype.onMapChange = function(name, rotation) {
 };
+
+BaseHandler.prototype.onOverlayChange = function(overlay, enabled) {
+};
+

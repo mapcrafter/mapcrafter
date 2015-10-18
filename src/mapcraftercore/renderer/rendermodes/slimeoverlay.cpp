@@ -58,7 +58,7 @@ int JavaRandom::nextInt(int max) {
 }
 
 SlimeOverlay::SlimeOverlay(fs::path world_dir, int rotation)
-	: OverlayRenderMode(OverlayMode::PER_BLOCK), world_dir(world_dir),
+	: OverlayRenderMode(OverlayMode::PER_BLOCK, "slime", "Slimes"), world_dir(world_dir),
 	  rotation(rotation), world_seed(0) {
 	try {
 		nbt::NBTFile level_dat;
@@ -73,10 +73,6 @@ SlimeOverlay::SlimeOverlay(fs::path world_dir, int rotation)
 }
 
 SlimeOverlay::~SlimeOverlay() {
-}
-
-std::string SlimeOverlay::getName() const {
-	return "slime";
 }
 
 bool SlimeOverlay::isSlimeChunk(const mc::ChunkPos& chunk, long long world_seed) {

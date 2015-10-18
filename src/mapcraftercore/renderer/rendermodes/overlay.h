@@ -75,20 +75,23 @@ enum class OverlayMode {
  */
 class OverlayRenderMode : public BaseRenderMode<OverlayRenderer> {
 public:
-	OverlayRenderMode(OverlayMode overlay_mode);
+	OverlayRenderMode(OverlayMode overlay_mode, const std::string& id, const std::string& name);
 	virtual ~OverlayRenderMode();
 
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 	virtual void drawOverlay(RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
-	virtual std::string getName() const = 0;
+	std::string getID() const;
+	std::string getName() const;
 
 protected:
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
 
 private:
 	OverlayMode overlay_mode;
+
+	std::string id, name;
 };
 
 std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(

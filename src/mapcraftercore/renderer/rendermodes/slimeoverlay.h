@@ -48,8 +48,6 @@ public:
 	SlimeOverlay(fs::path world_dir, int rotation);
 	virtual ~SlimeOverlay();
 
-	virtual std::string getName() const;
-
 	static bool isSlimeChunk(const mc::ChunkPos& chunk, long long world_seed);
 
 protected:

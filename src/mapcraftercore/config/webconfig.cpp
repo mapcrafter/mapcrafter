@@ -279,8 +279,12 @@ picojson::value WebConfig::getConfigJSON() const {
 
 		picojson::array overlays_json;
 		auto overlays = map_it->getOverlays();
-		for (auto it = overlays.begin(); it != overlays.end(); ++it)
-			overlays_json.push_back(picojson::value(util::str(*it)));
+		for (auto it = overlays.begin(); it != overlays.end(); ++it) {
+			picojson::object overlay_json;
+			overlay_json["id"] = picojson::value(util::str(*it));
+			overlay_json["name"] = picojson::value(util::capitalize(util::str(*it)));
+			overlays_json.push_back(picojson::value(overlay_json));
+		}
 		map_json["overlays"] = picojson::value(overlays_json);
 
 		map_json["tileSize"] = picojson::value((double) getMapTileSize(map_it->getShortName()));

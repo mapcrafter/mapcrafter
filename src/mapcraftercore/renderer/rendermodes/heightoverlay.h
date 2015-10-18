@@ -29,8 +29,7 @@ namespace renderer {
 class HeightOverlay : public OverlayRenderMode {
 public:
 	HeightOverlay();
-
-	virtual std::string getName() const;
+	virtual ~HeightOverlay();
 
 protected:
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data);

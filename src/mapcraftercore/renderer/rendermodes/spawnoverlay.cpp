@@ -25,14 +25,11 @@ namespace mapcrafter {
 namespace renderer {
 
 SpawnOverlay::SpawnOverlay(bool day)
-	: OverlayRenderMode(OverlayMode::PER_FACE), day(day) {
+	: OverlayRenderMode(OverlayMode::PER_FACE, (day ? "spawnday" : "spawnnight"),
+			(day ? "Spawn at day" : "Spawn at night")), day(day) {
 }
 
 SpawnOverlay::~SpawnOverlay() {
-}
-
-std::string SpawnOverlay::getName() const {
-	return day ? "spawnday" : "spawnnight";
 }
 
 RGBAPixel SpawnOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {

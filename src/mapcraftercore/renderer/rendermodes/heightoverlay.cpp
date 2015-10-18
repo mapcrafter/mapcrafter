@@ -26,11 +26,10 @@ namespace mapcrafter {
 namespace renderer {
 
 HeightOverlay::HeightOverlay()
-	: OverlayRenderMode(OverlayMode::PER_BLOCK) {
+	: OverlayRenderMode(OverlayMode::PER_BLOCK, "height", "Height") {
 }
 
-std::string HeightOverlay::getName() const {
-	return "height";
+HeightOverlay::~HeightOverlay() {
 }
 
 RGBAPixel HeightOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {

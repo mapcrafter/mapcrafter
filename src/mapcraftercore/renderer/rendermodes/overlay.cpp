@@ -91,8 +91,9 @@ std::tuple<int, int, int> OverlayRenderer::getRecolor(RGBAPixel color) const {
 
 const RenderModeRendererType OverlayRenderer::TYPE = RenderModeRendererType::OVERLAY;
 
-OverlayRenderMode::OverlayRenderMode(OverlayMode overlay_mode)
-	: overlay_mode(overlay_mode) {
+OverlayRenderMode::OverlayRenderMode(OverlayMode overlay_mode, const std::string& id,
+		const std::string& name)
+	: overlay_mode(overlay_mode), id(id), name(name) {
 }
 
 OverlayRenderMode::~OverlayRenderMode() {
@@ -178,6 +179,14 @@ void OverlayRenderMode::drawOverlay(RGBAImage& block, RGBAImage& overlay,
 				renderer->tintRight(overlay, color_right);
 		}
 	}
+}
+
+std::string OverlayRenderMode::getID() const {
+	return id;
+}
+
+std::string OverlayRenderMode::getName() const {
+	return name;
 }
 
 std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(const config::WorldSection& world_config,

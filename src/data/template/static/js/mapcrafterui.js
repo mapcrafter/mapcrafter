@@ -37,7 +37,7 @@ function createMCTileLayer(mapName, type, mapConfig, mapRotation) {
 		tileSize: mapConfig.tileSize,
 		noWrap: true,
 		continuousWorld: true,
-		imageFormat: mapConfig.imageFormat,
+		imageFormat: mapConfig.imageFormat
 	});
 };
 
@@ -159,8 +159,10 @@ function MapcrafterUI(config) {
 	
 	// current map (map name as string)
 	this.currentMap = null;
-	// and current rotation
+	// current rotation
 	this.currentRotation = null;
+	// currently enabled overlays
+	this.enabledOverlays = [];
 	
 	// leaflet map object
 	this.lmap = null;
@@ -201,8 +203,9 @@ MapcrafterUI.prototype.init = function() {
 			this.layers[map][rotation] = {};
 			this.layers[map][rotation]["terrain"] = createMCTileLayer(map, "terrain", mapConfig, rotation);
 			for(var i3 in mapConfig.overlays) {
-				var overlay = "overlay_" + mapConfig.overlays[i3];
-				this.layers[map][rotation][overlay] = createMCTileLayer(map, overlay, mapConfig, rotation);
+				var overlay = mapConfig.overlays[i3];
+				var type = "overlay_" + overlay.id;
+				this.layers[map][rotation][type] = createMCTileLayer(map, type, mapConfig, rotation);
 			}
 			if(firstMap === null)
 				firstMap = map;
@@ -275,10 +278,38 @@ MapcrafterUI.prototype.getCurrentMapConfig = function() {
 	return this.getMapConfig(this.currentMap);
 };
 
+MapcrafterUI.prototype.getCurrentOverlays = function() {
+	return this.getCurrentMapConfig().overlays;
+}
+
+/**
+ * Returns the name of an overlay by its ID.
+ *
+ * If you specify a map config, you can control where the overlay is searched (as the
+ * overlays are (for now) saved per map and not global). Otherwise the current map config
+ * is just used.
+ */
+MapcrafterUI.prototype.getOverlayName = function(id, mapConfig) {
+	overlays = typeof mapConfig !== 'undefined' ? mapConfig.overlays : this.getCurrentMapConfig().overlays;
+	for(var i in overlays) {
+		if(overlays[i].id == id)
+			return overlays[i].name;
+	}
+	return null;
+}
+
+/**
+ * Returns a list of IDs which overlays are currently enabled.
+ */
+MapcrafterUI.prototype.getEnabledOverlays = function() {
+	return this.enabledOverlays;
+};
+
 /**
  * Sets the current map and rotation.
  */
 MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
+	console.log("setMapAndRotation", map, rotation);
 	var oldMapConfig = this.getCurrentMapConfig();
 	var mapConfig = this.getMapConfig(map);
 	
@@ -296,13 +327,15 @@ MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 	this.currentMap = map;
 	this.currentRotation = parseInt(rotation);
 	
-	// remove old map layers and add the new map terrain layer
-	var self = this;
-	this.lmap.eachLayer(function(layer) {
-		self.lmap.removeLayer(layer);
-	});
+	// copy of overlays array, disable all overlays
+	var overlays = this.enabledOverlays.slice();
+	for(var i in overlays)
+		this.enableOverlay(overlays[i], false);
+	// and remove the old map terrain layer
+	if (oldMapLayer != null)
+		this.lmap.removeLayer(oldMapLayer);
+	// add the new map terrain layer
 	this.lmap.addLayer(this.layers[this.currentMap][this.currentRotation]["terrain"]);
-	//this.lmap.invalidateSize();
 	
 	// check whether we are switching to a completely different map
 	if(oldMapLayer == null || oldMapConfig.world != mapConfig.world) {
@@ -330,8 +363,14 @@ MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 	}
 	
 	// call handlers
+	console.log("handlers", this.handlers.length);
 	for(var i = 0; i < this.handlers.length; i++)
 		this.handlers[i].onMapChange(this.currentMap, this.currentRotation);
+
+	// enable all overlays again
+	// TODO which behavior here?
+	for(var i in overlays)
+		this.enableOverlay(overlays[i], true);
 };
 
 /**
@@ -363,6 +402,36 @@ MapcrafterUI.prototype.setMap = function(map) {
  */
 MapcrafterUI.prototype.setMapRotation = function(rotation) {
 	this.setMapAndRotation(this.currentMap, rotation);
+};
+
+
+/**
+ * Shows/Hides the given overlay (depending on the enabled argument).
+ */
+MapcrafterUI.prototype.enableOverlay = function(overlay, enabled) {
+	// overlay does not exist
+	if(this.getOverlayName(overlay) == null)
+		return;
+
+	var enabled_state = this.enabledOverlays.indexOf(overlay) != -1;
+	// overlay already enabled/disabled
+	if(enabled_state == enabled)
+		return;
+
+	// add/remove overlay to/from map
+	var type = "overlay_" + overlay;
+	var layer = this.layers[this.currentMap][this.currentRotation][type];
+	if(enabled) {
+		this.lmap.addLayer(layer);
+		this.enabledOverlays.push(overlay);
+	} else {
+		this.lmap.removeLayer(layer);
+		this.enabledOverlays.splice(this.enabledOverlays.indexOf(overlay), 1);
+	}
+
+	// call handlers
+	for(var i = 0; i < this.handlers.length; i++)
+		this.handlers[i].onOverlayChange(overlay, enabled);
 };
 
 /**
@@ -426,6 +495,8 @@ MapcrafterUI.prototype.addHandler = function(handler) {
 	handler.ui = this;
 	handler.create();
 	handler.onMapChange(this.currentMap, this.currentRotation);
+	for(var i in this.enabledOverlays)
+		handler.onOverlayChange(this.enabledOverlays[i], true);
 	this.handlers.push(handler);
 };
 

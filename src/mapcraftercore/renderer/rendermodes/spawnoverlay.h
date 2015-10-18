@@ -31,8 +31,6 @@ public:
 	SpawnOverlay(bool day);
 	virtual ~SpawnOverlay();
 
-	virtual std::string getName() const;
-
 protected:
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
