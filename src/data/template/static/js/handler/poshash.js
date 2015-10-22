@@ -82,7 +82,7 @@ PosHashHandler.prototype.gotoHash = function(hash) {
 	for(var i in availOverlays) {
 		var overlay = availOverlays[i].id;
 		var enabled = overlays.indexOf(overlay) != -1;
-		this.ui.enableOverlay(overlays[i], enabled);
+		this.ui.enableOverlay(overlay, enabled);
 	}
 		
 	var latlng = this.ui.mcToLatLng(x, z, y);
