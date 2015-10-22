@@ -102,13 +102,15 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 				type = "terrain";
 			else
 				type = std::string("overlay_") + render_context.overlays[i]->getID();
-			RGBAImage& image = tile;
+			// uhm, somehow doesn't work using a reference?
+			RGBAImage* image = &tile;
 			if (i != overlay_tiles.size())
-				image = overlay_tiles[i];
+				image = &overlay_tiles[i];
 			fs::path file = render_context.output_dir / type
 					/ (path.toString() + "." + render_context.map_config.getImageFormatSuffix());
-			if ((png && image.readPNG(file.string()))
-					|| (!png && image.readJPEG(file.string()))) {
+			if ((png && image->readPNG(file.string()))
+					|| (!png && image->readJPEG(file.string()))) {
+				// increase progress count only once
 				if (i == overlay_tiles.size() && render_work.tiles_skip.count(path) && progress != nullptr)
 					progress->setValue(progress->getValue()
 							+ render_context.tile_set->getContainingRenderTiles(path));
@@ -169,6 +171,7 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 		RGBAImage other;
 		RGBAImage resized;
 		std::vector<RGBAImage> other_overlays(overlay_tiles.size());
+
 		if (render_context.tile_set->hasTile(path + 1)) {
 			renderRecursive(path + 1, other, other_overlays);
 			other.resize(resized, 0, 0, InterpolationType::HALF);
