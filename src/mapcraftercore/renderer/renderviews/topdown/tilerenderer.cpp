@@ -173,8 +173,10 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, s
 				int px = dx + x * texture_size;
 				int pz = dz + z * texture_size;
 				tile.alphaBlit(render_block.block, px, pz);
-				for (size_t i = 0; i < overlays.size(); i++)
-					overlay_tiles[i].simpleAlphaBlit(render_block.block_overlays[i], px, pz);
+				for (size_t i = 0; i < overlays.size(); i++) {
+					// overlay_tiles[i].simpleAlphaBlit(render_block.block_overlays[i], px, pz);
+					overlay_tiles[i].blit(render_block.block_overlays[i], px, pz, render_block.block);
+				}
 				blocks.pop_back();
 			}
 		}
