@@ -26,7 +26,7 @@ namespace mapcrafter {
 namespace renderer {
 
 HeightOverlay::HeightOverlay()
-	: OverlayRenderMode(OverlayMode::PER_BLOCK, "height", "Height") {
+	: TintingOverlay(OverlayMode::PER_BLOCK, "height", "Height") {
 }
 
 HeightOverlay::~HeightOverlay() {

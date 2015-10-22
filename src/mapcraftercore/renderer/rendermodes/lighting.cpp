@@ -253,9 +253,11 @@ void LightingRenderer::createShade(RGBAImage& image, const CornerColors& corners
 	drawTopTriangle(image, size, corners[3], corners[1], corners[0]);
 }
 
-LightingRenderMode::LightingRenderMode(bool day, double lighting_intensity,
-		double lighting_water_intensity, bool simulate_sun_light)
-	: day(day), lighting_intensity(lighting_intensity),
+LightingRenderMode::LightingRenderMode(const std::string& id, const std::string& name,
+		bool day, double lighting_intensity, double lighting_water_intensity,
+		bool simulate_sun_light)
+	: BaseOverlayRenderMode<LightingRenderer>(id, name), day(day),
+	  lighting_intensity(lighting_intensity),
 	  lighting_water_intensity(lighting_water_intensity),
 	  simulate_sun_light(simulate_sun_light) {
 }
@@ -270,30 +272,38 @@ bool LightingRenderMode::isHidden(const mc::BlockPos& pos,
 
 void LightingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
+	RGBAImage overlay = image.emptyCopy();
+	drawOverlay(image, overlay, pos, id, data);
+	overlay.applyMask(image);
+	image.alphaBlit(overlay, 0, 0);
+}
+
+void LightingRenderMode::drawOverlay(RGBAImage& block, RGBAImage& overlay,
+		const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	bool transparent = images->isBlockTransparent(id, data);
 
 	bool water = (id == 8 || id == 9) && (data & util::binary<1111>::value) == 0;
-	int texture_size = image.getHeight() / 2;
+	int texture_size = block.getHeight() / 2;
 
 	if (id == 78 && (data & util::binary<1111>::value) == 0) {
 		// flat snow gets also smooth lighting
 		int height = ((data & util::binary<1111>::value) + 1) / 8.0 * texture_size;
-		renderer->lightTop(image, getCornerColors(pos, CORNERS_BOTTOM),
+		renderer->lightTop(overlay, getCornerColors(pos, CORNERS_BOTTOM),
 				texture_size - height);
-		renderer->lightLeft(image, getCornerColors(pos, CORNERS_LEFT),
+		renderer->lightLeft(overlay, getCornerColors(pos, CORNERS_LEFT),
 				texture_size - height, texture_size);
-		renderer->lightRight(image, getCornerColors(pos, CORNERS_RIGHT),
+		renderer->lightRight(overlay, getCornerColors(pos, CORNERS_RIGHT),
 				texture_size - height, texture_size);
 	} else if (id == 44 || id == 126) {
 		// slabs and wooden slabs
-		doSlabLight(image, pos, id, data);
+		doSlabLight(overlay, pos, id, data);
 	} else if (transparent && !water && id != 79) {
 		// transparent blocks (except full water blocks and ice)
 		// get simple lighting, they are completely lighted, not per face
-		doSimpleLight(image, pos, id, data);
+		doSimpleLight(overlay, pos, id, data);
 	} else {
 		// do smooth lighting for all other blocks
-		doSmoothLight(image, pos, id, data);
+		doSmoothLight(overlay, pos, id, data);
 	}
 }
 
@@ -441,8 +451,11 @@ void LightingRenderMode::doSimpleLight(RGBAImage& image, const mc::BlockPos& pos
 	for (int x = 0; x < size; x++) {
 		for (int y = 0; y < size; y++) {
 			uint32_t& pixel = image.pixel(x, y);
+			pixel = rgba(0, 0, 0, 255 - factor);
+			/*
 			if (pixel != 0)
 				pixel = rgba_multiply(pixel, factor, factor, factor, 255);
+			*/
 		}
 	}
 }

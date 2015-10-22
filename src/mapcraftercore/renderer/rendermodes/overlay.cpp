@@ -20,6 +20,7 @@
 #include "overlay.h"
 
 #include "heightoverlay.h"
+#include "lighting.h"
 #include "slimeoverlay.h"
 #include "spawnoverlay.h"
 #include "../blockimages.h"
@@ -91,60 +92,15 @@ std::tuple<int, int, int> OverlayRenderer::getRecolor(RGBAPixel color) const {
 
 const RenderModeRendererType OverlayRenderer::TYPE = RenderModeRendererType::OVERLAY;
 
-OverlayRenderMode::OverlayRenderMode(OverlayMode overlay_mode, const std::string& id,
+TintingOverlay::TintingOverlay(OverlayMode overlay_mode, const std::string& id,
 		const std::string& name)
-	: overlay_mode(overlay_mode), id(id), name(name) {
+	: BaseOverlayRenderMode(id, name), overlay_mode(overlay_mode) {
 }
 
-OverlayRenderMode::~OverlayRenderMode() {
+TintingOverlay::~TintingOverlay() {
 }
 
-void OverlayRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id,
-		uint16_t data) {
-	/*
-	// TODO handle some special cases, for example: colorize blocks under water?
-	if (overlay_mode == OverlayMode::PER_BLOCK) {
-		// simple mode where we just tint whole blocks
-		RGBAPixel color = getBlockColor(pos, id, data);
-		if (rgba_alpha(color) == 0)
-			return;
-		renderer->tintBlock(image, color);
-	} else {
-		// "advanced" mode where each block/position has a color,
-		// and adjacent faces are tinted / or the transparent blocks themselves
-		// TODO potential for optimization, maybe cache colors of blocks?
-		if (images->isBlockTransparent(id, data)) {
-			RGBAPixel color = getBlockColor(pos, id, data);
-			if (rgba_alpha(color) == 0)
-				return;
-			renderer->tintBlock(image, color);
-		} else {
-			mc::Block top, left, right;
-			RGBAPixel color_top, color_left, color_right;
-			top = getBlock(pos + mc::DIR_TOP, mc::GET_ID | mc::GET_DATA);
-			left = getBlock(pos + mc::DIR_WEST, mc::GET_ID | mc::GET_DATA);
-			right = getBlock(pos + mc::DIR_SOUTH, mc::GET_ID | mc::GET_DATA);
-			color_top = getBlockColor(pos + mc::DIR_TOP, top.id, top.data);
-			color_left = getBlockColor(pos + mc::DIR_WEST, left.id, left.data);
-			color_right = getBlockColor(pos + mc::DIR_SOUTH, right.id, right.data);
-			
-			if (rgba_alpha(color_top) != 0)
-				renderer->tintTop(image, color_top, 0);
-			if (rgba_alpha(color_left) != 0)
-				renderer->tintLeft(image, color_left);
-			if (rgba_alpha(color_right) != 0)
-				renderer->tintRight(image, color_right);
-		}
-	}
-	*/
-
-	RGBAImage overlay = image.emptyCopy();
-	drawOverlay(image, overlay, pos, id, data);
-	overlay.applyMask(image);
-	image.alphaBlit(overlay, 0, 0);
-}
-
-void OverlayRenderMode::drawOverlay(RGBAImage& block, RGBAImage& overlay,
+void TintingOverlay::drawOverlay(RGBAImage& block, RGBAImage& overlay,
 		const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	if (overlay_mode == OverlayMode::PER_BLOCK) {
 		// simple mode where we just tint whole blocks
@@ -181,14 +137,6 @@ void OverlayRenderMode::drawOverlay(RGBAImage& block, RGBAImage& overlay,
 	}
 }
 
-std::string OverlayRenderMode::getID() const {
-	return id;
-}
-
-std::string OverlayRenderMode::getName() const {
-	return name;
-}
-
 std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(const config::WorldSection& world_config,
 		const config::MapSection& map_config, int rotation) {
 	std::vector<std::shared_ptr<OverlayRenderMode>> overlays;
@@ -204,6 +152,14 @@ std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(const config::Wor
 			overlay = new SpawnOverlay(true);
 		else if (overlay_type == OverlayType::SPAWNNIGHT)
 			overlay = new SpawnOverlay(false);
+		else if (overlay_type == OverlayType::DAY)
+			overlay = new LightingRenderMode("day", "Day", true,
+					map_config.getLightingIntensity(), map_config.getLightingWaterIntensity(),
+					world_config.getDimension() == mc::Dimension::END);
+		else if (overlay_type == OverlayType::NIGHT)
+			overlay = new LightingRenderMode("night", "Night", false,
+					map_config.getLightingIntensity(), map_config.getLightingWaterIntensity(),
+					world_config.getDimension() == mc::Dimension::END);
 		else {
 			// should not happen
 			assert(false);

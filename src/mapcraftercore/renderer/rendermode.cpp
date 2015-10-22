@@ -101,6 +101,8 @@ std::ostream& operator<<(std::ostream& out, OverlayType overlay) {
 	case OverlayType::SLIME: return out << "slime";
 	case OverlayType::SPAWNDAY: return out << "spawnday";
 	case OverlayType::SPAWNNIGHT: return out << "spawnnight";
+	case OverlayType::DAY: return out << "day";
+	case OverlayType::NIGHT: return out << "night";
 	default: return out << "unknown";
 	}
 }
@@ -122,16 +124,16 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 			render_mode->addRenderMode(new CaveRenderMode({mc::DIR_TOP}));
 		// if we want some shadows, then simulate the sun light because it's dark in caves
 		if (type == RenderModeType::CAVELIGHT)
-			render_mode->addRenderMode(new LightingRenderMode(true, map_config.getLightingIntensity(),
+			render_mode->addRenderMode(new LightingRenderMode("day", "Day", true, map_config.getLightingIntensity(),
 						map_config.getLightingWaterIntensity(), true));
 		render_mode->addRenderMode(new HeightOverlay());
 	}
 	else if (type == RenderModeType::DAYLIGHT) {
-		render_mode->addRenderMode(new LightingRenderMode(true,
+		render_mode->addRenderMode(new LightingRenderMode("day", "Day", true,
 					map_config.getLightingIntensity(), map_config.getLightingWaterIntensity(),
 					world_config.getDimension() == mc::Dimension::END));
 	} else if (type == RenderModeType::NIGHTLIGHT) {
-		render_mode->addRenderMode(new LightingRenderMode(false,
+		render_mode->addRenderMode(new LightingRenderMode("night", "Night", false,
 					map_config.getLightingIntensity(), map_config.getLightingWaterIntensity(),
 					world_config.getDimension() == mc::Dimension::END));
 	} else {

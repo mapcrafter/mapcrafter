@@ -121,7 +121,9 @@ public:
 	void blendPixel(RGBAPixel color, int x, int y);
 
 	void blit(const RGBAImage& image, int x, int y, const RGBAImage& mask);
-	void blit(const RGBAImage& image, int x, int y);	
+	void blit(const RGBAImage& image, int x, int y);
+	void alphablit(const RGBAImage& image, int x, int y, const RGBAImage& mask);
+	void alphablit(const RGBAImage& image, int x, int y);
 	void applyMask(const RGBAImage& mask, RGBAPixel color = 0);
 
 	void fill(RGBAPixel color, int x1 = 0, int y1 = 0, int w = -1, int h = -1);

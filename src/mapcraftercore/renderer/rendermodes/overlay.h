@@ -63,40 +63,130 @@ protected:
 	bool high_contrast;
 };
 
-enum class OverlayMode {
-	PER_BLOCK,
-	PER_FACE,
-};
-
 /**
  * A render mode that renders an overlay on top of the blocks. You just have to implement
  * the function that returns the color for each block. Return something with alpha == 0
  * if there should be no color.
  */
-class OverlayRenderMode : public BaseRenderMode<OverlayRenderer> {
+class OverlayRenderMode : public RenderMode {
 public:
-	OverlayRenderMode(OverlayMode overlay_mode, const std::string& id, const std::string& name);
-	virtual ~OverlayRenderMode();
+	virtual ~OverlayRenderMode() {}
+
+	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
+
+	virtual void drawOverlay(RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
+
+	virtual std::string getID() const = 0;
+	virtual std::string getName() const = 0;
+};
+
+template <typename Renderer = OverlayRenderer>
+class BaseOverlayRenderMode : public OverlayRenderMode, public HasRenderModeRenderer<Renderer> {
+public:
+	BaseOverlayRenderMode(const std::string& id, const std::string& name);
+	virtual ~BaseOverlayRenderMode();
+
+	virtual void initialize(const RenderView* render_view, BlockImages* images,
+			mc::WorldCache* world, mc::Chunk** current_chunk);
+	
+	/**
+	 * Dummy implementation of interface method. Returns false as default.
+	 */
+	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 	virtual void drawOverlay(RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
-	std::string getID() const;
-	std::string getName() const;
+	virtual std::string getID() const;
+	virtual std::string getName() const;
+
+protected:
+	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
+	
+	std::string id, name;
+
+	BlockImages* images;
+	mc::WorldCache* world;
+	mc::Chunk** current_chunk;
+};
+
+enum class OverlayMode {
+	PER_BLOCK,
+	PER_FACE,
+};
+
+class TintingOverlay : public BaseOverlayRenderMode<> {
+public:
+	TintingOverlay(OverlayMode overlay_mode, const std::string& id, const std::string& name);
+	virtual ~TintingOverlay();
+
+	virtual void drawOverlay(RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 protected:
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
 
 private:
 	OverlayMode overlay_mode;
-
-	std::string id, name;
 };
 
 std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(
 		const config::WorldSection& world_config, const config::MapSection& map_config,
 		int rotation);
+
+template <typename Renderer>
+BaseOverlayRenderMode<Renderer>::BaseOverlayRenderMode(const std::string& id, const std::string& name)
+	: id(id), name(name), images(nullptr), world(nullptr), current_chunk(nullptr) {
+}
+
+template <typename Renderer>
+BaseOverlayRenderMode<Renderer>::~BaseOverlayRenderMode() {
+}
+
+template <typename Renderer>
+void BaseOverlayRenderMode<Renderer>::draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id,
+		uint16_t data) {
+	RGBAImage overlay = image.emptyCopy();
+	drawOverlay(image, overlay, pos, id, data);
+	overlay.applyMask(image);
+	image.alphaBlit(overlay, 0, 0);
+}
+
+template <typename Renderer>
+void BaseOverlayRenderMode<Renderer>::drawOverlay(RGBAImage& block, RGBAImage& overlay,
+		const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+}
+
+template <typename Renderer>
+void BaseOverlayRenderMode<Renderer>::initialize(const RenderView* render_view, 
+		BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk) {
+	this->images = images;
+	this->world = world;
+	this->current_chunk = current_chunk;
+
+	HasRenderModeRenderer<Renderer>::initializeRenderer(render_view);
+}
+
+template <typename Renderer>
+bool BaseOverlayRenderMode<Renderer>::isHidden(const mc::BlockPos& pos, uint16_t id,
+		uint16_t data) {
+	return false;
+}
+
+template <typename Renderer>
+std::string BaseOverlayRenderMode<Renderer>::getID() const {
+	return id;
+}
+
+template <typename Renderer>
+std::string BaseOverlayRenderMode<Renderer>::getName() const {
+	return name;
+}
+
+template <typename Renderer>
+mc::Block BaseOverlayRenderMode<Renderer>::getBlock(const mc::BlockPos& pos, int get) {
+	return world->getBlock(pos, *current_chunk, get);
+}
 
 }
 }

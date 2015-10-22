@@ -52,10 +52,14 @@ void TopdownLightingRenderer::lightTop(RGBAImage& image, const CornerColors& col
 	for (int x = 0; x < size; x++) {
 		for (int y = 0; y < size; y++) {
 			uint32_t& pixel = image.pixel(x, y);
+			uint8_t d = rgba_alpha(shade.pixel(x, y));
+			pixel = rgba(0, 0, 0, 255 - d);
+			/*
 			if (pixel != 0) {
 				uint8_t d = rgba_alpha(shade.pixel(x, y));
 				pixel = rgba_multiply(pixel, d, d, d);
 			}
+			*/
 		}
 	}
 }

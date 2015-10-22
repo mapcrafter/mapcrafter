@@ -138,6 +138,19 @@ public:
 	static const RenderModeRendererType TYPE;
 };
 
+template <typename Renderer = DummyRenderer>
+class HasRenderModeRenderer {
+public:
+	HasRenderModeRenderer();
+	virtual ~HasRenderModeRenderer();
+
+	void initializeRenderer(const RenderView* render_view);
+
+protected:
+	RenderModeRenderer* renderer_ptr;
+	Renderer* renderer;
+};
+
 /**
  * The base render mode class already implements handling of the initialize-method and
  * some other stuff (a comfortable getBlock-method that takes the current_chunk into
@@ -153,7 +166,7 @@ public:
  * DummyRenderer class as renderer in the template.
  */
 template <typename Renderer = DummyRenderer>
-class BaseRenderMode : public RenderMode {
+class BaseRenderMode : public RenderMode, public HasRenderModeRenderer<Renderer> {
 public:
 	BaseRenderMode();
 	virtual ~BaseRenderMode();
@@ -177,9 +190,6 @@ public:
 
 protected:
 	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
-
-	RenderModeRenderer* renderer_ptr;
-	Renderer* renderer;
 
 	BlockImages* images;
 	mc::WorldCache* world;
@@ -237,6 +247,8 @@ enum class OverlayType {
 	SLIME,
 	SPAWNDAY,
 	SPAWNNIGHT,
+	DAY,
+	NIGHT
 };
 
 std::ostream& operator<<(std::ostream& out, RenderModeType render_mode);
@@ -249,19 +261,44 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config, int rotation);
 
 template <typename Renderer>
-BaseRenderMode<Renderer>::BaseRenderMode()
-	: renderer_ptr(nullptr), images(nullptr), world(nullptr), current_chunk(nullptr) {
+HasRenderModeRenderer<Renderer>::HasRenderModeRenderer()
+	: renderer_ptr(nullptr), renderer(nullptr) {
 }
 
 template <typename Renderer>
-BaseRenderMode<Renderer>::~BaseRenderMode() {
+HasRenderModeRenderer<Renderer>::~HasRenderModeRenderer() {
 	if (renderer_ptr != nullptr)
 		delete renderer_ptr;
 }
 
 template <typename Renderer>
+void HasRenderModeRenderer<Renderer>::initializeRenderer(const RenderView* render_view) {
+	// create the render mode renderer by calling the render view factory method
+	// for this renderer type
+	renderer_ptr = render_view->createRenderModeRenderer(Renderer::TYPE);
+	// try to cast it to the right subclass, make sure that works if there is a renderer
+	renderer = dynamic_cast<Renderer*>(renderer_ptr);
+	if (Renderer::TYPE != RenderModeRendererType::DUMMY)
+		assert(renderer);
+}
+
+template <typename Renderer>
+BaseRenderMode<Renderer>::BaseRenderMode()
+	: /*renderer_ptr(nullptr), */images(nullptr), world(nullptr), current_chunk(nullptr) {
+}
+
+template <typename Renderer>
+BaseRenderMode<Renderer>::~BaseRenderMode() {
+	/*
+	if (renderer_ptr != nullptr)
+		delete renderer_ptr;
+	*/
+}
+
+template <typename Renderer>
 void BaseRenderMode<Renderer>::initialize(const RenderView* render_view, 
 		BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk) {
+	/*
 	// create the render mode renderer by calling the render view factory method
 	// for this renderer type
 	this->renderer_ptr = render_view->createRenderModeRenderer(Renderer::TYPE);
@@ -269,9 +306,12 @@ void BaseRenderMode<Renderer>::initialize(const RenderView* render_view,
 	this->renderer = dynamic_cast<Renderer*>(renderer_ptr);
 	if (Renderer::TYPE != RenderModeRendererType::DUMMY)
 		assert(renderer);
+	*/
 	this->images = images;
 	this->world = world;
 	this->current_chunk = current_chunk;
+
+	HasRenderModeRenderer<Renderer>::initializeRenderer(render_view);
 }
 
 template <typename Renderer>

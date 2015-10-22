@@ -101,7 +101,7 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 			if (i == overlay_tiles.size())
 				type = "terrain";
 			else
-				type = std::string("overlay_") + render_context.overlays[i]->getName();
+				type = std::string("overlay_") + render_context.overlays[i]->getID();
 			RGBAImage& image = tile;
 			if (i != overlay_tiles.size())
 				image = overlay_tiles[i];
@@ -148,7 +148,7 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 		// save it
 		saveTile(path, "terrain", tile);
 		for (size_t i = 0; i < overlay_tiles.size(); i++) {
-			std::string type = "overlay_" + render_context.overlays[i]->getName();
+			std::string type = "overlay_" + render_context.overlays[i]->getID();
 			saveTile(path, type, overlay_tiles[i]);
 		}
 
@@ -228,7 +228,7 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 		// then save the tile
 		saveTile(path, "terrain", tile);
 		for (size_t i = 0; i < overlay_tiles.size(); i++) {
-			std::string type = "overlay_" + render_context.overlays[i]->getName();
+			std::string type = "overlay_" + render_context.overlays[i]->getID();
 			saveTile(path, type, overlay_tiles[i]);
 		}
 	}
@@ -242,7 +242,7 @@ void TileRenderWorker::operator()() {
 		progress->setMax(work);
 		progress->setValue(0);
 	}
-	
+
 	RGBAImage tile;
 	std::vector<RGBAImage> overlay_images(render_context.overlays.size());
 	// iterate through the start composite tiles

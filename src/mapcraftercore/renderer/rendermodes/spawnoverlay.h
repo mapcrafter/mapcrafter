@@ -26,7 +26,7 @@
 namespace mapcrafter {
 namespace renderer {
 
-class SpawnOverlay : public OverlayRenderMode {
+class SpawnOverlay : public TintingOverlay {
 public:
 	SpawnOverlay(bool day);
 	virtual ~SpawnOverlay();

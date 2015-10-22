@@ -20,6 +20,7 @@
 #ifndef RENDERMODES_LIGHTING_H_
 #define RENDERMODES_LIGHTING_H_
 
+#include "overlay.h"
 #include "../rendermode.h"
 
 #include <array>
@@ -125,7 +126,7 @@ public:
 
 	/**
 	 * Adds "simple" lighting to a block by just tinting all pixels. This is used for
-	 * transparent pixels for example.
+	 * transparent blocks for example.
 	 */
 	virtual void lightAllSimple(RGBAImage& image, LightingColor color) const;
 
@@ -150,14 +151,16 @@ protected:
 	void createShade(RGBAImage& image, const CornerColors& corners) const;
 };
 
-class LightingRenderMode : public BaseRenderMode<LightingRenderer> {
+class LightingRenderMode : public BaseOverlayRenderMode<LightingRenderer> {
 public:
-	LightingRenderMode(bool day, double lighting_intensity,
-			double lighting_water_intensity, bool simulate_sun_light);
+	LightingRenderMode(const std::string& id, const std::string& name, bool day, 
+			double lighting_intensity, double lighting_water_intensity,
+			bool simulate_sun_light);
 	virtual ~LightingRenderMode();
 
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	virtual void drawOverlay(RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 private:
 	bool day;

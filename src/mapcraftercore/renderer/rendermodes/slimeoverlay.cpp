@@ -58,7 +58,7 @@ int JavaRandom::nextInt(int max) {
 }
 
 SlimeOverlay::SlimeOverlay(fs::path world_dir, int rotation)
-	: OverlayRenderMode(OverlayMode::PER_BLOCK, "slime", "Slimes"), world_dir(world_dir),
+	: TintingOverlay(OverlayMode::PER_BLOCK, "slime", "Slimes"), world_dir(world_dir),
 	  rotation(rotation), world_seed(0) {
 	try {
 		nbt::NBTFile level_dat;

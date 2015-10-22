@@ -38,10 +38,14 @@ void IsometricLightingRenderer::lightLeft(RGBAImage& image, const CornerColors& 
 		if (it.src_y < y_start || it.src_y > y_end)
 			continue;
 		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + size/2);
+		uint8_t d = rgba_alpha(shade.pixel(it.src_x, it.src_y));
+		pixel = rgba(0, 0, 0, 255 - d);
+		/*
 		if (pixel != 0) {
 			uint8_t d = rgba_alpha(shade.pixel(it.src_x, it.src_y));
 			pixel = rgba_multiply(pixel, d, d, d);
 		}
+		*/
 	}
 }
 
@@ -59,10 +63,14 @@ void IsometricLightingRenderer::lightRight(RGBAImage& image, const CornerColors&
 		if (it.src_y < y_start || it.src_y > y_end)
 			continue;
 		uint32_t& pixel = image.pixel(it.dest_x + size, it.dest_y + size/2);
+		uint8_t d = rgba_alpha(shade.pixel(it.src_x, it.src_y));
+		pixel = rgba(0, 0, 0, 255 - d);
+		/*
 		if (pixel != 0) {
 			uint8_t d = rgba_alpha(shade.pixel(it.src_x, it.src_y));
 			pixel = rgba_multiply(pixel, d, d, d);
 		}
+		*/
 	}
 }
 
@@ -80,10 +88,14 @@ void IsometricLightingRenderer::lightTop(RGBAImage& image, const CornerColors& c
 
 	for (TopFaceIterator it(size); !it.end(); it.next()) {
 		uint32_t& pixel = image.pixel(it.dest_x, it.dest_y + yoff);
+		uint8_t d = rgba_alpha(shade.pixel(it.src_x, it.src_y));
+		pixel = rgba(0, 0, 0, 255 - d);
+		/*
 		if (pixel != 0) {
 			uint8_t d = rgba_alpha(shade.pixel(it.src_x, it.src_y));
 			pixel = rgba_multiply(pixel, d, d, d);
 		}
+		*/
 	}
 }
 

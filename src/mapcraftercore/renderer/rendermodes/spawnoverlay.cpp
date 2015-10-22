@@ -25,7 +25,7 @@ namespace mapcrafter {
 namespace renderer {
 
 SpawnOverlay::SpawnOverlay(bool day)
-	: OverlayRenderMode(OverlayMode::PER_FACE, (day ? "spawnday" : "spawnnight"),
+	: TintingOverlay(OverlayMode::PER_FACE, (day ? "spawnday" : "spawnnight"),
 			(day ? "Spawn at day" : "Spawn at night")), day(day) {
 }
 

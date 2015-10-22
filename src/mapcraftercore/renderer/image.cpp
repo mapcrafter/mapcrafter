@@ -295,6 +295,25 @@ void RGBAImage::blit(const RGBAImage& image, int x, int y) {
 	blit(image, x, y, image);
 }
 
+void RGBAImage::alphablit(const RGBAImage& image, int x, int y, const RGBAImage& mask) {
+	if (x >= width || y >= height)
+		return;
+
+	int sx = std::max(0, -x);
+	int sy;
+	for (; sx < image.width && sx+x < width; sx++) {
+		sy = std::max(0, -y);
+		for (; sy < image.height && sy+y < height; sy++) {
+			if (rgba_alpha(mask.pixel(sx, sy)) != 0)
+				blend(data[(sy+y) * width + (sx+x)], image.data[sy * image.width + sx]);
+		}
+	}
+}
+
+void RGBAImage::alphablit(const RGBAImage& image, int x, int y) {
+	alphablit(image, x, y, image);
+}
+
 void RGBAImage::applyMask(const RGBAImage& mask, RGBAPixel color) {
 	assert(width == mask.width && height == mask.height);
 

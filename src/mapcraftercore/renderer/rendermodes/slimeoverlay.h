@@ -43,7 +43,7 @@ protected:
 	long long seed;
 };
 
-class SlimeOverlay : public OverlayRenderMode {
+class SlimeOverlay : public TintingOverlay {
 public:
 	SlimeOverlay(fs::path world_dir, int rotation);
 	virtual ~SlimeOverlay();

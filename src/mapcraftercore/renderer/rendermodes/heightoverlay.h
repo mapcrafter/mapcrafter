@@ -26,7 +26,7 @@
 namespace mapcrafter {
 namespace renderer {
 
-class HeightOverlay : public OverlayRenderMode {
+class HeightOverlay : public TintingOverlay {
 public:
 	HeightOverlay();
 	virtual ~HeightOverlay();
