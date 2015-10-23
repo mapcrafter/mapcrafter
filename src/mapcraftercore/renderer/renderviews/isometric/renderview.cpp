@@ -66,8 +66,10 @@ void IsometricRenderView::configureBlockImages(BlockImages* block_images,
 	IsometricBlockImages* images = dynamic_cast<IsometricBlockImages*>(block_images);
 	assert(images != nullptr);
 
+	// workaround so that plain render mode doesn't get dark block sides with overlays
 	RenderModeType render_mode = map_config.getRenderMode();
-	if (render_mode == RenderModeType::DAYLIGHT || render_mode == RenderModeType::NIGHTLIGHT)
+	if (render_mode == RenderModeType::DAYLIGHT || render_mode == RenderModeType::NIGHTLIGHT
+			|| (render_mode == RenderModeType::PLAIN && !map_config.getOverlays().empty()))
 		images->setBlockSideDarkening(0.95, 0.8);
 	else
 		images->setBlockSideDarkening(0.75, 0.6);
