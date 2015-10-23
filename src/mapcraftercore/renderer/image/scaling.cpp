@@ -2,6 +2,9 @@
 
 #include "../image.h"
 
+#include "../../util.h"
+#include <cassert>
+
 namespace mapcrafter {
 namespace renderer {
 
@@ -33,12 +36,14 @@ uint8_t interpolate(uint8_t a, uint8_t b, uint8_t c, uint8_t d, double w, double
 void imageResizeBilinear(const RGBAImage& image, RGBAImage& dest, int width, int height) {
 	dest.setSize(width, height);
 
-	double x_ratio = (double) image.getWidth() / width;
-	double y_ratio = (double) image.getWidth() / height;
-	if(image.getWidth() < width)
-		x_ratio = (double) (image.getWidth() - 1) / width;
-	if(image.getHeight() < height)
-		y_ratio = (double) (image.getWidth() - 1) / height;
+	int old_width = image.getWidth();
+	int old_height = image.getHeight();
+	double x_ratio = (double) old_width / width;
+	double y_ratio = (double) old_height / height;
+	if(old_width < width)
+		x_ratio = (double) (old_width - 1) / width;
+	if(old_height < height)
+		y_ratio = (double) (old_height - 1) / height;
 
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
@@ -58,13 +63,15 @@ void imageResizeBilinear(const RGBAImage& image, RGBAImage& dest, int width, int
 
 			// make sure output alpha is 255 if all input alphas are 255 too,
 			// so that no transparency (aka alpha=254) sneaks into images,
-			// otherwise shit hits the fani
+			// otherwise shit might hit the fan
+			// (had problems with some debian builds, because of this lighting rendering
+			//  broke as almost all blocks were detected as transparent)
 			
 			// sorry, this looks a bit complicated, but it's just making sure that this works
 			// for all special cases with the pixels on the sides of an image
-			if ((x == width - 1 && y == height - 1 && rgba_alpha(a) == 255) // pixel bottom-right corner
-					|| (x == width - 1 && rgba_alpha(a) == 255 && rgba_alpha(c) == 255) // pixel right side
-					|| (y == height - 1 &&  rgba_alpha(a) == 255 && rgba_alpha(b) == 255 && rgba_alpha(d) == 255) // pixel bottom side
+			if ((sx == old_width - 1 && sy == old_height - 1 && rgba_alpha(a) == 255) // pixel bottom-right corner
+					|| (sx == old_width - 1 && rgba_alpha(a) == 255 && rgba_alpha(c) == 255) // pixel right side
+					|| (sy == old_height - 1 &&  rgba_alpha(a) == 255 && rgba_alpha(b) == 255 && rgba_alpha(d) == 255) // pixel bottom side
 					|| (rgba_alpha(a) == 255 && rgba_alpha(b) == 255 && rgba_alpha(c) == 255 && rgba_alpha(d) == 255)) // other pixel
 				alpha = 255;
 			dest.setPixel(x, y, rgba(red, green, blue, alpha));
