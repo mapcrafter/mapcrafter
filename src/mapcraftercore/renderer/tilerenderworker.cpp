@@ -89,29 +89,39 @@ void TileRenderWorker::saveTile(const TilePath& tile, const std::string& type, c
 }
 
 void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, std::vector<RGBAImage>& overlay_tiles) {
-	// TODO overlays!
+	// we expect an array of images (they should be with zero size) for the overlays
+	// as many images as overlays there are
 	assert(overlay_tiles.size() == render_context.overlays.size());
 
 	// if this is tile is not required or we should skip it, try to load it from file
 	if (!render_context.tile_set->isTileRequired(path) || render_work.tiles_skip.count(path)) {
-		bool png = render_context.map_config.getImageFormat() == config::ImageFormat::PNG;
 		bool ok = true;
 		for (size_t i = 0; i <= overlay_tiles.size(); i++) {
-			std::string type;
-			if (i == overlay_tiles.size())
+			bool overlay = i != overlay_tiles.size();
+			
+			// which type/image suffix our tile has
+			std::string type, suffix;
+			if (overlay) {
+				// overlays are always png
+				type = "overlay_" + render_context.overlays[i]->getID();
+				suffix = "png";
+			} else {
 				type = "terrain";
-			else
-				type = std::string("overlay_") + render_context.overlays[i]->getID();
-			// uhm, somehow doesn't work using a reference?
+				suffix = render_context.map_config.getImageFormatSuffix();
+			}
+			bool png = suffix == "png";
+
+			// where we want to load the tile to
 			RGBAImage* image = &tile;
-			if (i != overlay_tiles.size())
+			if (overlay)
 				image = &overlay_tiles[i];
-			fs::path file = render_context.output_dir / type
-					/ (path.toString() + "." + render_context.map_config.getImageFormatSuffix());
+			
+			// now load the tile
+			fs::path file = render_context.output_dir / type / (path.toString() + "." + suffix);
 			if ((png && image->readPNG(file.string()))
 					|| (!png && image->readJPEG(file.string()))) {
 				// increase progress count only once
-				if (i == overlay_tiles.size() && render_work.tiles_skip.count(path) && progress != nullptr)
+				if (!overlay && render_work.tiles_skip.count(path) && progress != nullptr)
 					progress->setValue(progress->getValue()
 							+ render_context.tile_set->getContainingRenderTiles(path));
 			} else {
@@ -131,23 +141,12 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 
 	if (path.getDepth() == render_context.tile_set->getDepth()) {
 		// this tile is a render tile, render it
+		// also take the tile offset into account
 		render_context.tile_renderer->renderTile(path.getTilePos()
 				+ render_context.tile_set->getTileOffset(), tile, overlay_tiles);
 		render_work_result.tiles_rendered++;
 
-		/*
-		// draws a border on the tile
-		int size = settings.tile_size;
-		for (int x = 0; x < size; x++)
-			for (int y = 0; y < size; y++) {
-				if (x < 5 || x > size-5)
-					tile.setPixel(x, y, rgba(0, 0, 255, 255));
-				if (y < 5 || y > size-5)
-					tile.setPixel(x, y, rgba(0, 0, 255, 255));
-			}
-		*/
-
-		// save it
+		// save the tile and its overlays
 		saveTile(path, "terrain", tile);
 		for (size_t i = 0; i < overlay_tiles.size(); i++) {
 			std::string type = "overlay_" + render_context.overlays[i]->getID();
@@ -158,77 +157,67 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 		if (progress != nullptr)
 			progress->setValue(progress->getValue() + 1);
 	} else {
-		// this tile is a composite tile, we need to compose it from its children
-		// just check, if children 1, 2, 3, 4 exists, render it, resize it to the half size
-		// and blit it to the properly position
-		//int size = render_context.map_config.getTextureSize() * 32 * TILE_WIDTH;
-		// TODO
+		// this tile (and overlay) is a composite tile, we need to compose it from its children:
+		// - just check if children 1, 2, 3, 4 exist
+		// - render children
+		// - resize children it to the half size
+		// - blit children to the proper position on the new tile
+		
+		// set size of new tile
 		int size = render_context.tile_renderer->getTileSize();
 		tile.setSize(size, size);
 		for (size_t i = 0; i < overlay_tiles.size(); i++)
 			overlay_tiles[i].setSize(size, size);
 
-		RGBAImage other;
 		RGBAImage resized;
-		std::vector<RGBAImage> other_overlays(overlay_tiles.size());
+		RGBAImage rendered;
+		std::vector<RGBAImage> rendered_overlays(overlay_tiles.size());
 
 		if (render_context.tile_set->hasTile(path + 1)) {
-			renderRecursive(path + 1, other, other_overlays);
-			other.resize(resized, 0, 0, InterpolationType::HALF);
+			renderRecursive(path + 1, rendered, rendered_overlays);
+			rendered.resize(resized, 0, 0, InterpolationType::HALF);
 			tile.simpleAlphaBlit(resized, 0, 0);
-			other.clear();
+			rendered.clear();
 		
-			for (size_t i = 0; i < other_overlays.size(); i++) {
-				other_overlays[i].resize(resized, 0, 0, InterpolationType::HALF);
+			for (size_t i = 0; i < rendered_overlays.size(); i++) {
+				rendered_overlays[i].resize(resized, 0, 0, InterpolationType::HALF);
 				overlay_tiles[i].simpleAlphaBlit(resized, 0, 0);
-				other_overlays[i].clear();
+				rendered_overlays[i].clear();
 			}
 		}
 		if (render_context.tile_set->hasTile(path + 2)) {
-			renderRecursive(path + 2, other, other_overlays);
-			other.resize(resized, 0, 0, InterpolationType::HALF);
+			renderRecursive(path + 2, rendered, rendered_overlays);
+			rendered.resize(resized, 0, 0, InterpolationType::HALF);
 			tile.simpleAlphaBlit(resized, size / 2, 0);
-			for (size_t i = 0; i < other_overlays.size(); i++) {
-				other_overlays[i].resize(resized, 0, 0, InterpolationType::HALF);
+			for (size_t i = 0; i < rendered_overlays.size(); i++) {
+				rendered_overlays[i].resize(resized, 0, 0, InterpolationType::HALF);
 				overlay_tiles[i].simpleAlphaBlit(resized, size / 2, 0);
-				other_overlays[i].clear();
+				rendered_overlays[i].clear();
 			}
-			other.clear();
+			rendered.clear();
 		}
 		if (render_context.tile_set->hasTile(path + 3)) {
-			renderRecursive(path + 3, other, other_overlays);
-			other.resize(resized, 0, 0, InterpolationType::HALF);
+			renderRecursive(path + 3, rendered, rendered_overlays);
+			rendered.resize(resized, 0, 0, InterpolationType::HALF);
 			tile.simpleAlphaBlit(resized, 0, size / 2);
-			for (size_t i = 0; i < other_overlays.size(); i++) {
-				other_overlays[i].resize(resized, 0, 0, InterpolationType::HALF);
+			for (size_t i = 0; i < rendered_overlays.size(); i++) {
+				rendered_overlays[i].resize(resized, 0, 0, InterpolationType::HALF);
 				overlay_tiles[i].simpleAlphaBlit(resized, 0, size / 2);
-				other_overlays[i].clear();
+				rendered_overlays[i].clear();
 			}
-			other.clear();
+			rendered.clear();
 		}
 		if (render_context.tile_set->hasTile(path + 4)) {
-			renderRecursive(path + 4, other, other_overlays);
-			other.resize(resized, 0, 0, InterpolationType::HALF);
+			renderRecursive(path + 4, rendered, rendered_overlays);
+			rendered.resize(resized, 0, 0, InterpolationType::HALF);
 			tile.simpleAlphaBlit(resized, size / 2, size / 2);
-			for (size_t i = 0; i < other_overlays.size(); i++) {
-				other_overlays[i].resize(resized, 0, 0, InterpolationType::HALF);
+			for (size_t i = 0; i < rendered_overlays.size(); i++) {
+				rendered_overlays[i].resize(resized, 0, 0, InterpolationType::HALF);
 				overlay_tiles[i].simpleAlphaBlit(resized, size / 2, size / 2);
-				other_overlays[i].clear();
 			}
 		}
 
-		/*
-		// draws a border on the tile
-		for (int x = 0; x < size; x++)
-			for (int y = 0; y < size; y++) {
-				if (x < 5 || x > size-5)
-					tile.setPixel(x, y, rgba(255, 0, 0, 255));
-				if (y < 5 || y > size-5)
-					tile.setPixel(x, y, rgba(255, 0, 0, 255));
-			}
-		*/
-
-		// then save the tile
+		// then save the tile and its overlays
 		saveTile(path, "terrain", tile);
 		for (size_t i = 0; i < overlay_tiles.size(); i++) {
 			std::string type = "overlay_" + render_context.overlays[i]->getID();
