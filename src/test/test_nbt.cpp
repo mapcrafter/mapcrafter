@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(nbt_testIO) {
 	};
 	for (size_t i = 0; i < 3; i++) {
 		nbt::Compression compression = compressions[i];
-		BOOST_MESSAGE(std::string("Testing NBT with") + (compression == nbt::Compression::NO_COMPRESSION ? "out compression." : (compression == nbt::Compression::GZIP ? " Gzip compression." : " Zlib compression.")));
+		BOOST_TEST_MESSAGE(std::string("Testing NBT with") + (compression == nbt::Compression::NO_COMPRESSION ? "out compression." : (compression == nbt::Compression::GZIP ? " Gzip compression." : " Zlib compression.")));
 		
 		std::stringstream stream;
 		
