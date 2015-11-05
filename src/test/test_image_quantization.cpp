@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(image_quantization_octree) {
 	std::srand(std::time(0));
 
 	// create a random image to test octree with
-	BOOST_MESSAGE("Testing random image.");
+	BOOST_TEST_MESSAGE("Testing random image.");
 	RGBAImage random(1000, 1000);
 	for (int x = 0; x < random.getWidth(); x++)
 		for (int y = 0; y < random.getHeight(); y++)
