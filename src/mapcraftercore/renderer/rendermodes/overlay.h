@@ -78,12 +78,13 @@ public:
 
 	virtual std::string getID() const = 0;
 	virtual std::string getName() const = 0;
+	virtual bool isBase() const = 0;
 };
 
 template <typename Renderer = OverlayRenderer>
 class BaseOverlayRenderMode : public OverlayRenderMode, public HasRenderModeRenderer<Renderer> {
 public:
-	BaseOverlayRenderMode(const std::string& id, const std::string& name);
+	BaseOverlayRenderMode(const std::string& id, const std::string& name, bool base);
 	virtual ~BaseOverlayRenderMode();
 
 	virtual void initialize(const RenderView* render_view, BlockImages* images,
@@ -100,11 +101,13 @@ public:
 
 	virtual std::string getID() const;
 	virtual std::string getName() const;
+	virtual bool isBase() const;
 
 protected:
 	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
 	
 	std::string id, name;
+	bool base;
 
 	BlockImages* images;
 	mc::WorldCache* world;
@@ -135,8 +138,8 @@ std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(
 		int rotation);
 
 template <typename Renderer>
-BaseOverlayRenderMode<Renderer>::BaseOverlayRenderMode(const std::string& id, const std::string& name)
-	: id(id), name(name), images(nullptr), world(nullptr), current_chunk(nullptr) {
+BaseOverlayRenderMode<Renderer>::BaseOverlayRenderMode(const std::string& id, const std::string& name, bool base)
+	: id(id), name(name), base(base), images(nullptr), world(nullptr), current_chunk(nullptr) {
 }
 
 template <typename Renderer>
@@ -181,6 +184,11 @@ std::string BaseOverlayRenderMode<Renderer>::getID() const {
 template <typename Renderer>
 std::string BaseOverlayRenderMode<Renderer>::getName() const {
 	return name;
+}
+
+template <typename Renderer>
+bool BaseOverlayRenderMode<Renderer>::isBase() const {
+	return base;
 }
 
 template <typename Renderer>

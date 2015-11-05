@@ -164,6 +164,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 		// water render behavior n1:
 		// are we already in a row of water?
 		bool in_water = false;
+		bool has_full_water = false;
 
 		// water render behavior n2:
 		// water counter, how many water blocks are at the moment in this row?
@@ -216,6 +217,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 				// and darken the ground with the lighting data
 				// used for lighting rendermode
 
+				has_full_water = true;
 				// if we are already in water, skip checking this water block
 				if (is_water && in_water)
 					continue;
@@ -268,10 +270,10 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 								// get image and replace the old render block with this
 								//top.image = images->getOpaqueWater(neighbor_south,
 								//		neighbor_west);
-								top.image = images->getBlock(id, data);
+								top.block = images->getBlock(id, data);
 
 								// don't forget the render mode
-								render_mode->draw(top.image, top.pos, id, data);
+								render_mode->draw(top.block, top.pos, id, data);
 
 								row_nodes.insert(top);
 								break;
@@ -302,21 +304,22 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 				image = images->getBlock(id, data);
 
 			RenderBlock node;
-			node.x = it.draw_x;
-			node.y = it.draw_y;
-			node.transparent = transparent;
+			node.image_x = it.draw_x;
+			node.image_y = it.draw_y;
 			node.pos = block.current;
-			node.image = image;
 			node.id = id;
 			node.data = data;
+			node.transparent = transparent;
+			node.has_full_water = has_full_water;
+			node.block = image;
 
 			// let the render mode do their magic with the block image
-			render_mode->draw(node.image, node.pos, id, data);
+			render_mode->draw(node.block, node.pos, id, data);
 
 			for (size_t i = 0; i < overlay_tiles.size(); i++) {
 				RGBAImage block_overlay = image.emptyCopy();
-				overlays[i]->drawOverlay(node.image, block_overlay, node.pos, id, data);
-				// block_overlay.applyMask(node.image);
+				overlays[i]->drawOverlay(node.block, block_overlay, node.pos, id, data);
+				// block_overlay.applyMask(node.block);
 				node.block_overlays.push_back(block_overlay);
 			}
 
@@ -346,14 +349,17 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 	}
 
 	// now blit all blocks
-	for (std::set<RenderBlock>::const_iterator it = blocks.begin(); it != blocks.end();
-			++it) {
-		tile.alphaBlit(it->image, it->x, it->y);
+	for (std::set<RenderBlock>::const_iterator it = blocks.begin(); it != blocks.end(); ++it) {
+		tile.alphaBlit(it->block, it->image_x, it->image_y);
 		for (size_t i = 0; i < overlay_tiles.size(); i++) {
-			//if (it->transparent)
-			//	overlay_tiles[i].alphablit(it->block_overlays[i], it->x, it->y, it->image);
-			//else
-				overlay_tiles[i].blit(it->block_overlays[i], it->x, it->y, it->image);
+			// lighting overlay has to render the whole rows of water blocks,
+			// not just the overlay, because just overlaying water doesn't look that fancy
+			if (it->has_full_water && overlays[i]->isBase()) {
+				overlay_tiles[i].alphablit(it->block, it->image_x, it->image_y);
+				overlay_tiles[i].alphablit(it->block_overlays[i], it->image_x, it->image_y, it->block);
+			} else {
+				overlay_tiles[i].blit(it->block_overlays[i], it->image_x, it->image_y, it->block);
+			}
 		}
 	}
 }

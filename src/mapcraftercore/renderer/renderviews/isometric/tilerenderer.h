@@ -73,12 +73,12 @@ public:
 struct RenderBlock {
 
 	// drawing position in pixels on the tile
-	int x, y;
-	bool transparent;
-	RGBAImage image;
-	std::vector<RGBAImage> block_overlays;
+	int image_x, image_y;
 	mc::BlockPos pos;
 	uint8_t id, data;
+	bool transparent, has_full_water;
+	RGBAImage block;
+	std::vector<RGBAImage> block_overlays;
 
 	bool operator<(const RenderBlock& other) const;
 };

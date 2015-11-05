@@ -256,7 +256,7 @@ void LightingRenderer::createShade(RGBAImage& image, const CornerColors& corners
 LightingRenderMode::LightingRenderMode(const std::string& id, const std::string& name,
 		bool day, double lighting_intensity, double lighting_water_intensity,
 		bool simulate_sun_light)
-	: BaseOverlayRenderMode<LightingRenderer>(id, name), day(day),
+	: BaseOverlayRenderMode<LightingRenderer>(id, name, true), day(day),
 	  lighting_intensity(lighting_intensity),
 	  lighting_water_intensity(lighting_water_intensity),
 	  simulate_sun_light(simulate_sun_light) {

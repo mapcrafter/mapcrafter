@@ -52,10 +52,11 @@ TopdownTileRenderer::~TopdownTileRenderer() {
 namespace {
 
 struct RenderBlock {
+	mc::BlockPos pos;
+	uint16_t id, data;
+	bool has_full_water;
 	RGBAImage block;
 	std::vector<RGBAImage> block_overlays;
-	uint16_t id, data;
-	mc::BlockPos pos;
 };
 
 }
@@ -71,6 +72,7 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, s
 
 			// TODO make this water thing a bit nicer
 			bool in_water = false;
+			bool has_full_water = false;
 			int water = 0;
 
 			mc::LocalBlockPos localpos(x, z, 0);
@@ -106,6 +108,7 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, s
 				}
 
 				if (is_water && !use_preblit_water) {
+					has_full_water = true;
 					if (is_water == in_water) {
 						localpos.y--;
 						continue;
@@ -149,10 +152,11 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, s
 				render_mode->draw(block, globalpos, id, data);
 
 				RenderBlock render_block;
-				render_block.block = block;
+				render_block.pos = globalpos;
 				render_block.id = id;
 				render_block.data = data;
-				render_block.pos = globalpos;
+				render_block.has_full_water = has_full_water;
+				render_block.block = block;
 
 				for (size_t i = 0; i < overlays.size(); i++) {
 					RGBAImage block_overlay = block.emptyCopy();
@@ -170,12 +174,18 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, s
 
 			while (blocks.size() > 0) {
 				RenderBlock render_block = blocks.back();
-				int px = dx + x * texture_size;
-				int pz = dz + z * texture_size;
-				tile.alphaBlit(render_block.block, px, pz);
+				int image_x = dx + x * texture_size;
+				int image_y = dz + z * texture_size;
+				tile.alphaBlit(render_block.block, image_x, image_y);
 				for (size_t i = 0; i < overlays.size(); i++) {
-					// overlay_tiles[i].simpleAlphaBlit(render_block.block_overlays[i], px, pz);
-					overlay_tiles[i].blit(render_block.block_overlays[i], px, pz, render_block.block);
+					// lighting overlay has to render the whole rows of water blocks,
+					// not just the overlay, because just overlaying water doesn't look that fancy
+					if (render_block.has_full_water && overlays[i]->isBase()) {
+						overlay_tiles[i].alphablit(render_block.block, image_x, image_y);
+						overlay_tiles[i].alphablit(render_block.block_overlays[i], image_x, image_y, render_block.block);
+					} else {
+						overlay_tiles[i].blit(render_block.block_overlays[i], image_x, image_y, render_block.block);
+					}
 				}
 				blocks.pop_back();
 			}

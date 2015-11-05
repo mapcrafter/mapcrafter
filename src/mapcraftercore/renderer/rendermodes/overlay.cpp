@@ -94,7 +94,7 @@ const RenderModeRendererType OverlayRenderer::TYPE = RenderModeRendererType::OVE
 
 TintingOverlay::TintingOverlay(OverlayMode overlay_mode, const std::string& id,
 		const std::string& name)
-	: BaseOverlayRenderMode(id, name), overlay_mode(overlay_mode) {
+	: BaseOverlayRenderMode(id, name, false), overlay_mode(overlay_mode) {
 }
 
 TintingOverlay::~TintingOverlay() {
