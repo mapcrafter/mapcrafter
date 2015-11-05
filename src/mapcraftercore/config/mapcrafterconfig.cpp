@@ -123,9 +123,6 @@ void MapcrafterConfigRootSection::postParse(const INIConfigSection& section,
 }
 
 MapcrafterConfig::MapcrafterConfig() {
-	world_global.setGlobal(true);
-	map_global.setGlobal(true);
-	marker_global.setGlobal(true);
 }
 
 MapcrafterConfig::~MapcrafterConfig() {
@@ -162,14 +159,13 @@ ValidationMap MapcrafterConfig::parseString(const std::string& string,
 
 void MapcrafterConfig::dump(std::ostream& out) const {
 	out << root_section << std::endl;
-	out << world_global << std::endl;
-	out << map_global << std::endl;
-	out << marker_global << std::endl;
 
 	for (auto it = worlds.begin(); it != worlds.end(); ++it)
 		out << it->second << std::endl;
 	for (auto it = maps.begin(); it != maps.end(); ++it)
 		out << *it << std::endl;
+	for (auto it = overlays.begin(); it != overlays.end(); ++it)
+		out << it->second << std::endl;
 	for (auto it = markers.begin(); it != markers.end(); ++it)
 		out << *it << std::endl;
 	for (auto it = log_sections.begin(); it != log_sections.end(); ++it)
@@ -232,6 +228,16 @@ const MapSection& MapcrafterConfig::getMap(const std::string& map) const {
 	throw std::out_of_range("Map not found!");
 }
 
+bool MapcrafterConfig::hasOverlay(const std::string& overlay) const {
+	return overlays.count(overlay);
+}
+
+// const std::map<std::string, OverlaySection>& getOverlay() const;
+
+const OverlaySection& MapcrafterConfig::getOverlay(const std::string& overlay) const {
+	return overlays.at(overlay);
+}
+
 bool MapcrafterConfig::hasMarker(const std::string marker) const {
 	for (auto it = markers.begin(); it != markers.end(); ++it)
 		if (it->getShortName() == marker)
@@ -262,6 +268,7 @@ ValidationMap MapcrafterConfig::parse(const config::INIConfig& config,
 	parser.parseRootSection(root_section);
 	parser.parseSections(worlds, "world", ConfigDirSectionFactory<WorldSection>(config_dir));
 	parser.parseSections(maps, "map", ConfigDirSectionFactory<MapSection>(config_dir));
+	parser.parseSections(overlays, "overlay");
 	parser.parseSections(markers, "marker");
 	parser.parseSections(log_sections, "log", ConfigDirSectionFactory<LogSection>(config_dir));
 	parser.validate();
@@ -270,11 +277,12 @@ ValidationMap MapcrafterConfig::parse(const config::INIConfig& config,
 
 	// check if all worlds specified for maps exist
 	// 'map_it->getWorld() != ""' because that's already handled by map section class
-	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it)
+	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
 		if (map_it->getWorld() != "" && !hasWorld(map_it->getWorld())) {
 			validation.section(map_it->getPrettyName()).error(
 					"World '" + map_it->getWorld() + "' does not exist!");
 		}
+	}
 
 	return validation;
 }

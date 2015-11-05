@@ -24,6 +24,7 @@
 #include "configsections/log.h"
 #include "configsections/map.h"
 #include "configsections/marker.h"
+#include "configsections/overlay.h"
 #include "configsections/world.h"
 
 #include <iostream>
@@ -102,6 +103,10 @@ public:
 	const std::vector<MapSection>& getMaps() const;
 	const MapSection& getMap(const std::string& map) const;
 
+	bool hasOverlay(const std::string& overlay) const;
+	// const std::map<std::string, OverlaySection>& getOverlay() const;
+	const OverlaySection& getOverlay(const std::string& overlay) const;
+
 	bool hasMarker(const std::string marker) const;
 	const std::vector<MarkerSection>& getMarkers() const;
 	const MarkerSection& getMarker(const std::string& marker) const;
@@ -111,13 +116,10 @@ public:
 private:
 	ValidationMap parse(const INIConfig& config, const fs::path& config_dir);
 
-	WorldSection world_global;
-	MapSection map_global;
-	MarkerSection marker_global;
-
 	MapcrafterConfigRootSection root_section;
 	std::map<std::string, WorldSection> worlds;
 	std::vector<MapSection> maps;
+	std::map<std::string, OverlaySection> overlays;
 	std::vector<MarkerSection> markers;
 	std::vector<LogSection> log_sections;
 };
