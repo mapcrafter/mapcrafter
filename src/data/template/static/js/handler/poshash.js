@@ -80,11 +80,11 @@ PosHashHandler.prototype.gotoHash = function(hash) {
 
 	var availOverlays = this.ui.getCurrentOverlays();
 	for(var i in availOverlays) {
-		var overlay = availOverlays[i].id;
+		var overlay = availOverlays[i];
 		var enabled = overlays.indexOf(overlay) != -1;
 		this.ui.enableOverlay(overlay, enabled);
 	}
-		
+	
 	var latlng = this.ui.mcToLatLng(x, z, y);
 	this.ui.lmap.setView(latlng, zoom);
 };

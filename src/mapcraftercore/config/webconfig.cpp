@@ -217,7 +217,7 @@ void WebConfig::setMapLastRendered(const std::string& map,
 picojson::value WebConfig::getConfigJSON() const {
 	// we'll just call all the tile set group things tile sets here
 	// it would be too long otherwise
-	picojson::object config_json, maps_json, tile_sets_json;
+	picojson::object config_json, tile_sets_json, maps_json, overlays_json;
 	picojson::array maps_order_json;
 
 	// get used tile set groups
@@ -279,12 +279,8 @@ picojson::value WebConfig::getConfigJSON() const {
 
 		picojson::array overlays_json;
 		auto overlays = map_it->getOverlays();
-		for (auto it = overlays.begin(); it != overlays.end(); ++it) {
-			picojson::object overlay_json;
-			overlay_json["id"] = picojson::value(util::str(*it));
-			overlay_json["name"] = picojson::value(util::capitalize(util::str(*it)));
-			overlays_json.push_back(picojson::value(overlay_json));
-		}
+		for (auto it = overlays.begin(); it != overlays.end(); ++it)
+			overlays_json.push_back(picojson::value(*it));
 		map_json["overlays"] = picojson::value(overlays_json);
 
 		map_json["tileSize"] = picojson::value((double) getMapTileSize(map_it->getShortName()));
@@ -302,9 +298,19 @@ picojson::value WebConfig::getConfigJSON() const {
 		maps_json[map_it->getShortName()] = picojson::value(map_json);
 	}
 
+	auto overlays = config.getOverlays();
+	for (auto overlay_it = overlays.begin(); overlay_it != overlays.end(); ++overlay_it) {
+		auto overlay = overlay_it->second;
+		picojson::object overlay_json;
+		overlay_json["name"] = picojson::value(overlay.getName());
+		overlay_json["base"] = picojson::value(overlay.isBase());
+		overlays_json[overlay.getID()] = picojson::value(overlay_json);
+	}
+
 	config_json["tileSetGroups"] = picojson::value(tile_sets_json);
 	config_json["mapsOrder"] = picojson::value(maps_order_json);
 	config_json["maps"] = picojson::value(maps_json);
+	config_json["overlays"] = picojson::value(overlays_json);
 
 	return picojson::value(config_json);
 }

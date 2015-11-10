@@ -18,6 +18,7 @@
  */
 
 #include "overlay.h"
+
 #include "../iniconfig.h"
 #include "../../util.h"
 
@@ -25,6 +26,17 @@
 
 namespace mapcrafter {
 namespace util {
+
+template <>
+renderer::OverlayType as<renderer::OverlayType>(const std::string& from) {
+	if (from == "lighting")
+		return renderer::OverlayType::LIGHTING;
+	else if (from == "slime")
+		return renderer::OverlayType::SLIME;
+	else if (from == "spawn")
+		return renderer::OverlayType::SPAWN;
+	throw std::invalid_argument("Must be 'none', 'spawn', 'slime' or 'lighting'.");
+}
 
 }
 }
@@ -47,6 +59,8 @@ std::string OverlaySection::getPrettyName() const {
 void OverlaySection::dump(std::ostream& out) const {
 	out << getPrettyName() << ":" << std::endl;
 	out << "  name = " << name << std::endl;
+	out << "  type = " << type << std::endl;
+	out << "  base = " << base << std::endl;
 }
 
 std::string OverlaySection::getID() const {
@@ -55,6 +69,10 @@ std::string OverlaySection::getID() const {
 
 std::string OverlaySection::getName() const {
 	return name.getValue();
+}
+
+renderer::OverlayType OverlaySection::getType() const {
+	return type.getValue();
 }
 
 bool OverlaySection::isBase() const {
@@ -70,6 +88,8 @@ bool OverlaySection::parseField(const std::string key, const std::string value,
 		ValidationList& validation) {
 	if (key == "name") {
 		name.load(key, value, validation);
+	} else if (key == "type") {
+		type.load(key, value, validation);
 	} else if (key == "base") {
 		base.load(key, value, validation);
 	} else {
@@ -80,7 +100,7 @@ bool OverlaySection::parseField(const std::string key, const std::string value,
 
 void OverlaySection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
-	base.setDefault(false);
+	base.setDefault(getType() == renderer::OverlayType::LIGHTING);
 }
 
 } /* namespace config */

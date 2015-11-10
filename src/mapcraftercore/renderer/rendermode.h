@@ -243,12 +243,9 @@ enum class RenderModeType {
 };
 
 enum class OverlayType {
-	NONE,
+	LIGHTING,
 	SLIME,
-	SPAWNDAY,
-	SPAWNNIGHT,
-	DAY,
-	NIGHT
+	SPAWN,
 };
 
 std::ostream& operator<<(std::ostream& out, RenderModeType render_mode);

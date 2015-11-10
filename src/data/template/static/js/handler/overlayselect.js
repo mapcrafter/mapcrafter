@@ -27,15 +27,16 @@ OverlaySelectHandler.prototype.update = function(map, rotation) {
 	this.control.div.innerHTML = "";
 	for (var i in overlays) {
 		var overlay = overlays[i];
+		var overlayConfig = this.ui.getOverlayConfig(overlays[i]);
 		
 		var container = document.createElement("div");
 		var checkbox = document.createElement("input");
-		checkbox.setAttribute("id", "cb_overlay_" + overlay.id);
-		checkbox.setAttribute("data-overlay", overlay.id);
+		checkbox.setAttribute("id", "cb_overlay_" + overlayConfig.name);
+		checkbox.setAttribute("data-overlay", overlay);
 		checkbox.setAttribute("type", "checkbox");
 		checkbox.style.verticalAlign = "middle";
 		checkbox.checked = false;
-		this.checkboxes[overlay.id] = checkbox;
+		this.checkboxes[overlay] = checkbox;
 	
 		var self = this;
 		checkbox.addEventListener("change", function() {
@@ -43,11 +44,12 @@ OverlaySelectHandler.prototype.update = function(map, rotation) {
 		});
 		
 		var label = document.createElement("label");
-		label.setAttribute("for", "cb_overlay_" + overlay.id);
-		label.innerHTML = overlay.name;
+		label.setAttribute("for", "cb_overlay_" + overlay);
+		label.innerHTML = overlayConfig.name;
 		
 		container.appendChild(checkbox);
 		container.appendChild(label);
 		this.control.div.appendChild(container);
 	}
 };
+

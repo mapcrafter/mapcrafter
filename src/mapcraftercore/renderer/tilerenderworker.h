@@ -23,6 +23,7 @@
 #include "rendermodes/overlay.h"
 #include "../config/mapcrafterconfig.h"
 #include "../config/configsections/map.h"
+#include "../config/configsections/overlay.h"
 #include "../config/configsections/world.h"
 #include "../mc/world.h"
 
@@ -54,6 +55,7 @@ struct RenderContext {
 	config::Color background_color;
 	config::WorldSection world_config;
 	config::MapSection map_config;
+	std::map<std::string, config::OverlaySection> overlays_config;
 
 	RenderView* render_view;
 	BlockImages* block_images;

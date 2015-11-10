@@ -347,6 +347,7 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 	context.background_color = config.getBackgroundColor();
 	context.world_config = config.getWorld(map_config.getWorld());
 	context.map_config = map_config;
+	context.overlays_config = config.getOverlays();
 	context.render_view = render_view.get();
 	context.block_images = block_images.get();
 	context.tile_set = tile_set;

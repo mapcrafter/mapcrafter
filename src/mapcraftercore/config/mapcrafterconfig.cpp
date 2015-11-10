@@ -232,7 +232,9 @@ bool MapcrafterConfig::hasOverlay(const std::string& overlay) const {
 	return overlays.count(overlay);
 }
 
-// const std::map<std::string, OverlaySection>& getOverlay() const;
+const std::map<std::string, OverlaySection>& MapcrafterConfig::getOverlays() const {
+	return overlays;
+}
 
 const OverlaySection& MapcrafterConfig::getOverlay(const std::string& overlay) const {
 	return overlays.at(overlay);
@@ -275,9 +277,16 @@ ValidationMap MapcrafterConfig::parse(const config::INIConfig& config,
 
 	ValidationMap validation = parser.getValidation();
 
-	// check if all worlds specified for maps exist
-	// 'map_it->getWorld() != ""' because that's already handled by map section class
+	// check if all worlds and overlays specified for maps exist
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
+		auto overlays = map_it->getOverlays();
+		for (auto overlay_it = overlays.begin(); overlay_it != overlays.end(); ++overlay_it) {
+			if (!hasOverlay(*overlay_it)) {
+				validation.section(map_it->getPrettyName()).error(
+						"Overlay '" + *overlay_it + "' does not exist!");
+			}
+		}
+		// 'map_it->getWorld() != ""' because that's already handled by map section class
 		if (map_it->getWorld() != "" && !hasWorld(map_it->getWorld())) {
 			validation.section(map_it->getPrettyName()).error(
 					"World '" + map_it->getWorld() + "' does not exist!");

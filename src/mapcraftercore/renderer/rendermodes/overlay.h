@@ -33,6 +33,7 @@ namespace mapcrafter {
 
 namespace config {
 class MapSection;
+class OverlaySection;
 class WorldSection;
 }
 
@@ -135,6 +136,7 @@ private:
 
 std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(
 		const config::WorldSection& world_config, const config::MapSection& map_config,
+		const std::map<std::string, config::OverlaySection>& overlays_config,
 		int rotation);
 
 template <typename Renderer>

@@ -17,7 +17,8 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../configsections/map.h"
+#include "map.h"
+
 #include "../iniconfig.h"
 #include "../../util.h"
 
@@ -56,24 +57,6 @@ renderer::RenderViewType as<renderer::RenderViewType>(const std::string& from) {
 	else if (from == "topdown")
 		return renderer::RenderViewType::TOPDOWN;
 	throw std::invalid_argument("Must be 'isometric' or 'topdown'!");
-}
-
-template <>
-renderer::OverlayType as<renderer::OverlayType>(const std::string& from) {
-	if (from == "none")
-		return renderer::OverlayType::NONE;
-	else if (from == "slime")
-		return renderer::OverlayType::SLIME;
-	else if (from == "spawnday")
-		return renderer::OverlayType::SPAWNDAY;
-	else if (from == "spawnnight")
-		return renderer::OverlayType::SPAWNNIGHT;
-	else if (from == "day")
-		return renderer::OverlayType::DAY;
-	else if (from == "night")
-		return renderer::OverlayType::NIGHT;
-	throw std::invalid_argument("Must be 'none', 'slime', 'spawnday', or "
-			"'spawnnight'!");
 }
 
 }
@@ -152,7 +135,6 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  world = " << world << std::endl;
 	out << "  render_view" << render_view << std::endl;
 	out << "  render_mode = " << render_mode << std::endl;
-	out << "  overlay = " << overlay << std::endl;
 	out << "  overlays = " << overlays << std::endl;
 	out << "  rotations = " << rotations << std::endl;
 	out << "  texture_dir = " << texture_dir << std::endl;
@@ -193,11 +175,7 @@ renderer::RenderModeType MapSection::getRenderMode() const {
 	return render_mode.getValue();
 }
 
-renderer::OverlayType MapSection::getOverlay() const {
-	return overlay.getValue();
-}
-
-std::set<renderer::OverlayType> MapSection::getOverlays() const {
+std::set<std::string> MapSection::getOverlays() const {
 	return overlays_set;
 }
 
@@ -287,7 +265,6 @@ void MapSection::preParse(const INIConfigSection& section,
 	// set some default configuration values
 	render_view.setDefault(renderer::RenderViewType::ISOMETRIC);
 	render_mode.setDefault(renderer::RenderModeType::DAYLIGHT);
-	overlay.setDefault(renderer::OverlayType::NONE);
 	overlays.setValue("");
 	rotations.setDefault("top-left");
 
@@ -325,8 +302,6 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		if (key == "rendermode")
 			validation.warning("Using the option 'rendermode' is deprecated. "
 					"It's called 'render_mode' now.");
-	} else if (key == "overlay") {
-		overlay.load(key, value, validation);
 	} else if (key == "overlays") {
 		overlays.load(key, value, validation);
 		overlays_set.clear();
@@ -335,12 +310,7 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		std::string overlay;
 		while (ss >> overlay) {
 			// TODO make Field::load able to load sets of types?
-			try {
-				overlays_set.insert(util::as<renderer::OverlayType>(overlay));
-			} catch (std::invalid_argument& e) {
-				validation.error("Invalid overlay '" + overlay + "': " + e.what());
-				break;
-			}
+			overlays_set.insert(overlay);
 		}
 	} else if (key == "rotations") {
 		rotations.load(key, value ,validation);

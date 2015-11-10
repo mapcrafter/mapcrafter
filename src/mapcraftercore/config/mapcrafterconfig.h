@@ -104,7 +104,7 @@ public:
 	const MapSection& getMap(const std::string& map) const;
 
 	bool hasOverlay(const std::string& overlay) const;
-	// const std::map<std::string, OverlaySection>& getOverlay() const;
+	const std::map<std::string, OverlaySection>& getOverlays() const;
 	const OverlaySection& getOverlay(const std::string& overlay) const;
 
 	bool hasMarker(const std::string marker) const;

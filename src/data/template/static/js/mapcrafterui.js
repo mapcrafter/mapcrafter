@@ -204,7 +204,7 @@ MapcrafterUI.prototype.init = function() {
 			this.layers[map][rotation]["terrain"] = createMCTileLayer(map, "terrain", mapConfig, rotation);
 			for(var i3 in mapConfig.overlays) {
 				var overlay = mapConfig.overlays[i3];
-				var type = "overlay_" + overlay.id;
+				var type = "overlay_" + overlay;
 				this.layers[map][rotation][type] = createMCTileLayer(map, type, mapConfig, rotation);
 			}
 			if(firstMap === null)
@@ -278,28 +278,22 @@ MapcrafterUI.prototype.getCurrentMapConfig = function() {
 	return this.getMapConfig(this.currentMap);
 };
 
+/**
+ * Returns the config object of a specific overlay.
+ */
+MapcrafterUI.prototype.getOverlayConfig = function(overlay) {
+	return overlay in this.config["overlays"] ? this.config["overlays"][overlay] : null;
+}
+
+/**
+ * Returns a list of overlay IDs which are currently available.
+ */
 MapcrafterUI.prototype.getCurrentOverlays = function() {
 	return this.getCurrentMapConfig().overlays;
 }
 
 /**
- * Returns the name of an overlay by its ID.
- *
- * If you specify a map config, you can control where the overlay is searched (as the
- * overlays are (for now) saved per map and not global). Otherwise the current map config
- * is just used.
- */
-MapcrafterUI.prototype.getOverlayName = function(id, mapConfig) {
-	overlays = typeof mapConfig !== 'undefined' ? mapConfig.overlays : this.getCurrentMapConfig().overlays;
-	for(var i in overlays) {
-		if(overlays[i].id == id)
-			return overlays[i].name;
-	}
-	return null;
-}
-
-/**
- * Returns a list of IDs which overlays are currently enabled.
+ * Returns a list of overlays IDs which are currently enabled.
  */
 MapcrafterUI.prototype.getEnabledOverlays = function() {
 	return this.enabledOverlays;
@@ -309,7 +303,6 @@ MapcrafterUI.prototype.getEnabledOverlays = function() {
  * Sets the current map and rotation.
  */
 MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
-	console.log("setMapAndRotation", map, rotation);
 	var oldMapConfig = this.getCurrentMapConfig();
 	var mapConfig = this.getMapConfig(map);
 	
@@ -404,13 +397,12 @@ MapcrafterUI.prototype.setMapRotation = function(rotation) {
 	this.setMapAndRotation(this.currentMap, rotation);
 };
 
-
 /**
  * Shows/Hides the given overlay (depending on the enabled argument).
  */
 MapcrafterUI.prototype.enableOverlay = function(overlay, enabled) {
 	// overlay does not exist
-	if(this.getOverlayName(overlay) == null)
+	if(this.getCurrentOverlays().indexOf(overlay) == -1)
 		return;
 
 	var enabled_state = this.enabledOverlays.indexOf(overlay) != -1;

@@ -25,7 +25,9 @@
 #include "spawnoverlay.h"
 #include "../blockimages.h"
 #include "../image.h"
+#include "../../config/mapcrafterconfig.h"
 #include "../../config/configsections/map.h"
+#include "../../config/configsections/overlay.h"
 #include "../../config/configsections/world.h"
 #include "../../mc/pos.h"
 
@@ -137,15 +139,40 @@ void TintingOverlay::drawOverlay(RGBAImage& block, RGBAImage& overlay,
 	}
 }
 
-std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(const config::WorldSection& world_config,
-		const config::MapSection& map_config, int rotation) {
+OverlayRenderMode* createOverlay(const config::WorldSection& world_config,
+		const config::MapSection& map_config,
+		const config::OverlaySection& overlay_config, int rotation) {
+	OverlayType type = overlay_config.getType();
+	std::string id = overlay_config.getID();
+	std::string name = overlay_config.getName();
+
+	if (type == OverlayType::LIGHTING) {
+		return new LightingRenderMode(id, name, true, 1.0, 1.0, false);
+	} else if (type == OverlayType::SLIME) {
+		return new SlimeOverlay(world_config.getInputDir(), rotation);
+	} else if (type == OverlayType::SPAWN) {
+		return new SpawnOverlay(true);
+	} else {
+		// may not happen
+		assert(false);
+	}
+	return nullptr;
+}
+
+std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(
+		const config::WorldSection& world_config, const config::MapSection& map_config,
+		const std::map<std::string, config::OverlaySection>& overlays_config,
+		int rotation) {
 	std::vector<std::shared_ptr<OverlayRenderMode>> overlays;
 	
 	auto overlay_types = map_config.getOverlays();
 	for (auto it = overlay_types.begin(); it != overlay_types.end(); ++it) {
-		OverlayType overlay_type = *it;
-		OverlayRenderMode* overlay;
-	
+		config::OverlaySection overlay_config = overlays_config.at(*it);
+		OverlayRenderMode* overlay = createOverlay(world_config, map_config,
+				overlay_config, rotation);
+		overlays.push_back(std::shared_ptr<OverlayRenderMode>(overlay));
+		
+		/*
 		if (overlay_type == OverlayType::SLIME)
 			overlay = new SlimeOverlay(world_config.getInputDir(), rotation);
 		else if (overlay_type == OverlayType::SPAWNDAY)
@@ -164,8 +191,7 @@ std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(const config::Wor
 			// should not happen
 			assert(false);
 		}
-
-		overlays.push_back(std::shared_ptr<OverlayRenderMode>(overlay));
+		*/
 	}
 
 	return overlays;

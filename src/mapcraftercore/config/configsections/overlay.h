@@ -22,6 +22,7 @@
 
 #include "../configsection.h"
 #include "../validation.h"
+#include "../../renderer/rendermode.h"
 
 #include <string>
 
@@ -38,6 +39,7 @@ public:
 
 	std::string getID() const;
 	std::string getName() const;
+	renderer::OverlayType getType() const;
 	bool isBase() const;
 
 protected:
@@ -50,6 +52,7 @@ protected:
 
 private:
 	Field<std::string> name;
+	Field<renderer::OverlayType> type;
 	Field<bool> base;
 };
 
