@@ -314,19 +314,24 @@ void MapcrafterConfig::createDefaultOverlay(const std::string& id,
 
 void MapcrafterConfig::initializeDefaultOverlays() {
 	createDefaultOverlay("day", INIConfigSection("overlay", "day")
+			.set("name", "Daylight")
 			.set("type", "lighting")
 			.set("day", "true"));
 	createDefaultOverlay("night", INIConfigSection("overlay", "night")
+			.set("name", "Nightlight")
 			.set("type", "lighting")
 			.set("day", "false"));
 
 	createDefaultOverlay("slime", INIConfigSection("overlay", "slime")
+			.set("name", "Slimes")
 			.set("type", "slime"));
 
 	createDefaultOverlay("spawnday", INIConfigSection("overlay", "spawnday")
+			.set("name", "Spawnday")
 			.set("type", "spawn")
 			.set("day", "true"));
 	createDefaultOverlay("spawnnight", INIConfigSection("overlay", "spawnnight")
+			.set("name", "Spawnnight")
 			.set("type", "spawn")
 			.set("day", "false"));
 }

@@ -31,13 +31,14 @@ var MCTileLayer = L.TileLayer.extend({
 /**
  * Creates a tile layer of a map with a specific rotation
  */
-function createMCTileLayer(mapName, type, mapConfig, mapRotation) {
+function createMCTileLayer(mapName, type, mapConfig, mapRotation, zIndex) {
 	return new MCTileLayer(mapName + "/" + ["tl", "tr", "br", "bl"][mapRotation] + "/" + type, {
 		maxZoom: mapConfig.maxZoom,
 		tileSize: mapConfig.tileSize,
 		noWrap: true,
 		continuousWorld: true,
-		imageFormat: mapConfig.imageFormat
+		imageFormat: mapConfig.imageFormat,
+		zIndex: zIndex,
 	});
 };
 
@@ -201,11 +202,11 @@ MapcrafterUI.prototype.init = function() {
 		for(var i2 in mapConfig.rotations) {
 			var rotation = mapConfig.rotations[i2];
 			this.layers[map][rotation] = {};
-			this.layers[map][rotation]["terrain"] = createMCTileLayer(map, "terrain", mapConfig, rotation);
+			this.layers[map][rotation]["terrain"] = createMCTileLayer(map, "terrain", mapConfig, rotation, 0);
 			for(var i3 in mapConfig.overlays) {
-				var overlay = mapConfig.overlays[i3];
-				var type = "overlay_" + overlay;
-				this.layers[map][rotation][type] = createMCTileLayer(map, type, mapConfig, rotation);
+				var overlay = this.getOverlayConfig(mapConfig.overlays[i3]);
+				var type = "overlay_" + mapConfig.overlays[i3];
+				this.layers[map][rotation][type] = createMCTileLayer(map, type, mapConfig, rotation, overlay.base ? 1 : 2);
 			}
 			if(firstMap === null)
 				firstMap = map;
