@@ -116,6 +116,9 @@ public:
 private:
 	ValidationMap parse(const INIConfig& config, const fs::path& config_dir);
 
+	void createDefaultOverlay(const std::string& id, const INIConfigSection& config);
+	void initializeDefaultOverlays();
+
 	MapcrafterConfigRootSection root_section;
 	std::map<std::string, WorldSection> worlds;
 	std::vector<MapSection> maps;

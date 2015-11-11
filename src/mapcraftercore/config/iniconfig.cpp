@@ -71,18 +71,20 @@ const std::vector<INIConfigEntry>& INIConfigSection::getEntries() const {
 	return entries;
 }
 
-void INIConfigSection::set(const std::string& key, const std::string& value) {
+INIConfigSection& INIConfigSection::set(const std::string& key, const std::string& value) {
 	int index = getEntryIndex(key);
 	if (index != -1)
 		entries[index].second = value;
 	else
 		entries.push_back(std::make_pair(key, value));
+	return *this;
 }
 
-void INIConfigSection::remove(const std::string& key) {
+INIConfigSection& INIConfigSection::remove(const std::string& key) {
 	int index = getEntryIndex(key);
 	if (index != -1)
 		entries.erase(entries.begin() + index);
+	return *this;
 }
 
 int INIConfigSection::getEntryIndex(const std::string& key) const {

@@ -60,8 +60,8 @@ public:
 	
 	const std::vector<INIConfigEntry>& getEntries() const;
 
-	void set(const std::string& key, const std::string& value);
-	void remove(const std::string& key);
+	INIConfigSection& set(const std::string& key, const std::string& value);
+	INIConfigSection& remove(const std::string& key);
 
 private:
 	std::string type, name;

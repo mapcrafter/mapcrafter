@@ -42,6 +42,10 @@ public:
 	renderer::OverlayType getType() const;
 	bool isBase() const;
 
+	bool isDay() const;
+	double getLightingIntensity() const;
+	double getLightingWaterIntensity() const;
+
 protected:
 	virtual void preParse(const INIConfigSection& section,
 			ValidationList& validation);
@@ -54,6 +58,9 @@ private:
 	Field<std::string> name;
 	Field<renderer::OverlayType> type;
 	Field<bool> base;
+
+	Field<bool> day;
+	Field<double> lighting_intensity, lighting_water_intensity;
 };
 
 } /* namespace config */

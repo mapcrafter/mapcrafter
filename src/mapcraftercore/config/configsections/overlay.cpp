@@ -61,6 +61,8 @@ void OverlaySection::dump(std::ostream& out) const {
 	out << "  name = " << name << std::endl;
 	out << "  type = " << type << std::endl;
 	out << "  base = " << base << std::endl;
+	out << "  day = " << day << std::endl;
+	out << "  lighting_intensity = " << lighting_intensity << std::endl;
 }
 
 std::string OverlaySection::getID() const {
@@ -79,9 +81,25 @@ bool OverlaySection::isBase() const {
 	return base.getValue();
 }
 
+bool OverlaySection::isDay() const {
+	return day.getValue();
+}
+
+double OverlaySection::getLightingIntensity() const {
+	return lighting_intensity.getValue();
+}
+
+double OverlaySection::getLightingWaterIntensity() const {
+	return lighting_water_intensity.getValue();
+}
+
 void OverlaySection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	name.setDefault(getSectionName());
+
+	day.setDefault(true);
+	lighting_intensity.setDefault(1.0);
+	lighting_water_intensity.setDefault(1.0);
 }
 
 bool OverlaySection::parseField(const std::string key, const std::string value,
@@ -92,8 +110,14 @@ bool OverlaySection::parseField(const std::string key, const std::string value,
 		type.load(key, value, validation);
 	} else if (key == "base") {
 		base.load(key, value, validation);
+	} else if (key == "day") {
+		day.load(key, value, validation);
+	} else if (key == "lighting_intensity") {
+		lighting_intensity.load(key, value, validation);
+	} else if (key == "lighting_water_intensity") {
+		lighting_water_intensity.load(key, value, validation);
 	} else {
-		return false;	
+		return false;
 	}
 	return true;
 }
@@ -101,6 +125,10 @@ bool OverlaySection::parseField(const std::string key, const std::string value,
 void OverlaySection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	base.setDefault(getType() == renderer::OverlayType::LIGHTING);
+
+	if (!isGlobal()) {
+		type.require(validation, "You have to specify an overlay type!");
+	}
 }
 
 } /* namespace config */

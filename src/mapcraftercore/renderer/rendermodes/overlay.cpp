@@ -147,11 +147,14 @@ OverlayRenderMode* createOverlay(const config::WorldSection& world_config,
 	std::string name = overlay_config.getName();
 
 	if (type == OverlayType::LIGHTING) {
-		return new LightingRenderMode(id, name, true, 1.0, 1.0, false);
+		return new LightingRenderMode(id, name, overlay_config.isDay(),
+				overlay_config.getLightingIntensity(),
+				overlay_config.getLightingWaterIntensity(),
+				world_config.getDimension() == mc::Dimension::END);
 	} else if (type == OverlayType::SLIME) {
 		return new SlimeOverlay(world_config.getInputDir(), rotation);
 	} else if (type == OverlayType::SPAWN) {
-		return new SpawnOverlay(true);
+		return new SpawnOverlay(overlay_config.isDay());
 	} else {
 		// may not happen
 		assert(false);

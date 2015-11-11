@@ -266,6 +266,8 @@ ValidationMap MapcrafterConfig::parse(const config::INIConfig& config,
 		const fs::path& config_dir) {
 	root_section.setConfigDir(config_dir);
 
+	initializeDefaultOverlays();
+
 	ConfigParser parser(config);
 	parser.parseRootSection(root_section);
 	parser.parseSections(worlds, "world", ConfigDirSectionFactory<WorldSection>(config_dir));
@@ -294,6 +296,39 @@ ValidationMap MapcrafterConfig::parse(const config::INIConfig& config,
 	}
 
 	return validation;
+}
+
+void MapcrafterConfig::createDefaultOverlay(const std::string& id,
+		const INIConfigSection& config) {
+	OverlaySection overlay;
+	ValidationList validation = overlay.parse(config);
+	if (validation.isEmpty()) {
+		overlays[id] = overlay;
+	} else {
+		auto messages = validation.getMessages();
+		LOG(ERROR) << "Unable to initialize default overlay '" << id << "':";
+		for (auto it = messages.begin(); it != messages.end(); ++it)
+			LOG(ERROR) << " - " << *it;
+	}
+}
+
+void MapcrafterConfig::initializeDefaultOverlays() {
+	createDefaultOverlay("day", INIConfigSection("overlay", "day")
+			.set("type", "lighting")
+			.set("day", "true"));
+	createDefaultOverlay("night", INIConfigSection("overlay", "night")
+			.set("type", "lighting")
+			.set("day", "false"));
+
+	createDefaultOverlay("slime", INIConfigSection("overlay", "slime")
+			.set("type", "slime"));
+
+	createDefaultOverlay("spawnday", INIConfigSection("overlay", "spawnday")
+			.set("type", "spawn")
+			.set("day", "true"));
+	createDefaultOverlay("spawnnight", INIConfigSection("overlay", "spawnnight")
+			.set("type", "spawn")
+			.set("day", "false"));
 }
 
 } /* namespace config */
