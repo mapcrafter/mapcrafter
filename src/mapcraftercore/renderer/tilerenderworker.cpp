@@ -98,10 +98,11 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 	// if this is tile is not required or we should skip it, try to load it from file
 	if (!render_context.tile_set->isTileRequired(path) || render_work.tiles_skip.count(path)) {
 		bool ok = true;
+		std::string failed_path;
 		for (size_t i = 0; i <= overlay_tiles.size(); i++) {
 			bool overlay = i != overlay_tiles.size();
 			
-			// which type/image suffix our tile has
+			// which type (overlay X, terrain) / image format our tile has
 			std::string type;
 			ImageFormat image_format = terrain_image_format;
 			if (overlay) {
@@ -119,13 +120,14 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 			
 			// now load the tile
 			fs::path file = render_context.output_dir / type / path.toString();
-			if (!image->read(file.string(), image_format, true)) {
+			if (image->read(file.string(), image_format, true)) {
 				// increase progress count only once
 				if (!overlay && render_work.tiles_skip.count(path) && progress != nullptr)
 					progress->setValue(progress->getValue()
 							+ render_context.tile_set->getContainingRenderTiles(path));
 			} else {
 				ok = false;
+				failed_path = file.string() + "." + image_format.getSuffix();
 				break;
 			}
 		}
@@ -133,7 +135,7 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 		// return if all tiles are okay (they are now read from disk)
 		// render them later on in this method if a tile was not okay
 		if (!ok)
-			LOG(WARNING) << "Unable to read tile '" << path.toString()
+			LOG(WARNING) << "Unable to read tile '" << failed_path
 				<< "', I will just render it again.";
 		else
 			return;
