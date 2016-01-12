@@ -157,7 +157,7 @@ bool RenderManager::initialize() {
 	auto maps = config.getMaps();
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
 		std::string map_name = map_it->getShortName();
-		std::string ext = map_it->getImageFormatSuffix();
+		std::string ext = map_it->getImageFormat().getSuffix();
 		for (int rotation = 0; rotation < 4; rotation++) {
 			std::string rotation_name = config::ROTATION_NAMES_SHORT[rotation];
 			fs::path path = output_dir / map_name / rotation_name;
@@ -310,7 +310,7 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 		LOG(INFO) << "Scanning required tiles...";
 		// use the incremental check method specified in the config
 		if (map_config.useImageModificationTimes())
-			tile_set->scanRequiredByFiletimes(output_dir, map_config.getImageFormatSuffix());
+			tile_set->scanRequiredByFiletimes(output_dir, map_config.getImageFormat().getSuffix());
 		else
 			//tile_set->scanRequiredByTimestamp(settings.last_render[rotation]);
 			tile_set->scanRequiredByTimestamp(web_config.getMapLastRendered(map, rotation));
@@ -543,7 +543,7 @@ void RenderManager::initializeMap(const std::string& map) {
 			fs::path output_dir = config.getOutputPath(map + "/"
 					+ config::ROTATION_NAMES_SHORT[*rotation_it]);
 			for (int i = old_max_zoom; i < max_zoom; i++)
-				increaseMaxZoom(output_dir, map_config.getImageFormatSuffix());
+				increaseMaxZoom(output_dir, map_config.getImageFormat().getSuffix());
 		}
 	}
 

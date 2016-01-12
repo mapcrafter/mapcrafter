@@ -256,7 +256,8 @@ picojson::value WebConfig::getConfigJSON() const {
 		map_json["worldName"] = picojson::value(world.getWorldName());
 		map_json["renderView"] = picojson::value(util::str(map_it->getRenderView()));
 		map_json["textureSize"] = picojson::value((double) map_it->getTextureSize());
-		map_json["imageFormat"] = picojson::value(map_it->getImageFormatSuffix());
+		map_json["terrainImageFormat"] = picojson::value(map_it->getImageFormat().getSuffix());
+		map_json["overlayImageFormat"] = picojson::value("png");
 		
 		if (world.getDefaultView() != mc::BlockPos(0, 0, 0)) {
 			mc::BlockPos default_view = world.getDefaultView();

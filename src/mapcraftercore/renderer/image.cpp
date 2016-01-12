@@ -159,6 +159,49 @@ void blend(RGBAPixel& dest, const RGBAPixel& source) {
 	}
 }
 
+ImageFormat ImageFormat::png(bool indexed) {
+	ImageFormat format;
+	format.type = ImageFormatType::PNG;
+	format.png_indexed = indexed;
+	return format;
+}
+
+ImageFormat ImageFormat::jpeg(int quality, RGBAPixel background_color) {
+	ImageFormat format;
+	format.type = ImageFormatType::JPEG;
+	format.jpeg_quality = quality;
+	format.jpeg_background_color = background_color;
+	return format;
+}
+
+ImageFormatType ImageFormat::getType() const {
+	return type;
+}
+
+std::string ImageFormat::getSuffix() const {
+	return type == ImageFormatType::PNG ? "png" : "jpg";
+}
+
+bool ImageFormat::isPNGIndexed() const {
+	return png_indexed;
+}
+
+int ImageFormat::getJPEGQuality() const {
+	return jpeg_quality;
+}
+
+RGBAPixel ImageFormat::getJPEGBackgroundColor() const {
+	return jpeg_background_color;
+}
+
+void ImageFormat::setJPEGBackgroundColor(const RGBAPixel& background) {
+	this->jpeg_background_color = background;
+}
+
+
+ImageFormat::ImageFormat() {
+}
+
 /**
  * http://www.piko3d.com/tutorials/libpng-tutorial-loading-png-files-from-streams
  */
@@ -523,6 +566,44 @@ void RGBAImage::blur(RGBAImage& dest, int radius) const {
 	for (int x = 0; x < width; x++)
 		for (int y = 0; y < height; y++)
 			dest.pixel(x, y) = blurKernel(*this, x, y, radius);
+}
+
+bool RGBAImage::read(const std::string& filename, const ImageFormat& format,
+		bool append_suffix) {
+	std::string path = filename;
+	if (append_suffix && !util::endswith(filename, format.getSuffix()))
+		path += "." + format.getSuffix();
+	if (format.getType() == ImageFormatType::PNG)
+		return readPNG(path);
+	else if (format.getType() == ImageFormatType::JPEG)
+		return readJPEG(path);
+	// may not happen
+	assert(false);
+	return false;
+}
+
+bool RGBAImage::write(const std::string& filename, const ImageFormat& format,
+		bool append_suffix) const {
+	std::string path = filename;
+	if (append_suffix && !util::endswith(filename, format.getSuffix()))
+		path += "." + format.getSuffix();
+	if (format.getType() == ImageFormatType::PNG) {
+		if (format.isPNGIndexed())
+			return writeIndexedPNG(path);
+		return writePNG(path);
+	} else if (format.getType() == ImageFormatType::JPEG) {
+		return writeJPEG(path, format.getJPEGQuality(), format.getJPEGBackgroundColor());
+	}
+	// may not happen
+	assert(false);
+	return false;
+}
+
+std::ostream& operator<<(std::ostream& out, const ImageFormat& format) {
+	if (format.getType() == ImageFormatType::PNG)
+		return out << "PNG(indexed=" << format.isPNGIndexed() << ")";
+	else
+		return out << "JPEG(quality=" << format.getJPEGQuality() << ")";
 }
 
 bool RGBAImage::readPNG(const std::string& filename) {

@@ -37,7 +37,7 @@ function createMCTileLayer(mapName, type, mapConfig, mapRotation, zIndex) {
 		tileSize: mapConfig.tileSize,
 		noWrap: true,
 		continuousWorld: true,
-		imageFormat: mapConfig.imageFormat,
+		imageFormat: type == "terrain" ? mapConfig.terrainImageFormat : mapConfig.overlayImageFormat,
 		zIndex: zIndex,
 	});
 };

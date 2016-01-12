@@ -26,11 +26,11 @@ namespace mapcrafter {
 namespace util {
 
 template <>
-config::ImageFormat as<config::ImageFormat>(const std::string& from) {
+renderer::ImageFormatType as<renderer::ImageFormatType>(const std::string& from) {
 	if (from == "png")
-		return config::ImageFormat::PNG;
+		return renderer::ImageFormatType::PNG;
 	else if (from == "jpeg")
-		return config::ImageFormat::JPEG;
+		return renderer::ImageFormatType::JPEG;
 	throw std::invalid_argument("Must be 'png' or 'jpeg'!");
 }
 
@@ -107,14 +107,6 @@ bool TileSetID::operator<(const TileSetID& other) const {
 	return toString() < other.toString();
 }
 
-std::ostream& operator<<(std::ostream& out, ImageFormat image_format) {
-	if (image_format == ImageFormat::PNG)
-		out << "png";
-	else if (image_format == ImageFormat::JPEG)
-		out << "jpeg";
-	return out;
-}
-
 MapSection::MapSection()
 	: texture_size(12), render_unknown_blocks(false),
 	  render_leaves_transparent(false), render_biomes(false) {
@@ -140,7 +132,7 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  texture_dir = " << texture_dir << std::endl;
 	out << "  texture_size = " << texture_size << std::endl;
 	out << "  water_opacity = " << water_opacity << std::endl;
-	out << "  image_format = " << image_format << std::endl;
+	out << "  image_format = " << getImageFormat() << std::endl;
 	out << "  png_indexed = " << png_indexed << std::endl;
 	out << "  jpeg_quality = " << jpeg_quality << std::endl;
 	out << "  lighting_intensity = " << lighting_intensity << std::endl;
@@ -203,22 +195,10 @@ int MapSection::getTileWidth() const {
 	return tile_width.getValue();
 }
 
-ImageFormat MapSection::getImageFormat() const {
-	return image_format.getValue();
-}
-
-std::string MapSection::getImageFormatSuffix() const {
-	if (getImageFormat() == ImageFormat::PNG)
-		return "png";
-	return "jpg";
-}
-
-bool MapSection::isPNGIndexed() const {
-	return png_indexed.getValue();
-}
-
-int MapSection::getJPEGQuality() const {
-	return jpeg_quality.getValue();
+renderer::ImageFormat MapSection::getImageFormat() const {
+	if (image_format_type.getValue() == renderer::ImageFormatType::PNG)
+		return renderer::ImageFormat::png(png_indexed.getValue());
+	return renderer::ImageFormat::jpeg(jpeg_quality.getValue(), renderer::rgba(0, 0, 0, 0));
 }
 
 double MapSection::getLightingIntensity() const {
@@ -277,7 +257,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	water_opacity.setDefault(1.0);
 	tile_width.setDefault(1);
 
-	image_format.setDefault(ImageFormat::PNG);
+	image_format_type.setDefault(renderer::ImageFormatType::PNG);
 	png_indexed.setDefault(false);
 	jpeg_quality.setDefault(85);
 
@@ -336,7 +316,7 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		if (tile_width.getValue() < 1)
 			validation.error("'tile_width' must be a positive number!");
 	} else if (key == "image_format") {
-		image_format.load(key, value, validation);
+		image_format_type.load(key, value, validation);
 	} else if (key == "png_indexed") {
 		png_indexed.load(key, value, validation);
 	} else if (key == "jpeg_quality") {

@@ -93,6 +93,38 @@ enum class InterpolationType {
 	AUTO
 };
 
+enum class ImageFormatType {
+	PNG,
+	JPEG
+};
+
+class ImageFormat {
+public:
+	static ImageFormat png(bool indexed);
+	static ImageFormat jpeg(int quality, RGBAPixel background_color);
+
+	ImageFormatType getType() const;
+	std::string getSuffix() const;
+
+	bool isPNGIndexed() const;
+
+	int getJPEGQuality() const;
+	RGBAPixel getJPEGBackgroundColor() const;
+	void setJPEGBackgroundColor(const RGBAPixel& background);
+
+private:
+	ImageFormat();
+
+	ImageFormatType type;
+
+	bool png_indexed;
+
+	int jpeg_quality;
+	RGBAPixel jpeg_background_color;
+};
+
+std::ostream& operator<<(std::ostream& out, const ImageFormat& format);
+
 // TODO better documentation...
 class RGBAImage : public Image<RGBAPixel> {
 public:
@@ -163,6 +195,9 @@ public:
 	 * (quadratic) blur effect.
 	 */
 	void blur(RGBAImage& dest, int radius) const;
+
+	bool read(const std::string& filename, const ImageFormat& format, bool append_suffix = true);
+	bool write(const std::string& filename, const ImageFormat& format, bool append_suffix = true) const;
 
 	bool readPNG(const std::string& filename);
 	bool writePNG(const std::string& filename) const;

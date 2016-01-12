@@ -22,6 +22,7 @@
 
 #include "../configsection.h"
 #include "../validation.h"
+#include "../../renderer/image.h"
 #include "../../renderer/rendermode.h"
 #include "../../renderer/renderview.h"
 
@@ -74,13 +75,6 @@ public:
 	int rotation;
 };
 
-enum class ImageFormat {
-	PNG,
-	JPEG
-};
-
-std::ostream& operator<<(std::ostream& out, ImageFormat image_format);
-
 class INIConfigSection;
 
 class MapSection : public ConfigSection {
@@ -107,10 +101,7 @@ public:
 	double getWaterOpacity() const;
 	int getTileWidth() const;
 
-	ImageFormat getImageFormat() const;
-	std::string getImageFormatSuffix() const;
-	bool isPNGIndexed() const;
-	int getJPEGQuality() const;
+	renderer::ImageFormat getImageFormat() const;
 
 	double getLightingIntensity() const;
 	double getLightingWaterIntensity() const;
@@ -148,7 +139,7 @@ private:
 	Field<int> texture_size, texture_blur, tile_width;
 	Field<double> water_opacity;
 
-	Field<ImageFormat> image_format;
+	Field<renderer::ImageFormatType> image_format_type;
     Field<bool> png_indexed;
 	Field<int> jpeg_quality;
 

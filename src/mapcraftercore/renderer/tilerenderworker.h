@@ -101,7 +101,7 @@ public:
 
 	void setProgressHandler(util::IProgressHandler* progress);
 
-	void saveTile(const TilePath& path, const std::string& type, const RGBAImage& tile);
+	void saveTile(const TilePath& path, const std::string& type, const RGBAImage& tile, const ImageFormat& image_format);
 	void renderRecursive(const TilePath& path, RGBAImage& tile, std::vector<RGBAImage>& overlay_tiles);
 
 	void operator()();

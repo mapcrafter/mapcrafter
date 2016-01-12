@@ -65,33 +65,35 @@ void TileRenderWorker::setProgressHandler(util::IProgressHandler* progress) {
 	this->progress = progress;
 }
 
-void TileRenderWorker::saveTile(const TilePath& tile, const std::string& type, const RGBAImage& image) {
-	bool png = render_context.map_config.getImageFormat() == config::ImageFormat::PNG;
-	bool png_indexed = render_context.map_config.isPNGIndexed();
-	std::string suffix = std::string(".") + render_context.map_config.getImageFormatSuffix();
-	std::string filename = tile.toString() + suffix;
+void TileRenderWorker::saveTile(const TilePath& tile, const std::string& type,
+		const RGBAImage& image, const ImageFormat& image_format)  {
+	std::string filename = tile.toString();
 	if (tile.getDepth() == 0)
-		filename = std::string("base") + suffix;
+		filename = "base";
 	fs::path file = render_context.output_dir / type / filename;
 	if (!fs::exists(file.branch_path()))
 		fs::create_directories(file.branch_path());
 
-	if ((png && !png_indexed) && !image.writePNG(file.string()))
-		LOG(WARNING) << "Unable to write '" << file.string() << "'.";
+	if (!image.write(file.string(), image_format, true))
+		LOG(WARNING) << "Unable to write '" << file.string() << "." << image_format.getSuffix() << "'.";
 
-	if ((png && png_indexed) && !image.writeIndexedPNG(file.string()))
-		LOG(WARNING) << "Unable to write '" << file.string() << "'.";
-
+	/*
 	config::Color bg = render_context.background_color;
 	if (!png && !image.writeJPEG(file.string(),
 			render_context.map_config.getJPEGQuality(), rgba(bg.red, bg.green, bg.blue, 255)))
 		LOG(WARNING) << "Unable to write '" << file.string() << "'.";
+	*/
 }
 
 void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, std::vector<RGBAImage>& overlay_tiles) {
 	// we expect an array of images (they should be with zero size) for the overlays
 	// as many images as overlays there are
 	assert(overlay_tiles.size() == render_context.overlays.size());
+
+	ImageFormat terrain_image_format = render_context.map_config.getImageFormat();
+	config::Color bg = render_context.background_color;
+	terrain_image_format.setJPEGBackgroundColor(rgba(bg.red, bg.green, bg.blue, 255));
+	ImageFormat overlay_image_format = ImageFormat::png(terrain_image_format.isPNGIndexed());
 
 	// if this is tile is not required or we should skip it, try to load it from file
 	if (!render_context.tile_set->isTileRequired(path) || render_work.tiles_skip.count(path)) {
@@ -100,16 +102,15 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 			bool overlay = i != overlay_tiles.size();
 			
 			// which type/image suffix our tile has
-			std::string type, suffix;
+			std::string type;
+			ImageFormat image_format = terrain_image_format;
 			if (overlay) {
 				// overlays are always png
 				type = "overlay_" + render_context.overlays[i]->getID();
-				suffix = "png";
+				image_format = overlay_image_format;
 			} else {
 				type = "terrain";
-				suffix = render_context.map_config.getImageFormatSuffix();
 			}
-			bool png = suffix == "png";
 
 			// where we want to load the tile to
 			RGBAImage* image = &tile;
@@ -117,9 +118,8 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 				image = &overlay_tiles[i];
 			
 			// now load the tile
-			fs::path file = render_context.output_dir / type / (path.toString() + "." + suffix);
-			if ((png && image->readPNG(file.string()))
-					|| (!png && image->readJPEG(file.string()))) {
+			fs::path file = render_context.output_dir / type / path.toString();
+			if (!image->read(file.string(), image_format, true)) {
 				// increase progress count only once
 				if (!overlay && render_work.tiles_skip.count(path) && progress != nullptr)
 					progress->setValue(progress->getValue()
@@ -147,10 +147,10 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 		render_work_result.tiles_rendered++;
 
 		// save the tile and its overlays
-		saveTile(path, "terrain", tile);
+		saveTile(path, "terrain", tile, terrain_image_format);
 		for (size_t i = 0; i < overlay_tiles.size(); i++) {
 			std::string type = "overlay_" + render_context.overlays[i]->getID();
-			saveTile(path, type, overlay_tiles[i]);
+			saveTile(path, type, overlay_tiles[i], overlay_image_format);
 		}
 
 		// update progress
@@ -218,10 +218,10 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 		}
 
 		// then save the tile and its overlays
-		saveTile(path, "terrain", tile);
+		saveTile(path, "terrain", tile, terrain_image_format);
 		for (size_t i = 0; i < overlay_tiles.size(); i++) {
 			std::string type = "overlay_" + render_context.overlays[i]->getID();
-			saveTile(path, type, overlay_tiles[i]);
+			saveTile(path, type, overlay_tiles[i], overlay_image_format);
 		}
 	}
 }
