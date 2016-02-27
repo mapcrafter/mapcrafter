@@ -240,6 +240,7 @@ picojson::value WebConfig::getConfigJSON() const {
 			tile_offsets_json.push_back(picojson::value(offset_json));
 		}
 		tile_set_json["tileOffsets"] = picojson::value(tile_offsets_json);
+		tile_set_json["tileWidth"] = picojson::value((double) it->tile_width);
 
 		tile_sets_json[it->toString()] = picojson::value(tile_set_json);
 	}

@@ -45,18 +45,18 @@ function createMCTileLayer(mapName, mapConfig, mapRotation) {
  * Functions to convert Minecraft x, z, y (isometric render view) <-> Leaflet latitute/longitude.
  */
 var IsometricRenderView = {
-	mcToLatLng: function(x, z, y, lmap, mapConfig, tileOffset) {
+	mcToLatLng: function(x, z, y, lmap, mapConfig, tileOffset, tileWidth) {
 		// the size of a 1/4 block image divided by the total size of all render tiles 
 		// on the highest zoom level
-		var block = (mapConfig.textureSize/2.0) / (mapConfig.tileSize * Math.pow(2, mapConfig.maxZoom));
+		var block = (mapConfig.textureSize/2.0) / (mapConfig.tileSize / tileWidth * Math.pow(2, mapConfig.maxZoom));
 		
 		// at first calculate the row and the column of the block:
 		// column is just x+z
 		// also don't forget the possible tile offset: one tile has 32 columns
-		var col = x+z - tileOffset[0]*32;
+		var col = x+z - tileOffset[0]*tileWidth*32;
 		// row is z-x, and every y to bottom adds 2 rows
 		// tile offset again: one tile has 64 rows
-		var row = z-x + (256-y)*2 - tileOffset[1]*64;
+		var row = z-x + (256-y)*2 - tileOffset[1]*tileWidth*64;
 	
 		// midpoint of the map is in lat/lng 0.5|0.5
 		// we have to move the lng by the size of one tile
@@ -74,7 +74,7 @@ var IsometricRenderView = {
 		return lmap.unproject([lng * size, lat * size]);
 	},
 	
-	latLngToMC: function(latLng, y, lmap, mapConfig, tileOffset) {
+	latLngToMC: function(latLng, y, lmap, mapConfig, tileOffset, tileWidth) {
 		// this is the equivalent of the Minecraft x,z,y to lat/lng converter
 		// have some fun with the formulas from above!
 		
@@ -100,7 +100,7 @@ var IsometricRenderView = {
 		// in the range [0; count of tiles * tile size]
 		var point = lmap.project(latLng);
 		// size = count of tiles on this zoom level * tile size
-		var size = mapConfig.tileSize * Math.pow(2, lmap.getZoom());
+		var size = mapConfig.tileSize / tileWidth * Math.pow(2, lmap.getZoom());
 		// then we need to convert the pixel coordinates to lat/lng coordinates
 		// in the range [0; 1] to use them for the lat/lng -> MC algorithm
 		var lat = point.y / size;
@@ -108,8 +108,8 @@ var IsometricRenderView = {
 		// add tile offset to lat/lng coordinates,
 		// as we have now lat/lng coordinates in the range [0; 1],
 		// divide tile offset by the count of tiles on max zoom level 
-		lat += tileOffset[1] / Math.pow(2, mapConfig.maxZoom);
-		lng += tileOffset[0] / Math.pow(2, mapConfig.maxZoom);
+		lat += tileOffset[1] * tileWidth / Math.pow(2, mapConfig.maxZoom);
+		lng += tileOffset[0] * tileWidth / Math.pow(2, mapConfig.maxZoom);
 		
 		// convert lat/lng coordinates to Minecraft coordinates
 		var tile = (1.0 / Math.pow(2, mapConfig.maxZoom + 1));
@@ -125,26 +125,26 @@ var IsometricRenderView = {
  * Functions to convert Minecraft x, z, y (topdown render view) <-> Leaflet latitute/longitude.
  */
 var TopdownRenderView = {
-	mcToLatLng: function(x, z, y, lmap, mapConfig, tileOffset) {
-		var block = mapConfig.textureSize / (mapConfig.tileSize * Math.pow(2, mapConfig.maxZoom));
+	mcToLatLng: function(x, z, y, lmap, mapConfig, tileOffset, tileWidth) {
+		var block = mapConfig.textureSize / (mapConfig.tileSize / tileWidth * Math.pow(2, mapConfig.maxZoom));
 		
-		var lng = 0.5 + (x - tileOffset[0]*16) * block;
-		var lat = 0.5 + (z - tileOffset[1]*16) * block;
+		var lng = 0.5 + (x - tileOffset[0]*tileWidth*16) * block;
+		var lat = 0.5 + (z - tileOffset[1]*tileWidth*16) * block;
 		
-		var size = mapConfig.tileSize * Math.pow(2, lmap.getZoom());
+		var size = mapConfig.tileSize / tileWidth * Math.pow(2, lmap.getZoom());
 		return lmap.unproject([lng * size, lat * size]);
 	},
 	
-	latLngToMC: function(latLng, y, lmap, mapConfig, tileOffset) {
+	latLngToMC: function(latLng, y, lmap, mapConfig, tileOffset, tileWidth) {
 		var point = lmap.project(latLng);
-		var size = mapConfig.tileSize * Math.pow(2, lmap.getZoom());
+		var size = mapConfig.tileSize / tileWidth * Math.pow(2, lmap.getZoom());
 		
 		var lat = point.y / size;
 		var lng = point.x / size;
-		lat += tileOffset[1] / Math.pow(2, mapConfig.maxZoom);
-		lng += tileOffset[0] / Math.pow(2, mapConfig.maxZoom);
+		lat += tileOffset[1] * tileWidth / Math.pow(2, mapConfig.maxZoom);
+		lng += tileOffset[0] * tileWidth / Math.pow(2, mapConfig.maxZoom);
 
-		var block = mapConfig.textureSize / (mapConfig.tileSize * Math.pow(2, mapConfig.maxZoom));
+		var block = mapConfig.textureSize / (mapConfig.tileSize / tileWidth * Math.pow(2, mapConfig.maxZoom));
 		x = (lng - 0.5) / block;
 		z = (lat - 0.5) / block;
 		return [x, z, y];
@@ -425,7 +425,9 @@ MapcrafterUI.prototype.addHandler = function(handler) {
  */
 MapcrafterUI.prototype.mcToLatLng = function(x, z, y) {
 	var mapConfig = this.getCurrentMapConfig();
-	var tileOffset = this.getTileSetGroupConfig(mapConfig.tileSetGroup).tileOffsets[this.currentRotation];
+	var tileSetGroup = this.getTileSetGroupConfig(mapConfig.tileSetGroup);
+	var tileOffset = tileSetGroup.tileOffsets[this.currentRotation];
+	var tileWidth = tileSetGroup.tileWidth;
 	
 	// rotate the position to the map rotation
 	for(var i = 0; i < this.currentRotation; i++) {
@@ -437,8 +439,8 @@ MapcrafterUI.prototype.mcToLatLng = function(x, z, y) {
 	
 	// do the conversion depending on the current render view
 	if (mapConfig.renderView == "isometric")
-		return IsometricRenderView.mcToLatLng(x, z, y, this.lmap, mapConfig, tileOffset);
-	return TopdownRenderView.mcToLatLng(x, z, y, this.lmap, mapConfig, tileOffset);
+		return IsometricRenderView.mcToLatLng(x, z, y, this.lmap, mapConfig, tileOffset, tileWidth);
+	return TopdownRenderView.mcToLatLng(x, z, y, this.lmap, mapConfig, tileOffset, tileWidth);
 };
 
 /**
@@ -447,14 +449,16 @@ MapcrafterUI.prototype.mcToLatLng = function(x, z, y) {
  */
 MapcrafterUI.prototype.latLngToMC = function(latLng, y) {
 	var mapConfig = this.getCurrentMapConfig();
-	var tileOffset = this.getTileSetGroupConfig(mapConfig.tileSetGroup).tileOffsets[this.currentRotation];
+	var tileSetGroup = this.getTileSetGroupConfig(mapConfig.tileSetGroup);
+	var tileOffset = tileSetGroup.tileOffsets[this.currentRotation];
+	var tileWidth = tileSetGroup.tileWidth;
 
 	// do the conversion depending on the current render view
 	var mc;
 	if (mapConfig.renderView == "isometric")
-		mc = IsometricRenderView.latLngToMC(latLng, y, this.lmap, mapConfig, tileOffset);
+		mc = IsometricRenderView.latLngToMC(latLng, y, this.lmap, mapConfig, tileOffset, tileWidth);
 	else
-		mc = TopdownRenderView.latLngToMC(latLng, y, this.lmap, mapConfig, tileOffset)
+		mc = TopdownRenderView.latLngToMC(latLng, y, this.lmap, mapConfig, tileOffset, tileWidth);
 	var x = mc[0], z = mc[1];
 	
 	// rotate the position in the other direction back from map rotation
