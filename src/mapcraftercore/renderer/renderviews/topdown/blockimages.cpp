@@ -428,8 +428,10 @@ void TopdownBlockImages::createDoubleChest(uint16_t id, const DoubleChestTexture
 
 void TopdownBlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data, uint8_t r,
 		uint8_t g, uint8_t b) { // id 55
-	RGBAImage redstone_cross = resources.getBlockTextures().REDSTONE_DUST_CROSS;
-	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE;
+	RGBAImage redstone_cross = resources.getBlockTextures().REDSTONE_DUST_DOT;
+	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE0;
+	redstone_cross.simpleAlphaBlit(redstone_line, 0, 0);
+	redstone_cross.simpleAlphaBlit(redstone_line.rotate(1), 0, 0);
 
 	//uint8_t color = powered ? 50 : 255;
 	redstone_cross = redstone_cross.colorize(r, g, b);
@@ -820,7 +822,7 @@ void TopdownBlockImages::createCocoas() { // id 127
 }
 
 void TopdownBlockImages::createTripwireHook() { // id 131
-	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE.colorize((uint8_t) 192, 192, 192);
+	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE0.colorize((uint8_t) 192, 192, 192);
 
 	// TODO also render that part on the wall?
 	setBlockImage(131, 0, tripwire.rotate(1)); // trip wire hook on the north side
@@ -1322,7 +1324,8 @@ void TopdownBlockImages::createBlocks() {
 	createStairs(134, t.PLANKS_SPRUCE); // spruce wood stairs
 	createStairs(135, t.PLANKS_BIRCH); // birch wood stairs
 	createStairs(136, t.PLANKS_JUNGLE); // jungle wood stairs
-	setBlockImage(137, 0, t.COMMAND_BLOCK);
+	// TODO
+	setBlockImage(137, 0, t.COMMAND_BLOCK_SIDE);
 	// -- beacon
 	RGBAImage beacon = t.OBSIDIAN, beacon_block;
 	int beacon_size = texture_size / 16.0 * 10;

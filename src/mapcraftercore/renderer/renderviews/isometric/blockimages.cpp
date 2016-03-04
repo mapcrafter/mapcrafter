@@ -1026,8 +1026,10 @@ void IsometricBlockImages::createDoubleChest(uint16_t id, const DoubleChestTextu
 
 void IsometricBlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data,
 		uint8_t r, uint8_t g, uint8_t b) { // id 55
-	RGBAImage redstone_cross = resources.getBlockTextures().REDSTONE_DUST_CROSS;
-	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE;
+	RGBAImage redstone_cross = resources.getBlockTextures().REDSTONE_DUST_DOT;
+	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE0;
+	redstone_cross.simpleAlphaBlit(redstone_line, 0, 0);
+	redstone_cross.simpleAlphaBlit(redstone_line.rotate(1), 0, 0);
 
 	//uint8_t color = powered ? 50 : 255;
 	redstone_cross = redstone_cross.colorize(r, g, b);
@@ -1617,7 +1619,7 @@ void IsometricBlockImages::createCocoas() { // id 127
 }
 
 void IsometricBlockImages::createTripwireHook() { // id 131
-	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE.colorize((uint8_t) 192, 192, 192);
+	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE0.colorize((uint8_t) 192, 192, 192);
 
 	BlockImage block;
 	block.setFace(FACE_NORTH, resources.getBlockTextures().TRIP_WIRE_SOURCE);
@@ -2018,7 +2020,8 @@ void IsometricBlockImages::createBlocks() {
 	createStairs(134, t.PLANKS_SPRUCE); // spruce wood stairs
 	createStairs(135, t.PLANKS_BIRCH); // birch wood stairs
 	createStairs(136, t.PLANKS_JUNGLE); // jungle wood stairs
-	createBlock(137, 0, t.COMMAND_BLOCK); // command block
+	// TODO
+	createBlock(137, 0, t.COMMAND_BLOCK_SIDE); // command block
 	createBeacon(); // beacon
 	createFence(139, 0, t.COBBLESTONE); // cobblestone wall
 	createFence(139, 1, t.COBBLESTONE_MOSSY); // cobblestone wall mossy
