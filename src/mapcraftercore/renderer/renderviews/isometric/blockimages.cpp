@@ -397,6 +397,8 @@ uint16_t IsometricBlockImages::filterBlockData(uint16_t id, uint16_t data) const
 	// the light sensor shouldn't have any data, but I had problems with it...
 	else if (id == 151 || id == 178)
 		return 0;
+	else if (id == 154) // hopper
+		return 0;
 	return data;
 }
 
@@ -1712,6 +1714,22 @@ void IsometricBlockImages::createFlowerPot() { // id 140
 	}
 }
 
+void IsometricBlockImages::createHopper() { // id 154
+	RGBAImage inside = resources.getBlockTextures().HOPPER_INSIDE;
+	RGBAImage outside = resources.getBlockTextures().HOPPER_OUTSIDE;
+	RGBAImage top = resources.getBlockTextures().HOPPER_TOP;
+
+	RGBAImage block(getBlockSize(), getBlockSize());
+	blitFace(block, FACE_NORTH, outside, 0, 0, true, dleft, dright);
+	blitFace(block, FACE_EAST, outside, 0, 0, true, dleft, dright);
+	blitFace(block, FACE_TOP, inside, 0, texture_size / 2);
+	blitFace(block, FACE_SOUTH, outside, 0, 0, true, dleft, dright);
+	blitFace(block, FACE_WEST, outside, 0, 0, true, dleft, dright);
+	blitFace(block, FACE_TOP, top);
+
+	setBlockImage(154, 0, block);
+}
+
 void IsometricBlockImages::createLargePlant(uint16_t data, const RGBAImage& texture, const RGBAImage& top_texture) { // id 175
 	createItemStyleBlock(175, data, texture);
 	createItemStyleBlock(175, data | LARGEPLANT_TOP, top_texture);
@@ -2058,8 +2076,8 @@ void IsometricBlockImages::createBlocks() {
 	createSmallerBlock(151, 0, t.DAYLIGHT_DETECTOR_SIDE, t.DAYLIGHT_DETECTOR_TOP, 0, 8); // daylight sensor
 	createBlock(152, 0, t.REDSTONE_BLOCK); // block of redstone
 	createBlock(153, 0, t.QUARTZ_ORE); // nether quartz ore
-	// id 154 // hopper
-	// block of quartz --
+	createHopper(); // id 154
+		// block of quartz --
 	createBlock(155, 0, t.QUARTZ_BLOCK_SIDE, t.QUARTZ_BLOCK_TOP);
 	createBlock(155, 1, t.QUARTZ_BLOCK_CHISELED, t.QUARTZ_BLOCK_CHISELED_TOP);
 	createBlock(155, 2, t.QUARTZ_BLOCK_LINES, t.QUARTZ_BLOCK_LINES_TOP);
