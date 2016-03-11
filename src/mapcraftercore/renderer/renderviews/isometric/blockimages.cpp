@@ -2214,7 +2214,7 @@ void IsometricBlockImages::createBlocks() {
 	// id 205 // purpur slab
 	// id 206 // end stone bricks
 	// id 207 // beetroot seeds
-	// id 208 // grass path
+	createSmallerBlock(208, 0, t.GRASS_PATH_SIDE, t.GRASS_PATH_TOP, 0, texture_size * 15.0 / 16.0); // grass paths
 	// id 209 // end gateway
 	// id 210 // repeating command block
 	// id 211 // chain command block

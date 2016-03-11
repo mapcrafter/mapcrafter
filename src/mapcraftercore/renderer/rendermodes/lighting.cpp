@@ -131,6 +131,7 @@ bool isSpecialTransparent(uint16_t id) {
 			|| id == 164 // dark oak wood stairs
 			|| id == 180 // red sandstone stairs
 			|| id == 182 // stone2 slabs
+			|| id == 208 // grass paths
 			;
 }
 
@@ -275,9 +276,11 @@ void LightingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 	bool water = (id == 8 || id == 9) && (data & util::binary<1111>::value) == 0;
 	int texture_size = image.getHeight() / 2;
 
-	if (id == 78 && (data & util::binary<1111>::value) == 0) {
-		// flat snow gets also smooth lighting
+	if ((id == 78 && (data & util::binary<1111>::value) == 0) || id == 208) {
+		// flat snow and grass paths also get smooth lighting
 		int height = ((data & util::binary<1111>::value) + 1) / 8.0 * texture_size;
+		if (id == 208)
+			height = texture_size * 15.0 / 16.0;
 		renderer->lightTop(image, getCornerColors(pos, CORNERS_BOTTOM),
 				texture_size - height);
 		renderer->lightLeft(image, getCornerColors(pos, CORNERS_LEFT),
@@ -288,7 +291,7 @@ void LightingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 		// slabs and wooden slabs
 		doSlabLight(image, pos, id, data);
 	} else if (transparent && !water && id != 79) {
-		// transparent blocks (except full water blocks and ice)
+		// transparent blocks (except full water blocks, ice, grass paths)
 		// get simple lighting, they are completely lighted, not per face
 		doSimpleLight(image, pos, id, data);
 	} else {

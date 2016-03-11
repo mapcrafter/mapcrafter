@@ -1541,7 +1541,7 @@ void TopdownBlockImages::createBlocks() {
 	// id 205 // purpur slab
 	// id 206 // end stone bricks
 	// id 207 // beetroot seeds
-	// id 208 // grass path
+	setBlockImage(208, 0, t.GRASS_PATH_TOP); // grass path
 	// id 209 // end gateway
 	// id 210 // repeating command block
 	// id 211 // chain command block
