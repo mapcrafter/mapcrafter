@@ -32,3 +32,7 @@ MapSelectControl.prototype.create = function(wrapper) {
 	wrapper.appendChild(text);
 	wrapper.appendChild(select);
 };
+
+MapSelectControl.prototype.name = function() {
+	return 'map-select';
+};

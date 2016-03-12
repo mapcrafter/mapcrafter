@@ -15,6 +15,10 @@ BaseControl.prototype.TYPE = "BaseControl";
 BaseControl.prototype.create = function(wrapper) {
 };
 
+BaseControl.prototype.name = function() {
+	return 'base';
+};
+
 BaseControl.prototype.getHandler = function() {
 	return null;
 };

@@ -79,3 +79,7 @@ MarkerControl.prototype.create = function(wrapper) {
 MarkerControl.prototype.getHandler = function() {
 	return this.handler;
 };
+
+MarkerControl.prototype.name = function() {
+	return 'marker';
+};
