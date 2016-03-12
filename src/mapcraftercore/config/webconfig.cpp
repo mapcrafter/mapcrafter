@@ -240,6 +240,7 @@ picojson::value WebConfig::getConfigJSON() const {
 			tile_offsets_json.push_back(picojson::value(offset_json));
 		}
 		tile_set_json["tileOffsets"] = picojson::value(tile_offsets_json);
+		tile_set_json["tileWidth"] = picojson::value((double) it->tile_width);
 
 		tile_sets_json[it->toString()] = picojson::value(tile_set_json);
 	}
@@ -254,6 +255,7 @@ picojson::value WebConfig::getConfigJSON() const {
 		map_json["name"] = picojson::value(map_it->getLongName());
 		map_json["world"] = picojson::value(map_it->getWorld());
 		map_json["worldName"] = picojson::value(world.getWorldName());
+		map_json["worldSeaLevel"] = picojson::value((double) world.getSeaLevel());
 		map_json["renderView"] = picojson::value(util::str(map_it->getRenderView()));
 		map_json["textureSize"] = picojson::value((double) map_it->getTextureSize());
 		map_json["terrainImageFormat"] = picojson::value(map_it->getImageFormat().getSuffix());

@@ -53,7 +53,7 @@ PosHashHandler.prototype.updateHash = function() {
 	if(overlays == "")
 		overlays = "-";
 	var rotation = this.ui.getCurrentRotation();
-	var xzy = this.ui.latLngToMC(this.ui.lmap.getCenter(), 64);
+	var xzy = this.ui.latLngToMC(this.ui.lmap.getCenter(), this.ui.getCurrentMapConfig().worldSeaLevel);
 	for(var i = 0; i < 3; i++)
 		xzy[i] = Math.round(xzy[i]);
 	var zoom = this.ui.lmap.getZoom();
