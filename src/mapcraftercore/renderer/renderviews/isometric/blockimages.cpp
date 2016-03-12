@@ -397,6 +397,8 @@ uint16_t IsometricBlockImages::filterBlockData(uint16_t id, uint16_t data) const
 	// the light sensor shouldn't have any data, but I had problems with it...
 	else if (id == 151 || id == 178)
 		return 0;
+	else if (id == 154) // hopper
+		return 0;
 	return data;
 }
 
@@ -1026,8 +1028,10 @@ void IsometricBlockImages::createDoubleChest(uint16_t id, const DoubleChestTextu
 
 void IsometricBlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data,
 		uint8_t r, uint8_t g, uint8_t b) { // id 55
-	RGBAImage redstone_cross = resources.getBlockTextures().REDSTONE_DUST_CROSS;
-	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE;
+	RGBAImage redstone_cross = resources.getBlockTextures().REDSTONE_DUST_DOT;
+	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE0;
+	redstone_cross.simpleAlphaBlit(redstone_line, 0, 0);
+	redstone_cross.simpleAlphaBlit(redstone_line.rotate(1), 0, 0);
 
 	//uint8_t color = powered ? 50 : 255;
 	redstone_cross = redstone_cross.colorize(r, g, b);
@@ -1617,7 +1621,7 @@ void IsometricBlockImages::createCocoas() { // id 127
 }
 
 void IsometricBlockImages::createTripwireHook() { // id 131
-	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE.colorize((uint8_t) 192, 192, 192);
+	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE0.colorize((uint8_t) 192, 192, 192);
 
 	BlockImage block;
 	block.setFace(FACE_NORTH, resources.getBlockTextures().TRIP_WIRE_SOURCE);
@@ -1708,6 +1712,22 @@ void IsometricBlockImages::createFlowerPot() { // id 140
 
 		setBlockImage(140, i, block);
 	}
+}
+
+void IsometricBlockImages::createHopper() { // id 154
+	RGBAImage inside = resources.getBlockTextures().HOPPER_INSIDE;
+	RGBAImage outside = resources.getBlockTextures().HOPPER_OUTSIDE;
+	RGBAImage top = resources.getBlockTextures().HOPPER_TOP;
+
+	RGBAImage block(getBlockSize(), getBlockSize());
+	blitFace(block, FACE_NORTH, outside, 0, 0, true, dleft, dright);
+	blitFace(block, FACE_EAST, outside, 0, 0, true, dleft, dright);
+	blitFace(block, FACE_TOP, inside, 0, texture_size / 2);
+	blitFace(block, FACE_SOUTH, outside, 0, 0, true, dleft, dright);
+	blitFace(block, FACE_WEST, outside, 0, 0, true, dleft, dright);
+	blitFace(block, FACE_TOP, top);
+
+	setBlockImage(154, 0, block);
 }
 
 void IsometricBlockImages::createLargePlant(uint16_t data, const RGBAImage& texture, const RGBAImage& top_texture) { // id 175
@@ -2018,7 +2038,8 @@ void IsometricBlockImages::createBlocks() {
 	createStairs(134, t.PLANKS_SPRUCE); // spruce wood stairs
 	createStairs(135, t.PLANKS_BIRCH); // birch wood stairs
 	createStairs(136, t.PLANKS_JUNGLE); // jungle wood stairs
-	createBlock(137, 0, t.COMMAND_BLOCK); // command block
+	// TODO
+	createBlock(137, 0, t.COMMAND_BLOCK_SIDE); // command block
 	createBeacon(); // beacon
 	createFence(139, 0, t.COBBLESTONE); // cobblestone wall
 	createFence(139, 1, t.COBBLESTONE_MOSSY); // cobblestone wall mossy
@@ -2055,8 +2076,8 @@ void IsometricBlockImages::createBlocks() {
 	createSmallerBlock(151, 0, t.DAYLIGHT_DETECTOR_SIDE, t.DAYLIGHT_DETECTOR_TOP, 0, 8); // daylight sensor
 	createBlock(152, 0, t.REDSTONE_BLOCK); // block of redstone
 	createBlock(153, 0, t.QUARTZ_ORE); // nether quartz ore
-	// id 154 // hopper
-	// block of quartz --
+	createHopper(); // id 154
+		// block of quartz --
 	createBlock(155, 0, t.QUARTZ_BLOCK_SIDE, t.QUARTZ_BLOCK_TOP);
 	createBlock(155, 1, t.QUARTZ_BLOCK_CHISELED, t.QUARTZ_BLOCK_CHISELED_TOP);
 	createBlock(155, 2, t.QUARTZ_BLOCK_LINES, t.QUARTZ_BLOCK_LINES_TOP);
@@ -2193,7 +2214,7 @@ void IsometricBlockImages::createBlocks() {
 	// id 205 // purpur slab
 	// id 206 // end stone bricks
 	// id 207 // beetroot seeds
-	// id 208 // grass path
+	createSmallerBlock(208, 0, t.GRASS_PATH_SIDE, t.GRASS_PATH_TOP, 0, texture_size * 15.0 / 16.0); // grass paths
 	// id 209 // end gateway
 	// id 210 // repeating command block
 	// id 211 // chain command block

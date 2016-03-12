@@ -202,7 +202,7 @@ public:
 	 * Sets the limits (in block coordinates) of the circular boundaries.
 	 */
 	void setCenter(const BlockPos& pos);
-	void setRadius(int radius);
+	void setRadius(long radius);
 
 	/**
 	 * Returns whether a specific region is contained.
@@ -270,7 +270,7 @@ private:
 
 	// circular limits
 	BlockPos center;
-	int radius;
+	long radius;
 
 	// whether to hide unpopulated chunks
 	bool crop_unpopulated_chunks;
