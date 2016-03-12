@@ -12,7 +12,7 @@ MousePosControl.prototype.create = function(wrapper) {
 	
 	var updatePos = function(ui) {
 		return function(event) {
-			var xzy = ui.latLngToMC(event.latlng, 64);
+			var xzy = ui.latLngToMC(event.latlng, ui.getCurrentMapConfig().worldSeaLevel);
 			document.getElementById("mouse-move-div").innerHTML = "X: " + Math.round(xzy[0]) 
 				+ " Z: " + Math.round(xzy[1]) + " Y: " + Math.round(xzy[2]);
 		};

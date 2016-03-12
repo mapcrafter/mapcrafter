@@ -281,7 +281,7 @@ MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 	var oldZoom = 0;
 	if(this.currentMap != null && this.currentRotation != null) {
 		oldMapLayer = this.layers[this.currentMap][this.currentRotation];
-		oldView = this.latLngToMC(this.lmap.getCenter(), 64);
+		oldView = this.latLngToMC(this.lmap.getCenter(), oldMapConfig.worldSeaLevel);
 		oldZoom = this.lmap.getZoom();
 	}
 	
