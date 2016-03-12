@@ -8,9 +8,18 @@ body {
 	height: 100%;
 	margin: 0;
 	padding: 0;
-	
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 14px;
+}
+
+img.rotation {
+	width: 40px;
+}
+
+#control-wrapper-rotation-select {
+	background-color: white;
+	border: 1px solid #ccc;
+	border-radius: 4px;
 }
 
 #mcmap {
@@ -21,17 +30,25 @@ body {
 .control-wrapper {
 	margin: 5px;
 	padding: 4px;
-	border: 1px solid gray;
-	background-color: white;
-	
-	font-size: 12px;
-	font-weight: bold;
 }
 
-#control-wrapper-map-select select {
-	padding: 3px;
-	border: 1px solid black;
+#control-wrapper-marker {
+	border: 1px solid #ccc;
+	border-radius: 4px;
 	background-color: white;
+	padding: 10px;
+	font-size: 14px;
+}
+
+#control-wrapper-marker input, #control-wrapper-marker label {
+	margin:0;
+}
+#control-wrapper-marker label {
+	padding-left: 5px;
+}
+
+#control-wrapper-marker div div {
+	padding-bottom: 5px;
 }
 
 img.rotation {
@@ -39,7 +56,6 @@ img.rotation {
 	margin-right: 3px;
 }
 
-.hidden {
-  display: none;
+#control-wrapper-map-select {
+	z-index: initial !important;
 }
-
