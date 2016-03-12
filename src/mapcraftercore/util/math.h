@@ -22,6 +22,7 @@
 #define MATH_H_
 
 #include <cmath>
+#include <limits>
 
 namespace mapcrafter {
 namespace util {
@@ -81,6 +82,116 @@ template <>
 struct binary<0> {
 	static const unsigned long value = 0;
 };
+
+/**
+ * A 1-dimensional interval.
+ * Has either two limits, one limit (minimum or maximum) or no limit.
+ */
+template <typename T>
+class Interval1D {
+public:
+	Interval1D(T min = MIN_DEFAULT, T max = MAX_DEFAULT);
+
+	/**
+	 * Sets the minimum/maximum limit.
+	 */
+	void setMin(T min);
+	void setMax(T max);
+
+	/**
+	 * Resets the minimum/maximum, i.e. sets it to infinity (or -infinity for minimum).
+	 */
+	void resetMin();
+	void resetMax();
+
+	/**
+	 * Returns whether a specific value is within in the bounds.
+	 */
+	bool contains(T value) const;
+
+	static const T MIN_DEFAULT = std::numeric_limits<T>::lowest();
+	static const T MAX_DEFAULT = std::numeric_limits<T>::max();
+
+private:
+	// minimum, maximum
+	T min, max;
+};
+
+/**
+ * A 3-dimensional interval consisting of three 1-dimension intervals.
+ */
+template <typename T>
+class Interval3D {
+public:
+	Interval3D(const Interval1D<T>& interval_x = Interval1D<T>(),
+			const Interval1D<T>& interval_z = Interval1D<T>(),
+			const Interval1D<T>& interval_y = Interval1D<T>());
+
+	void setIntervalX(Interval1D<T> interval_x);
+	void setIntervalZ(Interval1D<T> interval_z);
+	void setIntervalY(Interval1D<T> interval_y);
+
+	bool contains(T x, T z, T y) const;
+
+protected:
+	Interval1D<T> interval_x, interval_z, interval_y;
+};
+
+template <typename T>
+Interval1D<T>::Interval1D(T min, T max)
+	: min(min), max(max) {
+}
+
+template <typename T>
+void Interval1D<T>::setMin(T min) {
+	this->min = min;
+}
+
+template <typename T>
+void Interval1D<T>::setMax(T max) {
+	this->max = max;
+}
+
+template <typename T>
+void Interval1D<T>::resetMin() {
+	min = MIN_DEFAULT;
+}
+
+template <typename T>
+void Interval1D<T>::resetMax() {
+	max = MAX_DEFAULT;
+}
+
+template <typename T>
+bool Interval1D<T>::contains(T value) const {
+	return min <= value && value <= max;
+}
+
+template <typename T>
+Interval3D<T>::Interval3D(const Interval1D<T>& interval_x, const Interval1D<T>& interval_z,
+		const Interval1D<T>& interval_y)
+	: interval_x(interval_x), interval_z(interval_z), interval_y(interval_y) {
+}
+
+template <typename T>
+void Interval3D<T>::setIntervalX(Interval1D<T> interval_x) {
+	this->interval_x = interval_x;
+}
+
+template <typename T>
+void Interval3D<T>::setIntervalZ(Interval1D<T> interval_z) {
+	this->interval_z = interval_z;
+}
+
+template <typename T>
+void Interval3D<T>::setIntervalY(Interval1D<T> interval_y) {
+	this->interval_y = interval_y;
+}
+
+template <typename T>
+bool Interval3D<T>::contains(T x, T z, T y) const {
+	return interval_x.contains(x) && interval_z.contains(z) && interval_y.contains(y);
+}
 
 } /* namespace util */
 } /* namespace mapcrafter */

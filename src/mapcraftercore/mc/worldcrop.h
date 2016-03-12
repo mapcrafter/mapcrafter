@@ -21,6 +21,7 @@
 #define WORLDCROP_H_
 
 #include "pos.h"
+#include "../util.h"
 
 #include <bitset>
 #include <memory>
@@ -29,40 +30,6 @@
 
 namespace mapcrafter {
 namespace mc {
-
-/**
- * A 1-dimensional boundary.
- * Has either two limits, one limit (minimum or maximum) or no limit.
- */
-template <typename T>
-class Bounds {
-public:
-	Bounds();
-	~Bounds();
-
-	/**
-	 * Sets the minimum/maximum limit.
-	 */
-	void setMin(T min);
-	void setMax(T max);
-
-	/**
-	 * Resets the minimum/maximum, i.e. sets it to infinity (or -infinity for minimum).
-	 */
-	void resetMin();
-	void resetMax();
-
-	/**
-	 * Returns whether a specific value is within in the bounds.
-	 */
-	bool contains(T value) const;
-
-private:
-	// minimum, maximum
-	T min, max;
-	// whether minimum, maximum is set to infinity (or -infinity for minimum)
-	bool min_set, max_set;
-};
 
 /**
  * Data structure to hold information about which blocks should be hidden/shown.
@@ -258,15 +225,15 @@ private:
 	int type;
 
 	// usable for both rectangular and circular
-	Bounds<int> bounds_y;
+	util::Interval1D<int> bounds_y;
 
 	// rectangular limits:
 	// in block coordinates
-	Bounds<int> bounds_x, bounds_z;
+	util::Interval1D<int> bounds_x, bounds_z;
 	// in chunk coordinates
-	Bounds<int> bounds_chunk_x, bounds_chunk_z;
+	util::Interval1D<int> bounds_chunk_x, bounds_chunk_z;
 	// in region coordinates
-	Bounds<int> bounds_region_x, bounds_region_z;
+	util::Interval1D<int> bounds_region_x, bounds_region_z;
 
 	// circular limits
 	BlockPos center;
@@ -278,59 +245,6 @@ private:
 	// block mask
 	std::shared_ptr<BlockMask> block_mask;
 };
-
-template <typename T>
-Bounds<T>::Bounds()
-	: min_set(false), max_set(false) {
-}
-
-template <typename T>
-Bounds<T>::~Bounds() {
-}
-
-template <typename T>
-void Bounds<T>::setMin(T min) {
-	this->min = min;
-	min_set = true;
-}
-
-template <typename T>
-void Bounds<T>::setMax(T max) {
-	this->max = max;
-	max_set = true;
-}
-
-template <typename T>
-void Bounds<T>::resetMin() {
-	min_set = false;
-}
-
-template <typename T>
-void Bounds<T>::resetMax() {
-	max_set = false;
-}
-
-template <typename T>
-bool Bounds<T>::contains(T value) const {
-	// case 1: no limits
-	// value is definitely included
-	if (!min_set && !max_set)
-		return true;
-
-	// case 2: only a minimum limit
-	// value is included if value >= minimum
-	if (min_set && !max_set)
-		return value >= min;
-
-	// case 3: only a maximum limits
-	// value is included if value <= maximum
-	if (max_set && !min_set)
-		return value <= max;
-
-	// case 3: two limits
-	// value is included if value >= minimum and value <= maximum
-	return min <= value && value <= max;
-}
 
 }
 }
