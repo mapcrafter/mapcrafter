@@ -305,10 +305,10 @@ picojson::value WebConfig::getConfigJSON() const {
 	for (auto overlay_it = overlays.begin(); overlay_it != overlays.end(); ++overlay_it) {
 		auto overlay = overlay_it->second;
 		picojson::object overlay_json;
-		overlay_json["id"] = picojson::value(overlay.getID());
-		overlay_json["name"] = picojson::value(overlay.getName());
-		overlay_json["base"] = picojson::value(overlay.isBase());
-		overlays_json[overlay.getID()] = picojson::value(overlay_json);
+		overlay_json["id"] = picojson::value(overlay->getID());
+		overlay_json["name"] = picojson::value(overlay->getName());
+		overlay_json["base"] = picojson::value(overlay->isBase());
+		overlays_json[overlay->getID()] = picojson::value(overlay_json);
 	}
 
 	config_json["tileSetGroups"] = picojson::value(tile_sets_json);

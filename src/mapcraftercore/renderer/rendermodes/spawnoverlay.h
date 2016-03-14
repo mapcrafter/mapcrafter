@@ -26,10 +26,9 @@
 namespace mapcrafter {
 namespace renderer {
 
-class SpawnOverlay : public TintingOverlay {
+class SpawnOverlay : public TintingOverlay<config::SpawnOverlaySection> {
 public:
-	SpawnOverlay(bool day);
-	virtual ~SpawnOverlay();
+	SpawnOverlay(std::shared_ptr<config::ConfigSection> config);
 
 protected:
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data);

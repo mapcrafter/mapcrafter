@@ -114,6 +114,7 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 	if (type == RenderModeType::PLAIN) {
 		// nothing
 	} else if (type == RenderModeType::CAVE || type == RenderModeType::CAVELIGHT) {
+		/*
 		// hide some walls of caves which would cover the view into the caves
 		if (map_config.getRenderView() == RenderViewType::ISOMETRIC)
 			render_mode->addRenderMode(new CaveRenderMode({mc::DIR_SOUTH, mc::DIR_WEST, mc::DIR_TOP}));
@@ -124,15 +125,20 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 			render_mode->addRenderMode(new LightingRenderMode("day", "Day", true, map_config.getLightingIntensity(),
 						map_config.getLightingWaterIntensity(), true));
 		render_mode->addRenderMode(new HeightOverlay());
+		*/
 	}
 	else if (type == RenderModeType::DAYLIGHT) {
+		/*
 		render_mode->addRenderMode(new LightingRenderMode("day", "Day", true,
 					map_config.getLightingIntensity(), map_config.getLightingWaterIntensity(),
 					world_config.getDimension() == mc::Dimension::END));
+		*/
 	} else if (type == RenderModeType::NIGHTLIGHT) {
+		/*
 		render_mode->addRenderMode(new LightingRenderMode("night", "Night", false,
 					map_config.getLightingIntensity(), map_config.getLightingWaterIntensity(),
 					world_config.getDimension() == mc::Dimension::END));
+		*/
 	} else {
 		// this shouldn't happen
 		delete render_mode;

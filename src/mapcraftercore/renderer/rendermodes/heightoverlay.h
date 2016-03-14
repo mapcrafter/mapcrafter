@@ -22,14 +22,14 @@
 
 #include "overlay.h"
 #include "../rendermode.h"
+#include "../../config/configsection.h"
 
 namespace mapcrafter {
 namespace renderer {
 
-class HeightOverlay : public TintingOverlay {
+class HeightOverlay : public TintingOverlay<config::DummyOverlaySection> {
 public:
-	HeightOverlay();
-	virtual ~HeightOverlay();
+	HeightOverlay(std::shared_ptr<config::ConfigSection> config);
 
 protected:
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data);

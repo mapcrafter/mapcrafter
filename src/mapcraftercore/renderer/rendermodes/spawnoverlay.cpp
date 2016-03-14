@@ -24,12 +24,8 @@
 namespace mapcrafter {
 namespace renderer {
 
-SpawnOverlay::SpawnOverlay(bool day)
-	: TintingOverlay(OverlayMode::PER_FACE, (day ? "spawnday" : "spawnnight"),
-			(day ? "Spawn at day" : "Spawn at night")), day(day) {
-}
-
-SpawnOverlay::~SpawnOverlay() {
+SpawnOverlay::SpawnOverlay(std::shared_ptr<config::ConfigSection> config)
+	: TintingOverlay(OverlayMode::PER_FACE, config) {
 }
 
 RGBAPixel SpawnOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
@@ -37,7 +33,7 @@ RGBAPixel SpawnOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint
 	// TODO also mobs can't spawn on specific blocks?
 	mc::Block block = getBlock(pos, mc::GET_ID | mc::GET_DATA | mc::GET_LIGHT);
 	LightingData light = LightingData::estimate(block, images, world, *current_chunk);
-	uint8_t light_level = light.getLightLevel(day);
+	uint8_t light_level = light.getLightLevel(config->isDay());
 	if (light_level < 8)
 		return rgba(255, 0, 0, 85);
 	return rgba(0, 0, 0, 0);

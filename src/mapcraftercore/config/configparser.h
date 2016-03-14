@@ -74,6 +74,11 @@ public:
 	void parseSections(std::vector<Section>& sections, const std::string& type,
 			SectionFactory section_factory = GenericSectionFactory<Section>());
 
+	template <typename Section, typename SpecificSection, typename SectionFactory = GenericSectionFactory<SpecificSection>>
+	void parseSections(std::vector<std::shared_ptr<Section>>& sections, const std::string& type,
+			SectionFactory section_factory = GenericSectionFactory<SpecificSection>());
+
+
 	/**
 	 * Same as parseSections(std::vector<Section>& sections... but puts the parsed
 	 * sections into a map with section name -> section object.
@@ -82,6 +87,11 @@ public:
 	void parseSections(std::map<std::string, Section>& sections,
 			const std::string& type,
 			SectionFactory section_factory = GenericSectionFactory<Section>());
+
+	template <typename Section, typename SpecificSection, typename SectionFactory = GenericSectionFactory<SpecificSection>>
+	void parseSections(std::map<std::string, std::shared_ptr<Section>>& sections,
+			const std::string& type,
+			SectionFactory section_factory = GenericSectionFactory<SpecificSection>());
 
 	/**
 	 * Does the remaining validation work after parsing the sections, for example add
@@ -166,13 +176,75 @@ void ConfigParser::parseSections(std::vector<Section>& sections,
 	}
 }
 
+template <typename Section, typename SpecificSection, typename SectionFactory>
+void ConfigParser::parseSections(std::vector<std::shared_ptr<Section>>& sections,
+		const std::string& type, SectionFactory section_factory) {
+	parsed_section_types.insert(type);
+
+	// create global section object and parse it if a global section exists in config
+	SpecificSection* section_global = new SpecificSection();
+	*section_global = section_factory();
+	section_global->setGlobal(true);
+	if (config.hasSection("global", type)) {
+		ValidationList global_validation = section_global->parse(config.getSection("global", type));
+		if (!global_validation.isEmpty())
+			validation.section(section_global->getPrettyName()) = global_validation;
+		// stop parsing here if global section contains critical errors
+		// parsing also the other sections would lead to redundant error messages
+		if (global_validation.isCritical())
+			return;
+	}
+
+	// set of used section names, to make sure section names aren't used multiple types
+	std::set<std::string> parsed_sections_names;
+
+	// go through all config sections with the specified type and try to parse it
+	auto config_sections = config.getSections();
+	for (auto config_section_it = config_sections.begin();
+			config_section_it != config_sections.end(); ++config_section_it) {
+		if (config_section_it->getType() != type)
+			continue;
+
+		// create section object as copy from global section object
+		SpecificSection* section = new SpecificSection();
+		*section = *section_global;
+		section->setGlobal(false);
+		// and parse section
+		ValidationList section_validation = section->parse(*config_section_it);
+
+		// make sure section name is not in use already, otherwise add to parsed sections
+		if (parsed_sections_names.count(config_section_it->getName())) {
+			section_validation.error(util::capitalize(type) + " name '"
+					+ config_section_it->getName() + "' already used!");
+		} else {
+			parsed_sections_names.insert(config_section_it->getName());
+			sections.push_back(std::shared_ptr<Section>(section));
+		}
+
+		// add validation messages (if any) to global validation object
+		if (!section_validation.isEmpty())
+			validation.section(section->getPrettyName()) = section_validation;
+	}
+
+	delete section_global;
+}
+
 template <typename Section, typename SectionFactory>
 void ConfigParser::parseSections(std::map<std::string, Section>& sections,
 		const std::string& type, SectionFactory section_factory) {
 	std::vector<Section> sections_list;
-	parseSections(sections_list, type, section_factory);
+	parseSections<Section, SectionFactory>(sections_list, type, section_factory);
 	for (auto it = sections_list.begin(); it != sections_list.end(); ++it)
 		sections[it->getSectionName()] = *it;
+}
+
+template <typename Section, typename SpecificSection, typename SectionFactory>
+void ConfigParser::parseSections(std::map<std::string, std::shared_ptr<Section>>& sections,
+		const std::string& type, SectionFactory section_factory) {
+	std::vector<std::shared_ptr<Section>> sections_list;
+	parseSections<Section, SpecificSection, SectionFactory>(sections_list, type, section_factory);
+	for (auto it = sections_list.begin(); it != sections_list.end(); ++it)
+		sections[(*it)->getSectionName()] = *it;
 }
 
 } /* namespace config */

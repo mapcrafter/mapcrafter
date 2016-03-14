@@ -23,7 +23,6 @@
 #include "lighting.h"
 #include "slimeoverlay.h"
 #include "spawnoverlay.h"
-#include "../blockimages.h"
 #include "../image.h"
 #include "../../config/mapcrafterconfig.h"
 #include "../../config/configsections/map.h"
@@ -94,58 +93,14 @@ std::tuple<int, int, int> OverlayRenderer::getRecolor(RGBAPixel color) const {
 
 const RenderModeRendererType OverlayRenderer::TYPE = RenderModeRendererType::OVERLAY;
 
-TintingOverlay::TintingOverlay(OverlayMode overlay_mode, const std::string& id,
-		const std::string& name)
-	: BaseOverlayRenderMode(id, name, false), overlay_mode(overlay_mode) {
-}
-
-TintingOverlay::~TintingOverlay() {
-}
-
-void TintingOverlay::drawOverlay(RGBAImage& block, RGBAImage& overlay,
-		const mc::BlockPos& pos, uint16_t id, uint16_t data) {
-	if (overlay_mode == OverlayMode::PER_BLOCK) {
-		// simple mode where we just tint whole blocks
-		RGBAPixel color = getBlockColor(pos, id, data);
-		if (rgba_alpha(color) == 0)
-			return;
-		renderer->tintBlock(overlay, color);
-	} else {
-		// "advanced" mode where each block/position has a color,
-		// and adjacent faces are tinted / or the transparent blocks themselves
-		// TODO potential for optimization, maybe cache colors of blocks?
-		if (images->isBlockTransparent(id, data)) {
-			RGBAPixel color = getBlockColor(pos, id, data);
-			if (rgba_alpha(color) == 0)
-				return;
-			renderer->tintBlock(overlay, color);
-		} else {
-			mc::Block top, left, right;
-			RGBAPixel color_top, color_left, color_right;
-			top = getBlock(pos + mc::DIR_TOP, mc::GET_ID | mc::GET_DATA);
-			left = getBlock(pos + mc::DIR_WEST, mc::GET_ID | mc::GET_DATA);
-			right = getBlock(pos + mc::DIR_SOUTH, mc::GET_ID | mc::GET_DATA);
-			color_top = getBlockColor(pos + mc::DIR_TOP, top.id, top.data);
-			color_left = getBlockColor(pos + mc::DIR_WEST, left.id, left.data);
-			color_right = getBlockColor(pos + mc::DIR_SOUTH, right.id, right.data);
-			
-			if (rgba_alpha(color_top) != 0)
-				renderer->tintTop(overlay, color_top, 0);
-			if (rgba_alpha(color_left) != 0)
-				renderer->tintLeft(overlay, color_left);
-			if (rgba_alpha(color_right) != 0)
-				renderer->tintRight(overlay, color_right);
-		}
-	}
-}
-
 OverlayRenderMode* createOverlay(const config::WorldSection& world_config,
 		const config::MapSection& map_config,
-		const config::OverlaySection& overlay_config, int rotation) {
-	OverlayType type = overlay_config.getType();
-	std::string id = overlay_config.getID();
-	std::string name = overlay_config.getName();
+		std::shared_ptr<config::OverlaySection> overlay_config, int rotation) {
+	OverlayType type = overlay_config->getType();
+	std::string id = overlay_config->getID();
+	std::string name = overlay_config->getName();
 
+	/*
 	if (type == OverlayType::LIGHTING) {
 		return new LightingRenderMode(id, name, overlay_config.isDay(),
 				overlay_config.getLightingIntensity(),
@@ -159,42 +114,32 @@ OverlayRenderMode* createOverlay(const config::WorldSection& world_config,
 		// may not happen
 		assert(false);
 	}
+	*/
+	if (type == OverlayType::LIGHTING) {
+		return new LightingRenderMode(overlay_config);
+	} else if (type == OverlayType::SLIME) {
+		return new SlimeOverlay(overlay_config, world_config.getInputDir(), rotation);
+	} else if (type == OverlayType::SPAWN) {
+		return new SpawnOverlay(overlay_config);
+	} else {
+		// may not happen
+		assert(false);
+	}
 	return nullptr;
 }
 
 std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(
 		const config::WorldSection& world_config, const config::MapSection& map_config,
-		const std::map<std::string, config::OverlaySection>& overlays_config,
+		const std::map<std::string, std::shared_ptr<config::OverlaySection>>& overlays_config,
 		int rotation) {
 	std::vector<std::shared_ptr<OverlayRenderMode>> overlays;
 	
 	auto overlay_types = map_config.getOverlays();
 	for (auto it = overlay_types.begin(); it != overlay_types.end(); ++it) {
-		config::OverlaySection overlay_config = overlays_config.at(*it);
+		std::shared_ptr<config::OverlaySection> overlay_config = overlays_config.at(*it);
 		OverlayRenderMode* overlay = createOverlay(world_config, map_config,
 				overlay_config, rotation);
 		overlays.push_back(std::shared_ptr<OverlayRenderMode>(overlay));
-		
-		/*
-		if (overlay_type == OverlayType::SLIME)
-			overlay = new SlimeOverlay(world_config.getInputDir(), rotation);
-		else if (overlay_type == OverlayType::SPAWNDAY)
-			overlay = new SpawnOverlay(true);
-		else if (overlay_type == OverlayType::SPAWNNIGHT)
-			overlay = new SpawnOverlay(false);
-		else if (overlay_type == OverlayType::DAY)
-			overlay = new LightingRenderMode("day", "Day", true,
-					map_config.getLightingIntensity(), map_config.getLightingWaterIntensity(),
-					world_config.getDimension() == mc::Dimension::END);
-		else if (overlay_type == OverlayType::NIGHT)
-			overlay = new LightingRenderMode("night", "Night", false,
-					map_config.getLightingIntensity(), map_config.getLightingWaterIntensity(),
-					world_config.getDimension() == mc::Dimension::END);
-		else {
-			// should not happen
-			assert(false);
-		}
-		*/
 	}
 
 	return overlays;

@@ -52,17 +52,13 @@ OverlaySection::~OverlaySection() {
 
 std::string OverlaySection::getPrettyName() const {
 	if (isGlobal())
-		return "Global overlay section";
-	return "Overlay section '" + getSectionName() + "'";
+		return "Global " + getSectionType() + " section";
+	return util::capitalize(getSectionType()) + " section '" + getSectionName() + "'";
 }
 
 void OverlaySection::dump(std::ostream& out) const {
 	out << getPrettyName() << ":" << std::endl;
 	out << "  name = " << name << std::endl;
-	out << "  type = " << type << std::endl;
-	out << "  base = " << base << std::endl;
-	out << "  day = " << day << std::endl;
-	out << "  lighting_intensity = " << lighting_intensity << std::endl;
 }
 
 std::string OverlaySection::getID() const {
@@ -74,48 +70,26 @@ std::string OverlaySection::getName() const {
 }
 
 renderer::OverlayType OverlaySection::getType() const {
-	return type.getValue();
+	std::string section_name = getSectionType();
+	section_name = section_name.substr(std::string("section-").size());
+	return util::as<renderer::OverlayType>(section_name);
 }
 
 bool OverlaySection::isBase() const {
 	return base.getValue();
 }
 
-bool OverlaySection::isDay() const {
-	return day.getValue();
-}
-
-double OverlaySection::getLightingIntensity() const {
-	return lighting_intensity.getValue();
-}
-
-double OverlaySection::getLightingWaterIntensity() const {
-	return lighting_water_intensity.getValue();
-}
-
 void OverlaySection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	name.setDefault(getSectionName());
-
-	day.setDefault(true);
-	lighting_intensity.setDefault(1.0);
-	lighting_water_intensity.setDefault(1.0);
 }
 
 bool OverlaySection::parseField(const std::string key, const std::string value,
 		ValidationList& validation) {
 	if (key == "name") {
 		name.load(key, value, validation);
-	} else if (key == "type") {
-		type.load(key, value, validation);
 	} else if (key == "base") {
 		base.load(key, value, validation);
-	} else if (key == "day") {
-		day.load(key, value, validation);
-	} else if (key == "lighting_intensity") {
-		lighting_intensity.load(key, value, validation);
-	} else if (key == "lighting_water_intensity") {
-		lighting_water_intensity.load(key, value, validation);
 	} else {
 		return false;
 	}
@@ -125,10 +99,112 @@ bool OverlaySection::parseField(const std::string key, const std::string value,
 void OverlaySection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	base.setDefault(getType() == renderer::OverlayType::LIGHTING);
+}
 
-	if (!isGlobal()) {
-		type.require(validation, "You have to specify an overlay type!");
+void HeightOverlaySection::dump(std::ostream& out) const {
+	OverlaySection::dump(out);
+}
+
+void HeightOverlaySection::preParse(const INIConfigSection& section,
+		ValidationList& validation) {
+	OverlaySection::preParse(section, validation);
+}
+
+bool HeightOverlaySection::parseField(const std::string key, const std::string value,
+		ValidationList& validation) {
+	if (OverlaySection::parseField(key, value, validation))
+		return true;
+	return false;
+}
+
+void LightingOverlaySection::dump(std::ostream& out) const {
+	OverlaySection::dump(out);
+	out << "  day = " << day << std::endl;
+	out << "  intensity = " << intensity << std::endl;
+	out << "  water_intensity = " << water_intensity << std::endl;
+}
+
+bool LightingOverlaySection::isDay() const {
+	return day.getValue();
+}
+
+double LightingOverlaySection::getIntensity() const {
+	return intensity.getValue();
+}
+
+double LightingOverlaySection::getWaterIntensity() const {
+	return water_intensity.getValue();
+}
+
+void LightingOverlaySection::preParse(const INIConfigSection& section,
+		ValidationList& validation) {
+	OverlaySection::preParse(section, validation);
+
+	day.setDefault(true);
+	intensity.setDefault(1.0);
+	water_intensity.setDefault(1.0);
+}
+
+bool LightingOverlaySection::parseField(const std::string key, const std::string value,
+		ValidationList& validation) {
+	if (OverlaySection::parseField(key, value, validation))
+		return true;
+
+	if (key == "day") {
+		day.load(key, value, validation);
+	} else if (key == "intensity") {
+		intensity.load(key, value, validation);
+	} else if (key == "water_intensity") {
+		water_intensity.load(key, value, validation);
+	} else {
+		return false;
 	}
+	return true;
+}
+
+
+void SlimeOverlaySection::dump(std::ostream& out) const {
+	OverlaySection::dump(out);
+}
+
+void SlimeOverlaySection::preParse(const INIConfigSection& section,
+		ValidationList& validation) {
+	OverlaySection::preParse(section, validation);
+}
+
+bool SlimeOverlaySection::parseField(const std::string key, const std::string value,
+		ValidationList& validation) {
+	if (OverlaySection::parseField(key, value, validation))
+		return true;
+	return false;
+}
+
+void SpawnOverlaySection::dump(std::ostream& out) const {
+	OverlaySection::dump(out);
+	out << "day = " << day << std::endl;
+}
+
+bool SpawnOverlaySection::isDay() const {
+	return day.getValue();
+}
+
+void SpawnOverlaySection::preParse(const INIConfigSection& section,
+		ValidationList& validation) {
+	OverlaySection::preParse(section, validation);
+	day.setDefault(true);
+}
+
+bool SpawnOverlaySection::parseField(const std::string key, const std::string value,
+		ValidationList& validation) {
+	if (OverlaySection::parseField(key, value, validation))
+		return true;
+
+	if (key == "day") {
+		day.load(key, value, validation);
+	} else {
+		return false;
+	}
+	return true;
 }
 
 } /* namespace config */

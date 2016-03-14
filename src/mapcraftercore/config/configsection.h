@@ -56,6 +56,11 @@ public:
 	void setGlobal(bool global);
 
 	/**
+	 * Returns the type of the section.
+	 */
+	std::string getSectionType() const;
+
+	/**
 	 * Returns the name of the section.
 	 */
 	std::string getSectionName() const;
@@ -109,8 +114,8 @@ private:
 	// might change with future versions, [section:my_glob_*] seems to be a good idea, too
 	bool global;
 
-	// name of this section
-	std::string section_name;
+	// type, name of this section
+	std::string section_type, section_name;
 
 	ValidationList validation;
 };

@@ -25,11 +25,8 @@
 namespace mapcrafter {
 namespace renderer {
 
-HeightOverlay::HeightOverlay()
-	: TintingOverlay(OverlayMode::PER_BLOCK, "height", "Height") {
-}
-
-HeightOverlay::~HeightOverlay() {
+HeightOverlay::HeightOverlay(std::shared_ptr<config::ConfigSection> config)
+	: TintingOverlay(OverlayMode::PER_BLOCK, config) {
 }
 
 RGBAPixel HeightOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {

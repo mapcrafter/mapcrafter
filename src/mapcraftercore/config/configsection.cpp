@@ -39,6 +39,10 @@ void ConfigSection::setGlobal(bool global) {
 	this->global = global;
 }
 
+std::string ConfigSection::getSectionType() const {
+	return section_type;
+}
+
 std::string ConfigSection::getSectionName() const {
 	return section_name;
 }
@@ -52,6 +56,7 @@ void ConfigSection::dump(std::ostream& out) const {
 }
 
 ValidationList ConfigSection::parse(const INIConfigSection& section) {
+	section_type = section.getType();
 	section_name = section.getName();
 
 	preParse(section, validation);

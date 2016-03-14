@@ -22,6 +22,7 @@
 
 #include "overlay.h"
 #include "../rendermode.h"
+#include "../../config/configsection.h"
 
 #include <array>
 
@@ -151,11 +152,9 @@ protected:
 	void createShade(RGBAImage& image, const CornerColors& corners) const;
 };
 
-class LightingRenderMode : public BaseOverlayRenderMode<LightingRenderer> {
+class LightingRenderMode : public BaseOverlayRenderMode<LightingRenderer, config::LightingOverlaySection> {
 public:
-	LightingRenderMode(const std::string& id, const std::string& name, bool day, 
-			double lighting_intensity, double lighting_water_intensity,
-			bool simulate_sun_light);
+	LightingRenderMode(std::shared_ptr<config::ConfigSection> config);
 	virtual ~LightingRenderMode();
 
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);

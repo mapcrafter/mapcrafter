@@ -32,7 +32,7 @@ namespace config {
 class OverlaySection : public ConfigSection {
 public:
 	OverlaySection();
-	~OverlaySection();
+	virtual ~OverlaySection();
 
 	virtual std::string getPrettyName() const;
 	virtual void dump(std::ostream& out) const;
@@ -41,10 +41,6 @@ public:
 	std::string getName() const;
 	renderer::OverlayType getType() const;
 	bool isBase() const;
-
-	bool isDay() const;
-	double getLightingIntensity() const;
-	double getLightingWaterIntensity() const;
 
 protected:
 	virtual void preParse(const INIConfigSection& section,
@@ -56,11 +52,76 @@ protected:
 
 private:
 	Field<std::string> name;
-	Field<renderer::OverlayType> type;
 	Field<bool> base;
 
 	Field<bool> day;
 	Field<double> lighting_intensity, lighting_water_intensity;
+};
+
+class DummyOverlaySection : public OverlaySection {
+};
+
+class HeightOverlaySection : public OverlaySection {
+public:
+	virtual void dump(std::ostream& out) const;
+
+protected:
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+
+private:
+	// TODO colors
+};
+
+class LightingOverlaySection : public OverlaySection {
+public:
+	virtual void dump(std::ostream& out) const;
+
+	bool isDay() const;
+	double getIntensity() const;
+	double getWaterIntensity() const;
+
+protected:
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+
+private:
+	Field<bool> day;
+	Field<double> intensity, water_intensity;
+};
+
+class SlimeOverlaySection : public OverlaySection {
+public:
+	virtual void dump(std::ostream& out) const;
+
+protected:
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+
+private:
+	Field<bool> day;
+};
+
+class SpawnOverlaySection : public OverlaySection {
+public:
+	virtual void dump(std::ostream& out) const;
+
+	bool isDay() const;
+
+protected:
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+
+private:
+	Field<bool> day;
 };
 
 } /* namespace config */

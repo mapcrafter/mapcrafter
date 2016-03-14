@@ -21,7 +21,6 @@
 
 #include "configparser.h"
 #include "configsection.h"
-#include "iniconfig.h"
 
 #include <sstream>
 
@@ -232,11 +231,11 @@ bool MapcrafterConfig::hasOverlay(const std::string& overlay) const {
 	return overlays.count(overlay);
 }
 
-const std::map<std::string, OverlaySection>& MapcrafterConfig::getOverlays() const {
+const std::map<std::string, std::shared_ptr<OverlaySection>>& MapcrafterConfig::getOverlays() const {
 	return overlays;
 }
 
-const OverlaySection& MapcrafterConfig::getOverlay(const std::string& overlay) const {
+std::shared_ptr<OverlaySection> MapcrafterConfig::getOverlay(const std::string& overlay) const {
 	return overlays.at(overlay);
 }
 
@@ -272,7 +271,10 @@ ValidationMap MapcrafterConfig::parse(const config::INIConfig& config,
 	parser.parseRootSection(root_section);
 	parser.parseSections(worlds, "world", ConfigDirSectionFactory<WorldSection>(config_dir));
 	parser.parseSections(maps, "map", ConfigDirSectionFactory<MapSection>(config_dir));
-	parser.parseSections(overlays, "overlay");
+	parser.parseSections<OverlaySection, HeightOverlaySection>(overlays, "overlay-height");
+	parser.parseSections<OverlaySection, LightingOverlaySection>(overlays, "overlay-lighting");
+	parser.parseSections<OverlaySection, SlimeOverlaySection>(overlays, "overlay-slime");
+	parser.parseSections<OverlaySection, SpawnOverlaySection>(overlays, "overlay-spawn");
 	parser.parseSections(markers, "marker");
 	parser.parseSections(log_sections, "log", ConfigDirSectionFactory<LogSection>(config_dir));
 	parser.validate();
@@ -298,41 +300,22 @@ ValidationMap MapcrafterConfig::parse(const config::INIConfig& config,
 	return validation;
 }
 
-void MapcrafterConfig::createDefaultOverlay(const std::string& id,
-		const INIConfigSection& config) {
-	OverlaySection overlay;
-	ValidationList validation = overlay.parse(config);
-	if (validation.isEmpty()) {
-		overlays[id] = overlay;
-	} else {
-		auto messages = validation.getMessages();
-		LOG(ERROR) << "Unable to initialize default overlay '" << id << "':";
-		for (auto it = messages.begin(); it != messages.end(); ++it)
-			LOG(ERROR) << " - " << *it;
-	}
-}
-
 void MapcrafterConfig::initializeDefaultOverlays() {
-	createDefaultOverlay("day", INIConfigSection("overlay", "day")
-			.set("name", "Daylight")
-			.set("type", "lighting")
+	createDefaultOverlay<LightingOverlaySection>(INIConfigSection("overlay-lighting", "day")
+			.set("name", "Day")
 			.set("day", "true"));
-	createDefaultOverlay("night", INIConfigSection("overlay", "night")
-			.set("name", "Nightlight")
-			.set("type", "lighting")
+	createDefaultOverlay<LightingOverlaySection>(INIConfigSection("overlay-lighting", "night")
+			.set("name", "Night")
 			.set("day", "false"));
 
-	createDefaultOverlay("slime", INIConfigSection("overlay", "slime")
-			.set("name", "Slimes")
-			.set("type", "slime"));
+	createDefaultOverlay<SlimeOverlaySection>(INIConfigSection("overlay-slime", "slime")
+			.set("name", "Slimes"));
 
-	createDefaultOverlay("spawnday", INIConfigSection("overlay", "spawnday")
+	createDefaultOverlay<SpawnOverlaySection>(INIConfigSection("overlay-spawn", "spawnday")
 			.set("name", "Spawnday")
-			.set("type", "spawn")
 			.set("day", "true"));
-	createDefaultOverlay("spawnnight", INIConfigSection("overlay", "spawnnight")
+	createDefaultOverlay<SpawnOverlaySection>(INIConfigSection("overlay-spawn", "spawnnight")
 			.set("name", "Spawnnight")
-			.set("type", "spawn")
 			.set("day", "false"));
 }
 

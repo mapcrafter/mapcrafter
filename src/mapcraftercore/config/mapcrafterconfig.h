@@ -26,6 +26,7 @@
 #include "configsections/marker.h"
 #include "configsections/overlay.h"
 #include "configsections/world.h"
+#include "iniconfig.h"
 
 #include <iostream>
 #include <map>
@@ -37,9 +38,6 @@ namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace config {
-
-class INIConfig;
-class INIConfigSection;
 
 struct Color {
 	std::string hex;
@@ -104,8 +102,8 @@ public:
 	const MapSection& getMap(const std::string& map) const;
 
 	bool hasOverlay(const std::string& overlay) const;
-	const std::map<std::string, OverlaySection>& getOverlays() const;
-	const OverlaySection& getOverlay(const std::string& overlay) const;
+	const std::map<std::string, std::shared_ptr<OverlaySection>>& getOverlays() const;
+	std::shared_ptr<OverlaySection> getOverlay(const std::string& overlay) const;
 
 	bool hasMarker(const std::string marker) const;
 	const std::vector<MarkerSection>& getMarkers() const;
@@ -116,16 +114,31 @@ public:
 private:
 	ValidationMap parse(const INIConfig& config, const fs::path& config_dir);
 
-	void createDefaultOverlay(const std::string& id, const INIConfigSection& config);
+	template <typename T>
+	void createDefaultOverlay(const INIConfigSection& config);
 	void initializeDefaultOverlays();
 
 	MapcrafterConfigRootSection root_section;
 	std::map<std::string, WorldSection> worlds;
 	std::vector<MapSection> maps;
-	std::map<std::string, OverlaySection> overlays;
+	std::map<std::string, std::shared_ptr<OverlaySection>> overlays;
 	std::vector<MarkerSection> markers;
 	std::vector<LogSection> log_sections;
 };
+
+template <typename T>
+void MapcrafterConfig::createDefaultOverlay(const INIConfigSection& config) {
+	std::shared_ptr<T> section = std::make_shared<T>();
+	ValidationList validation = section->parse(config);
+	if (validation.isEmpty()) {
+		overlays[section->getID()] = section;
+	} else {
+		auto messages = validation.getMessages();
+		LOG(ERROR) << "Unable to initialize default overlay '" << config.getName() << "':";
+		for (auto it = messages.begin(); it != messages.end(); ++it)
+			LOG(ERROR) << " - " << *it;
+	}
+}
 
 } /* namespace config */
 } /* namespace mapcrafter */
