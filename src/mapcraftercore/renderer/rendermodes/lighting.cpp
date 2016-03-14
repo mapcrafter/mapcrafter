@@ -254,22 +254,13 @@ void LightingRenderer::createShade(RGBAImage& image, const CornerColors& corners
 	drawTopTriangle(image, size, corners[3], corners[1], corners[0]);
 }
 
-/*
-LightingRenderMode::LightingRenderMode(const std::string& id, const std::string& name,
-		bool day, double lighting_intensity, double lighting_water_intensity,
+LightingRenderMode::LightingRenderMode(std::shared_ptr<config::ConfigSection> config,
 		bool simulate_sun_light)
-	: BaseOverlayRenderMode<LightingRenderer>(id, name, true), day(day),
-	  lighting_intensity(lighting_intensity),
-	  lighting_water_intensity(lighting_water_intensity),
-	  simulate_sun_light(simulate_sun_light) {
-}
-*/
-
-LightingRenderMode::LightingRenderMode(std::shared_ptr<config::ConfigSection> config)
 	: BaseOverlayRenderMode(config),
 	day(this->config->isDay()),
 	lighting_intensity(this->config->getIntensity()),
-	lighting_water_intensity(this->config->getWaterIntensity()) {
+	lighting_water_intensity(this->config->getWaterIntensity()),
+	simulate_sun_light(simulate_sun_light) {
 }
 
 LightingRenderMode::~LightingRenderMode() {

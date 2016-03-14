@@ -116,7 +116,7 @@ OverlayRenderMode* createOverlay(const config::WorldSection& world_config,
 	}
 	*/
 	if (type == OverlayType::LIGHTING) {
-		return new LightingRenderMode(overlay_config);
+		return new LightingRenderMode(overlay_config, world_config.getDimension() == mc::Dimension::END);
 	} else if (type == OverlayType::SLIME) {
 		return new SlimeOverlay(overlay_config, world_config.getInputDir(), rotation);
 	} else if (type == OverlayType::SPAWN) {
