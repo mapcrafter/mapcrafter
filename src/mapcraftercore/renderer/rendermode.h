@@ -155,7 +155,7 @@ protected:
 template <typename Config>
 class HasConfigSection {
 public:
-	void initializeConfig(std::shared_ptr<config::ConfigSection> config_ptr);
+	void initializeConfig(std::shared_ptr<config::ConfigSection> config_section);
 
 protected:
 	std::shared_ptr<config::ConfigSection> config_ptr;
@@ -291,37 +291,24 @@ void HasRenderModeRenderer<Renderer>::initializeRenderer(const RenderView* rende
 }
 
 template <typename Config>
-void HasConfigSection<Config>::initializeConfig(std::shared_ptr<config::ConfigSection> config_ptr) {
-	this->config_ptr = config_ptr;
-	this->config = dynamic_cast<Config*>(config_ptr.get());
+void HasConfigSection<Config>::initializeConfig(std::shared_ptr<config::ConfigSection> config_section) {
+	config_ptr = config_section;
+	config = dynamic_cast<Config*>(config_ptr.get());
 	assert(this->config);
 }
 
 template <typename Renderer>
 BaseRenderMode<Renderer>::BaseRenderMode()
-	: /*renderer_ptr(nullptr), */images(nullptr), world(nullptr), current_chunk(nullptr) {
+	: images(nullptr), world(nullptr), current_chunk(nullptr) {
 }
 
 template <typename Renderer>
 BaseRenderMode<Renderer>::~BaseRenderMode() {
-	/*
-	if (renderer_ptr != nullptr)
-		delete renderer_ptr;
-	*/
 }
 
 template <typename Renderer>
 void BaseRenderMode<Renderer>::initialize(const RenderView* render_view, 
 		BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk) {
-	/*
-	// create the render mode renderer by calling the render view factory method
-	// for this renderer type
-	this->renderer_ptr = render_view->createRenderModeRenderer(Renderer::TYPE);
-	// try to cast it to the right subclass, make sure that works if there is a renderer
-	this->renderer = dynamic_cast<Renderer*>(renderer_ptr);
-	if (Renderer::TYPE != RenderModeRendererType::DUMMY)
-		assert(renderer);
-	*/
 	this->images = images;
 	this->world = world;
 	this->current_chunk = current_chunk;

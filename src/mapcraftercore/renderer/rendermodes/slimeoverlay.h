@@ -45,7 +45,7 @@ protected:
 
 class SlimeOverlay : public TintingOverlay<config::SlimeOverlaySection> {
 public:
-	SlimeOverlay(std::shared_ptr<config::ConfigSection> config, fs::path world_dir, int rotation);
+	SlimeOverlay(std::shared_ptr<config::ConfigSection> overlay_config, fs::path world_dir, int rotation);
 	virtual ~SlimeOverlay();
 
 	static bool isSlimeChunk(const mc::ChunkPos& chunk, long long world_seed);

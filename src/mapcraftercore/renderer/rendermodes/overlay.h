@@ -87,7 +87,7 @@ template <typename Renderer, typename Config>
 class BaseOverlayRenderMode : public OverlayRenderMode,
 	public HasRenderModeRenderer<Renderer>, public HasConfigSection<Config> {
 public:
-	BaseOverlayRenderMode(std::shared_ptr<config::ConfigSection> config);
+	BaseOverlayRenderMode(std::shared_ptr<config::ConfigSection> overlay_config);
 	virtual ~BaseOverlayRenderMode();
 
 	virtual void initialize(const RenderView* render_view, BlockImages* images,
@@ -125,7 +125,7 @@ enum class OverlayMode {
 template <typename Config>
 class TintingOverlay : public BaseOverlayRenderMode<OverlayRenderer, Config> {
 public:
-	TintingOverlay(OverlayMode overlay_mode, std::shared_ptr<config::ConfigSection> config);
+	TintingOverlay(OverlayMode overlay_mode, std::shared_ptr<config::ConfigSection> overlay_config);
 
 	virtual void drawOverlay(RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
@@ -142,9 +142,9 @@ std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(
 		int rotation);
 
 template <typename Renderer, typename Config>
-BaseOverlayRenderMode<Renderer, Config>::BaseOverlayRenderMode(std::shared_ptr<config::ConfigSection> config)
+BaseOverlayRenderMode<Renderer, Config>::BaseOverlayRenderMode(std::shared_ptr<config::ConfigSection> overlay_config)
 	: images(nullptr), world(nullptr), current_chunk(nullptr) {
-	HasConfigSection<Config>::initializeConfig(config);
+	HasConfigSection<Config>::initializeConfig(overlay_config);
 }
 
 template <typename Renderer, typename Config>
@@ -203,8 +203,8 @@ mc::Block BaseOverlayRenderMode<Renderer, Config>::getBlock(const mc::BlockPos& 
 
 template <typename Config>
 TintingOverlay<Config>::TintingOverlay(OverlayMode overlay_mode,
-		std::shared_ptr<config::ConfigSection> config)
-	: BaseOverlayRenderMode<OverlayRenderer, Config>(config), overlay_mode(overlay_mode) {
+		std::shared_ptr<config::ConfigSection> overlay_config)
+	: BaseOverlayRenderMode<OverlayRenderer, Config>(overlay_config), overlay_mode(overlay_mode) {
 }
 
 template <typename Config>

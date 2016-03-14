@@ -28,7 +28,7 @@ namespace renderer {
 
 class SpawnOverlay : public TintingOverlay<config::SpawnOverlaySection> {
 public:
-	SpawnOverlay(std::shared_ptr<config::ConfigSection> config);
+	SpawnOverlay(std::shared_ptr<config::ConfigSection> overlay_config);
 
 protected:
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data);

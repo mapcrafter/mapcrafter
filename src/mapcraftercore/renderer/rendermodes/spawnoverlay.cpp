@@ -24,8 +24,8 @@
 namespace mapcrafter {
 namespace renderer {
 
-SpawnOverlay::SpawnOverlay(std::shared_ptr<config::ConfigSection> config)
-	: TintingOverlay(OverlayMode::PER_FACE, config) {
+SpawnOverlay::SpawnOverlay(std::shared_ptr<config::ConfigSection> overlay_config)
+	: TintingOverlay(OverlayMode::PER_FACE, overlay_config) {
 }
 
 RGBAPixel SpawnOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {

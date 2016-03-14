@@ -154,7 +154,7 @@ protected:
 
 class LightingRenderMode : public BaseOverlayRenderMode<LightingRenderer, config::LightingOverlaySection> {
 public:
-	LightingRenderMode(std::shared_ptr<config::ConfigSection> config, bool simulate_sun_light);
+	LightingRenderMode(std::shared_ptr<config::ConfigSection> overlay_config, bool simulate_sun_light);
 	virtual ~LightingRenderMode();
 
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);

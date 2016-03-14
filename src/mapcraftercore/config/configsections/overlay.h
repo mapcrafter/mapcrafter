@@ -103,9 +103,6 @@ protected:
 			ValidationList& validation);
 	virtual bool parseField(const std::string key, const std::string value,
 			ValidationList& validation);
-
-private:
-	Field<bool> day;
 };
 
 class SpawnOverlaySection : public OverlaySection {
