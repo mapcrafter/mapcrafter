@@ -26,6 +26,6 @@ MousePosControl.prototype.create = function(wrapper) {
 	wrapper.appendChild(text);
 };
 
-MousePosControl.prototype.name = function() {
+MousePosControl.prototype.getName = function() {
 	return 'mouse-pos';
 };

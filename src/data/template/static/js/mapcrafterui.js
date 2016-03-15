@@ -375,7 +375,7 @@ MapcrafterUI.prototype.addControl = function(control, position, index) {
 		onAdd: function(map) {
 			var wrapper = document.createElement("div");
 			wrapper.setAttribute("class", "control-wrapper");
-			wrapper.setAttribute("id", "control-wrapper-" + control.name());
+			wrapper.setAttribute("id", "control-wrapper-" + control.getName());
 
 			// just a dirty hack to prevent the map getting all mouse click events
 			wrapper.onmouseover = function() {

@@ -79,6 +79,6 @@ MarkerControl.prototype.getHandler = function() {
 	return this.handler;
 };
 
-MarkerControl.prototype.name = function() {
+MarkerControl.prototype.getName = function() {
 	return 'marker';
 };

@@ -33,6 +33,6 @@ MapSelectControl.prototype.create = function(wrapper) {
 	wrapper.appendChild(select);
 };
 
-MapSelectControl.prototype.name = function() {
+MapSelectControl.prototype.getName = function() {
 	return 'map-select';
 };
