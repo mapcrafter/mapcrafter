@@ -273,6 +273,11 @@ picojson::value WebConfig::getConfigJSON() const {
 			map_json["defaultZoom"] = picojson::value((double) world.getDefaultZoom());
 		if (world.getDefaultRotation() != -1)
 			map_json["defaultRotation"] = picojson::value((double) world.getDefaultRotation());
+		auto default_overlays = map_it->getDefaultOverlays();
+		picojson::array default_overlays_json;
+		for (auto it = default_overlays.begin(); it != default_overlays.end(); ++it)
+			default_overlays_json.push_back(picojson::value(*it));
+		map_json["defaultOverlays"] = picojson::value(default_overlays_json);
 
 		picojson::array rotations_json;
 		auto rotations = map_it->getRotations();

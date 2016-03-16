@@ -128,6 +128,7 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  render_view" << render_view << std::endl;
 	out << "  render_mode = " << render_mode << std::endl;
 	out << "  overlays = " << overlays << std::endl;
+	out << "  default_overlays = " << default_overlays << std::endl;
 	out << "  rotations = " << rotations << std::endl;
 	out << "  texture_dir = " << texture_dir << std::endl;
 	out << "  texture_size = " << texture_size << std::endl;
@@ -169,6 +170,10 @@ renderer::RenderModeType MapSection::getRenderMode() const {
 
 std::set<std::string> MapSection::getOverlays() const {
 	return overlays_set;
+}
+
+std::set<std::string> MapSection::getDefaultOverlays() const {
+	return default_overlays_set;
 }
 
 std::set<int> MapSection::getRotations() const {
@@ -291,6 +296,16 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		while (ss >> overlay) {
 			// TODO make Field::load able to load sets of types?
 			overlays_set.insert(overlay);
+		}
+	} else if (key == "default_overlays") {
+		default_overlays.load(key, value, validation);
+		default_overlays_set.clear();
+		std::stringstream ss;
+		ss << default_overlays.getValue();
+		std::string overlay;
+		while (ss >> overlay) {
+			// TODO make Field::load able to load sets of types?
+			default_overlays_set.insert(overlay);
 		}
 	} else if (key == "rotations") {
 		rotations.load(key, value ,validation);

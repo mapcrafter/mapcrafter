@@ -300,6 +300,21 @@ MapcrafterUI.prototype.getEnabledOverlays = function() {
 	return this.enabledOverlays;
 };
 
+function arraysHaveSameElements(array1, array2) {
+	var sorted1 = array1.slice();
+	var sorted2 = array2.slice();
+	sorted1.sort();
+	sorted2.sort();
+
+	if (sorted1.length != sorted2.length)
+		return false;
+	for (var i = 0; i < sorted1.length; i++) {
+		if (sorted1[i] != sorted2[i])
+			return false;
+	}
+	return true;
+}
+
 /**
  * Sets the current map and rotation.
  */
@@ -317,17 +332,18 @@ MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 		oldZoom = this.lmap.getZoom();
 	}
 	
+	// copy of old enabled overlays array -> disable all overlays
+	var oldOverlays = this.enabledOverlays.slice();
+	for(var i in oldOverlays)
+		this.enableOverlay(oldOverlays[i], false);
+	// and remove the old map terrain layer
+	if (oldMapLayer != null)
+		this.lmap.removeLayer(oldMapLayer);
+	
 	// set the new map and rotation
 	this.currentMap = map;
 	this.currentRotation = parseInt(rotation);
 	
-	// copy of overlays array, disable all overlays
-	var overlays = this.enabledOverlays.slice();
-	for(var i in overlays)
-		this.enableOverlay(overlays[i], false);
-	// and remove the old map terrain layer
-	if (oldMapLayer != null)
-		this.lmap.removeLayer(oldMapLayer);
 	// add the new map terrain layer
 	this.lmap.addLayer(this.layers[this.currentMap][this.currentRotation]["terrain"]);
 	
@@ -350,7 +366,6 @@ MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 			var center = mapConfig.tileSize / 2;
 			this.lmap.setView(this.lmap.unproject([center, center]), zoom, {animate: false});
 		}
-
 	} else {
 		// same world, we can set the view to the view of the old map
 		this.lmap.setView(this.mcToLatLng(oldView[0], oldView[1], oldView[2]), oldZoom, {animate: false});
@@ -361,10 +376,13 @@ MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 	for(var i = 0; i < this.handlers.length; i++)
 		this.handlers[i].onMapChange(this.currentMap, this.currentRotation);
 
-	// enable all overlays again
-	// TODO which behavior here?
-	for(var i in overlays)
-		this.enableOverlay(overlays[i], true);
+	// if two maps have exactly the same overlays available, keep enabled overlays
+	// otherwise set default overlays
+	var enableOverlays = mapConfig["defaultOverlays"];
+	if(oldMapConfig != null && arraysHaveSameElements(oldMapConfig["overlays"], mapConfig["overlays"]))
+		enableOverlays = oldOverlays;
+	for(var i in enableOverlays)
+		this.enableOverlay(enableOverlays[i], true);
 };
 
 /**
@@ -421,6 +439,8 @@ MapcrafterUI.prototype.enableOverlay = function(overlay, enabled) {
 		this.lmap.removeLayer(layer);
 		this.enabledOverlays.splice(this.enabledOverlays.indexOf(overlay), 1);
 	}
+
+	console.log("overlay " + overlay + " -> " + enabled + ": " + this.enabledOverlays);
 
 	// call handlers
 	for(var i = 0; i < this.handlers.length; i++)
