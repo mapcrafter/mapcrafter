@@ -56,6 +56,7 @@ protected:
 	fs::path world_dir;
 	int rotation;
 	long long world_seed;
+	RGBAPixel color;
 };
 
 }

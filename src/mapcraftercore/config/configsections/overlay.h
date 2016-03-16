@@ -23,6 +23,7 @@
 #include "../configsection.h"
 #include "../validation.h"
 #include "../../renderer/rendermode.h"
+#include "../../util.h"
 
 #include <string>
 
@@ -98,11 +99,18 @@ class SlimeOverlaySection : public OverlaySection {
 public:
 	virtual void dump(std::ostream& out) const;
 
+	util::Color getColor() const;
+	int getOpacity() const;
+
 protected:
 	virtual void preParse(const INIConfigSection& section,
 			ValidationList& validation);
 	virtual bool parseField(const std::string key, const std::string value,
 			ValidationList& validation);
+
+private:
+	Field<util::Color> color;
+	Field<int> opacity;
 };
 
 class SpawnOverlaySection : public OverlaySection {

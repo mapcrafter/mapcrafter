@@ -165,18 +165,41 @@ bool LightingOverlaySection::parseField(const std::string key, const std::string
 
 void SlimeOverlaySection::dump(std::ostream& out) const {
 	OverlaySection::dump(out);
+	out << "  color = " << color << std::endl;
+	out << "  opacity = " << opacity << std::endl;
 }
 
 void SlimeOverlaySection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	OverlaySection::preParse(section, validation);
+
+	color.setDefault(util::Color(60, 200, 20));
+	opacity.setDefault(85);
 }
 
 bool SlimeOverlaySection::parseField(const std::string key, const std::string value,
 		ValidationList& validation) {
 	if (OverlaySection::parseField(key, value, validation))
 		return true;
-	return false;
+
+	if (key == "color") {
+		color.load(key, value, validation);
+	} else if (key == "opacity") {
+		if (opacity.load(key, value, validation) && (getOpacity() <= 0 || getOpacity() > 255)) {
+			validation.error("'opacity' must be an integer between 0 and 255!");
+		}
+	} else {
+		return false;
+	}
+	return true;
+}
+
+util::Color SlimeOverlaySection::getColor() const {
+	return color.getValue();
+}
+
+int SlimeOverlaySection::getOpacity() const {
+	return opacity.getValue();
 }
 
 void SpawnOverlaySection::dump(std::ostream& out) const {

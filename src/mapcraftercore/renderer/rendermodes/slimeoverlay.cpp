@@ -70,6 +70,9 @@ SlimeOverlay::SlimeOverlay(std::shared_ptr<config::ConfigSection> overlay_config
 	} catch (nbt::NBTError& e) {
 		LOG(ERROR) << "Unable to read world seed from level.dat file for slime overlay: " << e.what();
 	}
+
+	util::Color c = config->getColor();
+	color = rgba(c.getRed(), c.getGreen(), c.getBlue(), config->getOpacity());
 }
 
 SlimeOverlay::~SlimeOverlay() {
@@ -97,7 +100,7 @@ RGBAPixel SlimeOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint
 	}
 
 	if (isSlimeChunk(chunk, world_seed))
-		return rgba(60, 200, 20, 85);
+		return color;
 	return rgba(0, 0, 0, 0);
 }
 
