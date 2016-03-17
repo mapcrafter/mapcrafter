@@ -55,8 +55,8 @@ RGBAPixel SpawnOverlay::getBlockColor(const mc::BlockPos& pos,
 	// TODO is that interpretation of where mobs can spawn correct?
 	
 	// don't colorize sides of blocks or transparent blocks (where pos == for_pos)
-	// except snow!
-	if (id != 78 && pos.y - for_pos.y == 0)
+	// but colorize the top snow layers
+	if (!(id == 78 && pos == for_pos) && pos.y - for_pos.y == 0)
 		return no_spawn;
 
 	mc::Block block = getBlock(pos, mc::GET_ID | mc::GET_DATA | mc::GET_LIGHT);
