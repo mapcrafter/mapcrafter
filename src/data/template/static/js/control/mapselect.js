@@ -8,7 +8,10 @@ function MapSelectControl() {
 
 MapSelectControl.prototype.create = function(wrapper) {
 
-	wrapper.innerHTML = '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Map Select <span class="caret"></span> </button>';
+	wrapper.innerHTML = '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'
+	+ this.ui.getMapConfig(this.ui.getMapConfigsOrder()[0]).name
+	+ ' <span class="caret"></span></button>';
+
 	var select = document.createElement("ul");
 	select.setAttribute("id", "map-select");
 	select.setAttribute("class", "dropdown-menu dropdown-menu-right");
@@ -23,7 +26,10 @@ MapSelectControl.prototype.create = function(wrapper) {
 
 		link.addEventListener("click", (function(ui) {
 			return function(a) {
-				ui.setMap(a.target.getAttribute('data-world'));
+				var h = a.target.getAttribute('data-world');
+				var button = document.getElementById('control-wrapper-map-select').getElementsByTagName('button')[0];
+				button.innerHTML = this.ui.getMapConfig(h).name + ' <span class="caret"></span>';
+				ui.setMap(h);
 			}
 		})(this.ui));
 
