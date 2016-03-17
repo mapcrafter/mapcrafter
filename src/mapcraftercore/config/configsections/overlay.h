@@ -95,6 +95,22 @@ private:
 	Field<double> intensity, water_intensity;
 };
 
+class LightLevelOverlaySection : public OverlaySection {
+public:
+	virtual void dump(std::ostream& out) const;
+
+	bool isDay() const;
+
+protected:
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+
+private:
+	Field<bool> day;
+};
+
 class SlimeOverlaySection : public OverlaySection {
 public:
 	virtual void dump(std::ostream& out) const;

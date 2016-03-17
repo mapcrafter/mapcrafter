@@ -31,11 +31,13 @@ template <>
 renderer::OverlayType as<renderer::OverlayType>(const std::string& from) {
 	if (from == "lighting")
 		return renderer::OverlayType::LIGHTING;
+	else if (from == "lightlevel")
+		return renderer::OverlayType::LIGHTLEVEL;
 	else if (from == "slime")
 		return renderer::OverlayType::SLIME;
 	else if (from == "spawn")
 		return renderer::OverlayType::SPAWN;
-	throw std::invalid_argument("Must be 'none', 'spawn', 'slime' or 'lighting'.");
+	throw std::invalid_argument("Must be 'none', 'lighting', 'lightlevel', 'spawn' or 'slime'.");
 }
 
 }
@@ -162,6 +164,33 @@ bool LightingOverlaySection::parseField(const std::string key, const std::string
 	return true;
 }
 
+void LightLevelOverlaySection::dump(std::ostream& out) const {
+	OverlaySection::dump(out);
+	out << "day = " << day << std::endl;
+}
+
+bool LightLevelOverlaySection::isDay() const {
+	return day.getValue();
+}
+
+void LightLevelOverlaySection::preParse(const INIConfigSection& section,
+		ValidationList& validation) {
+	OverlaySection::preParse(section, validation);
+	day.setDefault(true);
+}
+
+bool LightLevelOverlaySection::parseField(const std::string key, const std::string value,
+		ValidationList& validation) {
+	if (OverlaySection::parseField(key, value, validation))
+		return true;
+
+	if (key == "day") {
+		day.load(key, value, validation);
+	} else {
+		return false;
+	}
+	return true;
+}
 
 void SlimeOverlaySection::dump(std::ostream& out) const {
 	OverlaySection::dump(out);

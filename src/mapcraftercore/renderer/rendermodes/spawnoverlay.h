@@ -31,9 +31,10 @@ public:
 	SpawnOverlay(std::shared_ptr<config::ConfigSection> overlay_config);
 
 protected:
-	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, const mc::BlockPos& pos_for, uint16_t id, uint16_t data);
 
 	bool day;
+	RGBAPixel spawn, no_spawn;
 };
 
 }

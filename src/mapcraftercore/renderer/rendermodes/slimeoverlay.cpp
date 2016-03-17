@@ -91,7 +91,8 @@ bool SlimeOverlay::isSlimeChunk(const mc::ChunkPos& chunk, long long world_seed)
 	return random.nextInt(10) == 0;
 }
 
-RGBAPixel SlimeOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+RGBAPixel SlimeOverlay::getBlockColor(const mc::BlockPos& pos, const mc::BlockPos& for_pos,
+		uint16_t id, uint16_t data) {
 	// get original (not rotated) chunk position
 	mc::ChunkPos chunk(pos);
 	if (rotation) {

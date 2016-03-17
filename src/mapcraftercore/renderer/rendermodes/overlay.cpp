@@ -21,6 +21,7 @@
 
 #include "heightoverlay.h"
 #include "lighting.h"
+#include "lightleveloverlay.h"
 #include "slimeoverlay.h"
 #include "spawnoverlay.h"
 #include "../image.h"
@@ -117,6 +118,8 @@ OverlayRenderMode* createOverlay(const config::WorldSection& world_config,
 	*/
 	if (type == OverlayType::LIGHTING) {
 		return new LightingRenderMode(overlay_config, world_config.getDimension() == mc::Dimension::END);
+	} else if (type == OverlayType::LIGHTLEVEL) {
+		return new LightLevelOverlay(overlay_config);
 	} else if (type == OverlayType::SLIME) {
 		return new SlimeOverlay(overlay_config, world_config.getInputDir(), rotation);
 	} else if (type == OverlayType::SPAWN) {

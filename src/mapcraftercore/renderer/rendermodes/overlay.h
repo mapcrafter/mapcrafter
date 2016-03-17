@@ -130,7 +130,7 @@ public:
 	virtual void drawOverlay(RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 protected:
-	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
+	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, const mc::BlockPos& pos_for, uint16_t id, uint16_t data) = 0;
 
 private:
 	OverlayMode overlay_mode;
@@ -212,7 +212,7 @@ void TintingOverlay<Config>::drawOverlay(RGBAImage& block, RGBAImage& overlay,
 		const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	if (overlay_mode == OverlayMode::PER_BLOCK) {
 		// simple mode where we just tint whole blocks
-		RGBAPixel color = this->getBlockColor(pos, id, data);
+		RGBAPixel color = this->getBlockColor(pos, pos, id, data);
 		if (rgba_alpha(color) == 0)
 			return;
 		this->renderer->tintBlock(overlay, color);
@@ -221,7 +221,7 @@ void TintingOverlay<Config>::drawOverlay(RGBAImage& block, RGBAImage& overlay,
 		// and adjacent faces are tinted / or the transparent blocks themselves
 		// TODO potential for optimization, maybe cache colors of blocks?
 		if (this->images->isBlockTransparent(id, data)) {
-			RGBAPixel color = getBlockColor(pos, id, data);
+			RGBAPixel color = getBlockColor(pos, pos, id, data);
 			if (rgba_alpha(color) == 0)
 				return;
 			this->renderer->tintBlock(overlay, color);
@@ -231,9 +231,9 @@ void TintingOverlay<Config>::drawOverlay(RGBAImage& block, RGBAImage& overlay,
 			top = this->getBlock(pos + mc::DIR_TOP, mc::GET_ID | mc::GET_DATA);
 			left = this->getBlock(pos + mc::DIR_WEST, mc::GET_ID | mc::GET_DATA);
 			right = this->getBlock(pos + mc::DIR_SOUTH, mc::GET_ID | mc::GET_DATA);
-			color_top = getBlockColor(pos + mc::DIR_TOP, top.id, top.data);
-			color_left = getBlockColor(pos + mc::DIR_WEST, left.id, left.data);
-			color_right = getBlockColor(pos + mc::DIR_SOUTH, right.id, right.data);
+			color_top = getBlockColor(pos + mc::DIR_TOP, pos, top.id, top.data);
+			color_left = getBlockColor(pos + mc::DIR_WEST, pos, left.id, left.data);
+			color_right = getBlockColor(pos + mc::DIR_SOUTH, pos, right.id, right.data);
 			
 			if (rgba_alpha(color_top) != 0)
 				this->renderer->tintTop(overlay, color_top, 0);

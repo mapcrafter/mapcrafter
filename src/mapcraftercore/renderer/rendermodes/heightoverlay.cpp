@@ -29,7 +29,8 @@ HeightOverlay::HeightOverlay(std::shared_ptr<config::ConfigSection> overlay_conf
 	: TintingOverlay(OverlayMode::PER_BLOCK, overlay_config) {
 }
 
-RGBAPixel HeightOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
+RGBAPixel HeightOverlay::getBlockColor(const mc::BlockPos& pos,
+		const mc::BlockPos& pos_for, uint16_t id, uint16_t data) {
 	// TODO make the gradient configurable
 	double h1 = (double) (64 - pos.y) / 64;
 	if (pos.y > 64)
