@@ -134,6 +134,7 @@ public:
 	virtual void dump(std::ostream& out) const;
 
 	bool isDay() const;
+	util::Color getColor() const;
 
 protected:
 	virtual void preParse(const INIConfigSection& section,
@@ -143,6 +144,7 @@ protected:
 
 private:
 	Field<bool> day;
+	Field<util::Color> color;
 };
 
 } /* namespace config */

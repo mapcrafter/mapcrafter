@@ -25,8 +25,8 @@
 namespace mapcrafter {
 namespace util {
 
-Color::Color(uint8_t red, uint8_t green, uint8_t blue)
-	: red(red), green(green), blue(blue) {
+Color::Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha)
+	: red(red), green(green), blue(blue), alpha(alpha) {
 }
 
 uint8_t Color::getRed() const {
@@ -41,6 +41,14 @@ uint8_t Color::getBlue() const {
 	return blue;
 }
 
+uint8_t Color::getAlpha() const {
+	return alpha;
+}
+
+uint32_t Color::getRGBA() const {
+	return (alpha << 24) | (blue << 16) | (green << 8) | red;
+}
+
 std::string Color::getHex() const {
 	std::stringstream ss;
 	ss.width(2);
@@ -48,13 +56,24 @@ std::string Color::getHex() const {
 	ss << std::hex << (int) red;
 	ss << std::hex << (int) green;
 	ss << std::hex << (int) blue;
+	ss << std::hex << (int) alpha;
 	return "#" + ss.str();
+}
+
+Color Color::mix(Color other, double t) const {
+	return Color(
+		(1 - t) * red + t * other.red,
+		(1 - t) * green + t * other.green,
+		(1 - t) * blue + t * other.blue,
+		(1 - t) * alpha + t * other.alpha
+	);
 }
 
 bool Color::operator==(const Color& color) const {
 	return red == color.red
 		&& green == color.green
-		&& blue == color.blue;
+		&& blue == color.blue
+		&& alpha == color.alpha;
 }
 
 bool Color::operator!=(const Color& color) const {
@@ -109,13 +128,13 @@ Color Color::byHex(const std::string& string) {
 	if (string.empty() || string[0] != '#')
 		throw std::invalid_argument("Hex color must start with '#'!");
 	std::string hex = string.substr(1);
-	if (hex.size() != 3 && hex.size() != 6)
+	if (hex.size() != 3 && hex.size() != 4 && hex.size() != 6 && hex.size() != 8)
 		throw std::invalid_argument("Hex color has invalid length!");
 	if (!isHexNumber(hex))
 		throw std::invalid_argument("Hex color may only contain hex characters!");
 
 	Color color;
-	if (hex.size() == 3) {
+	if (hex.size() <= 4) {
 		color.red = parseHexNumber(hex.substr(0, 1));
 		color.red += color.red * 16;
 		color.green = parseHexNumber(hex.substr(1, 1));
@@ -123,11 +142,18 @@ Color Color::byHex(const std::string& string) {
 		color.blue = parseHexNumber(hex.substr(2, 1));
 		color.blue += color.blue * 16;
 	}
+	if (hex.size() == 4) {
+		color.alpha = parseHexNumber(hex.substr(3, 1));
+		color.alpha += color.alpha * 16;
+	}
 
-	if (hex.size() == 6) {
+	if (hex.size() >= 6) {
 		color.red = parseHexNumber(hex.substr(0, 2));
 		color.green = parseHexNumber(hex.substr(2, 2));
 		color.blue = parseHexNumber(hex.substr(4, 2));
+	}
+	if (hex.size() == 8) {
+		color.alpha = parseHexNumber(hex.substr(6, 2));
 	}
 	return color;
 }

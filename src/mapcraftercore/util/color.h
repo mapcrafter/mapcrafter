@@ -32,12 +32,17 @@ namespace util {
 
 class Color {
 public:
-	Color(uint8_t red = 0, uint8_t green = 0, uint8_t blue = 0);
+	Color(uint8_t red = 0, uint8_t green = 0, uint8_t blue = 0, uint8_t alpha = 255);
 
 	uint8_t getRed() const;
 	uint8_t getGreen() const;
 	uint8_t getBlue() const;
+	uint8_t getAlpha() const;
+
 	std::string getHex() const;
+	uint32_t getRGBA() const;
+
+	Color mix(Color other, double alpha) const;
 
 	bool operator==(const Color& color) const;
 	bool operator!=(const Color& color) const;

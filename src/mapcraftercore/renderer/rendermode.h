@@ -255,6 +255,7 @@ enum class RenderModeType {
 
 enum class OverlayType {
 	LIGHTING,
+	LIGHTLEVEL,
 	SLIME,
 	SPAWN,
 };

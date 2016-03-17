@@ -26,7 +26,7 @@ namespace renderer {
 
 SpawnOverlay::SpawnOverlay(std::shared_ptr<config::ConfigSection> overlay_config)
 	: TintingOverlay(OverlayMode::PER_FACE, overlay_config),
-	  spawn(rgba(255, 0, 0, 85)), no_spawn(rgba(0, 0, 0, 0)) {
+	  spawn(config->getColor().getRGBA()), no_spawn(rgba(0, 0, 0, 0)) {
 }
 
 /**
@@ -67,10 +67,9 @@ RGBAPixel SpawnOverlay::getBlockColor(const mc::BlockPos& pos,
 		// and the light level of this block is smaller than 8
 		mc::Block below = getBlock(pos + mc::DIR_BOTTOM, mc::GET_ID | mc::GET_DATA);
 		// there are always some exceptions...
-		if (isNegativeSpawnException(below))
-			return no_spawn;
-		if (isPositiveSpawnException(below)
-				|| (below.id != 0 && !images->isBlockTransparent(below.id, below.data)))
+		if (!isNegativeSpawnException(below)
+			&& (isPositiveSpawnException(below)
+				|| (below.id != 0 && !images->isBlockTransparent(below.id, below.data))))
 			return spawn;
 	}
 	return no_spawn;

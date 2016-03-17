@@ -240,10 +240,15 @@ bool SpawnOverlaySection::isDay() const {
 	return day.getValue();
 }
 
+util::Color SpawnOverlaySection::getColor() const {
+	return color.getValue();
+}
+
 void SpawnOverlaySection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	OverlaySection::preParse(section, validation);
 	day.setDefault(true);
+	color.setDefault(util::Color(255, 0, 0, 85));
 }
 
 bool SpawnOverlaySection::parseField(const std::string key, const std::string value,
@@ -253,6 +258,8 @@ bool SpawnOverlaySection::parseField(const std::string key, const std::string va
 
 	if (key == "day") {
 		day.load(key, value, validation);
+	} else if (key == "color") {
+		color.load(key, value, validation);
 	} else {
 		return false;
 	}
