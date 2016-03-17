@@ -1029,7 +1029,7 @@ void IsometricBlockImages::createDoubleChest(uint16_t id, const DoubleChestTextu
 void IsometricBlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data,
 		uint8_t r, uint8_t g, uint8_t b) { // id 55
 	RGBAImage redstone_cross = resources.getBlockTextures().REDSTONE_DUST_DOT;
-	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE0;
+	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE0.rotate(1);
 	redstone_cross.simpleAlphaBlit(redstone_line, 0, 0);
 	redstone_cross.simpleAlphaBlit(redstone_line.rotate(1), 0, 0);
 
@@ -1621,7 +1621,7 @@ void IsometricBlockImages::createCocoas() { // id 127
 }
 
 void IsometricBlockImages::createTripwireHook() { // id 131
-	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE0.colorize((uint8_t) 192, 192, 192);
+	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE0.colorize((uint8_t) 192, 192, 192).rotate(1);
 
 	BlockImage block;
 	block.setFace(FACE_NORTH, resources.getBlockTextures().TRIP_WIRE_SOURCE);
