@@ -429,7 +429,7 @@ void TopdownBlockImages::createDoubleChest(uint16_t id, const DoubleChestTexture
 void TopdownBlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data, uint8_t r,
 		uint8_t g, uint8_t b) { // id 55
 	RGBAImage redstone_cross = resources.getBlockTextures().REDSTONE_DUST_DOT;
-	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE0;
+	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE0.rotate(1);
 	redstone_cross.simpleAlphaBlit(redstone_line, 0, 0);
 	redstone_cross.simpleAlphaBlit(redstone_line.rotate(1), 0, 0);
 
@@ -822,7 +822,7 @@ void TopdownBlockImages::createCocoas() { // id 127
 }
 
 void TopdownBlockImages::createTripwireHook() { // id 131
-	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE0.colorize((uint8_t) 192, 192, 192);
+	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE0.colorize((uint8_t) 192, 192, 192).rotate(1);
 
 	// TODO also render that part on the wall?
 	setBlockImage(131, 0, tripwire.rotate(1)); // trip wire hook on the north side
@@ -907,7 +907,7 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 		return data & (0xff00 | 0b00000011);
 	else if (id == 26) // bed
 		return data & (0xff00 | util::binary<1011>::value);
-	else if (id == 43 || id == 44 || id == 125 || id == 126 || id == 181 || id == 182)
+	else if (id == 43 || id == 44 || id == 125 || id == 126 || id == 181 || id == 182 || id == 204 || id == 205)
 		return data & ~8;
 	else if (id == 53 || id == 67 || id == 108 || id == 109 || id == 114 || id == 128 || id == 134 || id == 135 || id == 136 || id == 156 || id == 163 || id == 164 || id == 180 || id == 203) {
 		// stairs: ignore lower two bits, and if third bit set, then ignore all the remaining bits
@@ -1534,17 +1534,28 @@ void TopdownBlockImages::createBlocks() {
 	// id 198 // end rod
 	// id 199 // chrous plant
 	// id 200 // chorus flower
-	// id 201 // purpur block
-	// id 202 // purpur pillar
-	// id 203 // purpur stairs
-	// id 204 // purpur double slab
-	// id 205 // purpur slab
-	// id 206 // end stone bricks
-	// id 207 // beetroot seeds
+	setBlockImage(201, 0, t.PURPUR_BLOCK); // purpur block
+	setBlockImage(202, 0, t.PURPUR_PILLAR_TOP); // purpur pillar
+	createStairs(203, t.PURPUR_BLOCK); // purpur stairs
+	setBlockImage(204, 0, t.PURPUR_BLOCK); // purpur double slab
+	setBlockImage(205, 0, t.PURPUR_BLOCK); // purpur slab
+	setBlockImage(206, 0, t.END_BRICKS); // end stone bricks
+	// beetroot seeds --
+	createItemStyleBlock(207, 0, t.BEETROOTS_STAGE_0);
+	createItemStyleBlock(207, 1, t.BEETROOTS_STAGE_1);
+	createItemStyleBlock(207, 2, t.BEETROOTS_STAGE_2);
+	createItemStyleBlock(207, 3, t.BEETROOTS_STAGE_3);
+	// --
 	setBlockImage(208, 0, t.GRASS_PATH_TOP); // grass path
 	// id 209 // end gateway
 	// id 210 // repeating command block
 	// id 211 // chain command block
+	// frosted ice --
+	setBlockImage(212, 0, t.FROSTED_ICE_0);
+	setBlockImage(212, 1, t.FROSTED_ICE_1);
+	setBlockImage(212, 2, t.FROSTED_ICE_2);
+	setBlockImage(212, 3, t.FROSTED_ICE_3);
+	// --
 	// id 255 // structure block
 }
 

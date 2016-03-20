@@ -859,6 +859,8 @@ void IsometricBlockImages::createSlabs(uint16_t id, SlabType type, bool double_s
 		slab_textures[0x3] = textures.PLANKS_JUNGLE;
 		slab_textures[0x4] = textures.PLANKS_ACACIA;
 		slab_textures[0x5] = textures.PLANKS_BIG_OAK;
+	} else if (type == SlabType::PURPUR) {
+		slab_textures[0x0] = textures.PURPUR_BLOCK;
 	}
 	for (auto it = slab_textures.begin(); it != slab_textures.end(); ++it) {
 		RGBAImage side = it->second;
@@ -1029,7 +1031,7 @@ void IsometricBlockImages::createDoubleChest(uint16_t id, const DoubleChestTextu
 void IsometricBlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data,
 		uint8_t r, uint8_t g, uint8_t b) { // id 55
 	RGBAImage redstone_cross = resources.getBlockTextures().REDSTONE_DUST_DOT;
-	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE0;
+	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE0.rotate(1);
 	redstone_cross.simpleAlphaBlit(redstone_line, 0, 0);
 	redstone_cross.simpleAlphaBlit(redstone_line.rotate(1), 0, 0);
 
@@ -1621,7 +1623,7 @@ void IsometricBlockImages::createCocoas() { // id 127
 }
 
 void IsometricBlockImages::createTripwireHook() { // id 131
-	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE0.colorize((uint8_t) 192, 192, 192);
+	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE0.colorize((uint8_t) 192, 192, 192).rotate(1);
 
 	BlockImage block;
 	block.setFace(FACE_NORTH, resources.getBlockTextures().TRIP_WIRE_SOURCE);
@@ -2207,17 +2209,28 @@ void IsometricBlockImages::createBlocks() {
 	// id 198 // end rod
 	// id 199 // chrous plant
 	// id 200 // chorus flower
-	// id 201 // purpur block
-	// id 202 // purpur pillar
-	// id 203 // purpur stairs
-	// id 204 // purpur double slab
-	// id 205 // purpur slab
-	// id 206 // end stone bricks
-	// id 207 // beetroot seeds
+	createBlock(201, 0, t.PURPUR_BLOCK); // purpur block
+	createBlock(202, 0, t.PURPUR_PILLAR, t.PURPUR_PILLAR_TOP); // purpur pillar
+	createStairs(203, t.PURPUR_BLOCK); // purpur stairs
+	createSlabs(204, SlabType::PURPUR, true); // purpur double slab
+	createSlabs(205, SlabType::PURPUR, false); // purpur slab
+	createBlock(206, 0, t.END_BRICKS); // end stone bricks
+	// beetroot seeds --
+	createItemStyleBlock(207, 0, t.BEETROOTS_STAGE_0);
+	createItemStyleBlock(207, 1, t.BEETROOTS_STAGE_1);
+	createItemStyleBlock(207, 2, t.BEETROOTS_STAGE_2);
+	createItemStyleBlock(207, 3, t.BEETROOTS_STAGE_3);
+	// --
 	createSmallerBlock(208, 0, t.GRASS_PATH_SIDE, t.GRASS_PATH_TOP, 0, texture_size * 15.0 / 16.0); // grass paths
 	// id 209 // end gateway
 	// id 210 // repeating command block
 	// id 211 // chain command block
+	// frosted ice --
+	createBlock(212, 0, t.FROSTED_ICE_0);
+	createBlock(212, 1, t.FROSTED_ICE_1);
+	createBlock(212, 2, t.FROSTED_ICE_2);
+	createBlock(212, 3, t.FROSTED_ICE_3);
+	// --
 	// id 255 // structure block
 }
 

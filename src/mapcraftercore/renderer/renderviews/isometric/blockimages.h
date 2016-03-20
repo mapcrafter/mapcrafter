@@ -94,7 +94,7 @@ const int NORTH_BOTTOM_RIGHT = 2;
 const int NORTH_BOTTOM_LEFT = 3;
 
 enum class SlabType {
-	STONE, STONE2, WOOD
+	STONE, STONE2, WOOD, PURPUR
 };
 
 /**
