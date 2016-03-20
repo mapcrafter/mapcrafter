@@ -297,7 +297,7 @@ ValidationMap MapcrafterConfig::parse(const config::INIConfig& config,
 			if (!hasOverlay(*overlay_it)) {
 				validation.section(map_it->getPrettyName()).error(
 						"Default overlay '" + *overlay_it + "' does not exist!");
-			} else if (!overlays.count(*overlay_it)) {
+			} else if (std::find(overlays.begin(), overlays.end(), *overlay_it) == overlays.end()) {
 				validation.section(map_it->getPrettyName()).error(
 						"Default overlay '" + *overlay_it + "' is not part of the maps overlays!");
 			}
@@ -321,20 +321,20 @@ void MapcrafterConfig::initializeDefaultOverlays() {
 			.set("name", "Night")
 			.set("day", "false"));
 
-	createDefaultOverlay<LightLevelOverlaySection>(INIConfigSection("overlay-lightlevel", "lightlevelsday")
+	createDefaultOverlay<LightLevelOverlaySection>(INIConfigSection("overlay-lightlevel", "lightlevels-day")
 			.set("name", "Lightlevels at day")
 			.set("day", "true"));
-	createDefaultOverlay<LightLevelOverlaySection>(INIConfigSection("overlay-lightlevel", "lightlevelsnight")
+	createDefaultOverlay<LightLevelOverlaySection>(INIConfigSection("overlay-lightlevel", "lightlevels-night")
 			.set("name", "Lightlevels at night")
 			.set("day", "false"));
 
 	createDefaultOverlay<SlimeOverlaySection>(INIConfigSection("overlay-slime", "slime")
 			.set("name", "Slimes"));
 
-	createDefaultOverlay<SpawnOverlaySection>(INIConfigSection("overlay-spawn", "spawnday")
+	createDefaultOverlay<SpawnOverlaySection>(INIConfigSection("overlay-spawn", "spawn-day")
 			.set("name", "Mobs spawning at day")
 			.set("day", "true"));
-	createDefaultOverlay<SpawnOverlaySection>(INIConfigSection("overlay-spawn", "spawnnight")
+	createDefaultOverlay<SpawnOverlaySection>(INIConfigSection("overlay-spawn", "spawn-night")
 			.set("name", "Mobs spawning at night")
 			.set("day", "false"));
 }

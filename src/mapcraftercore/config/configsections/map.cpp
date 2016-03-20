@@ -168,12 +168,12 @@ renderer::RenderModeType MapSection::getRenderMode() const {
 	return render_mode.getValue();
 }
 
-std::set<std::string> MapSection::getOverlays() const {
-	return overlays_set;
+std::vector<std::string> MapSection::getOverlays() const {
+	return overlays_vector;
 }
 
-std::set<std::string> MapSection::getDefaultOverlays() const {
-	return default_overlays_set;
+std::vector<std::string> MapSection::getDefaultOverlays() const {
+	return default_overlays_vector;
 }
 
 std::set<int> MapSection::getRotations() const {
@@ -289,23 +289,23 @@ bool MapSection::parseField(const std::string key, const std::string value,
 					"It's called 'render_mode' now.");
 	} else if (key == "overlays") {
 		overlays.load(key, value, validation);
-		overlays_set.clear();
+		overlays_vector.clear();
 		std::stringstream ss;
 		ss << overlays.getValue();
 		std::string overlay;
 		while (ss >> overlay) {
-			// TODO make Field::load able to load sets of types?
-			overlays_set.insert(overlay);
+			// TODO make Field::load able to load sets/vectors of types?
+			overlays_vector.push_back(overlay);
 		}
 	} else if (key == "default_overlays") {
 		default_overlays.load(key, value, validation);
-		default_overlays_set.clear();
+		default_overlays_vector.clear();
 		std::stringstream ss;
 		ss << default_overlays.getValue();
 		std::string overlay;
 		while (ss >> overlay) {
-			// TODO make Field::load able to load sets of types?
-			default_overlays_set.insert(overlay);
+			// TODO make Field::load able to load sets/vectors of types?
+			default_overlays_vector.push_back(overlay);
 		}
 	} else if (key == "rotations") {
 		rotations.load(key, value ,validation);
