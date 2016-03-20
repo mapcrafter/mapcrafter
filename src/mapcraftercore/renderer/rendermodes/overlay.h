@@ -136,6 +136,10 @@ private:
 	OverlayMode overlay_mode;
 };
 
+OverlayRenderMode* createOverlay(const config::WorldSection& world_config,
+		const config::MapSection& map_config,
+		std::shared_ptr<config::OverlaySection> overlay_config, int rotation);
+	
 std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(
 		const config::WorldSection& world_config, const config::MapSection& map_config,
 		const std::map<std::string, std::shared_ptr<config::OverlaySection>>& overlays_config,

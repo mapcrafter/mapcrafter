@@ -33,11 +33,14 @@ namespace renderer {
 
 TileRenderer::TileRenderer(const RenderView* render_view, BlockImages* images,
 		int tile_width, mc::WorldCache* world, RenderMode* render_mode,
-		const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays)
+		std::shared_ptr<OverlayRenderMode> hardcode_overlay,
+		std::vector<std::shared_ptr<OverlayRenderMode>> overlays)
 	: images(images), tile_width(tile_width), world(world), current_chunk(nullptr),
-	  render_mode(render_mode), overlays(overlays),
+	  render_mode(render_mode), hardcode_overlay(hardcode_overlay), overlays(overlays),
 	  render_biomes(true), use_preblit_water(false) {
 	render_mode->initialize(render_view, images, world, &current_chunk);
+	if (hardcode_overlay)
+		hardcode_overlay->initialize(render_view, images, world, &current_chunk);
 	for (size_t i = 0; i < overlays.size(); i++)
 		overlays[i]->initialize(render_view, images, world, &current_chunk);
 }
@@ -474,6 +477,15 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 	}
 
 	return data;
+}
+
+void TileRenderer::drawHardcodeOverlay(RGBAImage& block, const mc::BlockPos& pos, uint16_t id, uint16_t data) const {
+	if (hardcode_overlay) {
+		RGBAImage overlay = block.emptyCopy();
+		hardcode_overlay->drawOverlay(block, overlay, pos, id, data);
+		overlay.applyMask(block);
+		block.alphaBlit(overlay, 0, 0);
+	}
 }
 
 }

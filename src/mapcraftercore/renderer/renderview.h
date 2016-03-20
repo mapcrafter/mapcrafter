@@ -71,7 +71,8 @@ public:
 	 */
 	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderMode* render_mode,
-			const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays) const = 0;
+			std::shared_ptr<OverlayRenderMode> hardcode_overlay,
+			std::vector<std::shared_ptr<OverlayRenderMode>> overlays) const = 0;
 
 	/**
 	 * Creates an instance of the render view specific render mode renderer class.

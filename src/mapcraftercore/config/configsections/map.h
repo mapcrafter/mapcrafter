@@ -93,6 +93,7 @@ public:
 
 	renderer::RenderViewType getRenderView() const;
 	renderer::RenderModeType getRenderMode() const;
+	std::string getHardcodeOverlay() const;
 	std::vector<std::string> getOverlays() const;
 	std::vector<std::string> getDefaultOverlays() const;
 	std::set<int> getRotations() const;
@@ -131,6 +132,7 @@ private:
 
 	Field<renderer::RenderViewType> render_view;
 	Field<renderer::RenderModeType> render_mode;
+	Field<std::string> hardcode_overlay;
 	Field<std::string> overlays, default_overlays;
 	std::vector<std::string> overlays_vector, default_overlays_vector;
 	Field<std::string> rotations;

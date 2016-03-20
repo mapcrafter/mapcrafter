@@ -41,9 +41,10 @@ namespace mapcrafter {
 namespace renderer {
 
 TopdownTileRenderer::TopdownTileRenderer(const RenderView* render_view,
-		BlockImages* images, int tile_width, mc::WorldCache* world,
-		RenderMode* render_mode, const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays)
-	: TileRenderer(render_view, images, tile_width, world, render_mode, overlays) {
+		BlockImages* images, int tile_width, mc::WorldCache* world, RenderMode* render_mode,
+		std::shared_ptr<OverlayRenderMode> hardcode_overlay,
+		std::vector<std::shared_ptr<OverlayRenderMode>> overlays)
+	: TileRenderer(render_view, images, tile_width, world, render_mode, hardcode_overlay, overlays) {
 }
 
 TopdownTileRenderer::~TopdownTileRenderer() {
@@ -130,7 +131,8 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, s
 									top.id = 8;
 									top.data = OPAQUE_WATER;
 									top.block = images->getBlock(top.id, top.data);
-									render_mode->draw(top.block, top.pos, top.id, top.data);
+									// render_mode->draw(top.block, top.pos, top.id, top.data);
+									drawHardcodeOverlay(top.block, top.pos, top.id, top.data);
 									// blocks.insert(current, top);
 									break;
 								} else {
@@ -149,7 +151,8 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, s
 					block = images->getBiomeBlock(id, data, getBiomeOfBlock(globalpos, &chunk));
 				}
 
-				render_mode->draw(block, globalpos, id, data);
+				// render_mode->draw(block, globalpos, id, data);
+				drawHardcodeOverlay(block, globalpos, id, data);
 
 				RenderBlock render_block;
 				render_block.pos = globalpos;

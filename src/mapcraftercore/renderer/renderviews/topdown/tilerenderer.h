@@ -33,7 +33,8 @@ class TopdownTileRenderer : public TileRenderer {
 public:
 	TopdownTileRenderer(const RenderView* render_view, BlockImages* images,
 			int tile_width, mc::WorldCache* world, RenderMode* render_mode,
-			const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays);
+			std::shared_ptr<OverlayRenderMode> hardcode_overlay,
+			std::vector<std::shared_ptr<OverlayRenderMode>> overlays);
 	~TopdownTileRenderer();
 
 	void renderChunk(const mc::Chunk& chunk, RGBAImage& tile, std::vector<RGBAImage>& overlay_tiles, int dx, int dz);

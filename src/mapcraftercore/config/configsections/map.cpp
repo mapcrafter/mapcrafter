@@ -127,6 +127,7 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  world = " << world << std::endl;
 	out << "  render_view" << render_view << std::endl;
 	out << "  render_mode = " << render_mode << std::endl;
+	out << "  hardcode_overlay = " << hardcode_overlay << std::endl;
 	out << "  overlays = " << overlays << std::endl;
 	out << "  default_overlays = " << default_overlays << std::endl;
 	out << "  rotations = " << rotations << std::endl;
@@ -166,6 +167,10 @@ renderer::RenderViewType MapSection::getRenderView() const {
 
 renderer::RenderModeType MapSection::getRenderMode() const {
 	return render_mode.getValue();
+}
+
+std::string MapSection::getHardcodeOverlay() const {
+	return hardcode_overlay.getValue();
 }
 
 std::vector<std::string> MapSection::getOverlays() const {
@@ -250,6 +255,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	// set some default configuration values
 	render_view.setDefault(renderer::RenderViewType::ISOMETRIC);
 	render_mode.setDefault(renderer::RenderModeType::DAYLIGHT);
+	hardcode_overlay.setDefault("");
 	overlays.setValue("");
 	rotations.setDefault("top-left");
 
@@ -287,6 +293,8 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		if (key == "rendermode")
 			validation.warning("Using the option 'rendermode' is deprecated. "
 					"It's called 'render_mode' now.");
+	} else if (key == "hardcode_overlay") {
+		hardcode_overlay.load(key, value, validation);
 	} else if (key == "overlays") {
 		overlays.load(key, value, validation);
 		overlays_vector.clear();

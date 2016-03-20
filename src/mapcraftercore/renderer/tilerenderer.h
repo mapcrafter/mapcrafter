@@ -49,7 +49,8 @@ class TileRenderer {
 public:
 	TileRenderer(const RenderView* render_view, BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderMode* render_mode,
-			const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays);
+			std::shared_ptr<OverlayRenderMode> hardcode_overlay,
+			std::vector<std::shared_ptr<OverlayRenderMode>> overlays);
 	virtual ~TileRenderer();
 
 	void setRenderBiomes(bool render_biomes);
@@ -64,11 +65,14 @@ protected:
 	Biome getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk);
 	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
+	void drawHardcodeOverlay(RGBAImage& block, const mc::BlockPos& pos, uint16_t id, uint16_t data) const;
+
 	BlockImages* images;
 	int tile_width;
 	mc::WorldCache* world;
 	mc::Chunk* current_chunk;
 	RenderMode* render_mode;
+	std::shared_ptr<OverlayRenderMode> hardcode_overlay;
 	std::vector<std::shared_ptr<OverlayRenderMode>> overlays;
 
 	bool render_biomes;

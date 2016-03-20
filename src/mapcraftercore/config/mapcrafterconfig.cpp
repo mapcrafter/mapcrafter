@@ -285,6 +285,12 @@ ValidationMap MapcrafterConfig::parse(const config::INIConfig& config,
 	// check if all worlds and overlays specified for maps exist
 	for (auto map_it = maps.begin(); map_it != maps.end(); ++map_it) {
 		auto overlays = map_it->getOverlays();
+		std::string hardcode_overlay = map_it->getHardcodeOverlay();
+		if (hardcode_overlay != "" && !hasOverlay(hardcode_overlay)) {
+			validation.section(map_it->getPrettyName()).error(
+					"Hardcode overlay '" + hardcode_overlay + "' does not exist!");
+		}
+
 		for (auto overlay_it = overlays.begin(); overlay_it != overlays.end(); ++overlay_it) {
 			if (!hasOverlay(*overlay_it)) {
 				validation.section(map_it->getPrettyName()).error(

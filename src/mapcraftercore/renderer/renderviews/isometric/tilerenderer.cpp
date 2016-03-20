@@ -133,8 +133,9 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 
 IsometricTileRenderer::IsometricTileRenderer(const RenderView* render_view,
 		BlockImages* images, int tile_width, mc::WorldCache* world,
-		RenderMode* render_mode, const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays)
-	: TileRenderer(render_view, images, tile_width, world, render_mode, overlays) {
+		RenderMode* render_mode, std::shared_ptr<OverlayRenderMode> hardcode_overlay,
+		std::vector<std::shared_ptr<OverlayRenderMode>> overlays)
+	: TileRenderer(render_view, images, tile_width, world, render_mode, hardcode_overlay, overlays) {
 }
 
 IsometricTileRenderer::~IsometricTileRenderer() {
@@ -273,7 +274,8 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 								top.block = images->getBlock(id, data);
 
 								// don't forget the render mode
-								render_mode->draw(top.block, top.pos, id, data);
+								// render_mode->draw(top.block, top.pos, id, data);
+								drawHardcodeOverlay(top.block, top.pos, id, data);
 
 								row_nodes.insert(top);
 								break;
@@ -314,7 +316,8 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 			node.block = image;
 
 			// let the render mode do their magic with the block image
-			render_mode->draw(node.block, node.pos, id, data);
+			// render_mode->draw(node.block, node.pos, id, data);
+			drawHardcodeOverlay(node.block, node.pos, id, data);
 
 			for (size_t i = 0; i < overlay_tiles.size(); i++) {
 				RGBAImage block_overlay = image.emptyCopy();

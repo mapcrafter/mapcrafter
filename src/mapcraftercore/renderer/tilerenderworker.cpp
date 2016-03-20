@@ -34,9 +34,10 @@ namespace renderer {
 void RenderContext::initializeTileRenderer() {
 	world_cache.reset(new mc::WorldCache(world));
 	render_mode.reset(createRenderMode(world_config, map_config, world.getRotation()));
+	hardcode_overlay.reset(createOverlay(world_config, map_config, overlays_config.at(map_config.getHardcodeOverlay()), world.getRotation()));
 	overlays = createOverlays(world_config, map_config, overlays_config, world.getRotation());
 	tile_renderer.reset(render_view->createTileRenderer(block_images,
-			map_config.getTileWidth(), world_cache.get(), render_mode.get(), overlays));
+			map_config.getTileWidth(), world_cache.get(), render_mode.get(), hardcode_overlay, overlays));
 	render_view->configureTileRenderer(tile_renderer.get(), world_config, map_config);
 }
 

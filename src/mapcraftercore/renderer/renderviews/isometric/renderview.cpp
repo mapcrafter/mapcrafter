@@ -44,8 +44,9 @@ TileSet* IsometricRenderView::createTileSet(int tile_width) const {
 
 TileRenderer* IsometricRenderView::createTileRenderer(BlockImages* images,
 		int tile_width, mc::WorldCache* world, RenderMode* render_mode,
-		const std::vector<std::shared_ptr<OverlayRenderMode>>& overlays) const {
-	return new IsometricTileRenderer(this, images, tile_width, world, render_mode, overlays);
+		std::shared_ptr<OverlayRenderMode> hardcode_overlay,
+		std::vector<std::shared_ptr<OverlayRenderMode>> overlays) const {
+	return new IsometricTileRenderer(this, images, tile_width, world, render_mode, hardcode_overlay, overlays);
 }
 
 RenderModeRenderer* IsometricRenderView::createRenderModeRenderer(
