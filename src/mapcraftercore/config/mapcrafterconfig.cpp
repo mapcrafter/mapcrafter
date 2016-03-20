@@ -294,10 +294,7 @@ ValidationMap MapcrafterConfig::parse(const config::INIConfig& config,
 		
 		auto default_overlays = map_it->getDefaultOverlays();
 		for (auto overlay_it = default_overlays.begin(); overlay_it != default_overlays.end(); ++overlay_it) {
-			if (!hasOverlay(*overlay_it)) {
-				validation.section(map_it->getPrettyName()).error(
-						"Default overlay '" + *overlay_it + "' does not exist!");
-			} else if (std::find(overlays.begin(), overlays.end(), *overlay_it) == overlays.end()) {
+			if (std::find(overlays.begin(), overlays.end(), *overlay_it) == overlays.end()) {
 				validation.section(map_it->getPrettyName()).error(
 						"Default overlay '" + *overlay_it + "' is not part of the maps overlays!");
 			}
