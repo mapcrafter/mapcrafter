@@ -28,7 +28,7 @@ MapSelectControl.prototype.create = function(wrapper) {
 			return function(a) {
 				var h = a.target.getAttribute('data-world');
 				var button = document.getElementById('control-wrapper-map-select').getElementsByTagName('button')[0];
-				button.innerHTML = this.ui.getMapConfig(h).name + ' <span class="caret"></span>';
+				button.innerHTML = ui.getMapConfig(h).name + ' <span class="caret"></span>';
 				ui.setMap(h);
 			}
 		})(this.ui));
