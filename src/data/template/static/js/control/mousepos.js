@@ -15,6 +15,7 @@ MousePosControl.prototype.create = function(wrapper) {
 			var xzy = ui.latLngToMC(event.latlng, 64);
 			document.getElementById("mouse-move-div").innerHTML = '<div class="btn-group" role="group">'
 			+ '<button type="button" class="btn btn-default">' + "X: " + Math.round(xzy[0]) + '</button>'
+			+ '<button type="button" class="btn btn-default">' + "Y: " + Math.round(xzy[2]) + '</button>'
 			+ '<button type="button" class="btn btn-default">' + "Z: " + Math.round(xzy[1]) + '</button>'
 			+ "</div>";
 		};
