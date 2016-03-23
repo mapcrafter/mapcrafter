@@ -1635,6 +1635,11 @@ void IsometricBlockImages::createTripwireHook() { // id 131
 	setBlockImage(131, 3, block.rotate(3)); // on the west side
 }
 
+void IsometricBlockImages::createCommandBlock(uint16_t id, const RGBAImage& front,
+		const RGBAImage& side, const RGBAImage& back, const RGBAImage& conditional) { // id 137, 210, 211
+	// TODO
+}
+
 void IsometricBlockImages::createBeacon() { // id 138
 	const BlockTextures& textures = resources.getBlockTextures();
 	RGBAImage beacon(texture_size * 2, texture_size * 2);
@@ -2040,8 +2045,8 @@ void IsometricBlockImages::createBlocks() {
 	createStairs(134, t.PLANKS_SPRUCE); // spruce wood stairs
 	createStairs(135, t.PLANKS_BIRCH); // birch wood stairs
 	createStairs(136, t.PLANKS_JUNGLE); // jungle wood stairs
-	// TODO
-	createBlock(137, 0, t.COMMAND_BLOCK_SIDE); // command block
+	createCommandBlock(137, t.COMMAND_BLOCK_FRONT, t.COMMAND_BLOCK_BACK,
+			t.COMMAND_BLOCK_SIDE, t.COMMAND_BLOCK_CONDITIONAL); // id 137
 	createBeacon(); // beacon
 	createFence(139, 0, t.COBBLESTONE); // cobblestone wall
 	createFence(139, 1, t.COBBLESTONE_MOSSY); // cobblestone wall mossy
@@ -2223,15 +2228,22 @@ void IsometricBlockImages::createBlocks() {
 	// --
 	createSmallerBlock(208, 0, t.GRASS_PATH_SIDE, t.GRASS_PATH_TOP, 0, texture_size * 15.0 / 16.0); // grass paths
 	// id 209 // end gateway
-	// id 210 // repeating command block
-	// id 211 // chain command block
+	createCommandBlock(210, t.REPEATING_COMMAND_BLOCK_FRONT, t.REPEATING_COMMAND_BLOCK_BACK,
+			t.REPEATING_COMMAND_BLOCK_SIDE, t.REPEATING_COMMAND_BLOCK_CONDITIONAL); // id 210
+	createCommandBlock(211, t.CHAIN_COMMAND_BLOCK_FRONT, t.CHAIN_COMMAND_BLOCK_BACK,
+			t.CHAIN_COMMAND_BLOCK_FRONT, t.CHAIN_COMMAND_BLOCK_CONDITIONAL); // id 211
 	// frosted ice --
 	createBlock(212, 0, t.FROSTED_ICE_0);
 	createBlock(212, 1, t.FROSTED_ICE_1);
 	createBlock(212, 2, t.FROSTED_ICE_2);
 	createBlock(212, 3, t.FROSTED_ICE_3);
 	// --
-	// id 255 // structure block
+	// structure block --
+	createBlock(255, 0, t.STRUCTURE_BLOCK_SAVE);
+	createBlock(255, 1, t.STRUCTURE_BLOCK_LOAD);
+	createBlock(255, 2, t.STRUCTURE_BLOCK_CORNER);
+	createBlock(255, 3, t.STRUCTURE_BLOCK_DATA);
+	// --
 }
 
 int IsometricBlockImages::createOpaqueWater() {

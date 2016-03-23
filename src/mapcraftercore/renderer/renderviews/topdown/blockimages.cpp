@@ -831,6 +831,11 @@ void TopdownBlockImages::createTripwireHook() { // id 131
 	setBlockImage(131, 3, tripwire); // on the west side
 }
 
+void TopdownBlockImages::createCommandBlock(uint16_t id, const RGBAImage& front,
+		const RGBAImage& side, const RGBAImage& back, const RGBAImage& conditional) { // id 137, 210, 211
+	// TODO
+}
+
 void TopdownBlockImages::createFlowerPot() { // id 140
 	const BlockTextures& textures = resources.getBlockTextures();
 	double s = (double) textures.FLOWER_POT.getOriginal().getWidth() / 16;
@@ -1548,15 +1553,22 @@ void TopdownBlockImages::createBlocks() {
 	// --
 	setBlockImage(208, 0, t.GRASS_PATH_TOP); // grass path
 	// id 209 // end gateway
-	// id 210 // repeating command block
-	// id 211 // chain command block
+	createCommandBlock(210, t.REPEATING_COMMAND_BLOCK_FRONT, t.REPEATING_COMMAND_BLOCK_BACK,
+			t.REPEATING_COMMAND_BLOCK_SIDE, t.REPEATING_COMMAND_BLOCK_CONDITIONAL); // id 210
+	createCommandBlock(211, t.CHAIN_COMMAND_BLOCK_FRONT, t.CHAIN_COMMAND_BLOCK_BACK,
+			t.CHAIN_COMMAND_BLOCK_FRONT, t.CHAIN_COMMAND_BLOCK_CONDITIONAL); // id 211
 	// frosted ice --
 	setBlockImage(212, 0, t.FROSTED_ICE_0);
 	setBlockImage(212, 1, t.FROSTED_ICE_1);
 	setBlockImage(212, 2, t.FROSTED_ICE_2);
 	setBlockImage(212, 3, t.FROSTED_ICE_3);
 	// --
-	// id 255 // structure block
+	// structure block --
+	setBlockImage(255, 0, t.STRUCTURE_BLOCK_SAVE);
+	setBlockImage(255, 1, t.STRUCTURE_BLOCK_LOAD);
+	setBlockImage(255, 2, t.STRUCTURE_BLOCK_CORNER);
+	setBlockImage(255, 3, t.STRUCTURE_BLOCK_DATA);
+	// --
 }
 
 int TopdownBlockImages::createOpaqueWater() {

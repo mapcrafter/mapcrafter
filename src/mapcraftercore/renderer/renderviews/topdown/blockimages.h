@@ -68,6 +68,8 @@ protected:
 	void createFenceGate(uint8_t id, RGBAImage texture); // id 107, 183-187
 	void createCocoas(); // id 127
 	void createTripwireHook(); // id 131
+	void createCommandBlock(uint16_t id, const RGBAImage& front, const RGBAImage& side,
+			const RGBAImage& back, const RGBAImage& conditional); // id 137, 210, 211
 	void createFlowerPot(); // id 140
 	void createLargePlant(uint16_t data, const RGBAImage& texture, const RGBAImage& top_texture); // id 175
 
