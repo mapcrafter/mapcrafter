@@ -268,7 +268,12 @@ BlockImage BlockImage::rotate(int count) const {
 	for (int i = 0; i < 4; i++) {
 		int face = 1 << i;
 		int new_face = util::rotateShiftLeft(face, count, 4);
-		rotated.setFace(new_face, getFace(face), getXOffset(face), getYOffset(face));
+		RGBAImage texture = getFace(face);
+		// we have to flip the texture if it is moved from/to south|west to/from north|east
+		if (((face == FACE_SOUTH || face == FACE_WEST) && (new_face == FACE_NORTH || new_face == FACE_EAST))
+				|| ((new_face == FACE_SOUTH || new_face == FACE_WEST) && (face == FACE_NORTH || face == FACE_EAST)))
+			texture = texture.flip(true, false);
+		rotated.setFace(new_face, texture, getXOffset(face), getYOffset(face));
 	}
 
 	RGBAImage top = getFace(FACE_TOP).rotate(count);
@@ -1636,8 +1641,40 @@ void IsometricBlockImages::createTripwireHook() { // id 131
 }
 
 void IsometricBlockImages::createCommandBlock(uint16_t id, const RGBAImage& front,
-		const RGBAImage& side, const RGBAImage& back, const RGBAImage& conditional) { // id 137, 210, 211
-	// TODO
+		const RGBAImage& back, const RGBAImage& side, const RGBAImage& conditional) { // id 137, 210, 211
+	for (int i = 0; i <= 15; i++) {
+		int rotation_data = i & ~0x8;
+		RGBAImage side_texture = (i & 0x8) ? conditional : side;
+
+		if (rotation_data <= 1 || rotation_data >= 6) {
+			// a command block that's pointing up or down
+			bool down = rotation_data == 0 || rotation_data == 6;
+			int face_up = down ? FACE_BOTTOM : FACE_TOP;
+			int face_down = down ? FACE_TOP : FACE_BOTTOM;
+			int side_flip = down ? true : false;
+			BlockImage block;
+			block.setFace(face_up, front);
+			block.setFace(FACE_NORTH | FACE_SOUTH | FACE_EAST | FACE_WEST, side_texture.flip(false, side_flip));
+			block.setFace(face_down, back);
+			setBlockImage(id, i, block);
+		} else {
+			// otherwise it's a command block showing in one of the other directions
+			BlockImage block;
+			block.setFace(FACE_NORTH, front);
+			block.setFace(FACE_EAST | FACE_WEST | FACE_TOP | FACE_BOTTOM, side_texture.rotate(3));
+			block.setFace(FACE_SOUTH, back);
+			int rotation = -1;
+			if (rotation_data == 2)
+				rotation = 0;
+			else if (rotation_data == 3)
+				rotation = 2;
+			else if (rotation_data == 4)
+				rotation = 3;
+			else if (rotation_data == 5)
+				rotation = 1;
+			setBlockImage(id, i, block.rotate(rotation));
+		}
+	}
 }
 
 void IsometricBlockImages::createBeacon() { // id 138
@@ -2231,7 +2268,7 @@ void IsometricBlockImages::createBlocks() {
 	createCommandBlock(210, t.REPEATING_COMMAND_BLOCK_FRONT, t.REPEATING_COMMAND_BLOCK_BACK,
 			t.REPEATING_COMMAND_BLOCK_SIDE, t.REPEATING_COMMAND_BLOCK_CONDITIONAL); // id 210
 	createCommandBlock(211, t.CHAIN_COMMAND_BLOCK_FRONT, t.CHAIN_COMMAND_BLOCK_BACK,
-			t.CHAIN_COMMAND_BLOCK_FRONT, t.CHAIN_COMMAND_BLOCK_CONDITIONAL); // id 211
+			t.CHAIN_COMMAND_BLOCK_SIDE, t.CHAIN_COMMAND_BLOCK_CONDITIONAL); // id 211
 	// frosted ice --
 	createBlock(212, 0, t.FROSTED_ICE_0);
 	createBlock(212, 1, t.FROSTED_ICE_1);

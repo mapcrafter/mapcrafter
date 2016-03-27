@@ -313,8 +313,8 @@ protected:
 	RGBAImage buildCocoa(int stage);
 	void createCocoas(); // id 127
 	void createTripwireHook(); // id 131
-	void createCommandBlock(uint16_t id, const RGBAImage& front, const RGBAImage& side,
-			const RGBAImage& back, const RGBAImage& conditional); // id 137, 210, 211
+	void createCommandBlock(uint16_t id, const RGBAImage& front, const RGBAImage& back,
+			const RGBAImage& side, const RGBAImage& conditional); // id 137, 210, 211
 	void createBeacon(); // id 138
 	void createFlowerPot(); // id 140
 	void createHopper(); // id 154
