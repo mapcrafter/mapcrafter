@@ -78,6 +78,13 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.2.2**
+
+* Added support for 1.9 blocks (and hoppers)
+* Fixed bug which caused water not being rendered (#178)
+* Fixed circular crop overflowing bug (#179)
+* Fixed a config validation bug (#185)
+
 **v.2.1**
 
 * Added support for corner stairs (thanks for some Minecraft Overviewer code!)
