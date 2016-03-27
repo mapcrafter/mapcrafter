@@ -319,6 +319,7 @@ protected:
 	void createFlowerPot(); // id 140
 	void createHopper(); // id 154
 	void createLargePlant(uint16_t data, const RGBAImage& texture, const RGBAImage& top_texture); // id 175
+	void createEndRod(); // id 198
 
 	virtual RGBAImage createUnknownBlock() const;
 	virtual RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;

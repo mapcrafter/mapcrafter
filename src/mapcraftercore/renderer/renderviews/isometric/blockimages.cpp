@@ -1780,6 +1780,49 @@ void IsometricBlockImages::createLargePlant(uint16_t data, const RGBAImage& text
 	createItemStyleBlock(175, data | LARGEPLANT_TOP, top_texture);
 }
 
+void IsometricBlockImages::createEndRod() { // id 198
+	double s = (double) getTextureSize() / 16;
+	int base_height = std::max(2.0, std::ceil(s*2));
+	int base_width = std::max(4.0, std::ceil(s*6));
+	int rod_width = std::max(2.0, std::ceil(s*2));
+	int rod_length = s*16;
+
+	RGBAImage texture = resources.getBlockTextures().END_ROD.getOriginal();
+	s = (double) texture.getWidth() / 16;
+	RGBAImage rod_side, rod_top, base_side, base_top;
+	texture.clip(0, 0, s*2, s*14).resize(rod_side, rod_width, rod_length, InterpolationType::NEAREST);
+	texture.clip(s*2, 0, s*2, s*2).resize(rod_top, rod_width, rod_width, InterpolationType::NEAREST);
+	texture.clip(s*2, s*2, s*4, s*1).resize(base_side, base_width, base_height, InterpolationType::NEAREST);
+	texture.clip(s*2, s*3, s*4, s*4).resize(base_top, base_width, base_width, InterpolationType::NEAREST);
+
+	RGBAImage rod(getTextureSize(), getTextureSize());
+	rod.simpleAlphaBlit(rod_side, (rod.getWidth() - rod_side.getWidth()) / 2, 0);
+	RGBAImage base(getTextureSize(), getTextureSize());
+	base.simpleAlphaBlit(base_top, (base.getWidth() - base_top.getWidth()) / 2, (base.getHeight() - base_top.getHeight()) / 2);
+
+	BlockImage up, down;
+	up.setFace(FACE_BOTTOM, base);
+	up.setFace(FACE_NORTH, rod, getTextureSize() / 2, getTextureSize() / 4);
+	down.setFace(FACE_NORTH, rod, getTextureSize() / 2, getTextureSize() / 4);
+	down.setFace(FACE_TOP, base);
+	setBlockImage(198, 0, down);
+	setBlockImage(198, 1, up);
+
+	BlockImage north, south, east, west;
+	north.setFace(FACE_SOUTH, base);
+	north.setFace(FACE_BOTTOM, rod.rotate(1), 0, -getTextureSize() / 2);
+	south.setFace(FACE_NORTH, base);
+	south.setFace(FACE_TOP, rod.rotate(1), 0, getTextureSize() / 2);
+	west.setFace(FACE_EAST, base);
+	west.setFace(FACE_TOP, rod, 0, getTextureSize() / 2);
+	east.setFace(FACE_WEST, base);
+	east.setFace(FACE_BOTTOM, rod, 0, -getTextureSize() / 2);
+	setBlockImage(198, 2, buildImage(north));
+	setBlockImage(198, 3, buildImage(south));
+	setBlockImage(198, 4, buildImage(west));
+	setBlockImage(198, 5, buildImage(east));
+}
+
 RGBAImage IsometricBlockImages::createUnknownBlock() const {
 	RGBAImage texture(texture_size, texture_size);
 	texture.fill(rgba(255, 0, 0, 255), 0, 0, texture_size, texture_size);
@@ -2249,7 +2292,7 @@ void IsometricBlockImages::createBlocks() {
 	createDoor(195, t.DOOR_JUNGLE_LOWER, t.DOOR_JUNGLE_UPPER); // jungle door
 	createDoor(196, t.DOOR_ACACIA_LOWER, t.DOOR_ACACIA_UPPER); // acacia door
 	createDoor(197, t.DOOR_DARK_OAK_LOWER, t.DOOR_DARK_OAK_UPPER); // dark oak door
-	// id 198 // end rod
+	createEndRod(); // id 198
 	createBlock(199, 0, t.CHORUS_PLANT); // chrous plant
 	// chorus flower --
 	createBlock(200, 0, t.CHORUS_FLOWER);
