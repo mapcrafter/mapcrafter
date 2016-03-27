@@ -295,7 +295,7 @@ protected:
 	void createWallSign(); // id 68
 	void createButton(uint16_t id, const RGBAImage& tex); // id 77, 143
 	void createSnow(); // id 78
-	void createIce(uint8_t id); // id 79
+	void createIce(uint8_t id, uint16_t extra_data, const RGBAImage& texture); // id 79, 212
 	void createCactus(); // id 81
 	void createFence(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 85, 113, 188-192
 	void createPumkin(uint16_t id, const RGBAImage& front); // id 86, 91

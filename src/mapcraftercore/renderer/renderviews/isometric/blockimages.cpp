@@ -1210,25 +1210,24 @@ void IsometricBlockImages::createSnow() { // id 78
 	}
 }
 
-void IsometricBlockImages::createIce(uint8_t id) { // id 79
-	RGBAImage texture = resources.getBlockTextures().ICE;
-
-	for (int w = 0; w <= 1; w++)
+void IsometricBlockImages::createIce(uint8_t id, uint16_t extra_data, const RGBAImage& texture) { // id 79, 212
+	for (int w = 0; w <= 1; w++) {
 		for (int s = 0; s <= 1; s++) {
 			RGBAImage block(getBlockSize(), getBlockSize());
-			uint16_t extra_data = 0;
+			uint16_t data = extra_data;
 			if (w == 1)
 				blitFace(block, FACE_WEST, texture, 0, 0, true, dleft, dright);
 			else
-				extra_data |= DATA_WEST;
+				data |= DATA_WEST;
 
 			if (s == 1)
 				blitFace(block, FACE_SOUTH, texture, 0, 0, true, dleft, dright);
 			else
-				extra_data |= DATA_SOUTH;
+				data |= DATA_SOUTH;
 			blitFace(block, FACE_TOP, texture, 0, 0, true, dleft, dright);
-			setBlockImage(id, extra_data, block);
+			setBlockImage(id, data, block);
 		}
+	}
 }
 
 void IsometricBlockImages::createCactus() { // id 81
@@ -1985,7 +1984,7 @@ void IsometricBlockImages::createBlocks() {
 	createTorch(76, t.REDSTONE_TORCH_ON); // redstone torch on
 	createButton(77, t.STONE); // stone button
 	createSnow(); // id 78
-	createIce(79); // ice block
+	createIce(79, 0, t.ICE); // ice block
 	createBlock(80, 0, t.SNOW); // snow block
 	createCactus(); // id 81
 	createBlock(82, 0, t.CLAY); // clay block
@@ -2270,10 +2269,10 @@ void IsometricBlockImages::createBlocks() {
 	createCommandBlock(211, t.CHAIN_COMMAND_BLOCK_FRONT, t.CHAIN_COMMAND_BLOCK_BACK,
 			t.CHAIN_COMMAND_BLOCK_SIDE, t.CHAIN_COMMAND_BLOCK_CONDITIONAL); // id 211
 	// frosted ice --
-	createBlock(212, 0, t.FROSTED_ICE_0);
-	createBlock(212, 1, t.FROSTED_ICE_1);
-	createBlock(212, 2, t.FROSTED_ICE_2);
-	createBlock(212, 3, t.FROSTED_ICE_3);
+	createIce(212, 0, t.FROSTED_ICE_0);
+	createIce(212, 1, t.FROSTED_ICE_1);
+	createIce(212, 2, t.FROSTED_ICE_2);
+	createIce(212, 3, t.FROSTED_ICE_3);
 	// --
 	// structure block --
 	createBlock(255, 0, t.STRUCTURE_BLOCK_SAVE);

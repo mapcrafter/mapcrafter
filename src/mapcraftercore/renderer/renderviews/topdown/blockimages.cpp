@@ -917,7 +917,7 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 			//|| id == 50 || id == 75 || id == 76 // torch // TODO
 			|| id == 51 // fire
 			|| id == 78 // snow
-			|| id == 79 // ice
+			|| id == 79 || id == 212 // ice
 			|| id == 84 // jukebox
 			|| id == 90 // nether portal
 			|| id == 117 // brewing stand
