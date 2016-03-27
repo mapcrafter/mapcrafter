@@ -904,6 +904,36 @@ void TopdownBlockImages::createLargePlant(uint16_t data, const RGBAImage& textur
 	createItemStyleBlock(175, data | LARGEPLANT_TOP, top_texture);
 }
 
+void TopdownBlockImages::createEndRod() { // id 198
+	double s = (double) getTextureSize() / 16;
+	int base_height = std::max(2.0, std::ceil(s*2));
+	int base_width = std::max(4.0, std::ceil(s*6));
+	int rod_width = std::max(2.0, std::ceil(s*2));
+	int rod_length = s*14;
+
+	RGBAImage texture = resources.getBlockTextures().END_ROD.getOriginal();
+	s = (double) texture.getWidth() / 16;
+	RGBAImage rod_side, rod_top, base_side, base_top;
+	texture.clip(0, 0, s*2, s*14).resize(rod_side, rod_width, rod_length, InterpolationType::NEAREST);
+	texture.clip(s*2, 0, s*2, s*2).resize(rod_top, rod_width, rod_width, InterpolationType::NEAREST);
+	texture.clip(s*2, s*2, s*4, s*1).resize(base_side, base_width, base_height, InterpolationType::NEAREST);
+	texture.clip(s*2, s*3, s*4, s*4).resize(base_top, base_width, base_width, InterpolationType::NEAREST);
+
+	RGBAImage top(getTextureSize(), getTextureSize());
+	top.simpleAlphaBlit(base_top, (top.getWidth() - base_top.getWidth()) / 2, (top.getHeight() - base_top.getHeight()) / 2);
+	setBlockImage(198, 0, top);
+	top.simpleAlphaBlit(rod_top, (top.getWidth() - rod_top.getWidth()) / 2, (top.getHeight() - rod_top.getHeight()) / 2);
+	setBlockImage(198, 1, top);
+
+	RGBAImage side(getTextureSize(), getTextureSize());
+	side.simpleAlphaBlit(base_side, (side.getWidth() - base_side.getWidth()) / 2, 0);
+	side.simpleAlphaBlit(rod_side, (side.getWidth() - rod_side.getWidth()) / 2, base_side.getHeight());
+	setBlockImage(198, 2, side.rotate(2));
+	setBlockImage(198, 3, side);
+	setBlockImage(198, 4, side.rotate(1));
+	setBlockImage(198, 5, side.rotate(3));
+}
+
 uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	// call super method
 	data = AbstractBlockImages::filterBlockData(id, data);
@@ -1540,9 +1570,6 @@ void TopdownBlockImages::createBlocks() {
 	// double red sandstone slabs --
 	setBlockImage(181, 0, t.RED_SANDSTONE_TOP);
 	// --
-	// normal red sandstone slabs --
-	setBlockImage(181, 0, t.RED_SANDSTONE_TOP);
-	// --
 	createFenceGate(183, t.PLANKS_SPRUCE); // spruce fence gate
 	createFenceGate(184, t.PLANKS_BIRCH); // birch fence gate
 	createFenceGate(185, t.PLANKS_JUNGLE); // jungle fence gate
@@ -1558,7 +1585,7 @@ void TopdownBlockImages::createBlocks() {
 	createDoor(195, t.DOOR_JUNGLE_LOWER, t.DOOR_JUNGLE_UPPER); // jungle door
 	createDoor(196, t.DOOR_ACACIA_LOWER, t.DOOR_ACACIA_UPPER); // acacia door
 	createDoor(197, t.DOOR_DARK_OAK_LOWER, t.DOOR_DARK_OAK_UPPER); // dark oak door
-	// id 198 // end rod
+	createEndRod(); // id 198
 	setBlockImage(199, 0, t.CHORUS_PLANT); // chrous plant
 	// chorus flower --
 	setBlockImage(200, 0, t.CHORUS_FLOWER);
