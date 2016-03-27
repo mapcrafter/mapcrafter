@@ -832,8 +832,29 @@ void TopdownBlockImages::createTripwireHook() { // id 131
 }
 
 void TopdownBlockImages::createCommandBlock(uint16_t id, const RGBAImage& front,
-		const RGBAImage& side, const RGBAImage& back, const RGBAImage& conditional) { // id 137, 210, 211
-	// TODO
+		const RGBAImage& back, const RGBAImage& side, const RGBAImage& conditional) { // id 137, 210, 211
+	for (int i = 0; i <= 15; i++) {
+		int rotation_data = i & ~0x8;
+		RGBAImage side_texture = (i & 0x8) ? conditional : side;
+
+		if (rotation_data <= 1 || rotation_data >= 6) {
+			// a command block that's pointing up or down
+			bool down = rotation_data == 0 || rotation_data == 6;
+			setBlockImage(id, i, down ? back : front);
+		} else {
+			// otherwise it's a command block showing in one of the other directions
+			int rotation = -1;
+			if (rotation_data == 2)
+				rotation = 0;
+			else if (rotation_data == 3)
+				rotation = 2;
+			else if (rotation_data == 4)
+				rotation = 3;
+			else if (rotation_data == 5)
+				rotation = 1;
+			setBlockImage(id, i, side_texture.rotate(rotation));
+		}
+	}
 }
 
 void TopdownBlockImages::createFlowerPot() { // id 140
@@ -1329,8 +1350,8 @@ void TopdownBlockImages::createBlocks() {
 	createStairs(134, t.PLANKS_SPRUCE); // spruce wood stairs
 	createStairs(135, t.PLANKS_BIRCH); // birch wood stairs
 	createStairs(136, t.PLANKS_JUNGLE); // jungle wood stairs
-	// TODO
-	setBlockImage(137, 0, t.COMMAND_BLOCK_SIDE);
+	createCommandBlock(137, t.COMMAND_BLOCK_FRONT, t.COMMAND_BLOCK_BACK,
+			t.COMMAND_BLOCK_SIDE, t.COMMAND_BLOCK_CONDITIONAL); // command block
 	// -- beacon
 	RGBAImage beacon = t.OBSIDIAN, beacon_block;
 	int beacon_size = texture_size / 16.0 * 10;
@@ -1556,7 +1577,7 @@ void TopdownBlockImages::createBlocks() {
 	createCommandBlock(210, t.REPEATING_COMMAND_BLOCK_FRONT, t.REPEATING_COMMAND_BLOCK_BACK,
 			t.REPEATING_COMMAND_BLOCK_SIDE, t.REPEATING_COMMAND_BLOCK_CONDITIONAL); // id 210
 	createCommandBlock(211, t.CHAIN_COMMAND_BLOCK_FRONT, t.CHAIN_COMMAND_BLOCK_BACK,
-			t.CHAIN_COMMAND_BLOCK_FRONT, t.CHAIN_COMMAND_BLOCK_CONDITIONAL); // id 211
+			t.CHAIN_COMMAND_BLOCK_SIDE, t.CHAIN_COMMAND_BLOCK_CONDITIONAL); // id 211
 	// frosted ice --
 	setBlockImage(212, 0, t.FROSTED_ICE_0);
 	setBlockImage(212, 1, t.FROSTED_ICE_1);
