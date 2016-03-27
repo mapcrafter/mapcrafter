@@ -924,6 +924,7 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 			|| id == 151 || id == 178 // lighting sensor
 			|| id == 154 // hopper
 			|| id == 174 // packed ice
+			|| id == 199 // chorus plant
 			)
 		return 0;
 
@@ -1558,10 +1559,22 @@ void TopdownBlockImages::createBlocks() {
 	createDoor(196, t.DOOR_ACACIA_LOWER, t.DOOR_ACACIA_UPPER); // acacia door
 	createDoor(197, t.DOOR_DARK_OAK_LOWER, t.DOOR_DARK_OAK_UPPER); // dark oak door
 	// id 198 // end rod
-	// id 199 // chrous plant
-	// id 200 // chorus flower
+	setBlockImage(199, 0, t.CHORUS_PLANT); // chrous plant
+	// chorus flower --
+	setBlockImage(200, 0, t.CHORUS_FLOWER);
+	setBlockImage(200, 1, t.CHORUS_FLOWER);
+	setBlockImage(200, 2, t.CHORUS_FLOWER);
+	setBlockImage(200, 3, t.CHORUS_FLOWER);
+	setBlockImage(200, 4, t.CHORUS_FLOWER);
+	setBlockImage(200, 5, t.CHORUS_FLOWER_DEAD);
+	// --
 	setBlockImage(201, 0, t.PURPUR_BLOCK); // purpur block
-	setBlockImage(202, 0, t.PURPUR_PILLAR_TOP); // purpur pillar
+	// purpur pillar --
+	// TODO is the official data like this or are there also other combination? 0, 4, 8 seems odd...
+	setBlockImage(202, 0, t.PURPUR_PILLAR_TOP); // vertically
+	setBlockImage(202, 4, t.PURPUR_PILLAR.rotate(1)); // east-west
+	setBlockImage(202, 8, t.PURPUR_PILLAR); // north-south
+	// --
 	createStairs(203, t.PURPUR_BLOCK); // purpur stairs
 	setBlockImage(204, 0, t.PURPUR_BLOCK); // purpur double slab
 	setBlockImage(205, 0, t.PURPUR_BLOCK); // purpur slab
@@ -1573,7 +1586,7 @@ void TopdownBlockImages::createBlocks() {
 	createItemStyleBlock(207, 3, t.BEETROOTS_STAGE_3);
 	// --
 	setBlockImage(208, 0, t.GRASS_PATH_TOP); // grass path
-	// id 209 // end gateway
+	setBlockImage(209, 0, resources.getEndportalTexture()); // end gateway
 	createCommandBlock(210, t.REPEATING_COMMAND_BLOCK_FRONT, t.REPEATING_COMMAND_BLOCK_BACK,
 			t.REPEATING_COMMAND_BLOCK_SIDE, t.REPEATING_COMMAND_BLOCK_CONDITIONAL); // id 210
 	createCommandBlock(211, t.CHAIN_COMMAND_BLOCK_FRONT, t.CHAIN_COMMAND_BLOCK_BACK,

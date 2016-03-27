@@ -404,6 +404,8 @@ uint16_t IsometricBlockImages::filterBlockData(uint16_t id, uint16_t data) const
 		return 0;
 	else if (id == 154) // hopper
 		return 0;
+	else if (id == 199) // chrous plant
+		return 0;
 	return data;
 }
 
@@ -2248,22 +2250,33 @@ void IsometricBlockImages::createBlocks() {
 	createDoor(196, t.DOOR_ACACIA_LOWER, t.DOOR_ACACIA_UPPER); // acacia door
 	createDoor(197, t.DOOR_DARK_OAK_LOWER, t.DOOR_DARK_OAK_UPPER); // dark oak door
 	// id 198 // end rod
-	// id 199 // chrous plant
-	// id 200 // chorus flower
+	createBlock(199, 0, t.CHORUS_PLANT); // chrous plant
+	// chorus flower --
+	createBlock(200, 0, t.CHORUS_FLOWER);
+	createBlock(200, 1, t.CHORUS_FLOWER);
+	createBlock(200, 2, t.CHORUS_FLOWER);
+	createBlock(200, 3, t.CHORUS_FLOWER);
+	createBlock(200, 4, t.CHORUS_FLOWER);
+	createBlock(200, 5, t.CHORUS_FLOWER_DEAD);
+	// --
 	createBlock(201, 0, t.PURPUR_BLOCK); // purpur block
-	createBlock(202, 0, t.PURPUR_PILLAR, t.PURPUR_PILLAR_TOP); // purpur pillar
+	// purpur pillar --
+	// TODO is the official data like this or are there also other combination? 0, 4, 8 seems odd...
+	createBlock(202, 0, t.PURPUR_PILLAR, t.PURPUR_PILLAR_TOP); // vertically
+	createBlock(202, 4, t.PURPUR_PILLAR_TOP, t.PURPUR_PILLAR); // east-west
+	createBlock(202, 8, t.PURPUR_PILLAR_TOP, t.PURPUR_PILLAR.rotate(1)); // north-south
+	// --
 	createStairs(203, t.PURPUR_BLOCK); // purpur stairs
 	createSlabs(204, SlabType::PURPUR, true); // purpur double slab
 	createSlabs(205, SlabType::PURPUR, false); // purpur slab
 	createBlock(206, 0, t.END_BRICKS); // end stone bricks
 	// beetroot seeds --
 	createItemStyleBlock(207, 0, t.BEETROOTS_STAGE_0);
-	createItemStyleBlock(207, 1, t.BEETROOTS_STAGE_1);
 	createItemStyleBlock(207, 2, t.BEETROOTS_STAGE_2);
 	createItemStyleBlock(207, 3, t.BEETROOTS_STAGE_3);
 	// --
 	createSmallerBlock(208, 0, t.GRASS_PATH_SIDE, t.GRASS_PATH_TOP, 0, texture_size * 15.0 / 16.0); // grass paths
-	// id 209 // end gateway
+	createBlock(209, 0, resources.getEndportalTexture()); // end gateway
 	createCommandBlock(210, t.REPEATING_COMMAND_BLOCK_FRONT, t.REPEATING_COMMAND_BLOCK_BACK,
 			t.REPEATING_COMMAND_BLOCK_SIDE, t.REPEATING_COMMAND_BLOCK_CONDITIONAL); // id 210
 	createCommandBlock(211, t.CHAIN_COMMAND_BLOCK_FRONT, t.CHAIN_COMMAND_BLOCK_BACK,
