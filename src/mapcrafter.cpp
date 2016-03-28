@@ -52,7 +52,8 @@ int main(int argc, char** argv) {
 	po::options_description general("General options");
 	general.add_options()
 		("help,h", "shows this help message")
-		("version,v", "shows the version of Mapcrafter");
+		("version,v", "shows the version of Mapcrafter")
+		("mc-version", "shows the required Minecraft version");
 
 	po::options_description logging("Logging/output options");
 	logging.add_options()
@@ -117,6 +118,11 @@ int main(int argc, char** argv) {
 		if (strlen(MAPCRAFTER_GITVERSION))
 			std::cout << " (" << MAPCRAFTER_GITVERSION << ")";
 		std::cout << std::endl;
+		return 0;
+	}
+
+	if (vm.count("mc-version")) {
+		std::cout << MINECRAFT_VERSION << std::endl;
 		return 0;
 	}
 
