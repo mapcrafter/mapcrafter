@@ -78,6 +78,10 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.2.2.1**
+
+* Updated Minecraft version file to 1.9
+
 **v.2.2**
 
 * Added support for 1.9 blocks (and hoppers)
