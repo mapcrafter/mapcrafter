@@ -128,10 +128,12 @@ RenderBehaviors RenderBehaviors::fromRenderOpts(
 		const config::MapcrafterConfig& config, const RenderOpts& render_opts) {
 	RenderBehaviors behaviors;
 
-	if (!render_opts.skip_all)
-		parseRenderBehaviorMaps(render_opts.render_skip, RenderBehavior::SKIP, behaviors, config);
-	else
+	if (render_opts.skip_all)
 		behaviors = RenderBehaviors(RenderBehavior::SKIP);
+	else if (render_opts.force_all)
+		behaviors = RenderBehaviors(RenderBehavior::FORCE);
+	else
+		parseRenderBehaviorMaps(render_opts.render_skip, RenderBehavior::SKIP, behaviors, config);
 	parseRenderBehaviorMaps(render_opts.render_auto, RenderBehavior::AUTO, behaviors, config);
 	parseRenderBehaviorMaps(render_opts.render_force, RenderBehavior::FORCE, behaviors, config);
 	return behaviors;

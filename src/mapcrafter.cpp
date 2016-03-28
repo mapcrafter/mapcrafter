@@ -74,6 +74,7 @@ int main(int argc, char** argv) {
 			"renders the specified map(s)")
 		("render-force,f", po::value<std::vector<std::string>>(&opts.render_force)->multitoken(),
 			"renders the specified map(s) completely")
+		("render-force-all,F", "force renders all maps")
 		("jobs,j", po::value<int>(&opts.jobs)->default_value(1),
 			"the count of jobs to use when rendering the map");
 
@@ -162,9 +163,16 @@ int main(int argc, char** argv) {
 
 	opts.config = arg_config;
 	opts.skip_all = vm.count("render-reset");
+	opts.force_all = vm.count("render-force-all");
 	opts.batch = vm.count("batch");
 	if (!vm.count("logging-config"))
 		opts.logging_config = util::findLoggingConfigFile();
+
+	if (opts.skip_all && opts.force_all) {
+		std::cerr << "You may only use one of --render-reset or --render-force-all!" << std::endl;
+		std::cerr << "Use '" << argv[0] << " --help' for more information." << std::endl;
+		return 1;
+	}
 
 	// ###
 	// ### First big step: Load/parse/validate the configuration file
