@@ -831,6 +831,32 @@ void TopdownBlockImages::createTripwireHook() { // id 131
 	setBlockImage(131, 3, tripwire); // on the west side
 }
 
+void TopdownBlockImages::createCommandBlock(uint16_t id, const RGBAImage& front,
+		const RGBAImage& back, const RGBAImage& side, const RGBAImage& conditional) { // id 137, 210, 211
+	for (int i = 0; i <= 15; i++) {
+		int rotation_data = i & ~0x8;
+		RGBAImage side_texture = (i & 0x8) ? conditional : side;
+
+		if (rotation_data <= 1 || rotation_data >= 6) {
+			// a command block that's pointing up or down
+			bool down = rotation_data == 0 || rotation_data == 6;
+			setBlockImage(id, i, down ? back : front);
+		} else {
+			// otherwise it's a command block showing in one of the other directions
+			int rotation = -1;
+			if (rotation_data == 2)
+				rotation = 0;
+			else if (rotation_data == 3)
+				rotation = 2;
+			else if (rotation_data == 4)
+				rotation = 3;
+			else if (rotation_data == 5)
+				rotation = 1;
+			setBlockImage(id, i, side_texture.rotate(rotation));
+		}
+	}
+}
+
 void TopdownBlockImages::createFlowerPot() { // id 140
 	const BlockTextures& textures = resources.getBlockTextures();
 	double s = (double) textures.FLOWER_POT.getOriginal().getWidth() / 16;
@@ -878,6 +904,36 @@ void TopdownBlockImages::createLargePlant(uint16_t data, const RGBAImage& textur
 	createItemStyleBlock(175, data | LARGEPLANT_TOP, top_texture);
 }
 
+void TopdownBlockImages::createEndRod() { // id 198
+	double s = (double) getTextureSize() / 16;
+	int base_height = std::max(2.0, std::ceil(s*2));
+	int base_width = std::max(4.0, std::ceil(s*6));
+	int rod_width = std::max(2.0, std::ceil(s*2));
+	int rod_length = s*14;
+
+	RGBAImage texture = resources.getBlockTextures().END_ROD.getOriginal();
+	s = (double) texture.getWidth() / 16;
+	RGBAImage rod_side, rod_top, base_side, base_top;
+	texture.clip(0, 0, s*2, s*14).resize(rod_side, rod_width, rod_length, InterpolationType::NEAREST);
+	texture.clip(s*2, 0, s*2, s*2).resize(rod_top, rod_width, rod_width, InterpolationType::NEAREST);
+	texture.clip(s*2, s*2, s*4, s*1).resize(base_side, base_width, base_height, InterpolationType::NEAREST);
+	texture.clip(s*2, s*3, s*4, s*4).resize(base_top, base_width, base_width, InterpolationType::NEAREST);
+
+	RGBAImage top(getTextureSize(), getTextureSize());
+	top.simpleAlphaBlit(base_top, (top.getWidth() - base_top.getWidth()) / 2, (top.getHeight() - base_top.getHeight()) / 2);
+	setBlockImage(198, 0, top);
+	top.simpleAlphaBlit(rod_top, (top.getWidth() - rod_top.getWidth()) / 2, (top.getHeight() - rod_top.getHeight()) / 2);
+	setBlockImage(198, 1, top);
+
+	RGBAImage side(getTextureSize(), getTextureSize());
+	side.simpleAlphaBlit(base_side, (side.getWidth() - base_side.getWidth()) / 2, 0);
+	side.simpleAlphaBlit(rod_side, (side.getWidth() - rod_side.getWidth()) / 2, base_side.getHeight());
+	setBlockImage(198, 2, side.rotate(2));
+	setBlockImage(198, 3, side);
+	setBlockImage(198, 4, side.rotate(1));
+	setBlockImage(198, 5, side.rotate(3));
+}
+
 uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	// call super method
 	data = AbstractBlockImages::filterBlockData(id, data);
@@ -891,13 +947,14 @@ uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 			//|| id == 50 || id == 75 || id == 76 // torch // TODO
 			|| id == 51 // fire
 			|| id == 78 // snow
-			|| id == 79 // ice
+			|| id == 79 || id == 212 // ice
 			|| id == 84 // jukebox
 			|| id == 90 // nether portal
 			|| id == 117 // brewing stand
 			|| id == 151 || id == 178 // lighting sensor
 			|| id == 154 // hopper
 			|| id == 174 // packed ice
+			|| id == 199 // chorus plant
 			)
 		return 0;
 
@@ -1324,8 +1381,8 @@ void TopdownBlockImages::createBlocks() {
 	createStairs(134, t.PLANKS_SPRUCE); // spruce wood stairs
 	createStairs(135, t.PLANKS_BIRCH); // birch wood stairs
 	createStairs(136, t.PLANKS_JUNGLE); // jungle wood stairs
-	// TODO
-	setBlockImage(137, 0, t.COMMAND_BLOCK_SIDE);
+	createCommandBlock(137, t.COMMAND_BLOCK_FRONT, t.COMMAND_BLOCK_BACK,
+			t.COMMAND_BLOCK_SIDE, t.COMMAND_BLOCK_CONDITIONAL); // command block
 	// -- beacon
 	RGBAImage beacon = t.OBSIDIAN, beacon_block;
 	int beacon_size = texture_size / 16.0 * 10;
@@ -1513,9 +1570,6 @@ void TopdownBlockImages::createBlocks() {
 	// double red sandstone slabs --
 	setBlockImage(181, 0, t.RED_SANDSTONE_TOP);
 	// --
-	// normal red sandstone slabs --
-	setBlockImage(181, 0, t.RED_SANDSTONE_TOP);
-	// --
 	createFenceGate(183, t.PLANKS_SPRUCE); // spruce fence gate
 	createFenceGate(184, t.PLANKS_BIRCH); // birch fence gate
 	createFenceGate(185, t.PLANKS_JUNGLE); // jungle fence gate
@@ -1531,11 +1585,23 @@ void TopdownBlockImages::createBlocks() {
 	createDoor(195, t.DOOR_JUNGLE_LOWER, t.DOOR_JUNGLE_UPPER); // jungle door
 	createDoor(196, t.DOOR_ACACIA_LOWER, t.DOOR_ACACIA_UPPER); // acacia door
 	createDoor(197, t.DOOR_DARK_OAK_LOWER, t.DOOR_DARK_OAK_UPPER); // dark oak door
-	// id 198 // end rod
-	// id 199 // chrous plant
-	// id 200 // chorus flower
+	createEndRod(); // id 198
+	setBlockImage(199, 0, t.CHORUS_PLANT); // chrous plant
+	// chorus flower --
+	setBlockImage(200, 0, t.CHORUS_FLOWER);
+	setBlockImage(200, 1, t.CHORUS_FLOWER);
+	setBlockImage(200, 2, t.CHORUS_FLOWER);
+	setBlockImage(200, 3, t.CHORUS_FLOWER);
+	setBlockImage(200, 4, t.CHORUS_FLOWER);
+	setBlockImage(200, 5, t.CHORUS_FLOWER_DEAD);
+	// --
 	setBlockImage(201, 0, t.PURPUR_BLOCK); // purpur block
-	setBlockImage(202, 0, t.PURPUR_PILLAR_TOP); // purpur pillar
+	// purpur pillar --
+	// TODO is the official data like this or are there also other combination? 0, 4, 8 seems odd...
+	setBlockImage(202, 0, t.PURPUR_PILLAR_TOP); // vertically
+	setBlockImage(202, 4, t.PURPUR_PILLAR.rotate(1)); // east-west
+	setBlockImage(202, 8, t.PURPUR_PILLAR); // north-south
+	// --
 	createStairs(203, t.PURPUR_BLOCK); // purpur stairs
 	setBlockImage(204, 0, t.PURPUR_BLOCK); // purpur double slab
 	setBlockImage(205, 0, t.PURPUR_BLOCK); // purpur slab
@@ -1547,16 +1613,23 @@ void TopdownBlockImages::createBlocks() {
 	createItemStyleBlock(207, 3, t.BEETROOTS_STAGE_3);
 	// --
 	setBlockImage(208, 0, t.GRASS_PATH_TOP); // grass path
-	// id 209 // end gateway
-	// id 210 // repeating command block
-	// id 211 // chain command block
+	setBlockImage(209, 0, resources.getEndportalTexture()); // end gateway
+	createCommandBlock(210, t.REPEATING_COMMAND_BLOCK_FRONT, t.REPEATING_COMMAND_BLOCK_BACK,
+			t.REPEATING_COMMAND_BLOCK_SIDE, t.REPEATING_COMMAND_BLOCK_CONDITIONAL); // id 210
+	createCommandBlock(211, t.CHAIN_COMMAND_BLOCK_FRONT, t.CHAIN_COMMAND_BLOCK_BACK,
+			t.CHAIN_COMMAND_BLOCK_SIDE, t.CHAIN_COMMAND_BLOCK_CONDITIONAL); // id 211
 	// frosted ice --
 	setBlockImage(212, 0, t.FROSTED_ICE_0);
 	setBlockImage(212, 1, t.FROSTED_ICE_1);
 	setBlockImage(212, 2, t.FROSTED_ICE_2);
 	setBlockImage(212, 3, t.FROSTED_ICE_3);
 	// --
-	// id 255 // structure block
+	// structure block --
+	setBlockImage(255, 0, t.STRUCTURE_BLOCK_SAVE);
+	setBlockImage(255, 1, t.STRUCTURE_BLOCK_LOAD);
+	setBlockImage(255, 2, t.STRUCTURE_BLOCK_CORNER);
+	setBlockImage(255, 3, t.STRUCTURE_BLOCK_DATA);
+	// --
 }
 
 int TopdownBlockImages::createOpaqueWater() {

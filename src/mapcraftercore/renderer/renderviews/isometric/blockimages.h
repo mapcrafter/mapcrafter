@@ -295,7 +295,7 @@ protected:
 	void createWallSign(); // id 68
 	void createButton(uint16_t id, const RGBAImage& tex); // id 77, 143
 	void createSnow(); // id 78
-	void createIce(uint8_t id); // id 79
+	void createIce(uint8_t id, uint16_t extra_data, const RGBAImage& texture); // id 79, 212
 	void createCactus(); // id 81
 	void createFence(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 85, 113, 188-192
 	void createPumkin(uint16_t id, const RGBAImage& front); // id 86, 91
@@ -313,10 +313,13 @@ protected:
 	RGBAImage buildCocoa(int stage);
 	void createCocoas(); // id 127
 	void createTripwireHook(); // id 131
+	void createCommandBlock(uint16_t id, const RGBAImage& front, const RGBAImage& back,
+			const RGBAImage& side, const RGBAImage& conditional); // id 137, 210, 211
 	void createBeacon(); // id 138
 	void createFlowerPot(); // id 140
 	void createHopper(); // id 154
 	void createLargePlant(uint16_t data, const RGBAImage& texture, const RGBAImage& top_texture); // id 175
+	void createEndRod(); // id 198
 
 	virtual RGBAImage createUnknownBlock() const;
 	virtual RGBAImage createBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;
