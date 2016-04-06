@@ -40,6 +40,7 @@ class WorldSection;
 
 namespace renderer {
 
+class BlockHandler;
 class BlockImages;
 class OverlayRenderMode;
 class RenderMode;
@@ -69,7 +70,8 @@ public:
 	/**
 	 * Creates an instance of the render view specific tile renderer class.
 	 */
-	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
+	virtual TileRenderer* createTileRenderer(BlockHandler* block_handler,
+			BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderMode* render_mode,
 			std::shared_ptr<OverlayRenderMode> hardcode_overlay,
 			std::vector<std::shared_ptr<OverlayRenderMode>> overlays) const = 0;

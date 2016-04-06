@@ -20,6 +20,7 @@
 #include "tilerenderer.h"
 
 #include "../../biomes.h"
+#include "../../blockhandler.h"
 #include "../../blockimages.h"
 #include "../../image.h"
 #include "../../rendermode.h"
@@ -132,10 +133,10 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 }
 
 IsometricTileRenderer::IsometricTileRenderer(const RenderView* render_view,
-		BlockImages* images, int tile_width, mc::WorldCache* world,
+		BlockHandler* block_handler, BlockImages* images, int tile_width, mc::WorldCache* world,
 		RenderMode* render_mode, std::shared_ptr<OverlayRenderMode> hardcode_overlay,
 		std::vector<std::shared_ptr<OverlayRenderMode>> overlays)
-	: TileRenderer(render_view, images, tile_width, world, render_mode, hardcode_overlay, overlays) {
+	: TileRenderer(render_view, block_handler, images, tile_width, world, render_mode, hardcode_overlay, overlays) {
 }
 
 IsometricTileRenderer::~IsometricTileRenderer() {
@@ -196,22 +197,21 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 			// get local block position
 			mc::LocalBlockPos local(block.current);
 
-			// now get block id
+			// now get block id and data, consider special data depending on neighbors
 			uint16_t id = current_chunk->getBlockID(local);
+			uint16_t data = current_chunk->getBlockData(local);
+			block_handler->handleBlock(block.current, id, data);
 			// air is completely transparent so continue
 			if (id == 0) {
 				in_water = false;
 				continue;
 			}
 
-			// now get the block data
-			uint16_t data = current_chunk->getBlockData(local);
-
 			// check if the render mode hides this block
 			if (render_mode->isHidden(block.current, id, data))
 				continue;
 
-			bool is_water = (id == 8 || id == 9) && data == 0;
+			bool is_water = (id == 8 || id == 9) && (data & 0xf) == 0;
 			if (is_water && !use_preblit_water) {
 				// water render behavior n1:
 				// render only the top sides of the water blocks
@@ -261,22 +261,15 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 								data = OPAQUE_WATER;
 								bool neighbor_south = !south.isFullWater();
 								if (neighbor_south)
-								//	data |= DATA_SOUTH;
 									data |= OPAQUE_WATER_SOUTH;
 								bool neighbor_west = !west.isFullWater();
 								if (neighbor_west)
-								//	data |= DATA_WEST;
 									data |= OPAQUE_WATER_WEST;
 
 								// get image and replace the old render block with this
-								//top.image = images->getOpaqueWater(neighbor_south,
-								//		neighbor_west);
 								top.block = images->getBlock(id, data);
-
-								// don't forget the render mode
-								// render_mode->draw(top.block, top.pos, id, data);
+								
 								drawHardcodeOverlay(top.block, top.pos, id, data);
-
 								row_nodes.insert(top);
 								break;
 
@@ -293,7 +286,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 
 			// check for special data (neighbor related)
 			// get block image, check for transparency, create render block...
-			data = checkNeighbors(block.current, id, data);
+			// data = checkNeighbors(block.current, id, data);
 			//if (is_water && (data & DATA_WEST) && (data & DATA_SOUTH))
 			//	continue;
 			RGBAImage image;

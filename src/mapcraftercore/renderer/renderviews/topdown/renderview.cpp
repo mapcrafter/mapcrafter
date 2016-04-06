@@ -23,6 +23,7 @@
 #include "tileset.h"
 #include "tilerenderer.h"
 #include "rendermodes.h"
+#include "../../blockhandler.h"
 #include "../../rendermode.h"
 #include "../../rendermodes/overlay.h"
 
@@ -37,11 +38,11 @@ TileSet* TopdownRenderView::createTileSet(int tile_width) const {
 	return new TopdownTileSet(tile_width);
 }
 
-TileRenderer* TopdownRenderView::createTileRenderer(BlockImages* images,
-		int tile_width, mc::WorldCache* world, RenderMode* render_mode,
+TileRenderer* TopdownRenderView::createTileRenderer(BlockHandler* block_handler,
+		BlockImages* images, int tile_width, mc::WorldCache* world, RenderMode* render_mode,
 		std::shared_ptr<OverlayRenderMode> hardcode_overlay,
 		std::vector<std::shared_ptr<OverlayRenderMode>> overlays) const {
-	return new TopdownTileRenderer(this, images, tile_width, world, render_mode, hardcode_overlay, overlays);
+	return new TopdownTileRenderer(this, block_handler, images, tile_width, world, render_mode, hardcode_overlay, overlays);
 }
 
 RenderModeRenderer* TopdownRenderView::createRenderModeRenderer(

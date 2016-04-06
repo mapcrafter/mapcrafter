@@ -88,8 +88,8 @@ struct RenderBlock {
  */
 class IsometricTileRenderer : public TileRenderer {
 public:
-	IsometricTileRenderer(const RenderView* render_view, BlockImages* images,
-			int tile_width, mc::WorldCache* world, RenderMode* render_mode,
+	IsometricTileRenderer(const RenderView* render_view, BlockHandler* block_handler,
+			BlockImages* images, int tile_width, mc::WorldCache* world, RenderMode* render_mode,
 			std::shared_ptr<OverlayRenderMode> hardcode_overlay,
 			std::vector<std::shared_ptr<OverlayRenderMode>> overlays);
 	virtual ~IsometricTileRenderer();

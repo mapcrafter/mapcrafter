@@ -20,6 +20,7 @@
 #include "tilerenderer.h"
 
 #include "../../biomes.h"
+#include "../../blockhandler.h"
 #include "../../blockimages.h"
 #include "../../image.h"
 #include "../../rendermode.h"
@@ -41,10 +42,11 @@ namespace mapcrafter {
 namespace renderer {
 
 TopdownTileRenderer::TopdownTileRenderer(const RenderView* render_view,
-		BlockImages* images, int tile_width, mc::WorldCache* world, RenderMode* render_mode,
+		BlockHandler* block_handler, BlockImages* images, int tile_width,
+		mc::WorldCache* world, RenderMode* render_mode,
 		std::shared_ptr<OverlayRenderMode> hardcode_overlay,
 		std::vector<std::shared_ptr<OverlayRenderMode>> overlays)
-	: TileRenderer(render_view, images, tile_width, world, render_mode, hardcode_overlay, overlays) {
+	: TileRenderer(render_view, block_handler, images, tile_width, world, render_mode, hardcode_overlay, overlays) {
 }
 
 TopdownTileRenderer::~TopdownTileRenderer() {
@@ -63,8 +65,6 @@ struct RenderBlock {
 }
 
 void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, std::vector<RGBAImage>& overlay_tiles, int dx, int dz) {
-	// TODO implement preblit water render behavior
-
 	int texture_size = images->getTextureSize();
 
 	for (int x = 0; x < 16; x++) {
@@ -84,6 +84,8 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, s
 				localpos.y = mc::CHUNK_HEIGHT*16 - 1;
 
 			uint16_t id = chunk.getBlockID(localpos);
+			uint16_t data = chunk.getBlockData(localpos);
+			block_handler->handleBlock(localpos.toGlobalPos(chunk.getPos()), id, data);
 			while (id == 0 && localpos.y > 0) {
 				localpos.y--;
 				id = chunk.getBlockID(localpos);
@@ -95,13 +97,14 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, s
 				mc::BlockPos globalpos = localpos.toGlobalPos(chunk.getPos());
 
 				id = chunk.getBlockID(localpos);
+				data = chunk.getBlockData(localpos);
+				block_handler->handleBlock(globalpos, id, data);
 				if (id == 0) {
 					in_water = false;
 					localpos.y--;
 					continue;
 				}
-				uint16_t data = chunk.getBlockData(localpos);
-				bool is_water = (id == 8 || id == 9) && data == 0;
+				bool is_water = (id == 8 || id == 9) && (data & 0xf) == 0;
 
 				if (render_mode->isHidden(globalpos, id, data)) {
 					localpos.y--;
@@ -126,14 +129,11 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, s
 								auto current = it++;
 								if (it == blocks.end() || (it->id != 8 && it->id != 9)) {
 									RenderBlock& top = *current;
-									// blocks.erase(current);
 
 									top.id = 8;
 									top.data = OPAQUE_WATER;
 									top.block = images->getBlock(top.id, top.data);
-									// render_mode->draw(top.block, top.pos, top.id, top.data);
 									drawHardcodeOverlay(top.block, top.pos, top.id, top.data);
-									// blocks.insert(current, top);
 									break;
 								} else {
 									blocks.erase(current);
@@ -144,14 +144,11 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, s
 					}
 				}
 
-				data = checkNeighbors(globalpos, id, data);
-				
 				RGBAImage block = images->getBlock(id, data);
 				if (Biome::isBiomeBlock(id, data)) {
 					block = images->getBiomeBlock(id, data, getBiomeOfBlock(globalpos, &chunk));
 				}
 
-				// render_mode->draw(block, globalpos, id, data);
 				drawHardcodeOverlay(block, globalpos, id, data);
 
 				RenderBlock render_block;

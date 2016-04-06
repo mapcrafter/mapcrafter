@@ -1,6 +1,7 @@
 set(SOURCE
     ${SOURCE}
     "${CMAKE_CURRENT_SOURCE_DIR}/biomes.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/blockhandler.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/blockimages.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/blocktextures.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/image.cpp"
@@ -16,6 +17,7 @@ set(SOURCE
 set(HEADERS
     ${HEADERS}
     "${CMAKE_CURRENT_SOURCE_DIR}/biomes.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/blockhandler.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/blockimages.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/blocktextures.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/image.h"

@@ -31,8 +31,8 @@ class IsometricRenderView : public RenderView {
 public:
 	virtual BlockImages* createBlockImages() const;
 	virtual TileSet* createTileSet(int tile_width) const;
-	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
-			mc::WorldCache* world, RenderMode* render_mode,
+	virtual TileRenderer* createTileRenderer(BlockHandler* block_handler,
+			BlockImages* images, int tile_width, mc::WorldCache* world, RenderMode* render_mode,
 			std::shared_ptr<OverlayRenderMode> hardcode_overlay,
 			std::vector<std::shared_ptr<OverlayRenderMode>> overlays) const;
 

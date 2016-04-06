@@ -38,6 +38,7 @@ class Chunk;
 
 namespace renderer {
 
+class BlockHandler;
 class BlockImages;
 class OverlayRenderMode;
 class TilePos;
@@ -47,7 +48,8 @@ class RGBAImage;
 
 class TileRenderer {
 public:
-	TileRenderer(const RenderView* render_view, BlockImages* images, int tile_width,
+	TileRenderer(const RenderView* render_view, BlockHandler* block_handler,
+			BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderMode* render_mode,
 			std::shared_ptr<OverlayRenderMode> hardcode_overlay,
 			std::vector<std::shared_ptr<OverlayRenderMode>> overlays);
@@ -63,10 +65,10 @@ public:
 protected:
 	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
 	Biome getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk);
-	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 	void drawHardcodeOverlay(RGBAImage& block, const mc::BlockPos& pos, uint16_t id, uint16_t data) const;
 
+	BlockHandler* block_handler;
 	BlockImages* images;
 	int tile_width;
 	mc::WorldCache* world;
