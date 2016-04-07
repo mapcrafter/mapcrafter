@@ -63,7 +63,9 @@ template <>
 renderer::BlockHandlerType as<renderer::BlockHandlerType>(const std::string& from) {
 	if (from == "default")
 		return renderer::BlockHandlerType::DEFAULT;
-	throw std::invalid_argument("Must be 'default'!");
+	else if (from == "cave")
+		return renderer::BlockHandlerType::CAVE;
+	throw std::invalid_argument("Must be 'default' or 'cave'!");
 }
 
 }

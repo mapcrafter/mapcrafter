@@ -35,7 +35,7 @@ namespace renderer {
 void RenderContext::initializeTileRenderer() {
 	world_cache.reset(new mc::WorldCache(world));
 	render_mode.reset(createRenderMode(world_config, map_config, world.getRotation()));
-	block_handler.reset(createBlockHandler(map_config.getBlockHandler()));
+	block_handler.reset(createBlockHandler(map_config));
 	if (map_config.getHardcodeOverlay() != "")
 		hardcode_overlay.reset(createOverlay(world_config, map_config, overlays_config.at(map_config.getHardcodeOverlay()), world.getRotation()));
 	overlays = createOverlays(world_config, map_config, overlays_config, world.getRotation());
