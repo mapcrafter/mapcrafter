@@ -22,6 +22,7 @@
 
 #include "../configsection.h"
 #include "../validation.h"
+#include "../../renderer/blockhandler.h"
 #include "../../renderer/image.h"
 #include "../../renderer/rendermode.h"
 #include "../../renderer/renderview.h"
@@ -91,6 +92,7 @@ public:
 	std::string getLongName() const;
 	std::string getWorld() const;
 
+	renderer::BlockHandlerType getBlockHandler() const;
 	renderer::RenderViewType getRenderView() const;
 	renderer::RenderModeType getRenderMode() const;
 	std::string getHardcodeOverlay() const;
@@ -130,6 +132,7 @@ private:
 	std::string name_short, name_long;
 	Field<std::string> world;
 
+	Field<renderer::BlockHandlerType> block_handler;
 	Field<renderer::RenderViewType> render_view;
 	Field<renderer::RenderModeType> render_mode;
 	Field<std::string> hardcode_overlay;

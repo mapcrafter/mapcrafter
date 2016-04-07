@@ -59,6 +59,13 @@ renderer::RenderViewType as<renderer::RenderViewType>(const std::string& from) {
 	throw std::invalid_argument("Must be 'isometric' or 'topdown'!");
 }
 
+template <>
+renderer::BlockHandlerType as<renderer::BlockHandlerType>(const std::string& from) {
+	if (from == "default")
+		return renderer::BlockHandlerType::DEFAULT;
+	throw std::invalid_argument("Must be 'default'!");
+}
+
 }
 }
 
@@ -125,6 +132,7 @@ void MapSection::dump(std::ostream& out) const {
 	out << getPrettyName() << ":" << std::endl;
 	out << "  name = " << getLongName() << std::endl;
 	out << "  world = " << world << std::endl;
+	out << "  block_handler = " << block_handler << std::endl;
 	out << "  render_view" << render_view << std::endl;
 	out << "  render_mode = " << render_mode << std::endl;
 	out << "  hardcode_overlay = " << hardcode_overlay << std::endl;
@@ -159,6 +167,10 @@ std::string MapSection::getLongName() const {
 
 std::string MapSection::getWorld() const {
 	return world.getValue();
+}
+
+renderer::BlockHandlerType MapSection::getBlockHandler() const {
+	return block_handler.getValue();
 }
 
 renderer::RenderViewType MapSection::getRenderView() const {
@@ -249,10 +261,11 @@ const std::set<TileSetID>& MapSection::getTileSets() const {
 
 void MapSection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
+	// set some default configuration values
 	name_short = getSectionName();
 	name_long = name_short;
 
-	// set some default configuration values
+	block_handler.setDefault(renderer::BlockHandlerType::DEFAULT);
 	render_view.setDefault(renderer::RenderViewType::ISOMETRIC);
 	render_mode.setDefault(renderer::RenderModeType::DAYLIGHT);
 	hardcode_overlay.setDefault("");
@@ -286,6 +299,8 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		name_long = value;
 	} else if (key == "world") {
 		world.load(key, value, validation);
+	} else if (key == "block_handler") {
+		block_handler.load(key, value, validation);
 	} else if (key == "render_view") {
 		render_view.load(key, value, validation);
 	} else if (key == "render_mode" || key == "rendermode") {
