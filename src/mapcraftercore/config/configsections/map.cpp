@@ -51,6 +51,22 @@ renderer::RenderModeType as<renderer::RenderModeType>(const std::string& from) {
 }
 
 template <>
+config::LegacyRenderMode as<config::LegacyRenderMode>(const std::string& from) {
+	if (from == "plain")
+		return config::LegacyRenderMode::PLAIN;
+	else if (from == "daylight")
+		return config::LegacyRenderMode::DAYLIGHT;
+	else if (from == "nightlight")
+		return config::LegacyRenderMode::NIGHTLIGHT;
+	else if (from == "cave")
+		return config::LegacyRenderMode::CAVE;
+	else if (from == "cavelight")
+		return config::LegacyRenderMode::CAVELIGHT;
+	throw std::invalid_argument("Must be one of 'plain', 'daylight', 'nightlight', "
+			"'cave' or 'cavelight'!");
+}
+
+template <>
 renderer::RenderViewType as<renderer::RenderViewType>(const std::string& from) {
 	if (from == "isometric")
 		return renderer::RenderViewType::ISOMETRIC;
@@ -116,6 +132,17 @@ bool TileSetID::operator<(const TileSetID& other) const {
 	return toString() < other.toString();
 }
 
+std::ostream& operator<<(std::ostream& out, LegacyRenderMode render_mode) {
+	switch (render_mode) {
+	case LegacyRenderMode::PLAIN: return out << "plain";
+	case LegacyRenderMode::DAYLIGHT: return out << "daylight";
+	case LegacyRenderMode::NIGHTLIGHT: return out << "nightlight";
+	case LegacyRenderMode::CAVE: return out << "cave";
+	case LegacyRenderMode::CAVELIGHT: return out << "cavelight";
+	default: return out << "unknown";
+	}
+}
+
 MapSection::MapSection()
 	: texture_size(12), render_unknown_blocks(false),
 	  render_leaves_transparent(false), render_biomes(false) {
@@ -135,7 +162,7 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  name = " << getLongName() << std::endl;
 	out << "  world = " << world << std::endl;
 	out << "  block_handler = " << block_handler << std::endl;
-	out << "  render_view" << render_view << std::endl;
+	out << "  render_view = " << render_view << std::endl;
 	out << "  render_mode = " << render_mode << std::endl;
 	out << "  hardcode_overlay = " << hardcode_overlay << std::endl;
 	out << "  overlays = " << overlays << std::endl;
@@ -180,7 +207,8 @@ renderer::RenderViewType MapSection::getRenderView() const {
 }
 
 renderer::RenderModeType MapSection::getRenderMode() const {
-	return render_mode.getValue();
+	return renderer::RenderModeType::PLAIN;
+	//return render_mode.getValue();
 }
 
 std::string MapSection::getHardcodeOverlay() const {
@@ -269,7 +297,6 @@ void MapSection::preParse(const INIConfigSection& section,
 
 	block_handler.setDefault(renderer::BlockHandlerType::DEFAULT);
 	render_view.setDefault(renderer::RenderViewType::ISOMETRIC);
-	render_mode.setDefault(renderer::RenderModeType::DAYLIGHT);
 	hardcode_overlay.setDefault("");
 	overlays.setValue("");
 	rotations.setDefault("top-left");
@@ -314,24 +341,8 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		hardcode_overlay.load(key, value, validation);
 	} else if (key == "overlays") {
 		overlays.load(key, value, validation);
-		overlays_vector.clear();
-		std::stringstream ss;
-		ss << overlays.getValue();
-		std::string overlay;
-		while (ss >> overlay) {
-			// TODO make Field::load able to load sets/vectors of types?
-			overlays_vector.push_back(overlay);
-		}
 	} else if (key == "default_overlays") {
 		default_overlays.load(key, value, validation);
-		default_overlays_vector.clear();
-		std::stringstream ss;
-		ss << default_overlays.getValue();
-		std::string overlay;
-		while (ss >> overlay) {
-			// TODO make Field::load able to load sets/vectors of types?
-			default_overlays_vector.push_back(overlay);
-		}
 	} else if (key == "rotations") {
 		rotations.load(key, value ,validation);
 	} else if (key == "texture_dir") {
@@ -382,20 +393,58 @@ bool MapSection::parseField(const std::string key, const std::string value,
 
 void MapSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
+	bool render_mode_set = render_mode.isLoaded();
+	render_mode.setDefault(LegacyRenderMode::PLAIN);
+
+	// parse legacy render mode
+	if (render_mode_set) {
+		block_handler.setValue(renderer::BlockHandlerType::DEFAULT);
+		overlays.setValue("");
+		default_overlays.setValue("");
+		if (render_mode.getValue() == LegacyRenderMode::DAYLIGHT) {
+			overlays.setValue("day");
+			default_overlays.setValue("day");
+		} else if (render_mode.getValue() == LegacyRenderMode::NIGHTLIGHT) {
+			overlays.setValue("night");
+			default_overlays.setValue("night");
+		} else if (render_mode.getValue() == LegacyRenderMode::CAVE) {
+			block_handler.setValue(renderer::BlockHandlerType::CAVE);
+			// TODO cave coloring overlay
+		} else if (render_mode.getValue() == LegacyRenderMode::CAVELIGHT) {
+			block_handler.setValue(renderer::BlockHandlerType::CAVE);
+			// TODO cave coloring overlay
+			overlays.setValue("day");
+			default_overlays.setValue("day");
+		}
+	}
+	
+	// parse overlays
+	overlays_vector.clear();
+	std::stringstream overlays_ss(overlays.getValue());
+	std::string overlay;
+	while (overlays_ss >> overlay) {
+		overlays_vector.push_back(overlay);
+	}
+	
+	// parse default overlays
+	default_overlays_vector.clear();
+	std::stringstream default_overlays_ss(default_overlays.getValue());
+	while (default_overlays_ss >> overlay) {
+		default_overlays_vector.push_back(overlay);
+	}
+
 	// parse rotations
 	rotations_set.clear();
 	tile_sets.clear();
-	std::string str = rotations.getValue();
-	std::stringstream ss;
-	ss << str;
-	std::string elem;
-	while (ss >> elem) {
-		int r = stringToRotation(elem);
+	std::stringstream ss_rotations(rotations.getValue());
+	std::string rotation;
+	while (ss_rotations >> rotation) {
+		int r = stringToRotation(rotation);
 		if (r != -1) {
 			rotations_set.insert(r);
 			tile_sets.insert(getTileSet(r));
 		} else {
-			validation.error("Invalid rotation '" + elem + "'!");
+			validation.error("Invalid rotation '" + rotation + "'!");
 		}
 	}
 

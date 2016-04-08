@@ -37,6 +37,8 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace config {
 
+class INIConfigSection;
+
 /**
  * Represents all tile sets which are using the same world (as specified in the world
  * config section, with a specific world crop eventually), render view and tile width,
@@ -76,7 +78,15 @@ public:
 	int rotation;
 };
 
-class INIConfigSection;
+enum class LegacyRenderMode {
+	PLAIN,
+	DAYLIGHT,
+	NIGHTLIGHT,
+	CAVE,
+	CAVELIGHT
+};
+
+std::ostream& operator<<(std::ostream& out, LegacyRenderMode render_mode);
 
 class MapSection : public ConfigSection {
 public:
@@ -134,7 +144,7 @@ private:
 
 	Field<renderer::BlockHandlerType> block_handler;
 	Field<renderer::RenderViewType> render_view;
-	Field<renderer::RenderModeType> render_mode;
+	Field<LegacyRenderMode> render_mode;
 	Field<std::string> hardcode_overlay;
 	Field<std::string> overlays, default_overlays;
 	std::vector<std::string> overlays_vector, default_overlays_vector;
