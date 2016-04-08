@@ -206,11 +206,6 @@ renderer::RenderViewType MapSection::getRenderView() const {
 	return render_view.getValue();
 }
 
-renderer::RenderModeType MapSection::getRenderMode() const {
-	return renderer::RenderModeType::PLAIN;
-	//return render_mode.getValue();
-}
-
 std::string MapSection::getHardcodeOverlay() const {
 	return hardcode_overlay.getValue();
 }

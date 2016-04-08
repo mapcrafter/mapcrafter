@@ -108,7 +108,8 @@ std::ostream& operator<<(std::ostream& out, OverlayType overlay) {
 
 RenderMode* createRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config, int rotation) {
-	RenderModeType type = map_config.getRenderMode();
+	// RenderModeType type = map_config.getRenderMode();
+	RenderModeType type = RenderModeType::PLAIN;
 	MultiplexingRenderMode* render_mode = new MultiplexingRenderMode();
 	
 	// create render mode

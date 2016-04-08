@@ -104,7 +104,6 @@ public:
 
 	renderer::BlockHandlerType getBlockHandler() const;
 	renderer::RenderViewType getRenderView() const;
-	renderer::RenderModeType getRenderMode() const;
 	std::string getHardcodeOverlay() const;
 	std::vector<std::string> getOverlays() const;
 	std::vector<std::string> getDefaultOverlays() const;
