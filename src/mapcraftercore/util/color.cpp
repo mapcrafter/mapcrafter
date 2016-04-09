@@ -25,8 +25,12 @@
 namespace mapcrafter {
 namespace util {
 
+Color::Color(uint8_t red, uint8_t green, uint8_t blue)
+	: red(red), green(green), blue(blue), alpha(255), alpha_set(false) {
+}
+
 Color::Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha)
-	: red(red), green(green), blue(blue), alpha(alpha) {
+	: red(red), green(green), blue(blue), alpha(alpha), alpha_set(true) {
 }
 
 uint8_t Color::getRed() const {
@@ -45,6 +49,10 @@ uint8_t Color::getAlpha() const {
 	return alpha;
 }
 
+bool Color::isAlphaSet() const {
+	return alpha_set;
+}
+
 uint32_t Color::getRGBA() const {
 	return (alpha << 24) | (blue << 16) | (green << 8) | red;
 }
@@ -61,12 +69,24 @@ std::string Color::getHex() const {
 }
 
 Color Color::mix(Color other, double t) const {
-	return Color(
+	Color mixed = Color(
 		(1 - t) * red + t * other.red,
 		(1 - t) * green + t * other.green,
-		(1 - t) * blue + t * other.blue,
-		(1 - t) * alpha + t * other.alpha
+		(1 - t) * blue + t * other.blue
 	);
+	if (!isAlphaSet() && !other.isAlphaSet())
+		return mixed;
+	return mixed.withAlpha((1 - t) * alpha + t * other.alpha);
+}
+
+Color Color::withAlpha(uint8_t new_alpha) const {
+	return Color(red, green, blue, new_alpha);
+}
+
+Color Color::withAlphaIfAbsent(uint8_t new_alpha) const {
+	if (isAlphaSet())
+		return *this;
+	return withAlpha(new_alpha);
 }
 
 bool Color::operator==(const Color& color) const {
@@ -145,6 +165,7 @@ Color Color::byHex(const std::string& string) {
 	if (hex.size() == 4) {
 		color.alpha = parseHexNumber(hex.substr(3, 1));
 		color.alpha += color.alpha * 16;
+		color.alpha_set = true;
 	}
 
 	if (hex.size() >= 6) {
@@ -154,6 +175,7 @@ Color Color::byHex(const std::string& string) {
 	}
 	if (hex.size() == 8) {
 		color.alpha = parseHexNumber(hex.substr(6, 2));
+		color.alpha_set = true;
 	}
 	return color;
 }

@@ -44,5 +44,20 @@ BOOST_AUTO_TEST_CASE(util_test_color) {
 	BOOST_CHECK_THROW(Color::byString("#12z"), std::invalid_argument);
 	BOOST_CHECK_THROW(Color::byString("#12345"), std::invalid_argument);
 	BOOST_CHECK_THROW(Color::byString("#12345y"), std::invalid_argument);
+
+	BOOST_CHECK(!Color::byString("#123").isAlphaSet());
+	BOOST_CHECK(!Color::byString("#123456").isAlphaSet());
+	BOOST_CHECK(Color::byString("#1234").isAlphaSet());
+	BOOST_CHECK(Color::byString("#12345678").isAlphaSet());
+	BOOST_CHECK(!Color::byString("red").isAlphaSet());
+	BOOST_CHECK(!Color(12, 34, 56).isAlphaSet());
+	BOOST_CHECK(Color(12, 34, 56, 78).isAlphaSet());
+
+	Color with_alpha(12, 34, 56, 78);
+	Color without_alpha(56, 78, 12);
+	BOOST_CHECK(with_alpha.mix(without_alpha, 0.5).isAlphaSet());
+	BOOST_CHECK(with_alpha.mix(with_alpha, 0.5).isAlphaSet());
+	BOOST_CHECK(without_alpha.mix(with_alpha, 0.5).isAlphaSet());
+	BOOST_CHECK(!without_alpha.mix(without_alpha, 0.5).isAlphaSet());
 }
 
