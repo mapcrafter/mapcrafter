@@ -23,16 +23,23 @@
 #include "overlay.h"
 #include "../rendermode.h"
 #include "../../config/configsection.h"
+#include "../../util.h"
+
+#include <tuple>
 
 namespace mapcrafter {
 namespace renderer {
 
-class HeightOverlay : public TintingOverlay<config::DummyOverlaySection> {
+class HeightOverlay : public TintingOverlay<config::HeightOverlaySection> {
 public:
 	HeightOverlay(std::shared_ptr<config::ConfigSection> overlay_config);
 
 protected:
+	void initializeColors(std::vector<std::tuple<int, util::Color>> color_points);
+
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, const mc::BlockPos& pos_for, uint16_t id, uint16_t data);
+
+	std::vector<RGBAPixel> colors;
 };
 
 } /* namespace renderer */

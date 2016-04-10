@@ -66,14 +66,19 @@ class HeightOverlaySection : public OverlaySection {
 public:
 	virtual void dump(std::ostream& out) const;
 
+	const std::vector<std::tuple<int, util::Color>> getColorPoints() const;
+
 protected:
 	virtual void preParse(const INIConfigSection& section,
 			ValidationList& validation);
 	virtual bool parseField(const std::string key, const std::string value,
 			ValidationList& validation);
+	virtual void postParse(const INIConfigSection& section,
+			ValidationList& validation);
 
 private:
-	// TODO colors
+	Field<std::string> color_points;
+	std::vector<std::tuple<int, util::Color>> color_points_vector;
 };
 
 class LightingOverlaySection : public OverlaySection {

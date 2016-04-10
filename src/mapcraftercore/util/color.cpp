@@ -74,6 +74,7 @@ Color Color::mix(Color other, double t) const {
 		(1 - t) * green + t * other.green,
 		(1 - t) * blue + t * other.blue
 	);
+	// try to keep whether an alpha value is set
 	if (!isAlphaSet() && !other.isAlphaSet())
 		return mixed;
 	return mixed.withAlpha((1 - t) * alpha + t * other.alpha);

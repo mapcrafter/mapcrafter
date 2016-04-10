@@ -254,6 +254,7 @@ enum class RenderModeType {
 };
 
 enum class OverlayType {
+	HEIGHT,
 	LIGHTING,
 	LIGHTLEVEL,
 	SLIME,

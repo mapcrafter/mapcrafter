@@ -29,7 +29,9 @@ namespace util {
 
 template <>
 renderer::OverlayType as<renderer::OverlayType>(const std::string& from) {
-	if (from == "lighting")
+	if (from == "height") {
+		return renderer::OverlayType::HEIGHT;
+	} else if (from == "lighting")
 		return renderer::OverlayType::LIGHTING;
 	else if (from == "lightlevel")
 		return renderer::OverlayType::LIGHTLEVEL;
@@ -105,6 +107,12 @@ void OverlaySection::postParse(const INIConfigSection& section,
 
 void HeightOverlaySection::dump(std::ostream& out) const {
 	OverlaySection::dump(out);
+	out << "  color_points = " << color_points << std::endl;
+}
+
+
+const std::vector<std::tuple<int, util::Color>> HeightOverlaySection::getColorPoints() const {
+	return color_points_vector;
 }
 
 void HeightOverlaySection::preParse(const INIConfigSection& section,
@@ -116,7 +124,34 @@ bool HeightOverlaySection::parseField(const std::string key, const std::string v
 		ValidationList& validation) {
 	if (OverlaySection::parseField(key, value, validation))
 		return true;
-	return false;
+	if (key == "color_points") {
+		color_points.load(key, value, validation);
+	} else {
+		return false;
+	}
+	return true;
+}
+
+void HeightOverlaySection::postParse(const INIConfigSection& section,
+		ValidationList& validation) {
+	OverlaySection::postParse(section, validation);
+
+	std::stringstream ss(color_points.getValue());
+	std::string str;
+	while (ss >> str) {
+		if (str.empty())
+			continue;
+
+	}
+
+	color_points_vector = {
+		std::make_tuple(0, util::Color::byString("#fe0000")),
+		std::make_tuple(20, util::Color::byString("#d81500")),
+		std::make_tuple(66, util::Color::byString("#80f703")),
+		std::make_tuple(92, util::Color::byString("#800083")),
+		std::make_tuple(128, util::Color::byString("#8000ff")),
+		std::make_tuple(255, util::Color::byString("#800002"))
+	};
 }
 
 void LightingOverlaySection::dump(std::ostream& out) const {

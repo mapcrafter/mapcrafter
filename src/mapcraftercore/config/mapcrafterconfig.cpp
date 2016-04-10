@@ -331,6 +331,9 @@ void MapcrafterConfig::initializeDefaultOverlays() {
 			.set("name", "Lightlevels at night")
 			.set("day", "false"));
 
+	createDefaultOverlay<HeightOverlaySection>(INIConfigSection("overlay-height", "height-cave")
+			.set("name", "Cave"));
+
 	createDefaultOverlay<SlimeOverlaySection>(INIConfigSection("overlay-slime", "slime")
 			.set("name", "Slimes"));
 

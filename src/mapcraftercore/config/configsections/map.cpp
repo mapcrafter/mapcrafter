@@ -404,12 +404,12 @@ void MapSection::postParse(const INIConfigSection& section,
 			default_overlays.setValue("night");
 		} else if (render_mode.getValue() == LegacyRenderMode::CAVE) {
 			block_handler.setValue(renderer::BlockHandlerType::CAVE);
-			// TODO cave coloring overlay
+			overlays.setValue("height-cave");
+			default_overlays.setValue("height-cave");
 		} else if (render_mode.getValue() == LegacyRenderMode::CAVELIGHT) {
 			block_handler.setValue(renderer::BlockHandlerType::CAVE);
-			// TODO cave coloring overlay
-			overlays.setValue("day");
-			default_overlays.setValue("day");
+			overlays.setValue("day height-cave");
+			default_overlays.setValue("day height-cave");
 		}
 	}
 	

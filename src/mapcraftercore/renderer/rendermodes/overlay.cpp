@@ -116,7 +116,9 @@ OverlayRenderMode* createOverlay(const config::WorldSection& world_config,
 		assert(false);
 	}
 	*/
-	if (type == OverlayType::LIGHTING) {
+	if (type == OverlayType::HEIGHT) {
+		return new HeightOverlay(overlay_config);
+	} else if (type == OverlayType::LIGHTING) {
 		bool simulate_sun_light = false;
 		simulate_sun_light = simulate_sun_light || world_config.getDimension() == mc::Dimension::END;
 		simulate_sun_light = simulate_sun_light || map_config.getBlockHandler() == BlockHandlerType::CAVE;
