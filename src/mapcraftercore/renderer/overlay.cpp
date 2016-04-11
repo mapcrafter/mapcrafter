@@ -103,7 +103,7 @@ Overlay* createOverlay(const config::WorldSection& world_config,
 
 	/*
 	if (type == OverlayType::LIGHTING) {
-		return new LightingRenderMode(id, name, overlay_config.isDay(),
+		return new LightingOverlay(id, name, overlay_config.isDay(),
 				overlay_config.getLightingIntensity(),
 				overlay_config.getLightingWaterIntensity(),
 				world_config.getDimension() == mc::Dimension::END);
@@ -122,7 +122,7 @@ Overlay* createOverlay(const config::WorldSection& world_config,
 		bool simulate_sun_light = false;
 		simulate_sun_light = simulate_sun_light || world_config.getDimension() == mc::Dimension::END;
 		simulate_sun_light = simulate_sun_light || map_config.getBlockHandler() == BlockHandlerType::CAVE;
-		return new LightingRenderMode(overlay_config, simulate_sun_light);
+		return new LightingOverlay(overlay_config, simulate_sun_light);
 	} else if (type == OverlayType::LIGHTLEVEL) {
 		return new LightLevelOverlay(overlay_config);
 	} else if (type == OverlayType::SLIME) {

@@ -152,10 +152,10 @@ protected:
 	void createShade(RGBAImage& image, const CornerColors& corners) const;
 };
 
-class LightingRenderMode : public AbstractOverlay<LightingRenderer, config::LightingOverlaySection> {
+class LightingOverlay : public AbstractOverlay<LightingRenderer, config::LightingOverlaySection> {
 public:
-	LightingRenderMode(std::shared_ptr<config::ConfigSection> overlay_config, bool simulate_sun_light);
-	virtual ~LightingRenderMode();
+	LightingOverlay(std::shared_ptr<config::ConfigSection> overlay_config, bool simulate_sun_light);
+	virtual ~LightingOverlay();
 
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);

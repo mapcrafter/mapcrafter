@@ -124,20 +124,20 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 			render_mode->addRenderMode(new CaveRenderMode({mc::DIR_TOP}));
 		// if we want some shadows, then simulate the sun light because it's dark in caves
 		if (type == RenderModeType::CAVELIGHT)
-			render_mode->addRenderMode(new LightingRenderMode("day", "Day", true, map_config.getLightingIntensity(),
+			render_mode->addRenderMode(new LightingOverlay("day", "Day", true, map_config.getLightingIntensity(),
 						map_config.getLightingWaterIntensity(), true));
 		render_mode->addRenderMode(new HeightOverlay());
 		*/
 	}
 	else if (type == RenderModeType::DAYLIGHT) {
 		/*
-		render_mode->addRenderMode(new LightingRenderMode("day", "Day", true,
+		render_mode->addRenderMode(new LightingOverlay("day", "Day", true,
 					map_config.getLightingIntensity(), map_config.getLightingWaterIntensity(),
 					world_config.getDimension() == mc::Dimension::END));
 		*/
 	} else if (type == RenderModeType::NIGHTLIGHT) {
 		/*
-		render_mode->addRenderMode(new LightingRenderMode("night", "Night", false,
+		render_mode->addRenderMode(new LightingOverlay("night", "Night", false,
 					map_config.getLightingIntensity(), map_config.getLightingWaterIntensity(),
 					world_config.getDimension() == mc::Dimension::END));
 		*/

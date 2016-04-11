@@ -256,7 +256,7 @@ void LightingRenderer::createShade(RGBAImage& image, const CornerColors& corners
 	drawTopTriangle(image, size, corners[3], corners[1], corners[0]);
 }
 
-LightingRenderMode::LightingRenderMode(std::shared_ptr<config::ConfigSection> overlay_config,
+LightingOverlay::LightingOverlay(std::shared_ptr<config::ConfigSection> overlay_config,
 		bool simulate_sun_light)
 	: AbstractOverlay(overlay_config),
 	day(config->isDay()),
@@ -265,15 +265,15 @@ LightingRenderMode::LightingRenderMode(std::shared_ptr<config::ConfigSection> ov
 	simulate_sun_light(simulate_sun_light) {
 }
 
-LightingRenderMode::~LightingRenderMode() {
+LightingOverlay::~LightingOverlay() {
 }
 
-bool LightingRenderMode::isHidden(const mc::BlockPos& pos,
+bool LightingOverlay::isHidden(const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
 	return false;
 }
 
-void LightingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
+void LightingOverlay::draw(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
 	RGBAImage overlay = image.emptyCopy();
 	drawOverlay(image, overlay, pos, id, data);
@@ -281,7 +281,7 @@ void LightingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 	image.alphaBlit(overlay, 0, 0);
 }
 
-void LightingRenderMode::drawOverlay(const RGBAImage& block, RGBAImage& overlay,
+void LightingOverlay::drawOverlay(const RGBAImage& block, RGBAImage& overlay,
 		const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	bool transparent = images->isBlockTransparent(id, data);
 
@@ -312,11 +312,11 @@ void LightingRenderMode::drawOverlay(const RGBAImage& block, RGBAImage& overlay,
 	}
 }
 
-LightingColor LightingRenderMode::calculateLightingColor(const LightingData& light) const {
+LightingColor LightingOverlay::calculateLightingColor(const LightingData& light) const {
 	return pow(0.8, 15 - light.getLightLevel(day));
 }
 
-LightingData LightingRenderMode::getBlockLight(const mc::BlockPos& pos) {
+LightingData LightingOverlay::getBlockLight(const mc::BlockPos& pos) {
 	mc::Block block = getBlock(pos, mc::GET_ID | mc::GET_DATA | mc::GET_LIGHT);
 	LightingData light = LightingData::estimate(block, images, world, *current_chunk);
 
@@ -333,13 +333,13 @@ LightingData LightingRenderMode::getBlockLight(const mc::BlockPos& pos) {
 	return light;
 }
 
-LightingColor LightingRenderMode::getLightingColor(const mc::BlockPos& pos, double intensity) {
+LightingColor LightingOverlay::getLightingColor(const mc::BlockPos& pos, double intensity) {
 	LightingData lighting = getBlockLight(pos);
 	LightingColor color = calculateLightingColor(lighting);
 	return color + (1-color)*(1-intensity);
 }
 
-LightingColor LightingRenderMode::getCornerColor(const mc::BlockPos& pos,
+LightingColor LightingOverlay::getCornerColor(const mc::BlockPos& pos,
 		const CornerNeighbors& corner, double intensity) {
 	LightingColor color = 0;
 	color += getLightingColor(pos + corner.pos1, intensity) * 0.25;
@@ -349,7 +349,7 @@ LightingColor LightingRenderMode::getCornerColor(const mc::BlockPos& pos,
 	return color;
 }
 
-CornerColors LightingRenderMode::getCornerColors(const mc::BlockPos& pos,
+CornerColors LightingOverlay::getCornerColors(const mc::BlockPos& pos,
 		const FaceCorners& corners, double intensity) {
 	if (intensity < 0)
 		intensity = lighting_intensity;
@@ -362,7 +362,7 @@ CornerColors LightingRenderMode::getCornerColors(const mc::BlockPos& pos,
 	return colors;
 }
 
-void LightingRenderMode::doSmoothLight(RGBAImage& image, const mc::BlockPos& pos,
+void LightingOverlay::doSmoothLight(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
 	// check if lighting faces are visible
 	bool light_left = true, light_right = true, light_top = true;
@@ -419,7 +419,7 @@ void LightingRenderMode::doSmoothLight(RGBAImage& image, const mc::BlockPos& pos
 		renderer->lightTop(image, getCornerColors(pos, CORNERS_TOP, under_water[2] ? water_intensity : intensity));
 }
 
-void LightingRenderMode::doSlabLight(RGBAImage& image, const mc::BlockPos& pos,
+void LightingOverlay::doSlabLight(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
 	// to apply smooth lighting to a slab,
 	// we move the top shadow down if this is the bottom slab
@@ -448,7 +448,7 @@ void LightingRenderMode::doSlabLight(RGBAImage& image, const mc::BlockPos& pos,
 		renderer->lightTop(image, getCornerColors(pos, CORNERS_TOP), yoff);
 }
 
-void LightingRenderMode::doSimpleLight(RGBAImage& image, const mc::BlockPos& pos,
+void LightingOverlay::doSimpleLight(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
 	uint8_t factor = getLightingColor(pos, lighting_intensity) * 255;
 
