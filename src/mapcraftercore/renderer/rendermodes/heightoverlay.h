@@ -28,6 +28,11 @@
 #include <tuple>
 
 namespace mapcrafter {
+
+namespace config {
+class HeightColor;
+}
+
 namespace renderer {
 
 class HeightOverlay : public TintingOverlay<config::HeightOverlaySection> {
@@ -35,7 +40,7 @@ public:
 	HeightOverlay(std::shared_ptr<config::ConfigSection> overlay_config);
 
 protected:
-	void initializeColors(std::vector<std::tuple<int, util::Color>> color_points);
+	void initializeColors(const std::vector<config::HeightColor>& base_colors, int default_opacity);
 
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, const mc::BlockPos& pos_for, uint16_t id, uint16_t data);
 

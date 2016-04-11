@@ -27,7 +27,7 @@ namespace renderer {
 
 HeightOverlay::HeightOverlay(std::shared_ptr<config::ConfigSection> overlay_config)
 	: TintingOverlay(OverlayMode::PER_BLOCK, overlay_config) {
-	initializeColors(config->getColorPoints());
+	initializeColors(config->getColors(), config->getDefaultOpacity());
 }
 
 RGBAPixel HeightOverlay::getBlockColor(const mc::BlockPos& pos,
@@ -56,26 +56,33 @@ RGBAPixel HeightOverlay::getBlockColor(const mc::BlockPos& pos,
 	return colors[pos.y];
 }
 
-void HeightOverlay::initializeColors(std::vector<std::tuple<int, util::Color>> color_points) {
-	if (color_points.empty()) {
-		color_points.push_back(std::make_tuple(0, util::Color(0, 0, 0, 0)));
-		color_points.push_back(std::make_tuple(255, util::Color(0, 0, 0, 0)));
+void HeightOverlay::initializeColors(const std::vector<config::HeightColor>& segments, int default_opacity) {
+	auto base_colors = segments;
+	// make sure that we have at least one segment
+	if (base_colors.empty()) {
+		base_colors.push_back({0, util::Color(0, 0, 0, 0)});
+		base_colors.push_back({255, util::Color(0, 0, 0, 0)});
 	}
 
+	// go through the segments and generate colors for each y of the segments
 	colors.resize(256);
-	auto it = color_points.begin();
-	while (it != color_points.end()) {
-		int y_a = std::get<0>(*it);
-		util::Color color_a = std::get<1>(*it).withAlphaIfAbsent(85);
+	auto it = base_colors.begin();
+	while (it != base_colors.end()) {
+		// set first color of segment
+		int y_a = it->y;
+		util::Color color_a = it->color.withAlphaIfAbsent(default_opacity);
 		colors[y_a] = color_a.getRGBA();
 		auto next = ++it;
-		if (next == color_points.end())
-			continue;
-		int y_b = std::get<0>(*next);
-		util::Color color_b = std::get<1>(*next).withAlphaIfAbsent(85);
+		// stop here if the color is the last color
+		if (next == base_colors.end())
+			break;
+
+		// otherwise generate all colors of segment
+		int y_b = it->y;
+		util::Color color_b = next->color.withAlphaIfAbsent(default_opacity);
 		for (int y = y_a; y <= y_b; y++) {
-			double alpha = (double) (y - y_a) / (y_b - y_a);
-			colors[y] = color_a.mix(color_b, alpha).getRGBA();
+			double t = (double) (y - y_a) / (y_b - y_a);
+			colors[y] = color_a.mix(color_b, t).getRGBA();
 		}
 	}
 }

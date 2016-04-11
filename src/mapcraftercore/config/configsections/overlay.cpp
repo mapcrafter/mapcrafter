@@ -22,6 +22,7 @@
 #include "../iniconfig.h"
 #include "../../util.h"
 
+#include <iostream>
 #include <sstream>
 
 namespace mapcrafter {
@@ -40,6 +41,17 @@ renderer::OverlayType as<renderer::OverlayType>(const std::string& from) {
 	else if (from == "spawn")
 		return renderer::OverlayType::SPAWN;
 	throw std::invalid_argument("Must be 'none', 'lighting', 'lightlevel', 'spawn' or 'slime'.");
+}
+
+template <>
+config::HeightColor as<config::HeightColor>(const std::string& from) {
+	if (std::count(from.begin(), from.end(), ':') != 1)
+		throw std::invalid_argument("Must be of format y:color.");
+	int index = from.find(':');
+	config::HeightColor color;
+	color.y = as<int>(from.substr(0, index));
+	color.color = as<Color>(from.substr(index + 1));
+	return color;
 }
 
 }
@@ -105,27 +117,39 @@ void OverlaySection::postParse(const INIConfigSection& section,
 	base.setDefault(getType() == renderer::OverlayType::LIGHTING);
 }
 
-void HeightOverlaySection::dump(std::ostream& out) const {
-	OverlaySection::dump(out);
-	out << "  color_points = " << color_points << std::endl;
+std::ostream& operator<<(std::ostream& out, const HeightColor& color) {
+	return out << color.y << ":" << color.color;
 }
 
+void HeightOverlaySection::dump(std::ostream& out) const {
+	OverlaySection::dump(out);
+	out << "  default_opacity = " << default_opacity << std::endl;
+	out << "  colors = " << colors << std::endl;
+}
 
-const std::vector<std::tuple<int, util::Color>> HeightOverlaySection::getColorPoints() const {
-	return color_points_vector;
+int HeightOverlaySection::getDefaultOpacity() const {
+	return default_opacity.getValue();
+}
+
+const std::vector<HeightColor> HeightOverlaySection::getColors() const {
+	return colors_vector;
 }
 
 void HeightOverlaySection::preParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	OverlaySection::preParse(section, validation);
+
+	default_opacity.setDefault(85);
 }
 
 bool HeightOverlaySection::parseField(const std::string key, const std::string value,
 		ValidationList& validation) {
 	if (OverlaySection::parseField(key, value, validation))
 		return true;
-	if (key == "color_points") {
-		color_points.load(key, value, validation);
+	if (key == "default_opacity") {
+		default_opacity.load(key, value, validation);
+	} else if (key == "colors") {
+		colors.load(key, value, validation);
 	} else {
 		return false;
 	}
@@ -136,22 +160,15 @@ void HeightOverlaySection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	OverlaySection::postParse(section, validation);
 
-	std::stringstream ss(color_points.getValue());
+	// TODO error handling
+	colors_vector.clear();
+	std::stringstream ss(colors.getValue());
 	std::string str;
 	while (ss >> str) {
 		if (str.empty())
 			continue;
-
+		colors_vector.push_back(util::as<HeightColor>(str));
 	}
-
-	color_points_vector = {
-		std::make_tuple(0, util::Color::byString("#fe0000")),
-		std::make_tuple(20, util::Color::byString("#d81500")),
-		std::make_tuple(66, util::Color::byString("#80f703")),
-		std::make_tuple(92, util::Color::byString("#800083")),
-		std::make_tuple(128, util::Color::byString("#8000ff")),
-		std::make_tuple(255, util::Color::byString("#800002"))
-	};
 }
 
 void LightingOverlaySection::dump(std::ostream& out) const {

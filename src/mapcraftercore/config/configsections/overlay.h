@@ -25,6 +25,7 @@
 #include "../../renderer/rendermode.h"
 #include "../../util.h"
 
+#include <iosfwd>
 #include <string>
 
 namespace mapcrafter {
@@ -62,11 +63,19 @@ private:
 class DummyOverlaySection : public OverlaySection {
 };
 
+struct HeightColor {
+	int y;
+	util::Color color;
+};
+
+std::ostream& operator<<(std::ostream& out, const HeightColor& color);
+
 class HeightOverlaySection : public OverlaySection {
 public:
 	virtual void dump(std::ostream& out) const;
 
-	const std::vector<std::tuple<int, util::Color>> getColorPoints() const;
+	int getDefaultOpacity() const;
+	const std::vector<HeightColor> getColors() const;
 
 protected:
 	virtual void preParse(const INIConfigSection& section,
@@ -77,8 +86,9 @@ protected:
 			ValidationList& validation);
 
 private:
-	Field<std::string> color_points;
-	std::vector<std::tuple<int, util::Color>> color_points_vector;
+	Field<int> default_opacity;
+	Field<std::string> colors;
+	std::vector<HeightColor> colors_vector;
 };
 
 class LightingOverlaySection : public OverlaySection {

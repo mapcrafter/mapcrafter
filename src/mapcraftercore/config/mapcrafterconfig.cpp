@@ -332,7 +332,8 @@ void MapcrafterConfig::initializeDefaultOverlays() {
 			.set("day", "false"));
 
 	createDefaultOverlay<HeightOverlaySection>(INIConfigSection("overlay-height", "height-cave")
-			.set("name", "Cave"));
+			.set("name", "Cave")
+			.set("colors", "0:#fe0000 20:#d81500 66:#80f703 92:#800083 128:#8000ff 255:#800002"));
 
 	createDefaultOverlay<SlimeOverlaySection>(INIConfigSection("overlay-slime", "slime")
 			.set("name", "Slimes"));
