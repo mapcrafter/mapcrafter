@@ -134,8 +134,8 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 
 IsometricTileRenderer::IsometricTileRenderer(const RenderView* render_view,
 		BlockHandler* block_handler, BlockImages* images, int tile_width, mc::WorldCache* world,
-		RenderMode* render_mode, std::shared_ptr<OverlayRenderMode> hardcode_overlay,
-		std::vector<std::shared_ptr<OverlayRenderMode>> overlays)
+		RenderMode* render_mode, std::shared_ptr<Overlay> hardcode_overlay,
+		std::vector<std::shared_ptr<Overlay>> overlays)
 	: TileRenderer(render_view, block_handler, images, tile_width, world, render_mode, hardcode_overlay, overlays) {
 }
 

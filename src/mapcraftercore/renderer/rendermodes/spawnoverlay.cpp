@@ -25,7 +25,7 @@ namespace mapcrafter {
 namespace renderer {
 
 SpawnOverlay::SpawnOverlay(std::shared_ptr<config::ConfigSection> overlay_config)
-	: TintingOverlay(OverlayMode::PER_FACE, overlay_config),
+	: TintingOverlay(TintingOverlayMode::PER_FACE, overlay_config),
 	  spawn(config->getColor().getRGBA()), no_spawn(rgba(0, 0, 0, 0)) {
 }
 

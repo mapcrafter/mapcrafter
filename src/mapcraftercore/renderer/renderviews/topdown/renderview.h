@@ -34,8 +34,8 @@ public:
 	virtual TileRenderer* createTileRenderer(BlockHandler* block_handler,
 			BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderMode* render_mode,
-			std::shared_ptr<OverlayRenderMode> hardcode_overlay,
-			std::vector<std::shared_ptr<OverlayRenderMode>> overlays) const;
+			std::shared_ptr<Overlay> hardcode_overlay,
+			std::vector<std::shared_ptr<Overlay>> overlays) const;
 
 	virtual RenderModeRenderer* createRenderModeRenderer(
 			const RenderModeRendererType& renderer) const;

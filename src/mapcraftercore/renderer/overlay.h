@@ -66,41 +66,51 @@ protected:
 };
 
 /**
- * A render mode that renders an overlay on top of the blocks. You just have to implement
- * the function that returns the color for each block. Return something with alpha == 0
- * if there should be no color.
+ * Interface for an overlay that is used as additional map layer on top of the rendered
+ * terrain. You get some information about the world and the current block and draw
+ * on an image how the overlay on top of the block would look like.
  */
-class OverlayRenderMode : public RenderMode {
+class Overlay {
 public:
-	virtual ~OverlayRenderMode() {}
+	virtual ~Overlay() {}
 
-	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
+	/**
+	 * Passes the overlay some required data about the map and the world to render.
+	 */
+	virtual void initialize(const RenderView* render_view, BlockImages* images,
+			mc::WorldCache* world, mc::Chunk** current_chunk) = 0;
 
-	virtual void drawOverlay(RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
+	/**
+	 * This method lets the overlay draw its overlay for a given block. You just have to
+	 * draw the transparent part (or not even transparent) that should be displayed on
+	 * top of that specific block on the overlay image.
+	 *
+	 * The renderer makes sure that overlay pixels are only visible if there is a
+	 * corresponding pixel on the block image, so you could fill the overlay image with
+	 * just one color for example.
+	 */
+	virtual void drawOverlay(const RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos,
+			uint16_t id, uint16_t data) = 0;
 
 	virtual std::string getID() const = 0;
 	virtual std::string getName() const = 0;
 	virtual bool isBase() const = 0;
 };
 
+/**
+ * An overlay that's already implementing the storing of the given world and accessing it.
+ * You just have to implement the drawOverlay-method.
+ */
 template <typename Renderer, typename Config>
-class BaseOverlayRenderMode : public OverlayRenderMode,
-	public HasRenderModeRenderer<Renderer>, public HasConfigSection<Config> {
+class AbstractOverlay : public Overlay, public HasRenderModeRenderer<Renderer>, public HasConfigSection<Config> {
 public:
-	BaseOverlayRenderMode(std::shared_ptr<config::ConfigSection> overlay_config);
-	virtual ~BaseOverlayRenderMode();
+	AbstractOverlay(std::shared_ptr<config::ConfigSection> overlay_config);
+	virtual ~AbstractOverlay();
 
 	virtual void initialize(const RenderView* render_view, BlockImages* images,
 			mc::WorldCache* world, mc::Chunk** current_chunk);
 	
-	/**
-	 * Dummy implementation of interface method. Returns false as default.
-	 */
-	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
-
-	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
-
-	virtual void drawOverlay(RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	virtual void drawOverlay(const RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
 
 	virtual std::string getID() const;
 	virtual std::string getName() const;
@@ -117,60 +127,63 @@ protected:
 	mc::Chunk** current_chunk;
 };
 
-enum class OverlayMode {
+/**
+ * Different working modes for the tinting overlay:
+ * - per block: Whole blocks are overlayed with the same color
+ * - per face: Each face of each block can get another color
+ */
+enum class TintingOverlayMode {
 	PER_BLOCK,
 	PER_FACE,
 };
 
+/**
+ * An overlay that's generating the overlay image for you. You just have to specify a
+ * color for each block / face.
+ */
 template <typename Config>
-class TintingOverlay : public BaseOverlayRenderMode<OverlayRenderer, Config> {
+class TintingOverlay : public AbstractOverlay<OverlayRenderer, Config> {
 public:
-	TintingOverlay(OverlayMode overlay_mode, std::shared_ptr<config::ConfigSection> overlay_config);
+	/**
+	 * Constructor. You have to specify the working mode of the tinting overlay.
+	 */
+	TintingOverlay(TintingOverlayMode overlay_mode, std::shared_ptr<config::ConfigSection> overlay_config);
 
-	virtual void drawOverlay(RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	virtual void drawOverlay(const RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 protected:
+	/**
+	 * Depending on the mode of the tinting overlay, should return:
+	 * - If per-block-tinting: Color for block xyz (getBlockColor(xyz, xyz, ...))
+	 * - If per-face-tinting: Color for face of block xyz seen from block abc (getBlockColor(abc, xyz, ...))
+	 */
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, const mc::BlockPos& pos_for, uint16_t id, uint16_t data) = 0;
 
 private:
-	OverlayMode overlay_mode;
+	TintingOverlayMode overlay_mode;
 };
 
-OverlayRenderMode* createOverlay(const config::WorldSection& world_config,
+Overlay* createOverlay(const config::WorldSection& world_config,
 		const config::MapSection& map_config,
 		std::shared_ptr<config::OverlaySection> overlay_config, int rotation);
 	
-std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(
+std::vector<std::shared_ptr<Overlay>> createOverlays(
 		const config::WorldSection& world_config, const config::MapSection& map_config,
 		const std::map<std::string, std::shared_ptr<config::OverlaySection>>& overlays_config,
 		int rotation);
 
 template <typename Renderer, typename Config>
-BaseOverlayRenderMode<Renderer, Config>::BaseOverlayRenderMode(std::shared_ptr<config::ConfigSection> overlay_config)
+AbstractOverlay<Renderer, Config>::AbstractOverlay(std::shared_ptr<config::ConfigSection> overlay_config)
 	: images(nullptr), world(nullptr), current_chunk(nullptr) {
 	HasConfigSection<Config>::initializeConfig(overlay_config);
 }
 
 template <typename Renderer, typename Config>
-BaseOverlayRenderMode<Renderer, Config>::~BaseOverlayRenderMode() {
+AbstractOverlay<Renderer, Config>::~AbstractOverlay() {
 }
 
 template <typename Renderer, typename Config>
-void BaseOverlayRenderMode<Renderer, Config>::draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id,
-		uint16_t data) {
-	RGBAImage overlay = image.emptyCopy();
-	drawOverlay(image, overlay, pos, id, data);
-	overlay.applyMask(image);
-	image.alphaBlit(overlay, 0, 0);
-}
-
-template <typename Renderer, typename Config>
-void BaseOverlayRenderMode<Renderer, Config>::drawOverlay(RGBAImage& block, RGBAImage& overlay,
-		const mc::BlockPos& pos, uint16_t id, uint16_t data) {
-}
-
-template <typename Renderer, typename Config>
-void BaseOverlayRenderMode<Renderer, Config>::initialize(const RenderView* render_view, 
+void AbstractOverlay<Renderer, Config>::initialize(const RenderView* render_view, 
 		BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk) {
 	this->images = images;
 	this->world = world;
@@ -180,50 +193,43 @@ void BaseOverlayRenderMode<Renderer, Config>::initialize(const RenderView* rende
 }
 
 template <typename Renderer, typename Config>
-bool BaseOverlayRenderMode<Renderer, Config>::isHidden(const mc::BlockPos& pos, uint16_t id,
-		uint16_t data) {
-	return false;
-}
-
-template <typename Renderer, typename Config>
-std::string BaseOverlayRenderMode<Renderer, Config>::getID() const {
+std::string AbstractOverlay<Renderer, Config>::getID() const {
 	return this->config->getID();
 }
 
 template <typename Renderer, typename Config>
-std::string BaseOverlayRenderMode<Renderer, Config>::getName() const {
+std::string AbstractOverlay<Renderer, Config>::getName() const {
 	return this->config->getName();
 }
 
 template <typename Renderer, typename Config>
-bool BaseOverlayRenderMode<Renderer, Config>::isBase() const {
+bool AbstractOverlay<Renderer, Config>::isBase() const {
 	return this->config->isBase();
 }
 
 template <typename Renderer, typename Config>
-mc::Block BaseOverlayRenderMode<Renderer, Config>::getBlock(const mc::BlockPos& pos, int get) {
+mc::Block AbstractOverlay<Renderer, Config>::getBlock(const mc::BlockPos& pos, int get) {
 	return world->getBlock(pos, *current_chunk, get);
 }
 
 template <typename Config>
-TintingOverlay<Config>::TintingOverlay(OverlayMode overlay_mode,
+TintingOverlay<Config>::TintingOverlay(TintingOverlayMode overlay_mode,
 		std::shared_ptr<config::ConfigSection> overlay_config)
-	: BaseOverlayRenderMode<OverlayRenderer, Config>(overlay_config), overlay_mode(overlay_mode) {
+	: AbstractOverlay<OverlayRenderer, Config>(overlay_config), overlay_mode(overlay_mode) {
 }
 
 template <typename Config>
-void TintingOverlay<Config>::drawOverlay(RGBAImage& block, RGBAImage& overlay,
+void TintingOverlay<Config>::drawOverlay(const RGBAImage& block, RGBAImage& overlay,
 		const mc::BlockPos& pos, uint16_t id, uint16_t data) {
-	if (overlay_mode == OverlayMode::PER_BLOCK) {
+	if (overlay_mode == TintingOverlayMode::PER_BLOCK) {
 		// simple mode where we just tint whole blocks
 		RGBAPixel color = this->getBlockColor(pos, pos, id, data);
 		if (rgba_alpha(color) == 0)
 			return;
 		this->renderer->tintBlock(overlay, color);
 	} else {
-		// "advanced" mode where each block/position has a color,
-		// and adjacent faces are tinted / or the transparent blocks themselves
-		// TODO potential for optimization, maybe cache colors of blocks?
+		// "advanced" mode where each face gets a color
+		// (and transparent blocks a single color)
 		if (this->images->isBlockTransparent(id, data)) {
 			RGBAPixel color = getBlockColor(pos, pos, id, data);
 			if (rgba_alpha(color) == 0)

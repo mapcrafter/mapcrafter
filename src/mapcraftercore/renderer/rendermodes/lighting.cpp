@@ -258,7 +258,7 @@ void LightingRenderer::createShade(RGBAImage& image, const CornerColors& corners
 
 LightingRenderMode::LightingRenderMode(std::shared_ptr<config::ConfigSection> overlay_config,
 		bool simulate_sun_light)
-	: BaseOverlayRenderMode(overlay_config),
+	: AbstractOverlay(overlay_config),
 	day(config->isDay()),
 	lighting_intensity(config->getIntensity()),
 	lighting_water_intensity(config->getWaterIntensity()),
@@ -281,7 +281,7 @@ void LightingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 	image.alphaBlit(overlay, 0, 0);
 }
 
-void LightingRenderMode::drawOverlay(RGBAImage& block, RGBAImage& overlay,
+void LightingRenderMode::drawOverlay(const RGBAImage& block, RGBAImage& overlay,
 		const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	bool transparent = images->isBlockTransparent(id, data);
 

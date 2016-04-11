@@ -40,8 +40,8 @@ TileSet* TopdownRenderView::createTileSet(int tile_width) const {
 
 TileRenderer* TopdownRenderView::createTileRenderer(BlockHandler* block_handler,
 		BlockImages* images, int tile_width, mc::WorldCache* world, RenderMode* render_mode,
-		std::shared_ptr<OverlayRenderMode> hardcode_overlay,
-		std::vector<std::shared_ptr<OverlayRenderMode>> overlays) const {
+		std::shared_ptr<Overlay> hardcode_overlay,
+		std::vector<std::shared_ptr<Overlay>> overlays) const {
 	return new TopdownTileRenderer(this, block_handler, images, tile_width, world, render_mode, hardcode_overlay, overlays);
 }
 

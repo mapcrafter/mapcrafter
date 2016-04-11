@@ -26,7 +26,7 @@ namespace mapcrafter {
 namespace renderer {
 
 LightLevelOverlay::LightLevelOverlay(std::shared_ptr<config::ConfigSection> overlay_config)
-	: TintingOverlay(OverlayMode::PER_FACE, overlay_config) {
+	: TintingOverlay(TintingOverlayMode::PER_FACE, overlay_config) {
 	for (int i = 0; i <= 7; i++) {
 		double t = (double) i / 7.0;
 		colors[i] = util::Color(255, 0, 0, 150).mix(util::Color(255, 0, 0, 75), t).getRGBA();

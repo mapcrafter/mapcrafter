@@ -40,7 +40,7 @@ namespace renderer {
 
 class BlockHandler;
 class BlockImages;
-class OverlayRenderMode;
+class Overlay;
 class TilePos;
 class RenderMode;
 class RenderView;
@@ -51,8 +51,8 @@ public:
 	TileRenderer(const RenderView* render_view, BlockHandler* block_handler,
 			BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderMode* render_mode,
-			std::shared_ptr<OverlayRenderMode> hardcode_overlay,
-			std::vector<std::shared_ptr<OverlayRenderMode>> overlays);
+			std::shared_ptr<Overlay> hardcode_overlay,
+			std::vector<std::shared_ptr<Overlay>> overlays);
 	virtual ~TileRenderer();
 
 	void setRenderBiomes(bool render_biomes);
@@ -74,8 +74,8 @@ protected:
 	mc::WorldCache* world;
 	mc::Chunk* current_chunk;
 	RenderMode* render_mode;
-	std::shared_ptr<OverlayRenderMode> hardcode_overlay;
-	std::vector<std::shared_ptr<OverlayRenderMode>> overlays;
+	std::shared_ptr<Overlay> hardcode_overlay;
+	std::vector<std::shared_ptr<Overlay>> overlays;
 
 	bool render_biomes;
 	bool use_preblit_water;

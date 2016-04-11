@@ -66,8 +66,8 @@ struct RenderContext {
 	std::shared_ptr<mc::WorldCache> world_cache;
 	std::shared_ptr<RenderMode> render_mode;
 	std::shared_ptr<BlockHandler> block_handler;
-	std::shared_ptr<OverlayRenderMode> hardcode_overlay;
-	std::vector<std::shared_ptr<OverlayRenderMode>> overlays;
+	std::shared_ptr<Overlay> hardcode_overlay;
+	std::vector<std::shared_ptr<Overlay>> overlays;
 	std::shared_ptr<TileRenderer> tile_renderer;
 
 	/**

@@ -94,7 +94,7 @@ std::tuple<int, int, int> OverlayRenderer::getRecolor(RGBAPixel color) const {
 
 const RenderModeRendererType OverlayRenderer::TYPE = RenderModeRendererType::OVERLAY;
 
-OverlayRenderMode* createOverlay(const config::WorldSection& world_config,
+Overlay* createOverlay(const config::WorldSection& world_config,
 		const config::MapSection& map_config,
 		std::shared_ptr<config::OverlaySection> overlay_config, int rotation) {
 	OverlayType type = overlay_config->getType();
@@ -136,18 +136,18 @@ OverlayRenderMode* createOverlay(const config::WorldSection& world_config,
 	return nullptr;
 }
 
-std::vector<std::shared_ptr<OverlayRenderMode>> createOverlays(
+std::vector<std::shared_ptr<Overlay>> createOverlays(
 		const config::WorldSection& world_config, const config::MapSection& map_config,
 		const std::map<std::string, std::shared_ptr<config::OverlaySection>>& overlays_config,
 		int rotation) {
-	std::vector<std::shared_ptr<OverlayRenderMode>> overlays;
+	std::vector<std::shared_ptr<Overlay>> overlays;
 	
 	auto overlay_types = map_config.getOverlays();
 	for (auto it = overlay_types.begin(); it != overlay_types.end(); ++it) {
 		std::shared_ptr<config::OverlaySection> overlay_config = overlays_config.at(*it);
-		OverlayRenderMode* overlay = createOverlay(world_config, map_config,
+		Overlay* overlay = createOverlay(world_config, map_config,
 				overlay_config, rotation);
-		overlays.push_back(std::shared_ptr<OverlayRenderMode>(overlay));
+		overlays.push_back(std::shared_ptr<Overlay>(overlay));
 	}
 
 	return overlays;

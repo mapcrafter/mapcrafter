@@ -42,7 +42,7 @@ namespace renderer {
 
 class BlockHandler;
 class BlockImages;
-class OverlayRenderMode;
+class Overlay;
 class RenderMode;
 class RenderModeRenderer;
 #ifdef HAVE_ENUM_CLASS_FORWARD_DECLARATION
@@ -73,8 +73,8 @@ public:
 	virtual TileRenderer* createTileRenderer(BlockHandler* block_handler,
 			BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderMode* render_mode,
-			std::shared_ptr<OverlayRenderMode> hardcode_overlay,
-			std::vector<std::shared_ptr<OverlayRenderMode>> overlays) const = 0;
+			std::shared_ptr<Overlay> hardcode_overlay,
+			std::vector<std::shared_ptr<Overlay>> overlays) const = 0;
 
 	/**
 	 * Creates an instance of the render view specific render mode renderer class.
