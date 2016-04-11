@@ -21,7 +21,7 @@
 #ifndef RENDERMODES_LIGHTLEVELOVERLAY_H_
 #define RENDERMODES_LIGHTLEVELOVERLAY_H_
 
-#include "overlay.h"
+#include "../overlay.h"
 #include "../../config/configsections/overlay.h"
 
 namespace mapcrafter {

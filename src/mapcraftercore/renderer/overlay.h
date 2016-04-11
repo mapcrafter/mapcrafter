@@ -18,13 +18,13 @@
  */
 
 
-#ifndef RENDERMODES_OVERLAY_H_
-#define RENDERMODES_OVERLAY_H_
+#ifndef OVERLAY_H_
+#define OVERLAY_H_
 
-#include "../blockimages.h"
-#include "../rendermode.h"
-#include "../image.h"
-#include "../../config/configsections/overlay.h"
+#include "blockimages.h"
+#include "rendermode.h"
+#include "image.h"
+#include "../config/configsections/overlay.h"
 
 #include <string>
 #include <tuple>
@@ -252,5 +252,5 @@ void TintingOverlay<Config>::drawOverlay(RGBAImage& block, RGBAImage& overlay,
 }
 }
 
-#endif /* RENDERMODES_OVERLAY_H_ */
+#endif /* OVERLAY_H_ */
 

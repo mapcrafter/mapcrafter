@@ -21,7 +21,7 @@
 #ifndef RENDERMODES_SLIMEOVERLAY_H_
 #define RENDERMODES_SLIMEOVERLAY_H_
 
-#include "overlay.h"
+#include "../overlay.h"
 
 #include <boost/filesystem.hpp>
 

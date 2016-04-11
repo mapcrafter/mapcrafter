@@ -24,8 +24,8 @@
 #include "tilerenderer.h"
 #include "rendermodes.h"
 #include "../../blockhandler.h"
+#include "../../overlay.h"
 #include "../../rendermode.h"
-#include "../../rendermodes/overlay.h"
 
 namespace mapcrafter {
 namespace renderer {

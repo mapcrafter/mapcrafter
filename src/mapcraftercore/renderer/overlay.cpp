@@ -19,17 +19,17 @@
 
 #include "overlay.h"
 
-#include "heightoverlay.h"
-#include "lighting.h"
-#include "lightleveloverlay.h"
-#include "slimeoverlay.h"
-#include "spawnoverlay.h"
-#include "../image.h"
-#include "../../config/mapcrafterconfig.h"
-#include "../../config/configsections/map.h"
-#include "../../config/configsections/overlay.h"
-#include "../../config/configsections/world.h"
-#include "../../mc/pos.h"
+#include "rendermodes/heightoverlay.h"
+#include "rendermodes/lighting.h"
+#include "rendermodes/lightleveloverlay.h"
+#include "rendermodes/slimeoverlay.h"
+#include "rendermodes/spawnoverlay.h"
+#include "image.h"
+#include "../config/mapcrafterconfig.h"
+#include "../config/configsections/map.h"
+#include "../config/configsections/overlay.h"
+#include "../config/configsections/world.h"
+#include "../mc/pos.h"
 
 namespace mapcrafter {
 namespace renderer {

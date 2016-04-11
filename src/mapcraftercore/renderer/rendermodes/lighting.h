@@ -20,7 +20,7 @@
 #ifndef RENDERMODES_LIGHTING_H_
 #define RENDERMODES_LIGHTING_H_
 
-#include "overlay.h"
+#include "../overlay.h"
 #include "../rendermode.h"
 #include "../../config/configsection.h"
 

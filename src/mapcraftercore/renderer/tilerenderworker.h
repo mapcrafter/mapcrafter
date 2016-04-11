@@ -20,7 +20,7 @@
 #ifndef TILERENDERWORKER_H_
 #define TILERENDERWORKER_H_
 
-#include "rendermodes/overlay.h"
+#include "overlay.h"
 #include "../config/mapcrafterconfig.h"
 #include "../config/configsections/map.h"
 #include "../config/configsections/overlay.h"

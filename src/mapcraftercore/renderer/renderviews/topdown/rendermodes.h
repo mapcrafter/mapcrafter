@@ -18,7 +18,7 @@
  */
 
 #include "../../rendermodes/lighting.h"
-#include "../../rendermodes/overlay.h"
+#include "../../overlay.h"
 
 #ifndef TOPDOWN_RENDERMODES_H_
 #define TOPDOWN_RENDERMODES_H_

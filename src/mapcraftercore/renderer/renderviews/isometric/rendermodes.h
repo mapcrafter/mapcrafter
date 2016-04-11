@@ -18,7 +18,7 @@
  */
 
 #include "../../rendermodes/lighting.h"
-#include "../../rendermodes/overlay.h"
+#include "../../overlay.h"
 
 #ifndef ISOMETRIC_RENDERMODES_H_
 #define ISOMETRIC_RENDERMODES_H_

@@ -21,7 +21,7 @@
 #ifndef RENDERMODES_SPAWNOVERLAY_H_
 #define RENDERMODES_SPAWNOVERLAY_H_
 
-#include "overlay.h"
+#include "../overlay.h"
 
 namespace mapcrafter {
 namespace renderer {

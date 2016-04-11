@@ -22,10 +22,10 @@
 #include "blockhandler.h"
 #include "blockimages.h"
 #include "image.h"
+#include "overlay.h"
 #include "rendermode.h"
 #include "renderview.h"
 #include "tileset.h"
-#include "rendermodes/overlay.h"
 #include "../mc/pos.h"
 #include "../util.h"
 
