@@ -43,10 +43,9 @@ namespace renderer {
 
 TopdownTileRenderer::TopdownTileRenderer(const RenderView* render_view,
 		BlockHandler* block_handler, BlockImages* images, int tile_width,
-		mc::WorldCache* world, RenderMode* render_mode,
-		std::shared_ptr<Overlay> hardcode_overlay,
+		mc::WorldCache* world, std::shared_ptr<Overlay> hardcode_overlay,
 		std::vector<std::shared_ptr<Overlay>> overlays)
-	: TileRenderer(render_view, block_handler, images, tile_width, world, render_mode, hardcode_overlay, overlays) {
+	: TileRenderer(render_view, block_handler, images, tile_width, world, hardcode_overlay, overlays) {
 }
 
 TopdownTileRenderer::~TopdownTileRenderer() {
@@ -105,11 +104,6 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, s
 					continue;
 				}
 				bool is_water = (id == 8 || id == 9) && (data & 0xf) == 0;
-
-				if (render_mode->isHidden(globalpos, id, data)) {
-					localpos.y--;
-					continue;
-				}
 
 				if (is_water && !use_preblit_water) {
 					has_full_water = true;

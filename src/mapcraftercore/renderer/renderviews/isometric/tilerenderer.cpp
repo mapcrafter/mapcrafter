@@ -133,10 +133,10 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 }
 
 IsometricTileRenderer::IsometricTileRenderer(const RenderView* render_view,
-		BlockHandler* block_handler, BlockImages* images, int tile_width, mc::WorldCache* world,
-		RenderMode* render_mode, std::shared_ptr<Overlay> hardcode_overlay,
+		BlockHandler* block_handler, BlockImages* images, int tile_width,
+		mc::WorldCache* world, std::shared_ptr<Overlay> hardcode_overlay,
 		std::vector<std::shared_ptr<Overlay>> overlays)
-	: TileRenderer(render_view, block_handler, images, tile_width, world, render_mode, hardcode_overlay, overlays) {
+	: TileRenderer(render_view, block_handler, images, tile_width, world, hardcode_overlay, overlays) {
 }
 
 IsometricTileRenderer::~IsometricTileRenderer() {
@@ -206,10 +206,6 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 				in_water = false;
 				continue;
 			}
-
-			// check if the render mode hides this block
-			if (render_mode->isHidden(block.current, id, data))
-				continue;
 
 			bool is_water = (id == 8 || id == 9) && (data & 0xf) == 0;
 			if (is_water && !use_preblit_water) {
@@ -308,8 +304,6 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile,
 			node.has_full_water = has_full_water;
 			node.block = image;
 
-			// let the render mode do their magic with the block image
-			// render_mode->draw(node.block, node.pos, id, data);
 			drawHardcodeOverlay(node.block, node.pos, id, data);
 
 			for (size_t i = 0; i < overlay_tiles.size(); i++) {

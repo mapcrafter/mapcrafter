@@ -49,8 +49,7 @@ class RGBAImage;
 class TileRenderer {
 public:
 	TileRenderer(const RenderView* render_view, BlockHandler* block_handler,
-			BlockImages* images, int tile_width,
-			mc::WorldCache* world, RenderMode* render_mode,
+			BlockImages* images, int tile_width, mc::WorldCache* world,
 			std::shared_ptr<Overlay> hardcode_overlay,
 			std::vector<std::shared_ptr<Overlay>> overlays);
 	virtual ~TileRenderer();
@@ -73,7 +72,6 @@ protected:
 	int tile_width;
 	mc::WorldCache* world;
 	mc::Chunk* current_chunk;
-	RenderMode* render_mode;
 	std::shared_ptr<Overlay> hardcode_overlay;
 	std::vector<std::shared_ptr<Overlay>> overlays;
 

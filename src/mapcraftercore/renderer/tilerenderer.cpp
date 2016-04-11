@@ -34,14 +34,12 @@ namespace renderer {
 
 TileRenderer::TileRenderer(const RenderView* render_view,
 		BlockHandler* block_handler, BlockImages* images,
-		int tile_width, mc::WorldCache* world, RenderMode* render_mode,
-		std::shared_ptr<Overlay> hardcode_overlay,
+		int tile_width, mc::WorldCache* world, std::shared_ptr<Overlay> hardcode_overlay,
 		std::vector<std::shared_ptr<Overlay>> overlays)
 	: block_handler(block_handler), images(images), tile_width(tile_width), world(world),
-	  current_chunk(nullptr), render_mode(render_mode), hardcode_overlay(hardcode_overlay),
-	  overlays(overlays), render_biomes(true), use_preblit_water(false) {
+	  current_chunk(nullptr), hardcode_overlay(hardcode_overlay), overlays(overlays),
+	  render_biomes(true), use_preblit_water(false) {
 	block_handler->initialize(render_view, images, world, &current_chunk);
-	render_mode->initialize(render_view, images, world, &current_chunk);
 	if (hardcode_overlay)
 		hardcode_overlay->initialize(render_view, images, world, &current_chunk);
 	for (size_t i = 0; i < overlays.size(); i++)
