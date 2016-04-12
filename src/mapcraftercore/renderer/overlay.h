@@ -65,6 +65,16 @@ protected:
 	bool high_contrast;
 };
 
+template <typename Config>
+class HasConfig {
+public:
+	void initializeConfig(std::shared_ptr<config::ConfigSection> config_section);
+
+protected:
+	std::shared_ptr<config::ConfigSection> config_ptr;
+	const Config* config;
+};
+
 /**
  * Interface for an overlay that is used as additional map layer on top of the rendered
  * terrain. You get some information about the world and the current block and draw
@@ -102,7 +112,7 @@ public:
  * You just have to implement the drawOverlay-method.
  */
 template <typename Renderer, typename Config>
-class AbstractOverlay : public Overlay, public HasRenderModeRenderer<Renderer>, public HasConfigSection<Config> {
+class AbstractOverlay : public Overlay, public HasRenderModeRenderer<Renderer>, public HasConfig<Config> {
 public:
 	AbstractOverlay(std::shared_ptr<config::ConfigSection> overlay_config);
 	virtual ~AbstractOverlay();
@@ -172,10 +182,17 @@ std::vector<std::shared_ptr<Overlay>> createOverlays(
 		const std::map<std::string, std::shared_ptr<config::OverlaySection>>& overlays_config,
 		int rotation);
 
+template <typename Config>
+void HasConfig<Config>::initializeConfig(std::shared_ptr<config::ConfigSection> config_section) {
+	config_ptr = config_section;
+	config = dynamic_cast<Config*>(config_ptr.get());
+	assert(this->config);
+}
+
 template <typename Renderer, typename Config>
 AbstractOverlay<Renderer, Config>::AbstractOverlay(std::shared_ptr<config::ConfigSection> overlay_config)
 	: images(nullptr), world(nullptr), current_chunk(nullptr) {
-	HasConfigSection<Config>::initializeConfig(overlay_config);
+	HasConfig<Config>::initializeConfig(overlay_config);
 }
 
 template <typename Renderer, typename Config>

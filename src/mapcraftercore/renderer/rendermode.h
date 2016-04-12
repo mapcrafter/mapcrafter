@@ -152,16 +152,6 @@ protected:
 	Renderer* renderer;
 };
 
-template <typename Config>
-class HasConfigSection {
-public:
-	void initializeConfig(std::shared_ptr<config::ConfigSection> config_section);
-
-protected:
-	std::shared_ptr<config::ConfigSection> config_ptr;
-	const Config* config;
-};
-
 /**
  * The base render mode class already implements handling of the initialize-method and
  * some other stuff (a comfortable getBlock-method that takes the current_chunk into
@@ -290,13 +280,6 @@ void HasRenderModeRenderer<Renderer>::initializeRenderer(const RenderView* rende
 	renderer = dynamic_cast<Renderer*>(renderer_ptr);
 	if (Renderer::TYPE != RenderModeRendererType::DUMMY)
 		assert(renderer);
-}
-
-template <typename Config>
-void HasConfigSection<Config>::initializeConfig(std::shared_ptr<config::ConfigSection> config_section) {
-	config_ptr = config_section;
-	config = dynamic_cast<Config*>(config_ptr.get());
-	assert(this->config);
 }
 
 template <typename Renderer>
