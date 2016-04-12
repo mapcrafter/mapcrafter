@@ -41,7 +41,7 @@ public:
 	virtual void lightTop(RGBAImage& image, const CornerColors& colors, int yoff) const;
 };
 
-class IsometricOverlayRenderer : public OverlayRenderer {
+class IsometricOverlayRenderer : public TintingOverlayRenderer {
 public:
 	virtual void tintLeft(RGBAImage& image, RGBAPixel color) const;
 	virtual void tintRight(RGBAImage& image, RGBAPixel color) const;

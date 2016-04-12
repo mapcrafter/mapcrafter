@@ -25,7 +25,6 @@
 #include "rendermodes.h"
 #include "../../blockhandler.h"
 #include "../../overlay.h"
-#include "../../rendermode.h"
 #include "../../../config/configsections/map.h"
 #include "../../../config/configsections/world.h"
 #include "../../../util.h"
@@ -50,11 +49,11 @@ TileRenderer* IsometricRenderView::createTileRenderer(BlockHandler* block_handle
 	return new IsometricTileRenderer(this, block_handler, images, tile_width, world, hardcode_overlay, overlays);
 }
 
-RenderModeRenderer* IsometricRenderView::createRenderModeRenderer(
-		const RenderModeRendererType& renderer) const {
-	if (renderer == RenderModeRendererType::LIGHTING)
+OverlayRenderer* IsometricRenderView::createOverlayRenderer(
+		const OverlayRendererType& renderer) const {
+	if (renderer == OverlayRendererType::LIGHTING)
 		return new IsometricLightingRenderer();
-	else if (renderer == RenderModeRendererType::OVERLAY)
+	else if (renderer == OverlayRendererType::TINTING)
 		return new IsometricOverlayRenderer();
 	return nullptr;
 }

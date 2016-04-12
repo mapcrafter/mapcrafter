@@ -36,8 +36,8 @@ public:
 			std::shared_ptr<Overlay> hardcode_overlay,
 			std::vector<std::shared_ptr<Overlay>> overlays) const;
 
-	virtual RenderModeRenderer* createRenderModeRenderer(
-			const RenderModeRendererType& renderer) const;
+	virtual OverlayRenderer* createOverlayRenderer(
+			const OverlayRendererType& renderer) const;
 
 	virtual void configureBlockImages(BlockImages* images,
 			const config::WorldSection& world_config,

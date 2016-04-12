@@ -44,12 +44,8 @@ class BlockHandler;
 class BlockImages;
 class Overlay;
 class RenderMode;
-class RenderModeRenderer;
-#ifdef HAVE_ENUM_CLASS_FORWARD_DECLARATION
-enum class RenderModeRendererType;
-#else
-class RenderModeRendererType;
-#endif
+class OverlayRenderer;
+enum class OverlayRendererType;
 class TileSet;
 class TileRenderer;
 
@@ -76,17 +72,17 @@ public:
 			std::vector<std::shared_ptr<Overlay>> overlays) const = 0;
 
 	/**
-	 * Creates an instance of the render view specific render mode renderer class.
+	 * Creates an instance of the render view specific overlay renderer class.
 	 *
-	 * Have a look at each base render mode: There is an abstract class / interface
+	 * Have a look at each overlay: There is an abstract class / interface
 	 * (like OverlayRenderer or LightingRenderer) that you have to implement for
 	 * the render view.
 	 *
-	 * Sorry for the ugly "const RenderModeRendererType& renderer" reference thingy.
+	 * Sorry for the ugly "const OverlayRendererType& renderer" reference thingy.
 	 * Ähm, ya know, circular dependencies and forward declarations and stuff.
 	 */
-	virtual RenderModeRenderer* createRenderModeRenderer(
-			const RenderModeRendererType& renderer) const = 0;
+	virtual OverlayRenderer* createOverlayRenderer(
+			const OverlayRendererType& renderer) const = 0;
 
 	/**
 	 * Configures a block images object by calling some (eventually per render view

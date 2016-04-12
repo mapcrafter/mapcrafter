@@ -2,7 +2,6 @@
 #include "../mapcraftercore/mc/worldcache.h"
 #include "../mapcraftercore/renderer/blockimages.h"
 #include "../mapcraftercore/renderer/image.h"
-#include "../mapcraftercore/renderer/rendermode.h"
 #include "../mapcraftercore/renderer/renderview.h"
 #include "../mapcraftercore/renderer/tilerenderer.h"
 #include "../mapcraftercore/renderer/tileset.h"
@@ -241,28 +240,6 @@ int traverseOctree(Octree* octree) {
 */
 
 int main(int argc, char** argv) {
-	//RGBAImage test(200, 200);
-	RGBAImage test;
-	test.readPNG("input_rgb_big.png");
-
-	//std::set<RGBAPixel> colors;
-	//for (int x = 0; x < test.getWidth(); x++)
-	//	for (int y = 0; y < test.getHeight(); y++)
-	//		colors.insert(test.pixel(x, y));
-
-	std::cout << "start" << std::endl;
-	//OctreePalette palette(test, 256);
-	//std::cout << magic_count << " " << traverseOctree(palette.getOctree()) << " " << colors.size() << std::endl;
-
-	//imageDither(test, palette, true);
-	//imageColorQuantize(test, 256);
-	test.writeIndexedPNG("test.png", 8, true);
-
-	return 0;
-
-	//test.fill(rgba(127, 127, 127, 255), 0, 0, 200, 200);
-
-
 	// std::vector<RGBAPixel> palette;
 	/*
 	palette.push_back(rgba(255, 255, 255, 255));

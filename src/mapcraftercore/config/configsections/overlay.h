@@ -23,7 +23,6 @@
 #include "../configsection.h"
 #include "../validation.h"
 #include "../../renderer/overlay.h"
-#include "../../renderer/rendermode.h"
 #include "../../util.h"
 
 #include <iosfwd>

@@ -21,7 +21,6 @@
 #define RENDERMODES_LIGHTING_H_
 
 #include "../overlay.h"
-#include "../rendermode.h"
 #include "../../config/configsection.h"
 
 #include <array>
@@ -92,7 +91,7 @@ typedef double LightingColor;
 // - defined as array with corners top left / top right / bottom left / bottom right
 typedef std::array<LightingColor, 4> CornerColors;
 
-class LightingRenderer : public RenderModeRenderer {
+class LightingRenderer : public OverlayRenderer {
 public:
 	virtual ~LightingRenderer();
 
@@ -131,7 +130,7 @@ public:
 	 */
 	virtual void lightAllSimple(RGBAImage& image, LightingColor color) const;
 
-	static const RenderModeRendererType TYPE;
+	static const OverlayRendererType TYPE;
 
 protected:
 	/**

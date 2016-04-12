@@ -21,7 +21,6 @@
 #define RENDERMODES_HEIGHTOVERLAY_H_
 
 #include "../overlay.h"
-#include "../rendermode.h"
 #include "../../config/configsection.h"
 #include "../../util.h"
 

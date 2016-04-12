@@ -200,7 +200,7 @@ void LightingRenderer::lightAllSimple(RGBAImage& image, LightingColor color) con
 	}
 }
 
-const RenderModeRendererType LightingRenderer::TYPE = RenderModeRendererType::LIGHTING;
+const OverlayRendererType LightingRenderer::TYPE = OverlayRendererType::LIGHTING;
 
 void LightingRenderer::drawBottomTriangle(RGBAImage& image, int size, double c1,
 		double c2, double c3) const {

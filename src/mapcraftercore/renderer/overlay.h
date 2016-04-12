@@ -22,9 +22,10 @@
 #define OVERLAY_H_
 
 #include "blockimages.h"
-#include "rendermode.h"
 #include "image.h"
+#include "renderview.h"
 #include "../config/configsections/overlay.h"
+#include "../mc/worldcache.h"
 
 #include <iosfwd>
 #include <string>
@@ -43,10 +44,27 @@ namespace renderer {
 
 class RGBAImage;
 
-class OverlayRenderer : public RenderModeRenderer {
+enum class OverlayRendererType {
+	DUMMY,
+	LIGHTING,
+	TINTING
+};
+
+/**
+ * Empty class just to have a base class for the rendering part of each render mode.
+ */
+class OverlayRenderer {
 public:
-	OverlayRenderer();
-	virtual ~OverlayRenderer();
+	virtual ~OverlayRenderer() {};
+
+	// every render mode renderer needs a ...
+	static const OverlayRendererType TYPE;
+};
+
+class TintingOverlayRenderer : public OverlayRenderer {
+public:
+	TintingOverlayRenderer();
+	virtual ~TintingOverlayRenderer();
 
 	// TODO
 	// DEPRECATED
@@ -58,12 +76,25 @@ public:
 	virtual void tintRight(RGBAImage& image, RGBAPixel color) const = 0;
 	virtual void tintTop(RGBAImage& image, RGBAPixel color, int offset) const = 0;
 
-	static const RenderModeRendererType TYPE;
+	static const OverlayRendererType TYPE;
 
 protected:
 	std::tuple<int, int, int> getRecolor(RGBAPixel color) const;
 
 	bool high_contrast;
+};
+
+template <typename Renderer = OverlayRenderer>
+class HasOverlayRenderer {
+public:
+	HasOverlayRenderer();
+	virtual ~HasOverlayRenderer();
+
+	void initializeRenderer(const RenderView* render_view);
+
+protected:
+	OverlayRenderer* renderer_ptr;
+	Renderer* renderer;
 };
 
 template <typename Config>
@@ -113,7 +144,7 @@ public:
  * You just have to implement the drawOverlay-method.
  */
 template <typename Renderer, typename Config>
-class AbstractOverlay : public Overlay, public HasRenderModeRenderer<Renderer>, public HasConfig<Config> {
+class AbstractOverlay : public Overlay, public HasOverlayRenderer<Renderer>, public HasConfig<Config> {
 public:
 	AbstractOverlay(std::shared_ptr<config::ConfigSection> overlay_config);
 	virtual ~AbstractOverlay();
@@ -153,7 +184,7 @@ enum class TintingOverlayMode {
  * color for each block / face.
  */
 template <typename Config>
-class TintingOverlay : public AbstractOverlay<OverlayRenderer, Config> {
+class TintingOverlay : public AbstractOverlay<TintingOverlayRenderer, Config> {
 public:
 	/**
 	 * Constructor. You have to specify the working mode of the tinting overlay.
@@ -183,6 +214,28 @@ std::vector<std::shared_ptr<Overlay>> createOverlays(
 		const std::map<std::string, std::shared_ptr<config::OverlaySection>>& overlays_config,
 		int rotation);
 
+template <typename Renderer>
+HasOverlayRenderer<Renderer>::HasOverlayRenderer()
+	: renderer_ptr(nullptr), renderer(nullptr) {
+}
+
+template <typename Renderer>
+HasOverlayRenderer<Renderer>::~HasOverlayRenderer() {
+	if (renderer_ptr != nullptr)
+		delete renderer_ptr;
+}
+
+template <typename Renderer>
+void HasOverlayRenderer<Renderer>::initializeRenderer(const RenderView* render_view) {
+	// create the render mode renderer by calling the render view factory method
+	// for this renderer type
+	renderer_ptr = render_view->createOverlayRenderer(Renderer::TYPE);
+	// try to cast it to the right subclass, make sure that works if there is a renderer
+	renderer = dynamic_cast<Renderer*>(renderer_ptr);
+	if (Renderer::TYPE != OverlayRendererType::DUMMY)
+		assert(renderer);
+}
+
 template <typename Config>
 void HasConfig<Config>::initializeConfig(std::shared_ptr<config::ConfigSection> config_section) {
 	config_ptr = config_section;
@@ -207,7 +260,7 @@ void AbstractOverlay<Renderer, Config>::initialize(const RenderView* render_view
 	this->world = world;
 	this->current_chunk = current_chunk;
 
-	HasRenderModeRenderer<Renderer>::initializeRenderer(render_view);
+	HasOverlayRenderer<Renderer>::initializeRenderer(render_view);
 }
 
 template <typename Renderer, typename Config>
@@ -233,7 +286,7 @@ mc::Block AbstractOverlay<Renderer, Config>::getBlock(const mc::BlockPos& pos, i
 template <typename Config>
 TintingOverlay<Config>::TintingOverlay(TintingOverlayMode overlay_mode,
 		std::shared_ptr<config::ConfigSection> overlay_config)
-	: AbstractOverlay<OverlayRenderer, Config>(overlay_config), overlay_mode(overlay_mode) {
+	: AbstractOverlay<TintingOverlayRenderer, Config>(overlay_config), overlay_mode(overlay_mode) {
 }
 
 template <typename Config>

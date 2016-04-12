@@ -24,7 +24,6 @@
 #include "../validation.h"
 #include "../../renderer/blockhandler.h"
 #include "../../renderer/image.h"
-#include "../../renderer/rendermode.h"
 #include "../../renderer/renderview.h"
 
 #include <iostream>

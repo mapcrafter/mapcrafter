@@ -42,7 +42,6 @@ class BlockHandler;
 class BlockImages;
 class Overlay;
 class TilePos;
-class RenderMode;
 class RenderView;
 class RGBAImage;
 

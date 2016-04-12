@@ -102,7 +102,7 @@ void IsometricLightingRenderer::lightTop(RGBAImage& image, const CornerColors& c
 void IsometricOverlayRenderer::tintLeft(RGBAImage& image, RGBAPixel color) const {
 	int texture_size = image.getWidth() / 2;
 	
-	auto overlay = getRecolor(color);
+	//auto overlay = getRecolor(color);
 	for (SideFaceIterator it(texture_size, SideFaceIterator::LEFT); !it.end(); it.next()) {
 		RGBAPixel& pixel = image.pixel(it.dest_x, it.dest_y + texture_size/2);
 		pixel = color;
@@ -118,7 +118,7 @@ void IsometricOverlayRenderer::tintLeft(RGBAImage& image, RGBAPixel color) const
 void IsometricOverlayRenderer::tintRight(RGBAImage& image, RGBAPixel color) const {
 	int texture_size = image.getWidth() / 2;
 	
-	auto overlay = getRecolor(color);
+	//auto overlay = getRecolor(color);
 	for (SideFaceIterator it(texture_size, SideFaceIterator::RIGHT); !it.end(); it.next()) {
 		RGBAPixel& pixel = image.pixel(it.dest_x + texture_size, it.dest_y + texture_size/2);
 		pixel = color;
@@ -134,7 +134,7 @@ void IsometricOverlayRenderer::tintRight(RGBAImage& image, RGBAPixel color) cons
 void IsometricOverlayRenderer::tintTop(RGBAImage& image, RGBAPixel color, int offset) const {
 	int texture_size = image.getWidth() / 2;
 
-	auto overlay = getRecolor(color);
+	//auto overlay = getRecolor(color);
 	for (TopFaceIterator it(texture_size); !it.end(); it.next()) {
 		RGBAPixel& pixel = image.pixel(it.dest_x, it.dest_y);
 		pixel = color;

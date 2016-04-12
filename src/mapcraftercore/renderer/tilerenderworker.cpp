@@ -22,7 +22,6 @@
 #include "blockhandler.h"
 #include "blockimages.h"
 #include "image.h"
-#include "rendermode.h"
 #include "renderview.h"
 #include "tilerenderer.h"
 #include "tileset.h"

@@ -25,7 +25,6 @@
 #include "rendermodes.h"
 #include "../../blockhandler.h"
 #include "../../overlay.h"
-#include "../../rendermode.h"
 
 namespace mapcrafter {
 namespace renderer {
@@ -45,11 +44,11 @@ TileRenderer* TopdownRenderView::createTileRenderer(BlockHandler* block_handler,
 	return new TopdownTileRenderer(this, block_handler, images, tile_width, world, hardcode_overlay, overlays);
 }
 
-RenderModeRenderer* TopdownRenderView::createRenderModeRenderer(
-		const RenderModeRendererType& renderer) const {
-	if (renderer == RenderModeRendererType::LIGHTING)
+OverlayRenderer* TopdownRenderView::createOverlayRenderer(
+		const OverlayRendererType& renderer) const {
+	if (renderer == OverlayRendererType::LIGHTING)
 		return new TopdownLightingRenderer();
-	else if (renderer == RenderModeRendererType::OVERLAY)
+	else if (renderer == OverlayRendererType::TINTING)
 		return new TopdownOverlayRenderer();
 	return nullptr;
 }

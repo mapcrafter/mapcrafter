@@ -35,22 +35,6 @@ renderer::ImageFormatType as<renderer::ImageFormatType>(const std::string& from)
 }
 
 template <>
-renderer::RenderModeType as<renderer::RenderModeType>(const std::string& from) {
-	if (from == "plain")
-		return renderer::RenderModeType::PLAIN;
-	else if (from == "daylight")
-		return renderer::RenderModeType::DAYLIGHT;
-	else if (from == "nightlight")
-		return renderer::RenderModeType::NIGHTLIGHT;
-	else if (from == "cave")
-		return renderer::RenderModeType::CAVE;
-	else if (from == "cavelight")
-		return renderer::RenderModeType::CAVELIGHT;
-	throw std::invalid_argument("Must be one of 'plain', 'daylight', 'nightlight', "
-			"'cave' or 'cavelight'!");
-}
-
-template <>
 config::LegacyRenderMode as<config::LegacyRenderMode>(const std::string& from) {
 	if (from == "plain")
 		return config::LegacyRenderMode::PLAIN;

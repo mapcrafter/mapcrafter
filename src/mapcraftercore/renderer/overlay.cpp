@@ -36,18 +36,20 @@
 namespace mapcrafter {
 namespace renderer {
 
-OverlayRenderer::OverlayRenderer()
+const OverlayRendererType OverlayRenderer::TYPE = OverlayRendererType::DUMMY;
+
+TintingOverlayRenderer::TintingOverlayRenderer()
 	: high_contrast(true) {
 }
 
-OverlayRenderer::~OverlayRenderer() {
+TintingOverlayRenderer::~TintingOverlayRenderer() {
 }
 
-void OverlayRenderer::setHighContrast(bool high_contrast) {
+void TintingOverlayRenderer::setHighContrast(bool high_contrast) {
 	this->high_contrast = high_contrast;
 }
 
-void OverlayRenderer::tintBlock(RGBAImage& image, RGBAPixel color) const {
+void TintingOverlayRenderer::tintBlock(RGBAImage& image, RGBAPixel color) const {
 	/*
 	if (high_contrast) {
 		// do the high contrast mode magic
@@ -74,7 +76,7 @@ void OverlayRenderer::tintBlock(RGBAImage& image, RGBAPixel color) const {
 	image.fill(color);
 }
 
-std::tuple<int, int, int> OverlayRenderer::getRecolor(RGBAPixel color) const {
+std::tuple<int, int, int> TintingOverlayRenderer::getRecolor(RGBAPixel color) const {
 	// get luminance of recolor:
 	// "10*r + 3*g + b" should actually be "3*r + 10*g + b"
 	// it was a typo, but doesn't look bad either
@@ -94,7 +96,7 @@ std::tuple<int, int, int> OverlayRenderer::getRecolor(RGBAPixel color) const {
 	return std::make_tuple(nr, ng, nb);
 }
 
-const RenderModeRendererType OverlayRenderer::TYPE = RenderModeRendererType::OVERLAY;
+const OverlayRendererType TintingOverlayRenderer::TYPE = OverlayRendererType::TINTING;
 
 Overlay* createOverlay(const config::WorldSection& world_config,
 		const config::MapSection& map_config,
