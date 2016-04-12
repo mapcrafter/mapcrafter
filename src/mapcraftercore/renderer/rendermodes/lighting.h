@@ -157,8 +157,6 @@ public:
 	LightingOverlay(std::shared_ptr<config::ConfigSection> overlay_config, bool simulate_sun_light);
 	virtual ~LightingOverlay();
 
-	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
-	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 	virtual void drawOverlay(const RGBAImage& block, RGBAImage& overlay, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 private:

@@ -268,19 +268,6 @@ LightingOverlay::LightingOverlay(std::shared_ptr<config::ConfigSection> overlay_
 LightingOverlay::~LightingOverlay() {
 }
 
-bool LightingOverlay::isHidden(const mc::BlockPos& pos,
-		uint16_t id, uint16_t data) {
-	return false;
-}
-
-void LightingOverlay::draw(RGBAImage& image, const mc::BlockPos& pos,
-		uint16_t id, uint16_t data) {
-	RGBAImage overlay = image.emptyCopy();
-	drawOverlay(image, overlay, pos, id, data);
-	overlay.applyMask(image);
-	image.alphaBlit(overlay, 0, 0);
-}
-
 void LightingOverlay::drawOverlay(const RGBAImage& block, RGBAImage& overlay,
 		const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	bool transparent = images->isBlockTransparent(id, data);
