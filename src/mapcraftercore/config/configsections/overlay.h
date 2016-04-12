@@ -22,6 +22,7 @@
 
 #include "../configsection.h"
 #include "../validation.h"
+#include "../../renderer/overlay.h"
 #include "../../renderer/rendermode.h"
 #include "../../util.h"
 
@@ -30,6 +31,16 @@
 
 namespace mapcrafter {
 namespace config {
+
+enum class OverlayType {
+	HEIGHT,
+	LIGHTING,
+	LIGHTLEVEL,
+	SLIME,
+	SPAWN,
+};
+
+std::ostream& operator<<(std::ostream& out, OverlayType overlay);
 
 class OverlaySection : public ConfigSection {
 public:
@@ -41,7 +52,7 @@ public:
 
 	std::string getID() const;
 	std::string getName() const;
-	renderer::OverlayType getType() const;
+	OverlayType getType() const;
 	bool isBase() const;
 
 protected:

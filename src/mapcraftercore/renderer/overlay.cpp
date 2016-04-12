@@ -31,6 +31,8 @@
 #include "../config/configsections/world.h"
 #include "../mc/pos.h"
 
+#include <iostream>
+
 namespace mapcrafter {
 namespace renderer {
 
@@ -97,37 +99,37 @@ const RenderModeRendererType OverlayRenderer::TYPE = RenderModeRendererType::OVE
 Overlay* createOverlay(const config::WorldSection& world_config,
 		const config::MapSection& map_config,
 		std::shared_ptr<config::OverlaySection> overlay_config, int rotation) {
-	OverlayType type = overlay_config->getType();
+	config::OverlayType type = overlay_config->getType();
 	std::string id = overlay_config->getID();
 	std::string name = overlay_config->getName();
 
 	/*
-	if (type == OverlayType::LIGHTING) {
+	if (type == config::OverlayType::LIGHTING) {
 		return new LightingOverlay(id, name, overlay_config.isDay(),
 				overlay_config.getLightingIntensity(),
 				overlay_config.getLightingWaterIntensity(),
 				world_config.getDimension() == mc::Dimension::END);
-	} else if (type == OverlayType::SLIME) {
+	} else if (type == config::OverlayType::SLIME) {
 		return new SlimeOverlay(world_config.getInputDir(), rotation);
-	} else if (type == OverlayType::SPAWN) {
+	} else if (type == config::OverlayType::SPAWN) {
 		return new SpawnOverlay(overlay_config.isDay());
 	} else {
 		// may not happen
 		assert(false);
 	}
 	*/
-	if (type == OverlayType::HEIGHT) {
+	if (type == config::OverlayType::HEIGHT) {
 		return new HeightOverlay(overlay_config);
-	} else if (type == OverlayType::LIGHTING) {
+	} else if (type == config::OverlayType::LIGHTING) {
 		bool simulate_sun_light = false;
 		simulate_sun_light = simulate_sun_light || world_config.getDimension() == mc::Dimension::END;
 		simulate_sun_light = simulate_sun_light || map_config.getBlockHandler() == BlockHandlerType::CAVE;
 		return new LightingOverlay(overlay_config, simulate_sun_light);
-	} else if (type == OverlayType::LIGHTLEVEL) {
+	} else if (type == config::OverlayType::LIGHTLEVEL) {
 		return new LightLevelOverlay(overlay_config);
-	} else if (type == OverlayType::SLIME) {
+	} else if (type == config::OverlayType::SLIME) {
 		return new SlimeOverlay(overlay_config, world_config.getInputDir(), rotation);
-	} else if (type == OverlayType::SPAWN) {
+	} else if (type == config::OverlayType::SPAWN) {
 		return new SpawnOverlay(overlay_config);
 	} else {
 		// may not happen

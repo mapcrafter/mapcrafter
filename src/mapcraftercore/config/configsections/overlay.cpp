@@ -29,17 +29,17 @@ namespace mapcrafter {
 namespace util {
 
 template <>
-renderer::OverlayType as<renderer::OverlayType>(const std::string& from) {
+config::OverlayType as<config::OverlayType>(const std::string& from) {
 	if (from == "height") {
-		return renderer::OverlayType::HEIGHT;
+		return config::OverlayType::HEIGHT;
 	} else if (from == "lighting")
-		return renderer::OverlayType::LIGHTING;
+		return config::OverlayType::LIGHTING;
 	else if (from == "lightlevel")
-		return renderer::OverlayType::LIGHTLEVEL;
+		return config::OverlayType::LIGHTLEVEL;
 	else if (from == "slime")
-		return renderer::OverlayType::SLIME;
+		return config::OverlayType::SLIME;
 	else if (from == "spawn")
-		return renderer::OverlayType::SPAWN;
+		return config::OverlayType::SPAWN;
 	throw std::invalid_argument("Must be 'none', 'lighting', 'lightlevel', 'spawn' or 'slime'.");
 }
 
@@ -59,6 +59,16 @@ config::HeightColor as<config::HeightColor>(const std::string& from) {
 
 namespace mapcrafter {
 namespace config {
+
+std::ostream& operator<<(std::ostream& out, OverlayType overlay) {
+	switch (overlay) {
+	case OverlayType::LIGHTING: return out << "lighting";
+	case OverlayType::LIGHTLEVEL: return out << "lightlevel";
+	case OverlayType::SLIME: return out << "slime";
+	case OverlayType::SPAWN: return out << "spawn";
+	default: return out << "unknown";
+	}
+}
 
 OverlaySection::OverlaySection() {
 }
@@ -85,10 +95,10 @@ std::string OverlaySection::getName() const {
 	return name.getValue();
 }
 
-renderer::OverlayType OverlaySection::getType() const {
+OverlayType OverlaySection::getType() const {
 	std::string section_name = getSectionType();
 	section_name = section_name.substr(std::string("section-").size());
-	return util::as<renderer::OverlayType>(section_name);
+	return util::as<OverlayType>(section_name);
 }
 
 bool OverlaySection::isBase() const {
@@ -114,7 +124,7 @@ bool OverlaySection::parseField(const std::string key, const std::string value,
 
 void OverlaySection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
-	base.setDefault(getType() == renderer::OverlayType::LIGHTING);
+	base.setDefault(getType() == OverlayType::LIGHTING);
 }
 
 std::ostream& operator<<(std::ostream& out, const HeightColor& color) {

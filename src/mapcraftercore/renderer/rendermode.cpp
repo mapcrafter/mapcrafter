@@ -96,16 +96,6 @@ std::ostream& operator<<(std::ostream& out, RenderModeType render_mode) {
 	}
 }
 
-std::ostream& operator<<(std::ostream& out, OverlayType overlay) {
-	switch (overlay) {
-	case OverlayType::LIGHTING: return out << "lighting";
-	case OverlayType::LIGHTLEVEL: return out << "lightlevel";
-	case OverlayType::SLIME: return out << "slime";
-	case OverlayType::SPAWN: return out << "spawn";
-	default: return out << "unknown";
-	}
-}
-
 RenderMode* createRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config, int rotation) {
 	// RenderModeType type = map_config.getRenderMode();

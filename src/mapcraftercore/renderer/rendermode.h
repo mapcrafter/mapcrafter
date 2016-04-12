@@ -243,17 +243,7 @@ enum class RenderModeType {
 	CAVELIGHT
 };
 
-enum class OverlayType {
-	HEIGHT,
-	LIGHTING,
-	LIGHTLEVEL,
-	SLIME,
-	SPAWN,
-};
-
 std::ostream& operator<<(std::ostream& out, RenderModeType render_mode);
-std::ostream& operator<<(std::ostream& out, OverlayType overlay);
-
 /**
  * Creates the render mode for a map config section.
  */

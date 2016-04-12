@@ -26,6 +26,7 @@
 #include "image.h"
 #include "../config/configsections/overlay.h"
 
+#include <iosfwd>
 #include <string>
 #include <tuple>
 #include <vector>
