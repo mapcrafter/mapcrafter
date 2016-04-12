@@ -62,6 +62,7 @@ namespace config {
 
 std::ostream& operator<<(std::ostream& out, OverlayType overlay) {
 	switch (overlay) {
+	case OverlayType::HEIGHT: return out << "height";
 	case OverlayType::LIGHTING: return out << "lighting";
 	case OverlayType::LIGHTLEVEL: return out << "lightlevel";
 	case OverlayType::SLIME: return out << "slime";
