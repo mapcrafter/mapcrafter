@@ -21,7 +21,7 @@
 #define TILERENDERER_H_
 
 #include "biomes.h"
-#include "../mc/worldcache.h" // mc::DIR_*
+#include "../mc/block.h"
 
 #include <vector>
 #include <boost/filesystem.hpp>
@@ -34,6 +34,7 @@ namespace mapcrafter {
 namespace mc {
 class BlockPos;
 class Chunk;
+class WorldCache;
 }
 
 namespace renderer {

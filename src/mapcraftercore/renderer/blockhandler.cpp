@@ -21,7 +21,7 @@
 
 #include "blockimages.h"
 #include "../config/configsections/map.h"
-#include "../mc/pos.h"
+#include "../mc/worldcache.h"
 #include "../util.h"
 
 namespace mapcrafter {

@@ -25,6 +25,8 @@
 #include "image.h"
 #include "renderview.h"
 #include "../config/configsections/overlay.h"
+#include "../mc/block.h"
+#include "../mc/pos.h"
 #include "../mc/worldcache.h"
 
 #include <iosfwd>

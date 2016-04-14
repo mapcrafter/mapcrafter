@@ -25,7 +25,6 @@
 #include "../config/mapcrafterconfig.h"
 #include "../config/webconfig.h"
 #include "../mc/world.h"
-#include "../mc/worldcache.h"
 
 #include <ctime>
 #include <map>

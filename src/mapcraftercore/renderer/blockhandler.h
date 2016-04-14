@@ -20,7 +20,8 @@
 #ifndef BLOCKHANDLER_H_
 #define BLOCKHANDLER_H_
 
-#include "../mc/worldcache.h"
+#include "../mc/block.h"
+#include "../mc/pos.h"
 
 #include <iosfwd>
 #include <vector>
@@ -33,6 +34,8 @@ class MapSection;
 
 namespace mc {
 class BlockPos;
+class Chunk;
+class WorldCache;
 }
 
 namespace renderer {

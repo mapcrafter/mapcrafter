@@ -26,6 +26,7 @@
 #include "renderview.h"
 #include "tileset.h"
 #include "../mc/pos.h"
+#include "../mc/worldcache.h"
 #include "../util.h"
 
 namespace mapcrafter {

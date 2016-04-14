@@ -20,9 +20,8 @@
 #ifndef WORLDCACHE_H_
 #define WORLDCACHE_H_
 
-#include "chunk.h"
+#include "block.h"
 #include "pos.h"
-#include "region.h"
 #include "world.h"
 
 #include <set>
@@ -30,31 +29,8 @@
 namespace mapcrafter {
 namespace mc {
 
-/**
- * A block with id/data/biome/lighting data.
- */
-struct Block {
-	Block();
-	Block(const mc::BlockPos& pos, uint16_t id, uint16_t data);
-
-	// which block does this data belong to (set by getBlock-method)
-	mc::BlockPos pos;
-	uint16_t id, data;
-	uint8_t biome;
-	uint8_t block_light, sky_light;
-	// which of the fields above are set? (set by getBlock-method)
-	int fields_set;
-
-	bool isFullWater() const;
-	bool isStairs() const;
-};
-
-const int GET_ID = 1;
-const int GET_DATA = 2;
-const int GET_BIOME = 4;
-const int GET_BLOCK_LIGHT = 8;
-const int GET_SKY_LIGHT = 16;
-const int GET_LIGHT = GET_BLOCK_LIGHT | GET_SKY_LIGHT;
+class Chunk;
+class Region;
 
 /**
  * Some cache statistics for debugging. Not used at the moment.

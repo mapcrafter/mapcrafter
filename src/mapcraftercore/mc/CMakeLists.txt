@@ -1,5 +1,6 @@
 set(SOURCE
     ${SOURCE}
+    "${CMAKE_CURRENT_SOURCE_DIR}/block.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/chunk.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/nbt.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/pos.cpp"
@@ -12,6 +13,7 @@ set(SOURCE
 )
 set(HEADERS
     ${HEADERS}
+    "${CMAKE_CURRENT_SOURCE_DIR}/block.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/chunk.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/nbt.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/pos.h"

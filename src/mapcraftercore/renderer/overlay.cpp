@@ -29,7 +29,6 @@
 #include "../config/configsections/map.h"
 #include "../config/configsections/overlay.h"
 #include "../config/configsections/world.h"
-#include "../mc/pos.h"
 
 #include <iostream>
 
