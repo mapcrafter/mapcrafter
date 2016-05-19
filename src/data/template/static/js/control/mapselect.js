@@ -29,6 +29,7 @@ MapSelectControl.prototype.create = function(wrapper) {
 	var text = document.createElement("span");
 	text.innerHTML = "Map type: ";
 	
+	L.DomEvent.disableClickPropagation(wrapper);
 	wrapper.appendChild(text);
 	wrapper.appendChild(select);
 };
