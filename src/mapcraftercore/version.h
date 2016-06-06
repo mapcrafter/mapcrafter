@@ -21,6 +21,7 @@
 #define VERSION_H_
 
 namespace mapcrafter {
+extern const char* MINECRAFT_VERSION;
 extern const char* MAPCRAFTER_VERSION;
 extern const char* MAPCRAFTER_GITVERSION;
 };

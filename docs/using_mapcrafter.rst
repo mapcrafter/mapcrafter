@@ -132,6 +132,11 @@ Renderer options
     the renderer renders all tiles, not just the tiles, which might have
     changed. See ``--render-skip`` for the format to specify maps.
 
+.. cmdoption:: -F, --render-force-all
+
+    This option is similar to the ``-f`` option, but it makes Mapcrafter force-render
+    all maps.
+
 .. cmdoption:: -j <number>, --jobs <number>
 
     This is the count of threads to use (defaults to one), when rendering the

@@ -268,7 +268,12 @@ BlockImage BlockImage::rotate(int count) const {
 	for (int i = 0; i < 4; i++) {
 		int face = 1 << i;
 		int new_face = util::rotateShiftLeft(face, count, 4);
-		rotated.setFace(new_face, getFace(face), getXOffset(face), getYOffset(face));
+		RGBAImage texture = getFace(face);
+		// we have to flip the texture if it is moved from/to south|west to/from north|east
+		if (((face == FACE_SOUTH || face == FACE_WEST) && (new_face == FACE_NORTH || new_face == FACE_EAST))
+				|| ((new_face == FACE_SOUTH || new_face == FACE_WEST) && (face == FACE_NORTH || face == FACE_EAST)))
+			texture = texture.flip(true, false);
+		rotated.setFace(new_face, texture, getXOffset(face), getYOffset(face));
 	}
 
 	RGBAImage top = getFace(FACE_TOP).rotate(count);
@@ -398,6 +403,8 @@ uint16_t IsometricBlockImages::filterBlockData(uint16_t id, uint16_t data) const
 	else if (id == 151 || id == 178)
 		return 0;
 	else if (id == 154) // hopper
+		return 0;
+	else if (id == 199) // chrous plant
 		return 0;
 	return data;
 }
@@ -859,6 +866,8 @@ void IsometricBlockImages::createSlabs(uint16_t id, SlabType type, bool double_s
 		slab_textures[0x3] = textures.PLANKS_JUNGLE;
 		slab_textures[0x4] = textures.PLANKS_ACACIA;
 		slab_textures[0x5] = textures.PLANKS_BIG_OAK;
+	} else if (type == SlabType::PURPUR) {
+		slab_textures[0x0] = textures.PURPUR_BLOCK;
 	}
 	for (auto it = slab_textures.begin(); it != slab_textures.end(); ++it) {
 		RGBAImage side = it->second;
@@ -1029,7 +1038,7 @@ void IsometricBlockImages::createDoubleChest(uint16_t id, const DoubleChestTextu
 void IsometricBlockImages::createRedstoneWire(uint16_t id, uint16_t extra_data,
 		uint8_t r, uint8_t g, uint8_t b) { // id 55
 	RGBAImage redstone_cross = resources.getBlockTextures().REDSTONE_DUST_DOT;
-	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE0;
+	RGBAImage redstone_line = resources.getBlockTextures().REDSTONE_DUST_LINE0.rotate(1);
 	redstone_cross.simpleAlphaBlit(redstone_line, 0, 0);
 	redstone_cross.simpleAlphaBlit(redstone_line.rotate(1), 0, 0);
 
@@ -1203,25 +1212,24 @@ void IsometricBlockImages::createSnow() { // id 78
 	}
 }
 
-void IsometricBlockImages::createIce(uint8_t id) { // id 79
-	RGBAImage texture = resources.getBlockTextures().ICE;
-
-	for (int w = 0; w <= 1; w++)
+void IsometricBlockImages::createIce(uint8_t id, uint16_t extra_data, const RGBAImage& texture) { // id 79, 212
+	for (int w = 0; w <= 1; w++) {
 		for (int s = 0; s <= 1; s++) {
 			RGBAImage block(getBlockSize(), getBlockSize());
-			uint16_t extra_data = 0;
+			uint16_t data = extra_data;
 			if (w == 1)
 				blitFace(block, FACE_WEST, texture, 0, 0, true, dleft, dright);
 			else
-				extra_data |= DATA_WEST;
+				data |= DATA_WEST;
 
 			if (s == 1)
 				blitFace(block, FACE_SOUTH, texture, 0, 0, true, dleft, dright);
 			else
-				extra_data |= DATA_SOUTH;
+				data |= DATA_SOUTH;
 			blitFace(block, FACE_TOP, texture, 0, 0, true, dleft, dright);
-			setBlockImage(id, extra_data, block);
+			setBlockImage(id, data, block);
 		}
+	}
 }
 
 void IsometricBlockImages::createCactus() { // id 81
@@ -1621,7 +1629,7 @@ void IsometricBlockImages::createCocoas() { // id 127
 }
 
 void IsometricBlockImages::createTripwireHook() { // id 131
-	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE0.colorize((uint8_t) 192, 192, 192);
+	RGBAImage tripwire = resources.getBlockTextures().REDSTONE_DUST_LINE0.colorize((uint8_t) 192, 192, 192).rotate(1);
 
 	BlockImage block;
 	block.setFace(FACE_NORTH, resources.getBlockTextures().TRIP_WIRE_SOURCE);
@@ -1631,6 +1639,43 @@ void IsometricBlockImages::createTripwireHook() { // id 131
 	setBlockImage(131, 1, block.rotate(1)); // on the east side
 	setBlockImage(131, 2, block.rotate(2)); // on the south side
 	setBlockImage(131, 3, block.rotate(3)); // on the west side
+}
+
+void IsometricBlockImages::createCommandBlock(uint16_t id, const RGBAImage& front,
+		const RGBAImage& back, const RGBAImage& side, const RGBAImage& conditional) { // id 137, 210, 211
+	for (int i = 0; i <= 15; i++) {
+		int rotation_data = i & ~0x8;
+		RGBAImage side_texture = (i & 0x8) ? conditional : side;
+
+		if (rotation_data <= 1 || rotation_data >= 6) {
+			// a command block that's pointing up or down
+			bool down = rotation_data == 0 || rotation_data == 6;
+			int face_up = down ? FACE_BOTTOM : FACE_TOP;
+			int face_down = down ? FACE_TOP : FACE_BOTTOM;
+			int side_flip = down ? true : false;
+			BlockImage block;
+			block.setFace(face_up, front);
+			block.setFace(FACE_NORTH | FACE_SOUTH | FACE_EAST | FACE_WEST, side_texture.flip(false, side_flip));
+			block.setFace(face_down, back);
+			setBlockImage(id, i, block);
+		} else {
+			// otherwise it's a command block showing in one of the other directions
+			BlockImage block;
+			block.setFace(FACE_NORTH, front);
+			block.setFace(FACE_EAST | FACE_WEST | FACE_TOP | FACE_BOTTOM, side_texture.rotate(3));
+			block.setFace(FACE_SOUTH, back);
+			int rotation = -1;
+			if (rotation_data == 2)
+				rotation = 0;
+			else if (rotation_data == 3)
+				rotation = 2;
+			else if (rotation_data == 4)
+				rotation = 3;
+			else if (rotation_data == 5)
+				rotation = 1;
+			setBlockImage(id, i, block.rotate(rotation));
+		}
+	}
 }
 
 void IsometricBlockImages::createBeacon() { // id 138
@@ -1733,6 +1778,49 @@ void IsometricBlockImages::createHopper() { // id 154
 void IsometricBlockImages::createLargePlant(uint16_t data, const RGBAImage& texture, const RGBAImage& top_texture) { // id 175
 	createItemStyleBlock(175, data, texture);
 	createItemStyleBlock(175, data | LARGEPLANT_TOP, top_texture);
+}
+
+void IsometricBlockImages::createEndRod() { // id 198
+	double s = (double) getTextureSize() / 16;
+	int base_height = std::max(2.0, std::ceil(s*2));
+	int base_width = std::max(4.0, std::ceil(s*6));
+	int rod_width = std::max(2.0, std::ceil(s*2));
+	int rod_length = s*16;
+
+	RGBAImage texture = resources.getBlockTextures().END_ROD.getOriginal();
+	s = (double) texture.getWidth() / 16;
+	RGBAImage rod_side, rod_top, base_side, base_top;
+	texture.clip(0, 0, s*2, s*14).resize(rod_side, rod_width, rod_length, InterpolationType::NEAREST);
+	texture.clip(s*2, 0, s*2, s*2).resize(rod_top, rod_width, rod_width, InterpolationType::NEAREST);
+	texture.clip(s*2, s*2, s*4, s*1).resize(base_side, base_width, base_height, InterpolationType::NEAREST);
+	texture.clip(s*2, s*3, s*4, s*4).resize(base_top, base_width, base_width, InterpolationType::NEAREST);
+
+	RGBAImage rod(getTextureSize(), getTextureSize());
+	rod.simpleAlphaBlit(rod_side, (rod.getWidth() - rod_side.getWidth()) / 2, 0);
+	RGBAImage base(getTextureSize(), getTextureSize());
+	base.simpleAlphaBlit(base_top, (base.getWidth() - base_top.getWidth()) / 2, (base.getHeight() - base_top.getHeight()) / 2);
+
+	BlockImage up, down;
+	up.setFace(FACE_BOTTOM, base);
+	up.setFace(FACE_NORTH, rod, getTextureSize() / 2, getTextureSize() / 4);
+	down.setFace(FACE_NORTH, rod, getTextureSize() / 2, getTextureSize() / 4);
+	down.setFace(FACE_TOP, base);
+	setBlockImage(198, 0, down);
+	setBlockImage(198, 1, up);
+
+	BlockImage north, south, east, west;
+	north.setFace(FACE_SOUTH, base);
+	north.setFace(FACE_BOTTOM, rod.rotate(1), 0, -getTextureSize() / 2);
+	south.setFace(FACE_NORTH, base);
+	south.setFace(FACE_TOP, rod.rotate(1), 0, getTextureSize() / 2);
+	west.setFace(FACE_EAST, base);
+	west.setFace(FACE_TOP, rod, 0, getTextureSize() / 2);
+	east.setFace(FACE_WEST, base);
+	east.setFace(FACE_BOTTOM, rod, 0, -getTextureSize() / 2);
+	setBlockImage(198, 2, buildImage(north));
+	setBlockImage(198, 3, buildImage(south));
+	setBlockImage(198, 4, buildImage(west));
+	setBlockImage(198, 5, buildImage(east));
 }
 
 RGBAImage IsometricBlockImages::createUnknownBlock() const {
@@ -1941,7 +2029,7 @@ void IsometricBlockImages::createBlocks() {
 	createTorch(76, t.REDSTONE_TORCH_ON); // redstone torch on
 	createButton(77, t.STONE); // stone button
 	createSnow(); // id 78
-	createIce(79); // ice block
+	createIce(79, 0, t.ICE); // ice block
 	createBlock(80, 0, t.SNOW); // snow block
 	createCactus(); // id 81
 	createBlock(82, 0, t.CLAY); // clay block
@@ -2038,8 +2126,8 @@ void IsometricBlockImages::createBlocks() {
 	createStairs(134, t.PLANKS_SPRUCE); // spruce wood stairs
 	createStairs(135, t.PLANKS_BIRCH); // birch wood stairs
 	createStairs(136, t.PLANKS_JUNGLE); // jungle wood stairs
-	// TODO
-	createBlock(137, 0, t.COMMAND_BLOCK_SIDE); // command block
+	createCommandBlock(137, t.COMMAND_BLOCK_FRONT, t.COMMAND_BLOCK_BACK,
+			t.COMMAND_BLOCK_SIDE, t.COMMAND_BLOCK_CONDITIONAL); // id 137
 	createBeacon(); // beacon
 	createFence(139, 0, t.COBBLESTONE); // cobblestone wall
 	createFence(139, 1, t.COBBLESTONE_MOSSY); // cobblestone wall mossy
@@ -2204,21 +2292,50 @@ void IsometricBlockImages::createBlocks() {
 	createDoor(195, t.DOOR_JUNGLE_LOWER, t.DOOR_JUNGLE_UPPER); // jungle door
 	createDoor(196, t.DOOR_ACACIA_LOWER, t.DOOR_ACACIA_UPPER); // acacia door
 	createDoor(197, t.DOOR_DARK_OAK_LOWER, t.DOOR_DARK_OAK_UPPER); // dark oak door
-	// id 198 // end rod
-	// id 199 // chrous plant
-	// id 200 // chorus flower
-	// id 201 // purpur block
-	// id 202 // purpur pillar
-	// id 203 // purpur stairs
-	// id 204 // purpur double slab
-	// id 205 // purpur slab
-	// id 206 // end stone bricks
-	// id 207 // beetroot seeds
+	createEndRod(); // id 198
+	createBlock(199, 0, t.CHORUS_PLANT); // chrous plant
+	// chorus flower --
+	createBlock(200, 0, t.CHORUS_FLOWER);
+	createBlock(200, 1, t.CHORUS_FLOWER);
+	createBlock(200, 2, t.CHORUS_FLOWER);
+	createBlock(200, 3, t.CHORUS_FLOWER);
+	createBlock(200, 4, t.CHORUS_FLOWER);
+	createBlock(200, 5, t.CHORUS_FLOWER_DEAD);
+	// --
+	createBlock(201, 0, t.PURPUR_BLOCK); // purpur block
+	// purpur pillar --
+	// TODO is the official data like this or are there also other combination? 0, 4, 8 seems odd...
+	createBlock(202, 0, t.PURPUR_PILLAR, t.PURPUR_PILLAR_TOP); // vertically
+	createBlock(202, 4, t.PURPUR_PILLAR_TOP, t.PURPUR_PILLAR); // east-west
+	createBlock(202, 8, t.PURPUR_PILLAR_TOP, t.PURPUR_PILLAR.rotate(1)); // north-south
+	// --
+	createStairs(203, t.PURPUR_BLOCK); // purpur stairs
+	createSlabs(204, SlabType::PURPUR, true); // purpur double slab
+	createSlabs(205, SlabType::PURPUR, false); // purpur slab
+	createBlock(206, 0, t.END_BRICKS); // end stone bricks
+	// beetroot seeds --
+	createItemStyleBlock(207, 0, t.BEETROOTS_STAGE_0);
+	createItemStyleBlock(207, 2, t.BEETROOTS_STAGE_2);
+	createItemStyleBlock(207, 3, t.BEETROOTS_STAGE_3);
+	// --
 	createSmallerBlock(208, 0, t.GRASS_PATH_SIDE, t.GRASS_PATH_TOP, 0, texture_size * 15.0 / 16.0); // grass paths
-	// id 209 // end gateway
-	// id 210 // repeating command block
-	// id 211 // chain command block
-	// id 255 // structure block
+	createBlock(209, 0, resources.getEndportalTexture()); // end gateway
+	createCommandBlock(210, t.REPEATING_COMMAND_BLOCK_FRONT, t.REPEATING_COMMAND_BLOCK_BACK,
+			t.REPEATING_COMMAND_BLOCK_SIDE, t.REPEATING_COMMAND_BLOCK_CONDITIONAL); // id 210
+	createCommandBlock(211, t.CHAIN_COMMAND_BLOCK_FRONT, t.CHAIN_COMMAND_BLOCK_BACK,
+			t.CHAIN_COMMAND_BLOCK_SIDE, t.CHAIN_COMMAND_BLOCK_CONDITIONAL); // id 211
+	// frosted ice --
+	createIce(212, 0, t.FROSTED_ICE_0);
+	createIce(212, 1, t.FROSTED_ICE_1);
+	createIce(212, 2, t.FROSTED_ICE_2);
+	createIce(212, 3, t.FROSTED_ICE_3);
+	// --
+	// structure block --
+	createBlock(255, 0, t.STRUCTURE_BLOCK_SAVE);
+	createBlock(255, 1, t.STRUCTURE_BLOCK_LOAD);
+	createBlock(255, 2, t.STRUCTURE_BLOCK_CORNER);
+	createBlock(255, 3, t.STRUCTURE_BLOCK_DATA);
+	// --
 }
 
 int IsometricBlockImages::createOpaqueWater() {

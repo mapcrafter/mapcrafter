@@ -4,13 +4,19 @@ MapSelectControl.prototype = new BaseControl("MapSelectControl");
  * This control widget allows the user to select a map.
  */
 function MapSelectControl() {
+	this.handler = new MapSelectHandler(this);
+	this.button = null;
 }
 
 MapSelectControl.prototype.create = function(wrapper) {
-
-	wrapper.innerHTML = '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'
-	+ this.ui.getMapConfig(this.ui.getMapConfigsOrder()[0]).name
-	+ ' <span class="caret"></span></button>';
+	var button = document.createElement("button");
+	button.setAttribute("type", "button");
+	button.setAttribute("class", "btn btn-default dropdown-toggle");
+	button.setAttribute("data-toggle", "dropdown");
+	button.setAttribute("aria-haspopup", "true");
+	button.setAttribute("aria-expanded", "false");
+	wrapper.appendChild(button);
+	this.button = button;
 
 	var select = document.createElement("ul");
 	select.setAttribute("id", "map-select");
@@ -22,22 +28,25 @@ MapSelectControl.prototype.create = function(wrapper) {
 		var link = document.createElement("a");
 
 		link.innerHTML = this.ui.getMapConfig(type).name;
-		link.setAttribute("data-world", type);
+		link.setAttribute("data-map", type);
 
-		link.addEventListener("click", (function(ui) {
+		link.addEventListener("click", function(ui) {
 			return function(a) {
-				var h = a.target.getAttribute('data-world');
-				var button = document.getElementById('control-wrapper-map-select').getElementsByTagName('button')[0];
-				button.innerHTML = ui.getMapConfig(h).name + ' <span class="caret"></span>';
-				ui.setMap(h);
+				ui.setMap(a.target.getAttribute("data-map"));
 			}
-		})(this.ui));
+		}(this.ui));
 
 		option.appendChild(link);
 		select.appendChild(option);
 	}
+
+	L.DomEvent.disableClickPropagation(wrapper);
 	wrapper.appendChild(select);
 };
+
+MapSelectControl.prototype.getHandler = function() {
+	return this.handler;
+}
 
 MapSelectControl.prototype.getName = function() {
 	return 'map-select';

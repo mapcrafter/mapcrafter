@@ -58,6 +58,14 @@ if __name__ == "__main__":
 	for info in jar.infolist():
 		if info.filename.startswith("assets/minecraft/textures/blocks/") and info.filename != "assets/minecraft/textures/blocks/":
 			filename = info.filename.replace("assets/minecraft/textures/", "")
+			# unpack only PNGs, no other files (or directory entries)
+			if not filename.endswith(".png"):
+				continue
+			# make sure to not unpack subdirectories
+			base_path = os.path.dirname(filename)
+			if base_path != os.path.dirname("blocks/test.png"):
+				continue
+
 			filename = os.path.join(args["outdir"], filename)
 			found += 1
 			

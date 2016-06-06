@@ -131,6 +131,8 @@ bool isSpecialTransparent(uint16_t id) {
 			|| id == 164 // dark oak wood stairs
 			|| id == 180 // red sandstone stairs
 			|| id == 182 // stone2 slabs
+			|| id == 203 // purpur stairs
+			|| id == 205 // purpur slabs
 			|| id == 208 // grass paths
 			;
 }

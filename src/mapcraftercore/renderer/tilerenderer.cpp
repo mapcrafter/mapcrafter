@@ -390,15 +390,15 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			data |= direction;
 		}
 
-	} else if (id == 79) {
+	} else if (id == 79 || id == 212) {
 		// ice blocks
 		west = getBlock(pos + mc::DIR_WEST);
 		south = getBlock(pos + mc::DIR_SOUTH);
 
 		// check if west and south neighbors are also ice blocks
-		if (west.id == 79)
+		if (west.id == 79 || west.id == 212)
 			data |= DATA_WEST;
-		if (south.id == 79)
+		if (south.id == 79 || south.id == 212)
 			data |= DATA_SOUTH;
 
 	} else if (id == 85 || id == 101 || id == 102 || id == 139 || id == 113 || id == 160
