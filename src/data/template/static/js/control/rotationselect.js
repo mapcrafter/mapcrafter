@@ -43,3 +43,7 @@ RotationSelectControl.prototype.create = function(wrapper) {
 	
 	this.ui.addHandler(this.handler);
 };
+
+RotationSelectControl.prototype.getName = function() {
+	return 'rotation-select';
+};

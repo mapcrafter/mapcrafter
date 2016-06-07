@@ -14,7 +14,7 @@ RotationSelectHandler.prototype.onMapChange = function(name, rotation) {
 	this.update();
 };
 
-RotationSelectHandler.prototype.update = function(text) {	
+RotationSelectHandler.prototype.update = function(text) {
 	var config = this.ui.getCurrentMapConfig();
 	var currentRotation = this.ui.getCurrentRotation();
 	
