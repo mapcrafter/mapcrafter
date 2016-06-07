@@ -36,7 +36,7 @@ MarkerControl.prototype.create = function(wrapper) {
 	}
 
 	var label = document.createElement("div");
-	label.innerHTML = "<p>Show markers:</p>";
+	label.innerHTML = "Show markers:";
 
 	var showAll = document.createElement("a");
 	showAll.setAttribute("href", "#");
