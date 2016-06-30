@@ -38,8 +38,8 @@ MarkerControl.prototype.create = function(wrapper) {
 	var label = document.createElement("div");
 	label.innerHTML = "Show markers:";
 
-	var showAll = document.createElement("a");
-	showAll.setAttribute("href", "#");
+	var showAll = document.createElement("button");
+	showAll.setAttribute("class", "btn btn-default");
 	showAll.innerHTML = "Show all";
 	showAll.addEventListener("click", function(event) {
 		for (var i = 0; i < groups.length; i++) {
@@ -53,8 +53,8 @@ MarkerControl.prototype.create = function(wrapper) {
 	var spacer = document.createElement("span");
 	spacer.innerHTML = "<br />";
 
-	var hideAll = document.createElement("a");
-	hideAll.setAttribute("href", "#");
+	var hideAll = document.createElement("button");
+	hideAll.setAttribute("class", "btn btn-default");
 	hideAll.innerHTML = "Hide all";
 	hideAll.addEventListener("click", function(event) {
 		for (var i = 0; i < groups.length; i++) {
@@ -70,9 +70,17 @@ MarkerControl.prototype.create = function(wrapper) {
 	container.appendChild(spacer);
 	container.appendChild(hideAll);
 
-	wrapper.appendChild(label);
-	wrapper.appendChild(checkboxes);
-	wrapper.appendChild(container);
+	var tmp = document.createElement("div");
+	tmp.setAttribute("class", "panel-body");
+	//tmp.appendChild(label);
+	tmp.appendChild(checkboxes);
+	tmp.appendChild(container);
+	var tmp2 = document.createElement("div");
+	tmp2.setAttribute("class", "panel-heading");
+	tmp2.innerHTML = "Markers";
+
+	wrapper.appendChild(tmp2);
+	wrapper.appendChild(tmp);
 };
 
 MarkerControl.prototype.getHandler = function() {
@@ -82,3 +90,8 @@ MarkerControl.prototype.getHandler = function() {
 MarkerControl.prototype.getName = function() {
 	return 'marker';
 };
+
+MarkerControl.prototype.usePanelWrapper = function() {
+	return true;
+}
+

@@ -23,7 +23,9 @@ RotationSelectHandler.prototype.update = function(text) {
 		if(config.rotations.indexOf(i) == -1) {
 			images[2*i].style.display = "none";
 			images[2*i+1].style.display = "none";
+			images[2*i].parentElement.style.display = "none";
 		} else {
+			images[2*i].parentElement.style.display = "inline";
 			if(i == currentRotation) {
 				images[2*i].style.display = "none";
 				images[2*i+1].style.display = "inline";

@@ -12,32 +12,31 @@ body {
 	font-size: 14px;
 }
 
-img.rotation {
-	width: 40px;
-}
-
-#control-wrapper-rotation-select {
-	background-color: white;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-}
-
 #mcmap {
 	width: 100%;
 	height: 100%;
 }
 
 .control-wrapper {
+}
+
+.control-wrapper-panel {
+	background-color: white;
+}
+
+.control-wrapper-panel .panel-heading,
+.control-wrapper-panel .panel-body,
+.control-wrapper-panel .panel-footer {
+	padding: 7px 10px;
+}
+
+.control-wrapper-invisible {
 	margin: 5px;
 	padding: 4px;
 }
 
-#control-wrapper-marker {
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	background-color: white;
-	padding: 10px;
-	font-size: 14px;
+#control-wrapper-marker .btn {
+	width: 100%;
 }
 
 #control-wrapper-marker input, #control-wrapper-marker label {
@@ -51,11 +50,11 @@ img.rotation {
 	padding-bottom: 5px;
 }
 
-img.rotation {
-	margin-left: 3px;
-	margin-right: 3px;
-}
-
 #control-wrapper-map-select {
 	z-index: initial !important;
+}
+
+#control-wrapper-rotation-select img {
+	width: 30px;
+	margin: 3px;
 }

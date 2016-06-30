@@ -51,3 +51,8 @@ MapSelectControl.prototype.getHandler = function() {
 MapSelectControl.prototype.getName = function() {
 	return 'map-select';
 };
+
+MapSelectControl.prototype.usePanelWrapper = function() {
+	return false;
+};
+

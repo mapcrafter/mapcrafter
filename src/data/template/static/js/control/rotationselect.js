@@ -10,10 +10,14 @@ function RotationSelectControl() {
 }
 
 RotationSelectControl.prototype.create = function(wrapper) {
+	var buttons = document.createElement("div");
+	buttons.setAttribute("class", "btn-group");
+	buttons.setAttribute("role", "group");
+
 	var names = ["tl", "tr", "br", "bl"];
 	for(var i = 0; i < 4; i++) {
-		var a = document.createElement("a");
-		a.setAttribute("href", "#");
+		var a = document.createElement("button");
+		a.setAttribute("class", "btn btn-default");
 		a.setAttribute("data-rotation", i);
 		a.addEventListener("click", (function(ui) {
 			return function(event) {
@@ -25,25 +29,30 @@ RotationSelectControl.prototype.create = function(wrapper) {
 		
 		img = document.createElement("img");
 		img.setAttribute("id", "rotation-" + names[i]);
-		img.setAttribute("class", "rotation");
-		img.setAttribute("src", "static/img/" + names[i] + ".png");
-		a.appendChild(img);
+		img.setAttribute("src", "static/img/" + names[i] + "_active.png");
 		
 		var img2 = document.createElement("img");
 		img2.setAttribute("id", "rotation-" + names[i] + "-active");
-		img2.setAttribute("class", "rotation");
-		img2.setAttribute("src", "static/img/" + names[i] + "_active.png");
+		img2.setAttribute("src", "static/img/" + names[i] + ".png");
 		
-		wrapper.appendChild(a);
-		wrapper.appendChild(img2);
+		a.appendChild(img);
+		a.appendChild(img2);
+		buttons.appendChild(a);
 		
-		this.images.push(a);
+		this.images.push(img);
 		this.images.push(img2);
 	}
+
+	wrapper.appendChild(buttons);
 	
 	this.ui.addHandler(this.handler);
 };
 
 RotationSelectControl.prototype.getName = function() {
-	return 'rotation-select';
+	return "rotation-select";
 };
+
+RotationSelectControl.prototype.usePanelWrapper = function() {
+	return false;
+};
+

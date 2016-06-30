@@ -20,5 +20,10 @@ BaseControl.prototype.getHandler = function() {
 };
 
 BaseControl.prototype.getName = function() {
-	return 'base';
+	return "base";
 };
+
+BaseControl.prototype.usePanelWrapper = function() {
+	return true;
+};
+
