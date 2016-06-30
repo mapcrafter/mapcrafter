@@ -9,7 +9,15 @@ MapSelectHandler.prototype.onMapChange = function(map, rotation) {
 };
 
 MapSelectHandler.prototype.update = function() {
-	var map = this.ui.getCurrentMapConfig().name;
-	this.control.button.innerHTML = map + " <span class='caret'></span>";
+	var currentMap = this.ui.getCurrentMap();
+	var mapConfig = this.ui.getCurrentMapConfig();
+
+	this.control.button.innerHTML = mapConfig.name + " <span class='caret'></span>";
+
+	var maps = this.control.dropdown.childNodes;
+	for (var i = 0; i < maps.length; i++) {
+		var current = maps[i].getAttribute("data-map") == currentMap;
+		maps[i].setAttribute("class", current ? "active" : "");
+	}
 };
 

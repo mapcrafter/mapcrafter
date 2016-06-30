@@ -6,6 +6,7 @@ MapSelectControl.prototype = new BaseControl("MapSelectControl");
 function MapSelectControl() {
 	this.handler = new MapSelectHandler(this);
 	this.button = null;
+	this.dropdown = null;
 }
 
 MapSelectControl.prototype.create = function(wrapper) {
@@ -15,33 +16,37 @@ MapSelectControl.prototype.create = function(wrapper) {
 	button.setAttribute("data-toggle", "dropdown");
 	button.setAttribute("aria-haspopup", "true");
 	button.setAttribute("aria-expanded", "false");
-	wrapper.appendChild(button);
-	this.button = button;
 
-	var select = document.createElement("ul");
-	select.setAttribute("id", "map-select");
-	select.setAttribute("class", "dropdown-menu dropdown-menu-right");
+	var ul = document.createElement("ul");
+	ul.setAttribute("id", "map-ul");
+	ul.setAttribute("class", "dropdown-menu dropdown-menu-right");
+
+	this.button = button;
+	this.dropdown = ul;
 
 	for(var i in this.ui.getMapConfigsOrder()) {
 		var type = this.ui.getMapConfigsOrder()[i];
-		var option = document.createElement("li");
-		var link = document.createElement("a");
+		var li = document.createElement("li");
+		var a = document.createElement("a");
 
-		link.innerHTML = this.ui.getMapConfig(type).name;
-		link.setAttribute("data-map", type);
+		a.innerHTML = this.ui.getMapConfig(type).name;
+		a.setAttribute("data-map", type);
+		li.setAttribute("data-map", type);
 
-		link.addEventListener("click", function(ui) {
-			return function(a) {
-				ui.setMap(a.target.getAttribute("data-map"));
+		a.addEventListener("click", function(ui) {
+			return function() {
+				ui.setMap(this.getAttribute("data-map"));
 			}
 		}(this.ui));
 
-		option.appendChild(link);
-		select.appendChild(option);
+		li.appendChild(a);
+		ul.appendChild(li);
 	}
 
+
 	L.DomEvent.disableClickPropagation(wrapper);
-	wrapper.appendChild(select);
+	wrapper.appendChild(this.button);
+	wrapper.appendChild(this.dropdown);
 };
 
 MapSelectControl.prototype.getHandler = function() {

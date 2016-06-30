@@ -35,6 +35,10 @@ body {
 	padding: 4px;
 }
 
+.dropdown-menu {
+	cursor: pointer;
+}
+
 #control-wrapper-marker .btn {
 	width: 100%;
 }
