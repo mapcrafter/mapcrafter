@@ -1,4 +1,4 @@
-# Mapcrafter #
+# Mapcrafter [![Build Status](https://travis-ci.org/mapcrafter/mapcrafter.svg?branch=master)](https://travis-ci.org/mapcrafter/mapcrafter) #
 
 by Moritz Hilscher
 
