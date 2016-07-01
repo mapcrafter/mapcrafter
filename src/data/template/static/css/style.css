@@ -39,10 +39,15 @@ body {
 	cursor: pointer;
 }
 
+#control-wrapper-marker .list-group-item .right-padding {
+	/* because of the floating badge */
+	padding-right: 20px;
+}
+
+/*
 #control-wrapper-marker .btn {
 	width: 100%;
 }
-
 #control-wrapper-marker input, #control-wrapper-marker label {
 	margin:0;
 }
@@ -53,6 +58,7 @@ body {
 #control-wrapper-marker div div {
 	padding-bottom: 5px;
 }
+*/
 
 #control-wrapper-map-select {
 	z-index: initial !important;
