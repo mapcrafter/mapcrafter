@@ -3,9 +3,11 @@ MarkerHandler.prototype = new BaseHandler();
 /**
  * Is responsible to show the markers from the markers.js.
  */
-function MarkerHandler(markers) {
+function MarkerHandler(control, markers) {
+	this.control = control;
 	this.layerGroups = {};
 	this.markers = markers;
+	this.markersByGroup = {};
 	this.visible = {};
 }
 
@@ -41,6 +43,8 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 	for(var i = 0; i < this.markers.length; i++) {
 		var groupInfo = this.markers[i];
 		var group = groupInfo.id;
+		this.markersByGroup[group] = groupInfo;
+		
 		if(!(world in groupInfo.markers)) {
 			// create empty layer group
 			this.layerGroups[group] = L.layerGroup();
@@ -70,6 +74,23 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 	
 	for(var group in this.visible)
 		this.show(group, this.visible[group]);
+
+	this.updateMarkerCounts();
+};
+
+MarkerHandler.prototype.updateMarkerCounts = function() {
+	var world = this.ui.getCurrentMapConfig().world;
+	var buttons = this.control.buttons;
+	for(var i = 0; i < buttons.length; i++) {
+		var button = buttons[i];
+		var group = button.getAttribute("data-group");
+		var count = 0;
+		if(world in this.markersByGroup[group].markers)
+			count = this.markersByGroup[group].markers[world].length;
+
+		var span = button.getElementsByTagName("span")[0];
+		span.innerHTML = count;
+	}
 };
 
 MarkerHandler.prototype.getMarkerGroups = function() {

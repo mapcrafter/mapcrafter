@@ -41,7 +41,7 @@ body {
 
 #control-wrapper-marker .list-group-item .right-padding {
 	/* because of the floating badge */
-	padding-right: 20px;
+	padding-right: 30px;
 }
 
 /*

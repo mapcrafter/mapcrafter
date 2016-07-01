@@ -1,7 +1,8 @@
 MarkerControl.prototype = new BaseControl("MarkerControl");
 
 function MarkerControl(markers) {
-	this.handler = new MarkerHandler(markers);
+	this.handler = new MarkerHandler(this, markers);
+	this.buttons = [];
 }
 
 function hasClass(node, clazz) {
@@ -40,19 +41,22 @@ MarkerControl.prototype.create = function(wrapper) {
 		button.setAttribute("class", "list-group-item  " + checkedClass);
 		button.setAttribute("data-group", group);
 		button.innerHTML = "<span class='badge'>17</span> <span class='right-padding'>" + groupLabel + "</span>";
-		button.addEventListener("click", function() {
-			var checked = hasClass(this, checkedClass);
-			var group = this.getAttribute("data-group");
-			self.handler.show(group, !checked);
-			
-			if (checked) {
-				removeClass(this, checkedClass);
-			} else {
-				addClass(this, checkedClass);
+		button.addEventListener("click", function(handler) {
+			return function() {
+				var checked = hasClass(this, checkedClass);
+				var group = this.getAttribute("data-group");
+				handler.show(group, !checked);
+				
+				if (checked) {
+					removeClass(this, checkedClass);
+				} else {
+					addClass(this, checkedClass);
+				}
 			}
-		});
+		}(this.handler));
 
 		listGroup.appendChild(button);
+		this.buttons.push(button);
 	}
 
 	var buttonShowAll = document.createElement("button");
