@@ -175,6 +175,7 @@ std::string MarkerSection::formatSign(std::string format, const mc::SignEntity& 
 	std::string pp = prefix.getValue() + postfix.getValue();
 	std::string textpp = sign.getText(); // with prefix/postfix
 	// remove prefix and postfix from sign text
+	LOG(INFO) << "prefix='" << prefix.getValue() << "' text='" << textpp << "' postfix='" << postfix.getValue() << "'";
 	std::string text = util::trim(textpp.substr(prefix.getValue().size(), textpp.size() - pp.size()));
 
 	// replace the placeholders with the sign data
