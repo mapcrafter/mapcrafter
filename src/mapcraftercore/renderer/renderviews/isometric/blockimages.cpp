@@ -2330,6 +2330,15 @@ void IsometricBlockImages::createBlocks() {
 	createIce(212, 2, t.FROSTED_ICE_2);
 	createIce(212, 3, t.FROSTED_ICE_3);
 	// --
+	createBlock(213, 0, t.MAGMA); // magma
+	createBlock(214, 0, t.NETHER_WART_BLOCK); // nether wart block
+	createBlock(215, 0, t.RED_NETHER_BRICK); // red nether brick
+	// bone block --
+	createBlock(216, 0, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_TOP); // vertically
+	createBlock(216, 4, t.BONE_BLOCK_TOP, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_SIDE); // east-west
+	createBlock(216, 8, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_TOP, t.BONE_BLOCK_SIDE); // north-south
+	// --
+	createBlock(217, 0, empty_texture); // structure void
 	// structure block --
 	createBlock(255, 0, t.STRUCTURE_BLOCK_SAVE);
 	createBlock(255, 1, t.STRUCTURE_BLOCK_LOAD);
