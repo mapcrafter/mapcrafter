@@ -1,81 +1,114 @@
 MarkerControl.prototype = new BaseControl("MarkerControl");
 
 function MarkerControl(markers) {
-	this.handler = new MarkerHandler(markers);
+	this.handler = new MarkerHandler(this, markers);
+	this.buttons = [];
 }
+
+function hasClass(node, clazz) {
+	return node.getAttribute("class").split(" ").indexOf(clazz) != -1;
+}
+
+function addClass(node, clazz)  {
+	var clazzes = node.getAttribute("class").split(" ");
+	if (clazzes.indexOf(clazz) == -1) {
+		clazzes.push(clazz);
+	}
+	node.setAttribute("class", clazzes.join(" "));
+};
+
+function removeClass(node, clazz) {
+	var clazzes = node.getAttribute("class").split(" ");
+	while (clazzes.indexOf(clazz) != -1) {
+		clazzes.splice(clazzes.indexOf(clazz), 1);
+	}
+	node.setAttribute("class", clazzes.join(" "));
+};
 
 MarkerControl.prototype.create = function(wrapper) {
 	var groups = this.handler.getMarkerGroups();
-	var self = this;
-	
-	var checkboxes = document.createElement("div");
+
+	var checkedClass = "list-group-item-info";
+	var listGroup = document.createElement("div");
+	listGroup.setAttribute("class", "list-group");
+
 	for (var i = 0; i < groups.length; i++) {
 		var group = groups[i][0];
 		var groupLabel = groups[i][1];
-		
-		var container = document.createElement("div");
-		var checkbox = document.createElement("input");
-		checkbox.setAttribute("id", "cb_group_" + group);
-		checkbox.setAttribute("data-group", group);
-		checkbox.setAttribute("type", "checkbox");
-		checkbox.style.verticalAlign = "middle";
-		checkbox.checked = true;
-		
-		checkbox.addEventListener("change", function() {
-			var group = this.getAttribute("data-group");
-			self.handler.show(group, this.checked);
-		});
-		
-		var label = document.createElement("label");
-		label.setAttribute("for", "cb_group_" + group);
-		label.innerHTML = groupLabel;
-		
-		container.appendChild(checkbox);
-		container.appendChild(label);
-		checkboxes.appendChild(container);
+
+		var button = document.createElement("button");
+		button.setAttribute("type", "button");
+		button.setAttribute("class", "list-group-item  " + checkedClass);
+		button.setAttribute("data-group", group);
+		button.innerHTML = "<span class='badge'>17</span> <span class='right-padding'>" + groupLabel + "</span>";
+		button.addEventListener("click", function(handler) {
+			return function() {
+				var checked = hasClass(this, checkedClass);
+				var group = this.getAttribute("data-group");
+				handler.show(group, !checked);
+				
+				if (checked) {
+					removeClass(this, checkedClass);
+				} else {
+					addClass(this, checkedClass);
+				}
+			}
+		}(this.handler));
+
+		listGroup.appendChild(button);
+		this.buttons.push(button);
 	}
 
-	var label = document.createElement("div");
-	label.innerHTML = "Show markers:";
-	
-	var showAll = document.createElement("a");
-	showAll.setAttribute("href", "#");
-	showAll.innerHTML = "Show all";
-	showAll.addEventListener("click", function(event) {
-		for (var i = 0; i < groups.length; i++) {
-			var checkbox = document.getElementById("cb_group_" + groups[i][0]);
-			checkbox.checked = true;
-			self.handler.show(groups[i][0], true);
+	var buttonShowAll = document.createElement("button");
+	buttonShowAll.setAttribute("type", "buttonShowAll");
+	buttonShowAll.setAttribute("class", "list-group-item");
+	buttonShowAll.innerHTML = "Show all";
+	buttonShowAll.addEventListener("click", function(handler) {
+		return function() {
+			for (var i = 0; i < listGroup.childNodes.length - 2; i++) {
+				var button = listGroup.childNodes[i];
+				var group = button.getAttribute("data-group");
+				handler.show(group, true);
+				addClass(button, checkedClass);
+			}
 		}
-		event.preventDefault()
-	});
+	}(this.handler));
 	
-	var spacer = document.createElement("span");
-	spacer.innerHTML = " ";
-	
-	var hideAll = document.createElement("a");
-	hideAll.setAttribute("href", "#");
-	hideAll.innerHTML = "Hide all";
-	hideAll.addEventListener("click", function(event) {
-		for (var i = 0; i < groups.length; i++) {
-			var checkbox = document.getElementById("cb_group_" + groups[i][0]);
-			checkbox.checked = false;
-			self.handler.show(groups[i][0], false);
+	var buttonHideAll = document.createElement("button");
+	buttonHideAll.setAttribute("type", "buttonHideAll");
+	buttonHideAll.setAttribute("class", "list-group-item");
+	buttonHideAll.innerHTML = "Hide all";
+	buttonHideAll.addEventListener("click", function(handler) {
+		return function() {
+			for (var i = 0; i < listGroup.childNodes.length - 2; i++) {
+				var button = listGroup.childNodes[i];
+				var group = button.getAttribute("data-group");
+				handler.show(group, false);
+				removeClass(button, checkedClass);
+			}
 		}
-		event.preventDefault()
-	});
+	}(this.handler));
 	
-	var container = document.createElement("div");
-	container.style.textAlign = "center";
-	container.appendChild(showAll);
-	container.appendChild(spacer);
-	container.appendChild(hideAll);
-	
-	wrapper.appendChild(label);
-	wrapper.appendChild(checkboxes);
-	wrapper.appendChild(container);
+	listGroup.appendChild(buttonShowAll);
+	listGroup.appendChild(buttonHideAll);
+
+	var heading = document.createElement("div");
+	heading.setAttribute("class", "panel-heading");
+	heading.innerHTML = "Markers";
+
+	wrapper.appendChild(heading);
+	wrapper.appendChild(listGroup);
 };
 
 MarkerControl.prototype.getHandler = function() {
 	return this.handler;
 };
+
+MarkerControl.prototype.getName = function() {
+	return 'marker';
+};
+
+MarkerControl.prototype.usePanelWrapper = function() {
+	return true;
+}
+

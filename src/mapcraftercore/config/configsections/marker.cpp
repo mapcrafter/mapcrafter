@@ -41,6 +41,7 @@ void MarkerSection::dump(std::ostream& out) const {
 	out << getPrettyName() << ":" << std::endl;
 	out << "  name = " << getLongName() << std::endl;
 	out << "  prefix = " << prefix << std::endl;
+	out << "  postfix = " << postfix << std::endl;
 	out << "  title_format = " << title_format << std::endl;
 	out << "  text_format = " << text_format << std::endl;
 	out << "  icon = " << icon << std::endl;
@@ -59,6 +60,10 @@ std::string MarkerSection::getLongName() const {
 
 std::string MarkerSection::getPrefix() const {
 	return prefix.getValue();
+}
+
+std::string MarkerSection::getPostfix() const {
+	return postfix.getValue();
 }
 
 std::string MarkerSection::getTitleFormat() const {
@@ -88,7 +93,10 @@ bool MarkerSection::isShownByDefault() const {
 bool MarkerSection::matchesSign(const mc::SignEntity& sign) const {
 	if (sign.getText().empty() && !match_empty.getValue())
 		return false;
-	return util::startswith(sign.getText(), prefix.getValue());
+	// make sure that prefix and postfix don't overlap
+	return util::startswith(sign.getText(), prefix.getValue())
+		&& util::endswith(sign.getText(), postfix.getValue())
+		&& sign.getText().size() >= prefix.getValue().size() + postfix.getValue().size();
 }
 
 std::string MarkerSection::formatTitle(const mc::SignEntity& sign) const {
@@ -113,6 +121,8 @@ bool MarkerSection::parseField(const std::string key, const std::string value,
 		name_long.load(key, value, validation);
 	else if (key == "prefix")
 		prefix.load(key, value, validation);
+	else if (key == "postfix")
+		postfix.load(key, value, validation);
 	else if (key == "title_format")
 		title_format.load(key, value, validation);
 	else if (key == "text_format")
@@ -137,7 +147,7 @@ void MarkerSection::postParse(const INIConfigSection& section,
 	// check if the old placeholders are used, just search for %placeholder
 	// they are still supported, but show a warning
 	std::vector<std::string> placeholders = {
-		"text", "textp", "prefix", "line1", "line2", "line3", "line4", "x", "y", "z"
+		"text", "textp", "prefix", "postfix", "line1", "line2", "line3", "line4", "x", "y", "z"
 	};
 	for (auto it = placeholders.begin(); it != placeholders.end(); ++it) {
 		std::string placeholder = "%" + *it;
@@ -162,19 +172,17 @@ void replacePlaceholder(std::string& str, const std::string& key, T value) {
 }
 
 std::string MarkerSection::formatSign(std::string format, const mc::SignEntity& sign) const {
-	// sign text with prefix
-	std::string textp = sign.getText();
-	// sign text without prefix
-	std::string text = textp;
-	// remove prefix from sign text
-	// but make sure there is also other text except the prefix, otherwise don't remove prefix
-	if (textp.size() > prefix.getValue().size())
-		text = util::trim(textp.substr(prefix.getValue().size()));
+	std::string pp = prefix.getValue() + postfix.getValue();
+	std::string textpp = sign.getText(); // with prefix/postfix
+	// remove prefix and postfix from sign text
+	LOG(INFO) << "prefix='" << prefix.getValue() << "' text='" << textpp << "' postfix='" << postfix.getValue() << "'";
+	std::string text = util::trim(textpp.substr(prefix.getValue().size(), textpp.size() - pp.size()));
 
 	// replace the placeholders with the sign data
-	replacePlaceholder(format, "textp", textp);
+	replacePlaceholder(format, "textp", textpp);
 	replacePlaceholder(format, "text", text);
 	replacePlaceholder(format, "prefix", prefix.getValue());
+	replacePlaceholder(format, "postfix", postfix.getValue());
 	replacePlaceholder(format, "line1", sign.getLines()[0]);
 	replacePlaceholder(format, "line2", sign.getLines()[1]);
 	replacePlaceholder(format, "line3", sign.getLines()[2]);

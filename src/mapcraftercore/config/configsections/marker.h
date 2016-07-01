@@ -39,6 +39,7 @@ public:
 	std::string getShortName() const;
 	std::string getLongName() const;
 	std::string getPrefix() const;
+	std::string getPostfix() const;
 	std::string getTitleFormat() const;
 	std::string getTextFormat() const;
 	std::string getIcon() const;
@@ -60,7 +61,7 @@ protected:
 
 private:
 	Field<std::string> name_long;
-	Field<std::string> prefix;
+	Field<std::string> prefix, postfix;
 	Field<std::string> title_format, text_format;
 	Field<std::string> icon, icon_size;
 	Field<bool> match_empty, show_default;

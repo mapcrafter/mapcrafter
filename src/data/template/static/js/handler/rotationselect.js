@@ -14,23 +14,23 @@ RotationSelectHandler.prototype.onMapChange = function(name, rotation) {
 	this.update();
 };
 
-RotationSelectHandler.prototype.update = function(text) {	
+RotationSelectHandler.prototype.update = function(text) {
 	var config = this.ui.getCurrentMapConfig();
 	var currentRotation = this.ui.getCurrentRotation();
 	
-	var images = this.control.images;
 	for(var i = 0; i < 4; i++) {
+		// hide buttons where rotations don't exist, set active/not active for others
+		var button = this.control.buttons[i];
 		if(config.rotations.indexOf(i) == -1) {
-			images[2*i].style.display = "none";
-			images[2*i+1].style.display = "none";
+			button.style.display = "none";
 		} else {
+			button.style.display = "inline";
 			if(i == currentRotation) {
-				images[2*i].style.display = "none";
-				images[2*i+1].style.display = "inline";
+				button.setAttribute("class", "btn btn-default active");
 			} else {
-				images[2*i].style.display = "inline";
-				images[2*i+1].style.display = "none";
+				button.setAttribute("class", "btn btn-default");
 			}
 		}
 	}
 };
+

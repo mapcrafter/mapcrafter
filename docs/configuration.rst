@@ -639,6 +639,12 @@ Marker Options
     all signs whose text starts with ``[home]`` are displayed as markers
     of this group.
 
+``postfix = <postfix>``
+
+    **Default:** *Empty*
+    
+    This is the postfix a sign must have to be recognized as marker
+    of this marker group.
 
 ``title_format = <format>``
 
@@ -650,9 +656,10 @@ Marker Options
     =============== =======
     Placeholder     Meaning
     =============== =======
-    ``%(text)``     Complete text of the sign without the prefix.
+    ``%(text)``     Complete text of the sign without the prefix/postfix.
     ``%(prefix)``   Configured prefix of this marker group.
-    ``%(textp)``    Complete text of the sign with the prefix.
+    ``%(postfix)``  Configured postfix of this marker group.
+    ``%(textp)``    Complete text of the sign with the prefix/postfix.
     ``%(line1)``    First line of the sign.
     ``%(line2)``    Second line of the sign.
     ``%(line3)``    Third line of the sign.
@@ -662,7 +669,7 @@ Marker Options
     ``%(y)``        Y coordinate of the sign position.
     =============== =======
     
-    The title of markers defaults to the text (without the prefix) of 
+    The title of markers defaults to the text (without the prefix/postfix) of 
     the belonging sign, e.g. the placeholder ``%(text)``.
     
     You can use different placeholders and other text in this format

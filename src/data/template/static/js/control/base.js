@@ -18,3 +18,12 @@ BaseControl.prototype.create = function(wrapper) {
 BaseControl.prototype.getHandler = function() {
 	return null;
 };
+
+BaseControl.prototype.getName = function() {
+	return "base";
+};
+
+BaseControl.prototype.usePanelWrapper = function() {
+	return true;
+};
+

@@ -460,14 +460,19 @@ MapcrafterUI.prototype.addControl = function(control, position, index) {
 		this.controlsNotCreated.push([control, position, index]);
 		return;
 	}
-	
+
 	var self = this;
 	var ControlType = L.Control.extend({
 		onAdd: function(map) {
 			var wrapper = document.createElement("div");
-			wrapper.setAttribute("class", "control-wrapper");
-			wrapper.setAttribute("id", "control-wrapper-" + name);
-			
+			if(control.usePanelWrapper()) {
+				wrapper.setAttribute("class", "control-wrapper control-wrapper-panel panel panel-default");
+				wrapper.setAttribute("id", "control-wrapper-" + control.getName());
+			} else {
+				wrapper.setAttribute("class", "control-wrapper control-wrapper-invisible");
+				wrapper.setAttribute("id", "control-wrapper-" + control.getName());
+			}
+
 			// just a dirty hack to prevent the map getting all mouse click events
 			wrapper.onmouseover = function() {
 				map.dragging.disable();

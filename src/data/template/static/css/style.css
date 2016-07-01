@@ -8,7 +8,6 @@ body {
 	height: 100%;
 	margin: 0;
 	padding: 0;
-	
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 14px;
 }
@@ -19,27 +18,53 @@ body {
 }
 
 .control-wrapper {
+}
+
+.control-wrapper-panel {
+	background-color: white;
+}
+
+.control-wrapper-panel .panel-heading,
+.control-wrapper-panel .panel-body,
+.control-wrapper-panel .panel-footer {
+	padding: 7px 10px;
+}
+
+.control-wrapper-invisible {
 	margin: 5px;
 	padding: 4px;
-	border: 1px solid gray;
-	background-color: white;
-	
-	font-size: 12px;
-	font-weight: bold;
 }
 
-#control-wrapper-map-select select {
-	padding: 3px;
-	border: 1px solid black;
-	background-color: white;
+.dropdown-menu {
+	cursor: pointer;
 }
 
-img.rotation {
-	margin-left: 3px;
-	margin-right: 3px;
+#control-wrapper-marker .list-group-item .right-padding {
+	/* because of the floating badge */
+	padding-right: 30px;
 }
 
-.hidden {
-  display: none;
+/*
+#control-wrapper-marker .btn {
+	width: 100%;
+}
+#control-wrapper-marker input, #control-wrapper-marker label {
+	margin:0;
+}
+#control-wrapper-marker label {
+	padding-left: 5px;
 }
 
+#control-wrapper-marker div div {
+	padding-bottom: 5px;
+}
+*/
+
+#control-wrapper-map-select {
+	z-index: initial !important;
+}
+
+#control-wrapper-rotation-select img {
+	width: 30px;
+	margin: 3px;
+}

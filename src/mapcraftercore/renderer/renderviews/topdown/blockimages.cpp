@@ -1624,6 +1624,15 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(212, 2, t.FROSTED_ICE_2);
 	setBlockImage(212, 3, t.FROSTED_ICE_3);
 	// --
+	setBlockImage(213, 0, t.MAGMA); // magma
+	setBlockImage(214, 0, t.NETHER_WART_BLOCK); // nether wart block
+	setBlockImage(215, 0, t.RED_NETHER_BRICK); // red nether brick
+	// bone block --
+	setBlockImage(216, 0, t.BONE_BLOCK_TOP); // vertically
+	setBlockImage(216, 4, t.BONE_BLOCK_SIDE); // east-west
+	setBlockImage(216, 8, t.BONE_BLOCK_SIDE); // north-south
+	// --
+	setBlockImage(217, 0, empty_texture); // structure void
 	// structure block --
 	setBlockImage(255, 0, t.STRUCTURE_BLOCK_SAVE);
 	setBlockImage(255, 1, t.STRUCTURE_BLOCK_LOAD);

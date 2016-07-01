@@ -5,7 +5,7 @@ Installation
 Requirements
 ============
 
-* A Linux-based or Mac operating system would be good, 
+* A Linux-based or Mac operating system would be good,
   building the renderer on Windows is possible but not easy.
 * A decent C++ compiler (preferable gcc >= 4.4, or clang), CMake and make to build Mapcrafter.
 * Some libraries:
@@ -58,8 +58,12 @@ You can now install Mapcrafter system-wide for all users if you want::
 
     sudo make install
 
-If you get an error concerning ``libmapcraftercore.so`` not found, you have to run 
+If you get an error concerning ``libmapcraftercore.so`` not found, you have to run
 ``ldconfig`` (as root).
+
+On CentOS and other RHEL and Fedora derived distributions, you may have to add
+``/usr/local/lib`` and ``/usr/local/lib64`` to ``/etc/ld.so.conf.d/usrlocal.conf``
+and run ``ldconfig -v``
 
 Don't forget that you still have to install the texture files needed for Mapcrafter.
 If you install the texture files to ``src/data/textures``, they will be copied
@@ -103,11 +107,11 @@ Currently there are no pre built packages available for Mac OS X but building it
 
 Prerequisites:
 
-* `Xcode <https://itunes.apple.com/us/app/xcode/id497799835?ls=1&mt=12>`_ 
+* `Xcode <https://itunes.apple.com/us/app/xcode/id497799835?ls=1&mt=12>`_
 * `Homebrew <http://brew.sh/>`_ or `Macports <http://www.macports.org/>`_
 
-Depending on your version of OS X you may or may not have git installed. 
-Starting from 10.9 Mavericks git is installed with Xcode, if you got 10.8 Mountain Lion or older, 
+Depending on your version of OS X you may or may not have git installed.
+Starting from 10.9 Mavericks git is installed with Xcode, if you got 10.8 Mountain Lion or older,
 you must install command line tools from Xcode and run the following command::
 
     brew install git
@@ -147,7 +151,7 @@ Arch Linux
 ==========
 
 If you are running Arch Linux as operating system, you can install Mapcrafter
-from the `AUR <https://aur.archlinux.org/packages/mapcrafter-git/>`_. 
+from the `AUR <https://aur.archlinux.org/packages/mapcrafter-git/>`_.
 
 Debian Packages
 ===============
