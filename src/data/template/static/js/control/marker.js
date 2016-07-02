@@ -5,26 +5,6 @@ function MarkerControl(markers) {
 	this.buttons = [];
 }
 
-function hasClass(node, clazz) {
-	return node.getAttribute("class").split(" ").indexOf(clazz) != -1;
-}
-
-function addClass(node, clazz)  {
-	var clazzes = node.getAttribute("class").split(" ");
-	if (clazzes.indexOf(clazz) == -1) {
-		clazzes.push(clazz);
-	}
-	node.setAttribute("class", clazzes.join(" "));
-};
-
-function removeClass(node, clazz) {
-	var clazzes = node.getAttribute("class").split(" ");
-	while (clazzes.indexOf(clazz) != -1) {
-		clazzes.splice(clazzes.indexOf(clazz), 1);
-	}
-	node.setAttribute("class", clazzes.join(" "));
-};
-
 MarkerControl.prototype.create = function(wrapper) {
 	var groups = this.handler.getMarkerGroups();
 
@@ -43,14 +23,14 @@ MarkerControl.prototype.create = function(wrapper) {
 		button.innerHTML = "<span class='badge'>17</span> <span class='right-padding'>" + groupLabel + "</span>";
 		button.addEventListener("click", function(handler) {
 			return function() {
-				var checked = hasClass(this, checkedClass);
+				var checked = Util.hasClass(this, checkedClass);
 				var group = this.getAttribute("data-group");
 				handler.show(group, !checked);
 				
 				if (checked) {
-					removeClass(this, checkedClass);
+					Util.removeClass(this, checkedClass);
 				} else {
-					addClass(this, checkedClass);
+					Util.addClass(this, checkedClass);
 				}
 			}
 		}(this.handler));
@@ -69,7 +49,7 @@ MarkerControl.prototype.create = function(wrapper) {
 				var button = listGroup.childNodes[i];
 				var group = button.getAttribute("data-group");
 				handler.show(group, true);
-				addClass(button, checkedClass);
+				Util.addClass(button, checkedClass);
 			}
 		}
 	}(this.handler));
@@ -84,7 +64,7 @@ MarkerControl.prototype.create = function(wrapper) {
 				var button = listGroup.childNodes[i];
 				var group = button.getAttribute("data-group");
 				handler.show(group, false);
-				removeClass(button, checkedClass);
+				Util.removeClass(button, checkedClass);
 			}
 		}
 	}(this.handler));
@@ -92,11 +72,7 @@ MarkerControl.prototype.create = function(wrapper) {
 	listGroup.appendChild(buttonShowAll);
 	listGroup.appendChild(buttonHideAll);
 
-	var heading = document.createElement("div");
-	heading.setAttribute("class", "panel-heading");
-	heading.innerHTML = "Markers";
-
-	wrapper.appendChild(heading);
+	wrapper.appendChild(Util.createPanelHeader("Markers"));
 	wrapper.appendChild(listGroup);
 };
 
