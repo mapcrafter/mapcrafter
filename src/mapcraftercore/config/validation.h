@@ -178,10 +178,10 @@ private:
 template <typename T>
 class Field {
 private:
-	T value;
-	bool loaded;
+	T value, default_value;
+	bool loaded, default_loaded;
 public:
-	Field(T value = T()) : value(value), loaded(false) {}
+	Field(T value = T()) : value(value), loaded(false), default_loaded(false) {}
 	~Field() {}
 
 	/**
@@ -223,11 +223,8 @@ int stringToRotation(const std::string& rotation, std::string names[4] = ROTATIO
 
 template <typename T>
 void Field<T>::setDefault(T value) {
-	// do not overwrite an already loaded value with a default value
-	if (!loaded) {
-		this->value = value;
-		loaded = true;
-	}
+	default_value = value;
+	default_loaded = true;
 }
 
 template <typename T>
@@ -245,7 +242,7 @@ bool Field<T>::load(const std::string& key, const std::string& value,
 
 template <typename T>
 bool Field<T>::require(ValidationList& validation, std::string message) const {
-	if (!loaded) {
+	if (!loaded && !default_loaded) {
 		validation.error(message);
 		return false;
 	}
@@ -254,7 +251,7 @@ bool Field<T>::require(ValidationList& validation, std::string message) const {
 
 template <typename T>
 T Field<T>::getValue() const {
-	return value;
+	return isLoaded() ? value : default_value;
 }
 
 template <typename T>

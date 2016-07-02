@@ -404,7 +404,7 @@ void MapSection::postParse(const INIConfigSection& section,
 	while (overlays_ss >> overlay) {
 		overlays_vector.push_back(overlay);
 	}
-	
+
 	// parse default overlays
 	default_overlays_vector.clear();
 	std::stringstream default_overlays_ss(default_overlays.getValue());
