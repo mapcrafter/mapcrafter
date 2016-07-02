@@ -200,10 +200,14 @@ std::string replaceAll(const std::string& str, const std::string& from, const st
 }
 
 bool startswith(const std::string& str, const std::string& start) {
+	if (start.size() > str.size())
+		return false;
 	return str.substr(0, start.size()) == start;
 }
 
 bool endswith(const std::string& str, const std::string& end) {
+	if (end.size() > str.size())
+		return false;
 	return str.substr(str.size() - end.size(), end.size()) == end;
 }
 
