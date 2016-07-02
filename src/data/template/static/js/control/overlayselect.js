@@ -7,10 +7,16 @@ function OverlaySelectControl() {
 	this.handler = new OverlaySelectHandler(this);
 	
 	this.div = null;
-}
+};
 
 OverlaySelectControl.prototype.create = function(wrapper) {
 	this.div = wrapper;
+};
 
-	this.ui.addHandler(this.handler);
+OverlaySelectControl.prototype.getHandler = function() {
+	return this.handler;
+};
+
+OverlaySelectControl.prototype.usePanelWrapper = function() {
+	return true;
 };
