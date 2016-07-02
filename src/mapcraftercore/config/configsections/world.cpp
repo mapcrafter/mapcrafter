@@ -139,8 +139,8 @@ const mc::WorldCrop WorldSection::getWorldCrop() const {
 
 bool WorldSection::needsWorldCentering() const {
 	// circular cropped worlds and cropped worlds with complete x- and z-bounds
-	return (min_x.isLoaded() && max_x.isLoaded() && min_z.isLoaded() && max_z.isLoaded())
-			|| center_x.isLoaded() || center_z.isLoaded() || radius.isLoaded();
+	return (min_x.hasAnyValue() && max_x.hasValue() && min_z.hasValue() && max_z.hasValue())
+			|| center_x.hasAnyValue() || center_z.hasValue() || radius.hasValue();
 }
 
 void WorldSection::preParse(const INIConfigSection& section,
@@ -221,19 +221,19 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 
 void WorldSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
-	if (default_zoom.isLoaded() && default_zoom.getValue() < 0)
+	if (default_zoom.hasAnyValue() && default_zoom.getValue() < 0)
 		validation.error("The default zoom level must be bigger or equal to 0 ('default_zoom').");
 
 	// validate the world croppping
-	bool crop_rectangular = min_x.isLoaded() || max_x.isLoaded() || min_z.isLoaded() || max_z.isLoaded();
-	bool crop_circular = center_x.isLoaded() || center_z.isLoaded() || radius.isLoaded();
+	bool crop_rectangular = min_x.hasAnyValue() || max_x.hasValue() || min_z.hasValue() || max_z.hasValue();
+	bool crop_circular = center_x.hasAnyValue() || center_z.hasValue() || radius.hasValue();
 
 	if (crop_rectangular && crop_circular) {
 		validation.error("You can not use both world cropping types at the same time!");
 	} else if (crop_rectangular) {
-		if (min_x.isLoaded() && max_x.isLoaded() && min_x.getValue() > max_x.getValue())
+		if (min_x.hasAnyValue() && max_x.hasValue() && min_x.getValue() > max_x.getValue())
 			validation.error("min_x must be smaller than or equal to max_x!");
-		if (min_z.isLoaded() && max_z.isLoaded() && min_z.getValue() > max_z.getValue())
+		if (min_z.hasAnyValue() && max_z.hasValue() && min_z.getValue() > max_z.getValue())
 			validation.error("min_z must be smaller than or equal to max_z!");
 	} else if (crop_circular) {
 		std::string message = "You have to specify crop_center_x, crop_center_z "
@@ -246,11 +246,11 @@ void WorldSection::postParse(const INIConfigSection& section,
 		world_crop.setRadius(radius.getValue());
 	}
 
-	if (min_y.isLoaded() && max_y.isLoaded() && min_y.getValue() > max_y.getValue())
+	if (min_y.hasAnyValue() && max_y.hasValue() && min_y.getValue() > max_y.getValue())
 		validation.error("min_y must be smaller than or equal to max_y!");
 
 	world_crop.setCropUnpopulatedChunks(crop_unpopulated_chunks.getValue());
-	if (block_mask.isLoaded()) {
+	if (block_mask.hasAnyValue()) {
 		try {
 			world_crop.loadBlockMask(block_mask.getValue());
 		} catch (std::invalid_argument& exception) {

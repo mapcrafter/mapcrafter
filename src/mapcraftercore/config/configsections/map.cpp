@@ -372,11 +372,10 @@ bool MapSection::parseField(const std::string key, const std::string value,
 
 void MapSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
-	bool render_mode_set = render_mode.isLoaded();
 	render_mode.setDefault(LegacyRenderMode::PLAIN);
 
 	// parse legacy render mode
-	if (render_mode_set) {
+	if (render_mode.hasUserValue()) {
 		block_handler.setValue(renderer::BlockHandlerType::DEFAULT);
 		overlays.setValue("");
 		default_overlays.setValue("");

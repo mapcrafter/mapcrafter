@@ -97,9 +97,9 @@ void LogSection::configureLogging() const {
 
 	// set generic logging options for sinks (if specified in config)
 	util::Logging& logging = util::Logging::getInstance();
-	if (verbosity.isLoaded())
+	if (verbosity.hasAnyValue())
 		logging.setSinkVerbosity(sink_name, verbosity.getValue());
-	if (log_progress.isLoaded())
+	if (log_progress.hasAnyValue())
 		logging.setSinkLogProgress(sink_name, log_progress.getValue());
 
 	// try to create file log sink
@@ -116,9 +116,9 @@ void LogSection::configureLogging() const {
 		util::LogSink* sink_ptr = logging.getSink(sink_name);
 		util::FormattedLogSink* sink = dynamic_cast<util::FormattedLogSink*>(sink_ptr);
 		if (sink != nullptr) {
-			if (format.isLoaded())
+			if (format.hasAnyValue())
 				sink->setFormat(format.getValue());
-			if (date_format.isLoaded())
+			if (date_format.hasAnyValue())
 				sink->setDateFormat(date_format.getValue());
 		} else
 			LOG(WARNING) << "Unable to configure log sink '" << sink_name << "'!";

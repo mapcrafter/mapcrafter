@@ -67,32 +67,42 @@ BOOST_AUTO_TEST_CASE(config_testReadWrite) {
 	BOOST_CHECK_EQUAL(in_data, out_data);
 }
 
-BOOST_AUTO_TEST_CASE(config_testFieldValidation) {
+BOOST_AUTO_TEST_CASE(config_testField) {
 	config::ValidationList validation;
 
-	// test the behavior of loading config entries from different sections
-	// into the field objects
-	config::INIConfigSection section1, section2, section3, section4;
-	section2.set("test", "foobar");
-	section4.set("test", "42");
+	config::Field<std::string> field1;
+	BOOST_CHECK(!field1.hasAnyValue());
+	BOOST_CHECK(!field1.hasDefaultValue());
+	BOOST_CHECK(!field1.hasUserValue());
 
-	config::Field<std::string> field, field2;
-	BOOST_CHECK(!field.isLoaded());
-	BOOST_CHECK(!field.require(validation, "error"));
+	field1.setDefault("hello");
+	BOOST_CHECK(field1.hasAnyValue());
+	BOOST_CHECK(field1.hasDefaultValue());
+	BOOST_CHECK(!field1.hasUserValue());
+	BOOST_CHECK_EQUAL(field1.getValue(), "hello");
 
-	field.load("test", section2.get("test"), validation);
-	BOOST_CHECK(field.isLoaded());
-	BOOST_CHECK_EQUAL(field.getValue(), "foobar");
+	field1.setValue("world");
+	BOOST_CHECK(field1.hasAnyValue());
+	BOOST_CHECK(field1.hasDefaultValue());
+	BOOST_CHECK(field1.hasUserValue());
+	BOOST_CHECK_EQUAL(field1.getValue(), "world");
 
-	field.load("test", section4.get("test"), validation);
-	BOOST_CHECK(field.isLoaded());
-	BOOST_CHECK_EQUAL(field.getValue(), "42");
+	field1.setDefault("test_default");
+	BOOST_CHECK(field1.hasAnyValue());
+	BOOST_CHECK(field1.hasDefaultValue());
+	BOOST_CHECK(field1.hasUserValue());
+	BOOST_CHECK_EQUAL(field1.getValue(), "world");
 
-	field2.setDefault("default");
-	BOOST_CHECK(field2.isLoaded());
+	config::Field<std::string> field2("default");
+	BOOST_CHECK(field2.hasAnyValue());
+	BOOST_CHECK(field2.hasDefaultValue());
+	BOOST_CHECK(!field2.hasUserValue());
 	BOOST_CHECK_EQUAL(field2.getValue(), "default");
 
-	field2.load("test", section2.get("test"), validation);
-	BOOST_CHECK(field2.isLoaded());
-	BOOST_CHECK_EQUAL(field2.getValue(), "foobar");
+	config::Field<std::string> field3;
+	field3.setValue("test");
+	BOOST_CHECK(field3.hasAnyValue());
+	BOOST_CHECK(!field3.hasDefaultValue());
+	BOOST_CHECK(field3.hasUserValue());
+	BOOST_CHECK_EQUAL(field3.getValue(), "test");
 }

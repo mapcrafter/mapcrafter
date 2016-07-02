@@ -177,20 +177,33 @@ private:
 
 template <typename T>
 class Field {
-private:
-	T value, default_value;
-	bool loaded, default_loaded;
 public:
-	Field(T value = T()) : value(value), loaded(false), default_loaded(false) {}
+	Field(T default_value) : default_value(default_value), user_loaded(false), default_loaded(true) {}
+	Field() : user_loaded(false), default_loaded(false) {}
 	~Field() {}
 
 	/**
-	 * Sets the default value of a configuration option.
+	 * Whether the field has a default or a user value set.
 	 */
-	void setDefault(T value);
+	bool hasAnyValue() const;
+	
+	/**
+	 * Whether the field has a user value set (via. load or setValue).
+	 */
+	bool hasUserValue() const;
+	
+	/**
+	 * Gets the user value of the field.
+	 */
+	T getValue() const;
 
 	/**
-	 * Tries to load/parse the value of a configuration option.
+	 * Sets the user value of the field.
+	 */
+	void setValue(T value);
+
+	/**
+	 * Tries to load/parse the value of the field.
 	 * Uses the util::as function to convert the string value to the type of this field.
 	 * Returns false if this function threw an std::invalid_argument exception
 	 * and adds an error message to the validation list.
@@ -199,21 +212,24 @@ public:
 			ValidationList& validation);
 
 	/**
-	 * Checks if the configuration option was specified and adds an error to the
+	 * Whether the field has a default value set (via. setValue).
+	 */
+	bool hasDefaultValue() const;
+
+	/**
+	 * Sets the default value of the field.
+	 */
+	void setDefault(T value);
+
+	/**
+	 * Checks if the field has a value set (default or user) and adds an error to the
 	 * validation list if not.
 	 */
 	bool require(ValidationList& validation, std::string message) const;
 
-	/**
-	 * Gets/sets the value of the field.
-	 */
-	T getValue() const;
-	void setValue(T value);
-
-	/**
-	 * Returns whether a value is set.
-	 */
-	bool isLoaded() const;
+protected:
+	T user_value, default_value;
+	bool user_loaded, default_loaded;
 };
 
 static std::string ROTATION_NAMES[4] = {"top-left", "top-right", "bottom-right", "bottom-left"};
@@ -222,17 +238,31 @@ static std::string ROTATION_NAMES_SHORT[4] = {"tl", "tr", "br", "bl"};
 int stringToRotation(const std::string& rotation, std::string names[4] = ROTATION_NAMES);
 
 template <typename T>
-void Field<T>::setDefault(T value) {
-	default_value = value;
-	default_loaded = true;
+bool Field<T>::hasAnyValue() const {
+	return user_loaded || default_loaded;
+}
+
+template <typename T>
+bool Field<T>::hasUserValue() const {
+	return user_loaded;
+}
+
+template <typename T>
+T Field<T>::getValue() const {
+	return user_loaded ? user_value : default_value;
+}
+
+template <typename T>
+void Field<T>::setValue(T value) {
+	user_value = value;
+	user_loaded = true;
 }
 
 template <typename T>
 bool Field<T>::load(const std::string& key, const std::string& value,
 		ValidationList& validation) {
 	try {
-		this->value = util::as<T>(value);
-		loaded = true;
+		setValue(util::as<T>(value));
 		return true;
 	} catch (std::invalid_argument& e) {
 		validation.error("Invalid value for '" + key + "': " + e.what());
@@ -241,8 +271,19 @@ bool Field<T>::load(const std::string& key, const std::string& value,
 }
 
 template <typename T>
+bool Field<T>::hasDefaultValue() const {
+	return default_loaded;
+}
+
+template <typename T>
+void Field<T>::setDefault(T value) {
+	default_value = value;
+	default_loaded = true;
+}
+
+template <typename T>
 bool Field<T>::require(ValidationList& validation, std::string message) const {
-	if (!loaded && !default_loaded) {
+	if (!hasAnyValue()) {
 		validation.error(message);
 		return false;
 	}
@@ -250,23 +291,8 @@ bool Field<T>::require(ValidationList& validation, std::string message) const {
 }
 
 template <typename T>
-T Field<T>::getValue() const {
-	return isLoaded() ? value : default_value;
-}
-
-template <typename T>
-void Field<T>::setValue(T value) {
-	this->value = value;
-}
-
-template <typename T>
-bool Field<T>::isLoaded() const {
-	return loaded;
-}
-
-template <typename T>
 std::ostream& operator<<(std::ostream& out, Field<T> field) {
-	if (field.isLoaded())
+	if (field.hasAnyValue())
 		out << util::str(field.getValue());
 	else
 		out << "<not specified>";
