@@ -126,28 +126,38 @@ var IsometricRenderView = {
  */
 var TopdownRenderView = {
 	mcToLatLng: function(x, z, y, lmap, mapConfig, tileOffset, tileWidth) {
-		var block = mapConfig.textureSize / (mapConfig.tileSize / tileWidth * Math.pow(2, mapConfig.maxZoom));
-		
-		var lng = 0.5 + (x - tileOffset[0]*tileWidth*16) * block;
-		var lat = 0.5 + (z - tileOffset[1]*tileWidth*16) * block;
-		
-		var size = mapConfig.tileSize / tileWidth * Math.pow(2, lmap.getZoom());
-		return lmap.unproject([lng * size, lat * size]);
+		// all pixel units here are pixels on the highest zoom level
+		// size of the map in pixels
+		var mapWidth = mapConfig.tileSize * Math.pow(2, mapConfig.maxZoom);
+		// size of a single block in pixels
+		var blockWidth = mapConfig.tileSize / (16.0 * tileWidth);
+		// now construct mc-xzy in pixel coordinates:
+		// 1. scale xz by block size
+		// 2. map range [-mapWidth/2, mapWidth/2] to [0, mapWidth/2] (like unproject wants it)
+		// 3. apply tile offset
+		// 4. pixel coordinates -> leaflet lat/lng
+		var point = L.point(x, z).multiplyBy(blockWidth)
+			.add(L.point(mapWidth / 2, mapWidth / 2))
+			.add(L.point(-tileOffset[0], -tileOffset[1]).multiplyBy(mapConfig.tileSize));
+		return lmap.unproject(point, mapConfig.maxZoom);
 	},
 	
 	latLngToMC: function(latLng, y, lmap, mapConfig, tileOffset, tileWidth) {
-		var point = lmap.project(latLng);
-		var size = mapConfig.tileSize / tileWidth * Math.pow(2, lmap.getZoom());
-		
-		var lat = point.y / size;
-		var lng = point.x / size;
-		lat += tileOffset[1] * tileWidth / Math.pow(2, mapConfig.maxZoom);
-		lng += tileOffset[0] * tileWidth / Math.pow(2, mapConfig.maxZoom);
-
-		var block = mapConfig.textureSize / (mapConfig.tileSize / tileWidth * Math.pow(2, mapConfig.maxZoom));
-		x = (lng - 0.5) / block;
-		z = (lat - 0.5) / block;
-		return [x, z, y];
+		// all pixel units here are pixels on the highest zoom level
+		// size of the map in pixels
+		var mapWidth = mapConfig.tileSize * Math.pow(2, mapConfig.maxZoom);
+		// size of a single block in pixels
+		var blockWidth = mapConfig.tileSize / (16.0 * tileWidth);
+		// get correct pixel coordinates from leaflet map:
+		// 1. leaflet lat/lng -> pixel coordinates
+		// 2. map range [0, mapWidth/2] to [-mapWidth/2, mapWidth/2]
+		// 3. apply tile offset
+		// 4. divide by block size to get coordinates
+		var mc = lmap.project(latLng, mapConfig.maxZoom)
+			.add(L.point(-mapWidth / 2, -mapWidth / 2))
+			.add(L.point(tileOffset[0], tileOffset[1]).multiplyBy(mapConfig.tileSize))
+			.divideBy(blockWidth);
+		return [mc.x, mc.y, y];
 	}
 };
 
