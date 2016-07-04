@@ -646,6 +646,13 @@ Marker Options
     This is the postfix a sign must have to be recognized as marker
     of this marker group.
 
+.. note::
+
+    Note that prefix and postfix may not overlap in the text sign to be
+    matched. Example: If you have prefix ``foo`` and postfix ``oo bar`` and
+    your sign text says ``foo bar``, it won't be matched. A sign with text
+    ``foo ooaoo bar`` would be matched.
+
 ``title_format = <format>``
 
     **Default:** ``%(text)``
