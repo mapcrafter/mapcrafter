@@ -71,7 +71,7 @@ var IsometricRenderView = {
 		var quarterBlockSize = mapConfig.textureSize / 2;
 		// do the inverse translation from above
 		var point = lmap.project(latLng, mapConfig.maxZoom)
-			.add(L.point(tileOffset[0], tileOffset[1]).multiplyBy(mapConfig.tileSize));
+			.add(L.point(tileOffset[0], tileOffset[1]).multiplyBy(mapConfig.tileSize))
 			.add(L.point(-(tileWidth - 1) / tileWidth * mapConfig.tileSize, 0)) // TODO this seems to be required... why?
 			.add(L.point(-mapSize / 2, -mapSize / 2))
 		// remove block sizes from it
