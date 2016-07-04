@@ -56,17 +56,15 @@ void imageResizeBilinear(const RGBAImage& image, RGBAImage& dest, int width, int
 			uint8_t blue = interpolate(rgba_blue(a), rgba_blue(b), rgba_blue(c), rgba_blue(d), x_diff, y_diff);
 			uint8_t alpha = interpolate(rgba_alpha(a), rgba_alpha(b), rgba_alpha(c), rgba_alpha(d), x_diff, y_diff);
 
-			// make sure output alpha is 255 if all input alphas are 255 too,
-			// so that no transparency (aka alpha=254) sneaks into images,
-			// otherwise shit hits the fani
+			// make sure that that no transparency (aka alpha=254) sneaks into images
+			// caused by weird interpolation bugses, otherwise shit hits the fan
+			// when all blocks contain just a bit of transparency
 			
-			// sorry, this looks a bit complicated, but it's just making sure that this works
-			// for all special cases with the pixels on the sides of an image
-			if ((x == width - 1 && y == height - 1 && rgba_alpha(a) == 255) // pixel bottom-right corner
-					|| (x == width - 1 && rgba_alpha(a) == 255 && rgba_alpha(c) == 255) // pixel right side
-					|| (y == height - 1 &&  rgba_alpha(a) == 255 && rgba_alpha(b) == 255 && rgba_alpha(d) == 255) // pixel bottom side
-					|| (rgba_alpha(a) == 255 && rgba_alpha(b) == 255 && rgba_alpha(c) == 255 && rgba_alpha(d) == 255)) // other pixel
+			// do this by just clamping alpha >= threshold to 255, 245 or 255 won't be
+			// a big visual difference
+			if (alpha >= 245)
 				alpha = 255;
+		
 			dest.setPixel(x, y, rgba(red, green, blue, alpha));
 		}
 	}
