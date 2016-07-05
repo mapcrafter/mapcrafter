@@ -18,7 +18,8 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 	
 	var createDefaultMarker = function(ui, groupInfo, markerInfo) {
 		var pos = markerInfo.pos;
-		var marker = new L.Marker(ui.mcToLatLng(pos[0], pos[1], pos[2]), {
+		// show on top center of block
+		var marker = new L.Marker(ui.mcToLatLng(pos[0] + 0.5, pos[1] + 0.5, pos[2]), {
 			title: markerInfo.title,
 		});
 

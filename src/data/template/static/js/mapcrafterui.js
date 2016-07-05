@@ -57,10 +57,12 @@ var IsometricRenderView = {
 		// so we can get the correct pixel coordinates of the mc coordinates, and then lat/lng:
 		// 1. calculate row/column, multiply with row/column size (now pixel coordinates)
 		// 2. map range [-mapSize/2, mapSize/2] to [0, mapSize/2] (like unproject wants it)
-		// 3. apply tile offset
-		// 4. pixel coordinates -> leaflet lat/lng with unproject
+		// 3. apply little offset that is needed in this view
+		// 4. apply tile offset
+		// 5. pixel coordinates -> leaflet lat/lng with unproject
 		var point = L.point(2 * (x + z), z - x + (256 - y) * 2).multiplyBy(quarterBlockSize)
 			.add(L.point(mapSize / 2, mapSize / 2))
+			.add(L.point(-mapConfig.textureSize * 16, 0))
 			.add(L.point(-tileOffset[0], -tileOffset[1]).multiplyBy(mapConfig.tileSize));
 		return lmap.unproject(point, mapConfig.maxZoom);
 	},
@@ -71,6 +73,7 @@ var IsometricRenderView = {
 		// do the inverse translation from above
 		var point = lmap.project(latLng, mapConfig.maxZoom)
 			.add(L.point(tileOffset[0], tileOffset[1]).multiplyBy(mapConfig.tileSize))
+			.add(L.point(mapConfig.textureSize * 16, 0))
 			.add(L.point(-mapSize / 2, -mapSize / 2))
 		// remove block sizes from it
 		point.x /= 2*quarterBlockSize;
