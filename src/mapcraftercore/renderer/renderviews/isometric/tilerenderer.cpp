@@ -41,9 +41,14 @@ namespace renderer {
 TileTopBlockIterator::TileTopBlockIterator(const TilePos& tile, int block_size,
 		int tile_width)
 		: block_size(block_size), is_end(false) {
+	// row/col 0,0 are the top left chunk of the tile 0,0
+	// each tile is four rows high, two columns wide
+	
 	// at first get the chunk, whose row and column is at the top right of the tile
-	mc::ChunkPos topright_chunk = mc::ChunkPos::byRowCol(4 * tile_width * tile.getY(),
-			2 * tile_width * tile.getX() + 2);
+	// top right chunk of a tile is the top left chunk of the tile x+1,y
+	mc::ChunkPos topright_chunk = mc::ChunkPos::byRowCol(
+			4 * tile_width * tile.getY(),
+			2 * tile_width * (tile.getX() + 1));
 
 	// now get the first visible block from this chunk in this tile
 	top = mc::LocalBlockPos(8, 6, mc::CHUNK_HEIGHT * 16 - 1).toGlobalPos(topright_chunk);

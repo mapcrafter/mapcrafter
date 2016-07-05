@@ -38,8 +38,8 @@ void addRowColTiles(int row, int col, int tile_width, std::set<TilePos>& tiles) 
 	// the tiles are 2 * TILE_WIDTH columns wide
 	// and 4 * TILE_WIDTH row tall
 	// calculate the approximate position of the tile
-	int x = col / (2 * tile_width);
-	int y = row / (4 * tile_width);
+	int x = std::floor((float) col / (2 * tile_width));
+	int y = std::floor((float) row / (4 * tile_width));
 
 	// add this tile
 	tiles.insert(TilePos(x, y));
