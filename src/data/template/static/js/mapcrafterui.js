@@ -48,41 +48,36 @@ var IsometricRenderView = {
 	mcToLatLng: function(x, z, y, lmap, mapConfig, tileOffset, tileWidth) {
 		// all pixel units here are pixels on the highest zoom level
 		// size of the map in pixels
-		var mapWidth = mapConfig.tileSize * Math.pow(2, mapConfig.maxZoom);
+		var mapSize = mapConfig.tileSize * Math.pow(2, mapConfig.maxZoom);
 		// size of a quarter block = texture size / 2
-		var quarterBlockWidth = mapConfig.textureSize / 2;
+		var quarterBlockSize = mapConfig.textureSize / 2;
 		// each block has a row/column depending on x/z/y
 		// each row is a half block high, each column a quarter block wide
 		// row = x+z, column = z - x + (256-y)*2
 		// so we can get the correct pixel coordinates of the mc coordinates, and then lat/lng:
 		// 1. calculate row/column, multiply with row/column size (now pixel coordinates)
-		// 2. map range [-mapWidth/2, mapWidth/2] to [0, mapWidth/2] (like unproject wants it)
+		// 2. map range [-mapSize/2, mapSize/2] to [0, mapSize/2] (like unproject wants it)
 		// 3. apply tile offset
-		// 4. pixel coordinates -> leaflet lat/lng
-		var point = L.point(2 * (x + z), z - x + (256 - y) * 2).multiplyBy(quarterBlockWidth)
-			.add(L.point(mapWidth / 2, mapWidth / 2))
-//			.add(L.point((tileWidth - 1) / tileWidth * mapConfig.tileSize, 0))
+		// 4. pixel coordinates -> leaflet lat/lng with unproject
+		var point = L.point(2 * (x + z), z - x + (256 - y) * 2).multiplyBy(quarterBlockSize)
+			.add(L.point(mapSize / 2, mapSize / 2))
+			.add(L.point((tileWidth - 1) / tileWidth * mapConfig.tileSize, 0)) // TODO this seems to be required... why?
 			.add(L.point(-tileOffset[0], -tileOffset[1]).multiplyBy(mapConfig.tileSize));
 		return lmap.unproject(point, mapConfig.maxZoom);
 	},
 	
 	latLngToMC: function(latLng, y, lmap, mapConfig, tileOffset, tileWidth) {
-		// all pixel units here are pixels on the highest zoom level
-		// size of the map in pixels
-		var mapWidth = mapConfig.tileSize * Math.pow(2, mapConfig.maxZoom);
-		// size of a quarter block = texture size / 2
-		var quarterBlockWidth = mapConfig.textureSize / 2;
-		// get correct pixel coordinates from leaflet map:
-		// 1. leaflet lat/lng -> pixel coordinates
-		// 2. map range [0, mapWidth/2] to [-mapWidth/2, mapWidth/2]
-		// 3. apply tile offset
+		var mapSize = mapConfig.tileSize * Math.pow(2, mapConfig.maxZoom);
+		var quarterBlockSize = mapConfig.textureSize / 2;
+		// do the inverse translation from above
 		var point = lmap.project(latLng, mapConfig.maxZoom)
-			.add(L.point(-mapWidth / 2, -mapWidth / 2))
-			.add(L.point(tileOffset[0], tileOffset[1]).multiplyBy(mapConfig.tileSize));
-		// remove block width from it
-		point.x /= 2*quarterBlockWidth;
-		point.y /= quarterBlockWidth;
-		// by inserting the row/col formulars from above into wolframalpha you get can this:
+			.add(L.point(tileOffset[0], tileOffset[1]).multiplyBy(mapConfig.tileSize))
+			.add(L.point(-(tileWidth - 1) / tileWidth * mapConfig.tileSize, 0)) // TODO this seems to be required... why?
+			.add(L.point(-mapSize / 2, -mapSize / 2))
+		// remove block sizes from it
+		point.x /= 2*quarterBlockSize;
+		point.y /= quarterBlockSize;
+		// solve the row = ... col = ... equation system and you get this:
 		var x = 0.5 * (point.x - point.y - 2*y + 512);
 		var z = 0.5 * (point.x + point.y + 2*y - 512);
 		return [x, z, y];
@@ -94,36 +89,22 @@ var IsometricRenderView = {
  */
 var TopdownRenderView = {
 	mcToLatLng: function(x, z, y, lmap, mapConfig, tileOffset, tileWidth) {
-		// all pixel units here are pixels on the highest zoom level
-		// size of the map in pixels
-		var mapWidth = mapConfig.tileSize * Math.pow(2, mapConfig.maxZoom);
-		// size of a single block in pixels
+		// like the isometric render view, except we don't have to deal with the row/col hassle
+		var mapSize = mapConfig.tileSize * Math.pow(2, mapConfig.maxZoom);
 		var blockWidth = mapConfig.tileSize / (16.0 * tileWidth);
-		// now construct mc-xzy in pixel coordinates:
-		// 1. scale xz by block size
-		// 2. map range [-mapWidth/2, mapWidth/2] to [0, mapWidth/2] (like unproject wants it)
-		// 3. apply tile offset
-		// 4. pixel coordinates -> leaflet lat/lng
 		var point = L.point(x, z).multiplyBy(blockWidth)
-			.add(L.point(mapWidth / 2, mapWidth / 2))
+			.add(L.point(mapSize / 2, mapSize / 2))
 			.add(L.point(-tileOffset[0], -tileOffset[1]).multiplyBy(mapConfig.tileSize));
 		return lmap.unproject(point, mapConfig.maxZoom);
 	},
 	
 	latLngToMC: function(latLng, y, lmap, mapConfig, tileOffset, tileWidth) {
-		// all pixel units here are pixels on the highest zoom level
-		// size of the map in pixels
-		var mapWidth = mapConfig.tileSize * Math.pow(2, mapConfig.maxZoom);
-		// size of a single block in pixels
+		var mapSize = mapConfig.tileSize * Math.pow(2, mapConfig.maxZoom);
 		var blockWidth = mapConfig.tileSize / (16.0 * tileWidth);
-		// get correct pixel coordinates from leaflet map:
-		// 1. leaflet lat/lng -> pixel coordinates
-		// 2. map range [0, mapWidth/2] to [-mapWidth/2, mapWidth/2]
-		// 3. apply tile offset
-		// 4. divide by block size to get coordinates
+		// inverse transformation from above again
 		var mc = lmap.project(latLng, mapConfig.maxZoom)
-			.add(L.point(-mapWidth / 2, -mapWidth / 2))
 			.add(L.point(tileOffset[0], tileOffset[1]).multiplyBy(mapConfig.tileSize))
+			.add(L.point(-mapSize / 2, -mapSize / 2))
 			.divideBy(blockWidth);
 		return [mc.x, mc.y, y];
 	}

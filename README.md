@@ -78,6 +78,15 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 ## Version history ##
 
+**v.2.3**
+
+* Added support for Minecraft 1.10 blocks (#226)
+* Added new bootstrap web UI (thanks to jamestaylr #205)
+* Added `postfix` option for signs to also use a postfix instead of just a prefix (#223)
+* Fixed map selection on mobile devices (thanks to joshproehl #220 #123)
+* Fixed a bug in the bilinear image resizing algorithm that caused dark sides of
+    grass and other transparent blocks
+
 **v.2.2.1**
 
 * Updated Minecraft version file to 1.9
