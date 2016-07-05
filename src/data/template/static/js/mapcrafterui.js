@@ -61,7 +61,6 @@ var IsometricRenderView = {
 		// 4. pixel coordinates -> leaflet lat/lng with unproject
 		var point = L.point(2 * (x + z), z - x + (256 - y) * 2).multiplyBy(quarterBlockSize)
 			.add(L.point(mapSize / 2, mapSize / 2))
-			.add(L.point((tileWidth - 1) / tileWidth * mapConfig.tileSize, 0)) // TODO this seems to be required... why?
 			.add(L.point(-tileOffset[0], -tileOffset[1]).multiplyBy(mapConfig.tileSize));
 		return lmap.unproject(point, mapConfig.maxZoom);
 	},
@@ -72,7 +71,6 @@ var IsometricRenderView = {
 		// do the inverse translation from above
 		var point = lmap.project(latLng, mapConfig.maxZoom)
 			.add(L.point(tileOffset[0], tileOffset[1]).multiplyBy(mapConfig.tileSize))
-			.add(L.point(-(tileWidth - 1) / tileWidth * mapConfig.tileSize, 0)) // TODO this seems to be required... why?
 			.add(L.point(-mapSize / 2, -mapSize / 2))
 		// remove block sizes from it
 		point.x /= 2*quarterBlockSize;
