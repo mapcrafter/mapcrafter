@@ -35,6 +35,25 @@ renderer::ImageFormatType as<renderer::ImageFormatType>(const std::string& from)
 }
 
 template <>
+renderer::ImageFormat as<renderer::ImageFormat>(const std::string& from) {
+	size_t pos = from.find_first_of(" ");
+	if (pos == std::string::npos)
+		pos = from.size();
+	std::string type = from.substr(0, pos);
+	std::string remaining = pos == from.size() ? "" : from.substr(pos + 1);
+	if (type == "png") {
+		return renderer::ImageFormat::png(remaining == "indexed");
+	}
+	if (type == "jpeg") {
+		int quality = remaining == "" ? 85 : util::as<int>(remaining);
+		if (quality < 0 || quality > 100)
+			throw std::invalid_argument("JPEG quality must be between 0 and 100!");
+		return renderer::ImageFormat::jpeg(quality, renderer::rgba(0, 0, 0, 0));
+	}
+	throw std::invalid_argument("Image format must be one of 'png' or 'jpeg'!");
+}
+
+template <>
 config::LegacyRenderMode as<config::LegacyRenderMode>(const std::string& from) {
 	if (from == "plain")
 		return config::LegacyRenderMode::PLAIN;
@@ -155,9 +174,7 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  texture_dir = " << texture_dir << std::endl;
 	out << "  texture_size = " << texture_size << std::endl;
 	out << "  water_opacity = " << water_opacity << std::endl;
-	out << "  image_format = " << getImageFormat() << std::endl;
-	out << "  png_indexed = " << png_indexed << std::endl;
-	out << "  jpeg_quality = " << jpeg_quality << std::endl;
+	out << "  image_format = " << image_format << std::endl;
 	out << "  lighting_intensity = " << lighting_intensity << std::endl;
 	out << "  lighting_water_intensity = " << water_opacity << std::endl;
 	out << "  render_unknown_blocks = " << render_unknown_blocks << std::endl;
@@ -227,9 +244,7 @@ int MapSection::getTileWidth() const {
 }
 
 renderer::ImageFormat MapSection::getImageFormat() const {
-	if (image_format_type.getValue() == renderer::ImageFormatType::PNG)
-		return renderer::ImageFormat::png(png_indexed.getValue());
-	return renderer::ImageFormat::jpeg(jpeg_quality.getValue(), renderer::rgba(0, 0, 0, 0));
+	return image_format.getValue();
 }
 
 double MapSection::getLightingIntensity() const {
@@ -289,9 +304,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	water_opacity.setDefault(1.0);
 	tile_width.setDefault(1);
 
-	image_format_type.setDefault(renderer::ImageFormatType::PNG);
-	png_indexed.setDefault(false);
-	jpeg_quality.setDefault(85);
+	image_format.setDefault(renderer::ImageFormat::png(false));
 
 	lighting_intensity.setDefault(1.0);
 	lighting_water_intensity.setDefault(1.0);
@@ -346,13 +359,7 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		if (tile_width.getValue() < 1)
 			validation.error("'tile_width' must be a positive number!");
 	} else if (key == "image_format") {
-		image_format_type.load(key, value, validation);
-	} else if (key == "png_indexed") {
-		png_indexed.load(key, value, validation);
-	} else if (key == "jpeg_quality") {
-		if (jpeg_quality.load(key, value, validation)
-				&& (jpeg_quality.getValue() < 0 || jpeg_quality.getValue() > 100))
-			validation.error("'jpeg_quality' must be a number between 0 and 100!");
+		image_format.load(key, value, validation);
 	} else if (key == "lighting_intensity") {
 		lighting_intensity.load(key, value, validation);
 	} else if (key == "lighting_water_intensity") {

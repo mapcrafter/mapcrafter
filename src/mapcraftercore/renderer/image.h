@@ -100,6 +100,7 @@ enum class ImageFormatType {
 
 class ImageFormat {
 public:
+	ImageFormat();
 	static ImageFormat png(bool indexed);
 	static ImageFormat jpeg(int quality, RGBAPixel background_color);
 
@@ -113,8 +114,6 @@ public:
 	void setJPEGBackgroundColor(const RGBAPixel& background);
 
 private:
-	ImageFormat();
-
 	ImageFormatType type;
 
 	bool png_indexed;

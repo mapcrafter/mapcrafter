@@ -153,9 +153,7 @@ private:
 	Field<int> texture_size, texture_blur, tile_width;
 	Field<double> water_opacity;
 
-	Field<renderer::ImageFormatType> image_format_type;
-    Field<bool> png_indexed;
-	Field<int> jpeg_quality;
+	Field<renderer::ImageFormat> image_format;
 
 	Field<double> lighting_intensity, lighting_water_intensity;
 	Field<bool> cave_high_contrast;

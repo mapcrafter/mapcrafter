@@ -159,6 +159,9 @@ void blend(RGBAPixel& dest, const RGBAPixel& source) {
 	}
 }
 
+ImageFormat::ImageFormat() {
+}
+
 ImageFormat ImageFormat::png(bool indexed) {
 	ImageFormat format;
 	format.type = ImageFormatType::PNG;
@@ -196,10 +199,6 @@ RGBAPixel ImageFormat::getJPEGBackgroundColor() const {
 
 void ImageFormat::setJPEGBackgroundColor(const RGBAPixel& background) {
 	this->jpeg_background_color = background;
-}
-
-
-ImageFormat::ImageFormat() {
 }
 
 /**
