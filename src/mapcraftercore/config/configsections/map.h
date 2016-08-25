@@ -114,6 +114,7 @@ public:
 	int getTileWidth() const;
 
 	renderer::ImageFormat getImageFormat() const;
+	renderer::ImageFormat getOverlayImageFormat() const;
 
 	double getLightingIntensity() const;
 	double getLightingWaterIntensity() const;
@@ -153,7 +154,7 @@ private:
 	Field<int> texture_size, texture_blur, tile_width;
 	Field<double> water_opacity;
 
-	Field<renderer::ImageFormat> image_format;
+	Field<renderer::ImageFormat> image_format, overlay_image_format;
 
 	Field<double> lighting_intensity, lighting_water_intensity;
 	Field<bool> cave_high_contrast;

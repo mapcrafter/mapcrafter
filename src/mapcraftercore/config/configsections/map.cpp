@@ -175,6 +175,7 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  texture_size = " << texture_size << std::endl;
 	out << "  water_opacity = " << water_opacity << std::endl;
 	out << "  image_format = " << image_format << std::endl;
+	out << "  overlay_image_format = " << overlay_image_format << std::endl;
 	out << "  lighting_intensity = " << lighting_intensity << std::endl;
 	out << "  lighting_water_intensity = " << water_opacity << std::endl;
 	out << "  render_unknown_blocks = " << render_unknown_blocks << std::endl;
@@ -247,6 +248,10 @@ renderer::ImageFormat MapSection::getImageFormat() const {
 	return image_format.getValue();
 }
 
+renderer::ImageFormat MapSection::getOverlayImageFormat() const {
+	return overlay_image_format.getValue();
+}
+
 double MapSection::getLightingIntensity() const {
 	return lighting_intensity.getValue();
 }
@@ -305,6 +310,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	tile_width.setDefault(1);
 
 	image_format.setDefault(renderer::ImageFormat::png(false));
+	overlay_image_format.setDefault(renderer::ImageFormat::png(true));
 
 	lighting_intensity.setDefault(1.0);
 	lighting_water_intensity.setDefault(1.0);
@@ -360,6 +366,11 @@ bool MapSection::parseField(const std::string key, const std::string value,
 			validation.error("'tile_width' must be a positive number!");
 	} else if (key == "image_format") {
 		image_format.load(key, value, validation);
+	} else if (key == "overlay_image_format") {
+		if (overlay_image_format.load(key, value, validation)
+				&& overlay_image_format.getValue().getSuffix() != "png") {
+			validation.error("'overlay_image_format' must be a PNG image format!");
+		}
 	} else if (key == "lighting_intensity") {
 		lighting_intensity.load(key, value, validation);
 	} else if (key == "lighting_water_intensity") {

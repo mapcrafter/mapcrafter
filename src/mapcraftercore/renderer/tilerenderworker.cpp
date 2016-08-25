@@ -95,7 +95,7 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 	ImageFormat terrain_image_format = render_context.map_config.getImageFormat();
 	config::Color bg = render_context.background_color;
 	terrain_image_format.setJPEGBackgroundColor(rgba(bg.red, bg.green, bg.blue, 255));
-	ImageFormat overlay_image_format = ImageFormat::png(terrain_image_format.isPNGIndexed());
+	ImageFormat overlay_image_format = render_context.map_config.getOverlayImageFormat();
 
 	// if this is tile is not required or we should skip it, try to load it from file
 	if (!render_context.tile_set->isTileRequired(path) || render_work.tiles_skip.count(path)) {
@@ -108,7 +108,6 @@ void TileRenderWorker::renderRecursive(const TilePath& path, RGBAImage& tile, st
 			std::string type;
 			ImageFormat image_format = terrain_image_format;
 			if (overlay) {
-				// overlays are always png
 				type = "overlay_" + render_context.overlays[i]->getID();
 				image_format = overlay_image_format;
 			} else {
