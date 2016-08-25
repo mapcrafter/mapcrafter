@@ -164,7 +164,7 @@ void MapcrafterConfig::dump(std::ostream& out) const {
 	for (auto it = maps.begin(); it != maps.end(); ++it)
 		out << *it << std::endl;
 	for (auto it = overlays.begin(); it != overlays.end(); ++it)
-		out << it->second << std::endl;
+		out << *(it->second) << std::endl;
 	for (auto it = markers.begin(); it != markers.end(); ++it)
 		out << *it << std::endl;
 	for (auto it = log_sections.begin(); it != log_sections.end(); ++it)

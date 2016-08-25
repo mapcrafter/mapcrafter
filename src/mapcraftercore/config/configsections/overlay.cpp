@@ -229,7 +229,7 @@ bool LightingOverlaySection::parseField(const std::string key, const std::string
 
 void LightLevelOverlaySection::dump(std::ostream& out) const {
 	OverlaySection::dump(out);
-	out << "day = " << day << std::endl;
+	out << "  day = " << day << std::endl;
 }
 
 bool LightLevelOverlaySection::isDay() const {
@@ -296,7 +296,7 @@ int SlimeOverlaySection::getOpacity() const {
 
 void SpawnOverlaySection::dump(std::ostream& out) const {
 	OverlaySection::dump(out);
-	out << "day = " << day << std::endl;
+	out << "  day = " << day << std::endl;
 }
 
 bool SpawnOverlaySection::isDay() const {
