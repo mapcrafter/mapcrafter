@@ -129,26 +129,6 @@ private:
 	T min, max;
 };
 
-/**
- * A 3-dimensional interval consisting of three 1-dimension intervals.
- */
-template <typename T>
-class Interval3D {
-public:
-	Interval3D(const Interval1D<T>& interval_x = Interval1D<T>(),
-			const Interval1D<T>& interval_z = Interval1D<T>(),
-			const Interval1D<T>& interval_y = Interval1D<T>());
-
-	void setIntervalX(Interval1D<T> interval_x);
-	void setIntervalZ(Interval1D<T> interval_z);
-	void setIntervalY(Interval1D<T> interval_y);
-
-	bool contains(T x, T z, T y) const;
-
-protected:
-	Interval1D<T> interval_x, interval_z, interval_y;
-};
-
 template <typename T>
 Interval1D<T>::Interval1D(T min, T max)
 	: min(min), max(max) {
@@ -197,32 +177,6 @@ void Interval1D<T>::resetMax() {
 template <typename T>
 bool Interval1D<T>::contains(T value) const {
 	return min <= value && value <= max;
-}
-
-template <typename T>
-Interval3D<T>::Interval3D(const Interval1D<T>& interval_x, const Interval1D<T>& interval_z,
-		const Interval1D<T>& interval_y)
-	: interval_x(interval_x), interval_z(interval_z), interval_y(interval_y) {
-}
-
-template <typename T>
-void Interval3D<T>::setIntervalX(Interval1D<T> interval_x) {
-	this->interval_x = interval_x;
-}
-
-template <typename T>
-void Interval3D<T>::setIntervalZ(Interval1D<T> interval_z) {
-	this->interval_z = interval_z;
-}
-
-template <typename T>
-void Interval3D<T>::setIntervalY(Interval1D<T> interval_y) {
-	this->interval_y = interval_y;
-}
-
-template <typename T>
-bool Interval3D<T>::contains(T x, T z, T y) const {
-	return interval_x.contains(x) && interval_z.contains(z) && interval_y.contains(y);
 }
 
 } /* namespace util */
