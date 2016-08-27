@@ -179,30 +179,20 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 		if (rotation == -1)
 			validation.error("Invalid rotation '" + value + "'!");
 		default_rotation.setValue(rotation);
-	} else if (key == "sea_level") {
+	} else if (key == "sea_level") 
 		sea_level.load(key,value, validation);
-	}
-
-	else if (key == "crop_min_y") {
-		if (min_y.load(key, value, validation))
-			world_crop.setMinY(min_y.getValue());
-	} else if (key == "crop_max_y") {
-		if (max_y.load(key, value, validation))
-			world_crop.setMaxY(max_y.getValue());
-	} else if (key == "crop_min_x") {
-		if (min_x.load(key, value, validation))
-			world_crop.setMinX(min_x.getValue());
-	} else if (key == "crop_max_x") {
-		if (max_x.load(key, value, validation))
-			world_crop.setMaxX(max_x.getValue());
-	} else if (key == "crop_min_z") {
-		if (min_z.load(key, value, validation))
-			world_crop.setMinZ(min_z.getValue());
-	} else if (key == "crop_max_z") {
-		if (max_z.load(key, value, validation))
-			world_crop.setMaxZ(max_z.getValue());
-	}
-
+	else if (key == "crop_min_y") 
+		min_y.load(key, value, validation);
+	else if (key == "crop_max_y") 
+		max_y.load(key, value, validation);
+	else if (key == "crop_min_x") 
+		min_x.load(key, value, validation);
+	else if (key == "crop_max_x") 
+		max_x.load(key, value, validation);
+	else if (key == "crop_min_z") 
+		min_z.load(key, value, validation);
+	else if (key == "crop_max_z") 
+		max_z.load(key, value, validation);
 	else if (key == "crop_center_x")
 		center_x.load(key, value, validation);
 	else if (key == "crop_center_z")
@@ -219,6 +209,20 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 	return true;
 }
 
+namespace {
+
+template <typename T>
+util::Interval1D<T> intervalFromFields(Field<T> f1, Field<T> f2) {
+	util::Interval1D<T> interval;
+	if (f1.hasAnyValue())
+		interval.setMin(f1.getValue());
+	if (f2.hasAnyValue())
+		interval.setMax(f2.getValue());
+	return interval;
+}
+
+}
+
 void WorldSection::postParse(const INIConfigSection& section,
 		ValidationList& validation) {
 	if (default_zoom.hasAnyValue() && default_zoom.getValue() < 0)
@@ -228,6 +232,7 @@ void WorldSection::postParse(const INIConfigSection& section,
 	bool crop_rectangular = min_x.hasAnyValue() || max_x.hasAnyValue() || min_z.hasAnyValue() || max_z.hasAnyValue();
 	bool crop_circular = center_x.hasAnyValue() || center_z.hasAnyValue() || radius.hasAnyValue();
 
+	mc::Area area = mc::Area::dummy();
 	if (crop_rectangular && crop_circular) {
 		validation.error("You can not use both world cropping types at the same time!");
 	} else if (crop_rectangular) {
@@ -235,6 +240,9 @@ void WorldSection::postParse(const INIConfigSection& section,
 			validation.error("min_x must be smaller than or equal to max_x!");
 		if (min_z.hasAnyValue() && max_z.hasAnyValue() && min_z.getValue() > max_z.getValue())
 			validation.error("min_z must be smaller than or equal to max_z!");
+		util::Interval1D<int> x = intervalFromFields(min_x, max_x);
+		util::Interval1D<int> z = intervalFromFields(min_z, max_z);
+		area = mc::Area::rectangular(x, z);
 	} else if (crop_circular) {
 		std::string message = "You have to specify crop_center_x, crop_center_z "
 				"and crop_radius for circular world cropping!";
@@ -242,8 +250,11 @@ void WorldSection::postParse(const INIConfigSection& section,
 			&& center_z.require(validation, message)
 			&& radius.require(validation, message);
 
-		world_crop.setCenter(mc::BlockPos(center_x.getValue(), center_z.getValue(), 0));
-		world_crop.setRadius(radius.getValue());
+		area = mc::Area::circular(mc::BlockPos(center_x.getValue(), center_z.getValue(), 0), radius.getValue());
+	}
+
+	if (crop_rectangular ^ crop_circular) {
+		world_crop.setArea(area.withYBounding(intervalFromFields(min_y, max_y)));
 	}
 
 	if (min_y.hasAnyValue() && max_y.hasAnyValue() && min_y.getValue() > max_y.getValue())

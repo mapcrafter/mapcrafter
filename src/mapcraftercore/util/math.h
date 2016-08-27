@@ -93,6 +93,18 @@ public:
 	Interval1D(T min = MIN_DEFAULT, T max = MAX_DEFAULT);
 
 	/**
+	 * Whether a minimum/maximum is set.
+	 */
+	bool hasMin() const;
+	bool hasMax() const;
+
+	/**
+	 * Returns the minimum/maximum limit.
+	 */
+	T getMin() const;
+	T getMax() const;
+
+	/**
 	 * Sets the minimum/maximum limit.
 	 */
 	void setMin(T min);
@@ -140,6 +152,26 @@ protected:
 template <typename T>
 Interval1D<T>::Interval1D(T min, T max)
 	: min(min), max(max) {
+}
+
+template <typename T>
+bool Interval1D<T>::hasMin() const {
+	return min != MIN_DEFAULT;
+}
+
+template <typename T>
+bool Interval1D<T>::hasMax() const {
+	return max != MAX_DEFAULT;
+}
+
+template <typename T>
+T Interval1D<T>::getMin() const {
+	return min;
+}
+
+template <typename T>
+T Interval1D<T>::getMax() const {
+	return max;
 }
 
 template <typename T>

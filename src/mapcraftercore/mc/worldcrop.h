@@ -134,42 +134,27 @@ private:
 	void updateBlockState(uint16_t id);
 };
 
-/**
- * Boundaries to crop a Minecraft World.
- */
-class WorldCrop {
+class Area {
 public:
-	// different types of boundaries -- either rectangular or circular
-	const static int RECTANGULAR = 1;
-	const static int CIRCULAR = 2;
-
-	WorldCrop();
-	~WorldCrop();
+	/**
+	 * Creates a dummy area with all blocks contained.
+	 */
+	static Area dummy();
 
 	/**
-	 * Returns the type of the boundaries.
+	 * Creates a rectangular area with the given x- and y-boundings.
 	 */
-	int getType() const;
+	static Area rectangular(const util::Interval1D<int>& x, const util::Interval1D<int>& z);
 
 	/**
-	 * Sets the minimum/maximum values for y-coordinates.
+	 * Creates a circular area with the given center and radius.
 	 */
-	void setMinY(int value);
-	void setMaxY(int value);
+	static Area circular(const BlockPos& center, long radius);
 
 	/**
-	 * Sets the limits (in block coordinates) of the rectangular boundaries.
+	 * Returns the area with the y-coordinate cropped.
 	 */
-	void setMinX(int value);
-	void setMaxX(int value);
-	void setMinZ(int value);
-	void setMaxZ(int value);
-
-	/**
-	 * Sets the limits (in block coordinates) of the circular boundaries.
-	 */
-	void setCenter(const BlockPos& pos);
-	void setRadius(long radius);
+	Area withYBounding(const util::Interval1D<int>& y) const;
 
 	/**
 	 * Returns whether a specific region is contained.
@@ -190,7 +175,7 @@ public:
 
 	/**
 	 * Returns whether a block is contained regarding x- and z-coordinates.
-	 * Used if a chunk is only partly contained.
+	 * Used to check if a chunk is only partly contained.
 	 */
 	bool isBlockContainedXZ(const mc::BlockPos& block) const;
 
@@ -198,6 +183,60 @@ public:
 	 * Returns whether a block is contained regarding its y-coordinate.
 	 */
 	bool isBlockContainedY(const mc::BlockPos& block) const;
+
+	/**
+	 * Returns whether a block is contained regarding all coordinate components.
+	 */
+	bool isBlockContained(const mc::BlockPos& block) const;
+
+	// different types of areas
+	const static int DUMMY = 0;
+	const static int RECTANGULAR = 1;
+	const static int CIRCULAR = 2;
+
+private:
+	Area(int type);
+
+	void setXBounds(const util::Interval1D<int>& bounds);
+	void setZBounds(const util::Interval1D<int>& bounds);
+	void setYBounds(const util::Interval1D<int>& bounds);
+
+	// type of world boundaries -- either RECTANGULAR or CIRCULAR
+	int type;
+
+	// usable for both rectangular and circular
+	util::Interval1D<int> bounds_y;
+
+	// rectangular limits:
+	// in block coordinates
+	util::Interval1D<int> bounds_x, bounds_z;
+	// in chunk coordinates
+	util::Interval1D<int> bounds_chunk_x, bounds_chunk_z;
+	// in region coordinates
+	util::Interval1D<int> bounds_region_x, bounds_region_z;
+
+	// circular limits
+	BlockPos center;
+	long radius;
+};
+
+/**
+ * Boundaries to crop a Minecraft World.
+ */
+class WorldCrop {
+public:
+	WorldCrop();
+	~WorldCrop();
+
+	/**
+	 * Returns the used area.
+	 */
+	const Area& getArea() const;
+
+	/**
+	 * Sets the area.
+	 */
+	void setArea(const Area& area);
 
 	/**
 	 * Returns/sets whether unpopulated chunks should be cropped.
@@ -221,23 +260,8 @@ public:
 	void loadBlockMask(const std::string& definition);
 
 private:
-	// type of world boundaries -- either RECTANGULAR or CIRCULAR
-	int type;
-
-	// usable for both rectangular and circular
-	util::Interval1D<int> bounds_y;
-
-	// rectangular limits:
-	// in block coordinates
-	util::Interval1D<int> bounds_x, bounds_z;
-	// in chunk coordinates
-	util::Interval1D<int> bounds_chunk_x, bounds_chunk_z;
-	// in region coordinates
-	util::Interval1D<int> bounds_region_x, bounds_region_z;
-
-	// circular limits
-	BlockPos center;
-	long radius;
+	// area that is only visible
+	Area area;
 
 	// whether to hide unpopulated chunks
 	bool crop_unpopulated_chunks;

@@ -78,7 +78,7 @@ bool World::readRegions(const fs::path& region_dir) {
 			continue;
 		RegionPos pos(x, z);
 		// check if we should not crop this region
-		if (!world_crop.isRegionContained(pos))
+		if (!world_crop.getArea().isRegionContained(pos))
 			continue;
 		if (rotation)
 			pos.rotate(rotation);

@@ -84,8 +84,8 @@ Markers findMarkers(const config::MapcrafterConfig& config) {
 		std::vector<mc::SignEntity> signs = entities.getSigns(world.getWorldCrop());
 		for (auto sign_it = signs.begin(); sign_it != signs.end(); ++sign_it) {
 			// don't use signs not contained in the world boundaries
-			if (!world_crop.isBlockContainedXZ(sign_it->getPos())
-					&& !world_crop.isBlockContainedY(sign_it->getPos()))
+			if (!world_crop.getArea().isBlockContainedXZ(sign_it->getPos())
+					&& !world_crop.getArea().isBlockContainedY(sign_it->getPos()))
 				continue;
 			for (auto marker_it = config_markers.begin();
 					marker_it != config_markers.end(); ++marker_it) {
