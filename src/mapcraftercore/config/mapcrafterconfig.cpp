@@ -271,6 +271,7 @@ ValidationMap MapcrafterConfig::parse(const config::INIConfig& config,
 	parser.parseRootSection(root_section);
 	parser.parseSections(worlds, "world", ConfigDirSectionFactory<WorldSection>(config_dir));
 	parser.parseSections(maps, "map", ConfigDirSectionFactory<MapSection>(config_dir));
+	parser.parseSections<OverlaySection, AreaOverlaySection>(overlays, "overlay-area");
 	parser.parseSections<OverlaySection, HeightOverlaySection>(overlays, "overlay-height");
 	parser.parseSections<OverlaySection, LightingOverlaySection>(overlays, "overlay-lighting");
 	parser.parseSections<OverlaySection, LightLevelOverlaySection>(overlays, "overlay-lightlevel");

@@ -195,7 +195,7 @@ public:
 	/**
 	 * Gets the user value of the field.
 	 */
-	T getValue() const;
+	const T& getValue() const;
 
 	/**
 	 * Sets the user value of the field.
@@ -248,7 +248,7 @@ bool Field<T>::hasUserValue() const {
 }
 
 template <typename T>
-T Field<T>::getValue() const {
+const T& Field<T>::getValue() const {
 	return user_loaded ? user_value : default_value;
 }
 

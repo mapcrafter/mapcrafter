@@ -30,9 +30,11 @@ namespace util {
 
 template <>
 config::OverlayType as<config::OverlayType>(const std::string& from) {
-	if (from == "height") {
+	if (from == "area")
+		return config::OverlayType::AREA;
+	else if (from == "height")
 		return config::OverlayType::HEIGHT;
-	} else if (from == "lighting")
+	else if (from == "lighting")
 		return config::OverlayType::LIGHTING;
 	else if (from == "lightlevel")
 		return config::OverlayType::LIGHTLEVEL;
@@ -40,7 +42,7 @@ config::OverlayType as<config::OverlayType>(const std::string& from) {
 		return config::OverlayType::SLIME;
 	else if (from == "spawn")
 		return config::OverlayType::SPAWN;
-	throw std::invalid_argument("Must be 'none', 'lighting', 'lightlevel', 'spawn' or 'slime'.");
+	throw std::invalid_argument("Must be 'none', 'area', 'lighting', 'lightlevel', 'spawn' or 'slime'.");
 }
 
 template <>
@@ -62,6 +64,7 @@ namespace config {
 
 std::ostream& operator<<(std::ostream& out, OverlayType overlay) {
 	switch (overlay) {
+	case OverlayType::AREA: return out << "area";
 	case OverlayType::HEIGHT: return out << "height";
 	case OverlayType::LIGHTING: return out << "lighting";
 	case OverlayType::LIGHTLEVEL: return out << "lightlevel";
@@ -130,6 +133,113 @@ void OverlaySection::postParse(const INIConfigSection& section,
 
 std::ostream& operator<<(std::ostream& out, const HeightColor& color) {
 	return out << color.y << ":" << color.color;
+}
+
+AreaOverlaySection::AreaOverlaySection()
+	: area(mc::Area::dummy()) {
+}
+
+void AreaOverlaySection::dump(std::ostream& out) const {
+	OverlaySection::dump(out);
+	out << "  color = " << color << std::endl;
+	out << "  min_y = " << min_y << std::endl;
+	out << "  max_y = " << max_y << std::endl;
+	out << "  min_x = " << min_x << std::endl;
+	out << "  max_x = " << max_x << std::endl;
+	out << "  min_z = " << min_z << std::endl;
+	out << "  max_z = " << max_z << std::endl;
+	out << "  center_x = " << center_x << std::endl;
+	out << "  center_z = " << center_z << std::endl;
+	out << "  radius = " << radius << std::endl;
+}
+
+const util::Color& AreaOverlaySection::getColor() const {
+	return color.getValue();
+}
+
+const mc::Area& AreaOverlaySection::getArea() const {
+	return area;
+}
+
+void AreaOverlaySection::preParse(const INIConfigSection& section,
+		ValidationList& validation) {
+	OverlaySection::preParse(section, validation);
+
+	color.setDefault(util::Color(255, 228, 0, 85));
+}
+
+bool AreaOverlaySection::parseField(const std::string key, const std::string value,
+		ValidationList& validation) {
+	if (OverlaySection::parseField(key, value, validation))
+		return true;
+	if (key == "color")
+		color.load(key, value, validation);
+	else if (key == "crop_min_y") 
+		min_y.load(key, value, validation);
+	else if (key == "crop_max_y") 
+		max_y.load(key, value, validation);
+	else if (key == "crop_min_x") 
+		min_x.load(key, value, validation);
+	else if (key == "crop_max_x") 
+		max_x.load(key, value, validation);
+	else if (key == "crop_min_z") 
+		min_z.load(key, value, validation);
+	else if (key == "crop_max_z") 
+		max_z.load(key, value, validation);
+	else if (key == "crop_center_x")
+		center_x.load(key, value, validation);
+	else if (key == "crop_center_z")
+		center_z.load(key, value, validation);
+	else if (key == "crop_radius")
+		radius.load(key, value, validation);
+	else
+		return false;
+	return true;
+}
+
+namespace {
+
+template <typename T>
+util::Interval1D<T> intervalFromFields(Field<T> f1, Field<T> f2) {
+	util::Interval1D<T> interval;
+	if (f1.hasAnyValue())
+		interval.setMin(f1.getValue());
+	if (f2.hasAnyValue())
+		interval.setMax(f2.getValue());
+	return interval;
+}
+
+}
+
+void AreaOverlaySection::postParse(const INIConfigSection& section,
+		ValidationList& validation) {
+	OverlaySection::postParse(section, validation);
+	
+	bool rectangular = min_x.hasAnyValue() || max_x.hasAnyValue() || min_z.hasAnyValue() || max_z.hasAnyValue();
+	bool circular = center_x.hasAnyValue() || center_z.hasAnyValue() || radius.hasAnyValue();
+
+	if (rectangular && circular) {
+		validation.error("You can not use both area types at the same time!");
+		return;
+	} else if (rectangular) {
+		if (min_x.hasAnyValue() && max_x.hasAnyValue() && min_x.getValue() > max_x.getValue())
+			validation.error("min_x must be smaller than or equal to max_x!");
+		if (min_z.hasAnyValue() && max_z.hasAnyValue() && min_z.getValue() > max_z.getValue())
+			validation.error("min_z must be smaller than or equal to max_z!");
+		util::Interval1D<int> x = intervalFromFields(min_x, max_x);
+		util::Interval1D<int> z = intervalFromFields(min_z, max_z);
+		area = mc::Area::rectangular(x, z);
+	} else if (circular) {
+		std::string message = "You have to specify center_x, center_z "
+				"and radius for a circular area!";
+		center_x.require(validation, message)
+			&& center_z.require(validation, message)
+			&& radius.require(validation, message);
+
+		area = mc::Area::circular(mc::BlockPos(center_x.getValue(), center_z.getValue(), 0), radius.getValue());
+	}
+
+	area = area.withYBounding(intervalFromFields(min_y, max_y));
 }
 
 void HeightOverlaySection::dump(std::ostream& out) const {

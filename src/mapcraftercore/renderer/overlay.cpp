@@ -19,6 +19,7 @@
 
 #include "overlay.h"
 
+#include "rendermodes/areaoverlay.h"
 #include "rendermodes/heightoverlay.h"
 #include "rendermodes/lighting.h"
 #include "rendermodes/lightleveloverlay.h"
@@ -119,7 +120,9 @@ Overlay* createOverlay(const config::WorldSection& world_config,
 		assert(false);
 	}
 	*/
-	if (type == config::OverlayType::HEIGHT) {
+	if (type == config::OverlayType::AREA) {
+		return new AreaOverlay(overlay_config);
+	} else if (type == config::OverlayType::HEIGHT) {
 		return new HeightOverlay(overlay_config);
 	} else if (type == config::OverlayType::LIGHTING) {
 		bool simulate_sun_light = false;

@@ -199,7 +199,6 @@ bool WorldSection::parseField(const std::string key, const std::string value,
 		center_z.load(key, value, validation);
 	else if (key == "crop_radius")
 		radius.load(key, value, validation);
-
 	else if (key == "crop_unpopulated_chunks")
 		crop_unpopulated_chunks.load(key, value, validation);
 	else if (key == "block_mask")

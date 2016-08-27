@@ -22,6 +22,7 @@
 
 #include "../configsection.h"
 #include "../validation.h"
+#include "../../mc/worldcrop.h"
 #include "../../renderer/overlay.h"
 #include "../../util.h"
 
@@ -32,6 +33,7 @@ namespace mapcrafter {
 namespace config {
 
 enum class OverlayType {
+	AREA,
 	HEIGHT,
 	LIGHTING,
 	LIGHTLEVEL,
@@ -71,6 +73,32 @@ private:
 };
 
 class DummyOverlaySection : public OverlaySection {
+};
+
+class AreaOverlaySection : public OverlaySection {
+public:
+	AreaOverlaySection();
+
+	virtual void dump(std::ostream& out) const;
+
+	const util::Color& getColor() const;
+	const mc::Area& getArea() const;
+
+protected:
+	virtual void preParse(const INIConfigSection& section,
+			ValidationList& validation);
+	virtual bool parseField(const std::string key, const std::string value,
+			ValidationList& validation);
+	virtual void postParse(const INIConfigSection& section,
+			ValidationList& validation);
+
+private:
+	mc::Area area;
+
+	Field<util::Color> color;
+	Field<int> min_y, max_y;
+	Field<int> min_x, max_x, min_z, max_z;
+	Field<int> center_x, center_z, radius;
 };
 
 struct HeightColor {

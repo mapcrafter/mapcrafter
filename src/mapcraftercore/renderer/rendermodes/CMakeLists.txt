@@ -1,5 +1,6 @@
 set(SOURCE
     ${SOURCE}
+    "${CMAKE_CURRENT_SOURCE_DIR}/areaoverlay.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/heightoverlay.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/lighting.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/lightleveloverlay.cpp"
@@ -9,6 +10,7 @@ set(SOURCE
 )
 set(HEADERS
     ${HEADERS}
+    "${CMAKE_CURRENT_SOURCE_DIR}/areaoverlay.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/heightoverlay.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/lighting.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/lightleveloverlay.h"

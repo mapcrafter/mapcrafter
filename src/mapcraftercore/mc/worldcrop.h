@@ -21,7 +21,7 @@
 #define WORLDCROP_H_
 
 #include "pos.h"
-#include "../util.h"
+#include "../util/math.h"
 
 #include <bitset>
 #include <memory>
