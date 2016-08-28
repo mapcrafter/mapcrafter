@@ -17,7 +17,7 @@
  * along with Mapcrafter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../../rendermodes/lighting.h"
+#include "../../overlays/lighting.h"
 #include "../../overlay.h"
 
 #ifndef TOPDOWN_RENDERMODES_H_

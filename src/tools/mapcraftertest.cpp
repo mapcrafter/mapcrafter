@@ -8,7 +8,7 @@
 #include "../mapcraftercore/renderer/image/dithering.h"
 #include "../mapcraftercore/renderer/image/palette.h"
 #include "../mapcraftercore/renderer/image/quantization.h"
-#include "../mapcraftercore/renderer/rendermodes/lighting.h"
+#include "../mapcraftercore/renderer/overlays/lighting.h"
 #include "../mapcraftercore/util.h"
 
 #include <string>

@@ -19,12 +19,12 @@
 
 #include "overlay.h"
 
-#include "rendermodes/areaoverlay.h"
-#include "rendermodes/heightoverlay.h"
-#include "rendermodes/lighting.h"
-#include "rendermodes/lightleveloverlay.h"
-#include "rendermodes/slimeoverlay.h"
-#include "rendermodes/spawnoverlay.h"
+#include "overlays/areaoverlay.h"
+#include "overlays/heightoverlay.h"
+#include "overlays/lighting.h"
+#include "overlays/lightleveloverlay.h"
+#include "overlays/slimeoverlay.h"
+#include "overlays/spawnoverlay.h"
 #include "image.h"
 #include "../config/mapcrafterconfig.h"
 #include "../config/configsections/map.h"

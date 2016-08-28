@@ -19,7 +19,7 @@
 
 #include "../mapcraftercore/mc/pos.h"
 #include "../mapcraftercore/renderer/overlay.h"
-#include "../mapcraftercore/renderer/rendermodes/slimeoverlay.h"
+#include "../mapcraftercore/renderer/overlays/slimeoverlay.h"
 
 #include <set>
 #include <boost/test/unit_test.hpp>
