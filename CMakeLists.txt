@@ -74,4 +74,6 @@ find_package(JPEG REQUIRED)
 # ${JPEG_INCLUDE_DIRS} somehow doesn't work
 include_directories(${JPEG_INCLUDE_DIR})
 
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib")
+
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")

@@ -80,6 +80,10 @@ else()
     target_link_libraries(mapcraftercore ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
+target_link_libraries(mapcraftercore libimagequant.a)
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-L /home/moritz/dev/misc/pngquant/lib abctest")
+set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "-L /home/moritz/dev/misc/pngquant/lib abctest")
+
 if(OPT_LINK_BOOST_STATICALLY)
     if(OPT_LINK_DEPS_STATICALLY)
         target_link_libraries(mapcraftercore libz.a)
