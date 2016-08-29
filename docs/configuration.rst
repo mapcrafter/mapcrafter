@@ -146,7 +146,8 @@ things you can do:
 * Block mask (skip rendering / render only specific types blocks)
 * Different render views, render modes, overlays
 * Use custom texture packs, texture sizes, apply a blur effect to textures
-* Custom tile widths
+* Custom tile widths of multiple chunks to keep the tile size reasonable when you are
+  working with smaller texture sizes
 * Different image formats
 * Custom lighting intensity
 

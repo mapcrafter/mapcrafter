@@ -2,8 +2,8 @@
 Mapcrafter
 ==========
 
-Welcome
-=======
+Introduction
+============
 
 Mapcrafter is a high performance Minecraft map renderer written in C++. It renders
 Minecraft worlds to a bunch of images which are viewable like a Google Map
@@ -69,6 +69,9 @@ Documentation Contents
    :maxdepth: 3
    
    installation
+   getting_started
+   configuration_of_mapcrafter
+   usage
    using_mapcrafter
    configuration
    logging
