@@ -792,7 +792,7 @@ bool RGBAImage::writeIndexedPNG(const std::string& filename, int palette_bits, b
 	}
 	
 	png_byte* palette_alpha = (png_byte*) png_malloc(png, palette_size * sizeof(png_byte));
-	if (palette == NULL) {
+	if (palette_alpha == NULL) {
 		png_free(png, palette);
 		png_destroy_write_struct(&png, &info);
 		return false;
@@ -849,17 +849,6 @@ bool RGBAImage::writeIndexedPNG(const std::string& filename, int palette_bits, b
 	return true;
 }
 
-void abgr_to_rgba_callback(liq_color row_out[], int row_index, int width, void *user_info) {
-	unsigned char *rgb_row = ((unsigned char *)user_info) + 3*width*row_index;
-
-	for(int i=0; i < width; i++) {
-		row_out[i].r = rgb_row[i*4+3];
-		row_out[i].g = rgb_row[i*4+2];
-		row_out[i].b = rgb_row[i*4+1];
-		row_out[i].a = rgb_row[i*4+0];
-	}
-}
-
 bool RGBAImage::writeIndexedPNG2(const std::string& filename) const {
 	int palette_bits = 8;
 	bool dithered = true;
@@ -890,30 +879,22 @@ bool RGBAImage::writeIndexedPNG2(const std::string& filename) const {
 
 	liq_attr *attr = liq_attr_create();
 	liq_image *image = liq_image_create_rgba(attr, (void*) &data[0], width, height, 0);
-	//liq_image *image = liq_image_create_custom(attr, abgr_to_rgba_callback, (void*) &data[0], width, height, 0);
 	liq_result *res = liq_quantize_image(attr, image);
-
-	/*
-	liq_write_remapped_image(res, image, example_bitmap_8bpp, example_bitmap_size);
-	const liq_palette *pal = liq_get_palette(res);
-
-	// Save the image and the palette now.
-	for(int i=0; i < pal->count; i++) {
-		example_copy_palette_entry(pal->entries[i]);
-	}
-	// You'll need a PNG library to write to a file.
-	example_write_image(example_bitmap_8bpp);
-	*/
 	
 	std::vector<uint8_t> data8b(width * height);
 	int status = liq_write_remapped_image(res, image, (void*) &data8b[0], data8b.size());
 	if (status != LIQ_OK) {
-		LOG(ERROR) << status;
+		liq_result_destroy(res);
+		liq_image_destroy(image);
+		liq_attr_destroy(attr);
 		return false;
 	}
+
 	const liq_palette *pal = liq_get_palette(res);
 	if (pal == NULL) {
-		LOG(ERROR) << "palette null";
+		liq_result_destroy(res);
+		liq_image_destroy(image);
+		liq_attr_destroy(attr);
 		return false;
 	}
 
@@ -924,14 +905,13 @@ bool RGBAImage::writeIndexedPNG2(const std::string& filename) const {
 	}
 	
 	png_byte* palette_alpha = (png_byte*) png_malloc(png, palette_size * sizeof(png_byte));
-	if (palette == NULL) {
+	if (palette_alpha == NULL) {
 		png_free(png, palette);
 		png_destroy_write_struct(&png, &info);
 		return false;
 	}
 
 	for (int i = 0; i < pal->count; i++) {
-		const auto& entry = pal->entries[i];
 		palette[i].red = pal->entries[i].r;
 		palette[i].green = pal->entries[i].g;
 		palette[i].blue = pal->entries[i].b;
@@ -945,31 +925,14 @@ bool RGBAImage::writeIndexedPNG2(const std::string& filename) const {
 	png_set_PLTE(png, info, palette, palette_size);
 	png_set_tRNS(png, info, palette_alpha, palette_size, NULL);
 
-	//OctreePalette p(colors);
-	
-	/*	
-	std::vector<int> data_dithered;
-	if (dithered) {
-		RGBAImage copy = *this;
-		imageDither(copy, p, data_dithered);
-	}
-	*/
-
 	png_bytep* rows = (png_bytep*) png_malloc(png, height * sizeof(png_bytep));
 	for (int y = 0; y < height; y++) {
+		// why doesn't this work?!
+		// rows[y] = &data8b[y * width];
+		
 		rows[y] = (png_byte*) png_malloc(png, width * sizeof(png_byte));
-		for (int x = 0; x < width; x++)
-			rows[y][x] = 0;
 		for (int x = 0; x < width; x++) {
 			rows[y][x] = data8b[y * width + x];
-			/*
-			if (dithered) {
-				setRowPixel(rows[y], palette_bits, x, data_dithered[y * width + x]);
-			} else {
-				setRowPixel(rows[y], palette_bits, x, p.getNearestColor(pixel(x, y)));
-			}
-			*/
-
 		}
 	}
 
@@ -986,7 +949,6 @@ bool RGBAImage::writeIndexedPNG2(const std::string& filename) const {
 	png_free(png, rows);
 	png_free(png, palette);
 	png_free(png, palette_alpha);
-	//delete octree;
 	png_destroy_write_struct(&png, &info);
 	return true;
 }
