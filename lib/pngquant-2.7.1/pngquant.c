@@ -39,7 +39,7 @@
 **
 */
 
-#define PNGQUANT_VERSION LIQ_VERSION_STRING " (August 2016)"
+#define PNGQUANT_VERSION LIQ_VERSION_STRING " (May 2016)"
 
 #define PNGQUANT_USAGE "\
 usage:  pngquant [options] [ncolors] -- pngfile [pngfile ...]\n\
@@ -389,7 +389,7 @@ int main(int argc, char *argv[])
                         fprintf(stderr, "  error: unable to read colors from %s", optarg);
                         return INVALID_ARGUMENT;
                     }
-                    for(unsigned int i=0; i < pal->count; i++) {
+                    for(int i=0; i < pal->count; i++) {
                         liq_image_add_fixed_color(options.fixed_palette_image, pal->entries[i]);
                     }
                     liq_result_destroy(tmp_quantize);
@@ -788,7 +788,7 @@ static pngquant_error write_image(png8_image *output_image, png24_image *output_
     free(tempname);
 
     if (retval && retval != TOO_LARGE_FILE) {
-        fprintf(stderr, "  error: failed writing image to %s (%d)\n", options->using_stdout ? "stdout" : outname, retval);
+        fprintf(stderr, "  error: failed writing image to %s\n", outname);
     }
 
     return retval;

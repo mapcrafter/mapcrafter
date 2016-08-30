@@ -27,7 +27,7 @@
 #include "image/quantization.h"
 #include "image/scaling.h"
 #include "../util.h"
-#include <pngquant/lib/libimagequant.h>
+#include <pngquant-2.7.1/lib/libimagequant.h>
 
 #include <jpeglib.h>
 #include <algorithm>

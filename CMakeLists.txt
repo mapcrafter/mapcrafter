@@ -74,6 +74,18 @@ find_package(JPEG REQUIRED)
 # ${JPEG_INCLUDE_DIRS} somehow doesn't work
 include_directories(${JPEG_INCLUDE_DIR})
 
+add_custom_target(
+    build_pngquant
+    COMMAND ./configure --extra-cflags=-fPIC && make
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/pngquant-2.7.1")
+
+add_library(imagequant STATIC IMPORTED)
+set_property(TARGET imagequant APPEND PROPERTY IMPORTED_CONFIGURATIONS NOCONFIG)
+set_target_properties(imagequant PROPERTIES
+    IMPORTED_LOCATION_NOCONFIG "${CMAKE_CURRENT_SOURCE_DIR}/lib/pngquant-2.7.1/lib/libimagequant.a")
+
+add_dependencies(imagequant build_pngquant)
+
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")
