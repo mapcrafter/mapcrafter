@@ -101,13 +101,13 @@ enum class ImageFormatType {
 class ImageFormat {
 public:
 	ImageFormat();
-	static ImageFormat png(bool indexed);
+	static ImageFormat png(int indexed);
 	static ImageFormat jpeg(int quality, RGBAPixel background_color);
 
 	ImageFormatType getType() const;
 	std::string getSuffix() const;
 
-	bool isPNGIndexed() const;
+	int isPNGIndexed() const;
 
 	int getJPEGQuality() const;
 	RGBAPixel getJPEGBackgroundColor() const;
@@ -116,7 +116,7 @@ public:
 private:
 	ImageFormatType type;
 
-	bool png_indexed;
+	int png_indexed;
 
 	int jpeg_quality;
 	RGBAPixel jpeg_background_color;

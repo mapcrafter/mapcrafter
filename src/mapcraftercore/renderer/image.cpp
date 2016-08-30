@@ -163,7 +163,7 @@ void blend(RGBAPixel& dest, const RGBAPixel& source) {
 ImageFormat::ImageFormat() {
 }
 
-ImageFormat ImageFormat::png(bool indexed) {
+ImageFormat ImageFormat::png(int indexed) {
 	ImageFormat format;
 	format.type = ImageFormatType::PNG;
 	format.png_indexed = indexed;
@@ -186,7 +186,7 @@ std::string ImageFormat::getSuffix() const {
 	return type == ImageFormatType::PNG ? "png" : "jpg";
 }
 
-bool ImageFormat::isPNGIndexed() const {
+int ImageFormat::isPNGIndexed() const {
 	return png_indexed;
 }
 
@@ -588,9 +588,10 @@ bool RGBAImage::write(const std::string& filename, const ImageFormat& format,
 	if (append_suffix && !util::endswith(filename, format.getSuffix()))
 		path += "." + format.getSuffix();
 	if (format.getType() == ImageFormatType::PNG) {
-		if (format.isPNGIndexed())
+		if (format.isPNGIndexed() == 1)
+			return writeIndexedPNG(path);
+		else if (format.isPNGIndexed() == 2)
 			return writeIndexedPNG2(path);
-			//return writeIndexedPNG(path);
 		return writePNG(path);
 	} else if (format.getType() == ImageFormatType::JPEG) {
 		return writeJPEG(path, format.getJPEGQuality(), format.getJPEGBackgroundColor());

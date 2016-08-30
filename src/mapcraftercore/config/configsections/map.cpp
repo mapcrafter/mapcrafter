@@ -42,7 +42,10 @@ renderer::ImageFormat as<renderer::ImageFormat>(const std::string& from) {
 	std::string type = from.substr(0, pos);
 	std::string remaining = pos == from.size() ? "" : from.substr(pos + 1);
 	if (type == "png") {
-		return renderer::ImageFormat::png(remaining == "indexed");
+		int indexed = 0;
+		if (remaining == "indexed") indexed = 1;
+		if (remaining == "indexed2") indexed = 2;
+		return renderer::ImageFormat::png(indexed);
 	}
 	if (type == "jpeg") {
 		int quality = remaining == "" ? 85 : util::as<int>(remaining);
