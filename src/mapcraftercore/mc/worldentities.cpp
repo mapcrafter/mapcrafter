@@ -267,7 +267,7 @@ std::vector<SignEntity> WorldEntitiesCache::getSigns(WorldCrop world_crop) const
 				const nbt::TagCompound& entity = *entity_it;
 
 				if (entity.findTag<nbt::TagString>("id").payload != "Sign"
-						|| entity.findTag<nbt::TagString>("id").payload != "minecraft:sign")
+						&& entity.findTag<nbt::TagString>("id").payload != "minecraft:sign")
 					continue;
 
 				mc::BlockPos pos(
