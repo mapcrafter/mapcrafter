@@ -76,6 +76,16 @@ MarkerControl.prototype.create = function(wrapper) {
 	wrapper.appendChild(listGroup);
 };
 
+// hmm this is a not-so-nice hack
+MarkerControl.prototype.uncheckGroup = function(group) {
+	for (var i = 0; i < this.buttons.length; i++) {
+		var button = this.buttons[i];
+		if (button.getAttribute("data-group") == group) {
+			Util.removeClass(button, "list-group-item-info");
+		}
+	}
+}
+
 MarkerControl.prototype.getHandler = function() {
 	return this.handler;
 };

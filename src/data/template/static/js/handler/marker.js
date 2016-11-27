@@ -68,7 +68,7 @@ MarkerHandler.prototype.onMapChange = function(name, rotation) {
 		if(!(group in this.visible))
 			this.visible[group] = true;
 		if("showDefault" in groupInfo && !groupInfo.showDefault) {
-			document.getElementById("cb_group_" + group).checked = false;
+			this.control.uncheckGroup(group);
 			this.visible[group] = false;
 		}
 	}
