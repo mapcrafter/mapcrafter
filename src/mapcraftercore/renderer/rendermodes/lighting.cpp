@@ -318,7 +318,7 @@ LightingData LightingRenderMode::getBlockLight(const mc::BlockPos& pos) {
 		uint8_t sky = 15;
 		if (block.id != 0 && !images->isBlockTransparent(block.id, block.data))
 			sky = 0;
-		return LightingData(sky, light.getBlockLight());
+		return LightingData(light.getBlockLight(), sky);
 	}
 	return light;
 }
