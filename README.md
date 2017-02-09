@@ -2,6 +2,8 @@
 
 by Moritz Hilscher
 
+*Due to my university studies and other projects, unfortunately I'm not able to develop new features for Mapcrafter anymore. I'll try to keep up with the issues on GitHub from time to time, so if you're experiencing a problem, don't mind reporting it. You can submit feature requests too in case I or some one else decides to do some work on Mapcrafter. I'm happy about PRs too. If you need help implementing something just ask me (Mail, IRC, GitHub), I can assist you a bit how the project is structured.*
+
 Mapcrafter is a high performance Minecraft map renderer written in C++. It renders
 Minecraft worlds to a bunch of images which are viewable in any webbrowser
 using Leaflet.js.
