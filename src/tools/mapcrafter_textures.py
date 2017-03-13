@@ -18,6 +18,7 @@ files = [
 	("entity/chest/trapped_double.png", assets + "entity/chest/trapped_double.png"),
 	("colormap/foliage.png", assets + "colormap/foliage.png"),
 	("colormap/grass.png", assets + "colormap/grass.png"),
+	("endportal.png", assets + "entity/end_portal.png"),
 ]
 
 def has_imagemagick():
