@@ -2339,7 +2339,24 @@ void IsometricBlockImages::createBlocks() {
 	createBlock(216, 8, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_TOP, t.BONE_BLOCK_SIDE); // north-south
 	// --
 	createBlock(217, 0, empty_texture); // structure void
-	// Glazed Terracotta --
+	// Shulker Box --
+	createBlock(219, 0, t.SHULKER_TOP_WHITE);
+	createBlock(220, 0, t.SHULKER_TOP_ORANGE);
+	createBlock(221, 0, t.SHULKER_TOP_MAGENTA);
+	createBlock(222, 0, t.SHULKER_TOP_LIGHT_BLUE);
+	createBlock(223, 0, t.SHULKER_TOP_YELLOW);
+	createBlock(224, 0, t.SHULKER_TOP_LIME);
+	createBlock(225, 0, t.SHULKER_TOP_PINK);
+	createBlock(226, 0, t.SHULKER_TOP_GRAY);
+	createBlock(227, 0, t.SHULKER_TOP_SILVER);
+	createBlock(228, 0, t.SHULKER_TOP_CYAN);
+	createBlock(229, 0, t.SHULKER_TOP_PURPLE);
+	createBlock(230, 0, t.SHULKER_TOP_BLUE);
+	createBlock(231, 0, t.SHULKER_TOP_BROWN);
+	createBlock(232, 0, t.SHULKER_TOP_GREEN);
+	createBlock(253, 0, t.SHULKER_TOP_RED);
+	createBlock(254, 0, t.SHULKER_TOP_BLACK);
+	// Glazed Terracotta -- Rotations do not display correctly
 	createBlock(235, 0, t.GLAZED_TERRACOTTA_WHITE);
 	createBlock(235, 1, t.GLAZED_TERRACOTTA_WHITE);
 	createBlock(235, 2, t.GLAZED_TERRACOTTA_WHITE);
