@@ -2339,6 +2339,23 @@ void IsometricBlockImages::createBlocks() {
 	createBlock(216, 8, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_TOP, t.BONE_BLOCK_SIDE); // north-south
 	// --
 	createBlock(217, 0, empty_texture); // structure void
+	// Glazed Terracotta --
+	createBlock(235, 0, t.GLAZED_TERRACOTTA_WHITE);
+	createBlock(236, 0, t.GLAZED_TERRACOTTA_ORANGE);
+	createBlock(237, 0, t.GLAZED_TERRACOTTA_MAGENTA);
+	createBlock(238, 0, t.GLAZED_TERRACOTTA_LIGHT_BLUE);
+	createBlock(239, 0, t.GLAZED_TERRACOTTA_YELLOW);
+	createBlock(240, 0, t.GLAZED_TERRACOTTA_LIME);
+	createBlock(241, 0, t.GLAZED_TERRACOTTA_PINK);
+	createBlock(242, 0, t.GLAZED_TERRACOTTA_GRAY);
+	createBlock(243, 0, t.GLAZED_TERRACOTTA_SILVER);
+	createBlock(244, 0, t.GLAZED_TERRACOTTA_CYAN);
+	createBlock(245, 0, t.GLAZED_TERRACOTTA_PURPLE);
+	createBlock(246, 0, t.GLAZED_TERRACOTTA_BLUE);
+	createBlock(247, 0, t.GLAZED_TERRACOTTA_BROWN);
+	createBlock(248, 0, t.GLAZED_TERRACOTTA_GREEN);
+	createBlock(249, 0, t.GLAZED_TERRACOTTA_RED);
+	createBlock(250, 0, t.GLAZED_TERRACOTTA_BLACK);
 	// Concrete --
 	createBlock(251, 0, t.CONCRETE_WHITE);
 	createBlock(251, 1, t.CONCRETE_ORANGE);
