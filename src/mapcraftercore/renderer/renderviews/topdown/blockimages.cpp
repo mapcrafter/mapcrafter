@@ -174,7 +174,7 @@ void TopdownBlockImages::createPistonExtension() { // id 34
 	RGBAImage front = textures.PISTON_TOP_NORMAL;
 	RGBAImage front_sticky = textures.PISTON_TOP_STICKY;
 	RGBAImage back = textures.PISTON_BOTTOM;
-	
+
 	// the extension is the connection moved a little + the piston side head
 	RGBAImage extension = getPistonConnection(textures.PISTON_SIDE);
 	extension = extension.move(0, texture_size / 4);
@@ -321,7 +321,7 @@ void darkenCircleInverted(RGBAImage& block, bool left, bool top) {
 void TopdownBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
 		const RGBAImage& texture_top) { // id 53, 67, 108, 109, 114, 128, 134, 135, 136, 180
 	// https://github.com/overviewer/Minecraft-Overviewer/blob/master/overviewer_core/src/iterate.c#L454
-	/* 4 ancillary bits will be added to indicate which quarters of the block contain the 
+	/* 4 ancillary bits will be added to indicate which quarters of the block contain the
 	 * upper step. Regular stairs will have 2 bits set & corner stairs will have 1 or 3.
 	 *     Southwest quarter is part of the upper step - 0x40
 	 *    / Southeast " - 0x20
@@ -555,7 +555,7 @@ void TopdownBlockImages::createWallSign() { // id 86
 
 void TopdownBlockImages::createLever() { // id 69
 	const BlockTextures& textures = resources.getBlockTextures();
-	
+
 	int t = std::max(1.0, std::ceil((double) texture_size / 16.0*3.0)); // 3px
 	int w = std::max(2.0, std::ceil((double) texture_size / 16.0*6.0)); // 6px
 	if (w % 2)
@@ -601,7 +601,7 @@ void TopdownBlockImages::createButton(uint16_t id, const RGBAImage& texture) { /
 	button_side = button_side.colorize(1.1, 1.1, 1.1);
 	button_top.alphaBlit(texture.clip(0, 0, w, h), (texture_size - w) / 2, (texture_size - h) / 2);
 	button_top = button_top.colorize(1.1, 1.1, 1.1);
-	
+
 	setBlockImage(id, 0, button_top);
 	setBlockImage(id, 1, button_side.rotate(3));
 	setBlockImage(id, 2, button_side.rotate(1));
@@ -890,7 +890,7 @@ void TopdownBlockImages::createFlowerPot() { // id 140
 		RGBAImage tmp;
 		content.resize(tmp, s*10, s*10, InterpolationType::NEAREST);
 		content = tmp;
-	
+
 		if (i != 0)
 			block.alphaBlit(content, (texture_size - content.getWidth()) / 2, (texture_size - content.getHeight()) / 2);
 
@@ -1633,6 +1633,122 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(216, 8, t.BONE_BLOCK_SIDE); // north-south
 	// --
 	setBlockImage(217, 0, empty_texture); // structure void
+	// Shulker Box Top
+	setBlockImage(219, 0, t.SHULKER_TOP_WHITE);
+	setBlockImage(220, 0, t.SHULKER_TOP_ORANGE);
+	setBlockImage(221, 0, t.SHULKER_TOP_MAGENTA);
+	setBlockImage(222, 0, t.SHULKER_TOP_LIGHT_BLUE);
+	setBlockImage(223, 0, t.SHULKER_TOP_YELLOW);
+	setBlockImage(224, 0, t.SHULKER_TOP_LIME);
+	setBlockImage(225, 0, t.SHULKER_TOP_PINK);
+	setBlockImage(226, 0, t.SHULKER_TOP_GRAY);
+	setBlockImage(227, 0, t.SHULKER_TOP_SILVER);
+	setBlockImage(228, 0, t.SHULKER_TOP_CYAN);
+	setBlockImage(229, 0, t.SHULKER_TOP_PURPLE);
+	setBlockImage(230, 0, t.SHULKER_TOP_BLUE);
+	setBlockImage(231, 0, t.SHULKER_TOP_BROWN);
+	setBlockImage(232, 0, t.SHULKER_TOP_GREEN);
+	setBlockImage(253, 0, t.SHULKER_TOP_RED);
+	setBlockImage(254, 0, t.SHULKER_TOP_BLACK);
+	// Glazed Terracotta -- Rotations do not display correctly
+	setBlockImage(235, 0, t.GLAZED_TERRACOTTA_WHITE);
+	setBlockImage(235, 1, t.GLAZED_TERRACOTTA_WHITE);
+	setBlockImage(235, 2, t.GLAZED_TERRACOTTA_WHITE);
+	setBlockImage(235, 3, t.GLAZED_TERRACOTTA_WHITE);
+	setBlockImage(236, 0, t.GLAZED_TERRACOTTA_ORANGE);
+	setBlockImage(236, 1, t.GLAZED_TERRACOTTA_ORANGE);
+	setBlockImage(236, 2, t.GLAZED_TERRACOTTA_ORANGE);
+	setBlockImage(236, 3, t.GLAZED_TERRACOTTA_ORANGE);
+	setBlockImage(237, 0, t.GLAZED_TERRACOTTA_MAGENTA);
+	setBlockImage(237, 1, t.GLAZED_TERRACOTTA_MAGENTA);
+	setBlockImage(237, 2, t.GLAZED_TERRACOTTA_MAGENTA);
+	setBlockImage(237, 3, t.GLAZED_TERRACOTTA_MAGENTA);
+	setBlockImage(238, 0, t.GLAZED_TERRACOTTA_LIGHT_BLUE);
+	setBlockImage(238, 1, t.GLAZED_TERRACOTTA_LIGHT_BLUE);
+	setBlockImage(238, 2, t.GLAZED_TERRACOTTA_LIGHT_BLUE);
+	setBlockImage(238, 3, t.GLAZED_TERRACOTTA_LIGHT_BLUE);
+	setBlockImage(239, 0, t.GLAZED_TERRACOTTA_YELLOW);
+	setBlockImage(239, 1, t.GLAZED_TERRACOTTA_YELLOW);
+	setBlockImage(239, 2, t.GLAZED_TERRACOTTA_YELLOW);
+	setBlockImage(239, 3, t.GLAZED_TERRACOTTA_YELLOW);
+	setBlockImage(240, 0, t.GLAZED_TERRACOTTA_LIME);
+	setBlockImage(240, 1, t.GLAZED_TERRACOTTA_LIME);
+	setBlockImage(240, 2, t.GLAZED_TERRACOTTA_LIME);
+	setBlockImage(240, 3, t.GLAZED_TERRACOTTA_LIME);
+	setBlockImage(241, 0, t.GLAZED_TERRACOTTA_PINK);
+	setBlockImage(241, 1, t.GLAZED_TERRACOTTA_PINK);
+	setBlockImage(241, 2, t.GLAZED_TERRACOTTA_PINK);
+	setBlockImage(241, 3, t.GLAZED_TERRACOTTA_PINK);
+	setBlockImage(242, 0, t.GLAZED_TERRACOTTA_GRAY);
+	setBlockImage(242, 1, t.GLAZED_TERRACOTTA_GRAY);
+	setBlockImage(242, 2, t.GLAZED_TERRACOTTA_GRAY);
+	setBlockImage(242, 3, t.GLAZED_TERRACOTTA_GRAY);
+	setBlockImage(243, 0, t.GLAZED_TERRACOTTA_SILVER);
+	setBlockImage(243, 1, t.GLAZED_TERRACOTTA_SILVER);
+	setBlockImage(243, 2, t.GLAZED_TERRACOTTA_SILVER);
+	setBlockImage(243, 3, t.GLAZED_TERRACOTTA_SILVER);
+	setBlockImage(244, 0, t.GLAZED_TERRACOTTA_CYAN);
+	setBlockImage(244, 1, t.GLAZED_TERRACOTTA_CYAN);
+	setBlockImage(244, 2, t.GLAZED_TERRACOTTA_CYAN);
+	setBlockImage(244, 3, t.GLAZED_TERRACOTTA_CYAN);
+	setBlockImage(245, 0, t.GLAZED_TERRACOTTA_PURPLE);
+	setBlockImage(245, 1, t.GLAZED_TERRACOTTA_PURPLE);
+	setBlockImage(245, 2, t.GLAZED_TERRACOTTA_PURPLE);
+	setBlockImage(245, 3, t.GLAZED_TERRACOTTA_PURPLE);
+	setBlockImage(246, 0, t.GLAZED_TERRACOTTA_BLUE);
+	setBlockImage(246, 1, t.GLAZED_TERRACOTTA_BLUE);
+	setBlockImage(246, 2, t.GLAZED_TERRACOTTA_BLUE);
+	setBlockImage(246, 3, t.GLAZED_TERRACOTTA_BLUE);
+	setBlockImage(247, 0, t.GLAZED_TERRACOTTA_BROWN);
+	setBlockImage(247, 1, t.GLAZED_TERRACOTTA_BROWN);
+	setBlockImage(247, 2, t.GLAZED_TERRACOTTA_BROWN);
+	setBlockImage(247, 3, t.GLAZED_TERRACOTTA_BROWN);
+	setBlockImage(248, 0, t.GLAZED_TERRACOTTA_GREEN);
+	setBlockImage(248, 1, t.GLAZED_TERRACOTTA_GREEN);
+	setBlockImage(248, 2, t.GLAZED_TERRACOTTA_GREEN);
+	setBlockImage(248, 3, t.GLAZED_TERRACOTTA_GREEN);
+	setBlockImage(249, 0, t.GLAZED_TERRACOTTA_RED);
+	setBlockImage(249, 1, t.GLAZED_TERRACOTTA_RED);
+	setBlockImage(249, 2, t.GLAZED_TERRACOTTA_RED);
+	setBlockImage(249, 3, t.GLAZED_TERRACOTTA_RED);
+	setBlockImage(250, 0, t.GLAZED_TERRACOTTA_BLACK);
+	setBlockImage(250, 1, t.GLAZED_TERRACOTTA_BLACK);
+	setBlockImage(250, 2, t.GLAZED_TERRACOTTA_BLACK);
+	setBlockImage(250, 3, t.GLAZED_TERRACOTTA_BLACK);
+	// Concrete --
+	setBlockImage(251, 0, t.CONCRETE_WHITE);
+	setBlockImage(251, 1, t.CONCRETE_ORANGE);
+	setBlockImage(251, 2, t.CONCRETE_MAGENTA);
+	setBlockImage(251, 3, t.CONCRETE_LIGHT_BLUE);
+	setBlockImage(251, 4, t.CONCRETE_YELLOW);
+	setBlockImage(251, 5, t.CONCRETE_LIME);
+	setBlockImage(251, 6, t.CONCRETE_PINK);
+	setBlockImage(251, 7, t.CONCRETE_GRAY);
+	setBlockImage(251, 8, t.CONCRETE_SILVER);
+	setBlockImage(251, 9, t.CONCRETE_CYAN);
+	setBlockImage(251, 10, t.CONCRETE_PURPLE);
+	setBlockImage(251, 11, t.CONCRETE_BLUE);
+	setBlockImage(251, 12, t.CONCRETE_BROWN);
+	setBlockImage(251, 13, t.CONCRETE_GREEN);
+	setBlockImage(251, 14, t.CONCRETE_RED);
+	setBlockImage(251, 15, t.CONCRETE_BLACK);
+	// Concrete Powder--
+	setBlockImage(252, 0, t.CONCRETE_POWDER_WHITE);
+	setBlockImage(252, 1, t.CONCRETE_POWDER_ORANGE);
+	setBlockImage(252, 2, t.CONCRETE_POWDER_MAGENTA);
+	setBlockImage(252, 3, t.CONCRETE_POWDER_LIGHT_BLUE);
+	setBlockImage(252, 4, t.CONCRETE_POWDER_YELLOW);
+	setBlockImage(252, 5, t.CONCRETE_POWDER_LIME);
+	setBlockImage(252, 6, t.CONCRETE_POWDER_PINK);
+	setBlockImage(252, 7, t.CONCRETE_POWDER_GRAY);
+	setBlockImage(252, 8, t.CONCRETE_POWDER_SILVER);
+	setBlockImage(252, 9, t.CONCRETE_POWDER_CYAN);
+	setBlockImage(252, 10, t.CONCRETE_POWDER_PURPLE);
+	setBlockImage(252, 11, t.CONCRETE_POWDER_BLUE);
+	setBlockImage(252, 12, t.CONCRETE_POWDER_BROWN);
+	setBlockImage(252, 13, t.CONCRETE_POWDER_GREEN);
+	setBlockImage(252, 14, t.CONCRETE_POWDER_RED);
+	setBlockImage(252, 15, t.CONCRETE_POWDER_BLACK);
 	// structure block --
 	setBlockImage(255, 0, t.STRUCTURE_BLOCK_SAVE);
 	setBlockImage(255, 1, t.STRUCTURE_BLOCK_LOAD);
@@ -1644,7 +1760,7 @@ void TopdownBlockImages::createBlocks() {
 int TopdownBlockImages::createOpaqueWater() {
 	// TODO pre-blit each water block of water depth x ?
 	// TODO min_alpha >= 250 ?
-	
+
 	// just use the Ocean biome watercolor
 	RGBAImage water = resources.getBlockTextures().WATER_STILL.colorize(0, 0.39, 0.89);
 	RGBAImage opaque_water = water;

@@ -937,7 +937,7 @@ RGBAImage IsometricBlockImages::buildStairsQuarter(const RGBAImage& texture_side
 void IsometricBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
 		const RGBAImage& texture_top) { // id 53, 67, 108, 109, 114, 128, 134, 135, 136, 180
 	// https://github.com/overviewer/Minecraft-Overviewer/blob/master/overviewer_core/src/iterate.c#L454
-	/* 4 ancillary bits will be added to indicate which quarters of the block contain the 
+	/* 4 ancillary bits will be added to indicate which quarters of the block contain the
 	 * upper step. Regular stairs will have 2 bits set & corner stairs will have 1 or 3.
 	 *     Southwest quarter is part of the upper step - 0x40
 	 *    / Southeast " - 0x20
@@ -1110,7 +1110,7 @@ void IsometricBlockImages::createSign() { // id 63
 	double ratio = (double) texture_size / 16.0;
 	int h1 = 10 * ratio;
 	int h2 = 8 * ratio;
-	
+
 	RGBAImage texture = resources.getBlockTextures().PLANKS_OAK;
 	RGBAImage head = texture.clip(0, 0, texture_size, h1);
 	RGBAImage post = texture.clip(0, 0, 2, h2).colorize(0.6, 0.6, 0.6);
@@ -1171,7 +1171,7 @@ void IsometricBlockImages::createRails() { // id 66
 void IsometricBlockImages::createWallSign() { // id 68
 	double ratio = (double) texture_size / 16.0;
 	int h = 10 * ratio;
-	
+
 	RGBAImage texture = resources.getBlockTextures().PLANKS_OAK.clip(0, 0, texture_size, h);
 	RGBAImage sign(texture_size, texture_size);
 	sign.simpleBlit(texture, 0, (texture_size - h) / 2);
@@ -2339,6 +2339,122 @@ void IsometricBlockImages::createBlocks() {
 	createBlock(216, 8, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_TOP, t.BONE_BLOCK_SIDE); // north-south
 	// --
 	createBlock(217, 0, empty_texture); // structure void
+	// Shulker Box --
+	createBlock(219, 0, t.SHULKER_TOP_WHITE);
+	createBlock(220, 0, t.SHULKER_TOP_ORANGE);
+	createBlock(221, 0, t.SHULKER_TOP_MAGENTA);
+	createBlock(222, 0, t.SHULKER_TOP_LIGHT_BLUE);
+	createBlock(223, 0, t.SHULKER_TOP_YELLOW);
+	createBlock(224, 0, t.SHULKER_TOP_LIME);
+	createBlock(225, 0, t.SHULKER_TOP_PINK);
+	createBlock(226, 0, t.SHULKER_TOP_GRAY);
+	createBlock(227, 0, t.SHULKER_TOP_SILVER);
+	createBlock(228, 0, t.SHULKER_TOP_CYAN);
+	createBlock(229, 0, t.SHULKER_TOP_PURPLE);
+	createBlock(230, 0, t.SHULKER_TOP_BLUE);
+	createBlock(231, 0, t.SHULKER_TOP_BROWN);
+	createBlock(232, 0, t.SHULKER_TOP_GREEN);
+	createBlock(253, 0, t.SHULKER_TOP_RED);
+	createBlock(254, 0, t.SHULKER_TOP_BLACK);
+	// Glazed Terracotta -- Rotations do not display correctly
+	createBlock(235, 0, t.GLAZED_TERRACOTTA_WHITE);
+	createBlock(235, 1, t.GLAZED_TERRACOTTA_WHITE);
+	createBlock(235, 2, t.GLAZED_TERRACOTTA_WHITE);
+	createBlock(235, 3, t.GLAZED_TERRACOTTA_WHITE);
+	createBlock(236, 0, t.GLAZED_TERRACOTTA_ORANGE);
+	createBlock(236, 1, t.GLAZED_TERRACOTTA_ORANGE);
+	createBlock(236, 2, t.GLAZED_TERRACOTTA_ORANGE);
+	createBlock(236, 3, t.GLAZED_TERRACOTTA_ORANGE);
+	createBlock(237, 0, t.GLAZED_TERRACOTTA_MAGENTA);
+	createBlock(237, 1, t.GLAZED_TERRACOTTA_MAGENTA);
+	createBlock(237, 2, t.GLAZED_TERRACOTTA_MAGENTA);
+	createBlock(237, 3, t.GLAZED_TERRACOTTA_MAGENTA);
+	createBlock(238, 0, t.GLAZED_TERRACOTTA_LIGHT_BLUE);
+	createBlock(238, 1, t.GLAZED_TERRACOTTA_LIGHT_BLUE);
+	createBlock(238, 2, t.GLAZED_TERRACOTTA_LIGHT_BLUE);
+	createBlock(238, 3, t.GLAZED_TERRACOTTA_LIGHT_BLUE);
+	createBlock(239, 0, t.GLAZED_TERRACOTTA_YELLOW);
+	createBlock(239, 1, t.GLAZED_TERRACOTTA_YELLOW);
+	createBlock(239, 2, t.GLAZED_TERRACOTTA_YELLOW);
+	createBlock(239, 3, t.GLAZED_TERRACOTTA_YELLOW);
+	createBlock(240, 0, t.GLAZED_TERRACOTTA_LIME);
+	createBlock(240, 1, t.GLAZED_TERRACOTTA_LIME);
+	createBlock(240, 2, t.GLAZED_TERRACOTTA_LIME);
+	createBlock(240, 3, t.GLAZED_TERRACOTTA_LIME);
+	createBlock(241, 0, t.GLAZED_TERRACOTTA_PINK);
+	createBlock(241, 1, t.GLAZED_TERRACOTTA_PINK);
+	createBlock(241, 2, t.GLAZED_TERRACOTTA_PINK);
+	createBlock(241, 3, t.GLAZED_TERRACOTTA_PINK);
+	createBlock(242, 0, t.GLAZED_TERRACOTTA_GRAY);
+	createBlock(242, 1, t.GLAZED_TERRACOTTA_GRAY);
+	createBlock(242, 2, t.GLAZED_TERRACOTTA_GRAY);
+	createBlock(242, 3, t.GLAZED_TERRACOTTA_GRAY);
+	createBlock(243, 0, t.GLAZED_TERRACOTTA_SILVER);
+	createBlock(243, 1, t.GLAZED_TERRACOTTA_SILVER);
+	createBlock(243, 2, t.GLAZED_TERRACOTTA_SILVER);
+	createBlock(243, 3, t.GLAZED_TERRACOTTA_SILVER);
+	createBlock(244, 0, t.GLAZED_TERRACOTTA_CYAN);
+	createBlock(244, 1, t.GLAZED_TERRACOTTA_CYAN);
+	createBlock(244, 2, t.GLAZED_TERRACOTTA_CYAN);
+	createBlock(244, 3, t.GLAZED_TERRACOTTA_CYAN);
+	createBlock(245, 0, t.GLAZED_TERRACOTTA_PURPLE);
+	createBlock(245, 1, t.GLAZED_TERRACOTTA_PURPLE);
+	createBlock(245, 2, t.GLAZED_TERRACOTTA_PURPLE);
+	createBlock(245, 3, t.GLAZED_TERRACOTTA_PURPLE);
+	createBlock(246, 0, t.GLAZED_TERRACOTTA_BLUE);
+	createBlock(246, 1, t.GLAZED_TERRACOTTA_BLUE);
+	createBlock(246, 2, t.GLAZED_TERRACOTTA_BLUE);
+	createBlock(246, 3, t.GLAZED_TERRACOTTA_BLUE);
+	createBlock(247, 0, t.GLAZED_TERRACOTTA_BROWN);
+	createBlock(247, 1, t.GLAZED_TERRACOTTA_BROWN);
+	createBlock(247, 2, t.GLAZED_TERRACOTTA_BROWN);
+	createBlock(247, 3, t.GLAZED_TERRACOTTA_BROWN);
+	createBlock(248, 0, t.GLAZED_TERRACOTTA_GREEN);
+	createBlock(248, 1, t.GLAZED_TERRACOTTA_GREEN);
+	createBlock(248, 2, t.GLAZED_TERRACOTTA_GREEN);
+	createBlock(248, 3, t.GLAZED_TERRACOTTA_GREEN);
+	createBlock(249, 0, t.GLAZED_TERRACOTTA_RED);
+	createBlock(249, 1, t.GLAZED_TERRACOTTA_RED);
+	createBlock(249, 2, t.GLAZED_TERRACOTTA_RED);
+	createBlock(249, 3, t.GLAZED_TERRACOTTA_RED);
+	createBlock(250, 0, t.GLAZED_TERRACOTTA_BLACK);
+	createBlock(250, 1, t.GLAZED_TERRACOTTA_BLACK);
+	createBlock(250, 2, t.GLAZED_TERRACOTTA_BLACK);
+	createBlock(250, 3, t.GLAZED_TERRACOTTA_BLACK);
+	// Concrete --
+	createBlock(251, 0, t.CONCRETE_WHITE);
+	createBlock(251, 1, t.CONCRETE_ORANGE);
+	createBlock(251, 2, t.CONCRETE_MAGENTA);
+	createBlock(251, 3, t.CONCRETE_LIGHT_BLUE);
+	createBlock(251, 4, t.CONCRETE_YELLOW);
+	createBlock(251, 5, t.CONCRETE_LIME);
+	createBlock(251, 6, t.CONCRETE_PINK);
+	createBlock(251, 7, t.CONCRETE_GRAY);
+	createBlock(251, 8, t.CONCRETE_SILVER);
+	createBlock(251, 9, t.CONCRETE_CYAN);
+	createBlock(251, 10, t.CONCRETE_PURPLE);
+	createBlock(251, 11, t.CONCRETE_BLUE);
+	createBlock(251, 12, t.CONCRETE_BROWN);
+	createBlock(251, 13, t.CONCRETE_GREEN);
+	createBlock(251, 14, t.CONCRETE_RED);
+	createBlock(251, 15, t.CONCRETE_BLACK);
+	// Concrete Powder--
+	createBlock(252, 0, t.CONCRETE_POWDER_WHITE);
+	createBlock(252, 1, t.CONCRETE_POWDER_ORANGE);
+	createBlock(252, 2, t.CONCRETE_POWDER_MAGENTA);
+	createBlock(252, 3, t.CONCRETE_POWDER_LIGHT_BLUE);
+	createBlock(252, 4, t.CONCRETE_POWDER_YELLOW);
+	createBlock(252, 5, t.CONCRETE_POWDER_LIME);
+	createBlock(252, 6, t.CONCRETE_POWDER_PINK);
+	createBlock(252, 7, t.CONCRETE_POWDER_GRAY);
+	createBlock(252, 8, t.CONCRETE_POWDER_SILVER);
+	createBlock(252, 9, t.CONCRETE_POWDER_CYAN);
+	createBlock(252, 10, t.CONCRETE_POWDER_PURPLE);
+	createBlock(252, 11, t.CONCRETE_POWDER_BLUE);
+	createBlock(252, 12, t.CONCRETE_POWDER_BROWN);
+	createBlock(252, 13, t.CONCRETE_POWDER_GREEN);
+	createBlock(252, 14, t.CONCRETE_POWDER_RED);
+	createBlock(252, 15, t.CONCRETE_POWDER_BLACK);
 	// structure block --
 	createBlock(255, 0, t.STRUCTURE_BLOCK_SAVE);
 	createBlock(255, 1, t.STRUCTURE_BLOCK_LOAD);
@@ -2349,7 +2465,7 @@ void IsometricBlockImages::createBlocks() {
 
 int IsometricBlockImages::createOpaqueWater() {
 	// TODO see TopdownBlockImages::createOpaqueWater()
-	
+
 	// just use the Ocean biome watercolor
 	RGBAImage water = resources.getBlockTextures().WATER_STILL.colorize(0, 0.39, 0.89);
 
@@ -2399,7 +2515,7 @@ int IsometricBlockImages::createOpaqueWater() {
 			break;
 		}
 		*/
-		
+
 		// images are "enough" opaque
 		if (min_alpha >= 250)
 			break;
