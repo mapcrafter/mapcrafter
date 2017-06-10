@@ -1631,6 +1631,13 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(216, 0, t.BONE_BLOCK_TOP); // vertically
 	setBlockImage(216, 4, t.BONE_BLOCK_SIDE); // east-west
 	setBlockImage(216, 8, t.BONE_BLOCK_SIDE); // north-south
+	// observer --
+	setBlockImage(218, 0, t.OBSERVER_BACK);
+	setBlockImage(218, 1, t.OBSERVER_FRONT.rotate(ROTATE_180));
+	setBlockImage(218, 2, t.OBSERVER_TOP.rotate(ROTATE_180));
+	setBlockImage(218, 3, t.OBSERVER_TOP);
+	setBlockImage(218, 4, t.OBSERVER_TOP.rotate(ROTATE_90));
+	setBlockImage(218, 5, t.OBSERVER_TOP.rotate(ROTATE_270));
 	// shulker boxes --
 	for (uint16_t i = 0; i < 16; i++) {
 		setBlockImage((uint16_t) (219 + i), 0, resources.getShulkerBoxTextures()[i * ShulkerTextures::DATA_SIZE + ShulkerTextures::BOTTOM].flip(true, false).rotate(ROTATE_180));
