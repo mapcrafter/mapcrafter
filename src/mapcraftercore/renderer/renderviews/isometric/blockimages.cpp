@@ -552,18 +552,42 @@ void IsometricBlockImages::createSmallerBlock(uint16_t id, uint16_t data, const 
 }
 
 void IsometricBlockImages::createGlazedTerracotta(uint16_t id, const RGBAImage& texture) {
-	// TODO: Fix orientations
-	BlockImage block;
-	block.setFace(FACE_NORTH, texture.flip(true, false));
-	block.setFace(FACE_SOUTH, texture);
-	block.setFace(FACE_EAST, texture.flip(true, false));
-	block.setFace(FACE_WEST, texture);
-	block.setFace(FACE_TOP, texture);
+    RGBAImage rotated_texture_0 = texture.rotate(ROTATE_0);
+    RGBAImage rotated_texture_90 = texture.rotate(ROTATE_90);
+    RGBAImage rotated_texture_180 = texture.rotate(ROTATE_180);
+    RGBAImage rotated_texture_270 = texture.rotate(ROTATE_270);
 
-	setBlockImage(id, 2, block);
-	setBlockImage(id, 3, block.rotate(2));
-	setBlockImage(id, 0, block.rotate(3));
-	setBlockImage(id, 1, block.rotate(1));
+    BlockImage block_0; // south
+    block_0.setFace(FACE_TOP, rotated_texture_270);
+    block_0.setFace(FACE_NORTH, rotated_texture_90);
+    block_0.setFace(FACE_SOUTH, rotated_texture_270);
+    block_0.setFace(FACE_EAST, rotated_texture_180);
+    block_0.setFace(FACE_WEST, rotated_texture_0);
+    setBlockImage(id, 0, block_0);
+
+    BlockImage block_1;
+    block_1.setFace(FACE_TOP, rotated_texture_0);
+    block_1.setFace(FACE_NORTH, rotated_texture_0);
+    block_1.setFace(FACE_SOUTH, rotated_texture_180);
+    block_1.setFace(FACE_EAST, rotated_texture_90);
+    block_1.setFace(FACE_WEST, rotated_texture_270);
+    setBlockImage(id, 1, block_1);
+
+    BlockImage block_2;
+    block_2.setFace(FACE_TOP, rotated_texture_90);
+    block_2.setFace(FACE_NORTH, rotated_texture_270);
+    block_2.setFace(FACE_SOUTH, rotated_texture_90);
+    block_2.setFace(FACE_EAST, rotated_texture_0);
+    block_2.setFace(FACE_WEST, rotated_texture_180);
+    setBlockImage(id, 2, block_2);
+
+    BlockImage block_3;
+    block_3.setFace(FACE_TOP, rotated_texture_180);
+    block_3.setFace(FACE_NORTH, rotated_texture_180);
+    block_3.setFace(FACE_SOUTH, rotated_texture_0);
+    block_3.setFace(FACE_EAST, rotated_texture_270);
+    block_3.setFace(FACE_WEST, rotated_texture_90);
+    setBlockImage(id, 3, block_3);
 }
 
 void IsometricBlockImages::createRotatedBlock(uint16_t id, uint16_t extra_data, const RGBAImage& texture) {
@@ -2441,7 +2465,7 @@ void IsometricBlockImages::createBlocks() {
     createShulkerBox(221, 2, resources.getShulkerBoxTextures()); // magenta
     createShulkerBox(222, 3, resources.getShulkerBoxTextures()); // light blue
     createShulkerBox(223, 4, resources.getShulkerBoxTextures()); // yellow
-    createShulkerBox(224, 5, resources.getShulkerBoxTextures()); // green
+    createShulkerBox(224, 5, resources.getShulkerBoxTextures()); // lime
     createShulkerBox(225, 6, resources.getShulkerBoxTextures()); // pink
     createShulkerBox(226, 7, resources.getShulkerBoxTextures()); // gray
     createShulkerBox(227, 8, resources.getShulkerBoxTextures()); // light gray
@@ -2458,7 +2482,7 @@ void IsometricBlockImages::createBlocks() {
 	createGlazedTerracotta(237, t.GLAZED_TERRACOTTA_MAGENTA); // magenta
 	createGlazedTerracotta(238, t.GLAZED_TERRACOTTA_LIGHT_BLUE); // light blue
 	createGlazedTerracotta(239, t.GLAZED_TERRACOTTA_YELLOW); // yellow
-	createGlazedTerracotta(240, t.GLAZED_TERRACOTTA_GREEN); // green
+	createGlazedTerracotta(240, t.GLAZED_TERRACOTTA_LIME); // lime
 	createGlazedTerracotta(241, t.GLAZED_TERRACOTTA_PINK); // pink
 	createGlazedTerracotta(242, t.GLAZED_TERRACOTTA_GRAY); // gray
 	createGlazedTerracotta(243, t.GLAZED_TERRACOTTA_SILVER); // light gray

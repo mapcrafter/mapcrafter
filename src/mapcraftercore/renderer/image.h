@@ -77,6 +77,7 @@ protected:
 	std::vector<Pixel> data;
 };
 
+const int ROTATE_0 = 0;
 const int ROTATE_90 = 1;
 const int ROTATE_180 = 2;
 const int ROTATE_270 = 3;
