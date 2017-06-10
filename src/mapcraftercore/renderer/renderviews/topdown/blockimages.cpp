@@ -934,6 +934,13 @@ void TopdownBlockImages::createEndRod() { // id 198
 	setBlockImage(198, 5, side.rotate(3));
 }
 
+void TopdownBlockImages::createGlazedTerracotta(uint16_t id, const RGBAImage &texture) {
+	setBlockImage(id, 0, texture.rotate(ROTATE_0));
+	setBlockImage(id, 1, texture.rotate(ROTATE_90));
+	setBlockImage(id, 2, texture.rotate(ROTATE_180));
+	setBlockImage(id, 3, texture.rotate(ROTATE_270));
+}
+
 uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	// call super method
 	data = AbstractBlockImages::filterBlockData(id, data);
@@ -1647,6 +1654,23 @@ void TopdownBlockImages::createBlocks() {
 		setBlockImage((uint16_t) (219 + i), 4, resources.getShulkerBoxTextures()[i * ShulkerTextures::DATA_SIZE + ShulkerTextures::SIDE].rotate(ROTATE_270)); // west
 		setBlockImage((uint16_t) (219 + i), 5, resources.getShulkerBoxTextures()[i * ShulkerTextures::DATA_SIZE + ShulkerTextures::SIDE].rotate(ROTATE_90)); // east
 	}
+	// glazed terracotta --
+	createGlazedTerracotta(235, t.GLAZED_TERRACOTTA_WHITE); // white
+	createGlazedTerracotta(236, t.GLAZED_TERRACOTTA_ORANGE); // orange
+	createGlazedTerracotta(237, t.GLAZED_TERRACOTTA_MAGENTA); // magenta
+	createGlazedTerracotta(238, t.GLAZED_TERRACOTTA_LIGHT_BLUE); // light blue
+	createGlazedTerracotta(239, t.GLAZED_TERRACOTTA_YELLOW); // yellow
+	createGlazedTerracotta(240, t.GLAZED_TERRACOTTA_LIME); // lime
+	createGlazedTerracotta(241, t.GLAZED_TERRACOTTA_PINK); // pink
+	createGlazedTerracotta(242, t.GLAZED_TERRACOTTA_GRAY); // gray
+	createGlazedTerracotta(243, t.GLAZED_TERRACOTTA_SILVER); // light gray
+	createGlazedTerracotta(244, t.GLAZED_TERRACOTTA_CYAN); // cyan
+	createGlazedTerracotta(245, t.GLAZED_TERRACOTTA_PURPLE); // purple
+	createGlazedTerracotta(246, t.GLAZED_TERRACOTTA_BLUE); // blue
+	createGlazedTerracotta(247, t.GLAZED_TERRACOTTA_BROWN); // brown
+	createGlazedTerracotta(248, t.GLAZED_TERRACOTTA_GREEN); // green
+	createGlazedTerracotta(249, t.GLAZED_TERRACOTTA_RED); // red
+	createGlazedTerracotta(250, t.GLAZED_TERRACOTTA_BLACK); // black
 	// --
 	setBlockImage(217, 0, empty_texture); // structure void
 	// structure block --

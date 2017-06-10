@@ -73,6 +73,7 @@ protected:
 	void createFlowerPot(); // id 140
 	void createLargePlant(uint16_t data, const RGBAImage& texture, const RGBAImage& top_texture); // id 175
 	void createEndRod(); // id 198
+	void createGlazedTerracotta(uint16_t id, const RGBAImage& texture);
 
 	virtual uint16_t filterBlockData(uint16_t id, uint16_t data) const;
 	virtual bool isImageTransparent(const RGBAImage& block) const;
