@@ -729,6 +729,35 @@ void IsometricBlockImages::createDispenserDropper(uint16_t id, const RGBAImage& 
 	createBlock(id, 1, side, front);
 }
 
+void IsometricBlockImages::createObserver(uint16_t id) { // id 23, 158
+    RGBAImage side = resources.getBlockTextures().OBSERVER_SIDE;
+    RGBAImage top = resources.getBlockTextures().OBSERVER_TOP;
+    RGBAImage front = resources.getBlockTextures().OBSERVER_FRONT;
+    RGBAImage back = resources.getBlockTextures().OBSERVER_BACK;
+
+    createRotatedBlock(id, 0, front, back, side, top.rotate(ROTATE_90));
+
+    BlockImage up_image;
+    up_image.setFace(FACE_NORTH, top);
+    up_image.setFace(FACE_EAST, side.rotate(ROTATE_90));
+    up_image.setFace(FACE_SOUTH, top);
+    up_image.setFace(FACE_WEST, side.rotate(ROTATE_90));
+    up_image.setFace(FACE_TOP, back.rotate(ROTATE_90));
+
+    setBlockImage(id, 0, up_image);
+
+    BlockImage down_image;
+    down_image.setFace(FACE_NORTH, top.rotate(ROTATE_180));
+    down_image.setFace(FACE_EAST, side.rotate(ROTATE_90));
+    down_image.setFace(FACE_SOUTH, top.rotate(ROTATE_180));
+    down_image.setFace(FACE_WEST, side.rotate(ROTATE_90));
+    down_image.setFace(FACE_TOP, front.rotate(ROTATE_90));
+
+    setBlockImage(id, 1, down_image);
+
+    // createBlock(id, 1, side.rotate(ROTATE_270), top.rotate(ROTATE_180));
+}
+
 BlockImage buildBed(const RGBAImage& top, const RGBAImage& north_south, const RGBAImage& east_west,
 		int face_skip) {
 	BlockImage block;
@@ -2385,7 +2414,9 @@ void IsometricBlockImages::createBlocks() {
 	createBlock(216, 0, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_TOP); // vertically
 	createBlock(216, 4, t.BONE_BLOCK_TOP, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_SIDE); // east-west
 	createBlock(216, 8, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_TOP, t.BONE_BLOCK_SIDE); // north-south
-	// shulker box
+	// --
+    createObserver(218);
+    // shulker box --
     createShulkerBox(219, 0, resources.getShulkerBoxTextures()); // white
     createShulkerBox(220, 1, resources.getShulkerBoxTextures()); // white
     createShulkerBox(221, 2, resources.getShulkerBoxTextures()); // white

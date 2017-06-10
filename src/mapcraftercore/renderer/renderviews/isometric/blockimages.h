@@ -275,6 +275,7 @@ protected:
 	void createLeaves(); // id 18
 	void createGlass(uint16_t id, uint16_t data, const RGBAImage& texture); // id 20, 95
 	void createDispenserDropper(uint16_t id, const RGBAImage& front); // id 23, 158
+	void createObserver(uint16_t id); // id 218
 	void createBed(); // id 26
 	void createStraightRails(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 27, 28, 66
 	void createPiston(uint16_t id, bool sticky); // id 29, 33
