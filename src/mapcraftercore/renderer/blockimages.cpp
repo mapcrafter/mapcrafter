@@ -109,6 +109,59 @@ bool DoubleChestTextures::load(const std::string& filename, int texture_size) {
 	return true;
 }
 
+bool ShulkerTextures::load(const std::string& base_filename, int texture_size) {
+    return (load_single(base_filename + "white.png", 0, texture_size) &&
+            load_single(base_filename + "orange.png", 1, texture_size) &&
+            load_single(base_filename + "magenta.png", 2, texture_size) &&
+            load_single(base_filename + "light_blue.png", 3, texture_size) &&
+            load_single(base_filename + "yellow.png", 4, texture_size) &&
+            load_single(base_filename + "lime.png", 5, texture_size) &&
+            load_single(base_filename + "pink.png", 6, texture_size) &&
+            load_single(base_filename + "gray.png", 7, texture_size) &&
+            load_single(base_filename + "silver.png", 8, texture_size) &&
+            load_single(base_filename + "cyan.png", 9, texture_size) &&
+            load_single(base_filename + "purple.png", 10, texture_size) &&
+            load_single(base_filename + "blue.png", 11, texture_size) &&
+            load_single(base_filename + "brown.png", 12, texture_size) &&
+            load_single(base_filename + "green.png", 13, texture_size) &&
+            load_single(base_filename + "red.png", 14, texture_size) &&
+            load_single(base_filename + "black.png", 15, texture_size));
+}
+
+bool ShulkerTextures::load_single(const std::string& filename, int color_index, int texture_size) {
+    RGBAImage image;
+    if (!image.readPNG(filename)) {
+        LOG(ERROR) << "Unable to read '" << filename << "'.";
+        return false;
+    }
+
+    if (image.getWidth() != image.getHeight()) {
+        LOG(ERROR) << "Shulker texture has invalid size (width:height must be 1:1): '"
+                   << filename << "'.";
+        return false;
+    }
+    // if the image is 64px wide, the shulker box images are 16x16
+    int ratio = image.getHeight() / 64;
+    int size = ratio * 16;
+    int size_h = ratio * 12; // Sides are slightly smaller
+
+    RGBAImage top = image.clip(size, 0, size, size);
+    RGBAImage side = image.clip(0, size, size, size);
+    RGBAImage side_bottom = image.clip(0, 2 * size + (size - size_h), size, size);
+    RGBAImage bottom = image.clip(2 * size, size + size_h, size, size);
+
+    side.alphaBlit(side_bottom, 0, 0);
+
+    int offset = color_index * ShulkerTextures::DATA_SIZE;
+
+    // resize the chest images to texture size
+    bottom.resize((*this)[offset + ShulkerTextures::BOTTOM], texture_size, texture_size);
+    side.resize((*this)[offset + ShulkerTextures::SIDE], texture_size, texture_size);
+    top.resize((*this)[offset + ShulkerTextures::TOP], texture_size, texture_size);
+
+    return true;
+}
+
 TextureResources::TextureResources()
 	: texture_size(12), texture_blur(0) {
 }
@@ -140,7 +193,8 @@ bool TextureResources::loadTextures(const std::string& texture_dir,
 			dir + "entity/chest/normal_double.png",
 			dir + "entity/chest/ender.png",
 			dir + "entity/chest/trapped.png",
-			dir + "entity/chest/trapped_double.png"))
+			dir + "entity/chest/trapped_double.png",
+            dir + "entity/shulker/shulker_"))
 		ok = false;
 	if (!loadColors(dir + "colormap/foliage.png",
 			dir + "colormap/grass.png"))
@@ -182,6 +236,10 @@ const DoubleChestTextures& TextureResources::getTrappedDoubleChest() const {
 	return trapped_double_chest;
 }
 
+const ShulkerTextures& TextureResources::getShulkerBoxTextures() const {
+    return shulker_textures;
+}
+
 const RGBAImage& TextureResources::getFoliageColors() const {
 	return foliage_colors;
 }
@@ -192,12 +250,14 @@ const RGBAImage& TextureResources::getGrassColors() const {
 
 bool TextureResources::loadChests(const std::string& normal_png,
 		const std::string& normal_double_png, const std::string& ender_png,
-		const std::string& trapped_png, const std::string& trapped_double_png) {
+		const std::string& trapped_png, const std::string& trapped_double_png,
+        const std::string& shulker_base_png) {
 	if (!normal_chest.load(normal_png, texture_size)
 			|| !normal_double_chest.load(normal_double_png, texture_size)
 			|| !ender_chest.load(ender_png, texture_size)
 			|| !trapped_chest.load(trapped_png, texture_size)
-			|| !trapped_double_chest.load(trapped_double_png, texture_size))
+			|| !trapped_double_chest.load(trapped_double_png, texture_size)
+            || !shulker_textures.load(shulker_base_png, texture_size))
 		return false;
 	return true;
 }

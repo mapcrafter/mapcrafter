@@ -836,6 +836,7 @@ void IsometricBlockImages::createPiston(uint16_t id, bool sticky) { //  id 29, 3
 	createBlock(id, 0, side.rotate(ROTATE_180), back);
 	createBlock(id, 1, side, front);
 
+    // TODO: Bug fix rotations
 	setBlockImage(id, 2, buildPiston(FACE_NORTH, front, back, side.rotate(3), side.rotate(3)));
 	setBlockImage(id, 3, buildPiston(FACE_SOUTH, front, back, side.rotate(1), side.rotate(1)));
 	setBlockImage(id, 4, buildPiston(FACE_WEST, front, back, side.rotate(3), side.rotate(2)));
@@ -994,6 +995,53 @@ void IsometricBlockImages::createStairs(uint16_t id, const RGBAImage& texture,
 
 void IsometricBlockImages::createStairs(uint16_t id, const RGBAImage& texture) {
 	createStairs(id, texture, texture);
+}
+
+void IsometricBlockImages::createShulkerBox(uint16_t id, int color_index, const ShulkerTextures& textures) { // id 219 - 234
+    int offset = color_index * ShulkerTextures::DATA_SIZE;
+
+    RGBAImage top = textures[offset + ShulkerTextures::TOP];
+    RGBAImage side = textures[offset + ShulkerTextures::SIDE];
+    RGBAImage bottom = textures[offset + ShulkerTextures::BOTTOM];
+
+    createBlock(id, 0, side.rotate(ROTATE_180), bottom.rotate(ROTATE_270).flip(true, false));
+    createBlock(id, 1, side, top);
+
+    BlockImage north_block;
+    north_block.setFace(FACE_NORTH, top);
+    north_block.setFace(FACE_EAST, side.rotate(ROTATE_270));
+    north_block.setFace(FACE_SOUTH, bottom.flip(true, false));
+    north_block.setFace(FACE_WEST, side.rotate(ROTATE_270));
+    north_block.setFace(FACE_TOP, side.rotate(ROTATE_270));
+
+    setBlockImage(id, 2, north_block);
+
+    BlockImage south_block;
+    south_block.setFace(FACE_NORTH, bottom.flip(true, false));
+    south_block.setFace(FACE_EAST, side.rotate(ROTATE_90));
+    south_block.setFace(FACE_SOUTH, top);
+    south_block.setFace(FACE_WEST, side.rotate(ROTATE_90));
+    south_block.setFace(FACE_TOP, side.rotate(ROTATE_90));
+
+    setBlockImage(id, 3, south_block);
+
+    BlockImage east_block;
+    east_block.setFace(FACE_NORTH, side.rotate(ROTATE_90));
+    east_block.setFace(FACE_EAST, top);
+    east_block.setFace(FACE_SOUTH, side.rotate(ROTATE_90));
+    east_block.setFace(FACE_WEST, bottom.flip(true, false));
+    east_block.setFace(FACE_TOP, side);
+
+    setBlockImage(id, 5, east_block);
+
+    BlockImage west_block;
+    west_block.setFace(FACE_NORTH, side.rotate(ROTATE_270));
+    west_block.setFace(FACE_EAST, bottom.flip(true, false));
+    west_block.setFace(FACE_SOUTH, side.rotate(ROTATE_270));
+    west_block.setFace(FACE_WEST, top);
+    west_block.setFace(FACE_TOP, side.rotate(ROTATE_180));
+
+    setBlockImage(id, 4, west_block);
 }
 
 void IsometricBlockImages::createChest(uint16_t id, const ChestTextures& textures) { // id 54, 130
@@ -2337,6 +2385,23 @@ void IsometricBlockImages::createBlocks() {
 	createBlock(216, 0, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_TOP); // vertically
 	createBlock(216, 4, t.BONE_BLOCK_TOP, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_SIDE); // east-west
 	createBlock(216, 8, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_TOP, t.BONE_BLOCK_SIDE); // north-south
+	// shulker box
+    createShulkerBox(219, 0, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(220, 1, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(221, 2, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(222, 3, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(223, 4, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(224, 5, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(225, 6, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(226, 7, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(227, 8, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(228, 9, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(229, 10, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(230, 11, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(231, 12, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(232, 13, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(233, 14, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(234, 15, resources.getShulkerBoxTextures()); // white
 	// --
 	createBlock(217, 0, empty_texture); // structure void
 	// structure block --

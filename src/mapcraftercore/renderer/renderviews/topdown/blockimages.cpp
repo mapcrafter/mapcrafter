@@ -1631,6 +1631,24 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(216, 0, t.BONE_BLOCK_TOP); // vertically
 	setBlockImage(216, 4, t.BONE_BLOCK_SIDE); // east-west
 	setBlockImage(216, 8, t.BONE_BLOCK_SIDE); // north-south
+	// shulker boxes
+	// TODO: Check colours
+	setBlockImage(219, 0, t.SHULKER_TOP_WHITE); // white
+	setBlockImage(220, 0, t.SHULKER_TOP_WHITE); // orange
+	setBlockImage(221, 0, t.SHULKER_TOP_WHITE); // magenta
+	setBlockImage(222, 0, t.SHULKER_TOP_WHITE); // light blue
+	setBlockImage(223, 0, t.SHULKER_TOP_WHITE); // yellow
+	setBlockImage(224, 0, t.SHULKER_TOP_WHITE); // lime
+	setBlockImage(225, 0, t.SHULKER_TOP_WHITE); // pink
+	setBlockImage(226, 0, t.SHULKER_TOP_WHITE); // gray
+	setBlockImage(227, 0, t.SHULKER_TOP_WHITE); // light gray
+	setBlockImage(228, 0, t.SHULKER_TOP_WHITE); // cyan
+	setBlockImage(229, 0, t.SHULKER_TOP_WHITE); // purple
+	setBlockImage(230, 0, t.SHULKER_TOP_WHITE); // blue
+	setBlockImage(231, 0, t.SHULKER_TOP_WHITE); // brown
+	setBlockImage(232, 0, t.SHULKER_TOP_WHITE); // green
+	setBlockImage(233, 0, t.SHULKER_TOP_WHITE); // red
+	setBlockImage(234, 0, t.SHULKER_TOP_WHITE); // black
 	// --
 	setBlockImage(217, 0, empty_texture); // structure void
 	// structure block --
