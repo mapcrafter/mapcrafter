@@ -551,6 +551,25 @@ void IsometricBlockImages::createSmallerBlock(uint16_t id, uint16_t data, const 
 	createSmallerBlock(id, data, texture, texture, texture, y1, y2);
 }
 
+void IsometricBlockImages::createGlazedTerracotta(uint16_t id, const RGBAImage& texture) {
+	// TODO: Fix orientations
+	BlockImage block;
+	block.setFace(FACE_NORTH, texture.flip(true, false));
+	block.setFace(FACE_SOUTH, texture);
+	block.setFace(FACE_EAST, texture.flip(true, false));
+	block.setFace(FACE_WEST, texture);
+	block.setFace(FACE_TOP, texture);
+
+	setBlockImage(id, 2, block);
+	setBlockImage(id, 3, block.rotate(2));
+	setBlockImage(id, 0, block.rotate(3));
+	setBlockImage(id, 1, block.rotate(1));
+}
+
+void IsometricBlockImages::createRotatedBlock(uint16_t id, uint16_t extra_data, const RGBAImage& texture) {
+    createRotatedBlock(id, extra_data, texture, texture, texture, texture);
+}
+
 void IsometricBlockImages::createRotatedBlock(uint16_t id, uint16_t extra_data,
         const RGBAImage& front_texture, const RGBAImage& side_texture,
         const RGBAImage& top_texture) {
@@ -2415,24 +2434,41 @@ void IsometricBlockImages::createBlocks() {
 	createBlock(216, 4, t.BONE_BLOCK_TOP, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_SIDE); // east-west
 	createBlock(216, 8, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_TOP, t.BONE_BLOCK_SIDE); // north-south
 	// --
-    createObserver(218);
+    createObserver(218); // observer
     // shulker box --
     createShulkerBox(219, 0, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(220, 1, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(221, 2, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(222, 3, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(223, 4, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(224, 5, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(225, 6, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(226, 7, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(227, 8, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(228, 9, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(229, 10, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(230, 11, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(231, 12, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(232, 13, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(233, 14, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(234, 15, resources.getShulkerBoxTextures()); // white
+    createShulkerBox(220, 1, resources.getShulkerBoxTextures()); // orange
+    createShulkerBox(221, 2, resources.getShulkerBoxTextures()); // magenta
+    createShulkerBox(222, 3, resources.getShulkerBoxTextures()); // light blue
+    createShulkerBox(223, 4, resources.getShulkerBoxTextures()); // yellow
+    createShulkerBox(224, 5, resources.getShulkerBoxTextures()); // green
+    createShulkerBox(225, 6, resources.getShulkerBoxTextures()); // pink
+    createShulkerBox(226, 7, resources.getShulkerBoxTextures()); // gray
+    createShulkerBox(227, 8, resources.getShulkerBoxTextures()); // light gray
+    createShulkerBox(228, 9, resources.getShulkerBoxTextures()); // cyan
+    createShulkerBox(229, 10, resources.getShulkerBoxTextures()); // purple
+    createShulkerBox(230, 11, resources.getShulkerBoxTextures()); // blue
+    createShulkerBox(231, 12, resources.getShulkerBoxTextures()); // brown
+    createShulkerBox(232, 13, resources.getShulkerBoxTextures()); // green
+    createShulkerBox(233, 14, resources.getShulkerBoxTextures()); // red
+    createShulkerBox(234, 15, resources.getShulkerBoxTextures()); // black
+    // glazed terracotta --
+    createGlazedTerracotta(235, t.GLAZED_TERRACOTTA_WHITE); // white
+	createGlazedTerracotta(236, t.GLAZED_TERRACOTTA_ORANGE); // orange
+	createGlazedTerracotta(237, t.GLAZED_TERRACOTTA_MAGENTA); // magenta
+	createGlazedTerracotta(238, t.GLAZED_TERRACOTTA_LIGHT_BLUE); // light blue
+	createGlazedTerracotta(239, t.GLAZED_TERRACOTTA_YELLOW); // yellow
+	createGlazedTerracotta(240, t.GLAZED_TERRACOTTA_GREEN); // green
+	createGlazedTerracotta(241, t.GLAZED_TERRACOTTA_PINK); // pink
+	createGlazedTerracotta(242, t.GLAZED_TERRACOTTA_GRAY); // gray
+	createGlazedTerracotta(243, t.GLAZED_TERRACOTTA_SILVER); // light gray
+	createGlazedTerracotta(244, t.GLAZED_TERRACOTTA_CYAN); // cyan
+	createGlazedTerracotta(245, t.GLAZED_TERRACOTTA_PURPLE); // purple
+	createGlazedTerracotta(246, t.GLAZED_TERRACOTTA_BLUE); // blue
+	createGlazedTerracotta(247, t.GLAZED_TERRACOTTA_BROWN); // brown
+	createGlazedTerracotta(248, t.GLAZED_TERRACOTTA_GREEN); // green
+	createGlazedTerracotta(249, t.GLAZED_TERRACOTTA_RED); // red
+	createGlazedTerracotta(250, t.GLAZED_TERRACOTTA_BLACK); // black
 	// --
 	createBlock(217, 0, empty_texture); // structure void
 	// structure block --
