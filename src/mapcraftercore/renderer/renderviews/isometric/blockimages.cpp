@@ -2493,7 +2493,41 @@ void IsometricBlockImages::createBlocks() {
 	createGlazedTerracotta(248, t.GLAZED_TERRACOTTA_GREEN); // green
 	createGlazedTerracotta(249, t.GLAZED_TERRACOTTA_RED); // red
 	createGlazedTerracotta(250, t.GLAZED_TERRACOTTA_BLACK); // black
-	// --
+	// concrete --
+    createBlock(251, 0, t.CONCRETE_WHITE); // white
+    createBlock(251, 1, t.CONCRETE_ORANGE); // orange
+    createBlock(251, 2, t.CONCRETE_MAGENTA); // magenta
+    createBlock(251, 3, t.CONCRETE_LIGHT_BLUE); // light blue
+    createBlock(251, 4, t.CONCRETE_YELLOW); // yellow
+    createBlock(251, 5, t.CONCRETE_LIME); // lime
+    createBlock(251, 6, t.CONCRETE_PINK); // pink
+    createBlock(251, 7, t.CONCRETE_GRAY); // gray
+    createBlock(251, 8, t.CONCRETE_SILVER); // light gray
+    createBlock(251, 9, t.CONCRETE_CYAN); // cyan
+    createBlock(251, 10, t.CONCRETE_PURPLE); // purple
+    createBlock(251, 11, t.CONCRETE_BLUE); // blue
+    createBlock(251, 12, t.CONCRETE_BROWN); // brown
+    createBlock(251, 13, t.CONCRETE_GREEN); // green
+    createBlock(251, 14, t.CONCRETE_RED); // red
+    createBlock(251, 15, t.CONCRETE_BLACK); // black
+    // concrete powder --
+    createBlock(252, 0, t.CONCRETE_POWDER_WHITE); // white
+    createBlock(252, 1, t.CONCRETE_POWDER_ORANGE); // orange
+    createBlock(252, 2, t.CONCRETE_POWDER_MAGENTA); // magenta
+    createBlock(252, 3, t.CONCRETE_POWDER_LIGHT_BLUE); // light blue
+    createBlock(252, 4, t.CONCRETE_POWDER_YELLOW); // yellow
+    createBlock(252, 5, t.CONCRETE_POWDER_LIME); // lime
+    createBlock(252, 6, t.CONCRETE_POWDER_PINK); // pink
+    createBlock(252, 7, t.CONCRETE_POWDER_GRAY); // gray
+    createBlock(252, 8, t.CONCRETE_POWDER_SILVER); // light gray
+    createBlock(252, 9, t.CONCRETE_POWDER_CYAN); // cyan
+    createBlock(252, 10, t.CONCRETE_POWDER_PURPLE); // purple
+    createBlock(252, 11, t.CONCRETE_POWDER_BLUE); // blue
+    createBlock(252, 12, t.CONCRETE_POWDER_BROWN); // brown
+    createBlock(252, 13, t.CONCRETE_POWDER_GREEN); // green
+    createBlock(252, 14, t.CONCRETE_POWDER_RED); // red
+    createBlock(252, 15, t.CONCRETE_POWDER_BLACK); // black
+    // --
 	createBlock(217, 0, empty_texture); // structure void
 	// structure block --
 	createBlock(255, 0, t.STRUCTURE_BLOCK_SAVE);
