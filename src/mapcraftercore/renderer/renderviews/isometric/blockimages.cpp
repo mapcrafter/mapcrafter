@@ -797,8 +797,6 @@ void IsometricBlockImages::createObserver(uint16_t id) { // id 23, 158
     down_image.setFace(FACE_TOP, front.rotate(ROTATE_90));
 
     setBlockImage(id, 1, down_image);
-
-    // createBlock(id, 1, side.rotate(ROTATE_270), top.rotate(ROTATE_180));
 }
 
 BlockImage buildBed(const RGBAImage& top, const RGBAImage& north_south, const RGBAImage& east_west,
@@ -820,23 +818,7 @@ BlockImage buildBed(const RGBAImage& top, const RGBAImage& north_south, const RG
 
 void IsometricBlockImages::createBed() { // id 26
 	const BlockTextures& textures = resources.getBlockTextures();
-	RGBAImage front = textures.BED_FEET_END;
-	RGBAImage side = textures.BED_FEET_SIDE;
-	RGBAImage top = textures.BED_FEET_TOP;
-
-	setBlockImage(26, 0, buildBed(top.rotate(1), front, side, FACE_SOUTH));
-	setBlockImage(26, 1, buildBed(top.rotate(2), side.flip(true, false), front, FACE_WEST));
-	setBlockImage(26, 2, buildBed(top.rotate(3), front, side.flip(true, false), FACE_NORTH));
-	setBlockImage(26, 3, buildBed(top, side, front, FACE_EAST));
-
-	front = textures.BED_HEAD_END;
-	side = textures.BED_HEAD_SIDE;
-	top = textures.BED_HEAD_TOP;
-
-	setBlockImage(26, 8, buildBed(top, front, side, FACE_NORTH));
-	setBlockImage(26, 1 | 8, buildBed(top.rotate(1), side.flip(true, false), front, FACE_EAST));
-	setBlockImage(26, 2 | 8, buildBed(top.rotate(2), front, side.flip(true, false), FACE_SOUTH));
-	setBlockImage(26, 3 | 8, buildBed(top.rotate(3), side, front, FACE_WEST));
+	// TODO: Add images for each bed colour
 }
 
 void IsometricBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
@@ -1070,50 +1052,50 @@ void IsometricBlockImages::createStairs(uint16_t id, const RGBAImage& texture) {
 }
 
 void IsometricBlockImages::createShulkerBox(uint16_t id, int color_index, const ShulkerTextures& textures) { // id 219 - 234
-    int offset = color_index * ShulkerTextures::DATA_SIZE;
+	int offset = color_index * ShulkerTextures::DATA_SIZE;
 
-    RGBAImage top = textures[offset + ShulkerTextures::TOP];
-    RGBAImage side = textures[offset + ShulkerTextures::SIDE];
-    RGBAImage bottom = textures[offset + ShulkerTextures::BOTTOM];
+	RGBAImage top = textures[offset + ShulkerTextures::TOP];
+	RGBAImage side = textures[offset + ShulkerTextures::SIDE];
+	RGBAImage bottom = textures[offset + ShulkerTextures::BOTTOM];
 
-    createBlock(id, 0, side.rotate(ROTATE_180), bottom.rotate(ROTATE_270).flip(true, false));
-    createBlock(id, 1, side, top);
+	createBlock(id, 0, side.rotate(ROTATE_180), bottom.rotate(ROTATE_270).flip(true, false));
+	createBlock(id, 1, side, top);
 
-    BlockImage north_block;
-    north_block.setFace(FACE_NORTH, top);
-    north_block.setFace(FACE_EAST, side.rotate(ROTATE_270));
-    north_block.setFace(FACE_SOUTH, bottom.flip(true, false));
-    north_block.setFace(FACE_WEST, side.rotate(ROTATE_270));
-    north_block.setFace(FACE_TOP, side.rotate(ROTATE_270));
+	BlockImage north_block;
+	north_block.setFace(FACE_NORTH, top);
+	north_block.setFace(FACE_EAST, side.rotate(ROTATE_270));
+	north_block.setFace(FACE_SOUTH, bottom.flip(true, false));
+	north_block.setFace(FACE_WEST, side.rotate(ROTATE_270));
+	north_block.setFace(FACE_TOP, side.rotate(ROTATE_270));
 
-    setBlockImage(id, 2, north_block);
+	setBlockImage(id, 2, north_block);
 
-    BlockImage south_block;
-    south_block.setFace(FACE_NORTH, bottom.flip(true, false));
-    south_block.setFace(FACE_EAST, side.rotate(ROTATE_90));
-    south_block.setFace(FACE_SOUTH, top);
-    south_block.setFace(FACE_WEST, side.rotate(ROTATE_90));
-    south_block.setFace(FACE_TOP, side.rotate(ROTATE_90));
+	BlockImage south_block;
+	south_block.setFace(FACE_NORTH, bottom.flip(true, false));
+	south_block.setFace(FACE_EAST, side.rotate(ROTATE_90));
+	south_block.setFace(FACE_SOUTH, top);
+	south_block.setFace(FACE_WEST, side.rotate(ROTATE_90));
+	south_block.setFace(FACE_TOP, side.rotate(ROTATE_90));
 
-    setBlockImage(id, 3, south_block);
+	setBlockImage(id, 3, south_block);
 
-    BlockImage east_block;
-    east_block.setFace(FACE_NORTH, side.rotate(ROTATE_90));
-    east_block.setFace(FACE_EAST, top);
-    east_block.setFace(FACE_SOUTH, side.rotate(ROTATE_90));
-    east_block.setFace(FACE_WEST, bottom.flip(true, false));
-    east_block.setFace(FACE_TOP, side);
+	BlockImage east_block;
+	east_block.setFace(FACE_NORTH, side.rotate(ROTATE_90));
+	east_block.setFace(FACE_EAST, top);
+	east_block.setFace(FACE_SOUTH, side.rotate(ROTATE_90));
+	east_block.setFace(FACE_WEST, bottom.flip(true, false));
+	east_block.setFace(FACE_TOP, side);
 
-    setBlockImage(id, 5, east_block);
+	setBlockImage(id, 5, east_block);
 
-    BlockImage west_block;
-    west_block.setFace(FACE_NORTH, side.rotate(ROTATE_270));
-    west_block.setFace(FACE_EAST, bottom.flip(true, false));
-    west_block.setFace(FACE_SOUTH, side.rotate(ROTATE_270));
-    west_block.setFace(FACE_WEST, top);
-    west_block.setFace(FACE_TOP, side.rotate(ROTATE_180));
+	BlockImage west_block;
+	west_block.setFace(FACE_NORTH, side.rotate(ROTATE_270));
+	west_block.setFace(FACE_EAST, bottom.flip(true, false));
+	west_block.setFace(FACE_SOUTH, side.rotate(ROTATE_270));
+	west_block.setFace(FACE_WEST, top);
+	west_block.setFace(FACE_TOP, side.rotate(ROTATE_180));
 
-    setBlockImage(id, 4, west_block);
+	setBlockImage(id, 4, west_block);
 }
 
 void IsometricBlockImages::createChest(uint16_t id, const ChestTextures& textures) { // id 54, 130
@@ -2458,8 +2440,8 @@ void IsometricBlockImages::createBlocks() {
 	createBlock(216, 4, t.BONE_BLOCK_TOP, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_SIDE); // east-west
 	createBlock(216, 8, t.BONE_BLOCK_SIDE, t.BONE_BLOCK_TOP, t.BONE_BLOCK_SIDE); // north-south
 	// --
-    createObserver(218); // observer
-    // shulker box --
+	createObserver(218); // observer
+	// shulker box --
     createShulkerBox(219, 0, resources.getShulkerBoxTextures()); // white
     createShulkerBox(220, 1, resources.getShulkerBoxTextures()); // orange
     createShulkerBox(221, 2, resources.getShulkerBoxTextures()); // magenta
@@ -2494,40 +2476,40 @@ void IsometricBlockImages::createBlocks() {
 	createGlazedTerracotta(249, t.GLAZED_TERRACOTTA_RED); // red
 	createGlazedTerracotta(250, t.GLAZED_TERRACOTTA_BLACK); // black
 	// concrete --
-    createBlock(251, 0, t.CONCRETE_WHITE); // white
-    createBlock(251, 1, t.CONCRETE_ORANGE); // orange
-    createBlock(251, 2, t.CONCRETE_MAGENTA); // magenta
-    createBlock(251, 3, t.CONCRETE_LIGHT_BLUE); // light blue
-    createBlock(251, 4, t.CONCRETE_YELLOW); // yellow
-    createBlock(251, 5, t.CONCRETE_LIME); // lime
-    createBlock(251, 6, t.CONCRETE_PINK); // pink
-    createBlock(251, 7, t.CONCRETE_GRAY); // gray
-    createBlock(251, 8, t.CONCRETE_SILVER); // light gray
-    createBlock(251, 9, t.CONCRETE_CYAN); // cyan
-    createBlock(251, 10, t.CONCRETE_PURPLE); // purple
-    createBlock(251, 11, t.CONCRETE_BLUE); // blue
-    createBlock(251, 12, t.CONCRETE_BROWN); // brown
-    createBlock(251, 13, t.CONCRETE_GREEN); // green
-    createBlock(251, 14, t.CONCRETE_RED); // red
-    createBlock(251, 15, t.CONCRETE_BLACK); // black
-    // concrete powder --
-    createBlock(252, 0, t.CONCRETE_POWDER_WHITE); // white
-    createBlock(252, 1, t.CONCRETE_POWDER_ORANGE); // orange
-    createBlock(252, 2, t.CONCRETE_POWDER_MAGENTA); // magenta
-    createBlock(252, 3, t.CONCRETE_POWDER_LIGHT_BLUE); // light blue
-    createBlock(252, 4, t.CONCRETE_POWDER_YELLOW); // yellow
-    createBlock(252, 5, t.CONCRETE_POWDER_LIME); // lime
-    createBlock(252, 6, t.CONCRETE_POWDER_PINK); // pink
-    createBlock(252, 7, t.CONCRETE_POWDER_GRAY); // gray
-    createBlock(252, 8, t.CONCRETE_POWDER_SILVER); // light gray
-    createBlock(252, 9, t.CONCRETE_POWDER_CYAN); // cyan
-    createBlock(252, 10, t.CONCRETE_POWDER_PURPLE); // purple
-    createBlock(252, 11, t.CONCRETE_POWDER_BLUE); // blue
-    createBlock(252, 12, t.CONCRETE_POWDER_BROWN); // brown
-    createBlock(252, 13, t.CONCRETE_POWDER_GREEN); // green
-    createBlock(252, 14, t.CONCRETE_POWDER_RED); // red
-    createBlock(252, 15, t.CONCRETE_POWDER_BLACK); // black
-    // --
+	createBlock(251, 0, t.CONCRETE_WHITE); // white
+	createBlock(251, 1, t.CONCRETE_ORANGE); // orange
+	createBlock(251, 2, t.CONCRETE_MAGENTA); // magenta
+	createBlock(251, 3, t.CONCRETE_LIGHT_BLUE); // light blue
+	createBlock(251, 4, t.CONCRETE_YELLOW); // yellow
+	createBlock(251, 5, t.CONCRETE_LIME); // lime
+	createBlock(251, 6, t.CONCRETE_PINK); // pink
+	createBlock(251, 7, t.CONCRETE_GRAY); // gray
+	createBlock(251, 8, t.CONCRETE_SILVER); // light gray
+	createBlock(251, 9, t.CONCRETE_CYAN); // cyan
+	createBlock(251, 10, t.CONCRETE_PURPLE); // purple
+	createBlock(251, 11, t.CONCRETE_BLUE); // blue
+	createBlock(251, 12, t.CONCRETE_BROWN); // brown
+	createBlock(251, 13, t.CONCRETE_GREEN); // green
+	createBlock(251, 14, t.CONCRETE_RED); // red
+	createBlock(251, 15, t.CONCRETE_BLACK); // black
+	// concrete powder --
+	createBlock(252, 0, t.CONCRETE_POWDER_WHITE); // white
+	createBlock(252, 1, t.CONCRETE_POWDER_ORANGE); // orange
+	createBlock(252, 2, t.CONCRETE_POWDER_MAGENTA); // magenta
+	createBlock(252, 3, t.CONCRETE_POWDER_LIGHT_BLUE); // light blue
+	createBlock(252, 4, t.CONCRETE_POWDER_YELLOW); // yellow
+	createBlock(252, 5, t.CONCRETE_POWDER_LIME); // lime
+	createBlock(252, 6, t.CONCRETE_POWDER_PINK); // pink
+	createBlock(252, 7, t.CONCRETE_POWDER_GRAY); // gray
+	createBlock(252, 8, t.CONCRETE_POWDER_SILVER); // light gray
+	createBlock(252, 9, t.CONCRETE_POWDER_CYAN); // cyan
+	createBlock(252, 10, t.CONCRETE_POWDER_PURPLE); // purple
+	createBlock(252, 11, t.CONCRETE_POWDER_BLUE); // blue
+	createBlock(252, 12, t.CONCRETE_POWDER_BROWN); // brown
+	createBlock(252, 13, t.CONCRETE_POWDER_GREEN); // green
+	createBlock(252, 14, t.CONCRETE_POWDER_RED); // red
+	createBlock(252, 15, t.CONCRETE_POWDER_BLACK); // black
+	// --
 	createBlock(217, 0, empty_texture); // structure void
 	// structure block --
 	createBlock(255, 0, t.STRUCTURE_BLOCK_SAVE);

@@ -259,7 +259,7 @@ protected:
 	void createSmallerBlock(uint16_t id, uint16_t data, const RGBAImage& texture, int y1, int y2);
 	void createGlazedTerracotta(uint16_t id, const RGBAImage& texture);
 	void createRotatedBlock(uint16_t id, uint16_t extra_data, const RGBAImage& texture);
-    void createRotatedBlock(uint16_t id, uint16_t extra_data, const RGBAImage& front_texture,
+	void createRotatedBlock(uint16_t id, uint16_t extra_data, const RGBAImage& front_texture,
 	        const RGBAImage& side_texture, const RGBAImage& top_texture);
 	void createRotatedBlock(uint16_t id, uint16_t extra_data, const RGBAImage& front_texture,
 	        const RGBAImage& back_texture, const RGBAImage& side_texture,
