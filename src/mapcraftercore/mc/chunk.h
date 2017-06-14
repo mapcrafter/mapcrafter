@@ -49,6 +49,14 @@ struct ChunkSection {
 	const uint8_t* getArray(int i) const;
 };
 
+struct Entity {
+	mc::BlockPos position;
+};
+
+struct EntityBed : Entity {
+	int32_t color;
+};
+
 /**
  * This class represents a Minecraft Chunk and provides an read-only interface to chunk
  * data such as block IDs, block data values and block lighting data.
@@ -140,6 +148,9 @@ private:
 
 	// the biomes in this chunk, as index z*16+x
 	uint8_t biomes[256];
+
+	// the beds in this chunk
+	std::vector<EntityBed> entities_beds;
 
 	/**
 	 * Checks whether a block (local coordinates, original/unrotated) is in the cropped

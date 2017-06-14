@@ -89,6 +89,29 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 	} else
 		LOG(ERROR) << "Corrupt chunk " << chunkpos << ": No biome data found!";
 
+	const nbt::TagList& tile_entities_tag = level.findTag<nbt::TagList>("TileEntities");
+
+	if (tile_entities_tag.tag_type == nbt::TagCompound::TAG_TYPE) {
+		// go through all entities
+		for (auto it = tile_entities_tag.payload.begin(); it != tile_entities_tag.payload.end(); ++it) {
+			const nbt::TagCompound &entity = (*it)->cast<nbt::TagCompound>();
+			std::string id = entity.findTag<nbt::TagString>("id").payload; // Not an integer, e.g. for beds: 'minecraft:bed'
+			mc::BlockPos pos(
+					entity.findTag<nbt::TagInt>("x").payload,
+					entity.findTag<nbt::TagInt>("z").payload,
+					entity.findTag<nbt::TagInt>("y").payload
+			);
+
+			if (id == "minecraft:bed") {
+				int32_t color = entity.findTag<nbt::TagInt>("color").payload;
+				EntityBed bed;
+				bed.color = color;
+				bed.position = pos;
+				entities_beds.push_back(bed);
+			}
+		}
+	}
+
 	// find sections list
 	// ignore it if section list does not exist, can happen sometimes with the empty
 	// chunks of the end

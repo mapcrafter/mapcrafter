@@ -366,7 +366,8 @@ bool AbstractBlockImages::hasBlock(uint16_t id, uint16_t data) const {
 	return block_images.count(id | (data << 16)) != 0;
 }
 
-const RGBAImage& AbstractBlockImages::getBlock(uint16_t id, uint16_t data) const {
+const RGBAImage& AbstractBlockImages::getBlock(uint16_t id, uint16_t data, mc::BlockPos position) const {
+	// TODO: (Bjarno) for given ids, return a different image, depending on the position
 	data = filterBlockData(id, data);
 	if (!hasBlock(id, data))
 		return unknown_block;
