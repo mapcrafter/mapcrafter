@@ -239,19 +239,21 @@ bool BedTextures::loadSingle(const std::string& filename, int color_index, int t
 	side_head_right.simpleBlit(leg.rotate(ROTATE_90).flip(false, true), 13 * ratio, 0);
     side_head_right = side_head_right.rotate(ROTATE_90);
 
-	side_foot_left.simpleBlit(small_side_foot_left, 0, 7 * ratio);
-	side_foot_left.simpleBlit(leg, 13 * ratio, 13 * ratio);
+	side_foot_left.simpleBlit(small_side_foot_left, 3 * ratio, 0);
+	side_foot_left.simpleBlit(leg.rotate(ROTATE_90), 0, 13 * ratio);
+    side_foot_left = side_foot_left.rotate(ROTATE_270);
 
-	side_foot_right.simpleBlit(small_side_foot_right, 0, 7 * ratio);
-	side_foot_right.simpleBlit(leg.flip(true, false), 13 * ratio, 13 * ratio);
+	side_foot_right.simpleBlit(small_side_foot_right, 7 * ratio, 0);
+	side_foot_right.simpleBlit(leg.rotate(ROTATE_90), 13 * ratio, 13 * ratio);
+    side_foot_right = side_foot_right.rotate(ROTATE_90);
 
 	side_head_end.simpleBlit(small_side_head_end.flip(false, true), 0, 7 * ratio);
 	side_head_end.simpleBlit(leg.flip(true, false), 0, 13 * ratio);
-	side_head_end.simpleBlit(leg.flip(true, false), 13 * ratio, 13 * ratio);
+	side_head_end.simpleBlit(leg, 13 * ratio, 13 * ratio);
 
 	side_foot_end.simpleBlit(small_side_foot_end.flip(false, true), 0, 7 * ratio);
 	side_foot_end.simpleBlit(leg.flip(true, false), 0, 13 * ratio);
-	side_foot_end.simpleBlit(leg.flip(true, false), 13 * ratio, 13 * ratio);
+	side_foot_end.simpleBlit(leg, 13 * ratio, 13 * ratio);
 
 	side_head_left.writePNG("tmp_side_head_left.png");
 	side_head_right.writePNG("tmp_side_head_right.png");

@@ -836,39 +836,20 @@ void IsometricBlockImages::createBed(const BedTextures& textures) { // id 26
 		RGBAImage side_head_end = textures[offset + BedTextures::SIDE_HEAD_END];
 		RGBAImage side_foot_end = textures[offset + BedTextures::SIDE_FOOT_END];
 
+        auto magma = resources.getBlockTextures().MAGMA;
+
 		// Head
 		/*setBlockImage(26, 8, resources.getBlockTextures().MAGMA);
 		setBlockImage(26, 1 | 8, resources.getBlockTextures().MAGMA);*/
-		setBedImage(2 | 8, colour, buildBed(top_head.rotate(ROTATE_270), side_head_end, 0, side_head_left.flip(true, false), side_head_right.flip(true, false))); // Pointing north
+		setBedImage(2 | 8, colour, buildBed(top_head.rotate(ROTATE_270), side_head_end, 0, side_head_right.flip(true, false), side_head_left)); // Pointing north
 		/*setBlockImage(26, 3 | 8, resources.getBlockTextures().MAGMA);*/
 
 		// Foot
 		/*setBlockImage(26, 0, resources.getBlockTextures().END_STONE);
-		setBlockImage(26, 1, resources.getBlockTextures().END_STONE);
-		setBlockImage(26, 2, resources.getBlockTextures().END_STONE);
-		setBlockImage(26, 3, resources.getBlockTextures().END_STONE);*/
+		setBlockImage(26, 1, resources.getBlockTextures().END_STONE);*/
+        setBedImage(2, colour, buildBed(top_foot.rotate(ROTATE_270), 0, side_foot_end, side_foot_right.flip(true, false), side_foot_left));
+		/*setBlockImage(26, 3, resources.getBlockTextures().END_STONE);*/
 	}
-
-	/*
-	 * RGBAImage front = textures.BED_FEET_END;
-	RGBAImage side = textures.BED_FEET_SIDE;
-	RGBAImage top = textures.BED_FEET_TOP;
-
-	setBlockImage(26, 0, buildBed(top.rotate(1), front, side, FACE_SOUTH));
-	setBlockImage(26, 1, buildBed(top.rotate(2), side.flip(true, false), front, FACE_WEST));
-	setBlockImage(26, 2, buildBed(top.rotate(3), front, side.flip(true, false), FACE_NORTH));
-	setBlockImage(26, 3, buildBed(top, side, front, FACE_EAST));
-
-	front = textures.BED_HEAD_END;
-	side = textures.BED_HEAD_SIDE;
-	top = textures.BED_HEAD_TOP;
-
-	setBlockImage(26, 8, buildBed(top, front, side, FACE_NORTH));
-	setBlockImage(26, 1 | 8, buildBed(top.rotate(1), side.flip(true, false), front, FACE_EAST));
-	setBlockImage(26, 2 | 8, buildBed(top.rotate(2), front, side.flip(true, false), FACE_SOUTH));
-	setBlockImage(26, 3 | 8, buildBed(top.rotate(3), side, front, FACE_WEST));
-	 */
-
 }
 
 void IsometricBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
