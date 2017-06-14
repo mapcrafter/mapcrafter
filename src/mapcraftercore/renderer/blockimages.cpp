@@ -110,25 +110,25 @@ bool DoubleChestTextures::load(const std::string& filename, int texture_size) {
 }
 
 bool ShulkerTextures::load(const std::string& base_filename, int texture_size) {
-    return (load_single(base_filename + "white.png", 0, texture_size) &&
-            load_single(base_filename + "orange.png", 1, texture_size) &&
-            load_single(base_filename + "magenta.png", 2, texture_size) &&
-            load_single(base_filename + "light_blue.png", 3, texture_size) &&
-            load_single(base_filename + "yellow.png", 4, texture_size) &&
-            load_single(base_filename + "lime.png", 5, texture_size) &&
-            load_single(base_filename + "pink.png", 6, texture_size) &&
-            load_single(base_filename + "gray.png", 7, texture_size) &&
-            load_single(base_filename + "silver.png", 8, texture_size) &&
-            load_single(base_filename + "cyan.png", 9, texture_size) &&
-            load_single(base_filename + "purple.png", 10, texture_size) &&
-            load_single(base_filename + "blue.png", 11, texture_size) &&
-            load_single(base_filename + "brown.png", 12, texture_size) &&
-            load_single(base_filename + "green.png", 13, texture_size) &&
-            load_single(base_filename + "red.png", 14, texture_size) &&
-            load_single(base_filename + "black.png", 15, texture_size));
+    return (loadSingle(base_filename + "white.png", 0, texture_size) &&
+			loadSingle(base_filename + "orange.png", 1, texture_size) &&
+			loadSingle(base_filename + "magenta.png", 2, texture_size) &&
+			loadSingle(base_filename + "light_blue.png", 3, texture_size) &&
+			loadSingle(base_filename + "yellow.png", 4, texture_size) &&
+			loadSingle(base_filename + "lime.png", 5, texture_size) &&
+			loadSingle(base_filename + "pink.png", 6, texture_size) &&
+			loadSingle(base_filename + "gray.png", 7, texture_size) &&
+			loadSingle(base_filename + "silver.png", 8, texture_size) &&
+			loadSingle(base_filename + "cyan.png", 9, texture_size) &&
+			loadSingle(base_filename + "purple.png", 10, texture_size) &&
+			loadSingle(base_filename + "blue.png", 11, texture_size) &&
+			loadSingle(base_filename + "brown.png", 12, texture_size) &&
+			loadSingle(base_filename + "green.png", 13, texture_size) &&
+			loadSingle(base_filename + "red.png", 14, texture_size) &&
+			loadSingle(base_filename + "black.png", 15, texture_size));
 }
 
-bool ShulkerTextures::load_single(const std::string& filename, int color_index, int texture_size) {
+bool ShulkerTextures::loadSingle(const std::string& filename, int color_index, int texture_size) {
     RGBAImage image;
     if (!image.readPNG(filename)) {
         LOG(ERROR) << "Unable to read '" << filename << "'.";

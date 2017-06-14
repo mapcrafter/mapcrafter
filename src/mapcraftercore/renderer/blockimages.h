@@ -142,7 +142,7 @@ public:
     static const int DATA_SIZE = 3;
 
 private:
-    bool load_single(const std::string& filename, int color_index, int texture_size);
+    bool loadSingle(const std::string& filename, int color_index, int texture_size);
 };
 
 /**
@@ -232,10 +232,10 @@ private:
 	/**
 	 * Loads the chest textures from the supplied files.
 	 */
-    bool loadChests( const std::string& normal_png,
-                     const std::string& normal_double_png, const std::string& ender_png,
-                     const std::string& trapped_png, const std::string& trapped_double_png,
-                     const std::string& shulker_base_png);
+    bool loadChests(const std::string& normal_png,
+			const std::string& normal_double_png, const std::string& ender_png,
+			const std::string& trapped_png, const std::string& trapped_double_png,
+			const std::string& shulker_base_png);
 
 	/**
 	 * Loads the biome color textures from the supplied files.
@@ -258,7 +258,7 @@ private:
 
 	ChestTextures normal_chest, ender_chest, trapped_chest;
 	DoubleChestTextures normal_double_chest, trapped_double_chest;
-    ShulkerTextures shulker_textures;
+	ShulkerTextures shulker_textures;
 
 	RGBAImage foliage_colors, grass_colors;
 };

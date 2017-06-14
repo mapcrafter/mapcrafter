@@ -96,17 +96,7 @@ void TopdownBlockImages::createDispenserDropper(uint16_t id, const RGBAImage& fr
 }
 
 void TopdownBlockImages::createBed() { // id 26
-	RGBAImage top = resources.getBlockTextures().BED_FEET_TOP;
-	setBlockImage(26, 0, top.rotate(2));
-	setBlockImage(26, 1, top.rotate(3));
-	setBlockImage(26, 2, top);
-	setBlockImage(26, 3, top.rotate(1));
-
-	top = resources.getBlockTextures().BED_HEAD_TOP;
-	setBlockImage(26, 8, top.rotate(1));
-	setBlockImage(26, 1 | 8, top.rotate(2));
-	setBlockImage(26, 2 | 8, top.rotate(3));
-	setBlockImage(26, 3 | 8, top);
+	// TODO: Add images for each bed colour
 }
 
 void TopdownBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
@@ -1671,40 +1661,40 @@ void TopdownBlockImages::createBlocks() {
 	createGlazedTerracotta(248, t.GLAZED_TERRACOTTA_GREEN); // green
 	createGlazedTerracotta(249, t.GLAZED_TERRACOTTA_RED); // red
 	createGlazedTerracotta(250, t.GLAZED_TERRACOTTA_BLACK); // black
-    // concrete --
-    setBlockImage(251, 0, t.CONCRETE_WHITE); // white
-    setBlockImage(251, 1, t.CONCRETE_ORANGE); // orange
-    setBlockImage(251, 2, t.CONCRETE_MAGENTA); // magenta
-    setBlockImage(251, 3, t.CONCRETE_LIGHT_BLUE); // light blue
-    setBlockImage(251, 4, t.CONCRETE_YELLOW); // yellow
-    setBlockImage(251, 5, t.CONCRETE_LIME); // lime
-    setBlockImage(251, 6, t.CONCRETE_PINK); // pink
-    setBlockImage(251, 7, t.CONCRETE_GRAY); // gray
-    setBlockImage(251, 8, t.CONCRETE_SILVER); // light gray
-    setBlockImage(251, 9, t.CONCRETE_CYAN); // cyan
-    setBlockImage(251, 10, t.CONCRETE_PURPLE); // purple
-    setBlockImage(251, 11, t.CONCRETE_BLUE); // blue
-    setBlockImage(251, 12, t.CONCRETE_BROWN); // brown
-    setBlockImage(251, 13, t.CONCRETE_GREEN); // green
-    setBlockImage(251, 14, t.CONCRETE_RED); // red
-    setBlockImage(251, 15, t.CONCRETE_BLACK); // black
-    // concrete powder --
-    setBlockImage(252, 0, t.CONCRETE_POWDER_WHITE); // white
-    setBlockImage(252, 1, t.CONCRETE_POWDER_ORANGE); // orange
-    setBlockImage(252, 2, t.CONCRETE_POWDER_MAGENTA); // magenta
-    setBlockImage(252, 3, t.CONCRETE_POWDER_LIGHT_BLUE); // light blue
-    setBlockImage(252, 4, t.CONCRETE_POWDER_YELLOW); // yellow
-    setBlockImage(252, 5, t.CONCRETE_POWDER_LIME); // lime
-    setBlockImage(252, 6, t.CONCRETE_POWDER_PINK); // pink
-    setBlockImage(252, 7, t.CONCRETE_POWDER_GRAY); // gray
-    setBlockImage(252, 8, t.CONCRETE_POWDER_SILVER); // light gray
-    setBlockImage(252, 9, t.CONCRETE_POWDER_CYAN); // cyan
-    setBlockImage(252, 10, t.CONCRETE_POWDER_PURPLE); // purple
-    setBlockImage(252, 11, t.CONCRETE_POWDER_BLUE); // blue
-    setBlockImage(252, 12, t.CONCRETE_POWDER_BROWN); // brown
-    setBlockImage(252, 13, t.CONCRETE_POWDER_GREEN); // green
-    setBlockImage(252, 14, t.CONCRETE_POWDER_RED); // red
-    setBlockImage(252, 15, t.CONCRETE_POWDER_BLACK); // black
+	// concrete --
+	setBlockImage(251, 0, t.CONCRETE_WHITE); // white
+	setBlockImage(251, 1, t.CONCRETE_ORANGE); // orange
+	setBlockImage(251, 2, t.CONCRETE_MAGENTA); // magenta
+	setBlockImage(251, 3, t.CONCRETE_LIGHT_BLUE); // light blue
+	setBlockImage(251, 4, t.CONCRETE_YELLOW); // yellow
+	setBlockImage(251, 5, t.CONCRETE_LIME); // lime
+	setBlockImage(251, 6, t.CONCRETE_PINK); // pink
+	setBlockImage(251, 7, t.CONCRETE_GRAY); // gray
+	setBlockImage(251, 8, t.CONCRETE_SILVER); // light gray
+	setBlockImage(251, 9, t.CONCRETE_CYAN); // cyan
+	setBlockImage(251, 10, t.CONCRETE_PURPLE); // purple
+	setBlockImage(251, 11, t.CONCRETE_BLUE); // blue
+	setBlockImage(251, 12, t.CONCRETE_BROWN); // brown
+	setBlockImage(251, 13, t.CONCRETE_GREEN); // green
+	setBlockImage(251, 14, t.CONCRETE_RED); // red
+	setBlockImage(251, 15, t.CONCRETE_BLACK); // black
+	// concrete powder --
+	setBlockImage(252, 0, t.CONCRETE_POWDER_WHITE); // white
+	setBlockImage(252, 1, t.CONCRETE_POWDER_ORANGE); // orange
+	setBlockImage(252, 2, t.CONCRETE_POWDER_MAGENTA); // magenta
+	setBlockImage(252, 3, t.CONCRETE_POWDER_LIGHT_BLUE); // light blue
+	setBlockImage(252, 4, t.CONCRETE_POWDER_YELLOW); // yellow
+	setBlockImage(252, 5, t.CONCRETE_POWDER_LIME); // lime
+	setBlockImage(252, 6, t.CONCRETE_POWDER_PINK); // pink
+	setBlockImage(252, 7, t.CONCRETE_POWDER_GRAY); // gray
+	setBlockImage(252, 8, t.CONCRETE_POWDER_SILVER); // light gray
+	setBlockImage(252, 9, t.CONCRETE_POWDER_CYAN); // cyan
+	setBlockImage(252, 10, t.CONCRETE_POWDER_PURPLE); // purple
+	setBlockImage(252, 11, t.CONCRETE_POWDER_BLUE); // blue
+	setBlockImage(252, 12, t.CONCRETE_POWDER_BROWN); // brown
+	setBlockImage(252, 13, t.CONCRETE_POWDER_GREEN); // green
+	setBlockImage(252, 14, t.CONCRETE_POWDER_RED); // red
+	setBlockImage(252, 15, t.CONCRETE_POWDER_BLACK); // black
 	// --
 	setBlockImage(217, 0, empty_texture); // structure void
 	// structure block --
