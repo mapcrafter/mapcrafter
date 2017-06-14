@@ -152,7 +152,7 @@ void TopdownBlockImages::createPiston(uint16_t id, bool sticky) { // id 29, 33
 	const BlockTextures& textures = resources.getBlockTextures();
 	RGBAImage top = textures.PISTON_TOP_NORMAL;
 	RGBAImage top_sticky = textures.PISTON_TOP_STICKY;
-	RGBAImage front = sticky ? top : top_sticky;
+	RGBAImage front = sticky ? top_sticky : top;
 	RGBAImage back = textures.PISTON_BOTTOM;
 
 	// side is the normale piston side

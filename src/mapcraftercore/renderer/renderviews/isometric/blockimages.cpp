@@ -891,21 +891,21 @@ BlockImage buildPiston(int frontface, const RGBAImage& front, const RGBAImage& b
 	block.setFace(FACE_TOP, top);
 	block.setFace(frontface, front);
 	if(frontface == FACE_NORTH || frontface == FACE_SOUTH) {
-		block.setFace(FACE_EAST, side.flip(true, false));
+		block.setFace(FACE_EAST, side);
 		block.setFace(FACE_WEST, side);
 	} else {
-		block.setFace(FACE_NORTH, side.flip(true, false));
+		block.setFace(FACE_NORTH, side);
 		block.setFace(FACE_SOUTH, side);
 	}
 
 	if(frontface == FACE_NORTH)
 		block.setFace(FACE_SOUTH, back);
 	else if(frontface == FACE_SOUTH)
-		block.setFace(FACE_NORTH, back);
+		block.setFace(FACE_NORTH, back.flip(true, false));
 	else if(frontface == FACE_EAST)
 		block.setFace(FACE_WEST, back);
 	else
-		block.setFace(FACE_EAST, back);
+		block.setFace(FACE_EAST, back.flip(true, false));
 
 	return block;
 }
