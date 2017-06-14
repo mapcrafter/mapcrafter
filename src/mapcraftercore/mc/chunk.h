@@ -25,6 +25,7 @@
 #include "worldcrop.h"
 
 #include <stdint.h>
+#include <unordered_map>
 
 namespace mapcrafter {
 namespace mc {
@@ -54,7 +55,7 @@ struct Entity {
 };
 
 struct EntityBed : Entity {
-	int32_t color;
+	uint16_t color;
 };
 
 /**
@@ -106,6 +107,11 @@ public:
 	uint8_t getBlockData(const LocalBlockPos& pos, bool force = false) const;
 
 	/**
+	 * Returns some additional block data, stored possibly in NBT tags
+	 */
+	uint16_t getExtraBlockData(const LocalBlockPos& pos) const;
+
+	/**
 	 * Returns the block light at a specific position (local coordinates).
 	 */
 	uint8_t getBlockLight(const LocalBlockPos& pos) const;
@@ -150,7 +156,7 @@ private:
 	uint8_t biomes[256];
 
 	// the beds in this chunk
-	std::vector<EntityBed> entities_beds;
+	std::unordered_map<int, EntityBed> entities_beds;
 
 	/**
 	 * Checks whether a block (local coordinates, original/unrotated) is in the cropped
@@ -165,6 +171,8 @@ private:
 	 *   2: sky light
 	 */
 	uint8_t getData(const LocalBlockPos& pos, int array, bool force = false) const;
+
+	int positionToKey(const LocalBlockPos &pos) const;
 };
 
 }

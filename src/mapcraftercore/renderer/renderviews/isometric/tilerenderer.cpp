@@ -204,6 +204,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 
 			// now get the block data
 			uint16_t data = current_chunk->getBlockData(local);
+			uint16_t extra_data = current_chunk->getExtraBlockData(local);
 
 			// check if the render mode hides this block
 			if (render_mode->isHidden(block.current, id, data))

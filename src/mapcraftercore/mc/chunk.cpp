@@ -50,6 +50,10 @@ void Chunk::setWorldCrop(const WorldCrop& world_crop) {
 	this->world_crop = world_crop;
 }
 
+int Chunk::positionToKey(const LocalBlockPos &pos) const {
+	return pos.y + 256 * (pos.x + 16 * pos.z);
+}
+
 bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) {
 	clear();
 
@@ -102,12 +106,15 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 					entity.findTag<nbt::TagInt>("y").payload
 			);
 
-			if (id == "minecraft:bed") {
-				int32_t color = entity.findTag<nbt::TagInt>("color").payload;
+			if (id == "minecraft:bed") { // bed, stored as a string here
+				uint16_t color = (uint16_t) entity.findTag<nbt::TagInt>("color").payload;
 				EntityBed bed;
 				bed.color = color;
-				bed.position = pos;
-				entities_beds.push_back(bed);
+
+				int key = positionToKey(pos);
+
+				std::pair<int,EntityBed> pair (key, bed);
+				entities_beds.insert(pair);
 			}
 		}
 	}
@@ -274,6 +281,32 @@ uint8_t Chunk::getData(const LocalBlockPos& pos, int array, bool force) const {
 			return array == 2 ? 15 : 0;
 	}
 	return data;
+}
+
+uint16_t Chunk::getExtraBlockData(const LocalBlockPos& pos) const {
+	uint16_t id = getBlockID(pos);
+
+	int x = pos.x;
+	int z = pos.z;
+	if (rotation)
+		rotateBlockPos(x, z, rotation);
+
+	LocalBlockPos rotatedPosition(x, z, pos.y);
+
+	if (id == 26) { // bed
+		int key = positionToKey(rotatedPosition);
+		auto result = entities_beds.find(key);
+
+		if (result == entities_beds.end()) {
+			LOG(WARNING) << "Bed at position " << rotatedPosition.toGlobalPos(chunkpos_original) << " has no colour. Assuming red.";
+			return 14;
+		}
+
+		return result->second.color;
+
+	}
+
+	return 0;
 }
 
 uint8_t Chunk::getBlockData(const LocalBlockPos& pos, bool force) const {
