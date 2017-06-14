@@ -298,7 +298,8 @@ uint16_t Chunk::getExtraBlockData(const LocalBlockPos& pos) const {
 		auto result = entities_beds.find(key);
 
 		if (result == entities_beds.end()) {
-			LOG(WARNING) << "Bed at position " << rotatedPosition.toGlobalPos(chunkpos_original) << " has no colour. Assuming red.";
+			// Not found, possibly from an old world
+			// Default value is 14 = red
 			return 14;
 		}
 
