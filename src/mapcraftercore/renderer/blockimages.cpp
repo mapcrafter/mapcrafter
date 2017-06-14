@@ -368,6 +368,11 @@ bool AbstractBlockImages::hasBlock(uint16_t id, uint16_t data) const {
 
 const RGBAImage& AbstractBlockImages::getBlock(uint16_t id, uint16_t data, uint16_t extra_data) const {
 	data = filterBlockData(id, data);
+
+	if (id == 26) { // Beds
+		return block_images_bed.at(data | (extra_data << 16));
+	}
+
 	if (!hasBlock(id, data))
 		return unknown_block;
 	return block_images.at(id | (data << 16));

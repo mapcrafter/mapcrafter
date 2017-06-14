@@ -454,6 +454,10 @@ protected:
 	// key is a 32 bit integer, first two bytes id, second two bytes data
 	std::unordered_map<uint32_t, RGBAImage> block_images;
 
+	// map of bed block images
+	// key is a 32 bit integer, first two bytes data, second two bytes extra data (colour)
+	std::unordered_map<uint32_t, RGBAImage> block_images_bed;
+
 	// comparator to sort block images by their id/data extracted  from the uint32_t keys
 	// used to sort blocks when exporting them
 	struct block_images_comparator {
