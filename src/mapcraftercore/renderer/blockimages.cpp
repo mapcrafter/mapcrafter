@@ -221,7 +221,6 @@ bool BedTextures::loadSingle(const std::string& filename, int color_index, int t
 	small_side_foot_end.writePNG("tmp_small_side_foot_end.png");
 	leg.writePNG("tmp_leg.png");
 
-
 	// Create blank canvases for the side textures at their proper size
 	RGBAImage side_head_left(size, size); side_head_left.clear();
 	RGBAImage side_head_right(size, size); side_head_right.clear();

@@ -836,19 +836,17 @@ void IsometricBlockImages::createBed(const BedTextures& textures) { // id 26
 		RGBAImage side_head_end = textures[offset + BedTextures::SIDE_HEAD_END];
 		RGBAImage side_foot_end = textures[offset + BedTextures::SIDE_FOOT_END];
 
-        auto magma = resources.getBlockTextures().MAGMA;
-
 		// Head
-		/*setBlockImage(26, 8, resources.getBlockTextures().MAGMA);
-		setBlockImage(26, 1 | 8, resources.getBlockTextures().MAGMA);*/
+        setBedImage(0 | 8, colour, buildBed(top_head.rotate(ROTATE_90), 0, side_head_end, side_head_left.flip(true, false), side_head_right)); // Pointing south
+        setBedImage(1 | 8, colour, buildBed(top_head.rotate(ROTATE_180), side_head_right.flip(true, false), side_head_left, 0, side_head_end)); // Pointing west
 		setBedImage(2 | 8, colour, buildBed(top_head.rotate(ROTATE_270), side_head_end, 0, side_head_right.flip(true, false), side_head_left)); // Pointing north
-		/*setBlockImage(26, 3 | 8, resources.getBlockTextures().MAGMA);*/
+        setBedImage(3 | 8, colour, buildBed(top_head, side_head_right, side_head_left.flip(true, false), side_head_end, 0)); // Pointing east
 
 		// Foot
-		/*setBlockImage(26, 0, resources.getBlockTextures().END_STONE);
-		setBlockImage(26, 1, resources.getBlockTextures().END_STONE);*/
-        setBedImage(2, colour, buildBed(top_foot.rotate(ROTATE_270), 0, side_foot_end, side_foot_right.flip(true, false), side_foot_left));
-		/*setBlockImage(26, 3, resources.getBlockTextures().END_STONE);*/
+		setBedImage(0, colour, buildBed(top_foot.rotate(ROTATE_90), side_foot_end, 0, side_foot_left.flip(true, false), side_foot_right)); // Pointing south
+        setBedImage(1, colour, buildBed(top_foot.rotate(ROTATE_180), side_foot_right.flip(true, false), side_foot_left, side_foot_end, 0)); // Pointing west
+        setBedImage(2, colour, buildBed(top_foot.rotate(ROTATE_270), 0, side_foot_end, side_foot_right.flip(true, false), side_foot_left)); // Pointing north
+        setBedImage(3, colour, buildBed(top_foot, side_foot_right, side_foot_left.flip(true, false), 0, side_foot_end)); // Pointing east
 	}
 }
 
