@@ -1,4 +1,4 @@
-/*
+/*b
  * Copyright 2012-2016 Moritz Hilscher
  *
  * This file is part of Mapcrafter.

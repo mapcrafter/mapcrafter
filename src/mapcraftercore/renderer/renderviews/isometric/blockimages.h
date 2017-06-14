@@ -217,7 +217,9 @@ protected:
 	void addBlockShadowEdges(uint16_t id, uint16_t data, const RGBAImage& block);
 
 	void setBlockImage(uint16_t id, uint16_t data, const BlockImage& block);
+    void setBedImage(uint16_t data, uint16_t extra_data, const RGBAImage& block);
 	virtual void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
+    virtual void setBedImage(uint16_t data, uint16_t extra_data, const BlockImage& block);
 
 	uint32_t darkenLeft(uint32_t pixel) const;
 	uint32_t darkenRight(uint32_t pixel) const;

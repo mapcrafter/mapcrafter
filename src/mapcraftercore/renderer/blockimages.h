@@ -150,7 +150,7 @@ private:
 /**
  * The textures of a single chest, just an array with three images.
  */
-class BedTextures : public std::array<RGBAImage, 48> { // 3 * 16 (3 textures for each colour)
+class BedTextures : public std::array<RGBAImage, 128> { // 8 * 16 (8 textures for each colour)
 public:
 	/**
 	 * Loads the textures from a chest texture file, you have to specify a texture size
@@ -268,7 +268,7 @@ private:
     bool loadChests(const std::string& normal_png,
 			const std::string& normal_double_png, const std::string& ender_png,
 			const std::string& trapped_png, const std::string& trapped_double_png,
-			const std::string& shulker_base_png);
+			const std::string& shulker_base_png, const std::string& bed_base_png);
 
 	/**
 	 * Loads the biome color textures from the supplied files.
@@ -400,7 +400,8 @@ public:
 	virtual RGBAImage exportBlocks() const;
 
 	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const;
-	virtual bool hasBlock(uint16_t id, uint16_t) const;
+    virtual bool hasBlock(uint16_t id, uint16_t data) const;
+    virtual bool hasBedBlock(uint16_t data, uint16_t extra_data) const;
 	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data, uint16_t extra_data = 0) const;
 
 	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome, uint16_t extra_data = 0) const;
@@ -425,13 +426,18 @@ protected:
 	 */
 	virtual bool isImageTransparent(const RGBAImage& block) const = 0;
 
-	/**
-	 * This method stores a generated block image in the map of generated block images.
-	 * It also checks with the isBlockTransparent-method whether a block image is
-	 * transparent. You can overwrite this method if you need special handling for
-	 * generated blocks.
+    /**
+     * This method stores a generated block image in the map of generated block images.
+     * It also checks with the isBlockTransparent-method whether a block image is
+     * transparent. You can overwrite this method if you need special handling for
+     * generated blocks.
+     */
+    virtual void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
+
+    /**
+	 * This method stores a generated block image for a bed in the map of generated bed images.
 	 */
-	virtual void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
+    virtual void setBedImage(uint16_t data, uint16_t extra_data, const RGBAImage& block);
 
 	/**
 	 * This method should create a block image of an unknown block (i.e. just a simple

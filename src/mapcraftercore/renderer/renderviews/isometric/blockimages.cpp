@@ -463,12 +463,20 @@ void IsometricBlockImages::setBlockImage(uint16_t id, uint16_t data, const Block
 	setBlockImage(id, data, buildImage(block.rotate(rotation)));
 }
 
+void IsometricBlockImages::setBedImage(uint16_t data, uint16_t extra_data, const BlockImage& block) {
+    setBedImage(data, extra_data, buildImage(block.rotate(rotation)));
+}
+
 void IsometricBlockImages::setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block) {
 	AbstractBlockImages::setBlockImage(id, data, block);
 
 	// if block is not transparent, add shadow edges
 	if (!isBlockTransparent(id, data))
 		addBlockShadowEdges(id, data, block);
+}
+
+void IsometricBlockImages::setBedImage(uint16_t data, uint16_t extra_data, const RGBAImage& block) {
+    AbstractBlockImages::setBedImage(data, extra_data, block);
 }
 
 uint32_t IsometricBlockImages::darkenLeft(uint32_t pixel) const {
@@ -799,25 +807,68 @@ void IsometricBlockImages::createObserver(uint16_t id) { // id 23, 158
     setBlockImage(id, 1, down_image);
 }
 
-BlockImage buildBed(const RGBAImage& top, const RGBAImage& north_south, const RGBAImage& east_west,
-		int face_skip) {
+BlockImage buildBed(const RGBAImage& top,
+		const RGBAImage& side_north, const RGBAImage& side_south,
+		const RGBAImage& side_east, const RGBAImage& side_west) {
 	BlockImage block;
 
 	block.setFace(FACE_TOP, top, 0, top.getHeight() / 16. * 7.0);
-	if (face_skip != FACE_NORTH)
-		block.setFace(FACE_NORTH, north_south.flip(true, false));
-	if (face_skip != FACE_SOUTH)
-		block.setFace(FACE_SOUTH, north_south);
-	if (face_skip != FACE_EAST)
-		block.setFace(FACE_EAST, east_west.flip(true, false));
-	if (face_skip != FACE_WEST)
-		block.setFace(FACE_WEST, east_west);
+	block.setFace(FACE_NORTH, side_north);
+	block.setFace(FACE_SOUTH, side_south);
+	block.setFace(FACE_EAST, side_east);
+	block.setFace(FACE_WEST, side_west);
 
 	return block;
 }
 
 void IsometricBlockImages::createBed(const BedTextures& textures) { // id 26
 	// TODO: Add images for each bed colour
+	// TODO: Check if right texture is assigned to the right face
+
+	for (uint16_t colour = 0; colour < 16; colour++) {
+		int offset = colour * BedTextures::DATA_SIZE;
+		RGBAImage top_foot = textures[offset + BedTextures::TOP_FOOT];
+		RGBAImage top_head = textures[offset + BedTextures::TOP_HEAD];
+		RGBAImage side_head_left = textures[offset + BedTextures::SIDE_HEAD_LEFT];
+		RGBAImage side_head_right = textures[offset + BedTextures::SIDE_HEAD_RIGHT];
+		RGBAImage side_foot_left = textures[offset + BedTextures::SIDE_FOOT_LEFT];
+		RGBAImage side_foot_right = textures[offset + BedTextures::SIDE_FOOT_RIGHT];
+		RGBAImage side_head_end = textures[offset + BedTextures::SIDE_HEAD_END];
+		RGBAImage side_foot_end = textures[offset + BedTextures::SIDE_FOOT_END];
+
+		// Head
+		/*setBlockImage(26, 8, resources.getBlockTextures().MAGMA);
+		setBlockImage(26, 1 | 8, resources.getBlockTextures().MAGMA);*/
+		setBedImage(2 | 8, colour, buildBed(top_head.rotate(ROTATE_270), side_head_end, 0, side_head_left.flip(true, false), side_head_right.flip(true, false))); // Pointing north
+		/*setBlockImage(26, 3 | 8, resources.getBlockTextures().MAGMA);*/
+
+		// Foot
+		/*setBlockImage(26, 0, resources.getBlockTextures().END_STONE);
+		setBlockImage(26, 1, resources.getBlockTextures().END_STONE);
+		setBlockImage(26, 2, resources.getBlockTextures().END_STONE);
+		setBlockImage(26, 3, resources.getBlockTextures().END_STONE);*/
+	}
+
+	/*
+	 * RGBAImage front = textures.BED_FEET_END;
+	RGBAImage side = textures.BED_FEET_SIDE;
+	RGBAImage top = textures.BED_FEET_TOP;
+
+	setBlockImage(26, 0, buildBed(top.rotate(1), front, side, FACE_SOUTH));
+	setBlockImage(26, 1, buildBed(top.rotate(2), side.flip(true, false), front, FACE_WEST));
+	setBlockImage(26, 2, buildBed(top.rotate(3), front, side.flip(true, false), FACE_NORTH));
+	setBlockImage(26, 3, buildBed(top, side, front, FACE_EAST));
+
+	front = textures.BED_HEAD_END;
+	side = textures.BED_HEAD_SIDE;
+	top = textures.BED_HEAD_TOP;
+
+	setBlockImage(26, 8, buildBed(top, front, side, FACE_NORTH));
+	setBlockImage(26, 1 | 8, buildBed(top.rotate(1), side.flip(true, false), front, FACE_EAST));
+	setBlockImage(26, 2 | 8, buildBed(top.rotate(2), front, side.flip(true, false), FACE_SOUTH));
+	setBlockImage(26, 3 | 8, buildBed(top.rotate(3), side, front, FACE_WEST));
+	 */
+
 }
 
 void IsometricBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
