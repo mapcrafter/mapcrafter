@@ -201,7 +201,7 @@ public:
 	/**
 	 * We need to overwrite this because there is a special case for the snowy grass block.
 	 */
-	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;
+	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, uint16_t extra_data, const Biome& biome) const;
 
 	virtual int getBlockSize() const;
 

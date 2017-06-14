@@ -332,11 +332,11 @@ bool IsometricBlockImages::isBlockTransparent(uint16_t id, uint16_t data) const 
 }
 
 RGBAImage IsometricBlockImages::getBiomeBlock(uint16_t id, uint16_t data,
-		const Biome& biome) const {
+		uint16_t extra_data, const Biome& biome) const {
 	// return normal block for the snowy grass block
 	if (id == 2 && (data & GRASS_SNOW))
-		return getBlock(id, data);
-	return AbstractBlockImages::getBiomeBlock(id, data, biome);
+		return getBlock(id, data, extra_data);
+	return AbstractBlockImages::getBiomeBlock(id, data, biome, extra_data);
 }
 
 int IsometricBlockImages::getBlockSize() const {

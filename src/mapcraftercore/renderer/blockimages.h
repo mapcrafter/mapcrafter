@@ -309,12 +309,12 @@ public:
 	/**
 	 * Returns the block image of a specific block.
 	 */
-	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data) const = 0;
+	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data, uint16_t extra_data = 0) const = 0;
 
 	/**
 	 * Returns the block image of a block whose appearance is depending on the biome.
 	 */
-	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const = 0;
+	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome, uint16_t extra_data = 0) const = 0;
 
 	/**
 	 * Returns how many blocks of water are needed in a row until the water becomes (almost)
@@ -367,9 +367,9 @@ public:
 
 	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const;
 	virtual bool hasBlock(uint16_t id, uint16_t) const;
-	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data) const;
+	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data, uint16_t extra_data = 0) const;
 
-	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;
+	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome, uint16_t extra_data = 0) const;
 
 	virtual int getMaxWaterPreblit() const;
 

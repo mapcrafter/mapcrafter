@@ -366,7 +366,7 @@ bool AbstractBlockImages::hasBlock(uint16_t id, uint16_t data) const {
 	return block_images.count(id | (data << 16)) != 0;
 }
 
-const RGBAImage& AbstractBlockImages::getBlock(uint16_t id, uint16_t data) const {
+const RGBAImage& AbstractBlockImages::getBlock(uint16_t id, uint16_t data, uint16_t extra_data) const {
 	data = filterBlockData(id, data);
 	if (!hasBlock(id, data))
 		return unknown_block;
@@ -374,7 +374,7 @@ const RGBAImage& AbstractBlockImages::getBlock(uint16_t id, uint16_t data) const
 }
 
 RGBAImage AbstractBlockImages::getBiomeBlock(uint16_t id, uint16_t data,
-		const Biome& biome) const {
+		const Biome& biome, uint16_t extra_data) const {
 	data = filterBlockData(id, data);
 	if (!hasBlock(id, data))
 		return unknown_block;

@@ -269,7 +269,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 								// get image and replace the old render block with this
 								//top.image = images->getOpaqueWater(neighbor_south,
 								//		neighbor_west);
-								top.image = images->getBlock(id, data);
+								top.image = images->getBlock(id, data, extra_data);
 
 								// don't forget the render mode
 								render_mode->draw(top.image, top.pos, id, data);
@@ -296,13 +296,11 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 			RGBAImage image;
 			bool transparent = images->isBlockTransparent(id, data);
 
-
-
 			// check for biome data
 			if (Biome::isBiomeBlock(id, data))
-				image = images->getBiomeBlock(id, data, getBiomeOfBlock(block.current, current_chunk));
+				image = images->getBiomeBlock(id, data, getBiomeOfBlock(block.current, current_chunk), extra_data);
 			else
-				image = images->getBlock(id, data);
+				image = images->getBlock(id, data, extra_data);
 
 			RenderBlock node;
 			node.x = it.draw_x;
