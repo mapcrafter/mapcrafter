@@ -299,9 +299,9 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 
 			// check for biome data
 			if (Biome::isBiomeBlock(id, data))
-				image = images->getBiomeBlock(id, data, block.current, getBiomeOfBlock(block.current, current_chunk));
+				image = images->getBiomeBlock(id, data, getBiomeOfBlock(block.current, current_chunk));
 			else
-				image = images->getBlock(id, data, block.current);
+				image = images->getBlock(id, data);
 
 			RenderBlock node;
 			node.x = it.draw_x;

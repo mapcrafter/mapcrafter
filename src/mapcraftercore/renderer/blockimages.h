@@ -309,12 +309,12 @@ public:
 	/**
 	 * Returns the block image of a specific block.
 	 */
-	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data, mc::BlockPos position) const = 0;
+	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data) const = 0;
 
 	/**
 	 * Returns the block image of a block whose appearance is depending on the biome.
 	 */
-	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, mc::BlockPos position, const Biome& biome) const = 0;
+	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const = 0;
 
 	/**
 	 * Returns how many blocks of water are needed in a row until the water becomes (almost)
@@ -367,7 +367,7 @@ public:
 
 	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const;
 	virtual bool hasBlock(uint16_t id, uint16_t) const;
-	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data, mc::BlockPos position) const;
+	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data) const;
 
 	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;
 
