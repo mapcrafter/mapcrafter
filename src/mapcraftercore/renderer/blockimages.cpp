@@ -208,19 +208,6 @@ bool BedTextures::loadSingle(const std::string& filename, int color_index, int t
 	RGBAImage small_side_foot_end = image.clip(22 * ratio, 22 * ratio, size, 6 * ratio); // 16 x 16
 	RGBAImage leg = image.clip(50 * ratio, 3 * ratio, 3 * ratio, 3 * ratio); // Only one leg, used on multiple locations, 3 x 3
 
-    // TODO: Remove temporary writes
-
-	top_head.writePNG("tmp_top_head.png");
-	top_foot.writePNG("tmp_top_foot.png");
-
-	small_side_head_left.writePNG("tmp_small_side_head_left.png");
-	small_side_head_right.writePNG("tmp_small_side_head_right.png");
-	small_side_foot_left.writePNG("tmp_small_side_foot_left.png");
-	small_side_foot_right.writePNG("tmp_small_side_foot_right.png");
-	small_side_head_end.writePNG("tmp_small_side_head_end.png");
-	small_side_foot_end.writePNG("tmp_small_side_foot_end.png");
-	leg.writePNG("tmp_leg.png");
-
 	// Create blank canvases for the side textures at their proper size
 	RGBAImage side_head_left(size, size); side_head_left.clear();
 	RGBAImage side_head_right(size, size); side_head_right.clear();
@@ -253,13 +240,6 @@ bool BedTextures::loadSingle(const std::string& filename, int color_index, int t
 	side_foot_end.simpleBlit(small_side_foot_end.flip(false, true), 0, 7 * ratio);
 	side_foot_end.simpleBlit(leg.flip(true, false), 0, 13 * ratio);
 	side_foot_end.simpleBlit(leg, 13 * ratio, 13 * ratio);
-
-	side_head_left.writePNG("tmp_side_head_left.png");
-	side_head_right.writePNG("tmp_side_head_right.png");
-	side_foot_left.writePNG("tmp_side_foot_left.png");
-	side_foot_right.writePNG("tmp_side_foot_right.png");
-	side_head_end.writePNG("tmp_side_head_end.png");
-	side_foot_end.writePNG("tmp_side_foot_end.png");
 
 	int offset = color_index * BedTextures::DATA_SIZE;
 
@@ -474,7 +454,10 @@ bool AbstractBlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
 	// special case for doors because they are only used with special data
 	// and not with the original minecraft data
 	// without this the lighting code for example would need to filter the door data
-	// FIXME
+
+    // special case for beds, as they are handled in a different way
+
+    // FIXME
 	if (id == 64 || id == 71 || id == 26)
 		return true;
 	if (block_images.count(id | (data << 16)) == 0)
