@@ -95,8 +95,26 @@ void TopdownBlockImages::createDispenserDropper(uint16_t id, const RGBAImage& fr
 	setBlockImage(id, 1, front);
 }
 
-void TopdownBlockImages::createBed() { // id 26
+void TopdownBlockImages::createBed(const BedTextures& textures) { // id 26
 	// TODO: Add images for each bed colour
+
+	for (uint16_t colour = 0; colour < 16; colour++) {
+		int offset = colour * BedTextures::DATA_SIZE;
+		RGBAImage top_foot = textures[offset + BedTextures::TOP_FOOT];
+		RGBAImage top_head = textures[offset + BedTextures::TOP_HEAD];
+
+		// Head
+		setBedImage(0 | 8, colour, top_head.rotate(ROTATE_180)); // Pointing south
+		setBedImage(1 | 8, colour, top_head.rotate(ROTATE_270)); // Pointing west
+		setBedImage(2 | 8, colour, top_head); // Pointing north
+		setBedImage(3 | 8, colour, top_head.rotate(ROTATE_90)); // Pointing east
+
+		// Foot
+		setBedImage(0, colour, top_foot.rotate(ROTATE_180)); // Pointing south
+		setBedImage(1, colour, top_foot.rotate(ROTATE_270)); // Pointing west
+		setBedImage(2, colour, top_foot); // Pointing north
+		setBedImage(3, colour, top_foot.rotate(ROTATE_90)); // Pointing east
+	}
 }
 
 void TopdownBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
@@ -1115,7 +1133,7 @@ void TopdownBlockImages::createBlocks() {
 	createDispenserDropper(23, t.DISPENSER_FRONT_HORIZONTAL); // dispenser
 	setBlockImage(24, 0, t.SANDSTONE_TOP); // sandstone
 	setBlockImage(25, 0, t.NOTEBLOCK); // noteblock
-	createBed(); // id 26 // bed
+	createBed(resources.getBedTextures()); // id 26 // bed
 	createStraightRails(27, 0, t.RAIL_GOLDEN); // powered rail (unpowered)
 	createStraightRails(27, 8, t.RAIL_GOLDEN_POWERED); // powered rail (powered);
 	createStraightRails(28, 0, t.RAIL_ACTIVATOR); // detector rail

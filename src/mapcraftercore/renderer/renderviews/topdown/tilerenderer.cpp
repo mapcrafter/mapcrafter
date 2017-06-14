@@ -95,7 +95,10 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 					localpos.y--;
 					continue;
 				}
+
 				uint16_t data = chunk.getBlockData(localpos);
+				uint16_t extra_data = chunk.getExtraBlockData(localpos);
+
 				bool is_water = (id == 8 || id == 9) && data == 0;
 
 				if (render_mode->isHidden(globalpos, id, data)) {
@@ -138,10 +141,12 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 				}
 
 				data = checkNeighbors(globalpos, id, data);
-				
-				RGBAImage block = images->getBlock(id, data);
+
+				RGBAImage block;
 				if (Biome::isBiomeBlock(id, data)) {
-					block = images->getBiomeBlock(id, data, getBiomeOfBlock(globalpos, &chunk));
+					block = images->getBiomeBlock(id, data, getBiomeOfBlock(globalpos, &chunk), extra_data);
+				} else {
+					block = images->getBlock(id, data, extra_data);
 				}
 
 				render_mode->draw(block, globalpos, id, data);
