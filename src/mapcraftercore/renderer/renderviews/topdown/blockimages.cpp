@@ -96,8 +96,6 @@ void TopdownBlockImages::createDispenserDropper(uint16_t id, const RGBAImage& fr
 }
 
 void TopdownBlockImages::createBed(const BedTextures& textures) { // id 26
-	// TODO: Add images for each bed colour
-
 	for (uint16_t colour = 0; colour < 16; colour++) {
 		int offset = colour * BedTextures::DATA_SIZE;
 		RGBAImage top_foot = textures[offset + BedTextures::TOP_FOOT];

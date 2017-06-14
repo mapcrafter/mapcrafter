@@ -822,9 +822,6 @@ BlockImage buildBed(const RGBAImage& top,
 }
 
 void IsometricBlockImages::createBed(const BedTextures& textures) { // id 26
-	// TODO: Add images for each bed colour
-	// TODO: Check if right texture is assigned to the right face
-
 	for (uint16_t colour = 0; colour < 16; colour++) {
 		int offset = colour * BedTextures::DATA_SIZE;
 		RGBAImage top_foot = textures[offset + BedTextures::TOP_FOOT];
@@ -919,7 +916,6 @@ void IsometricBlockImages::createPiston(uint16_t id, bool sticky) { //  id 29, 3
 	createBlock(id, 0, side.rotate(ROTATE_180), back);
 	createBlock(id, 1, side, front);
 
-	// TODO: Bug fix rotations
 	setBlockImage(id, 2, buildPiston(FACE_NORTH, front, back, side.rotate(3), side.rotate(3)));
 	setBlockImage(id, 3, buildPiston(FACE_SOUTH, front, back, side.rotate(1), side.rotate(1)));
 	setBlockImage(id, 4, buildPiston(FACE_WEST, front, back, side.rotate(3), side.rotate(2)));
