@@ -145,6 +145,34 @@ private:
     bool loadSingle(const std::string& filename, int color_index, int texture_size);
 };
 
+
+
+/**
+ * The textures of a single chest, just an array with three images.
+ */
+class BedTextures : public std::array<RGBAImage, 48> { // 3 * 16 (3 textures for each colour)
+public:
+	/**
+	 * Loads the textures from a chest texture file, you have to specify a texture size
+	 * to use.
+	 */
+	bool load(const std::string& base_filename, int texture_size);
+
+	static const int TOP_HEAD = 0;
+	static const int TOP_FOOT = 1;
+	static const int SIDE_HEAD_LEFT = 2;
+	static const int SIDE_HEAD_RIGHT = 3;
+	static const int SIDE_FOOT_LEFT = 4;
+	static const int SIDE_FOOT_RIGHT = 5;
+	static const int SIDE_HEAD_END = 6;
+	static const int SIDE_FOOT_END = 7;
+
+	static const int DATA_SIZE = 8;
+
+private:
+	bool loadSingle(const std::string& filename, int color_index, int texture_size);
+};
+
 /**
  * This class is responsible for loading the required texture files from a texture dir.
  */
@@ -219,6 +247,11 @@ public:
     const ShulkerTextures& getShulkerBoxTextures() const;
 
 	/**
+	 * Returns the loaed textures files of beds
+	 */
+	const BedTextures& getBedTextures() const;
+
+	/**
 	 * Returns the foliage color biomes texture.
 	 */
 	const RGBAImage& getFoliageColors() const;
@@ -259,6 +292,7 @@ private:
 	ChestTextures normal_chest, ender_chest, trapped_chest;
 	DoubleChestTextures normal_double_chest, trapped_double_chest;
 	ShulkerTextures shulker_textures;
+	BedTextures bed_textures;
 
 	RGBAImage foliage_colors, grass_colors;
 };

@@ -154,12 +154,102 @@ bool ShulkerTextures::loadSingle(const std::string& filename, int color_index, i
 
     int offset = color_index * ShulkerTextures::DATA_SIZE;
 
-    // resize the chest images to texture size
+    // resize the shulker images to texture size
     bottom.resize((*this)[offset + ShulkerTextures::BOTTOM], texture_size, texture_size);
     side.resize((*this)[offset + ShulkerTextures::SIDE], texture_size, texture_size);
     top.resize((*this)[offset + ShulkerTextures::TOP], texture_size, texture_size);
 
     return true;
+}
+
+bool BedTextures::load(const std::string& base_filename, int texture_size) {
+	return (loadSingle(base_filename + "white.png", 0, texture_size) &&
+			loadSingle(base_filename + "orange.png", 1, texture_size) &&
+			loadSingle(base_filename + "magenta.png", 2, texture_size) &&
+			loadSingle(base_filename + "light_blue.png", 3, texture_size) &&
+			loadSingle(base_filename + "yellow.png", 4, texture_size) &&
+			loadSingle(base_filename + "lime.png", 5, texture_size) &&
+			loadSingle(base_filename + "pink.png", 6, texture_size) &&
+			loadSingle(base_filename + "gray.png", 7, texture_size) &&
+			loadSingle(base_filename + "silver.png", 8, texture_size) &&
+			loadSingle(base_filename + "cyan.png", 9, texture_size) &&
+			loadSingle(base_filename + "purple.png", 10, texture_size) &&
+			loadSingle(base_filename + "blue.png", 11, texture_size) &&
+			loadSingle(base_filename + "brown.png", 12, texture_size) &&
+			loadSingle(base_filename + "green.png", 13, texture_size) &&
+			loadSingle(base_filename + "red.png", 14, texture_size) &&
+			loadSingle(base_filename + "black.png", 15, texture_size));
+}
+
+bool BedTextures::loadSingle(const std::string& filename, int color_index, int texture_size) {
+	RGBAImage image;
+	if (!image.readPNG(filename)) {
+		LOG(ERROR) << "Unable to read '" << filename << "'.";
+		return false;
+	}
+
+	if (image.getWidth() != image.getHeight()) {
+		LOG(ERROR) << "Bed texture has invalid size (width:height must be 1:1): '"
+				   << filename << "'.";
+		return false;
+	}
+	// if the image is 64px wide, the bed box images are 16x16
+	int ratio = image.getHeight() / 64;
+	int size = ratio * 16;
+
+	// Copy parts from the texture file (sizes according to base texture)
+	RGBAImage top_head = image.clip(6 * ratio, 6 * ratio, size, size); // 16 x 16
+	RGBAImage top_foot = image.clip(6 * ratio, 28 * ratio, size, size); // 16 x 16
+	RGBAImage small_side_head_left = image.clip(0, 6 * ratio, 6 * ratio, size); // 6 x 16
+	RGBAImage small_side_head_right = image.clip(22 * ratio, 6 * ratio, 6 * ratio, size); // 6 x 16
+	RGBAImage small_side_foot_left = image.clip(0, 28 * ratio, 6 * ratio, size); // 6 x 16
+	RGBAImage small_side_foot_right = image.clip(22 * ratio, 28 * ratio, 6 * ratio, size); // 6 x 16
+	RGBAImage small_side_head_end = image.clip(6 * ratio, 0, size, 6 * ratio); // 16 x 16
+	RGBAImage small_side_foot_end = image.clip(22 * ratio, 22 * ratio, size, 6 * ratio); // 16 x 16
+	RGBAImage leg = image.clip(50 * ratio, 3 * ratio, 3 * ratio, 3 * ratio); // Only one leg, used on multiple locations, 3 x 3
+
+	// Create blank canvases for the side textures at their proper size
+	RGBAImage side_head_left(size, size); side_head_left.clear();
+	RGBAImage side_head_right(size, size); side_head_right.clear();
+	RGBAImage side_foot_left(size, size); side_foot_left.clear();
+	RGBAImage side_foot_right(size, size); side_foot_right.clear();
+	RGBAImage side_head_end(size, size); side_head_end.clear();
+	RGBAImage side_foot_end(size, size); side_foot_end.clear();
+
+	// Render textures by copying things and adding legs
+	side_head_left.simpleBlit(small_side_head_left, 0, 7 * ratio);
+	side_head_left.simpleBlit(leg, 0, 13 * ratio);
+
+	side_head_right.simpleBlit(small_side_head_right, 0, 7 * ratio);
+	side_head_right.simpleBlit(leg.flip(true, false), 13 * ratio, 13 * ratio);
+
+	side_foot_left.simpleBlit(small_side_foot_left, 0, 7 * ratio);
+	side_foot_left.simpleBlit(leg, 13 * ratio, 13 * ratio);
+
+	side_foot_right.simpleBlit(small_side_foot_right, 0, 7 * ratio);
+	side_foot_right.simpleBlit(leg.flip(true, false), 13 * ratio, 13 * ratio);
+
+	side_head_end.simpleBlit(small_side_head_end.flip(false, true), 0, 7 * ratio);
+	side_head_end.simpleBlit(leg.flip(true, false), 0, 13 * ratio);
+	side_head_end.simpleBlit(leg.flip(true, false), 13 * ratio, 13 * ratio);
+
+	side_foot_end.simpleBlit(small_side_foot_end.flip(false, true), 0, 7 * ratio);
+	side_foot_end.simpleBlit(leg.flip(true, false), 0, 13 * ratio);
+	side_foot_end.simpleBlit(leg.flip(true, false), 13 * ratio, 13 * ratio);
+
+	int offset = color_index * BedTextures::DATA_SIZE;
+
+	// resize the bed images to texture size
+	top_head.resize((*this)[offset + BedTextures::TOP_HEAD], texture_size, texture_size);
+	top_foot.resize((*this)[offset + BedTextures::TOP_FOOT], texture_size, texture_size);
+	side_head_left.resize((*this)[offset + BedTextures::SIDE_HEAD_LEFT], texture_size, texture_size);
+	side_head_right.resize((*this)[offset + BedTextures::SIDE_HEAD_RIGHT], texture_size, texture_size);
+	side_foot_left.resize((*this)[offset + BedTextures::SIDE_FOOT_LEFT], texture_size, texture_size);
+	side_foot_right.resize((*this)[offset + BedTextures::SIDE_FOOT_RIGHT], texture_size, texture_size);
+	side_head_end.resize((*this)[offset + BedTextures::SIDE_HEAD_END], texture_size, texture_size);
+	side_foot_end.resize((*this)[offset + BedTextures::SIDE_FOOT_END], texture_size, texture_size);
+
+	return true;
 }
 
 TextureResources::TextureResources()
@@ -238,6 +328,10 @@ const DoubleChestTextures& TextureResources::getTrappedDoubleChest() const {
 
 const ShulkerTextures& TextureResources::getShulkerBoxTextures() const {
     return shulker_textures;
+}
+
+const BedTextures &TextureResources::getBedTextures() const {
+	return bed_textures;
 }
 
 const RGBAImage& TextureResources::getFoliageColors() const {

@@ -816,8 +816,7 @@ BlockImage buildBed(const RGBAImage& top, const RGBAImage& north_south, const RG
 	return block;
 }
 
-void IsometricBlockImages::createBed() { // id 26
-	const BlockTextures& textures = resources.getBlockTextures();
+void IsometricBlockImages::createBed(const BedTextures& textures) { // id 26
 	// TODO: Add images for each bed colour
 }
 
@@ -2030,7 +2029,7 @@ void IsometricBlockImages::createBlocks() {
 	createBlock(24, 2, t.SANDSTONE_SMOOTH, t.SANDSTONE_TOP); // smooth
 	// --
 	createBlock(25, 0, t.NOTEBLOCK); // noteblock
-	createBed(); // id 26 bed
+	createBed(resources.getBedTextures()); // id 26 bed
 	createStraightRails(27, 0, t.RAIL_GOLDEN); // id 27 powered rail (unpowered)
 	createStraightRails(27, 8, t.RAIL_GOLDEN_POWERED); // id 27 powered rail (powered)
 	createStraightRails(28, 0, t.RAIL_ACTIVATOR); // id 28 detector rail
