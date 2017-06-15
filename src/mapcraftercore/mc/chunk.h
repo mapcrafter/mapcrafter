@@ -50,14 +50,6 @@ struct ChunkSection {
 	const uint8_t* getArray(int i) const;
 };
 
-struct Entity {
-	mc::BlockPos position;
-};
-
-struct EntityBed : Entity {
-	uint16_t color;
-};
-
 /**
  * This class represents a Minecraft Chunk and provides an read-only interface to chunk
  * data such as block IDs, block data values and block lighting data.
@@ -109,7 +101,12 @@ public:
 	/**
 	 * Returns some additional block data, stored possibly in NBT tags
 	 */
-	uint16_t getExtraBlockData(const LocalBlockPos& pos) const;
+	uint16_t getBlockExtraData(const LocalBlockPos& pos) const;
+
+	/**
+	 * Combination of the upper 3 definitions, but expects references to store the result
+	 */
+	void getBlockInfo(const LocalBlockPos& pos, uint16_t& id, uint16_t& data, uint16_t& extra_data);
 
 	/**
 	 * Returns the block light at a specific position (local coordinates).
@@ -156,7 +153,7 @@ private:
 	uint8_t biomes[256];
 
 	// the beds in this chunk
-	std::unordered_map<int, EntityBed> entities_beds;
+	std::unordered_map<int, uint16_t> extra_data_map;
 
 	/**
 	 * Checks whether a block (local coordinates, original/unrotated) is in the cropped
@@ -172,7 +169,11 @@ private:
 	 */
 	uint8_t getData(const LocalBlockPos& pos, int array, bool force = false) const;
 
-	int positionToKey(const LocalBlockPos &pos) const;
+	int positionToKey(int x, int z, int y) const;
+	void insertExtraData(const LocalBlockPos& pos, uint16_t extra_data);
+	uint16_t getExtraData(const LocalBlockPos& pos, uint16_t default_value) const;
+
+	uint16_t getBlockExtraData(uint16_t id, const LocalBlockPos& pos) const;
 };
 
 }

@@ -194,17 +194,15 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 			// get local block position
 			mc::LocalBlockPos local(block.current);
 
-			// now get block id
-			uint16_t id = current_chunk->getBlockID(local);
+			// now get block id and block data
+			uint16_t id, data, extra_data;
+            current_chunk->getBlockInfo(local, id, data, extra_data);
+
 			// air is completely transparent so continue
 			if (id == 0) {
 				in_water = false;
 				continue;
 			}
-
-			// now get the block data
-			uint16_t data = current_chunk->getBlockData(local);
-			uint16_t extra_data = current_chunk->getExtraBlockData(local);
 
 			// check if the render mode hides this block
 			if (render_mode->isHidden(block.current, id, data))
