@@ -129,10 +129,10 @@ public:
  */
 class ShulkerTextures : public std::array<RGBAImage, 48> { // 3 * 16 (3 textures for each colour)
 public:
-    /**
-     * Loads the textures from shulker texture files, you have to specify a texture size
-     * to use.
-     */
+	/**
+	 * Loads the textures from shulker texture files, you have to specify a texture size
+	 * to use.
+	 */
 	bool load(const std::string& base_filename, int texture_size);
 
 	static const int BOTTOM = 0;
@@ -241,10 +241,10 @@ public:
 	 */
 	const DoubleChestTextures& getTrappedDoubleChest() const;
 
-    /**
-     * Returns the loaded textures files of the shulker boxes
-     */
-    const ShulkerTextures& getShulkerBoxTextures() const;
+	/**
+	 * Returns the loaded textures files of the shulker boxes
+	 */
+	const ShulkerTextures& getShulkerBoxTextures() const;
 
 	/**
 	 * Returns the loaed textures files of beds
@@ -265,7 +265,7 @@ private:
 	/**
 	 * Loads the chest textures from the supplied files.
 	 */
-    bool loadChests(const std::string& normal_png,
+	bool loadChests(const std::string& normal_png,
 			const std::string& normal_double_png, const std::string& ender_png,
 			const std::string& trapped_png, const std::string& trapped_double_png,
 			const std::string& shulker_base_png, const std::string& bed_base_png);
@@ -437,7 +437,7 @@ protected:
 	/**
 	 * This method stores a generated block image for a bed in the map of generated bed images.
 	 */
-    virtual void setBedImage(uint16_t data, uint16_t extra_data, const RGBAImage& block);
+	virtual void setBedImage(uint16_t data, uint16_t extra_data, const RGBAImage& block);
 
 	/**
 	 * This method should create a block image of an unknown block (i.e. just a simple

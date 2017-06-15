@@ -110,7 +110,7 @@ bool DoubleChestTextures::load(const std::string& filename, int texture_size) {
 }
 
 bool ShulkerTextures::load(const std::string& base_filename, int texture_size) {
-    return (loadSingle(base_filename + "white.png", 0, texture_size) &&
+	return (loadSingle(base_filename + "white.png", 0, texture_size) &&
 			loadSingle(base_filename + "orange.png", 1, texture_size) &&
 			loadSingle(base_filename + "magenta.png", 2, texture_size) &&
 			loadSingle(base_filename + "light_blue.png", 3, texture_size) &&
@@ -129,37 +129,37 @@ bool ShulkerTextures::load(const std::string& base_filename, int texture_size) {
 }
 
 bool ShulkerTextures::loadSingle(const std::string& filename, int color_index, int texture_size) {
-    RGBAImage image;
-    if (!image.readPNG(filename)) {
-        LOG(ERROR) << "Unable to read '" << filename << "'.";
-        return false;
-    }
+	RGBAImage image;
+	if (!image.readPNG(filename)) {
+		LOG(ERROR) << "Unable to read '" << filename << "'.";
+		return false;
+	}
 
-    if (image.getWidth() != image.getHeight()) {
-        LOG(ERROR) << "Shulker texture has invalid size (width:height must be 1:1): '"
-                   << filename << "'.";
-        return false;
-    }
-    // if the image is 64px wide, the shulker box images are 16x16
-    int ratio = image.getHeight() / 64;
-    int size = ratio * 16;
-    int size_h = ratio * 12; // Sides are slightly smaller
+	if (image.getWidth() != image.getHeight()) {
+		LOG(ERROR) << "Shulker texture has invalid size (width:height must be 1:1): '"
+				   << filename << "'.";
+		return false;
+	}
+	// if the image is 64px wide, the shulker box images are 16x16
+	int ratio = image.getHeight() / 64;
+	int size = ratio * 16;
+	int size_h = ratio * 12; // Sides are slightly smaller
 
-    RGBAImage top = image.clip(size, 0, size, size);
-    RGBAImage side = image.clip(0, size, size, size);
-    RGBAImage side_bottom = image.clip(0, 2 * size + (size - size_h), size, size);
-    RGBAImage bottom = image.clip(2 * size, size + size_h, size, size);
+	RGBAImage top = image.clip(size, 0, size, size);
+	RGBAImage side = image.clip(0, size, size, size);
+	RGBAImage side_bottom = image.clip(0, 2 * size + (size - size_h), size, size);
+	RGBAImage bottom = image.clip(2 * size, size + size_h, size, size);
 
-    side.alphaBlit(side_bottom, 0, 0);
+	side.alphaBlit(side_bottom, 0, 0);
 
-    int offset = color_index * ShulkerTextures::DATA_SIZE;
+	int offset = color_index * ShulkerTextures::DATA_SIZE;
 
-    // resize the shulker images to texture size
-    bottom.resize((*this)[offset + ShulkerTextures::BOTTOM], texture_size, texture_size);
-    side.resize((*this)[offset + ShulkerTextures::SIDE], texture_size, texture_size);
-    top.resize((*this)[offset + ShulkerTextures::TOP], texture_size, texture_size);
+	// resize the shulker images to texture size
+	bottom.resize((*this)[offset + ShulkerTextures::BOTTOM], texture_size, texture_size);
+	side.resize((*this)[offset + ShulkerTextures::SIDE], texture_size, texture_size);
+	top.resize((*this)[offset + ShulkerTextures::TOP], texture_size, texture_size);
 
-    return true;
+	return true;
 }
 
 bool BedTextures::load(const std::string& base_filename, int texture_size) {
@@ -350,7 +350,7 @@ const RGBAImage& TextureResources::getGrassColors() const {
 bool TextureResources::loadChests(const std::string& normal_png,
 		const std::string& normal_double_png, const std::string& ender_png,
 		const std::string& trapped_png, const std::string& trapped_double_png,
-        const std::string& shulker_base_png, const std::string& bed_base_png) {
+		const std::string& shulker_base_png, const std::string& bed_base_png) {
 	if (!normal_chest.load(normal_png, texture_size)
 			|| !normal_double_chest.load(normal_double_png, texture_size)
 			|| !ender_chest.load(ender_png, texture_size)
@@ -470,16 +470,16 @@ bool AbstractBlockImages::hasBlock(uint16_t id, uint16_t data) const {
 }
 
 bool AbstractBlockImages::hasBedBlock(uint16_t data, uint16_t extra_data) const {
-    return block_images_bed.count(data | (extra_data << 16)) != 0;
+	return block_images_bed.count(data | (extra_data << 16)) != 0;
 }
 
 const RGBAImage& AbstractBlockImages::getBlock(uint16_t id, uint16_t data, uint16_t extra_data) const {
 	data = filterBlockData(id, data);
 
 	if (id == 26) { // Beds
-        if (!hasBedBlock(data, extra_data)) {
+		if (!hasBedBlock(data, extra_data)) {
 			return unknown_block;
-        }
+		}
 		return block_images_bed.at(data | (extra_data << 16));
 	}
 
@@ -557,7 +557,7 @@ void AbstractBlockImages::setBlockImage(uint16_t id, uint16_t data,
 
 void AbstractBlockImages::setBedImage(uint16_t data, uint16_t extra_data,
 		const RGBAImage& block) {
-    block_images_bed[data | (extra_data << 16)] = block;
+	block_images_bed[data | (extra_data << 16)] = block;
 }
 
 void AbstractBlockImages::createBiomeBlocks() {

@@ -464,7 +464,7 @@ void IsometricBlockImages::setBlockImage(uint16_t id, uint16_t data, const Block
 }
 
 void IsometricBlockImages::setBedImage(uint16_t data, uint16_t extra_data, const BlockImage& block) {
-    setBedImage(data, extra_data, buildImage(block.rotate(rotation)));
+	setBedImage(data, extra_data, buildImage(block.rotate(rotation)));
 }
 
 void IsometricBlockImages::setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block) {
@@ -476,7 +476,7 @@ void IsometricBlockImages::setBlockImage(uint16_t id, uint16_t data, const RGBAI
 }
 
 void IsometricBlockImages::setBedImage(uint16_t data, uint16_t extra_data, const RGBAImage& block) {
-    AbstractBlockImages::setBedImage(data, extra_data, block);
+	AbstractBlockImages::setBedImage(data, extra_data, block);
 }
 
 uint32_t IsometricBlockImages::darkenLeft(uint32_t pixel) const {
@@ -560,51 +560,47 @@ void IsometricBlockImages::createSmallerBlock(uint16_t id, uint16_t data, const 
 }
 
 void IsometricBlockImages::createGlazedTerracotta(uint16_t id, const RGBAImage& texture) {
-    RGBAImage rotated_texture_0 = texture.rotate(ROTATE_0);
-    RGBAImage rotated_texture_90 = texture.rotate(ROTATE_90);
-    RGBAImage rotated_texture_180 = texture.rotate(ROTATE_180);
-    RGBAImage rotated_texture_270 = texture.rotate(ROTATE_270);
+	RGBAImage rotated_texture_0 = texture.rotate(ROTATE_0);
+	RGBAImage rotated_texture_90 = texture.rotate(ROTATE_90);
+	RGBAImage rotated_texture_180 = texture.rotate(ROTATE_180);
+	RGBAImage rotated_texture_270 = texture.rotate(ROTATE_270);
 
-    BlockImage block_0; // south
-    block_0.setFace(FACE_TOP, rotated_texture_270);
-    block_0.setFace(FACE_NORTH, rotated_texture_90);
-    block_0.setFace(FACE_SOUTH, rotated_texture_270);
-    block_0.setFace(FACE_EAST, rotated_texture_180);
-    block_0.setFace(FACE_WEST, rotated_texture_0);
-    setBlockImage(id, 0, block_0);
+	BlockImage block_0; // south
+	block_0.setFace(FACE_TOP, rotated_texture_270);
+	block_0.setFace(FACE_NORTH, rotated_texture_90);
+	block_0.setFace(FACE_SOUTH, rotated_texture_270);
+	block_0.setFace(FACE_EAST, rotated_texture_180);
+	block_0.setFace(FACE_WEST, rotated_texture_0);
+	setBlockImage(id, 0, block_0);
 
-    BlockImage block_1;
-    block_1.setFace(FACE_TOP, rotated_texture_0);
-    block_1.setFace(FACE_NORTH, rotated_texture_0);
-    block_1.setFace(FACE_SOUTH, rotated_texture_180);
-    block_1.setFace(FACE_EAST, rotated_texture_90);
-    block_1.setFace(FACE_WEST, rotated_texture_270);
-    setBlockImage(id, 1, block_1);
+	BlockImage block_1;
+	block_1.setFace(FACE_TOP, rotated_texture_0);
+	block_1.setFace(FACE_NORTH, rotated_texture_0);
+	block_1.setFace(FACE_SOUTH, rotated_texture_180);
+	block_1.setFace(FACE_EAST, rotated_texture_90);
+	block_1.setFace(FACE_WEST, rotated_texture_270);
+	setBlockImage(id, 1, block_1);
 
-    BlockImage block_2;
-    block_2.setFace(FACE_TOP, rotated_texture_90);
-    block_2.setFace(FACE_NORTH, rotated_texture_270);
-    block_2.setFace(FACE_SOUTH, rotated_texture_90);
-    block_2.setFace(FACE_EAST, rotated_texture_0);
-    block_2.setFace(FACE_WEST, rotated_texture_180);
-    setBlockImage(id, 2, block_2);
+	BlockImage block_2;
+	block_2.setFace(FACE_TOP, rotated_texture_90);
+	block_2.setFace(FACE_NORTH, rotated_texture_270);
+	block_2.setFace(FACE_SOUTH, rotated_texture_90);
+	block_2.setFace(FACE_EAST, rotated_texture_0);
+	block_2.setFace(FACE_WEST, rotated_texture_180);
+	setBlockImage(id, 2, block_2);
 
-    BlockImage block_3;
-    block_3.setFace(FACE_TOP, rotated_texture_180);
-    block_3.setFace(FACE_NORTH, rotated_texture_180);
-    block_3.setFace(FACE_SOUTH, rotated_texture_0);
-    block_3.setFace(FACE_EAST, rotated_texture_270);
-    block_3.setFace(FACE_WEST, rotated_texture_90);
-    setBlockImage(id, 3, block_3);
-}
-
-void IsometricBlockImages::createRotatedBlock(uint16_t id, uint16_t extra_data, const RGBAImage& texture) {
-    createRotatedBlock(id, extra_data, texture, texture, texture, texture);
+	BlockImage block_3;
+	block_3.setFace(FACE_TOP, rotated_texture_180);
+	block_3.setFace(FACE_NORTH, rotated_texture_180);
+	block_3.setFace(FACE_SOUTH, rotated_texture_0);
+	block_3.setFace(FACE_EAST, rotated_texture_270);
+	block_3.setFace(FACE_WEST, rotated_texture_90);
+	setBlockImage(id, 3, block_3);
 }
 
 void IsometricBlockImages::createRotatedBlock(uint16_t id, uint16_t extra_data,
-        const RGBAImage& front_texture, const RGBAImage& side_texture,
-        const RGBAImage& top_texture) {
+		const RGBAImage& front_texture, const RGBAImage& side_texture,
+		const RGBAImage& top_texture) {
 	createRotatedBlock(id, extra_data, front_texture, side_texture, side_texture,
 	        top_texture);
 }
@@ -781,30 +777,30 @@ void IsometricBlockImages::createDispenserDropper(uint16_t id, const RGBAImage& 
 }
 
 void IsometricBlockImages::createObserver(uint16_t id) { // id 23, 158
-    RGBAImage side = resources.getBlockTextures().OBSERVER_SIDE;
-    RGBAImage top = resources.getBlockTextures().OBSERVER_TOP;
-    RGBAImage front = resources.getBlockTextures().OBSERVER_FRONT;
-    RGBAImage back = resources.getBlockTextures().OBSERVER_BACK;
+	RGBAImage side = resources.getBlockTextures().OBSERVER_SIDE;
+	RGBAImage top = resources.getBlockTextures().OBSERVER_TOP;
+	RGBAImage front = resources.getBlockTextures().OBSERVER_FRONT;
+	RGBAImage back = resources.getBlockTextures().OBSERVER_BACK;
 
-    createRotatedBlock(id, 0, front, back, side, top.rotate(ROTATE_90));
+	createRotatedBlock(id, 0, front, back, side, top.rotate(ROTATE_90));
 
-    BlockImage up_image;
-    up_image.setFace(FACE_NORTH, top);
-    up_image.setFace(FACE_EAST, side.rotate(ROTATE_90));
-    up_image.setFace(FACE_SOUTH, top);
-    up_image.setFace(FACE_WEST, side.rotate(ROTATE_90));
-    up_image.setFace(FACE_TOP, back.rotate(ROTATE_90));
+	BlockImage up_image;
+	up_image.setFace(FACE_NORTH, top);
+	up_image.setFace(FACE_EAST, side.rotate(ROTATE_90));
+	up_image.setFace(FACE_SOUTH, top);
+	up_image.setFace(FACE_WEST, side.rotate(ROTATE_90));
+	up_image.setFace(FACE_TOP, back.rotate(ROTATE_90));
 
-    setBlockImage(id, 0, up_image);
+	setBlockImage(id, 0, up_image);
 
-    BlockImage down_image;
-    down_image.setFace(FACE_NORTH, top.rotate(ROTATE_180));
-    down_image.setFace(FACE_EAST, side.rotate(ROTATE_90));
-    down_image.setFace(FACE_SOUTH, top.rotate(ROTATE_180));
-    down_image.setFace(FACE_WEST, side.rotate(ROTATE_90));
-    down_image.setFace(FACE_TOP, front.rotate(ROTATE_90));
+	BlockImage down_image;
+	down_image.setFace(FACE_NORTH, top.rotate(ROTATE_180));
+	down_image.setFace(FACE_EAST, side.rotate(ROTATE_90));
+	down_image.setFace(FACE_SOUTH, top.rotate(ROTATE_180));
+	down_image.setFace(FACE_WEST, side.rotate(ROTATE_90));
+	down_image.setFace(FACE_TOP, front.rotate(ROTATE_90));
 
-    setBlockImage(id, 1, down_image);
+	setBlockImage(id, 1, down_image);
 }
 
 BlockImage buildBed(const RGBAImage& top,
@@ -834,21 +830,21 @@ void IsometricBlockImages::createBed(const BedTextures& textures) { // id 26
 		RGBAImage side_foot_end = textures[offset + BedTextures::SIDE_FOOT_END];
 
 		// Head
-        setBedImage(0 | 8, colour, buildBed(top_head.rotate(ROTATE_90), 0, side_head_end, side_head_left.flip(true, false), side_head_right)); // Pointing south
-        setBedImage(1 | 8, colour, buildBed(top_head.rotate(ROTATE_180), side_head_right.flip(true, false), side_head_left, 0, side_head_end)); // Pointing west
+		setBedImage(0 | 8, colour, buildBed(top_head.rotate(ROTATE_90), 0, side_head_end, side_head_left.flip(true, false), side_head_right)); // Pointing south
+		setBedImage(1 | 8, colour, buildBed(top_head.rotate(ROTATE_180), side_head_right.flip(true, false), side_head_left, 0, side_head_end)); // Pointing west
 		setBedImage(2 | 8, colour, buildBed(top_head.rotate(ROTATE_270), side_head_end, 0, side_head_right.flip(true, false), side_head_left)); // Pointing north
-        setBedImage(3 | 8, colour, buildBed(top_head, side_head_right, side_head_left.flip(true, false), side_head_end, 0)); // Pointing east
+		setBedImage(3 | 8, colour, buildBed(top_head, side_head_right, side_head_left.flip(true, false), side_head_end, 0)); // Pointing east
 
 		// Foot
 		setBedImage(0, colour, buildBed(top_foot.rotate(ROTATE_90), side_foot_end, 0, side_foot_left.flip(true, false), side_foot_right)); // Pointing south
-        setBedImage(1, colour, buildBed(top_foot.rotate(ROTATE_180), side_foot_right.flip(true, false), side_foot_left, side_foot_end, 0)); // Pointing west
-        setBedImage(2, colour, buildBed(top_foot.rotate(ROTATE_270), 0, side_foot_end, side_foot_right.flip(true, false), side_foot_left)); // Pointing north
-        setBedImage(3, colour, buildBed(top_foot, side_foot_right, side_foot_left.flip(true, false), 0, side_foot_end)); // Pointing east
+		setBedImage(1, colour, buildBed(top_foot.rotate(ROTATE_180), side_foot_right.flip(true, false), side_foot_left, side_foot_end, 0)); // Pointing west
+		setBedImage(2, colour, buildBed(top_foot.rotate(ROTATE_270), 0, side_foot_end, side_foot_right.flip(true, false), side_foot_left)); // Pointing north
+		setBedImage(3, colour, buildBed(top_foot, side_foot_right, side_foot_left.flip(true, false), 0, side_foot_end)); // Pointing east
 	}
 }
 
 void IsometricBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
-        const RGBAImage& texture) { // id 27, 28, 66
+		const RGBAImage& texture) { // id 27, 28, 66
 	createSingleFaceBlock(id, 0 | extra_data, FACE_BOTTOM, texture.rotate(ROTATE_90));
 	createSingleFaceBlock(id, 1 | extra_data, FACE_BOTTOM, texture);
 
@@ -2467,24 +2463,24 @@ void IsometricBlockImages::createBlocks() {
 	// --
 	createObserver(218); // observer
 	// shulker box --
-    createShulkerBox(219, 0, resources.getShulkerBoxTextures()); // white
-    createShulkerBox(220, 1, resources.getShulkerBoxTextures()); // orange
-    createShulkerBox(221, 2, resources.getShulkerBoxTextures()); // magenta
-    createShulkerBox(222, 3, resources.getShulkerBoxTextures()); // light blue
-    createShulkerBox(223, 4, resources.getShulkerBoxTextures()); // yellow
-    createShulkerBox(224, 5, resources.getShulkerBoxTextures()); // lime
-    createShulkerBox(225, 6, resources.getShulkerBoxTextures()); // pink
-    createShulkerBox(226, 7, resources.getShulkerBoxTextures()); // gray
-    createShulkerBox(227, 8, resources.getShulkerBoxTextures()); // light gray
-    createShulkerBox(228, 9, resources.getShulkerBoxTextures()); // cyan
-    createShulkerBox(229, 10, resources.getShulkerBoxTextures()); // purple
-    createShulkerBox(230, 11, resources.getShulkerBoxTextures()); // blue
-    createShulkerBox(231, 12, resources.getShulkerBoxTextures()); // brown
-    createShulkerBox(232, 13, resources.getShulkerBoxTextures()); // green
-    createShulkerBox(233, 14, resources.getShulkerBoxTextures()); // red
-    createShulkerBox(234, 15, resources.getShulkerBoxTextures()); // black
-    // glazed terracotta --
-    createGlazedTerracotta(235, t.GLAZED_TERRACOTTA_WHITE); // white
+	createShulkerBox(219, 0, resources.getShulkerBoxTextures()); // white
+	createShulkerBox(220, 1, resources.getShulkerBoxTextures()); // orange
+	createShulkerBox(221, 2, resources.getShulkerBoxTextures()); // magenta
+	createShulkerBox(222, 3, resources.getShulkerBoxTextures()); // light blue
+	createShulkerBox(223, 4, resources.getShulkerBoxTextures()); // yellow
+	createShulkerBox(224, 5, resources.getShulkerBoxTextures()); // lime
+	createShulkerBox(225, 6, resources.getShulkerBoxTextures()); // pink
+	createShulkerBox(226, 7, resources.getShulkerBoxTextures()); // gray
+	createShulkerBox(227, 8, resources.getShulkerBoxTextures()); // light gray
+	createShulkerBox(228, 9, resources.getShulkerBoxTextures()); // cyan
+	createShulkerBox(229, 10, resources.getShulkerBoxTextures()); // purple
+	createShulkerBox(230, 11, resources.getShulkerBoxTextures()); // blue
+	createShulkerBox(231, 12, resources.getShulkerBoxTextures()); // brown
+	createShulkerBox(232, 13, resources.getShulkerBoxTextures()); // green
+	createShulkerBox(233, 14, resources.getShulkerBoxTextures()); // red
+	createShulkerBox(234, 15, resources.getShulkerBoxTextures()); // black
+	// glazed terracotta --
+	createGlazedTerracotta(235, t.GLAZED_TERRACOTTA_WHITE); // white
 	createGlazedTerracotta(236, t.GLAZED_TERRACOTTA_ORANGE); // orange
 	createGlazedTerracotta(237, t.GLAZED_TERRACOTTA_MAGENTA); // magenta
 	createGlazedTerracotta(238, t.GLAZED_TERRACOTTA_LIGHT_BLUE); // light blue
