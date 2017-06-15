@@ -451,10 +451,7 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 			// and add the special 'flower-top-part' bit
 			return getBlock(pos + mc::DIR_BOTTOM).data | LARGEPLANT_TOP;
 		}
-	} else if ( (id >= 235) && (id <= 237) ) { // id 235 - 237
-
 	}
-
 
 	if (!images->isBlockTransparent(id, data)) {
 		// add shadow edges on opaque blockes
