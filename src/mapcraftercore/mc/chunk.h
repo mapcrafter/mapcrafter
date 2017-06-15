@@ -171,7 +171,7 @@ private:
 
 	int positionToKey(int x, int z, int y) const;
 	void insertExtraData(const LocalBlockPos& pos, uint16_t extra_data);
-	uint16_t getExtraData(const LocalBlockPos& pos, uint16_t default_value) const;
+	uint16_t getExtraData(const LocalBlockPos& pos, uint16_t default_value = 0) const;
 
 	uint16_t getBlockExtraData(uint16_t id, const LocalBlockPos& pos) const;
 };
