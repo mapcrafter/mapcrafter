@@ -196,7 +196,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 
 			// now get block id and block data
 			uint16_t id, data, extra_data;
-            current_chunk->getBlockInfo(local, id, data, extra_data);
+			current_chunk->getBlockInfo(local, id, data, extra_data);
 
 			// air is completely transparent so continue
 			if (id == 0) {
