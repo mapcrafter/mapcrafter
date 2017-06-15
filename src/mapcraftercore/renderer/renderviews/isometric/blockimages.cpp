@@ -599,8 +599,8 @@ void IsometricBlockImages::createGlazedTerracotta(uint16_t id, const RGBAImage& 
 }
 
 void IsometricBlockImages::createRotatedBlock(uint16_t id, uint16_t extra_data,
-		const RGBAImage& front_texture, const RGBAImage& side_texture,
-		const RGBAImage& top_texture) {
+        const RGBAImage& front_texture, const RGBAImage& side_texture,
+        const RGBAImage& top_texture) {
 	createRotatedBlock(id, extra_data, front_texture, side_texture, side_texture,
 	        top_texture);
 }
@@ -844,7 +844,7 @@ void IsometricBlockImages::createBed(const BedTextures& textures) { // id 26
 }
 
 void IsometricBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
-		const RGBAImage& texture) { // id 27, 28, 66
+        const RGBAImage& texture) { // id 27, 28, 66
 	createSingleFaceBlock(id, 0 | extra_data, FACE_BOTTOM, texture.rotate(ROTATE_90));
 	createSingleFaceBlock(id, 1 | extra_data, FACE_BOTTOM, texture);
 
