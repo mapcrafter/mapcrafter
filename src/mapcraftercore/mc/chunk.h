@@ -152,7 +152,7 @@ private:
 	// the biomes in this chunk, as index z*16+x
 	uint8_t biomes[256];
 
-	// the beds in this chunk
+	// extra_data (e.g. from attributes read from NBT data, like beds) are stored in this map
 	std::unordered_map<int, uint16_t> extra_data_map;
 
 	/**

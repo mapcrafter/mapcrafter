@@ -200,7 +200,7 @@ bool BedTextures::loadSingle(const std::string& filename, int color_index, int t
 	// Copy parts from the texture file (sizes according to base texture)
 	RGBAImage top_head = image.clip(6 * ratio, 6 * ratio, size, size); // 16 x 16
 	RGBAImage top_foot = image.clip(6 * ratio, 28 * ratio, size, size); // 16 x 16
-    RGBAImage small_side_head_left = image.clip(0, 6 * ratio, 6 * ratio, size); // 6 x 16
+	RGBAImage small_side_head_left = image.clip(0, 6 * ratio, 6 * ratio, size); // 6 x 16
 	RGBAImage small_side_head_right = image.clip(22 * ratio, 6 * ratio, 6 * ratio, size); // 6 x 16
 	RGBAImage small_side_foot_left = image.clip(0, 28 * ratio, 6 * ratio, size); // 6 x 16
 	RGBAImage small_side_foot_right = image.clip(22 * ratio, 28 * ratio, 6 * ratio, size); // 6 x 16
@@ -219,19 +219,19 @@ bool BedTextures::loadSingle(const std::string& filename, int color_index, int t
 	// Render textures by copying things and adding legs
 	side_head_left.simpleBlit(small_side_head_left, 3 * ratio, 0);
 	side_head_left.simpleBlit(leg.rotate(ROTATE_90).flip(false, true), 0, 0);
-    side_head_left = side_head_left.rotate(ROTATE_270);
+	side_head_left = side_head_left.rotate(ROTATE_270);
 
 	side_head_right.simpleBlit(small_side_head_right, 7 * ratio, 0);
 	side_head_right.simpleBlit(leg.rotate(ROTATE_90).flip(false, true), 13 * ratio, 0);
-    side_head_right = side_head_right.rotate(ROTATE_90);
+	side_head_right = side_head_right.rotate(ROTATE_90);
 
 	side_foot_left.simpleBlit(small_side_foot_left, 3 * ratio, 0);
 	side_foot_left.simpleBlit(leg.rotate(ROTATE_90), 0, 13 * ratio);
-    side_foot_left = side_foot_left.rotate(ROTATE_270);
+	side_foot_left = side_foot_left.rotate(ROTATE_270);
 
 	side_foot_right.simpleBlit(small_side_foot_right, 7 * ratio, 0);
 	side_foot_right.simpleBlit(leg.rotate(ROTATE_90), 13 * ratio, 13 * ratio);
-    side_foot_right = side_foot_right.rotate(ROTATE_90);
+	side_foot_right = side_foot_right.rotate(ROTATE_90);
 
 	side_head_end.simpleBlit(small_side_head_end.flip(false, true), 0, 7 * ratio);
 	side_head_end.simpleBlit(leg.flip(true, false), 0, 13 * ratio);
@@ -288,7 +288,7 @@ bool TextureResources::loadTextures(const std::string& texture_dir,
 			dir + "entity/chest/ender.png",
 			dir + "entity/chest/trapped.png",
 			dir + "entity/chest/trapped_double.png",
-            dir + "entity/shulker/shulker_",
+			dir + "entity/shulker/shulker_",
 			dir + "entity/bed/"))
 		ok = false;
 	if (!loadColors(dir + "colormap/foliage.png",
@@ -332,7 +332,7 @@ const DoubleChestTextures& TextureResources::getTrappedDoubleChest() const {
 }
 
 const ShulkerTextures& TextureResources::getShulkerBoxTextures() const {
-    return shulker_textures;
+	return shulker_textures;
 }
 
 const BedTextures &TextureResources::getBedTextures() const {
@@ -455,9 +455,9 @@ bool AbstractBlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
 	// and not with the original minecraft data
 	// without this the lighting code for example would need to filter the door data
 
-    // special case for beds, as they are handled in a different way
+	// special case for beds, as they are handled in a different way
 
-    // FIXME
+	// FIXME
 	if (id == 64 || id == 71 || id == 26)
 		return true;
 	if (block_images.count(id | (data << 16)) == 0)
@@ -478,7 +478,7 @@ const RGBAImage& AbstractBlockImages::getBlock(uint16_t id, uint16_t data, uint1
 
 	if (id == 26) { // Beds
         if (!hasBedBlock(data, extra_data)) {
-            return unknown_block;
+			return unknown_block;
         }
 		return block_images_bed.at(data | (extra_data << 16));
 	}
@@ -556,7 +556,7 @@ void AbstractBlockImages::setBlockImage(uint16_t id, uint16_t data,
 }
 
 void AbstractBlockImages::setBedImage(uint16_t data, uint16_t extra_data,
-        const RGBAImage& block) {
+		const RGBAImage& block) {
     block_images_bed[data | (extra_data << 16)] = block;
 }
 
