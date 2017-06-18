@@ -22,6 +22,7 @@
 
 #include "blocktextures.h"
 #include "image.h"
+#include "../mc/pos.h"
 
 #include <array>
 #include <string>
@@ -124,6 +125,55 @@ public:
 };
 
 /**
+ * The textures of a single chest, just an array with three images.
+ */
+class ShulkerTextures : public std::array<RGBAImage, 48> { // 3 * 16 (3 textures for each colour)
+public:
+	/**
+	 * Loads the textures from shulker texture files, you have to specify a texture size
+	 * to use.
+	 */
+	bool load(const std::string& base_filename, int texture_size);
+
+	static const int BOTTOM = 0;
+	static const int SIDE = 1;
+	static const int TOP = 2;
+
+	static const int DATA_SIZE = 3;
+
+private:
+	bool loadSingle(const std::string& filename, int color_index, int texture_size);
+};
+
+
+
+/**
+ * The textures of a single chest, just an array with three images.
+ */
+class BedTextures : public std::array<RGBAImage, 128> { // 8 * 16 (8 textures for each colour)
+public:
+	/**
+	 * Loads the textures from bed texture files, you have to specify a texture size
+	 * to use.
+	 */
+	bool load(const std::string& base_filename, int texture_size);
+
+	static const int TOP_HEAD = 0;
+	static const int TOP_FOOT = 1;
+	static const int SIDE_HEAD_LEFT = 2;
+	static const int SIDE_HEAD_RIGHT = 3;
+	static const int SIDE_FOOT_LEFT = 4;
+	static const int SIDE_FOOT_RIGHT = 5;
+	static const int SIDE_HEAD_END = 6;
+	static const int SIDE_FOOT_END = 7;
+
+	static const int DATA_SIZE = 8;
+
+private:
+	bool loadSingle(const std::string& filename, int color_index, int texture_size);
+};
+
+/**
  * This class is responsible for loading the required texture files from a texture dir.
  */
 class TextureResources {
@@ -192,6 +242,16 @@ public:
 	const DoubleChestTextures& getTrappedDoubleChest() const;
 
 	/**
+	 * Returns the loaded textures files of the shulker boxes
+	 */
+	const ShulkerTextures& getShulkerBoxTextures() const;
+
+	/**
+	 * Returns the loaed textures files of beds
+	 */
+	const BedTextures& getBedTextures() const;
+
+	/**
 	 * Returns the foliage color biomes texture.
 	 */
 	const RGBAImage& getFoliageColors() const;
@@ -205,9 +265,10 @@ private:
 	/**
 	 * Loads the chest textures from the supplied files.
 	 */
-	bool loadChests(const std::string& normal_png, const std::string& normal_double_png,
-			const std::string& ender_png, const std::string& trapped_png,
-			const std::string& trapped_double_png);
+	bool loadChests(const std::string& normal_png,
+			const std::string& normal_double_png, const std::string& ender_png,
+			const std::string& trapped_png, const std::string& trapped_double_png,
+			const std::string& shulker_base_png, const std::string& bed_base_png);
 
 	/**
 	 * Loads the biome color textures from the supplied files.
@@ -230,6 +291,8 @@ private:
 
 	ChestTextures normal_chest, ender_chest, trapped_chest;
 	DoubleChestTextures normal_double_chest, trapped_double_chest;
+	ShulkerTextures shulker_textures;
+	BedTextures bed_textures;
 
 	RGBAImage foliage_colors, grass_colors;
 };
@@ -280,12 +343,12 @@ public:
 	/**
 	 * Returns the block image of a specific block.
 	 */
-	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data) const = 0;
+	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data, uint16_t extra_data = 0) const = 0;
 
 	/**
 	 * Returns the block image of a block whose appearance is depending on the biome.
 	 */
-	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const = 0;
+	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome, uint16_t extra_data = 0) const = 0;
 
 	/**
 	 * Returns how many blocks of water are needed in a row until the water becomes (almost)
@@ -337,10 +400,11 @@ public:
 	virtual RGBAImage exportBlocks() const;
 
 	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const;
-	virtual bool hasBlock(uint16_t id, uint16_t) const;
-	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data) const;
+	virtual bool hasBlock(uint16_t id, uint16_t data) const;
+	virtual bool hasBedBlock(uint16_t data, uint16_t extra_data) const;
+	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data, uint16_t extra_data = 0) const;
 
-	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;
+	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome, uint16_t extra_data = 0) const;
 
 	virtual int getMaxWaterPreblit() const;
 
@@ -369,6 +433,11 @@ protected:
 	 * generated blocks.
 	 */
 	virtual void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
+
+	/**
+	 * This method stores a generated block image for a bed in the map of generated bed images.
+	 */
+	virtual void setBedImage(uint16_t data, uint16_t extra_data, const RGBAImage& block);
 
 	/**
 	 * This method should create a block image of an unknown block (i.e. just a simple
@@ -424,6 +493,10 @@ protected:
 	// map of block images
 	// key is a 32 bit integer, first two bytes id, second two bytes data
 	std::unordered_map<uint32_t, RGBAImage> block_images;
+
+	// map of bed block images
+	// key is a 32 bit integer, first two bytes data, second two bytes extra data (colour)
+	std::unordered_map<uint32_t, RGBAImage> block_images_bed;
 
 	// comparator to sort block images by their id/data extracted  from the uint32_t keys
 	// used to sort blocks when exporting them

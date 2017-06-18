@@ -25,6 +25,7 @@
 #include "worldcrop.h"
 
 #include <stdint.h>
+#include <unordered_map>
 
 namespace mapcrafter {
 namespace mc {
@@ -98,6 +99,11 @@ public:
 	uint8_t getBlockData(const LocalBlockPos& pos, bool force = false) const;
 
 	/**
+	 * Returns some additional block data, originally stored somewhere else (e.g. in an NBT tag)
+	 */
+	uint16_t getBlockExtraData(const LocalBlockPos& pos, uint16_t id) const;
+
+	/**
 	 * Returns the block light at a specific position (local coordinates).
 	 */
 	uint8_t getBlockLight(const LocalBlockPos& pos) const;
@@ -141,6 +147,9 @@ private:
 	// the biomes in this chunk, as index z*16+x
 	uint8_t biomes[256];
 
+	// extra_data (e.g. from attributes read from NBT data, like beds) are stored in this map
+	std::unordered_map<int, uint16_t> extra_data_map;
+
 	/**
 	 * Checks whether a block (local coordinates, original/unrotated) is in the cropped
 	 * part of the world and therefore not rendered.
@@ -154,6 +163,10 @@ private:
 	 *   2: sky light
 	 */
 	uint8_t getData(const LocalBlockPos& pos, int array, bool force = false) const;
+
+	int positionToKey(int x, int z, int y) const;
+	void insertExtraData(const LocalBlockPos& pos, uint16_t extra_data);
+	uint16_t getExtraData(const LocalBlockPos& pos, uint16_t default_value = 0) const;
 };
 
 }

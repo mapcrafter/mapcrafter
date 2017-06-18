@@ -194,16 +194,18 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 			// get local block position
 			mc::LocalBlockPos local(block.current);
 
-			// now get block id
+			// get block id
 			uint16_t id = current_chunk->getBlockID(local);
+
 			// air is completely transparent so continue
 			if (id == 0) {
 				in_water = false;
 				continue;
 			}
 
-			// now get the block data
+			// get the data and extra data
 			uint16_t data = current_chunk->getBlockData(local);
+			uint16_t extra_data = current_chunk->getBlockExtraData(local, id);
 
 			// check if the render mode hides this block
 			if (render_mode->isHidden(block.current, id, data))
@@ -268,7 +270,7 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 								// get image and replace the old render block with this
 								//top.image = images->getOpaqueWater(neighbor_south,
 								//		neighbor_west);
-								top.image = images->getBlock(id, data);
+								top.image = images->getBlock(id, data, extra_data);
 
 								// don't forget the render mode
 								render_mode->draw(top.image, top.pos, id, data);
@@ -297,9 +299,9 @@ void IsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile)
 
 			// check for biome data
 			if (Biome::isBiomeBlock(id, data))
-				image = images->getBiomeBlock(id, data, getBiomeOfBlock(block.current, current_chunk));
+				image = images->getBiomeBlock(id, data, getBiomeOfBlock(block.current, current_chunk), extra_data);
 			else
-				image = images->getBlock(id, data);
+				image = images->getBlock(id, data, extra_data);
 
 			RenderBlock node;
 			node.x = it.draw_x;

@@ -50,6 +50,10 @@ void Chunk::setWorldCrop(const WorldCrop& world_crop) {
 	this->world_crop = world_crop;
 }
 
+int Chunk::positionToKey(int x, int z, int y) const {
+	return y + 256 * (x + 16 * z);
+}
+
 bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) {
 	clear();
 
@@ -88,6 +92,26 @@ bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) 
 		std::copy(biomes_tag.payload.begin(), biomes_tag.payload.end(), biomes);
 	} else
 		LOG(ERROR) << "Corrupt chunk " << chunkpos << ": No biome data found!";
+
+	const nbt::TagList& tile_entities_tag = level.findTag<nbt::TagList>("TileEntities");
+
+	if (tile_entities_tag.tag_type == nbt::TagCompound::TAG_TYPE) {
+		// go through all entities
+		for (auto it = tile_entities_tag.payload.begin(); it != tile_entities_tag.payload.end(); ++it) {
+			const nbt::TagCompound &entity = (*it)->cast<nbt::TagCompound>();
+			std::string id = entity.findTag<nbt::TagString>("id").payload; // Not an integer, e.g. for beds: 'minecraft:bed'
+			mc::BlockPos pos(
+					entity.findTag<nbt::TagInt>("x").payload,
+					entity.findTag<nbt::TagInt>("z").payload,
+					entity.findTag<nbt::TagInt>("y").payload
+			);
+
+			if (id == "minecraft:bed") { // bed, stored as a string here
+				uint16_t color = (uint16_t) entity.findTag<nbt::TagInt>("color").payload;
+				insertExtraData(pos, color);
+			}
+		}
+	}
 
 	// find sections list
 	// ignore it if section list does not exist, can happen sometimes with the empty
@@ -253,6 +277,14 @@ uint8_t Chunk::getData(const LocalBlockPos& pos, int array, bool force) const {
 	return data;
 }
 
+uint16_t Chunk::getBlockExtraData(const LocalBlockPos& pos, uint16_t id) const {
+	if (id == 26) {
+		return getExtraData(pos, 14); // Default is red
+	}
+
+	return 0;
+}
+
 uint8_t Chunk::getBlockData(const LocalBlockPos& pos, bool force) const {
 	return getData(pos, 0, force);
 }
@@ -276,6 +308,29 @@ uint8_t Chunk::getBiomeAt(const LocalBlockPos& pos) const {
 
 const ChunkPos& Chunk::getPos() const {
 	return chunkpos;
+}
+
+void Chunk::insertExtraData(const LocalBlockPos &pos, uint16_t extra_data) {
+	int key = positionToKey(pos.x, pos.z, pos.y);
+	std::pair<int,uint16_t> pair (key, extra_data);
+	extra_data_map.insert(pair);
+}
+
+uint16_t Chunk::getExtraData(const LocalBlockPos &pos, uint16_t default_value) const {
+	int x = pos.x;
+	int z = pos.z;
+	if (rotation)
+		rotateBlockPos(x, z, rotation);
+	int key = positionToKey(x, z, pos.y);
+
+	auto result = extra_data_map.find(key);
+	if (result == extra_data_map.end()) {
+		// Not found, possibly from an old world
+		// Default value is 14 = red
+		return default_value;
+	}
+
+	return result->second;
 }
 
 }

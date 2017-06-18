@@ -201,7 +201,7 @@ public:
 	/**
 	 * We need to overwrite this because there is a special case for the snowy grass block.
 	 */
-	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome) const;
+	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, uint16_t extra_data, const Biome& biome) const;
 
 	virtual int getBlockSize() const;
 
@@ -217,7 +217,9 @@ protected:
 	void addBlockShadowEdges(uint16_t id, uint16_t data, const RGBAImage& block);
 
 	void setBlockImage(uint16_t id, uint16_t data, const BlockImage& block);
+	void setBedImage(uint16_t data, uint16_t extra_data, const RGBAImage& block);
 	virtual void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
+	virtual void setBedImage(uint16_t data, uint16_t extra_data, const BlockImage& block);
 
 	uint32_t darkenLeft(uint32_t pixel) const;
 	uint32_t darkenRight(uint32_t pixel) const;
@@ -257,6 +259,7 @@ protected:
 	void createSmallerBlock(uint16_t id, uint16_t data, const RGBAImage& side_face,
 	        const RGBAImage& top_texture, int y1, int y2);
 	void createSmallerBlock(uint16_t id, uint16_t data, const RGBAImage& texture, int y1, int y2);
+	void createGlazedTerracotta(uint16_t id, const RGBAImage& texture);
 	void createRotatedBlock(uint16_t id, uint16_t extra_data, const RGBAImage& front_texture,
 	        const RGBAImage& side_texture, const RGBAImage& top_texture);
 	void createRotatedBlock(uint16_t id, uint16_t extra_data, const RGBAImage& front_texture,
@@ -275,7 +278,8 @@ protected:
 	void createLeaves(); // id 18
 	void createGlass(uint16_t id, uint16_t data, const RGBAImage& texture); // id 20, 95
 	void createDispenserDropper(uint16_t id, const RGBAImage& front); // id 23, 158
-	void createBed(); // id 26
+	void createObserver(uint16_t id); // id 218
+	void createBed(const BedTextures& textures); // id 26
 	void createStraightRails(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 27, 28, 66
 	void createPiston(uint16_t id, bool sticky); // id 29, 33
 	void createSlabs(uint16_t id, SlabType type, bool double_slabs); // id 43, 44, 125, 126
@@ -285,6 +289,7 @@ protected:
 	void createStairs(uint16_t id, const RGBAImage& texture,
 			const RGBAImage& texture_top); // id 53, 67, 108, 109, 114, 128, 134, 135, 136, 180
 	void createStairs(uint16_t id, const RGBAImage& texture);
+	void createShulkerBox(uint16_t id, int color_index, const ShulkerTextures& textures); // id 219 - 234
 	void createChest(uint16_t id, const ChestTextures& textures); // id 54, 95, 130
 	void createDoubleChest(uint16_t id, const DoubleChestTextures& textures); // id 54
 	void createRedstoneWire(uint16_t id, uint16_t extra_data,

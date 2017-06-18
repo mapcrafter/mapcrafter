@@ -95,18 +95,24 @@ void TopdownBlockImages::createDispenserDropper(uint16_t id, const RGBAImage& fr
 	setBlockImage(id, 1, front);
 }
 
-void TopdownBlockImages::createBed() { // id 26
-	RGBAImage top = resources.getBlockTextures().BED_FEET_TOP;
-	setBlockImage(26, 0, top.rotate(2));
-	setBlockImage(26, 1, top.rotate(3));
-	setBlockImage(26, 2, top);
-	setBlockImage(26, 3, top.rotate(1));
+void TopdownBlockImages::createBed(const BedTextures& textures) { // id 26
+	for (uint16_t colour = 0; colour < 16; colour++) {
+		int offset = colour * BedTextures::DATA_SIZE;
+		RGBAImage top_foot = textures[offset + BedTextures::TOP_FOOT];
+		RGBAImage top_head = textures[offset + BedTextures::TOP_HEAD];
 
-	top = resources.getBlockTextures().BED_HEAD_TOP;
-	setBlockImage(26, 8, top.rotate(1));
-	setBlockImage(26, 1 | 8, top.rotate(2));
-	setBlockImage(26, 2 | 8, top.rotate(3));
-	setBlockImage(26, 3 | 8, top);
+		// Head
+		setBedImage(0 | 8, colour, top_head.rotate(ROTATE_180)); // Pointing south
+		setBedImage(1 | 8, colour, top_head.rotate(ROTATE_270)); // Pointing west
+		setBedImage(2 | 8, colour, top_head); // Pointing north
+		setBedImage(3 | 8, colour, top_head.rotate(ROTATE_90)); // Pointing east
+
+		// Foot
+		setBedImage(0, colour, top_foot.rotate(ROTATE_180)); // Pointing south
+		setBedImage(1, colour, top_foot.rotate(ROTATE_270)); // Pointing west
+		setBedImage(2, colour, top_foot); // Pointing north
+		setBedImage(3, colour, top_foot.rotate(ROTATE_90)); // Pointing east
+	}
 }
 
 void TopdownBlockImages::createStraightRails(uint16_t id, uint16_t extra_data,
@@ -144,7 +150,7 @@ void TopdownBlockImages::createPiston(uint16_t id, bool sticky) { // id 29, 33
 	const BlockTextures& textures = resources.getBlockTextures();
 	RGBAImage top = textures.PISTON_TOP_NORMAL;
 	RGBAImage top_sticky = textures.PISTON_TOP_STICKY;
-	RGBAImage front = sticky ? top : top_sticky;
+	RGBAImage front = sticky ? top_sticky : top;
 	RGBAImage back = textures.PISTON_BOTTOM;
 
 	// side is the normale piston side
@@ -934,6 +940,13 @@ void TopdownBlockImages::createEndRod() { // id 198
 	setBlockImage(198, 5, side.rotate(3));
 }
 
+void TopdownBlockImages::createGlazedTerracotta(uint16_t id, const RGBAImage &texture) {
+	setBlockImage(id, 0, texture.rotate(ROTATE_0));
+	setBlockImage(id, 1, texture.rotate(ROTATE_90));
+	setBlockImage(id, 2, texture.rotate(ROTATE_180));
+	setBlockImage(id, 3, texture.rotate(ROTATE_270));
+}
+
 uint16_t TopdownBlockImages::filterBlockData(uint16_t id, uint16_t data) const {
 	// call super method
 	data = AbstractBlockImages::filterBlockData(id, data);
@@ -1118,7 +1131,7 @@ void TopdownBlockImages::createBlocks() {
 	createDispenserDropper(23, t.DISPENSER_FRONT_HORIZONTAL); // dispenser
 	setBlockImage(24, 0, t.SANDSTONE_TOP); // sandstone
 	setBlockImage(25, 0, t.NOTEBLOCK); // noteblock
-	createBed(); // id 26 // bed
+	createBed(resources.getBedTextures()); // id 26 // bed
 	createStraightRails(27, 0, t.RAIL_GOLDEN); // powered rail (unpowered)
 	createStraightRails(27, 8, t.RAIL_GOLDEN_POWERED); // powered rail (powered);
 	createStraightRails(28, 0, t.RAIL_ACTIVATOR); // detector rail
@@ -1631,6 +1644,73 @@ void TopdownBlockImages::createBlocks() {
 	setBlockImage(216, 0, t.BONE_BLOCK_TOP); // vertically
 	setBlockImage(216, 4, t.BONE_BLOCK_SIDE); // east-west
 	setBlockImage(216, 8, t.BONE_BLOCK_SIDE); // north-south
+	// observer --
+	setBlockImage(218, 0, t.OBSERVER_BACK);
+	setBlockImage(218, 1, t.OBSERVER_FRONT.rotate(ROTATE_180));
+	setBlockImage(218, 2, t.OBSERVER_TOP.rotate(ROTATE_180));
+	setBlockImage(218, 3, t.OBSERVER_TOP);
+	setBlockImage(218, 4, t.OBSERVER_TOP.rotate(ROTATE_90));
+	setBlockImage(218, 5, t.OBSERVER_TOP.rotate(ROTATE_270));
+	// shulker boxes --
+	for (uint16_t i = 0; i < 16; i++) {
+		setBlockImage((uint16_t) (219 + i), 0, resources.getShulkerBoxTextures()[i * ShulkerTextures::DATA_SIZE + ShulkerTextures::BOTTOM].flip(true, false).rotate(ROTATE_180));
+		setBlockImage((uint16_t) (219 + i), 1, resources.getShulkerBoxTextures()[i * ShulkerTextures::DATA_SIZE + ShulkerTextures::TOP]);
+		setBlockImage((uint16_t) (219 + i), 2, resources.getShulkerBoxTextures()[i * ShulkerTextures::DATA_SIZE + ShulkerTextures::SIDE]); // north
+		setBlockImage((uint16_t) (219 + i), 3, resources.getShulkerBoxTextures()[i * ShulkerTextures::DATA_SIZE + ShulkerTextures::SIDE].rotate(ROTATE_180)); // south
+		setBlockImage((uint16_t) (219 + i), 4, resources.getShulkerBoxTextures()[i * ShulkerTextures::DATA_SIZE + ShulkerTextures::SIDE].rotate(ROTATE_270)); // west
+		setBlockImage((uint16_t) (219 + i), 5, resources.getShulkerBoxTextures()[i * ShulkerTextures::DATA_SIZE + ShulkerTextures::SIDE].rotate(ROTATE_90)); // east
+	}
+	// glazed terracotta --
+	createGlazedTerracotta(235, t.GLAZED_TERRACOTTA_WHITE); // white
+	createGlazedTerracotta(236, t.GLAZED_TERRACOTTA_ORANGE); // orange
+	createGlazedTerracotta(237, t.GLAZED_TERRACOTTA_MAGENTA); // magenta
+	createGlazedTerracotta(238, t.GLAZED_TERRACOTTA_LIGHT_BLUE); // light blue
+	createGlazedTerracotta(239, t.GLAZED_TERRACOTTA_YELLOW); // yellow
+	createGlazedTerracotta(240, t.GLAZED_TERRACOTTA_LIME); // lime
+	createGlazedTerracotta(241, t.GLAZED_TERRACOTTA_PINK); // pink
+	createGlazedTerracotta(242, t.GLAZED_TERRACOTTA_GRAY); // gray
+	createGlazedTerracotta(243, t.GLAZED_TERRACOTTA_SILVER); // light gray
+	createGlazedTerracotta(244, t.GLAZED_TERRACOTTA_CYAN); // cyan
+	createGlazedTerracotta(245, t.GLAZED_TERRACOTTA_PURPLE); // purple
+	createGlazedTerracotta(246, t.GLAZED_TERRACOTTA_BLUE); // blue
+	createGlazedTerracotta(247, t.GLAZED_TERRACOTTA_BROWN); // brown
+	createGlazedTerracotta(248, t.GLAZED_TERRACOTTA_GREEN); // green
+	createGlazedTerracotta(249, t.GLAZED_TERRACOTTA_RED); // red
+	createGlazedTerracotta(250, t.GLAZED_TERRACOTTA_BLACK); // black
+	// concrete --
+	setBlockImage(251, 0, t.CONCRETE_WHITE); // white
+	setBlockImage(251, 1, t.CONCRETE_ORANGE); // orange
+	setBlockImage(251, 2, t.CONCRETE_MAGENTA); // magenta
+	setBlockImage(251, 3, t.CONCRETE_LIGHT_BLUE); // light blue
+	setBlockImage(251, 4, t.CONCRETE_YELLOW); // yellow
+	setBlockImage(251, 5, t.CONCRETE_LIME); // lime
+	setBlockImage(251, 6, t.CONCRETE_PINK); // pink
+	setBlockImage(251, 7, t.CONCRETE_GRAY); // gray
+	setBlockImage(251, 8, t.CONCRETE_SILVER); // light gray
+	setBlockImage(251, 9, t.CONCRETE_CYAN); // cyan
+	setBlockImage(251, 10, t.CONCRETE_PURPLE); // purple
+	setBlockImage(251, 11, t.CONCRETE_BLUE); // blue
+	setBlockImage(251, 12, t.CONCRETE_BROWN); // brown
+	setBlockImage(251, 13, t.CONCRETE_GREEN); // green
+	setBlockImage(251, 14, t.CONCRETE_RED); // red
+	setBlockImage(251, 15, t.CONCRETE_BLACK); // black
+	// concrete powder --
+	setBlockImage(252, 0, t.CONCRETE_POWDER_WHITE); // white
+	setBlockImage(252, 1, t.CONCRETE_POWDER_ORANGE); // orange
+	setBlockImage(252, 2, t.CONCRETE_POWDER_MAGENTA); // magenta
+	setBlockImage(252, 3, t.CONCRETE_POWDER_LIGHT_BLUE); // light blue
+	setBlockImage(252, 4, t.CONCRETE_POWDER_YELLOW); // yellow
+	setBlockImage(252, 5, t.CONCRETE_POWDER_LIME); // lime
+	setBlockImage(252, 6, t.CONCRETE_POWDER_PINK); // pink
+	setBlockImage(252, 7, t.CONCRETE_POWDER_GRAY); // gray
+	setBlockImage(252, 8, t.CONCRETE_POWDER_SILVER); // light gray
+	setBlockImage(252, 9, t.CONCRETE_POWDER_CYAN); // cyan
+	setBlockImage(252, 10, t.CONCRETE_POWDER_PURPLE); // purple
+	setBlockImage(252, 11, t.CONCRETE_POWDER_BLUE); // blue
+	setBlockImage(252, 12, t.CONCRETE_POWDER_BROWN); // brown
+	setBlockImage(252, 13, t.CONCRETE_POWDER_GREEN); // green
+	setBlockImage(252, 14, t.CONCRETE_POWDER_RED); // red
+	setBlockImage(252, 15, t.CONCRETE_POWDER_BLACK); // black
 	// --
 	setBlockImage(217, 0, empty_texture); // structure void
 	// structure block --

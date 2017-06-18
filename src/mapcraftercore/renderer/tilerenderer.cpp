@@ -453,7 +453,6 @@ uint16_t TileRenderer::checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint
 		}
 	}
 
-
 	if (!images->isBlockTransparent(id, data)) {
 		// add shadow edges on opaque blockes
 		north = getBlock(pos + mc::DIR_NORTH);

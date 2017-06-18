@@ -41,7 +41,7 @@ protected:
 
 	void createWood(uint16_t id, uint16_t extra_data, const RGBAImage& side, const RGBAImage& top); // id 17, 162
 	void createDispenserDropper(uint16_t id, const RGBAImage& front); // id 23, 158
-	void createBed(); // id 26
+	void createBed(const BedTextures& textures); // id 26
 	void createStraightRails(uint16_t id, uint16_t extra_data, const RGBAImage& texture); // id 27, 28
 	void createPiston(uint16_t id, bool sticky); // id 29, 33
 	void createPistonExtension(); // id 34
@@ -73,6 +73,7 @@ protected:
 	void createFlowerPot(); // id 140
 	void createLargePlant(uint16_t data, const RGBAImage& texture, const RGBAImage& top_texture); // id 175
 	void createEndRod(); // id 198
+	void createGlazedTerracotta(uint16_t id, const RGBAImage& texture);
 
 	virtual uint16_t filterBlockData(uint16_t id, uint16_t data) const;
 	virtual bool isImageTransparent(const RGBAImage& block) const;

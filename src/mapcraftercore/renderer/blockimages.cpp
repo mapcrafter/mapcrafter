@@ -109,6 +109,153 @@ bool DoubleChestTextures::load(const std::string& filename, int texture_size) {
 	return true;
 }
 
+bool ShulkerTextures::load(const std::string& base_filename, int texture_size) {
+	return (loadSingle(base_filename + "white.png", 0, texture_size) &&
+			loadSingle(base_filename + "orange.png", 1, texture_size) &&
+			loadSingle(base_filename + "magenta.png", 2, texture_size) &&
+			loadSingle(base_filename + "light_blue.png", 3, texture_size) &&
+			loadSingle(base_filename + "yellow.png", 4, texture_size) &&
+			loadSingle(base_filename + "lime.png", 5, texture_size) &&
+			loadSingle(base_filename + "pink.png", 6, texture_size) &&
+			loadSingle(base_filename + "gray.png", 7, texture_size) &&
+			loadSingle(base_filename + "silver.png", 8, texture_size) &&
+			loadSingle(base_filename + "cyan.png", 9, texture_size) &&
+			loadSingle(base_filename + "purple.png", 10, texture_size) &&
+			loadSingle(base_filename + "blue.png", 11, texture_size) &&
+			loadSingle(base_filename + "brown.png", 12, texture_size) &&
+			loadSingle(base_filename + "green.png", 13, texture_size) &&
+			loadSingle(base_filename + "red.png", 14, texture_size) &&
+			loadSingle(base_filename + "black.png", 15, texture_size));
+}
+
+bool ShulkerTextures::loadSingle(const std::string& filename, int color_index, int texture_size) {
+	RGBAImage image;
+	if (!image.readPNG(filename)) {
+		LOG(ERROR) << "Unable to read '" << filename << "'.";
+		return false;
+	}
+
+	if (image.getWidth() != image.getHeight()) {
+		LOG(ERROR) << "Shulker texture has invalid size (width:height must be 1:1): '"
+				   << filename << "'.";
+		return false;
+	}
+	// if the image is 64px wide, the shulker box images are 16x16
+	int ratio = image.getHeight() / 64;
+	int size = ratio * 16;
+	int size_h = ratio * 12; // Sides are slightly smaller
+
+	RGBAImage top = image.clip(size, 0, size, size);
+	RGBAImage side = image.clip(0, size, size, size);
+	RGBAImage side_bottom = image.clip(0, 2 * size + (size - size_h), size, size);
+	RGBAImage bottom = image.clip(2 * size, size + size_h, size, size);
+
+	side.alphaBlit(side_bottom, 0, 0);
+
+	int offset = color_index * ShulkerTextures::DATA_SIZE;
+
+	// resize the shulker images to texture size
+	bottom.resize((*this)[offset + ShulkerTextures::BOTTOM], texture_size, texture_size);
+	side.resize((*this)[offset + ShulkerTextures::SIDE], texture_size, texture_size);
+	top.resize((*this)[offset + ShulkerTextures::TOP], texture_size, texture_size);
+
+	return true;
+}
+
+bool BedTextures::load(const std::string& base_filename, int texture_size) {
+	return (loadSingle(base_filename + "white.png", 0, texture_size) &&
+			loadSingle(base_filename + "orange.png", 1, texture_size) &&
+			loadSingle(base_filename + "magenta.png", 2, texture_size) &&
+			loadSingle(base_filename + "light_blue.png", 3, texture_size) &&
+			loadSingle(base_filename + "yellow.png", 4, texture_size) &&
+			loadSingle(base_filename + "lime.png", 5, texture_size) &&
+			loadSingle(base_filename + "pink.png", 6, texture_size) &&
+			loadSingle(base_filename + "gray.png", 7, texture_size) &&
+			loadSingle(base_filename + "silver.png", 8, texture_size) &&
+			loadSingle(base_filename + "cyan.png", 9, texture_size) &&
+			loadSingle(base_filename + "purple.png", 10, texture_size) &&
+			loadSingle(base_filename + "blue.png", 11, texture_size) &&
+			loadSingle(base_filename + "brown.png", 12, texture_size) &&
+			loadSingle(base_filename + "green.png", 13, texture_size) &&
+			loadSingle(base_filename + "red.png", 14, texture_size) &&
+			loadSingle(base_filename + "black.png", 15, texture_size));
+}
+
+bool BedTextures::loadSingle(const std::string& filename, int color_index, int texture_size) {
+	RGBAImage image;
+	if (!image.readPNG(filename)) {
+		LOG(ERROR) << "Unable to read '" << filename << "'.";
+		return false;
+	}
+
+	if (image.getWidth() != image.getHeight()) {
+		LOG(ERROR) << "Bed texture has invalid size (width:height must be 1:1): '"
+				   << filename << "'.";
+		return false;
+	}
+	// if the image is 64px wide, the bed box images are 16x16
+	int ratio = image.getHeight() / 64;
+	int size = ratio * 16;
+
+	// Copy parts from the texture file (sizes according to base texture)
+	RGBAImage top_head = image.clip(6 * ratio, 6 * ratio, size, size); // 16 x 16
+	RGBAImage top_foot = image.clip(6 * ratio, 28 * ratio, size, size); // 16 x 16
+	RGBAImage small_side_head_left = image.clip(0, 6 * ratio, 6 * ratio, size); // 6 x 16
+	RGBAImage small_side_head_right = image.clip(22 * ratio, 6 * ratio, 6 * ratio, size); // 6 x 16
+	RGBAImage small_side_foot_left = image.clip(0, 28 * ratio, 6 * ratio, size); // 6 x 16
+	RGBAImage small_side_foot_right = image.clip(22 * ratio, 28 * ratio, 6 * ratio, size); // 6 x 16
+	RGBAImage small_side_head_end = image.clip(6 * ratio, 0, size, 6 * ratio); // 16 x 16
+	RGBAImage small_side_foot_end = image.clip(22 * ratio, 22 * ratio, size, 6 * ratio); // 16 x 16
+	RGBAImage leg = image.clip(50 * ratio, 3 * ratio, 3 * ratio, 3 * ratio); // Only one leg, used on multiple locations, 3 x 3
+
+	// Create blank canvases for the side textures at their proper size
+	RGBAImage side_head_left(size, size); side_head_left.clear();
+	RGBAImage side_head_right(size, size); side_head_right.clear();
+	RGBAImage side_foot_left(size, size); side_foot_left.clear();
+	RGBAImage side_foot_right(size, size); side_foot_right.clear();
+	RGBAImage side_head_end(size, size); side_head_end.clear();
+	RGBAImage side_foot_end(size, size); side_foot_end.clear();
+
+	// Render textures by copying things and adding legs
+	side_head_left.simpleBlit(small_side_head_left, 3 * ratio, 0);
+	side_head_left.simpleBlit(leg.rotate(ROTATE_90).flip(false, true), 0, 0);
+	side_head_left = side_head_left.rotate(ROTATE_270);
+
+	side_head_right.simpleBlit(small_side_head_right, 7 * ratio, 0);
+	side_head_right.simpleBlit(leg.rotate(ROTATE_90).flip(false, true), 13 * ratio, 0);
+	side_head_right = side_head_right.rotate(ROTATE_90);
+
+	side_foot_left.simpleBlit(small_side_foot_left, 3 * ratio, 0);
+	side_foot_left.simpleBlit(leg.rotate(ROTATE_90), 0, 13 * ratio);
+	side_foot_left = side_foot_left.rotate(ROTATE_270);
+
+	side_foot_right.simpleBlit(small_side_foot_right, 7 * ratio, 0);
+	side_foot_right.simpleBlit(leg.rotate(ROTATE_90), 13 * ratio, 13 * ratio);
+	side_foot_right = side_foot_right.rotate(ROTATE_90);
+
+	side_head_end.simpleBlit(small_side_head_end.flip(false, true), 0, 7 * ratio);
+	side_head_end.simpleBlit(leg.flip(true, false), 0, 13 * ratio);
+	side_head_end.simpleBlit(leg, 13 * ratio, 13 * ratio);
+
+	side_foot_end.simpleBlit(small_side_foot_end.flip(false, true), 0, 7 * ratio);
+	side_foot_end.simpleBlit(leg.flip(true, false), 0, 13 * ratio);
+	side_foot_end.simpleBlit(leg, 13 * ratio, 13 * ratio);
+
+	int offset = color_index * BedTextures::DATA_SIZE;
+
+	// resize the bed images to texture size
+	top_head.resize((*this)[offset + BedTextures::TOP_HEAD], texture_size, texture_size);
+	top_foot.resize((*this)[offset + BedTextures::TOP_FOOT], texture_size, texture_size);
+	side_head_left.resize((*this)[offset + BedTextures::SIDE_HEAD_LEFT], texture_size, texture_size);
+	side_head_right.resize((*this)[offset + BedTextures::SIDE_HEAD_RIGHT], texture_size, texture_size);
+	side_foot_left.resize((*this)[offset + BedTextures::SIDE_FOOT_LEFT], texture_size, texture_size);
+	side_foot_right.resize((*this)[offset + BedTextures::SIDE_FOOT_RIGHT], texture_size, texture_size);
+	side_head_end.resize((*this)[offset + BedTextures::SIDE_HEAD_END], texture_size, texture_size);
+	side_foot_end.resize((*this)[offset + BedTextures::SIDE_FOOT_END], texture_size, texture_size);
+
+	return true;
+}
+
 TextureResources::TextureResources()
 	: texture_size(12), texture_blur(0) {
 }
@@ -140,7 +287,9 @@ bool TextureResources::loadTextures(const std::string& texture_dir,
 			dir + "entity/chest/normal_double.png",
 			dir + "entity/chest/ender.png",
 			dir + "entity/chest/trapped.png",
-			dir + "entity/chest/trapped_double.png"))
+			dir + "entity/chest/trapped_double.png",
+			dir + "entity/shulker/shulker_",
+			dir + "entity/bed/"))
 		ok = false;
 	if (!loadColors(dir + "colormap/foliage.png",
 			dir + "colormap/grass.png"))
@@ -182,6 +331,14 @@ const DoubleChestTextures& TextureResources::getTrappedDoubleChest() const {
 	return trapped_double_chest;
 }
 
+const ShulkerTextures& TextureResources::getShulkerBoxTextures() const {
+	return shulker_textures;
+}
+
+const BedTextures &TextureResources::getBedTextures() const {
+	return bed_textures;
+}
+
 const RGBAImage& TextureResources::getFoliageColors() const {
 	return foliage_colors;
 }
@@ -192,12 +349,15 @@ const RGBAImage& TextureResources::getGrassColors() const {
 
 bool TextureResources::loadChests(const std::string& normal_png,
 		const std::string& normal_double_png, const std::string& ender_png,
-		const std::string& trapped_png, const std::string& trapped_double_png) {
+		const std::string& trapped_png, const std::string& trapped_double_png,
+		const std::string& shulker_base_png, const std::string& bed_base_png) {
 	if (!normal_chest.load(normal_png, texture_size)
 			|| !normal_double_chest.load(normal_double_png, texture_size)
 			|| !ender_chest.load(ender_png, texture_size)
 			|| !trapped_chest.load(trapped_png, texture_size)
-			|| !trapped_double_chest.load(trapped_double_png, texture_size))
+			|| !trapped_double_chest.load(trapped_double_png, texture_size)
+			|| !shulker_textures.load(shulker_base_png, texture_size)
+			|| !bed_textures.load(bed_base_png, texture_size))
 		return false;
 	return true;
 }
@@ -294,8 +454,11 @@ bool AbstractBlockImages::isBlockTransparent(uint16_t id, uint16_t data) const {
 	// special case for doors because they are only used with special data
 	// and not with the original minecraft data
 	// without this the lighting code for example would need to filter the door data
+
+	// special case for beds, as they are handled in a different way
+
 	// FIXME
-	if (id == 64 || id == 71)
+	if (id == 64 || id == 71 || id == 26)
 		return true;
 	if (block_images.count(id | (data << 16)) == 0)
 		return !render_unknown_blocks;
@@ -306,15 +469,27 @@ bool AbstractBlockImages::hasBlock(uint16_t id, uint16_t data) const {
 	return block_images.count(id | (data << 16)) != 0;
 }
 
-const RGBAImage& AbstractBlockImages::getBlock(uint16_t id, uint16_t data) const {
+bool AbstractBlockImages::hasBedBlock(uint16_t data, uint16_t extra_data) const {
+	return block_images_bed.count(data | (extra_data << 16)) != 0;
+}
+
+const RGBAImage& AbstractBlockImages::getBlock(uint16_t id, uint16_t data, uint16_t extra_data) const {
 	data = filterBlockData(id, data);
+
+	if (id == 26) { // Beds
+		if (!hasBedBlock(data, extra_data)) {
+			return unknown_block;
+		}
+		return block_images_bed.at(data | (extra_data << 16));
+	}
+
 	if (!hasBlock(id, data))
 		return unknown_block;
 	return block_images.at(id | (data << 16));
 }
 
 RGBAImage AbstractBlockImages::getBiomeBlock(uint16_t id, uint16_t data,
-		const Biome& biome) const {
+		const Biome& biome, uint16_t extra_data) const {
 	data = filterBlockData(id, data);
 	if (!hasBlock(id, data))
 		return unknown_block;
@@ -378,6 +553,11 @@ void AbstractBlockImages::setBlockImage(uint16_t id, uint16_t data,
 	// check if block contains transparency
 	if (isImageTransparent(block))
 		block_transparency.insert(id | (data << 16));
+}
+
+void AbstractBlockImages::setBedImage(uint16_t data, uint16_t extra_data,
+		const RGBAImage& block) {
+	block_images_bed[data | (extra_data << 16)] = block;
 }
 
 void AbstractBlockImages::createBiomeBlocks() {
