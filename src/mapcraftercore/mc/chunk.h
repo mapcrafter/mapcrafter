@@ -99,14 +99,9 @@ public:
 	uint8_t getBlockData(const LocalBlockPos& pos, bool force = false) const;
 
 	/**
-	 * Returns some additional block data, stored possibly in NBT tags
+	 * Returns some additional block data, originally stored somewhere else (e.g. in an NBT tag)
 	 */
-	uint16_t getBlockExtraData(const LocalBlockPos& pos) const;
-
-	/**
-	 * Combination of the upper 3 definitions, but expects references to store the result
-	 */
-	void getBlockInfo(const LocalBlockPos& pos, uint16_t& id, uint16_t& data, uint16_t& extra_data);
+    uint16_t getBlockExtraData(const LocalBlockPos& pos, uint16_t id) const;
 
 	/**
 	 * Returns the block light at a specific position (local coordinates).
@@ -172,8 +167,6 @@ private:
 	int positionToKey(int x, int z, int y) const;
 	void insertExtraData(const LocalBlockPos& pos, uint16_t extra_data);
 	uint16_t getExtraData(const LocalBlockPos& pos, uint16_t default_value = 0) const;
-
-	uint16_t getBlockExtraData(uint16_t id, const LocalBlockPos& pos) const;
 };
 
 }

@@ -277,23 +277,12 @@ uint8_t Chunk::getData(const LocalBlockPos& pos, int array, bool force) const {
 	return data;
 }
 
-uint16_t Chunk::getBlockExtraData(const LocalBlockPos& pos) const {
-	uint16_t id = getBlockID(pos);
-	return getBlockExtraData(id, pos);
-}
-
-uint16_t Chunk::getBlockExtraData(uint16_t id, const LocalBlockPos& pos) const {
+uint16_t Chunk::getBlockExtraData(const LocalBlockPos& pos, uint16_t id) const {
 	if (id == 26) {
 		return getExtraData(pos, 14); // Default is red
 	}
 
 	return 0;
-}
-
-void Chunk::getBlockInfo(const LocalBlockPos& pos, uint16_t& id, uint16_t& data, uint16_t& extra_data) {
-	id = getBlockID(pos);
-	data = getBlockData(pos);
-	extra_data = getBlockExtraData(id, pos);
 }
 
 uint8_t Chunk::getBlockData(const LocalBlockPos& pos, bool force) const {

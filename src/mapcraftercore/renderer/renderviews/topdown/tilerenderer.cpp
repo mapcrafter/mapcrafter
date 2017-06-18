@@ -89,14 +89,18 @@ void TopdownTileRenderer::renderChunk(const mc::Chunk& chunk, RGBAImage& tile, i
 			while (localpos.y >= 0) {
 				mc::BlockPos globalpos = localpos.toGlobalPos(chunk.getPos());
 
-				uint16_t id, data, extra_data;
-				current_chunk->getBlockInfo(localpos, id, data, extra_data);
+				uint16_t id;
+				id = current_chunk->getBlockID(localpos);
 
 				if (id == 0) {
 					in_water = false;
 					localpos.y--;
 					continue;
 				}
+
+				uint16_t data, extra_data;
+				data = current_chunk->getBlockData(localpos);
+				extra_data = current_chunk->getBlockExtraData(localpos, id);
 
 				bool is_water = (id == 8 || id == 9) && data == 0;
 
