@@ -101,7 +101,7 @@ public:
 	/**
 	 * Returns some additional block data, originally stored somewhere else (e.g. in an NBT tag)
 	 */
-    uint16_t getBlockExtraData(const LocalBlockPos& pos, uint16_t id) const;
+	uint16_t getBlockExtraData(const LocalBlockPos& pos, uint16_t id) const;
 
 	/**
 	 * Returns the block light at a specific position (local coordinates).
