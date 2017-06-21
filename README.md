@@ -82,7 +82,7 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
 
 **v.2.4**
 
-* Add support for Minecraft 1.11 and 1.12 blocks (thanks to Bjarno #256)
+* Added support for Minecraft 1.11 and 1.12 blocks (thanks to Bjarno #256)
 
 **v.2.3.1**
 
