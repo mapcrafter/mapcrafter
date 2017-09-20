@@ -160,5 +160,15 @@ bool World::getRegion(const RegionPos& pos, RegionFile& region) const {
 	return true;
 }
 
+
+bool World::getRegionNoCrop(const RegionPos &pos, RegionFile &region) const {
+	RegionMap::const_iterator it = region_files.find(pos);
+	if (it == region_files.end())
+		return false;
+	region = RegionFile(it->second);
+	region.setRotation(rotation);
+	return true;
+}
+
 }
 }

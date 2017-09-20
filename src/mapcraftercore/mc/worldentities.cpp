@@ -221,7 +221,7 @@ void WorldEntitiesCache::update(util::IProgressHandler* progress) {
 		}
 
 		RegionFile region;
-		world.getRegion(*region_it, region);
+		world.getRegionNoCrop(*region_it, region);
 		region.read();
 
 		auto chunks = region.getContainingChunks();

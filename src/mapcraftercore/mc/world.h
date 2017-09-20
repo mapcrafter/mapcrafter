@@ -140,6 +140,15 @@ public:
 	 */
 	bool getRegion(const RegionPos& pos, RegionFile& region) const;
 
+	/**
+	 * Creates the Region-object for a specific region and assigns the supplied reference
+	 * 'region' to it. This variant ignore world's defined crop. It should be used specifically
+	 * for updating the cache, to prevent, crop boundaries affected regions to not be updated.
+	 * Returns false if the region does not exist.
+	 */
+	bool getRegionNoCrop(const RegionPos& pos, RegionFile& region) const;
+
+
 private:
 	// world directory, region directory
 	fs::path world_dir, region_dir;
