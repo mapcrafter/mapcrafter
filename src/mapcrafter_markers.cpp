@@ -68,7 +68,6 @@ Markers findMarkers(const config::MapcrafterConfig& config) {
 		mc::WorldCrop world_crop = world_it->second.getWorldCrop();
 		mc::World world(world_it->second.getInputDir().string(),
 				world_it->second.getDimension());
-		world.setWorldCrop(world_crop);
 		if (!world.load()) {
 			LOG(ERROR) << "Unable to load world " << world_it->first << "!";
 			continue;
@@ -78,6 +77,10 @@ Markers findMarkers(const config::MapcrafterConfig& config) {
 		mc::WorldEntitiesCache entities(world);
 		util::LogOutputProgressHandler progress;
 		entities.update(&progress);
+
+		// Setting world crop after WorldEntitiesCache is fully updated
+		// to allow markers of the same non-cropped world to be generated
+		world.setWorldCrop(world_crop);
 
 		// use name of the world section as world name, not the world_name
 		std::string world_name = world_it->second.getShortName();
