@@ -484,6 +484,8 @@ Tag* createTag(int8_t type) {
 		return new TagCompound;
 	case TagIntArray::TAG_TYPE:
 		return new TagIntArray;
+	case TagLongArray::TAG_TYPE:
+		return new TagLongArray;
 	default:
 		return nullptr;
 	}

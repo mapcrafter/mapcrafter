@@ -68,7 +68,8 @@ enum class TagType : int8_t {
 	TAG_STRING = 8,
 	TAG_LIST = 9,
 	TAG_COMPOUND = 10,
-	TAG_INT_ARRAY = 11
+	TAG_INT_ARRAY = 11,
+	TAG_LONG_ARRAY = 12,
 };
 
 enum class Compression {
@@ -88,6 +89,7 @@ static const char* TAG_NAMES[] = {
 	"TAG_List",
 	"TAG_Compound",
 	"TAG_Int_Array",
+	"TAG_Long_Array",
 };
 
 template <typename T>
@@ -244,6 +246,7 @@ public:
 
 typedef TagArray<int8_t, TagType::TAG_BYTE_ARRAY> TagByteArray;
 typedef TagArray<int32_t, TagType::TAG_INT_ARRAY> TagIntArray;
+typedef TagArray<int64_t, TagType::TAG_LONG_ARRAY> TagLongArray;
 
 class TagString: public Tag {
 public:
