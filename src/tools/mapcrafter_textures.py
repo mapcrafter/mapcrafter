@@ -48,6 +48,7 @@ files = [
 	("entity/bed/purple.png", assets + "entity/bed/purple.png"),
 	("entity/bed/red.png", assets + "entity/bed/red.png"),
 	("entity/bed/silver.png", assets + "entity/bed/silver.png"),
+	("entity/bed/light_gray.png", assets + "entity/bed/light_gray.png"),
 	("entity/bed/white.png", assets + "entity/bed/white.png"),
 	("entity/bed/yellow.png", assets + "entity/bed/yellow.png"),
 ]
@@ -120,9 +121,9 @@ if __name__ == "__main__":
 	print("Extracting other textures:")
 	
 	for filename, zipname in files:
+		filename = os.path.join(args["outdir"], filename)
 		try:
 			info = jar.getinfo(zipname)
-			filename = os.path.join(args["outdir"], filename)
 			if os.path.exists(filename) and not args["force"]:
 				print(" - Extracting %s ... skipped." % filename)
 			else:
