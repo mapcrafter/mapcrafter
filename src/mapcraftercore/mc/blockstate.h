@@ -40,6 +40,8 @@ public:
 
 	bool operator<(const BlockState& other) const;
 
+	static BlockState parse(std::string name, std::string variant_description);
+
 private:
 	void updatePropertyRepresentation();
 

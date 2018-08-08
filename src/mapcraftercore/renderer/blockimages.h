@@ -547,7 +547,7 @@ public:
 
 	RenderedBlockImages(mc::BlockStateRegistry& block_registry);
 
-	void loadBlockImages(std::string path);
+	bool loadBlockImages(std::string path);
 	virtual RGBAImage exportBlocks() const;
 
 	const RGBAImage& getBlockImage(uint16_t id) const;

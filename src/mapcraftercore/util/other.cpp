@@ -211,5 +211,16 @@ bool endswith(const std::string& str, const std::string& end) {
 	return str.substr(str.size() - end.size(), end.size()) == end;
 }
 
+std::vector<std::string> split(const std::string& str, char delimiter) {
+	std::vector<std::string> splitted;
+
+	std::istringstream ss(str);
+	for (std::string token; std::getline(ss, token, delimiter);) {
+		splitted.push_back(token);
+	}
+
+	return splitted;
+}
+
 } /* namespace util */
 } /* namespace mapcrafter */

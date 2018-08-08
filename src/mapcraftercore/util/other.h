@@ -94,6 +94,8 @@ std::string replaceAll(const std::string& str, const std::string& from, const st
 bool startswith(const std::string& str, const std::string& start);
 bool endswith(const std::string& str, const std::string& end);
 
+std::vector<std::string> split(const std::string& str, char delimiter);
+
 /**
  * TODO this is unused, maybe use it for the config option values? ... or remove it
  */
