@@ -23,6 +23,7 @@
 #include "tilerenderworker.h"
 #include "renderview.h"
 #include "../config/loggingconfig.h"
+#include "../mc/blockstate.h"
 #include "../thread/impl/singlethread.h"
 #include "../thread/impl/multithreading.h"
 #include "../thread/dispatcher.h"
@@ -267,6 +268,9 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 
 	config::MapSection map_config = config.getMap(map);
 	config::WorldSection world_config = config.getWorld(map_config.getWorld());
+
+	// TODO keep block state registry global per map. or are there any reasons to make more global?
+	mc::BlockStateRegistry block_registry;
 	std::shared_ptr<RenderView> render_view(createRenderView(map_config.getRenderView()));
 
 	// output a small notice if we render this map incrementally
@@ -313,10 +317,17 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 	}
 
 	// create other stuff for the render dispatcher
-	std::shared_ptr<BlockImages> block_images(render_view->createBlockImages());
+	std::shared_ptr<BlockImages> block_images(render_view->createBlockImages(block_registry));
 	render_view->configureBlockImages(block_images.get(), world_config, map_config);
 	block_images->setRotation(rotation);
 	block_images->generateBlocks(resources);
+
+	RenderedBlockImages* new_block_images = dynamic_cast<RenderedBlockImages*>(block_images.get());
+	if (new_block_images != nullptr) {
+		new_block_images->loadBlockImages("/home/moritz/dev/misc/blockcrafter/out");
+		std::cerr << "Okay that's enough for now!" << std::endl;
+		return;
+	}
 
 	RenderContext context;
 	context.output_dir = output_dir;

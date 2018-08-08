@@ -26,6 +26,7 @@
 #include "../../rendermode.h"
 #include "../../../config/configsections/map.h"
 #include "../../../config/configsections/world.h"
+#include "../../../mc/blockstate.h"
 #include "../../../util.h"
 
 #include <cassert>
@@ -33,7 +34,7 @@
 namespace mapcrafter {
 namespace renderer {
 
-BlockImages* IsometricRenderView::createBlockImages() const {
+BlockImages* IsometricRenderView::createBlockImages(mc::BlockStateRegistry& block_registry) {
 	return new IsometricBlockImages();
 }
 

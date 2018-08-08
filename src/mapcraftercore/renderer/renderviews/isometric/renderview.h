@@ -27,7 +27,7 @@ namespace renderer {
 
 class IsometricRenderView : public RenderView {
 public:
-	virtual BlockImages* createBlockImages() const;
+	virtual BlockImages* createBlockImages(mc::BlockStateRegistry& block_registry) const;
 	virtual TileSet* createTileSet(int tile_width) const;
 	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderMode* render_mode) const;

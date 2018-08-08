@@ -19,13 +19,15 @@
 
 #include "renderview.h"
 
-#include "../isometric/blockimages.h"
+//#include "../isometric/blockimages.h"
 #include "tileset.h"
 #include "tilerenderer.h"
 #include "rendermodes.h"
 #include "../../rendermode.h"
+#include "../../blockimages.h"
 #include "../../../config/configsections/map.h"
 #include "../../../config/configsections/world.h"
+#include "../../../mc/blockstate.h"
 #include "../../../util.h"
 
 #include <cassert>
@@ -33,8 +35,9 @@
 namespace mapcrafter {
 namespace renderer {
 
-BlockImages* NewIsometricRenderView::createBlockImages() const {
-	return new IsometricBlockImages();
+BlockImages* NewIsometricRenderView::createBlockImages(mc::BlockStateRegistry& block_registry) {
+	//return new IsometricBlockImages();
+	return new RenderedBlockImages(block_registry);
 }
 
 TileSet* NewIsometricRenderView::createTileSet(int tile_width) const {
@@ -61,6 +64,7 @@ void NewIsometricRenderView::configureBlockImages(BlockImages* block_images,
 	assert(block_images != nullptr);
 	RenderView::configureBlockImages(block_images, world_config, map_config);
 
+	/*
 	IsometricBlockImages* images = dynamic_cast<IsometricBlockImages*>(block_images);
 	assert(images != nullptr);
 
@@ -69,6 +73,7 @@ void NewIsometricRenderView::configureBlockImages(BlockImages* block_images,
 		images->setBlockSideDarkening(0.95, 0.8);
 	else
 		images->setBlockSideDarkening(0.75, 0.6);
+	*/
 }
 
 void NewIsometricRenderView::configureTileRenderer(TileRenderer* tile_renderer,

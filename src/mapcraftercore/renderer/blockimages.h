@@ -31,6 +31,12 @@
 #include <cstdint>
 
 namespace mapcrafter {
+
+namespace mc {
+class BlockState;
+class BlockStateRegistry;
+}
+
 namespace renderer {
 
 class Biome;
@@ -521,6 +527,39 @@ protected:
 	RGBAImage unknown_block;
 
 	int max_water_preblit;
+};
+
+class RenderedBlockImages : public BlockImages {
+public:
+	// OLD METHODS
+	virtual void setRotation(int rotation) {}
+	virtual void setRenderSpecialBlocks(bool render_unknown_blocks,
+			bool render_leaves_transparent) {}
+	virtual void generateBlocks(const TextureResources& resources) {}
+	//virtual RGBAImage exportBlocks() const {}
+	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const {};
+	virtual bool hasBlock(uint16_t id, uint16_t) const {};
+	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data, uint16_t extra_data = 0) const {};
+	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome, uint16_t extra_data = 0) const {};
+	virtual int getMaxWaterPreblit() const {};
+	virtual int getTextureSize() const {};
+	//virtual int getBlockSize() const {};
+
+	RenderedBlockImages(mc::BlockStateRegistry& block_registry);
+
+	void loadBlockImages(std::string path);
+	virtual RGBAImage exportBlocks() const;
+
+	const RGBAImage& getBlockImage(uint16_t id) const;
+	const RGBAImage& getBlockUVImage(uint16_t id) const;
+
+	virtual int getBlockSize() const;
+
+private:
+	mc::BlockStateRegistry& block_registry;
+
+	// Mapcrafter-local block ID -> block (color/uv) image
+	std::unordered_map<uint16_t, RGBAImage> block_images, block_uv_images;
 };
 
 }

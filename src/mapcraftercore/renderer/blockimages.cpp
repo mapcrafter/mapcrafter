@@ -590,5 +590,28 @@ std::vector<RGBAImage> AbstractBlockImages::getExportBlocks() const {
 	return blocks;
 }
 
+RenderedBlockImages::RenderedBlockImages(mc::BlockStateRegistry& block_registry)
+	: block_registry(block_registry) {
+}
+
+void RenderedBlockImages::loadBlockImages(std::string path) {
+	std::cerr << "I would load block images from " << path << " now" << std::endl;
+}
+
+RGBAImage RenderedBlockImages::exportBlocks() const {
+	RGBAImage empty;
+
+	return empty;
+}
+
+const RGBAImage& RenderedBlockImages::getBlockImage(uint16_t id) const {
+}
+
+const RGBAImage& RenderedBlockImages::getBlockUVImage(uint16_t id) const {
+}
+
+int RenderedBlockImages::getBlockSize() const {
+}
+
 }
 }

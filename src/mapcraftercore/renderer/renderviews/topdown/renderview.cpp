@@ -25,11 +25,12 @@
 #include "rendermodes.h"
 #include "../../rendermode.h"
 #include "../../rendermodes/overlay.h"
+#include "../../../mc/blockstate.h"
 
 namespace mapcrafter {
 namespace renderer {
 
-BlockImages* TopdownRenderView::createBlockImages() const {
+BlockImages* TopdownRenderView::createBlockImages(mc::BlockStateRegistry& block_registry) {
 	return new TopdownBlockImages();
 }
 
