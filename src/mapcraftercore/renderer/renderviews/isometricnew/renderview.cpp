@@ -35,7 +35,7 @@
 namespace mapcrafter {
 namespace renderer {
 
-BlockImages* NewIsometricRenderView::createBlockImages(mc::BlockStateRegistry& block_registry) {
+BlockImages* NewIsometricRenderView::createBlockImages(mc::BlockStateRegistry& block_registry) const {
 	//return new IsometricBlockImages();
 	return new RenderedBlockImages(block_registry);
 }

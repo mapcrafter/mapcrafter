@@ -30,7 +30,7 @@
 namespace mapcrafter {
 namespace renderer {
 
-BlockImages* TopdownRenderView::createBlockImages(mc::BlockStateRegistry& block_registry) {
+BlockImages* TopdownRenderView::createBlockImages(mc::BlockStateRegistry& block_registry) const {
 	return new TopdownBlockImages();
 }
 

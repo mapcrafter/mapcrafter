@@ -27,7 +27,7 @@ namespace renderer {
 
 class TopdownRenderView : public RenderView {
 public:
-	virtual BlockImages* createBlockImages(mc::BlockStateRegistry& block_registry);
+	virtual BlockImages* createBlockImages(mc::BlockStateRegistry& block_registry) const;
 	virtual TileSet* createTileSet(int tile_width) const;
 	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
 			mc::WorldCache* world, RenderMode* render_mode) const;
