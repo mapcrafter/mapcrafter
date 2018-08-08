@@ -23,6 +23,7 @@
 #include "tileset.h"
 #include "tilerenderer.h"
 #include "renderviews/isometric/renderview.h"
+#include "renderviews/isometricnew/renderview.h"
 #include "renderviews/topdown/renderview.h"
 #include "../config/configsections/map.h"
 #include "../config/configsections/world.h"
@@ -55,6 +56,7 @@ void RenderView::configureTileRenderer(TileRenderer* tile_renderer,
 std::ostream& operator<<(std::ostream& out, RenderViewType render_view) {
 	switch (render_view) {
 	case RenderViewType::ISOMETRIC: return out << "isometric";
+	case RenderViewType::ISOMETRICNEW: return out << "isometricnew";
 	case RenderViewType::TOPDOWN: return out << "topdown";
 	default: return out << "unknown";
 	}
@@ -63,6 +65,7 @@ std::ostream& operator<<(std::ostream& out, RenderViewType render_view) {
 RenderView* createRenderView(RenderViewType render_view) {
 	switch (render_view) {
 	case RenderViewType::ISOMETRIC: return new IsometricRenderView();
+	case RenderViewType::ISOMETRICNEW: return new NewIsometricRenderView();
 	case RenderViewType::TOPDOWN: return new TopdownRenderView();
 	// thou shalt not return nullptr!
 	default: assert(false); return nullptr;

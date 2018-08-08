@@ -115,6 +115,7 @@ public:
 
 enum class RenderViewType {
 	ISOMETRIC,
+	ISOMETRICNEW,
 	TOPDOWN
 };
 

@@ -53,6 +53,8 @@ template <>
 renderer::RenderViewType as<renderer::RenderViewType>(const std::string& from) {
 	if (from == "isometric")
 		return renderer::RenderViewType::ISOMETRIC;
+	else if (from == "isometricnew")
+		return renderer::RenderViewType::ISOMETRICNEW;
 	else if (from == "topdown")
 		return renderer::RenderViewType::TOPDOWN;
 	throw std::invalid_argument("Must be 'isometric' or 'topdown'!");
