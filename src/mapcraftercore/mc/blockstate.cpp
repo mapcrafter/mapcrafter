@@ -89,6 +89,8 @@ BlockStateRegistry::BlockStateRegistry()
 }
 
 uint16_t BlockStateRegistry::getBlockID(const BlockState& block) {
+	std::lock_guard<std::mutex> guard(mutex);
+
 	// first check if that block name is known
 	auto it = block_lookup.find(block.getName());
 	if (it == block_lookup.end()) {

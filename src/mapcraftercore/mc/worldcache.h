@@ -30,6 +30,8 @@
 namespace mapcrafter {
 namespace mc {
 
+class BlockStateRegistry;
+
 /**
  * A block with id/data/biome/lighting data.
  */
@@ -126,6 +128,7 @@ struct CacheEntry {
  */
 class WorldCache {
 private:
+	mc::BlockStateRegistry& block_registry;
 	World world;
 
 	CacheEntry<RegionPos, RegionFile> regioncache[RSIZE];
@@ -143,8 +146,7 @@ private:
 	int getChunkCacheIndex(const ChunkPos& pos) const;
 
 public:
-	WorldCache();
-	WorldCache(const World& world);
+	WorldCache(mc::BlockStateRegistry& block_registry, const World& world);
 
 	const World& getWorld() const;
 

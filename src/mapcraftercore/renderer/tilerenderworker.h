@@ -34,6 +34,7 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 
 namespace mc {
+class BlockStateRegistry;
 class WorldCache;
 }
 
@@ -56,6 +57,7 @@ struct RenderContext {
 	RenderView* render_view;
 	BlockImages* block_images;
 	TileSet* tile_set;
+	mc::BlockStateRegistry* block_registry;
 	mc::World world;
 
 	std::shared_ptr<mc::WorldCache> world_cache;

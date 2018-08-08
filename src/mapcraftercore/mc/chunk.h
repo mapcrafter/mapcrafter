@@ -30,6 +30,8 @@
 namespace mapcrafter {
 namespace mc {
 
+class BlockStateRegistry;
+
 // chunk height in sections, 16 per default
 const int CHUNK_HEIGHT = 16;
 
@@ -75,7 +77,7 @@ public:
 	 * Reads the NBT data of the chunk from a buffer. You need to specify a compression
 	 * type of the raw data.
 	 */
-	bool readNBT(const char* data, size_t len,
+	bool readNBT(BlockStateRegistry& block_registry, const char* data, size_t len,
 			nbt::Compression compression = nbt::Compression::ZLIB);
 
 	/**

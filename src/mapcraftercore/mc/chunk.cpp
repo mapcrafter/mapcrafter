@@ -19,6 +19,8 @@
 
 #include "chunk.h"
 
+#include "blockstate.h"
+
 #include <cmath>
 #include <iostream>
 
@@ -54,7 +56,8 @@ int Chunk::positionToKey(int x, int z, int y) const {
 	return y + 256 * (x + 16 * z);
 }
 
-bool Chunk::readNBT(const char* data, size_t len, nbt::Compression compression) {
+bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, size_t len,
+		nbt::Compression compression) {
 	clear();
 
 	nbt::NBTFile nbt;

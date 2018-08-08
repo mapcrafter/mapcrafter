@@ -21,6 +21,7 @@
 #define BLOCKSTATE_H_
 
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -60,6 +61,8 @@ public:
 	const BlockState& getBlockState(uint16_t id) const;
 
 private:
+	std::mutex mutex;
+
 	std::map<std::string, std::map<std::string, uint16_t>> block_lookup;
 	std::vector<BlockState> block_states;
 
