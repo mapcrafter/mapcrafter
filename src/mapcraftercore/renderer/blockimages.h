@@ -537,7 +537,7 @@ public:
 			bool render_leaves_transparent) {}
 	virtual void generateBlocks(const TextureResources& resources) {}
 	//virtual RGBAImage exportBlocks() const {}
-	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const {};
+	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const { return false; };
 	virtual bool hasBlock(uint16_t id, uint16_t) const {};
 	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data, uint16_t extra_data = 0) const {};
 	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome, uint16_t extra_data = 0) const {};
