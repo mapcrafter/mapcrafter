@@ -32,34 +32,34 @@ BOOST_AUTO_TEST_CASE(blockstate_test) {
 	// basic initialization checks
 	BOOST_CHECK_EQUAL(block.getName(), "mapcrafter:test");
 	BOOST_CHECK_EQUAL(block.getProperty("foo"), "");
-	BOOST_CHECK_EQUAL(block.getPropertyRepresentation(), "");
+	BOOST_CHECK_EQUAL(block.getVariantDescription(), "");
 
 	// check properties - overwriting / getting with default / property representation
 	block.setProperty("foo", "bar");
 	BOOST_CHECK_EQUAL(block.getProperty("foo"), "bar");
 	BOOST_CHECK_EQUAL(block.getProperty("foo2", "test"), "test");
-	BOOST_CHECK_EQUAL(block.getPropertyRepresentation(), "foo=bar,");
+	BOOST_CHECK_EQUAL(block.getVariantDescription(), "foo=bar,");
 
 	block.setProperty("foo", "newvalue");
 	block.setProperty("abc", "test");
 	BOOST_CHECK_EQUAL(block.getProperty("foo", "bar"), "newvalue");
 	BOOST_CHECK_EQUAL(block.getProperty("abc"), "test");
-	BOOST_CHECK_EQUAL(block.getPropertyRepresentation(), "abc=test,foo=newvalue,");
+	BOOST_CHECK_EQUAL(block.getVariantDescription(), "abc=test,foo=newvalue,");
 
 	// make sure different order of setting properties results in same property repr
 	block = mc::BlockState();
 	block.setProperty("foo", "bar");
 	block.setProperty("test", "blah");
-	BOOST_CHECK_EQUAL(block.getPropertyRepresentation(), "foo=bar,test=blah,");
+	BOOST_CHECK_EQUAL(block.getVariantDescription(), "foo=bar,test=blah,");
 
 	block = mc::BlockState();
 	block.setProperty("test", "blah");
 	block.setProperty("foo", "bar");
-	BOOST_CHECK_EQUAL(block.getPropertyRepresentation(), "foo=bar,test=blah,");
+	BOOST_CHECK_EQUAL(block.getVariantDescription(), "foo=bar,test=blah,");
 
 	// aaand overwrite something
 	block.setProperty("foo", "baaah");
-	BOOST_CHECK_EQUAL(block.getPropertyRepresentation(), "foo=baaah,test=blah,");
+	BOOST_CHECK_EQUAL(block.getVariantDescription(), "foo=baaah,test=blah,");
 }
 
 BOOST_AUTO_TEST_CASE(blockstate_testRegistry) {
@@ -74,6 +74,6 @@ BOOST_AUTO_TEST_CASE(blockstate_testRegistry) {
 
 	mc::BlockState block_compare = registry.getBlockState(id);
 	BOOST_CHECK_EQUAL(block_compare.getName(), block.getName());
-	BOOST_CHECK_EQUAL(block_compare.getPropertyRepresentation(), block.getPropertyRepresentation());
+	BOOST_CHECK_EQUAL(block_compare.getVariantDescription(), block.getVariantDescription());
 }
 

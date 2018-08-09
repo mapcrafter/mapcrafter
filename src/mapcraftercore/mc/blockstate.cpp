@@ -28,6 +28,7 @@ namespace mc {
 
 BlockState::BlockState(std::string name)
 	: name(name) {
+	updateVariantDescription();
 }
 
 std::string BlockState::getName() const {
@@ -43,15 +44,15 @@ std::string BlockState::getProperty(std::string key, std::string default_value) 
 
 void BlockState::setProperty(std::string key, std::string value) {
 	properties[key] = value;
-	updatePropertyRepresentation();
+	updateVariantDescription();
 }
 
-const std::string BlockState::getPropertyRepresentation() const {
-	return property_representation;
+const std::string BlockState::getVariantDescription() const {
+	return variant_description;
 }
 
 bool BlockState::operator<(const BlockState& other) const {
-	return property_representation < other.property_representation;
+	return variant_description < other.variant_description;
 }
 
 BlockState BlockState::parse(std::string name, std::string variant_description) {
@@ -77,10 +78,10 @@ BlockState BlockState::parse(std::string name, std::string variant_description) 
 	return block;
 }
 
-void BlockState::updatePropertyRepresentation() {
-	property_representation = "";
+void BlockState::updateVariantDescription() {
+	variant_description = "";
 	for (auto it = properties.begin(); it != properties.end(); ++it) {
-		property_representation += it->first + "=" + it->second + ",";
+		variant_description += it->first + "=" + it->second + ",";
 	}
 }
 
@@ -96,17 +97,17 @@ uint16_t BlockStateRegistry::getBlockID(const BlockState& block) {
 	if (it == block_lookup.end()) {
 		// block name unknown -> insert block
 		uint16_t id = block_states.size();
-		block_lookup[block.getName()][block.getPropertyRepresentation()] = id;
+		block_lookup[block.getName()][block.getVariantDescription()] = id;
 		block_states.push_back(block);
 		return id;
 	}
 
 	// block name is known -> just search for the variant now
-	auto it2 = it->second.find(block.getPropertyRepresentation());
+	auto it2 = it->second.find(block.getVariantDescription());
 	if (it2 == it->second.end()) {
 		// variant not found -> insert block
 		uint16_t id = block_states.size();
-		it->second[block.getPropertyRepresentation()] = id;
+		it->second[block.getVariantDescription()] = id;
 		block_states.push_back(block);
 		return id;
 	}
