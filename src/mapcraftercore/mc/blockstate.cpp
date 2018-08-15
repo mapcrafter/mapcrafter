@@ -57,24 +57,8 @@ bool BlockState::operator<(const BlockState& other) const {
 
 BlockState BlockState::parse(std::string name, std::string variant_description) {
 	mc::BlockState block(name);
-
-	// '-' stands for no properties
-	if (variant_description == "-") {
-		return block;
-	}
-
-	std::vector<std::string> properties = util::split(variant_description, ',');
-	for (auto it = properties.begin(); it != properties.end(); ++it) {
-		if (*it == "") {
-			continue;
-		}
-		size_t index = it->find('=');
-		assert(index != std::string::npos);
-		std::string key = it->substr(0, index);
-		std::string value = it->substr(index + 1);
-		block.setProperty(key, value);
-	}
-
+	block.properties = util::parseProperties(variant_description);
+	block.updateVariantDescription();
 	return block;
 }
 

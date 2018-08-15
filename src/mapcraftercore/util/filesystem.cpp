@@ -168,6 +168,21 @@ PathList findTextureDirs(const fs::path& executable) {
 	return textures;
 }
 
+PathList findDirs(const fs::path& executable, std::string dir_name) {
+	PathList resources = findResourceDirs(executable);
+	PathList dirs;
+	for (PathList::iterator it = resources.begin(); it != resources.end(); ++it) {
+		if (fs::is_directory(*it / dir_name)) {
+			dirs.push_back(*it / dir_name);
+		}
+	}
+	return dirs;
+}
+
+PathList findBlockDirs(const fs::path& executable) {
+	return findDirs(executable, "blocks");
+}
+
 PathList findLoggingConfigFiles(const fs::path& executable) {
 	fs::path mapcrafter_dir = findExecutableMapcrafterDir(findExecutablePath());
 	PathList configs = {
@@ -199,6 +214,14 @@ fs::path findTextureDir() {
 	PathList textures = findTextureDirs(findExecutablePath());
 	if (textures.size())
 		return *textures.begin();
+	return fs::path();
+}
+
+fs::path findBlockDir() {
+	PathList dirs = findBlockDirs(findExecutablePath());
+	if (dirs.size()) {
+		return *dirs.begin();
+	}
 	return fs::path();
 }
 

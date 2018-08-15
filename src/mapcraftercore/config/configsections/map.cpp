@@ -153,6 +153,7 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  overlay = " << overlay << std::endl;
 	out << "  rotations = " << rotations << std::endl;
 	out << "  texture_dir = " << texture_dir << std::endl;
+	out << "  block_dir = " << block_dir << std::endl;
 	out << "  texture_size = " << texture_size << std::endl;
 	out << "  water_opacity = " << water_opacity << std::endl;
 	out << "  image_format = " << image_format << std::endl;
@@ -200,6 +201,10 @@ std::set<int> MapSection::getRotations() const {
 
 fs::path MapSection::getTextureDir() const {
 	return texture_dir.getValue();
+}
+
+fs::path MapSection::getBlockDir() const {
+	return block_dir.getValue();
 }
 
 int MapSection::getTextureSize() const {
@@ -287,6 +292,12 @@ void MapSection::preParse(const INIConfigSection& section,
 	fs::path texture_dir_found = util::findTextureDir();
 	if (!texture_dir_found.empty())
 		texture_dir.setDefault(texture_dir_found);
+	
+	fs::path block_dir_found = util::findBlockDir();
+	if (!block_dir_found.empty()) {
+		block_dir.setDefault(block_dir_found);
+	}
+
 	texture_size.setDefault(12);
 	texture_blur.setDefault(0);
 	water_opacity.setDefault(1.0);
@@ -327,6 +338,14 @@ bool MapSection::parseField(const std::string key, const std::string value,
 			if (!fs::is_directory(texture_dir.getValue()))
 				validation.error("'texture_dir' must be an existing directory! '"
 						+ texture_dir.getValue().string() + "' does not exist!");
+		}
+	} else if (key == "block_dir") {
+		if (block_dir.load(key, value, validation)) {
+			block_dir.setValue(BOOST_FS_ABSOLUTE(block_dir.getValue(), config_dir));
+			if (!fs::is_directory(block_dir.getValue())) {
+				validation.error("'block_dir' must be an existing directory! '"
+						+ block_dir.getValue().string() + "' does not exist!");
+			}
 		}
 	} else if (key == "texture_blur") {
 		texture_blur.load(key, value, validation);

@@ -86,6 +86,8 @@ fs::path findTemplateDir();
  */
 fs::path findTextureDir();
 
+fs::path findBlockDir();
+
 /**
  * Returns the first existing logging configuration file.
  */

@@ -23,11 +23,8 @@
 #include "../util.h"
 #include "../mc/blockstate.h"
 
-#include <boost/filesystem.hpp>
 #include <map>
 #include <vector>
-
-namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 namespace renderer {
@@ -598,25 +595,62 @@ RenderedBlockImages::RenderedBlockImages(mc::BlockStateRegistry& block_registry)
 	: block_registry(block_registry) {
 }
 
-bool RenderedBlockImages::loadBlockImages(std::string p) {
-	fs::path path(p);
-
+bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int texture_size) {
 	LOG(INFO) << "I will load block images from " << path << " now";
 
 	if (!fs::is_directory(path)) {
-		LOG(ERROR) << "Unable to load block images: '" << path << "' is not a directory!";
+		LOG(ERROR) << "Unable to load block images: " << path << " is not a directory!";
 		return false;
 	}
 
-	fs::path description_file = path / "blocks.txt";
-	if (!fs::is_regular_file(description_file)) {
-		LOG(ERROR) << "Unable to load block images: Description file '" << description_file
-			<< "' does not exist!";
+	std::string name = "isometric_" + util::str(rotation) + "_" + util::str(texture_size);
+	fs::path info_file = path / (name + ".txt");
+	fs::path block_file = path / (name + ".png");
+
+	if (!fs::is_regular_file(info_file)) {
+		LOG(ERROR) << "Unable to load block images: Block info file " << info_file
+			<< " does not exist!";
+		return false;
+	}
+	if (!fs::is_regular_file(block_file)) {
+		LOG(ERROR) << "Unable to load block images: Block image file " << block_file
+			<< " does not exist!";
 		return false;
 	}
 
-	std::ifstream in(description_file.string());
-	int lineno = 1;
+	RGBAImage blocks;
+	if (!blocks.readPNG(block_file.string())) {
+		LOG(ERROR) << "Unable to load block images: Block image file " << block_file
+			<< " not readable!";
+		return false;
+	}
+
+	LOG(INFO) << blocks.getWidth() << ":" << blocks.getHeight();
+
+	std::ifstream in(info_file.string());
+	std::string first_line;
+	
+	std::getline(in, first_line);
+	std::vector<std::string> parts = util::split(first_line, ' ');
+	int block_count, columns;
+	bool ok = true;
+	try {
+		if (parts.size() == 2) {
+			block_count = util::as<int>(parts[0]);
+			columns = util::as<int>(parts[1]);
+		}
+	} catch (std::invalid_argument& e) {
+		ok = false;
+	}
+	if (!ok || parts.size() != 2) {
+		LOG(ERROR) << "Invalid first line in block info file " << info_file << "!";
+		LOG(ERROR) << "Line 1: '" << first_line << "'";
+		return false;
+	}
+
+	int block_size = texture_size * 2;
+
+	int lineno = 2;
 	for (std::string line; std::getline(in, line); lineno++) {
 		line = util::trim(line);
 		if (line.size() == 0) {
@@ -624,31 +658,34 @@ bool RenderedBlockImages::loadBlockImages(std::string p) {
 		}
 
 		std::vector<std::string> parts = util::split(line, ' ');
-		if (parts.size() != 4) {
-			LOG(ERROR) << "Invalid line in block description file '" << description_file << "'!";
+		if (parts.size() != 3) {
+			LOG(ERROR) << "Invalid line in block info file '" << info_file << "'!";
 			LOG(ERROR) << "Line " << lineno << ": '" << line << "'";
 			return false;
 		}
 		
 		std::string block_name = parts[0];
 		std::string variant = parts[1];
-		fs::path image_path = path / parts[2];
-		fs::path image_uv_path = path / parts[3];
+		std::map<std::string, std::string> block_info = util::parseProperties(parts[2]);
 
-		RGBAImage image, image_uv;
-		if (!image.readPNG(image_path.string())) {
-			
-		}
-		if (!image_uv.readPNG(image_uv_path.string())) {
+		int image_index = util::as<int>(block_info["color"]);
+		int image_uv_index = util::as<int>(block_info["uv"]);
 
-		}
+		int x, y;
+		x = (image_index % columns) * block_size;
+		y = (image_index / columns) * block_size;
+		RGBAImage image = blocks.clip(x, y, block_size, block_size);
+
+		x = (image_uv_index % columns) * block_size;
+		y = (image_uv_index / columns) * block_size;
+		RGBAImage image_uv = blocks.clip(x, y, block_size, block_size);
 
 		mc::BlockState block = mc::BlockState::parse(block_name, variant);
 		uint16_t id = block_registry.getBlockID(block);
 		block_images[id] = image;
 		block_uv_images[id] = image_uv;
 
-		std::cout << block_name << std::endl;
+		std::cout << block_name << " " << variant << std::endl;
 	}
 	in.close();
 	
@@ -659,6 +696,10 @@ RGBAImage RenderedBlockImages::exportBlocks() const {
 	std::vector<RGBAImage> blocks;
 	for (auto it = block_images.begin(); it != block_images.end(); ++it) {
 		blocks.push_back(it->second);
+	}
+
+	if (blocks.size() == 0) {
+		return RGBAImage(0, 0);
 	}
 
 	int width = 16;

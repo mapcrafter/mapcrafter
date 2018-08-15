@@ -24,11 +24,14 @@
 #include "image.h"
 #include "../mc/pos.h"
 
+#include <boost/filesystem.hpp>
 #include <array>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <cstdint>
+
+namespace fs = boost::filesystem;
 
 namespace mapcrafter {
 
@@ -547,7 +550,7 @@ public:
 
 	RenderedBlockImages(mc::BlockStateRegistry& block_registry);
 
-	bool loadBlockImages(std::string path);
+	bool loadBlockImages(fs::path block_dir, int rotation, int texture_size);
 	virtual RGBAImage exportBlocks() const;
 
 	const RGBAImage& getBlockImage(uint16_t id) const;
