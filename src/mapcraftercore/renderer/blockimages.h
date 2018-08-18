@@ -532,6 +532,19 @@ protected:
 	int max_water_preblit;
 };
 
+typedef std::array<float, 4> CornerValues;
+
+static const uint8_t FACE_LEFT_INDEX = ((float) 255.0 / 6.0) * 1;
+static const uint8_t FACE_RIGHT_INDEX = ((float) 255.0 / 6.0) * 4;
+static const uint8_t FACE_UP_INDEX = ((float) 255.0 / 6.0) * 2;
+
+void blockImageTest(RGBAImage& block, const RGBAImage& uv_mask);
+void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
+		float factor_left, float factor_right, float factor_up);
+void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
+		const CornerValues& factors_left, const CornerValues& factors_right, const CornerValues& factors_up);
+bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask);
+
 class RenderedBlockImages : public BlockImages {
 public:
 	// OLD METHODS
@@ -550,6 +563,8 @@ public:
 
 	RenderedBlockImages(mc::BlockStateRegistry& block_registry);
 
+	void setBlockSideDarkening(float darken_left, float darken_right);
+
 	bool loadBlockImages(fs::path block_dir, int rotation, int texture_size);
 	virtual RGBAImage exportBlocks() const;
 
@@ -559,7 +574,11 @@ public:
 	virtual int getBlockSize() const;
 
 private:
+	void prepareBlockImages();
+
 	mc::BlockStateRegistry& block_registry;
+
+	float darken_left, darken_right;
 
 	// Mapcrafter-local block ID -> block (color/uv) image
 	std::unordered_map<uint16_t, RGBAImage> block_images, block_uv_images;

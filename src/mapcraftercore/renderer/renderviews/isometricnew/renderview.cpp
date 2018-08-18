@@ -64,6 +64,16 @@ void NewIsometricRenderView::configureBlockImages(BlockImages* block_images,
 	assert(block_images != nullptr);
 	RenderView::configureBlockImages(block_images, world_config, map_config);
 
+	RenderedBlockImages* images = dynamic_cast<RenderedBlockImages*>(block_images);
+	assert(images != nullptr);
+	
+	RenderModeType render_mode = map_config.getRenderMode();
+	if (render_mode == RenderModeType::DAYLIGHT || render_mode == RenderModeType::NIGHTLIGHT) {
+		images->setBlockSideDarkening(0.95, 0.8);
+	} else {
+		images->setBlockSideDarkening(0.75, 0.6);
+	}
+
 	/*
 	IsometricBlockImages* images = dynamic_cast<IsometricBlockImages*>(block_images);
 	assert(images != nullptr);

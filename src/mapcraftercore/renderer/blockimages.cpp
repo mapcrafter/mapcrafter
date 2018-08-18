@@ -591,8 +591,127 @@ std::vector<RGBAImage> AbstractBlockImages::getExportBlocks() const {
 	return blocks;
 }
 
+void blockImageTest(RGBAImage& block, const RGBAImage& uv_mask) {
+	assert(block.getWidth() == uv_mask.getWidth());
+	assert(block.getHeight() == uv_mask.getHeight());
+	
+	for (size_t x = 0; x < block.getWidth(); x++) {
+		for (size_t y = 0; y < block.getHeight(); y++) {
+			uint32_t& pixel = block.pixel(x, y);
+			uint32_t uv_pixel = uv_mask.pixel(x, y);
+			if (rgba_alpha(uv_pixel) == 0) {
+				continue;
+			}
+
+			uint8_t side = rgba_blue(uv_pixel);
+			if (side == FACE_LEFT_INDEX) {
+				pixel = rgba(255, 0, 0);
+			}
+			if (side == FACE_RIGHT_INDEX) {
+				pixel = rgba(0, 255, 0);
+			}
+			if (side == FACE_UP_INDEX) {
+				pixel = rgba(0, 0, 255);;
+			}
+		}
+	}
+}
+
+void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
+		float factor_left, float factor_right, float factor_up) {
+	assert(block.getWidth() == uv_mask.getWidth());
+	assert(block.getHeight() == uv_mask.getHeight());
+	
+	for (size_t x = 0; x < block.getWidth(); x++) {
+		for (size_t y = 0; y < block.getHeight(); y++) {
+			uint32_t& pixel = block.pixel(x, y);
+			uint32_t uv_pixel = uv_mask.pixel(x, y);
+			if (rgba_alpha(uv_pixel) == 0) {
+				continue;
+			}
+
+			uint8_t side = rgba_blue(uv_pixel);
+			if (side == FACE_LEFT_INDEX) {
+				pixel = rgba_multiply(pixel, factor_left, factor_left, factor_left);
+			}
+			if (side == FACE_RIGHT_INDEX) {
+				pixel = rgba_multiply(pixel, factor_right, factor_right, factor_right);
+			}
+			if (side == FACE_UP_INDEX) {
+				pixel = rgba_multiply(pixel, factor_up, factor_up, factor_up);
+			}
+		}
+	}
+}
+
+void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
+		const CornerValues& factors_left, const CornerValues& factors_right, const CornerValues& factors_up) {
+	assert(block.getWidth() == uv_mask.getWidth());
+	assert(block.getHeight() == uv_mask.getHeight());
+	
+	for (size_t x = 0; x < block.getWidth(); x++) {
+		for (size_t y = 0; y < block.getHeight(); y++) {
+			uint32_t& pixel = block.pixel(x, y);
+			uint32_t uv_pixel = uv_mask.pixel(x, y);
+			if (rgba_alpha(uv_pixel) == 0) {
+				continue;
+			}
+
+			const CornerValues* vptr = nullptr;
+			uint8_t side = rgba_blue(uv_pixel);
+			if (side == FACE_LEFT_INDEX) {
+				//pixel = rgba_multiply(pixel, factor_left, factor_left, factor_left);
+				vptr = &factors_left;
+			} else if (side == FACE_RIGHT_INDEX) {
+				//pixel = rgba_multiply(pixel, factor_right, factor_right, factor_right);
+				vptr = &factors_right;
+			} else if (side == FACE_UP_INDEX) {
+				//pixel = rgba_multiply(pixel, factor_up, factor_up, factor_up);
+				vptr = &factors_up;
+			} else {
+				continue;
+			}
+
+			const CornerValues& values = *vptr;
+			float u = (float) rgba_red(uv_pixel) / 255.0;
+			float v = (float) rgba_green(uv_pixel) / 255.0;
+			float ab = (1-u) * values[0] + u * values[1];
+			float cd = (1-u) * values[2] + u * values[3];
+			float x = (1-v) * ab + v * cd;
+		
+			pixel = rgba_multiply(pixel, x, x, x);
+		}
+	}
+}
+
+bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask) {
+	assert(block.getWidth() == uv_mask.getWidth());
+	assert(block.getHeight() == uv_mask.getHeight());
+	
+	for (size_t x = 0; x < block.getWidth(); x++) {
+		for (size_t y = 0; y < block.getHeight(); y++) {
+			uint32_t& pixel = block.pixel(x, y);
+			uint32_t uv_pixel = uv_mask.pixel(x, y);
+			if (rgba_alpha(uv_pixel) == 0) {
+				continue;
+			}
+
+			if (rgba_alpha(pixel) != rgba_alpha(uv_pixel)) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 RenderedBlockImages::RenderedBlockImages(mc::BlockStateRegistry& block_registry)
 	: block_registry(block_registry) {
+}
+
+void RenderedBlockImages::setBlockSideDarkening(float darken_left, float darken_right) {
+	this->darken_left = darken_left;
+	this->darken_right = darken_right;
 }
 
 bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int texture_size) {
@@ -624,8 +743,6 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int textu
 			<< " not readable!";
 		return false;
 	}
-
-	LOG(INFO) << blocks.getWidth() << ":" << blocks.getHeight();
 
 	std::ifstream in(info_file.string());
 	std::string first_line;
@@ -685,9 +802,11 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int textu
 		block_images[id] = image;
 		block_uv_images[id] = image_uv;
 
-		std::cout << block_name << " " << variant << std::endl;
+		//std::cout << block_name << " " << variant << std::endl;
 	}
 	in.close();
+
+	prepareBlockImages();
 	
 	return true;
 }
@@ -726,6 +845,33 @@ const RGBAImage& RenderedBlockImages::getBlockUVImage(uint16_t id) const {
 }
 
 int RenderedBlockImages::getBlockSize() const {
+}
+
+void RenderedBlockImages::prepareBlockImages() {
+	uint16_t solid_id = block_registry.getBlockID(mc::BlockState("bedrock"));
+	RGBAImage solid_uv = block_uv_images[solid_id];
+
+	for (auto it = block_images.begin(); it != block_images.end(); ++it) {
+		uint16_t id = it->first;
+		const mc::BlockState& block = block_registry.getBlockState(id);
+		RGBAImage& image = it->second;
+		RGBAImage& image_uv = block_uv_images[id];
+
+		// blockImageTest(image, image_uv);
+
+		// CornerValues values = {0.0, 1.0, 1.0, 0.0};
+		// blockImageMultiply(image, image_uv, values, values, values);
+
+		blockImageMultiply(image, image_uv, darken_left, darken_right, 1.0);
+
+		if (blockImageIsTransparent(image, solid_uv)) {
+			LOG(INFO) << block.getName() << " " << block.getVariantDescription() << " is transparent!";
+		} else {
+			// to visualize transparent blocks
+			//blockImageTest(image, image_uv);
+			LOG(INFO) << block.getName() << " " << block.getVariantDescription() << " is not transparent!";
+		}
+	}
 }
 
 }
