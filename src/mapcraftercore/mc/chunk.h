@@ -46,6 +46,8 @@ struct ChunkSection {
 	uint8_t block_light[16 * 16 * 8];
 	uint8_t sky_light[16 * 16 * 8];
 
+	uint16_t block_ids[16 * 16 * 16];
+
 	/**
 	 * Returns one of the data arrays (1: block data, 2: block light, 3: sky light).
 	 */
@@ -147,7 +149,7 @@ private:
 	std::vector<ChunkSection> sections;
 
 	// the biomes in this chunk, as index z*16+x
-	uint8_t biomes[256];
+	uint32_t biomes[256];
 
 	// extra_data (e.g. from attributes read from NBT data, like beds) are stored in this map
 	std::unordered_map<int, uint16_t> extra_data_map;

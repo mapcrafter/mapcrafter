@@ -318,7 +318,8 @@ public:
 	template <typename T>
 	bool hasArray(const std::string& name, int32_t len = -1) const {
 		static_assert(std::is_same<T, TagByteArray>::value
-				|| std::is_same<T, TagIntArray>::value,
+				|| std::is_same<T, TagIntArray>::value
+				|| std::is_same<T, TagLongArray>::value,
 			"Only TagByteArray and TagIntArray are allowed as template argument!");
 		if (!hasTag<T>(name))
 			return false;

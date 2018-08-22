@@ -85,16 +85,19 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 	// check whether this chunk is completely contained within the cropped world
 	chunk_completely_contained = world_crop.isChunkCompletelyContained(chunkpos_original);
 
+	/*
 	if (level.hasTag<nbt::TagByte>("TerrainPopulated"))
 		terrain_populated = level.findTag<nbt::TagByte>("TerrainPopulated").payload;
 	else
 		LOG(ERROR) << "Corrupt chunk " << chunkpos << ": No terrain populated tag found!";
+	*/
 
-	if (level.hasArray<nbt::TagByteArray>("Biomes", 256)) {
-		const nbt::TagByteArray& biomes_tag = level.findTag<nbt::TagByteArray>("Biomes");
+	if (level.hasArray<nbt::TagIntArray>("Biomes", 256)) {
+		const nbt::TagIntArray& biomes_tag = level.findTag<nbt::TagIntArray>("Biomes");
 		std::copy(biomes_tag.payload.begin(), biomes_tag.payload.end(), biomes);
-	} else
+	} else {
 		LOG(ERROR) << "Corrupt chunk " << chunkpos << ": No biome data found!";
+	}
 
 	const nbt::TagList& tile_entities_tag = level.findTag<nbt::TagList>("TileEntities");
 
@@ -132,17 +135,51 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 		
 		// make sure section is valid
 		if (!section_tag.hasTag<nbt::TagByte>("Y")
-				|| !section_tag.hasArray<nbt::TagByteArray>("Blocks", 4096)
-				|| !section_tag.hasArray<nbt::TagByteArray>("Data", 2048)
+		//		|| !section_tag.hasArray<nbt::TagByteArray>("Blocks", 4096)
+		//		|| !section_tag.hasArray<nbt::TagByteArray>("Data", 2048)
 				|| !section_tag.hasArray<nbt::TagByteArray>("BlockLight", 2048)
-				|| !section_tag.hasArray<nbt::TagByteArray>("SkyLight", 2048))
+				|| !section_tag.hasArray<nbt::TagByteArray>("SkyLight", 2048)
+				|| !section_tag.hasArray<nbt::TagLongArray>("BlockStates")
+				|| !section_tag.hasTag<nbt::TagList>("Palette"))
 			continue;
 		
 		const nbt::TagByte& y = section_tag.findTag<nbt::TagByte>("Y");
 		if (y.payload >= CHUNK_HEIGHT)
 			continue;
-		const nbt::TagByteArray& blocks = section_tag.findTag<nbt::TagByteArray>("Blocks");
-		const nbt::TagByteArray& data = section_tag.findTag<nbt::TagByteArray>("Data");
+		//const nbt::TagByteArray& blocks = section_tag.findTag<nbt::TagByteArray>("Blocks");
+		//const nbt::TagByteArray& data = section_tag.findTag<nbt::TagByteArray>("Data");
+	
+		const nbt::TagLongArray& blockstates = section_tag.findTag<nbt::TagLongArray>("BlockStates");
+	
+		int bits_per_block = blockstates.payload.size() * 64 / (16*16*16);
+		int blocks_per_long = 64 / bits_per_block;
+		//if (bits_per_block == 4 || bits_per_block == 5 || bits_per_block == 6) {
+		//	continue;
+		//}
+		//LOG(INFO) << blockstates.payload.size() << " => " << bits_per_block;
+		
+		const nbt::TagList& palette = section_tag.findTag<nbt::TagList>("Palette");
+		std::vector<mc::BlockState> palette_blockstates(palette.payload.size());
+		std::vector<uint16_t> palette_lookup(palette.payload.size());
+
+		size_t i = 0;
+		for (auto it2 = palette.payload.begin(); it2 != palette.payload.end(); ++it2, ++i) {
+			const nbt::TagCompound& entry = (*it2)->cast<nbt::TagCompound>();
+			const nbt::TagString& name = entry.findTag<nbt::TagString>("Name");
+			
+			mc::BlockState block(name.payload);
+			if (entry.hasTag<nbt::TagCompound>("Properties")) {
+				const nbt::TagCompound& properties = entry.findTag<nbt::TagCompound>("Properties");
+				for (auto it3 = properties.payload.begin(); it3 != properties.payload.end(); ++it3) {
+					std::string key = it3->first;
+					std::string value = it3->second->cast<nbt::TagString>().payload;
+					block.setProperty(key, value);
+				}
+			}
+			palette_blockstates[i] = block;
+			palette_lookup[i] = block_registry.getBlockID(block);
+			//LOG(INFO) << i << ": " << block.getName() << " " << block.getVariantDescription();
+		}
 
 		const nbt::TagByteArray& block_light = section_tag.findTag<nbt::TagByteArray>("BlockLight");
 		const nbt::TagByteArray& sky_light = section_tag.findTag<nbt::TagByteArray>("SkyLight");
@@ -150,7 +187,31 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 		// create a ChunkSection-object
 		ChunkSection section;
 		section.y = y.payload;
-		std::copy(blocks.payload.begin(), blocks.payload.end(), section.blocks);
+
+		for (size_t i = 0; i < 16*16*16; i++) {
+			uint64_t long_index = i / blocks_per_long;
+			uint64_t bit_index = (i % blocks_per_long) * bits_per_block;
+			if (bit_index + bits_per_block > 64) {
+				LOG(WARNING) << "blah";
+				continue;
+			}
+
+			uint64_t value = blockstates.payload[long_index];
+			uint64_t mask = ((1LL << (uint64_t) bits_per_block) - 1LL) << bit_index;
+			uint64_t palette_index = (value & mask) >> bit_index;
+			if (palette_index >= palette_blockstates.size()) {
+				LOG(ERROR) << "Incorrectly parsed block ID at bit index " << bit_index << ": "
+					<< value << " (max is " << palette_blockstates.size()-1
+					<< " with " << bits_per_block << " bits per block)";
+				LOG(ERROR) << "value: " << value << "   mask: " << mask << "  value&mask: " << (value&mask);
+				break;
+			}
+			assert(palette_index < palette_blockstates.size());
+			section.block_ids[i] = palette_lookup[palette_index];
+		}
+
+		//std::copy(blocks.payload.begin(), blocks.payload.end(), section.blocks);
+		/*
 		if (!section_tag.hasArray<nbt::TagByteArray>("Add", 2048))
 			std::fill(&section.add[0], &section.add[2048], 0);
 		else {
@@ -158,6 +219,7 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 			std::copy(add.payload.begin(), add.payload.end(), section.add);
 		}
 		std::copy(data.payload.begin(), data.payload.end(), section.data);
+		*/
 		std::copy(block_light.payload.begin(), block_light.payload.end(), section.block_light);
 		std::copy(sky_light.payload.begin(), sky_light.payload.end(), section.sky_light);
 
