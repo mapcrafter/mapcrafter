@@ -706,7 +706,7 @@ bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask) {
 }
 
 RenderedBlockImages::RenderedBlockImages(mc::BlockStateRegistry& block_registry)
-	: block_registry(block_registry) {
+	: block_registry(block_registry), unknown_block(1, 1) {
 }
 
 void RenderedBlockImages::setBlockSideDarkening(float darken_left, float darken_right) {
@@ -715,6 +715,7 @@ void RenderedBlockImages::setBlockSideDarkening(float darken_left, float darken_
 }
 
 bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int texture_size) {
+	block_size = texture_size * 2;
 	LOG(INFO) << "I will load block images from " << path << " now";
 
 	if (!fs::is_directory(path)) {
@@ -797,10 +798,17 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int textu
 		y = (image_uv_index / columns) * block_size;
 		RGBAImage image_uv = blocks.clip(x, y, block_size, block_size);
 
-		mc::BlockState block = mc::BlockState::parse(block_name, variant);
-		uint16_t id = block_registry.getBlockID(block);
-		block_images[id] = image;
-		block_uv_images[id] = image_uv;
+		if (image.getWidth() != image_uv.getWidth() || image.getHeight() != image_uv.getHeight()) {
+			LOG(ERROR) << "Size mismatch of block " << block_name;
+			return false;
+		}
+
+		mc::BlockState block_state = mc::BlockState::parse(block_name, variant);
+		uint16_t id = block_registry.getBlockID(block_state);
+		BlockImage block;
+		block.image = image;
+		block.uv_image = image_uv;
+		block_images[id] = block;
 
 		//std::cout << block_name << " " << variant << std::endl;
 	}
@@ -814,7 +822,7 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int textu
 RGBAImage RenderedBlockImages::exportBlocks() const {
 	std::vector<RGBAImage> blocks;
 	for (auto it = block_images.begin(); it != block_images.end(); ++it) {
-		blocks.push_back(it->second);
+		blocks.push_back(it->second.image);
 	}
 
 	if (blocks.size() == 0) {
@@ -838,38 +846,42 @@ RGBAImage RenderedBlockImages::exportBlocks() const {
 	return image;
 }
 
-const RGBAImage& RenderedBlockImages::getBlockImage(uint16_t id) const {
+const BlockImage& RenderedBlockImages::getBlockImage(uint16_t id) const {
 }
 
-const RGBAImage& RenderedBlockImages::getBlockUVImage(uint16_t id) const {
+int RenderedBlockImages::getTextureSize() const {
+	return texture_size;
 }
 
 int RenderedBlockImages::getBlockSize() const {
+	return block_size;
 }
 
 void RenderedBlockImages::prepareBlockImages() {
-	uint16_t solid_id = block_registry.getBlockID(mc::BlockState("bedrock"));
-	RGBAImage solid_uv = block_uv_images[solid_id];
+	uint16_t solid_id = block_registry.getBlockID(mc::BlockState("minecraft:bedrock"));
+	assert(block_images.find(solid_id) != block_images.end());
+	const BlockImage& solid = block_images[solid_id];
 
 	for (auto it = block_images.begin(); it != block_images.end(); ++it) {
 		uint16_t id = it->first;
-		const mc::BlockState& block = block_registry.getBlockState(id);
-		RGBAImage& image = it->second;
-		RGBAImage& image_uv = block_uv_images[id];
+		BlockImage& block = it->second;
+		const mc::BlockState& block_state = block_registry.getBlockState(id);
 
 		// blockImageTest(image, image_uv);
 
 		// CornerValues values = {0.0, 1.0, 1.0, 0.0};
 		// blockImageMultiply(image, image_uv, values, values, values);
 
-		blockImageMultiply(image, image_uv, darken_left, darken_right, 1.0);
+		blockImageMultiply(block.image, block.uv_image, darken_left, darken_right, 1.0);
 
-		if (blockImageIsTransparent(image, solid_uv)) {
-			LOG(INFO) << block.getName() << " " << block.getVariantDescription() << " is transparent!";
+		if (blockImageIsTransparent(block.image, solid.uv_image)) {
+			LOG(INFO) << block_state.getName() << " " << block_state.getVariantDescription() << " is transparent!";
+			block.is_transparent = true;
 		} else {
 			// to visualize transparent blocks
 			//blockImageTest(image, image_uv);
-			LOG(INFO) << block.getName() << " " << block.getVariantDescription() << " is not transparent!";
+			LOG(INFO) << block_state.getName() << " " << block_state.getVariantDescription() << " is not transparent!";
+			block.is_transparent = false;
 		}
 	}
 }

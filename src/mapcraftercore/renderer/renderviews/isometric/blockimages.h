@@ -163,22 +163,22 @@ void rotateImages(RGBAImage& north, RGBAImage& south, RGBAImage& east, RGBAImage
 /**
  * A block with 6 face textures, used to create the block images and also rotate them.
  */
-class BlockImage {
+class IsometricBlockImage {
 private:
 	int type;
 	RGBAImage faces[6];
 	int x_offsets[6], y_offsets[6];
 	RGBAImage empty_image;
 public:
-	BlockImage(int type = NORMAL);
-	~BlockImage();
+	IsometricBlockImage(int type = NORMAL);
+	~IsometricBlockImage();
 
-	BlockImage& setFace(int face, const RGBAImage& texture, int xoff = 0, int yoff = 0);
+	IsometricBlockImage& setFace(int face, const RGBAImage& texture, int xoff = 0, int yoff = 0);
 	const RGBAImage& getFace(int face) const;
 	int getXOffset(int face) const;
 	int getYOffset(int face) const;
 
-	BlockImage rotate(int count) const;
+	IsometricBlockImage rotate(int count) const;
 	RGBAImage buildImage(double dleft, double dright) const;
 
 	static const int NORMAL = 1;
@@ -216,17 +216,17 @@ protected:
 	virtual bool isImageTransparent(const RGBAImage& block) const;
 	void addBlockShadowEdges(uint16_t id, uint16_t data, const RGBAImage& block);
 
-	void setBlockImage(uint16_t id, uint16_t data, const BlockImage& block);
+	void setBlockImage(uint16_t id, uint16_t data, const IsometricBlockImage& block);
 	void setBedImage(uint16_t data, uint16_t extra_data, const RGBAImage& block);
 	virtual void setBlockImage(uint16_t id, uint16_t data, const RGBAImage& block);
-	virtual void setBedImage(uint16_t data, uint16_t extra_data, const BlockImage& block);
+	virtual void setBedImage(uint16_t data, uint16_t extra_data, const IsometricBlockImage& block);
 
 	uint32_t darkenLeft(uint32_t pixel) const;
 	uint32_t darkenRight(uint32_t pixel) const;
 
-	RGBAImage buildImage(const BlockImage& image) const;
+	RGBAImage buildImage(const IsometricBlockImage& image) const;
 
-	BlockImage buildSmallerBlock(const RGBAImage& left_texture, const RGBAImage& right_texture,
+	IsometricBlockImage buildSmallerBlock(const RGBAImage& left_texture, const RGBAImage& right_texture,
 	        const RGBAImage& top_texture, int y1, int y2) const;
 
 	RGBAImage buildStairsSouth(const RGBAImage& texture,

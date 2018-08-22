@@ -545,6 +545,11 @@ void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
 		const CornerValues& factors_left, const CornerValues& factors_right, const CornerValues& factors_up);
 bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask);
 
+struct BlockImage {
+	RGBAImage image, uv_image;
+	bool is_transparent;
+};
+
 class RenderedBlockImages : public BlockImages {
 public:
 	// OLD METHODS
@@ -554,11 +559,10 @@ public:
 	virtual void generateBlocks(const TextureResources& resources) {}
 	//virtual RGBAImage exportBlocks() const {}
 	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const { return false; };
-	virtual bool hasBlock(uint16_t id, uint16_t) const {};
-	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data, uint16_t extra_data = 0) const {};
-	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome, uint16_t extra_data = 0) const {};
-	virtual int getMaxWaterPreblit() const {};
-	virtual int getTextureSize() const {};
+	virtual bool hasBlock(uint16_t id, uint16_t) const { return true; };
+	virtual const RGBAImage& getBlock(uint16_t id, uint16_t data, uint16_t extra_data = 0) const { return unknown_block; };
+	virtual RGBAImage getBiomeBlock(uint16_t id, uint16_t data, const Biome& biome, uint16_t extra_data = 0) const { return unknown_block; };
+	virtual int getMaxWaterPreblit() const { return 0; };
 	//virtual int getBlockSize() const {};
 
 	RenderedBlockImages(mc::BlockStateRegistry& block_registry);
@@ -568,9 +572,9 @@ public:
 	bool loadBlockImages(fs::path block_dir, int rotation, int texture_size);
 	virtual RGBAImage exportBlocks() const;
 
-	const RGBAImage& getBlockImage(uint16_t id) const;
-	const RGBAImage& getBlockUVImage(uint16_t id) const;
+	const BlockImage& getBlockImage(uint16_t id) const;
 
+	virtual int getTextureSize() const;;
 	virtual int getBlockSize() const;
 
 private:
@@ -580,8 +584,10 @@ private:
 
 	float darken_left, darken_right;
 
-	// Mapcrafter-local block ID -> block (color/uv) image
-	std::unordered_map<uint16_t, RGBAImage> block_images, block_uv_images;
+	int texture_size, block_size;
+	// Mapcrafter-local block ID -> BlockImage (image, uv_image, is_transparent, ...)
+	std::unordered_map<uint16_t, BlockImage> block_images;
+	RGBAImage unknown_block;
 };
 
 }
