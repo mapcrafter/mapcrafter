@@ -2882,7 +2882,7 @@ minecraft:gray_stained_glass_pane east=true,north=true,south=true,west=false col
 minecraft:gray_stained_glass_pane east=true,north=true,south=true,west=true color=5760,uv=5761
 minecraft:rose_bush half=lower color=5762,uv=5763
 minecraft:rose_bush half=upper color=5764,uv=5765
-minecraft:cave_air - color=5766,uv=5767
+minecraft:cave_air - color=5766,is_air=true,uv=5767
 minecraft:emerald_block - color=5768,uv=5769
 minecraft:oak_pressure_plate powered=false color=5770,uv=5771
 minecraft:oak_pressure_plate powered=true color=5772,uv=5773
@@ -2968,7 +2968,7 @@ minecraft:prismarine_stairs facing=west,half=top,shape=outer_left color=5930,uv=
 minecraft:prismarine_stairs facing=west,half=top,shape=outer_right color=5932,uv=5933
 minecraft:prismarine_stairs facing=west,half=top,shape=straight color=5934,uv=5935
 minecraft:iron_block - color=5936,uv=5937
-minecraft:air - color=5938,uv=5939
+minecraft:air - color=5938,is_air=true,uv=5939
 minecraft:diamond_ore - color=5940,uv=5941
 minecraft:mycelium snowy=false color=5942,uv=5943
 minecraft:mycelium snowy=true color=5944,uv=5945

@@ -808,6 +808,7 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int textu
 		BlockImage block;
 		block.image = image;
 		block.uv_image = image_uv;
+		block.is_air = block_info.count("is_air");
 		block_images[id] = block;
 
 		//std::cout << block_name << " " << variant << std::endl;
@@ -889,12 +890,6 @@ void RenderedBlockImages::prepareBlockImages() {
 			//blockImageTest(image, image_uv);
 			//LOG(INFO) << block_state.getName() << " " << block_state.getVariantDescription() << " is not transparent!";
 			block.is_transparent = false;
-		}
-
-		std::string name = block_state.getName();
-		block.is_air = name == "minecraft:air" || name == "minecraft:cave_air";
-		if (block.is_air) {
-			LOG(INFO) << id << " " << block_state.getName() << " is air!";
 		}
 	}
 
