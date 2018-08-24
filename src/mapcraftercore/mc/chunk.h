@@ -142,6 +142,8 @@ private:
 	// read from the chunk nbt format (Level["TerrainPopulated"])
 	bool terrain_populated;
 
+	uint16_t air_id;
+
 	// the index of the chunk sections in the sections array
 	// or -1 if section does not exist
 	int section_offsets[CHUNK_HEIGHT];

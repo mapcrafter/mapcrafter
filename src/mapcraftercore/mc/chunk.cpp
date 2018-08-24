@@ -27,6 +27,97 @@
 namespace mapcrafter {
 namespace mc {
 
+namespace {
+
+void readPackedShorts(const std::vector<int64_t>& data, uint16_t* palette) {
+	// this is basically taken from Minecraft Overviewer
+	// https://github.com/gmcnew/Minecraft-Overviewer/blob/minecraft113/overviewer_core/world.py#L809
+	// maybe we can keep this, or maybe we could do something with unions for speed-up?
+	const uint8_t* b = reinterpret_cast<const uint8_t*>(&data.front());
+	int bits_per_entry = data.size() * 64 / (16*16*16);
+
+	int i = 0, j = 0;
+	while (i < data.size() * sizeof(int64_t)) {
+		if (bits_per_entry == 4) {
+			for (int k = 0; k < 4; k++) {
+				palette[j++] = b[i+k] & 0x0f;
+				palette[j++] = (b[i+k] & 0xf0) >> 4;
+			}
+			i += 4;
+		}
+		if (bits_per_entry == 5) {
+			palette[j++] =   b[i] & 0x1f;
+			palette[j++] = ((b[i+1] & 0x03) << 3) | ((b[i] & 0xe0) >> 5);
+			palette[j++] =  (b[i+1] & 0x7c) >> 2;
+			palette[j++] = ((b[i+2] & 0x0f) << 1) | ((b[i+1] & 0x80) >> 7);
+			palette[j++] = ((b[i+3] & 0x01) << 4) | ((b[i+2] & 0xf0) >> 4);
+			palette[j++] =  (b[i+3] & 0x3e) >> 1;
+			palette[j++] = ((b[i+4]   & 0x07) << 2) | ((b[i+3] & 0xc0) >> 6);
+			palette[j++] =  (b[i+4]   & 0xf8) >> 3;
+			i += 5;
+		}
+		if (bits_per_entry == 6) {
+			palette[j++] =  b[i] & 0x3f;
+			palette[j++] = ((b[i+1] & 0x0f) << 2) | ((b[i]   & 0xc0) >> 6);
+			palette[j++] = ((b[i+2] & 0x03) << 4) | ((b[i+1] & 0xf0) >> 4);
+			palette[j++] =  (b[i+2] & 0xfc) >> 2;
+			i += 3;
+		}
+		if (bits_per_entry == 7) {
+			palette[j++] = b[i] & 0x7f;
+			palette[j++] = ((b[i+1] & 0x3f) << 1) | ((b[i]   & 0x80) >> 7);
+			palette[j++] = ((b[i+2] & 0x1f) << 2) | ((b[i+1] & 0xc0) >> 6);
+			palette[j++] = ((b[i+3] & 0x0f) << 3) | ((b[i+2] & 0xe0) >> 5);
+			palette[j++] = ((b[i+4] & 0x07) << 4) | ((b[i+3] & 0xf0) >> 4);
+			palette[j++] = ((b[i+5] & 0x03) << 5) | ((b[i+4] & 0xf8) >> 3);
+			palette[j++] = ((b[i+6] & 0x01) << 6) | ((b[i+5] & 0xfc) >> 2);
+			palette[j++] =  (b[i+6] & 0xfc) >> 1;
+			i += 7;
+		}
+		if (bits_per_entry == 8) {
+			palette[j++] = b[i];
+			i += 1;
+		}
+		if (bits_per_entry == 9) {
+			palette[j++] = ((b[i+1] & 0x01) << 8) | b[0];
+			palette[j++] = ((b[i+2] & 0x03) << 7) | ((b[i+1] & 0xfe) >> 1);
+			palette[j++] = ((b[i+3] & 0x07) << 6) | ((b[i+2] & 0xfc) >> 2);
+			palette[j++] = ((b[i+4] & 0x0f) << 5) | ((b[i+3] & 0xf8) >> 3);
+			palette[j++] = ((b[i+5] & 0x1f) << 4) | ((b[i+4] & 0xf0) >> 4);
+			palette[j++] = ((b[i+6] & 0x3f) << 3) | ((b[i+5] & 0xe0) >> 5);
+			palette[j++] = ((b[i+7] & 0x7f) << 2) | ((b[i+6] & 0xc0) >> 6);
+			palette[j++] =  (b[i+8] << 1) | ((b[i+7] & 0x80) >> 7);
+			i += 9;
+		}
+		if (bits_per_entry == 10) {
+			palette[j++] = ((b[i+1] & 0x03) << 8) |   b[0];
+			palette[j++] = ((b[i+2] & 0x0f) << 6) | ((b[i+1] & 0xfc) >> 2);
+			palette[j++] = ((b[i+3] & 0x3f) << 4) | ((b[i+2] & 0xf0) >> 4);
+			palette[j++] =  (b[i+4] << 2)         | ((b[i+3] & 0xc0) >> 6);
+			i += 5;
+		}
+		if (bits_per_entry == 11) {
+			palette[j++] = ((b[i+1] & 0x07) << 8) |   b[0];
+			palette[j++] = ((b[i+2] & 0x3f) << 5) | ((b[i+1] & 0xf8) >> 3);
+			palette[j++] = ((b[i+4] & 0x01) << 10)| (b[i+3] << 2) | ((b[i+2] & 0xc0) >> 6);
+			palette[j++] = ((b[i+5] & 0x0f) << 7) | ((b[i+4] & 0xfe) >> 1);
+			palette[j++] = ((b[i+6] & 0x7f) << 4) | ((b[i+5] & 0xf0) >> 4);
+			palette[j++] = ((b[i+8] & 0x03) << 9) | (b[i+7] << 1) | ((b[i+6] & 0x80) >> 7);
+			palette[j++] = ((b[i+9] & 0x1f) << 2) | ((b[i+8] & 0xfc) >> 2);
+			palette[j++] =  (b[i+10]        << 3) | ((b[i+9] & 0xe0) >> 5);
+			i += 11;
+		}
+		if (bits_per_entry == 12) {
+			palette[j++] = ((b[i+1] & 0x0f) << 8) |   b[0];
+			palette[j++] =  (b[i+2]         << 4) | ((b[i+1] & 0xf0) >> 4);
+			i += 3;
+		}
+	}
+	assert(j == 16*16*16);
+}
+
+}
+
 const uint8_t* ChunkSection::getArray(int i) const {
 	if (i == 0)
 		return data;
@@ -37,7 +128,7 @@ const uint8_t* ChunkSection::getArray(int i) const {
 }
 
 Chunk::Chunk()
-	: chunkpos(42, 42), rotation(0), terrain_populated(false) {
+	: chunkpos(42, 42), rotation(0), terrain_populated(false), air_id(0) {
 	clear();
 }
 
@@ -59,6 +150,8 @@ int Chunk::positionToKey(int x, int z, int y) const {
 bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, size_t len,
 		nbt::Compression compression) {
 	clear();
+
+	air_id = block_registry.getBlockID(mc::BlockState("minecraft:air"));
 
 	nbt::NBTFile nbt;
 	nbt.readNBT(data, len, compression);
@@ -150,13 +243,6 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 		//const nbt::TagByteArray& data = section_tag.findTag<nbt::TagByteArray>("Data");
 	
 		const nbt::TagLongArray& blockstates = section_tag.findTag<nbt::TagLongArray>("BlockStates");
-	
-		int bits_per_block = blockstates.payload.size() * 64 / (16*16*16);
-		int blocks_per_long = 64 / bits_per_block;
-		//if (bits_per_block == 4 || bits_per_block == 5 || bits_per_block == 6) {
-		//	continue;
-		//}
-		//LOG(INFO) << blockstates.payload.size() << " => " << bits_per_block;
 		
 		const nbt::TagList& palette = section_tag.findTag<nbt::TagList>("Palette");
 		std::vector<mc::BlockState> palette_blockstates(palette.payload.size());
@@ -168,7 +254,12 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 			const nbt::TagString& name = entry.findTag<nbt::TagString>("Name");
 			
 			mc::BlockState block(name.payload);
-			if (entry.hasTag<nbt::TagCompound>("Properties")) {
+			bool skip_properties = false;
+			if (util::endswith(name.payload, "_leaves") || name.payload == "minecraft:water"
+					|| name.payload == "minecraft:lava" || name.payload == "minecraft:sugar_cane") {
+				skip_properties = true;
+			}
+			if (!skip_properties && entry.hasTag<nbt::TagCompound>("Properties")) {
 				const nbt::TagCompound& properties = entry.findTag<nbt::TagCompound>("Properties");
 				for (auto it3 = properties.payload.begin(); it3 != properties.payload.end(); ++it3) {
 					std::string key = it3->first;
@@ -178,7 +269,6 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 			}
 			palette_blockstates[i] = block;
 			palette_lookup[i] = block_registry.getBlockID(block);
-			//LOG(INFO) << i << ": " << block.getName() << " " << block.getVariantDescription();
 		}
 
 		const nbt::TagByteArray& block_light = section_tag.findTag<nbt::TagByteArray>("BlockLight");
@@ -188,38 +278,24 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 		ChunkSection section;
 		section.y = y.payload;
 
+		readPackedShorts(blockstates.payload, section.block_ids);
+		
+		int bits_per_entry = blockstates.payload.size() * 64 / (16*16*16);
+		bool ok = true;
 		for (size_t i = 0; i < 16*16*16; i++) {
-			uint64_t long_index = i / blocks_per_long;
-			uint64_t bit_index = (i % blocks_per_long) * bits_per_block;
-			if (bit_index + bits_per_block > 64) {
-				LOG(WARNING) << "blah";
-				continue;
-			}
-
-			uint64_t value = blockstates.payload[long_index];
-			uint64_t mask = ((1LL << (uint64_t) bits_per_block) - 1LL) << bit_index;
-			uint64_t palette_index = (value & mask) >> bit_index;
-			if (palette_index >= palette_blockstates.size()) {
-				LOG(ERROR) << "Incorrectly parsed block ID at bit index " << bit_index << ": "
-					<< value << " (max is " << palette_blockstates.size()-1
-					<< " with " << bits_per_block << " bits per block)";
-				LOG(ERROR) << "value: " << value << "   mask: " << mask << "  value&mask: " << (value&mask);
+			if (section.block_ids[i] >= palette_blockstates.size()) {
+				LOG(ERROR) << "Incorrectly parsed palette ID " << section.block_ids[i]
+					<< " at index " << i << " (max is " << palette_blockstates.size()-1
+					<< " with " << bits_per_entry << " bits per entry)";
+				ok = false;
 				break;
 			}
-			assert(palette_index < palette_blockstates.size());
-			section.block_ids[i] = palette_lookup[palette_index];
+			section.block_ids[i] = palette_lookup[section.block_ids[i]];
+		}
+		if (!ok) {
+			continue;
 		}
 
-		//std::copy(blocks.payload.begin(), blocks.payload.end(), section.blocks);
-		/*
-		if (!section_tag.hasArray<nbt::TagByteArray>("Add", 2048))
-			std::fill(&section.add[0], &section.add[2048], 0);
-		else {
-			const nbt::TagByteArray& add = section_tag.findTag<nbt::TagByteArray>("Add");
-			std::copy(add.payload.begin(), add.payload.end(), section.add);
-		}
-		std::copy(data.payload.begin(), data.payload.end(), section.data);
-		*/
 		std::copy(block_light.payload.begin(), block_light.payload.end(), section.block_light);
 		std::copy(sky_light.payload.begin(), sky_light.payload.end(), section.sky_light);
 
@@ -255,7 +331,7 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos, bool force) const {
 	// at first find out the section and check if it's valid and contained
 	int section = pos.y / 16;
 	if (section >= CHUNK_HEIGHT || section_offsets[section] == -1)
-		return 0;
+		return air_id;
 	// FIXME sometimes this happens, fix this
 	//if (sections.size() > 16 || sections.size() <= (unsigned) section_offsets[section]) {
 	//	return 0;
@@ -269,7 +345,7 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos, bool force) const {
 
 	// check whether this block is really rendered
 	if (!checkBlockWorldCrop(x, z, pos.y))
-		return 0;
+		return air_id;
 
 	// calculate the offset and get the block ID
 	// and don't forget the add data
@@ -279,16 +355,17 @@ uint16_t Chunk::getBlockID(const LocalBlockPos& pos, bool force) const {
 		add = sections[section_offsets[section]].add[offset / 2] & 0xf;
 	else
 		add = (sections[section_offsets[section]].add[offset / 2] >> 4) & 0x0f;
-	uint16_t id = sections[section_offsets[section]].blocks[offset] + (add << 8);
+	//uint16_t id = sections[section_offsets[section]].blocks[offset] + (add << 8);
+	uint16_t id = sections[section_offsets[section]].block_ids[offset];
 	if (!force && world_crop.hasBlockMask()) {
 		const BlockMask* mask = world_crop.getBlockMask();
 		BlockMask::BlockState block_state = mask->getBlockState(id);
 		if (block_state == BlockMask::BlockState::COMPLETELY_HIDDEN)
-			return 0;
+			return air_id;
 		else if (block_state == BlockMask::BlockState::COMPLETELY_SHOWN)
 			return id;
 		if (mask->isHidden(id, getBlockData(pos, true)))
-			return 0;
+			return air_id;
 	}
 	return id;
 }
