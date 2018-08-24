@@ -706,7 +706,7 @@ bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask) {
 }
 
 RenderedBlockImages::RenderedBlockImages(mc::BlockStateRegistry& block_registry)
-	: block_registry(block_registry), unknown_block(1, 1) {
+	: block_registry(block_registry) {
 }
 
 void RenderedBlockImages::setBlockSideDarkening(float darken_left, float darken_right) {
@@ -847,6 +847,13 @@ RGBAImage RenderedBlockImages::exportBlocks() const {
 }
 
 const BlockImage& RenderedBlockImages::getBlockImage(uint16_t id) const {
+	auto it = block_images.find(id);
+	if (it == block_images.end()) {
+		const mc::BlockState& block_state = block_registry.getBlockState(id);
+		LOG(INFO) << "Unknown block " << block_state.getName() << " " << block_state.getVariantDescription();
+		return unknown_block;
+	}
+	return it->second;
 }
 
 int RenderedBlockImages::getTextureSize() const {
@@ -875,15 +882,23 @@ void RenderedBlockImages::prepareBlockImages() {
 		blockImageMultiply(block.image, block.uv_image, darken_left, darken_right, 1.0);
 
 		if (blockImageIsTransparent(block.image, solid.uv_image)) {
-			LOG(INFO) << block_state.getName() << " " << block_state.getVariantDescription() << " is transparent!";
+			//LOG(INFO) << block_state.getName() << " " << block_state.getVariantDescription() << " is transparent!";
 			block.is_transparent = true;
 		} else {
 			// to visualize transparent blocks
 			//blockImageTest(image, image_uv);
-			LOG(INFO) << block_state.getName() << " " << block_state.getVariantDescription() << " is not transparent!";
+			//LOG(INFO) << block_state.getName() << " " << block_state.getVariantDescription() << " is not transparent!";
 			block.is_transparent = false;
 		}
+
+		std::string name = block_state.getName();
+		block.is_air = name == "minecraft:air" || name == "minecraft:cave_air";
+		if (block.is_air) {
+			LOG(INFO) << id << " " << block_state.getName() << " is air!";
+		}
 	}
+
+	unknown_block = solid;
 }
 
 }

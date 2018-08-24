@@ -329,7 +329,7 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 			return;
 		}
 		new_block_images->exportBlocks().writePNG("blocks.png");
-		return;
+		//return;
 	}
 
 	RenderContext context;

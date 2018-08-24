@@ -160,6 +160,9 @@ void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& ti
 	// all visible blocks which are rendered in this tile
 	std::set<old::RenderBlock> blocks;
 
+	RenderedBlockImages* block_images = dynamic_cast<RenderedBlockImages*>(images);
+	assert(block_images != nullptr);
+
 	// iterate over the highest blocks in the tile
 	// we use as tile position tile_pos+tile_offset because the offset means that
 	// we treat the tile position as tile_pos, but it's actually tile_pos+tile_offset
@@ -199,6 +202,7 @@ void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& ti
 			mc::LocalBlockPos local(block.current);
 
 			// get block id
+			/*
 			uint16_t id = current_chunk->getBlockID(local);
 
 			// air is completely transparent so continue
@@ -306,23 +310,32 @@ void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& ti
 				image = images->getBiomeBlock(id, data, getBiomeOfBlock(block.current, current_chunk), extra_data);
 			else
 				image = images->getBlock(id, data, extra_data);
+			*/
+
+			uint16_t id = current_chunk->getBlockID(local);
+			const BlockImage& block_image = block_images->getBlockImage(id);
+			if (block_image.is_air) {
+				continue;
+			}
 
 			old::RenderBlock node;
 			node.x = it.draw_x;
 			node.y = it.draw_y;
 			node.pos = block.current;
-			node.image = image;
+			node.image = block_image.image;
+			/*
 			node.id = id;
 			node.data = data;
+			*/
 
 			// let the render mode do their magic with the block image
-			render_mode->draw(node.image, node.pos, id, data);
+			//render_mode->draw(node.image, node.pos, id, data);
 
 			// insert into current row
 			row_nodes.insert(node);
 
 			// if this block is not transparent, then break
-			if (!transparent)
+			if (!block_image.is_transparent)
 				break;
 		}
 
@@ -336,8 +349,8 @@ void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& ti
 				blocks.insert(*it);
 			} else {
 				// skip unnecessary leaves
-				if (it->id == 18 && next->id == 18 && (next->data & 3) == (it->data & 3))
-					continue;
+				//if (it->id == 18 && next->id == 18 && (next->data & 3) == (it->data & 3))
+				//	continue;
 				blocks.insert(*it);
 			}
 		}
