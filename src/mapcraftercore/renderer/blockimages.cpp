@@ -684,6 +684,24 @@ void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
 	}
 }
 
+void blockImageTint(RGBAImage& block, const RGBAImage& mask,
+		uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+	assert(block.getWidth() == mask.getWidth());
+	assert(block.getHeight() == mask.getHeight());
+	
+	for (size_t x = 0; x < block.getWidth(); x++) {
+		for (size_t y = 0; y < block.getHeight(); y++) {
+			uint32_t& pixel = block.pixel(x, y);
+			uint32_t mask_pixel = mask.pixel(x, y);
+			if (rgba_alpha(mask_pixel) == 0) {
+				continue;
+			}
+
+			pixel = rgba_multiply(mask_pixel, r, g, b, a);
+		}
+	}
+}
+
 bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask) {
 	assert(block.getWidth() == uv_mask.getWidth());
 	assert(block.getHeight() == uv_mask.getHeight());
@@ -809,6 +827,10 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int textu
 		block.image = image;
 		block.uv_image = image_uv;
 		block.is_air = block_info.count("is_air");
+		block.is_biome = block_info.count("biome");
+		if (block.is_biome) {
+			block.is_masked_biome = block_info["biome"] == "masked";
+		}
 		block_images[id] = block;
 
 		//std::cout << block_name << " " << variant << std::endl;
@@ -857,6 +879,27 @@ const BlockImage& RenderedBlockImages::getBlockImage(uint16_t id) const {
 	return it->second;
 }
 
+void RenderedBlockImages::prepareBiomeBlockImage(RGBAImage& image, const BlockImage& block, const Biome& biome) {
+	uint32_t color;
+	// leaves have the foliage colors
+	// for birches, the color x/y coordinate is flipped
+	//if (id == 18)
+	//	color = biome.getColor(resources.getFoliageColors(), (data & util::binary<11>::value) == 2);
+	//else
+		color = biome.getColor(resources.getGrassColors(), false);
+
+	uint8_t r = rgba_red(color);
+	uint8_t g = rgba_green(color);
+	uint8_t b = rgba_blue(color);
+	uint8_t a = 255;
+	
+	if (block.is_masked_biome) {
+		blockImageTint(image, block.biome_mask, r, g, b, a);
+	} else {
+		blockImageTint(image, image, r, g, b, a);
+	}
+}
+
 int RenderedBlockImages::getTextureSize() const {
 	return texture_size;
 }
@@ -880,7 +923,10 @@ void RenderedBlockImages::prepareBlockImages() {
 		// CornerValues values = {0.0, 1.0, 1.0, 0.0};
 		// blockImageMultiply(image, image_uv, values, values, values);
 
-		blockImageMultiply(block.image, block.uv_image, darken_left, darken_right, 1.0);
+		std::string name = block_state.getName();
+		if (!util::endswith(name, "_biome_mask")) {
+			blockImageMultiply(block.image, block.uv_image, darken_left, darken_right, 1.0);
+		}
 
 		if (blockImageIsTransparent(block.image, solid.uv_image)) {
 			//LOG(INFO) << block_state.getName() << " " << block_state.getVariantDescription() << " is transparent!";
@@ -890,6 +936,13 @@ void RenderedBlockImages::prepareBlockImages() {
 			//blockImageTest(image, image_uv);
 			//LOG(INFO) << block_state.getName() << " " << block_state.getVariantDescription() << " is not transparent!";
 			block.is_transparent = false;
+		}
+
+		if (block.is_biome && block.is_masked_biome) {
+			std::string mask_name = name + "_biome_mask";
+			uint16_t mask_id = block_registry.getBlockID(mc::BlockState::parse(mask_name, block_state.getVariantDescription()));
+			assert(block_images.find(mask_id) != block_images.end());
+			block.biome_mask = block_images[mask_id].image;
 		}
 	}
 

@@ -328,6 +328,11 @@ void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& ti
 			node.data = data;
 			*/
 
+			if (block_image.is_biome) {
+				Biome biome = getBiomeOfBlock(block.current, current_chunk);
+				block_images->prepareBiomeBlockImage(node.image, block_image, biome);
+			}
+
 			// let the render mode do their magic with the block image
 			//render_mode->draw(node.image, node.pos, id, data);
 

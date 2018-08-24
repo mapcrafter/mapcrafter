@@ -543,11 +543,16 @@ void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
 		float factor_left, float factor_right, float factor_up);
 void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
 		const CornerValues& factors_left, const CornerValues& factors_right, const CornerValues& factors_up);
+void blockImageTint(RGBAImage& block, const RGBAImage& mask,
+		uint8_t r, uint8_t g, uint8_t b);
 bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask);
 
 struct BlockImage {
 	RGBAImage image, uv_image;
-	bool is_transparent, is_air;
+	bool is_transparent, is_air, is_biome;
+	
+	bool is_masked_biome;
+	RGBAImage biome_mask;
 };
 
 class RenderedBlockImages : public BlockImages {
@@ -556,7 +561,9 @@ public:
 	virtual void setRotation(int rotation) {}
 	virtual void setRenderSpecialBlocks(bool render_unknown_blocks,
 			bool render_leaves_transparent) {}
-	virtual void generateBlocks(const TextureResources& resources) {}
+	virtual void generateBlocks(const TextureResources& resources) {
+		this->resources = resources;
+	}
 	//virtual RGBAImage exportBlocks() const {}
 	virtual bool isBlockTransparent(uint16_t id, uint16_t data) const { return false; };
 	virtual bool hasBlock(uint16_t id, uint16_t) const { return true; };
@@ -573,14 +580,16 @@ public:
 	virtual RGBAImage exportBlocks() const;
 
 	const BlockImage& getBlockImage(uint16_t id) const;
+	void prepareBiomeBlockImage(RGBAImage& image, const BlockImage& block, const Biome& biome);
 
-	virtual int getTextureSize() const;;
+	virtual int getTextureSize() const;
 	virtual int getBlockSize() const;
 
 private:
 	void prepareBlockImages();
 
 	mc::BlockStateRegistry& block_registry;
+	TextureResources resources;
 
 	float darken_left, darken_right;
 
