@@ -71,6 +71,8 @@ PathList findTemplateDirs(const fs::path& executable);
  */
 PathList findTextureDirs(const fs::path& executable);
 
+PathList findBlockDirs(const fs::path& executable);
+
 /**
  * Returns all possible logging configuration files.
  */
