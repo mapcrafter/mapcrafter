@@ -283,7 +283,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	name_long = name_short;
 
 	// set some default configuration values
-	render_view.setDefault(renderer::RenderViewType::ISOMETRIC);
+	render_view.setDefault(renderer::RenderViewType::ISOMETRICNEW);
 	render_mode.setDefault(renderer::RenderModeType::DAYLIGHT);
 	overlay.setDefault(renderer::OverlayType::NONE);
 	rotations.setDefault("top-left");
