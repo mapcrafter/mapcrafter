@@ -191,9 +191,12 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 	} else if (level.hasArray<nbt::TagIntArray>("Biomes", 256)) {
 		const nbt::TagIntArray& biomes_tag = level.findTag<nbt::TagIntArray>("Biomes");
 		std::copy(biomes_tag.payload.begin(), biomes_tag.payload.end(), biomes);
+	} else if (level.hasArray<nbt::TagByteArray>("Biomes", 0)
+			|| level.hasArray<nbt::TagLongArray>("Biomes", 0)) {
+		std::fill(biomes, biomes + 256, 0);
 	} else {
 		LOG(WARNING) << "Corrupt chunk " << chunkpos << ": No biome data found!";
-		level.dump(std::cout);
+		//level.dump(std::cout);
 	}
 
 	if (level.hasTag<nbt::TagList>("TileEntities")) {
