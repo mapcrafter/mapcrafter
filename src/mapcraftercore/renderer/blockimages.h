@@ -182,6 +182,12 @@ private:
 	bool loadSingle(const std::string& filename, int color_index, int texture_size);
 };
 
+enum class ColorMapType {
+	GRASS,
+	FOLIAGE,
+	FOLIAGE_FLIPPED,
+};
+
 /**
  * This class is responsible for loading the required texture files from a texture dir.
  */
@@ -270,6 +276,8 @@ public:
 	 */
 	const RGBAImage& getGrassColors() const;
 
+	const RGBAImage& getColorMap(ColorMapType type) const;
+
 private:
 	/**
 	 * Loads the chest textures from the supplied files.
@@ -303,7 +311,7 @@ private:
 	ShulkerTextures shulker_textures;
 	BedTextures bed_textures;
 
-	RGBAImage foliage_colors, grass_colors;
+	RGBAImage foliage_colors, foliage_flipped_colors, grass_colors;
 };
 
 /**
@@ -552,6 +560,7 @@ struct BlockImage {
 	bool is_transparent, is_air, is_biome;
 	
 	bool is_masked_biome;
+	ColorMapType biome_color;
 	RGBAImage biome_mask;
 };
 

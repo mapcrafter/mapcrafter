@@ -27,6 +27,25 @@
 #include <vector>
 
 namespace mapcrafter {
+namespace util {
+
+template <>
+renderer::ColorMapType as<renderer::ColorMapType>(const std::string& str) {
+	if (str == "foliage") {
+		return renderer::ColorMapType::FOLIAGE;
+	} else if (str == "foliage_flipped") {
+		return renderer::ColorMapType::FOLIAGE_FLIPPED;
+	} else if (str == "grass") {
+		return renderer::ColorMapType::GRASS;
+	} else {
+		throw std::invalid_argument("Must be 'foliage', 'foliage_flipped' or 'grass'!");
+	}
+}
+
+}
+}
+
+namespace mapcrafter {
 namespace renderer {
 
 bool ChestTextures::load(const std::string& filename, int texture_size) {
@@ -348,6 +367,16 @@ const RGBAImage& TextureResources::getGrassColors() const {
 	return grass_colors;
 }
 
+const RGBAImage& TextureResources::getColorMap(ColorMapType type) const {
+	if (type == ColorMapType::FOLIAGE) {
+		return foliage_colors;
+	} else if (type == ColorMapType::FOLIAGE_FLIPPED) {
+		return foliage_flipped_colors;
+	} else if (type == ColorMapType::GRASS) {
+		return grass_colors;
+	}
+}
+
 bool TextureResources::loadChests(const std::string& normal_png,
 		const std::string& normal_double_png, const std::string& ender_png,
 		const std::string& trapped_png, const std::string& trapped_double_png,
@@ -370,6 +399,7 @@ bool TextureResources::loadColors(const std::string& foliage_png,
 		LOG(ERROR) << "Unable to read '" << foliage_png << "'.";
 		ok = false;
 	}
+	foliage_flipped_colors = foliage_colors.rotate(2);
 	if (!grass_colors.readPNG(grass_png)) {
 		LOG(ERROR) << "Unable to read '" << grass_png << "'.";
 		ok = false;
@@ -827,9 +857,10 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int textu
 		block.image = image;
 		block.uv_image = image_uv;
 		block.is_air = block_info.count("is_air");
-		block.is_biome = block_info.count("biome");
+		block.is_biome = block_info.count("biome_type");
 		if (block.is_biome) {
-			block.is_masked_biome = block_info["biome"] == "masked";
+			block.is_masked_biome = block_info["biome_type"] == "masked";
+			block.biome_color = util::as<ColorMapType>(block_info["biome_colors"]);
 		}
 		block_images[id] = block;
 
@@ -880,13 +911,7 @@ const BlockImage& RenderedBlockImages::getBlockImage(uint16_t id) const {
 }
 
 void RenderedBlockImages::prepareBiomeBlockImage(RGBAImage& image, const BlockImage& block, const Biome& biome) {
-	uint32_t color;
-	// leaves have the foliage colors
-	// for birches, the color x/y coordinate is flipped
-	//if (id == 18)
-	//	color = biome.getColor(resources.getFoliageColors(), (data & util::binary<11>::value) == 2);
-	//else
-		color = biome.getColor(resources.getGrassColors(), false);
+	uint32_t color = biome.getColor(resources.getColorMap(block.biome_color), false);
 
 	uint8_t r = rgba_red(color);
 	uint8_t g = rgba_green(color);
