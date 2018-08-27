@@ -22,6 +22,7 @@
 
 #include <map>
 #include <mutex>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -34,6 +35,7 @@ public:
 
 	std::string getName() const;
 
+	const std::map<std::string, std::string>& getProperties() const;
 	std::string getProperty(std::string key, std::string default_value = "") const;
 	void setProperty(std::string key, std::string value);
 
@@ -60,11 +62,16 @@ public:
 	uint16_t getBlockID(const BlockState& block);
 	const BlockState& getBlockState(uint16_t id) const;
 
+	void addKnownProperty(std::string block, std::string property);
+	bool isKnownProperty(std::string block, std::string property) const;
+
 private:
 	std::mutex mutex;
 
 	std::map<std::string, std::map<std::string, uint16_t>> block_lookup;
 	std::vector<BlockState> block_states;
+
+	std::map<std::string, std::set<std::string>> known_properties;
 
 	BlockState unknown_block;
 };

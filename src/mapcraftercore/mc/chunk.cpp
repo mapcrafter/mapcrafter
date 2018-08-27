@@ -264,17 +264,14 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 			const nbt::TagString& name = entry.findTag<nbt::TagString>("Name");
 			
 			mc::BlockState block(name.payload);
-			bool skip_properties = false;
-			if (util::endswith(name.payload, "_leaves") || name.payload == "minecraft:water"
-					|| name.payload == "minecraft:lava" || name.payload == "minecraft:sugar_cane") {
-				skip_properties = true;
-			}
-			if (!skip_properties && entry.hasTag<nbt::TagCompound>("Properties")) {
+			if (entry.hasTag<nbt::TagCompound>("Properties")) {
 				const nbt::TagCompound& properties = entry.findTag<nbt::TagCompound>("Properties");
 				for (auto it3 = properties.payload.begin(); it3 != properties.payload.end(); ++it3) {
 					std::string key = it3->first;
 					std::string value = it3->second->cast<nbt::TagString>().payload;
-					block.setProperty(key, value);
+					if (block_registry.isKnownProperty(block.getName(), key)) {
+						block.setProperty(key, value);
+					}
 				}
 			}
 			palette_blockstates[i] = block;

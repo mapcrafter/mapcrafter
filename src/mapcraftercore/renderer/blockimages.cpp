@@ -864,6 +864,11 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int textu
 		}
 		block_images[id] = block;
 
+		auto properties = block_state.getProperties();
+		for (auto it = properties.begin(); it != properties.end(); ++it) {
+			block_registry.addKnownProperty(block_state.getName(), it->first);
+		}
+
 		//std::cout << block_name << " " << variant << std::endl;
 	}
 	in.close();
