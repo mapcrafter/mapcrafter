@@ -185,29 +185,36 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 		LOG(ERROR) << "Corrupt chunk " << chunkpos << ": No terrain populated tag found!";
 	*/
 
-	if (level.hasArray<nbt::TagIntArray>("Biomes", 256)) {
+	if (level.hasArray<nbt::TagByteArray>("Biomes", 256)) {
+		const nbt::TagByteArray& biomes_tag = level.findTag<nbt::TagByteArray>("Biomes");
+		std::copy(biomes_tag.payload.begin(), biomes_tag.payload.end(), biomes);
+	} else if (level.hasArray<nbt::TagIntArray>("Biomes", 256)) {
 		const nbt::TagIntArray& biomes_tag = level.findTag<nbt::TagIntArray>("Biomes");
 		std::copy(biomes_tag.payload.begin(), biomes_tag.payload.end(), biomes);
 	} else {
-		LOG(ERROR) << "Corrupt chunk " << chunkpos << ": No biome data found!";
+		LOG(WARNING) << "Corrupt chunk " << chunkpos << ": No biome data found!";
+		level.dump(std::cout);
 	}
 
-	const nbt::TagList& tile_entities_tag = level.findTag<nbt::TagList>("TileEntities");
+	if (level.hasTag<nbt::TagList>("TileEntities")) {
+		const nbt::TagList& tile_entities_tag = level.findTag<nbt::TagList>("TileEntities");
+		if (tile_entities_tag.tag_type == nbt::TagCompound::TAG_TYPE) {
+			// go through all entities
+			for (auto it = tile_entities_tag.payload.begin(); it != tile_entities_tag.payload.end(); ++it) {
+				const nbt::TagCompound &entity = (*it)->cast<nbt::TagCompound>();
+				std::string id = entity.findTag<nbt::TagString>("id").payload; // Not an integer, e.g. for beds: 'minecraft:bed'
+				mc::BlockPos pos(
+						entity.findTag<nbt::TagInt>("x").payload,
+						entity.findTag<nbt::TagInt>("z").payload,
+						entity.findTag<nbt::TagInt>("y").payload
+				);
 
-	if (tile_entities_tag.tag_type == nbt::TagCompound::TAG_TYPE) {
-		// go through all entities
-		for (auto it = tile_entities_tag.payload.begin(); it != tile_entities_tag.payload.end(); ++it) {
-			const nbt::TagCompound &entity = (*it)->cast<nbt::TagCompound>();
-			std::string id = entity.findTag<nbt::TagString>("id").payload; // Not an integer, e.g. for beds: 'minecraft:bed'
-			mc::BlockPos pos(
-					entity.findTag<nbt::TagInt>("x").payload,
-					entity.findTag<nbt::TagInt>("z").payload,
-					entity.findTag<nbt::TagInt>("y").payload
-			);
-
-			if (id == "minecraft:bed") { // bed, stored as a string here
-				uint16_t color = (uint16_t) entity.findTag<nbt::TagInt>("color").payload;
-				insertExtraData(pos, color);
+				/*
+				if (id == "minecraft:bed") { // bed, stored as a string here
+					uint16_t color = (uint16_t) entity.findTag<nbt::TagInt>("color").payload;
+					insertExtraData(pos, color);
+				}
+				*/
 			}
 		}
 	}
