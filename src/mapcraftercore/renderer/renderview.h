@@ -67,8 +67,9 @@ public:
 	/**
 	 * Creates an instance of the render view specific tile renderer class.
 	 */
-	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
-			mc::WorldCache* world, RenderMode* render_mode) const = 0;
+	virtual TileRenderer* createTileRenderer(mc::BlockStateRegistry& block_registry,
+			BlockImages* images, int tile_width, mc::WorldCache* world,
+			RenderMode* render_mode) const = 0;
 
 	/**
 	 * Creates an instance of the render view specific render mode renderer class.

@@ -24,6 +24,7 @@
 #include "../../image.h"
 #include "../../rendermode.h"
 #include "../../tileset.h"
+#include "../../../mc/blockstate.h"
 #include "../../../mc/pos.h"
 #include "../../../mc/worldcache.h"
 #include "../../../util.h"
@@ -140,9 +141,26 @@ bool RenderBlock::operator<(const RenderBlock& other) const {
 }
 
 NewIsometricTileRenderer::NewIsometricTileRenderer(const RenderView* render_view,
+		mc::BlockStateRegistry& block_registry,
 		BlockImages* images, int tile_width, mc::WorldCache* world,
 		RenderMode* render_mode)
-	: TileRenderer(render_view, images, tile_width, world, render_mode) {
+	: TileRenderer(render_view, images, tile_width, world, render_mode),
+	  block_registry(block_registry) {
+	full_water_ids.insert(block_registry.getBlockID(mc::BlockState::parse("minecraft:water", "level=0")));
+	full_water_ids.insert(block_registry.getBlockID(mc::BlockState::parse("minecraft:water", "level=8")));
+
+	for (uint8_t i = 0; i < 8; i++) {
+		bool up = i & 0x1;
+		bool south = i & 0x2;
+		bool west = i & 0x4;
+
+		mc::BlockState block("minecraft:full_water");
+		block.setProperty("up", up ? "true" : "false");
+		block.setProperty("south", south ? "true" : "false");
+		block.setProperty("west", west ? "true" : "false");
+
+		partial_full_water_ids.push_back(block_registry.getBlockID(block));
+	}
 }
 
 NewIsometricTileRenderer::~NewIsometricTileRenderer() {
@@ -200,6 +218,8 @@ void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& ti
 
 			// get local block position
 			mc::LocalBlockPos local(block.current);
+
+			// is something full water? minecraft:(flowing_?)water level=0|8
 
 			// get block id
 			/*
@@ -313,24 +333,40 @@ void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& ti
 			*/
 
 			uint16_t id = current_chunk->getBlockID(local);
-			const BlockImage& block_image = block_images->getBlockImage(id);
-			if (block_image.is_air) {
+			const BlockImage* block_image = &block_images->getBlockImage(id);
+			if (block_image->is_air) {
 				continue;
+			}
+
+			if (full_water_ids.count(id)) {
+				uint16_t up = getBlock(block.current + mc::DIR_TOP).id;
+				uint16_t south = getBlock(block.current + mc::DIR_SOUTH).id;
+				uint16_t west = getBlock(block.current + mc::DIR_WEST).id;
+
+				uint8_t index = full_water_ids.count(up)
+									| (full_water_ids.count(south) << 1)
+									| (full_water_ids.count(west) << 2);
+				if (index == 0) {
+					continue;
+				}
+				assert(index < 8);
+				uint16_t id = partial_full_water_ids[index];
+				block_image = &block_images->getBlockImage(id);
 			}
 
 			old::RenderBlock node;
 			node.x = it.draw_x;
 			node.y = it.draw_y;
 			node.pos = block.current;
-			node.image = block_image.image;
+			node.image = block_image->image;
 			/*
 			node.id = id;
 			node.data = data;
 			*/
 
-			if (block_image.is_biome) {
+			if (block_image->is_biome) {
 				Biome biome = getBiomeOfBlock(block.current, current_chunk);
-				block_images->prepareBiomeBlockImage(node.image, block_image, biome);
+				block_images->prepareBiomeBlockImage(node.image, *block_image, biome);
 			}
 
 			// let the render mode do their magic with the block image
@@ -340,7 +376,7 @@ void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& ti
 			row_nodes.insert(node);
 
 			// if this block is not transparent, then break
-			if (!block_image.is_transparent)
+			if (!block_image->is_transparent)
 				break;
 		}
 

@@ -38,8 +38,8 @@ TileSet* TopdownRenderView::createTileSet(int tile_width) const {
 	return new TopdownTileSet(tile_width);
 }
 
-TileRenderer* TopdownRenderView::createTileRenderer(BlockImages* images,
-		int tile_width, mc::WorldCache* world, RenderMode* render_mode) const {
+TileRenderer* TopdownRenderView::createTileRenderer(mc::BlockStateRegistry& block_registry,
+		BlockImages* images, int tile_width, mc::WorldCache* world, RenderMode* render_mode) const {
 	return new TopdownTileRenderer(this, images, tile_width, world, render_mode);
 }
 

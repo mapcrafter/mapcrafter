@@ -28,6 +28,11 @@
 namespace fs = boost::filesystem;
 
 namespace mapcrafter {
+
+namespace mc {
+class BlockStateRegistry;
+}
+
 namespace renderer {
 
 namespace old {
@@ -91,13 +96,21 @@ struct RenderBlock {
  */
 class NewIsometricTileRenderer : public TileRenderer {
 public:
-	NewIsometricTileRenderer(const RenderView* render_view, BlockImages* images,
-			int tile_width, mc::WorldCache* world, RenderMode* render_mode);
+	NewIsometricTileRenderer(const RenderView* render_view, mc::BlockStateRegistry& block_registry,
+			BlockImages* images, int tile_width, mc::WorldCache* world, RenderMode* render_mode);
 	virtual ~NewIsometricTileRenderer();
 
 	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile);
 
 	virtual int getTileSize() const;
+
+protected:
+	mc::BlockStateRegistry& block_registry;
+
+	// IDs of full water blocks appearing in minecraft worlds
+	std::set<uint16_t> full_water_ids;
+	// full water blocks will be replaced by these water blocks
+	std::vector<uint16_t> partial_full_water_ids;
 };
 
 }
