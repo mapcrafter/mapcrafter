@@ -862,6 +862,14 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int textu
 			block.is_masked_biome = block_info["biome_type"] == "masked";
 			block.biome_color = util::as<ColorMapType>(block_info["biome_colors"]);
 		}
+		block.is_waterloggable = block_info.count("is_waterloggable");
+		if (block.is_waterloggable) {
+			block.is_waterlogged = block_state.getProperty("waterlogged", "true") == "true";
+
+			mc::BlockState non_waterlogged = block_state;
+			non_waterlogged.setProperty("waterlogged", "false");
+			block.non_waterlogged_id = block_registry.getBlockID(non_waterlogged);
+		}
 		block_images[id] = block;
 
 		auto properties = block_state.getProperties();

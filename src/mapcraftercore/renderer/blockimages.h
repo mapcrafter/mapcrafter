@@ -562,6 +562,10 @@ struct BlockImage {
 	bool is_masked_biome;
 	ColorMapType biome_color;
 	RGBAImage biome_mask;
+
+	bool is_waterloggable;
+	bool is_waterlogged;
+	uint16_t non_waterlogged_id;
 };
 
 class RenderedBlockImages : public BlockImages {

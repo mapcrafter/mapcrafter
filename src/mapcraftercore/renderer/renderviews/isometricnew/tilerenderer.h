@@ -109,6 +109,9 @@ protected:
 
 	// IDs of full water blocks appearing in minecraft worlds
 	std::set<uint16_t> full_water_ids;
+	// IDs of blocks that can be seen as full water blocks for other full water blocks
+	// (for example ice: we don't want side faces of water next to ice)
+	std::set<uint16_t> full_water_like_ids;
 	// full water blocks will be replaced by these water blocks
 	std::vector<uint16_t> partial_full_water_ids;
 };

@@ -146,8 +146,12 @@ NewIsometricTileRenderer::NewIsometricTileRenderer(const RenderView* render_view
 		RenderMode* render_mode)
 	: TileRenderer(render_view, images, tile_width, world, render_mode),
 	  block_registry(block_registry) {
+
+	// TODO can we make this somehow less hardcoded?
 	full_water_ids.insert(block_registry.getBlockID(mc::BlockState::parse("minecraft:water", "level=0")));
 	full_water_ids.insert(block_registry.getBlockID(mc::BlockState::parse("minecraft:water", "level=8")));
+	full_water_like_ids.insert(block_registry.getBlockID(mc::BlockState::parse("minecraft:ice", "")));
+	full_water_like_ids.insert(block_registry.getBlockID(mc::BlockState::parse("minecraft:packed_ice", "")));
 
 	for (uint8_t i = 0; i < 8; i++) {
 		bool up = i & 0x1;
@@ -338,20 +342,36 @@ void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& ti
 				continue;
 			}
 
+			auto is_full_water = [this, block_images](uint16_t id) -> bool {
+				return full_water_ids.count(id)
+					|| full_water_like_ids.count(id)
+					|| block_images->getBlockImage(id).is_waterloggable;
+			};
+
 			if (full_water_ids.count(id)) {
 				uint16_t up = getBlock(block.current + mc::DIR_TOP).id;
 				uint16_t south = getBlock(block.current + mc::DIR_SOUTH).id;
 				uint16_t west = getBlock(block.current + mc::DIR_WEST).id;
 
-				uint8_t index = full_water_ids.count(up)
-									| (full_water_ids.count(south) << 1)
-									| (full_water_ids.count(west) << 2);
-				if (index == 0) {
+				uint8_t index = is_full_water(up)
+									| (is_full_water(south) << 1)
+									| (is_full_water(west) << 2);
+				// skip water blocks that are completely empty
+				if (index == 1+2+4) {
 					continue;
 				}
 				assert(index < 8);
 				uint16_t id = partial_full_water_ids[index];
 				block_image = &block_images->getBlockImage(id);
+			}
+
+			// when we have a block that is waterlogged:
+			// remove upper water texture if it's not the block at the water surface
+			if (block_image->is_waterloggable && block_image->is_waterlogged) {
+				uint16_t up = getBlock(block.current + mc::DIR_TOP).id;
+				if (is_full_water(up)) {
+					block_image = &block_images->getBlockImage(block_image->non_waterlogged_id);
+				}
 			}
 
 			old::RenderBlock node;
