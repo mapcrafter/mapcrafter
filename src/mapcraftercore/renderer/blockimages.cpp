@@ -303,6 +303,7 @@ bool TextureResources::loadTextures(const std::string& texture_dir,
 	if (dir[dir.size() - 1] != '/')
 		dir = dir + '/';
 	bool ok = true;
+	/*
 	if (!loadChests(dir + "entity/chest/normal.png",
 			dir + "entity/chest/normal_double.png",
 			dir + "entity/chest/ender.png",
@@ -311,11 +312,14 @@ bool TextureResources::loadTextures(const std::string& texture_dir,
 			dir + "entity/shulker/shulker_",
 			dir + "entity/bed/"))
 		ok = false;
+	*/
 	if (!loadColors(dir + "colormap/foliage.png",
 			dir + "colormap/grass.png"))
 		ok = false;
+	/*
 	if (!loadBlocks(dir + "blocks", dir + "endportal.png"))
 		ok = false;
+	*/
 	if (!ok) {
 		LOG(ERROR) << "Invalid texture directory '" << dir << "'. See previous log messages.";
 		return false;
