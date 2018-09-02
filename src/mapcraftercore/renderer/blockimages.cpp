@@ -766,8 +766,13 @@ void RenderedBlockImages::setBlockSideDarkening(float darken_left, float darken_
 	this->darken_right = darken_right;
 }
 
-bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int texture_size) {
-	block_size = texture_size * 2;
+bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int rotation, int texture_size) {
+	// TODO maybe?
+	if (view == "isometric") {
+		block_size = texture_size * 2;
+	} else {
+		block_size = texture_size;
+	}
 	LOG(INFO) << "I will load block images from " << path << " now";
 
 	if (!fs::is_directory(path)) {
@@ -775,7 +780,11 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int textu
 		return false;
 	}
 
-	std::string name = "isometric_" + util::str(rotation) + "_" + util::str(texture_size);
+	int load_rotation = rotation;
+	if (view == "topdown") {
+		load_rotation = 0;
+	}
+	std::string name = view + "_" + util::str(load_rotation) + "_" + util::str(texture_size);
 	fs::path info_file = path / (name + ".txt");
 	fs::path block_file = path / (name + ".png");
 
@@ -818,8 +827,6 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int textu
 		return false;
 	}
 
-	int block_size = texture_size * 2;
-
 	int lineno = 2;
 	for (std::string line; std::getline(in, line); lineno++) {
 		line = util::trim(line);
@@ -849,6 +856,11 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, int rotation, int textu
 		x = (image_uv_index % columns) * block_size;
 		y = (image_uv_index / columns) * block_size;
 		RGBAImage image_uv = blocks.clip(x, y, block_size, block_size);
+
+		if (view == "topdown" && rotation != 0) {
+			image = image.rotate((rotation + 4) % 4);
+			image_uv = image_uv.rotate((rotation + 4) % 4);
+		}
 
 		if (image.getWidth() != image_uv.getWidth() || image.getHeight() != image_uv.getHeight()) {
 			LOG(ERROR) << "Size mismatch of block " << block_name;

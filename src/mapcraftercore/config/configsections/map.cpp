@@ -283,7 +283,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	name_long = name_short;
 
 	// set some default configuration values
-	render_view.setDefault(renderer::RenderViewType::ISOMETRICNEW);
+	render_view.setDefault(renderer::RenderViewType::ISOMETRIC);
 	render_mode.setDefault(renderer::RenderModeType::DAYLIGHT);
 	overlay.setDefault(renderer::OverlayType::NONE);
 	rotations.setDefault("top-left");
@@ -322,7 +322,12 @@ bool MapSection::parseField(const std::string key, const std::string value,
 	} else if (key == "world") {
 		world.load(key, value, validation);
 	} else if (key == "render_view") {
-		render_view.load(key, value, validation);
+		if (render_view.load(key, value, validation)) {
+			if (render_view.getValue() == renderer::RenderViewType::ISOMETRICNEW) {
+				validation.error("Using 'isometricnew' for 'render_view' is not necessary anymore! "
+						"Just use 'isometric' or 'topdown'.");
+			}
+		}
 	} else if (key == "render_mode" || key == "rendermode") {
 		render_mode.load(key, value, validation);
 		if (key == "rendermode")

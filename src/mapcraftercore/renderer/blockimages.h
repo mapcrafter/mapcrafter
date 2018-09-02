@@ -589,7 +589,7 @@ public:
 
 	void setBlockSideDarkening(float darken_left, float darken_right);
 
-	bool loadBlockImages(fs::path block_dir, int rotation, int texture_size);
+	bool loadBlockImages(fs::path block_dir, std::string view, int rotation, int texture_size);
 	virtual RGBAImage exportBlocks() const;
 
 	const BlockImage& getBlockImage(uint16_t id) const;

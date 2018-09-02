@@ -21,6 +21,7 @@
 #define TILERENDERER_H_
 
 #include "biomes.h"
+#include "image.h"
 #include "../mc/worldcache.h" // mc::DIR_*
 
 #include <vector>
@@ -33,6 +34,7 @@ namespace mapcrafter {
 // some forward declarations
 namespace mc {
 class BlockPos;
+class BlockStateRegistry;
 class Chunk;
 }
 
@@ -40,29 +42,43 @@ namespace renderer {
 
 class BlockImages;
 class TilePos;
+class RenderedBlockImages;
 class RenderMode;
 class RenderView;
-class RGBAImage;
+
+struct TileImage {
+	int x, y;
+	RGBAImage image;
+	mc::BlockPos pos;
+
+	bool operator<(const TileImage& other) const;
+};
 
 class TileRenderer {
 public:
-	TileRenderer(const RenderView* render_view, BlockImages* images, int tile_width,
-			mc::WorldCache* world, RenderMode* render_mode);
+	TileRenderer(const RenderView* render_view, mc::BlockStateRegistry& block_registry,
+			BlockImages* images, int tile_width, mc::WorldCache* world, RenderMode* render_mode);
 	virtual ~TileRenderer();
 
 	void setRenderBiomes(bool render_biomes);
 	void setUsePreblitWater(bool use_preblit_water);
 
-	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile) = 0;
+	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile);
 
 	virtual int getTileSize() const = 0;
 
 protected:
+	void renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockPos& dir, std::set<TileImage>& tile_images);
+	virtual void renderTopBlocks(const TilePos& tile_pos, std::set<TileImage>& tile_images) {}
+
 	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
 	Biome getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk);
 	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
+	mc::BlockStateRegistry& block_registry;
+
 	BlockImages* images;
+	RenderedBlockImages* block_images;
 	int tile_width;
 	mc::WorldCache* world;
 	mc::Chunk* current_chunk;
@@ -70,6 +86,14 @@ protected:
 
 	bool render_biomes;
 	bool use_preblit_water;
+
+	// IDs of full water blocks appearing in minecraft worlds
+	std::set<uint16_t> full_water_ids;
+	// IDs of blocks that can be seen as full water blocks for other full water blocks
+	// (for example ice: we don't want side faces of water next to ice)
+	std::set<uint16_t> full_water_like_ids;
+	// full water blocks will be replaced by these water blocks
+	std::vector<uint16_t> partial_full_water_ids;
 };
 
 }

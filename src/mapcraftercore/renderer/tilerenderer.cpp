@@ -20,22 +20,47 @@
 #include "tilerenderer.h"
 
 #include "blockimages.h"
-#include "image.h"
 #include "rendermode.h"
 #include "renderview.h"
 #include "tileset.h"
+#include "../mc/blockstate.h"
 #include "../mc/pos.h"
 #include "../util.h"
 
 namespace mapcrafter {
 namespace renderer {
 
-TileRenderer::TileRenderer(const RenderView* render_view, BlockImages* images,
-		int tile_width, mc::WorldCache* world, RenderMode* render_mode)
-	: images(images), tile_width(tile_width), world(world), current_chunk(nullptr),
+bool TileImage::operator<(const TileImage& other) const {
+	return pos < other.pos;
+}
+
+TileRenderer::TileRenderer(const RenderView* render_view, mc::BlockStateRegistry& block_registry,
+		BlockImages* images, int tile_width, mc::WorldCache* world, RenderMode* render_mode)
+	: block_registry(block_registry), images(images), block_images(dynamic_cast<RenderedBlockImages*>(images)),
+	  tile_width(tile_width), world(world), current_chunk(nullptr),
 	  render_mode(render_mode),
 	  render_biomes(true), use_preblit_water(false) {
+	assert(block_images);
 	render_mode->initialize(render_view, images, world, &current_chunk);
+
+	// TODO can we make this somehow less hardcoded?
+	full_water_ids.insert(block_registry.getBlockID(mc::BlockState::parse("minecraft:water", "level=0")));
+	full_water_ids.insert(block_registry.getBlockID(mc::BlockState::parse("minecraft:water", "level=8")));
+	full_water_like_ids.insert(block_registry.getBlockID(mc::BlockState::parse("minecraft:ice", "")));
+	full_water_like_ids.insert(block_registry.getBlockID(mc::BlockState::parse("minecraft:packed_ice", "")));
+
+	for (uint8_t i = 0; i < 8; i++) {
+		bool up = i & 0x1;
+		bool south = i & 0x2;
+		bool west = i & 0x4;
+
+		mc::BlockState block("minecraft:full_water");
+		block.setProperty("up", up ? "true" : "false");
+		block.setProperty("south", south ? "true" : "false");
+		block.setProperty("west", west ? "true" : "false");
+
+		partial_full_water_ids.push_back(block_registry.getBlockID(block));
+	}
 }
 
 TileRenderer::~TileRenderer() {
@@ -47,6 +72,97 @@ void TileRenderer::setRenderBiomes(bool render_biomes) {
 
 void TileRenderer::setUsePreblitWater(bool use_preblit_water) {
 	this->use_preblit_water = use_preblit_water;
+}
+
+void TileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
+	tile.setSize(getTileSize(), getTileSize());
+
+	std::set<TileImage> tile_images;
+	renderTopBlocks(tile_pos, tile_images);
+
+	for (auto it = tile_images.begin(); it != tile_images.end(); ++it) {
+		tile.alphaBlit(it->image, it->x, it->y);
+	}
+}
+
+void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockPos& dir, std::set<TileImage>& tile_images) {
+	for (; top.y >= 0 ; top += dir) {
+		// get current chunk position
+		mc::ChunkPos current_chunk_pos(top);
+
+		// check if current chunk is not null
+		// and if the chunk wasn't replaced in the cache (i.e. position changed)
+		if (current_chunk == nullptr || current_chunk->getPos() != current_chunk_pos) {
+			//if (!state.world->hasChunkSection(current_chunk, top.current.y))
+			//	continue;
+			current_chunk = world->getChunk(current_chunk_pos);
+		}
+		if (current_chunk == nullptr) {
+			continue;
+		}
+
+		// get local block position
+		mc::LocalBlockPos local(top);
+
+		uint16_t id = current_chunk->getBlockID(local);
+		const BlockImage* block_image = &block_images->getBlockImage(id);
+		if (block_image->is_air) {
+			continue;
+		}
+
+		auto is_full_water = [this](uint16_t id) -> bool {
+			return full_water_ids.count(id)
+				|| full_water_like_ids.count(id)
+				|| block_images->getBlockImage(id).is_waterloggable;
+		};
+
+		if (full_water_ids.count(id)) {
+			uint16_t up = getBlock(top + mc::DIR_TOP).id;
+			uint16_t south = getBlock(top + mc::DIR_SOUTH).id;
+			uint16_t west = getBlock(top + mc::DIR_WEST).id;
+
+			uint8_t index = is_full_water(up)
+								| (is_full_water(south) << 1)
+								| (is_full_water(west) << 2);
+			// skip water blocks that are completely empty
+			if (index == 1+2+4) {
+				continue;
+			}
+			assert(index < 8);
+			uint16_t id = partial_full_water_ids[index];
+			block_image = &block_images->getBlockImage(id);
+		}
+
+		// when we have a block that is waterlogged:
+		// remove upper water texture if it's not the block at the water surface
+		if (block_image->is_waterloggable && block_image->is_waterlogged) {
+			uint16_t up = getBlock(top + mc::DIR_TOP).id;
+			if (is_full_water(up)) {
+				block_image = &block_images->getBlockImage(block_image->non_waterlogged_id);
+			}
+		}
+
+		TileImage tile_image;
+		tile_image.x = x;
+		tile_image.y = y;
+		tile_image.pos = top;
+		tile_image.image = block_image->image;
+
+		if (block_image->is_biome) {
+			Biome biome = getBiomeOfBlock(top, current_chunk);
+			block_images->prepareBiomeBlockImage(tile_image.image, *block_image, biome);
+		}
+
+		// let the render mode do their magic with the block image
+		//render_mode->draw(node.image, node.pos, id, data);
+
+		tile_images.insert(tile_image);
+
+		// if this block is not transparent, then break
+		if (!block_image->is_transparent) {
+			break;
+		}
+	}
 }
 
 mc::Block TileRenderer::getBlock(const mc::BlockPos& pos, int get) {

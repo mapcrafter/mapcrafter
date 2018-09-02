@@ -144,32 +144,13 @@ NewIsometricTileRenderer::NewIsometricTileRenderer(const RenderView* render_view
 		mc::BlockStateRegistry& block_registry,
 		BlockImages* images, int tile_width, mc::WorldCache* world,
 		RenderMode* render_mode)
-	: TileRenderer(render_view, images, tile_width, world, render_mode),
-	  block_registry(block_registry) {
-
-	// TODO can we make this somehow less hardcoded?
-	full_water_ids.insert(block_registry.getBlockID(mc::BlockState::parse("minecraft:water", "level=0")));
-	full_water_ids.insert(block_registry.getBlockID(mc::BlockState::parse("minecraft:water", "level=8")));
-	full_water_like_ids.insert(block_registry.getBlockID(mc::BlockState::parse("minecraft:ice", "")));
-	full_water_like_ids.insert(block_registry.getBlockID(mc::BlockState::parse("minecraft:packed_ice", "")));
-
-	for (uint8_t i = 0; i < 8; i++) {
-		bool up = i & 0x1;
-		bool south = i & 0x2;
-		bool west = i & 0x4;
-
-		mc::BlockState block("minecraft:full_water");
-		block.setProperty("up", up ? "true" : "false");
-		block.setProperty("south", south ? "true" : "false");
-		block.setProperty("west", west ? "true" : "false");
-
-		partial_full_water_ids.push_back(block_registry.getBlockID(block));
-	}
+	: TileRenderer(render_view, block_registry, images, tile_width, world, render_mode) {
 }
 
 NewIsometricTileRenderer::~NewIsometricTileRenderer() {
 }
 
+/*
 void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 	// some vars, set correct image size
 	int block_size = images->getBlockSize();
@@ -224,6 +205,7 @@ void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& ti
 			mc::LocalBlockPos local(block.current);
 
 			// is something full water? minecraft:(flowing_?)water level=0|8
+			*/
 
 			// get block id
 			/*
@@ -336,6 +318,7 @@ void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& ti
 				image = images->getBlock(id, data, extra_data);
 			*/
 
+			/*
 			uint16_t id = current_chunk->getBlockID(local);
 			const BlockImage* block_image = &block_images->getBlockImage(id);
 			if (block_image->is_air) {
@@ -379,10 +362,6 @@ void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& ti
 			node.y = it.draw_y;
 			node.pos = block.current;
 			node.image = block_image->image;
-			/*
-			node.id = id;
-			node.data = data;
-			*/
 
 			if (block_image->is_biome) {
 				Biome biome = getBiomeOfBlock(block.current, current_chunk);
@@ -393,27 +372,12 @@ void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& ti
 			//render_mode->draw(node.image, node.pos, id, data);
 
 			// insert into current row
-			row_nodes.insert(node);
+			//row_nodes.insert(node);
+			blocks.insert(node);
 
 			// if this block is not transparent, then break
 			if (!block_image->is_transparent)
 				break;
-		}
-
-		// iterate through the created render blocks
-		for (std::set<old::RenderBlock>::const_iterator it = row_nodes.begin();
-		        it != row_nodes.end(); ++it) {
-			std::set<old::RenderBlock>::const_iterator next = it;
-			next++;
-			// insert render block to
-			if (next == row_nodes.end()) {
-				blocks.insert(*it);
-			} else {
-				// skip unnecessary leaves
-				//if (it->id == 18 && next->id == 18 && (next->data & 3) == (it->data & 3))
-				//	continue;
-				blocks.insert(*it);
-			}
 		}
 	}
 
@@ -423,9 +387,17 @@ void NewIsometricTileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& ti
 		tile.alphaBlit(it->image, it->x, it->y);
 	}
 }
+*/
 
 int NewIsometricTileRenderer::getTileSize() const {
 	return images->getBlockSize() * 16 * tile_width;
+}
+
+void NewIsometricTileRenderer::renderTopBlocks(const TilePos& tile_pos, std::set<TileImage>& tile_images) {
+	int block_size = images->getBlockSize();
+	for (old::TileTopBlockIterator it(tile_pos, block_size, tile_width); !it.end(); it.next()) {
+		renderBlocks(it.draw_x, it.draw_y, it.current, mc::BlockPos(1, -1, -1), tile_images);
+	}
 }
 
 }

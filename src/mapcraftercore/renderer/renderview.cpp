@@ -64,8 +64,8 @@ std::ostream& operator<<(std::ostream& out, RenderViewType render_view) {
 
 RenderView* createRenderView(RenderViewType render_view) {
 	switch (render_view) {
-	case RenderViewType::ISOMETRIC: return new IsometricRenderView();
-	case RenderViewType::ISOMETRICNEW: return new NewIsometricRenderView();
+	case RenderViewType::ISOMETRIC: return new NewIsometricRenderView();
+	case RenderViewType::ISOMETRICNEW: return new IsometricRenderView();
 	case RenderViewType::TOPDOWN: return new TopdownRenderView();
 	// thou shalt not return nullptr!
 	default: assert(false); return nullptr;
