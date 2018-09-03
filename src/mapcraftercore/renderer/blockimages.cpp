@@ -767,12 +767,6 @@ void RenderedBlockImages::setBlockSideDarkening(float darken_left, float darken_
 }
 
 bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int rotation, int texture_size) {
-	// TODO maybe?
-	if (view == "isometric") {
-		block_size = texture_size * 2;
-	} else {
-		block_size = texture_size;
-	}
 	LOG(INFO) << "I will load block images from " << path << " now";
 
 	if (!fs::is_directory(path)) {
@@ -827,6 +821,7 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 		return false;
 	}
 
+	block_size = blocks.getWidth() / columns;
 	int lineno = 2;
 	for (std::string line; std::getline(in, line); lineno++) {
 		line = util::trim(line);
