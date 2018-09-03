@@ -958,7 +958,7 @@ int RenderedBlockImages::getBlockSize() const {
 }
 
 void RenderedBlockImages::prepareBlockImages() {
-	uint16_t solid_id = block_registry.getBlockID(mc::BlockState("minecraft:bedrock"));
+	uint16_t solid_id = block_registry.getBlockID(mc::BlockState("minecraft:unknown_block"));
 	assert(block_images.find(solid_id) != block_images.end());
 	const BlockImage& solid = block_images[solid_id];
 
