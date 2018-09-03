@@ -356,7 +356,7 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		texture_blur.load(key, value, validation);
 	} else if (key == "texture_size") {
 		if (texture_size.load(key, value, validation)
-				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 32))
+				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 128))
 			validation.error("'texture_size' must be a number between 1 and 32!");
 	} else if (key == "water_opacity") {
 		if (water_opacity.load(key, value, validation)
