@@ -125,7 +125,8 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 								| (is_full_water(south) << 1)
 								| (is_full_water(west) << 2);
 			// skip water blocks that are completely empty
-			if (index == 1+2+4) {
+			// (that commented thing hides the water surface)
+			if (index == 1+2+4 /*|| index == 2+4*/) {
 				continue;
 			}
 			assert(index < 8);

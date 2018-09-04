@@ -308,7 +308,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	jpeg_quality.setDefault(85);
 
 	lighting_intensity.setDefault(1.0);
-	lighting_water_intensity.setDefault(1.0);
+	lighting_water_intensity.setDefault(0.85);
 	render_unknown_blocks.setDefault(false);
 	render_leaves_transparent.setDefault(true);
 	render_biomes.setDefault(true);

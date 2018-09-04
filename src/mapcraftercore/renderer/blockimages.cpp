@@ -691,6 +691,27 @@ void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
 	}
 }
 
+void blockImageMultiplyExcept(RGBAImage& block, const RGBAImage& uv_mask,
+		uint8_t except_face, float factor) {
+	assert(block.getWidth() == uv_mask.getWidth());
+	assert(block.getHeight() == uv_mask.getHeight());
+	
+	for (size_t x = 0; x < block.getWidth(); x++) {
+		for (size_t y = 0; y < block.getHeight(); y++) {
+			uint32_t& pixel = block.pixel(x, y);
+			uint32_t uv_pixel = uv_mask.pixel(x, y);
+			if (rgba_alpha(uv_pixel) == 0) {
+				continue;
+			}
+
+			uint8_t side = rgba_blue(uv_pixel);
+			if (side != except_face) {
+				pixel = rgba_multiply(pixel, factor, factor, factor);
+			}
+		}
+	}
+}
+
 void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
 		const CornerValues& factors_left, const CornerValues& factors_right, const CornerValues& factors_up) {
 	assert(block.getWidth() == uv_mask.getWidth());
@@ -768,6 +789,27 @@ bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask) {
 	}
 
 	return false;
+}
+
+std::array<bool, 3> blockImageGetSideMask(const RGBAImage& uv) {
+	std::array<bool, 3> side_mask = {false, false, false};
+	uint8_t mask_indices[3] = {FACE_LEFT_INDEX, FACE_RIGHT_INDEX, FACE_UP_INDEX};
+	for (size_t x = 0; x < uv.getWidth(); x++) {
+		for (size_t y = 0; y < uv.getHeight(); y++) {
+			uint32_t pixel = uv.pixel(x, y);
+			if (rgba_alpha(pixel) == 0) {
+				continue;
+			}
+
+			uint8_t face = rgba_blue(pixel);
+			for (uint8_t i = 0; i < 3; i++) {
+				if (face == mask_indices[i]) {
+					side_mask[i] = true;
+				}
+			}
+		}
+	}
+	return side_mask;
 }
 
 RenderedBlockImages::RenderedBlockImages(mc::BlockStateRegistry& block_registry)
@@ -889,10 +931,15 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 		}
 		block.is_waterloggable = block_info.count("is_waterloggable");
 		if (block.is_waterloggable) {
-			block.is_waterlogged = block_state.getProperty("waterlogged", "true") == "true";
+			block.is_waterlogged = block_state.getProperty("waterlogged", "true") == "true"
+				|| block_state.getProperty("was_waterlogged") == "true";
+			block.has_water_top = block_state.getProperty("waterlogged", "true") == "true"
+				&& block_state.getProperty("was_waterlogged") != "true";
 
 			mc::BlockState non_waterlogged = block_state;
 			non_waterlogged.setProperty("waterlogged", "false");
+			// required for tile renderer / render modes to know if a block is actually waterlogged
+			non_waterlogged.setProperty("was_waterlogged", "true");
 			block.non_waterlogged_id = block_registry.getBlockID(non_waterlogged);
 		}
 		if (block_info.count("lighting_type")) {
@@ -997,6 +1044,8 @@ void RenderedBlockImages::prepareBlockImages() {
 			blockImageMultiply(block.image, block.uv_image, darken_left, darken_right, 1.0);
 		}
 
+		block.side_mask = blockImageGetSideMask(block.uv_image);
+
 		if (blockImageIsTransparent(block.image, solid.uv_image)) {
 			//LOG(INFO) << block_state.getName() << " " << block_state.getVariantDescription() << " is transparent!";
 			block.is_transparent = true;
@@ -1021,6 +1070,8 @@ void RenderedBlockImages::prepareBlockImages() {
 				// TODO adapt ice
 				if (block.is_full_water) {
 					block.lighting_type = LightingType::SMOOTH;
+				} else if (block.is_waterlogged && block.has_water_top) {
+					block.lighting_type = LightingType::SMOOTH_TOP_REMAINING_SIMPLE;
 				} else {
 					block.lighting_type = LightingType::SIMPLE;
 				}

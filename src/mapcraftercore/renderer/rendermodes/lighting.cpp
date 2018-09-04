@@ -352,9 +352,15 @@ void LightingRenderMode::draw(RGBAImage& image, const BlockImage& block_image,
    
 	if (block_image.lighting_type == LightingType::SMOOTH) {
 		doSmoothLight(image, block_image, pos, id, false);
-	}
-	if (block_image.lighting_type == LightingType::SIMPLE) {
+	} else if (block_image.lighting_type == LightingType::SIMPLE) {
 		doSimpleLight(image, block_image, pos, id);
+	} else if (block_image.lighting_type == LightingType::SMOOTH_TOP_REMAINING_SIMPLE) {
+		CornerValues id = {1.0, 1.0, 1.0, 1.0};
+		CornerValues up = getCornerColors(pos, CORNERS_TOP, lighting_intensity);
+		blockImageMultiply(image, block_image.uv_image, id, id, up);
+
+		float factor = getLightingColor(pos, lighting_intensity);
+		blockImageMultiplyExcept(image, block_image.uv_image, FACE_UP_INDEX, factor);
 	}
 }
 
@@ -477,11 +483,36 @@ void LightingRenderMode::doSmoothLight(RGBAImage& image, const BlockImage& block
 	// TODO adapt
 	// - light only visible faces
 	// - underwater
+
+	std::array<bool, 3> side_mask = block_image.side_mask;
+	bool under_water[3] = {false, false, false};
+
+	mc::BlockPos dirs[3] = {mc::DIR_WEST, mc::DIR_SOUTH, mc::DIR_TOP};
+	for (int i = 0; i < 3; i++) {
+		if (side_mask[i]) {
+			const BlockImage& block = block_images->getBlockImage(getBlock(pos + dirs[i]).id);
+			under_water[i] = block.is_full_water || block.is_waterlogged;
+			side_mask[i] = block.is_air || block.is_transparent;
+		}
+	}
 	
-	double intensity = lighting_intensity;
-	CornerValues left = getCornerColors(pos, CORNERS_LEFT, intensity);
-	CornerValues right = getCornerColors(pos, CORNERS_RIGHT, intensity);
-	CornerValues up = getCornerColors(pos, use_bottom_corners ? CORNERS_BOTTOM : CORNERS_TOP, intensity);
+	CornerValues left = {1.0, 1.0, 1.0, 1.0};
+	CornerValues right = {1.0, 1.0, 1.0, 1.0};
+	CornerValues up = {1.0, 1.0, 1.0, 1.0};
+	//lighting_water_intensity = lighting_intensity;
+
+	if (side_mask[0]) {
+		left = getCornerColors(pos, CORNERS_LEFT,
+				under_water[0] ? lighting_water_intensity : lighting_intensity);
+	}
+	if (side_mask[1]) {
+		right = getCornerColors(pos, CORNERS_RIGHT,
+				under_water[1] ? lighting_water_intensity : lighting_intensity);
+	}
+	if (side_mask[2]) {
+		up = getCornerColors(pos, use_bottom_corners ? CORNERS_BOTTOM : CORNERS_TOP,
+				under_water[2] ? lighting_water_intensity : lighting_intensity);
+	}
 	blockImageMultiply(image, block_image.uv_image, left, right, up);
 }
 
