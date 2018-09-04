@@ -178,12 +178,12 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 	// check whether this chunk is completely contained within the cropped world
 	chunk_completely_contained = world_crop.isChunkCompletelyContained(chunkpos_original);
 
-	/*
-	if (level.hasTag<nbt::TagByte>("TerrainPopulated"))
-		terrain_populated = level.findTag<nbt::TagByte>("TerrainPopulated").payload;
-	else
-		LOG(ERROR) << "Corrupt chunk " << chunkpos << ": No terrain populated tag found!";
-	*/
+	if (level.hasTag<nbt::TagString>("Status")) {
+		const nbt::TagString& tag = level.findTag<nbt::TagString>("Status");
+		if (!(tag.payload == "fullchunk" || tag.payload == "postprocessed")) {
+			return true;
+		}
+	}
 
 	if (level.hasArray<nbt::TagByteArray>("Biomes", 256)) {
 		const nbt::TagByteArray& biomes_tag = level.findTag<nbt::TagByteArray>("Biomes");
