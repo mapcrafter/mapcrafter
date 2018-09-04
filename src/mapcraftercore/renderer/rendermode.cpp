@@ -85,6 +85,13 @@ void MultiplexingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 		(*it)->draw(image, pos, id, data);
 }
 
+
+void MultiplexingRenderMode::draw(RGBAImage& image, const BlockImage& block_image,
+		const mc::BlockPos& pos, uint16_t id) {
+	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
+		(*it)->draw(image, block_image, pos, id);
+}
+
 std::ostream& operator<<(std::ostream& out, RenderModeType render_mode) {
 	switch (render_mode) {
 	case RenderModeType::PLAIN: return out << "plain";

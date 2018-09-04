@@ -107,6 +107,9 @@ uint8_t LightingData::getLightLevel(bool day) const {
 namespace {
 
 bool isSpecialTransparent(uint16_t id) {
+	// not to be called anymore
+	assert(false);
+
 	// blocks which are transparent but don't have correct lighting data
 
 	// they need skylight from the block above
@@ -140,10 +143,15 @@ bool isSpecialTransparent(uint16_t id) {
 }
 
 LightingData LightingData::estimate(const mc::Block& block,
-		BlockImages* images, mc::WorldCache* world, mc::Chunk* current_chunk) {
+		RenderedBlockImages* block_images, mc::WorldCache* world, mc::Chunk* current_chunk) {
 	// estimate the light if this is a special block
+	/*
 	if (!isSpecialTransparent(block.id))
 		return LightingData(block.block_light, block.sky_light);
+	*/
+	if (!block_images->getBlockImage(block.id).has_faulty_lighting) {
+		return LightingData(block.block_light, block.sky_light);
+	}
 
 	uint8_t block_light = 0, sky_light = 0;
 
@@ -153,9 +161,16 @@ LightingData LightingData::estimate(const mc::Block& block,
 	while (++off.y) {
 		above = world->getBlock(block.pos + off, current_chunk,
 				mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
+		const BlockImage& above_block = block_images->getBlockImage(above.id);
+		/*
 		if (isSpecialTransparent(above.id))
 			continue;
-		if (above.id == 0 || images->isBlockTransparent(above.id, above.data))
+		*/
+		if (above_block.has_faulty_lighting) {
+			continue;
+		}
+		//if (above.id == 0 || images->isBlockTransparent(above.id, above.data))
+		if (above_block.is_air || above_block.is_transparent)
 			sky_light = above.sky_light;
 		else
 			sky_light = 15;
@@ -170,9 +185,17 @@ LightingData LightingData::estimate(const mc::Block& block,
 			for (int dy = -1; dy <= 1; dy++) {
 				mc::Block other = world->getBlock(block.pos + mc::BlockPos(dx, dz, dy),
 						current_chunk, mc::GET_ID | mc::GET_DATA | mc::GET_BLOCK_LIGHT);
+				const BlockImage& other_block = block_images->getBlockImage(other.id);
+				/*
 				if ((other.id == 0
 						|| images->isBlockTransparent(other.id, other.data))
 						&& !isSpecialTransparent(other.id)) {
+					block_lights += other.block_light;
+					block_lights_count++;
+				}
+				*/
+				if ((other_block.is_air || other_block.is_transparent)
+						&& !other_block.has_faulty_lighting) {
 					block_lights += other.block_light;
 					block_lights_count++;
 				}
@@ -302,13 +325,46 @@ void LightingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 	}
 }
 
+void LightingRenderMode::draw(RGBAImage& image, const BlockImage& block_image,
+		const mc::BlockPos& pos, uint16_t id) {
+	
+	//void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
+	//		const CornerValues& factors_left, const CornerValues& factors_right, const CornerValues& factors_up);
+
+	// top-left, top-right, bottom-right, bottom-left
+	/*
+	CornerValues left = {1.0, 1.0, 1.0, 0.0};
+	CornerValues right = {1.0, 1.0, 1.0, 1.0};
+	CornerValues up = {1.0, 1.0, 1.0, 1.0};
+	blockImageMultiply(image, block_image.uv_image, left, right, up);
+	*/
+
+	// flat snow and grass paths: smooth (but bottom corners) (aka. lighting type smooth_bottom ?)
+	// waterlogged blocks: simple but water surface smooth (aka. lighting type smooth_top_simple_rest ?)
+	// slabs: smooth
+	// transparent, except full water, except ice
+	// smooth
+	
+	// so what we need:
+	// - blockstate property: lighting type (smooth, simple, ...)
+	// - block image: side mask (3x bool)
+	// - ice needs to be treated a bit like water after all
+   
+	if (block_image.lighting_type == LightingType::SMOOTH) {
+		doSmoothLight(image, block_image, pos, id, false);
+	}
+	if (block_image.lighting_type == LightingType::SIMPLE) {
+		doSimpleLight(image, block_image, pos, id);
+	}
+}
+
 LightingColor LightingRenderMode::calculateLightingColor(const LightingData& light) const {
 	return pow(0.8, 15 - light.getLightLevel(day));
 }
 
 LightingData LightingRenderMode::getBlockLight(const mc::BlockPos& pos) {
 	mc::Block block = getBlock(pos, mc::GET_ID | mc::GET_DATA | mc::GET_LIGHT);
-	LightingData light = LightingData::estimate(block, images, world, *current_chunk);
+	LightingData light = LightingData::estimate(block, block_images, world, *current_chunk);
 
 	// TODO also move this to LightingData class?
 	// lighting fix for The End
@@ -316,8 +372,14 @@ LightingData LightingRenderMode::getBlockLight(const mc::BlockPos& pos) {
 	// just emulate the sun light for transparent blocks
 	if (simulate_sun_light) {
 		uint8_t sky = 15;
+		/*
 		if (block.id != 0 && !images->isBlockTransparent(block.id, block.data))
 			sky = 0;
+		*/
+		const BlockImage& block_image = block_images->getBlockImage(block.id);
+		if (!block_image.is_air && !block_image.is_transparent) {
+			sky = 0;
+		}
 		return LightingData(light.getBlockLight(), sky);
 	}
 	return light;
@@ -409,6 +471,20 @@ void LightingRenderMode::doSmoothLight(RGBAImage& image, const mc::BlockPos& pos
 		renderer->lightTop(image, getCornerColors(pos, CORNERS_TOP, under_water[2] ? water_intensity : intensity));
 }
 
+void LightingRenderMode::doSmoothLight(RGBAImage& image, const BlockImage& block_image,
+		const mc::BlockPos& pos, uint16_t id, bool use_bottom_corners) {
+
+	// TODO adapt
+	// - light only visible faces
+	// - underwater
+	
+	double intensity = lighting_intensity;
+	CornerValues left = getCornerColors(pos, CORNERS_LEFT, intensity);
+	CornerValues right = getCornerColors(pos, CORNERS_RIGHT, intensity);
+	CornerValues up = getCornerColors(pos, use_bottom_corners ? CORNERS_BOTTOM : CORNERS_TOP, intensity);
+	blockImageMultiply(image, block_image.uv_image, left, right, up);
+}
+
 void LightingRenderMode::doSlabLight(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
 	// to apply smooth lighting to a slab,
@@ -440,6 +516,29 @@ void LightingRenderMode::doSlabLight(RGBAImage& image, const mc::BlockPos& pos,
 
 void LightingRenderMode::doSimpleLight(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
+	uint8_t factor = getLightingColor(pos, lighting_intensity) * 255;
+
+	int size = image.getWidth();
+	for (int x = 0; x < size; x++) {
+		for (int y = 0; y < size; y++) {
+			uint32_t& pixel = image.pixel(x, y);
+			if (pixel != 0)
+				pixel = rgba_multiply(pixel, factor, factor, factor, 255);
+		}
+	}
+}
+
+void LightingRenderMode::doSimpleLight(RGBAImage& image, const BlockImage& block_image,
+		const mc::BlockPos& pos, uint16_t id) {
+	// TODO adapt how to consider underwater with waterlogged blocks?
+	// (some waterlogged blocks are rendered as if they weren't)
+	
+	float intensity = lighting_intensity;
+	if (block_image.is_waterloggable) {
+		// TODO adapt
+		// all waterloggable blocks are assumed to be under water for now
+		intensity = lighting_water_intensity;
+	}
 	uint8_t factor = getLightingColor(pos, lighting_intensity) * 255;
 
 	int size = image.getWidth();

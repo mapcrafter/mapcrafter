@@ -77,14 +77,14 @@ public:
 	uint8_t getSkyLight() const;
 	uint8_t getLightLevel(bool day) const;
 
-	static LightingData estimate(const mc::Block& block, BlockImages* images,
+	static LightingData estimate(const mc::Block& block, RenderedBlockImages* block_images,
 			mc::WorldCache* world, mc::Chunk* current_chunk);
 
 protected:
 	uint8_t block_light, sky_light;
 };
 
-typedef double LightingColor;
+typedef float LightingColor;
 
 // corner colors of a face
 // - defined as array with corners top left / top right / bottom left / bottom right
@@ -159,6 +159,8 @@ public:
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
+	virtual void draw(RGBAImage& image, const BlockImage& block_image, const mc::BlockPos& pos, uint16_t id);
+
 private:
 	bool day;
 	double lighting_intensity, lighting_water_intensity;
@@ -202,6 +204,8 @@ private:
 	 */
 	void doSmoothLight(RGBAImage& image, const mc::BlockPos& pos,
 			uint16_t id, uint16_t data);
+	void doSmoothLight(RGBAImage& image, const BlockImage& block_image, const mc::BlockPos& pos,
+			uint16_t id, bool use_bottom_corners);
 
 	/**
 	 * Applies the smooth lighting to a slab (not double slabs).
@@ -213,6 +217,7 @@ private:
 	 * color of the block.
 	 */
 	void doSimpleLight(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	void doSimpleLight(RGBAImage& image, const BlockImage& block_image, const mc::BlockPos& pos, uint16_t id);
 };
 
 } /* namespace render */

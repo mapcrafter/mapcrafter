@@ -129,7 +129,7 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 				continue;
 			}
 			assert(index < 8);
-			uint16_t id = partial_full_water_ids[index];
+			id = partial_full_water_ids[index];
 			block_image = &block_images->getBlockImage(id);
 		}
 
@@ -138,7 +138,8 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 		if (block_image->is_waterloggable && block_image->is_waterlogged) {
 			uint16_t up = getBlock(top + mc::DIR_TOP).id;
 			if (is_full_water(up)) {
-				block_image = &block_images->getBlockImage(block_image->non_waterlogged_id);
+				id = block_image->non_waterlogged_id;
+				block_image = &block_images->getBlockImage(id);
 			}
 		}
 
@@ -155,6 +156,7 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 
 		// let the render mode do their magic with the block image
 		//render_mode->draw(node.image, node.pos, id, data);
+		render_mode->draw(tile_image.image, *block_image, tile_image.pos, id);
 
 		tile_images.insert(tile_image);
 

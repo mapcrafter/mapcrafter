@@ -555,10 +555,20 @@ void blockImageTint(RGBAImage& block, const RGBAImage& mask,
 		uint8_t r, uint8_t g, uint8_t b);
 bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask);
 
+enum class LightingType {
+	NONE,
+	SIMPLE,
+	SMOOTH
+};
+
 struct BlockImage {
+	BlockImage()
+		: lighting_specified(false) {}
+
 	RGBAImage image, uv_image;
-	bool is_transparent, is_air, is_biome;
+	bool is_transparent, is_air, is_full_water;
 	
+	bool is_biome;
 	bool is_masked_biome;
 	ColorMapType biome_color;
 	RGBAImage biome_mask;
@@ -566,6 +576,10 @@ struct BlockImage {
 	bool is_waterloggable;
 	bool is_waterlogged;
 	uint16_t non_waterlogged_id;
+
+	bool lighting_specified;
+	LightingType lighting_type;
+	bool has_faulty_lighting;
 };
 
 class RenderedBlockImages : public BlockImages {

@@ -21,6 +21,8 @@
 #define RENDERMODE_H_
 
 #include "renderview.h"
+// TODO forward-declare once template is gone!
+#include "../renderer/blockimages.h"
 #include "../mc/worldcache.h"
 
 #include <iostream>
@@ -45,6 +47,7 @@ class Chunk;
 namespace renderer {
 
 class BlockImages;
+class BlockImage;
 class RGBAImage;
 
 /**
@@ -76,6 +79,9 @@ public:
 	 */
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id,
 			uint16_t data) = 0;
+
+	virtual void draw(RGBAImage& image, const BlockImage& block_image,
+			const mc::BlockPos& pos, uint16_t id) {}
 };
 
 #ifdef HAVE_ENUM_CLASS_FORWARD_DECLARATION
@@ -182,6 +188,7 @@ protected:
 	Renderer* renderer;
 
 	BlockImages* images;
+	RenderedBlockImages* block_images;
 	mc::WorldCache* world;
 	mc::Chunk** current_chunk;
 };
@@ -215,6 +222,8 @@ public:
 	 * Calls this method of each render mode.
 	 */
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+	virtual void draw(RGBAImage& image, const BlockImage& block_image, const mc::BlockPos& pos, uint16_t id);
 
 protected:
 	std::vector<RenderMode*> render_modes;
@@ -250,7 +259,8 @@ RenderMode* createRenderMode(const config::WorldSection& world_config,
 
 template <typename Renderer>
 BaseRenderMode<Renderer>::BaseRenderMode()
-	: renderer_ptr(nullptr), images(nullptr), world(nullptr), current_chunk(nullptr) {
+	: renderer_ptr(nullptr), images(nullptr), block_images(nullptr), world(nullptr),
+	current_chunk(nullptr) {
 }
 
 template <typename Renderer>
@@ -270,6 +280,8 @@ void BaseRenderMode<Renderer>::initialize(const RenderView* render_view,
 	if (Renderer::TYPE != RenderModeRendererType::DUMMY)
 		assert(renderer);
 	this->images = images;
+	this->block_images = dynamic_cast<RenderedBlockImages*>(images);
+	assert(this->block_images != nullptr);
 	this->world = world;
 	this->current_chunk = current_chunk;
 }

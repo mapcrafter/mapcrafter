@@ -42,6 +42,19 @@ renderer::ColorMapType as<renderer::ColorMapType>(const std::string& str) {
 	}
 }
 
+template <>
+renderer::LightingType as<renderer::LightingType>(const std::string& str) {
+	if (str == "none") {
+		return renderer::LightingType::NONE;
+	} else if (str == "simple") {
+		return renderer::LightingType::SIMPLE;
+	} else if (str == "smooth") {
+		return renderer::LightingType::SMOOTH;
+	} else {
+		throw std::invalid_argument("Must be 'none', 'simple' or 'smooth'!");
+	}
+}
+
 }
 }
 
@@ -868,6 +881,16 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 		block.image = image;
 		block.uv_image = image_uv;
 		block.is_air = block_info.count("is_air");
+
+		block.is_full_water = false;
+		if (block_name == "minecraft:water") {
+			block.is_full_water = block_state.getProperty("level") == "0"
+				|| block_state.getProperty("level") == "8";
+		}
+		if (block_name == "minecraft:full_water") {
+			block.is_full_water = true;
+		}
+
 		block.is_biome = block_info.count("biome_type");
 		if (block.is_biome) {
 			block.is_masked_biome = block_info["biome_type"] == "masked";
@@ -881,6 +904,12 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 			non_waterlogged.setProperty("waterlogged", "false");
 			block.non_waterlogged_id = block_registry.getBlockID(non_waterlogged);
 		}
+		if (block_info.count("lighting_type")) {
+			block.lighting_specified = true;
+			block.lighting_type = util::as<LightingType>(block_info["lighting_type"]);
+		}
+		block.has_faulty_lighting = block_info.count("faulty_lighting");
+
 		block_images[id] = block;
 
 		auto properties = block_state.getProperties();
@@ -992,6 +1021,19 @@ void RenderedBlockImages::prepareBlockImages() {
 			uint16_t mask_id = block_registry.getBlockID(mc::BlockState::parse(mask_name, block_state.getVariantDescription()));
 			assert(block_images.find(mask_id) != block_images.end());
 			block.biome_mask = block_images[mask_id].image;
+		}
+
+		if (!block.lighting_specified) {
+			if (!block.is_transparent) {
+				block.lighting_type = LightingType::SMOOTH;
+			} else {
+				// TODO adapt ice
+				if (block.is_full_water) {
+					block.lighting_type = LightingType::SMOOTH;
+				} else {
+					block.lighting_type = LightingType::SIMPLE;
+				}
+			}
 		}
 	}
 
