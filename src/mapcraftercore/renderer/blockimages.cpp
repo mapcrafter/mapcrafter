@@ -787,11 +787,7 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 		return false;
 	}
 
-	int load_rotation = rotation;
-	if (view == "topdown") {
-		load_rotation = 0;
-	}
-	std::string name = view + "_" + util::str(load_rotation) + "_" + util::str(texture_size);
+	std::string name = view + "_" + util::str(rotation) + "_" + util::str(texture_size);
 	fs::path info_file = path / (name + ".txt");
 	fs::path block_file = path / (name + ".png");
 
@@ -864,11 +860,6 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 		x = (image_uv_index % columns) * block_size;
 		y = (image_uv_index / columns) * block_size;
 		RGBAImage image_uv = blocks.clip(x, y, block_size, block_size);
-
-		if (view == "topdown" && rotation != 0) {
-			image = image.rotate((rotation + 4) % 4);
-			image_uv = image_uv.rotate((rotation + 4) % 4);
-		}
 
 		if (image.getWidth() != image_uv.getWidth() || image.getHeight() != image_uv.getHeight()) {
 			LOG(ERROR) << "Size mismatch of block " << block_name;
