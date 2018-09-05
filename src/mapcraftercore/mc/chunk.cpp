@@ -318,6 +318,7 @@ void Chunk::clear() {
 	sections.clear();
 	for (int i = 0; i < CHUNK_HEIGHT; i++)
 		section_offsets[i] = -1;
+	std::fill(biomes, biomes + 256, DEFAULT_BIOME);
 }
 
 bool Chunk::hasSection(int section) const {

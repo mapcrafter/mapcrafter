@@ -1007,8 +1007,8 @@ const BlockImage& RenderedBlockImages::getBlockImage(uint16_t id) const {
 	return it->second;
 }
 
-void RenderedBlockImages::prepareBiomeBlockImage(RGBAImage& image, const BlockImage& block, const Biome& biome) {
-	uint32_t color = biome.getColor(resources.getColorMap(block.biome_color), false);
+void RenderedBlockImages::prepareBiomeBlockImage(int y, RGBAImage& image, const BlockImage& block, const Biome& biome) {
+	uint32_t color = biome.getColor(y, resources.getColorMap(block.biome_color), false);
 
 	uint8_t r = rgba_red(color);
 	uint8_t g = rgba_green(color);

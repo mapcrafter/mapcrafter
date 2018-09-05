@@ -195,7 +195,7 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 
 		if (block_image->is_biome) {
 			Biome biome = getBiomeOfBlock(top, current_chunk);
-			block_images->prepareBiomeBlockImage(tile_image.image, *block_image, biome);
+			block_images->prepareBiomeBlockImage(top.y, tile_image.image, *block_image, biome);
 		}
 
 		// let the render mode do their magic with the block image

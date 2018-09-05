@@ -30,7 +30,7 @@ namespace mapcrafter {
 namespace renderer {
 
 
-Biome::Biome(uint8_t id, double temperature, double rainfall, uint8_t r, uint8_t g, uint8_t b)
+Biome::Biome(uint16_t id, double temperature, double rainfall, uint8_t r, uint8_t g, uint8_t b)
 	: id(id), temperature(temperature), rainfall(rainfall),
 	  extra_r(r), extra_g(g), extra_b(b) {
 }
@@ -73,24 +73,19 @@ bool Biome::operator==(const Biome& other) const {
 /**
  * Returns the biome ID.
  */
-uint8_t Biome::getID() const {
+uint16_t Biome::getID() const {
 	return id;
 }
 
 /**
  * Calculates the color of the biome with a biome color image.
  */
-uint32_t Biome::getColor(const RGBAImage& colors, bool flip_xy) const {
+uint32_t Biome::getColor(int block_y, const RGBAImage& colors, bool flip_xy) const {
+	float elevation = std::max(block_y - 64, 0);
 	// x is temperature
-	double tmp_temperature = temperature;
+	double tmp_temperature = std::min(1.0, std::max(0.0, temperature - elevation*0.00166667f));
 	// y is temperature * rainfall
-	double tmp_rainfall = rainfall * temperature;
-
-	// check if temperature and rainfall are valid
-	if(tmp_temperature > 1)
-		tmp_temperature = 1;
-	if (tmp_rainfall > 1)
-		tmp_rainfall = 1;
+	double tmp_rainfall = std::min(1.0, std::max(0.0, rainfall * temperature));
 
 	// calculate positions
 	int x = 255 - (255 * tmp_temperature);
@@ -128,6 +123,7 @@ bool Biome::isBiomeBlock(uint16_t id, uint16_t data) {
 // empty/unknown biomes in this array have the ID 0
 static Biome ALL_BIOMES[256] = {};
 static bool biomes_initialized;
+static std::set<uint16_t> unknown_biomes;
 
 void initializeBiomes() {
 	// put all biomes with their IDs into the array with all possible biomes
@@ -139,7 +135,7 @@ void initializeBiomes() {
 	biomes_initialized = true;
 }
 
-Biome getBiome(uint8_t id) {
+Biome getBiome(uint16_t id) {
 	// initialize biomes at the first time we access them
 	if (!biomes_initialized)
 		initializeBiomes();
@@ -147,6 +143,10 @@ Biome getBiome(uint8_t id) {
 	// check if this biome exists and return the default biome otherwise
 	if (ALL_BIOMES[id].getID() == id)
 		return ALL_BIOMES[id];
+	if (!unknown_biomes.count(id)) {
+		LOG(WARNING) << "Unknown biome with id " << (int) id;
+		unknown_biomes.insert(id);
+	}
 	return ALL_BIOMES[DEFAULT_BIOME];
 }
 

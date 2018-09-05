@@ -34,7 +34,7 @@ class RGBAImage;
 class Biome {
 private:
 	// id of the biome
-	uint8_t id;
+	uint16_t id;
 
 	// temperature and rainfall
 	// used to calculate the position of the tinting color in the color image
@@ -44,15 +44,15 @@ private:
 	// extra color values, for example for the swampland biome
 	int extra_r, extra_g, extra_b;
 public:
-	Biome(uint8_t id = 0, double temperature = 0, double rainfall = 0,
+	Biome(uint16_t id = 0, double temperature = 0, double rainfall = 0,
 			uint8_t r = 255, uint8_t g = 255, uint8_t b = 255);
 
 	Biome& operator+=(const Biome& other);
 	Biome& operator/=(int n);
 	bool operator==(const Biome& other) const;
 
-	uint8_t getID() const;
-	uint32_t getColor(const RGBAImage& colors, bool flip_xy = false) const;
+	uint16_t getID() const;
+	uint32_t getColor(int y, const RGBAImage& colors, bool flip_xy = false) const;
 
 	static bool isBiomeBlock(uint16_t id, uint16_t data);
 };
@@ -95,11 +95,8 @@ static const Biome BIOMES[] = {
 	{28, 0.6, 0.6},    // Birch Forest Hills
 	{29, 0.7, 0.8},    // Roofed Forest
 
-	// Cold Taiga/Cold Taiga Hills have -0.5/0.4 as temperature/rainfall
-	// but I'm not sure yet how to handle negative temperatures
-	// so they just have the colors of normal Taiga
-	{30, 0.05, 0.8},   // Cold Taiga
-	{31, 0.05, 0.8},   // Cold Taiga Hills
+	{30, -0.5, 0.4},   // Cold Taiga
+	{31, -0.5, 0.4},   // Cold Taiga Hills
 	{32, 0.3, 0.8},    // Mega Taiga
 	{33, 0.3, 0.8},    // Mega Taiga Hills
 	{34, 0.2, 0.3},    // Extreme Hills+
@@ -109,20 +106,39 @@ static const Biome BIOMES[] = {
 	{38, 2.0, 0},      // Mesa Plateau F
 	{39, 2.0, 0},      // Mesa Plateau
 
+	{40, 0.5, 0.4}, // Small End Islands
+	{41, 0.5, 0.4}, // End Midlands
+	{42, 0.5, 0.4}, // End Highlands
+	{43, 0.5, 0.4}, // End Barrens
+	{44, 0.8, 0.4}, // Warm Ocean
+	{45, 0.8, 0.4}, // Lukewarm Ocean
+	{46, 0.8, 0.4}, // Cold Ocean
+	{47, 0.8, 0.4}, // Deep Warm Ocean
+	{48, 0.8, 0.4}, // Deep Lukewarm Ocean
+	{49, 0.8, 0.4}, // Deep Cold Ocean
+	{50, 0.8, 0.4}, // Deep Frozen Ocean
+
+	{127, 0.5, 0.5}, // The Void
+
 	{129, 0.8, 0.4},   // Sunflower Plains (= Plains)
 	{130, 2.0, 0.0},   // Desert M (= Desert)
 	{131, 0.2, 0.3},   // Extreme Hills M (= Extreme Hills)
 	{132, 0.7, 0.8},   // Flower Forest (= Forest)
 	{133, 0.05, 0.8},  // Taiga M (= Taiga)
 	{134, 0.8, 0.9, 205, 128, 255}, // Swampland M (= Swampland)
+	
 	{140, 0.0, 0.5},   // Ice Plains Spikes
 	{141, 0.0, 0.5},   // Ice Mountains Spikes
+	
 	{149, 0.95, 0.9},  // Jungle M (= Jungle)
+	
 	{151, 0.95, 0.9},  // Jungle Edge M (= Jungle Edge)
+	
 	{155, 0.6, 0.6},   // Birch Forest M (= Birch Forest)
 	{156, 0.6, 0.6},   // Birch Forest Hills M (= Birch Forest)
 	{157, 0.7, 0.8},   // Roofed Forest M (= Forest)
 	{158, 0.05, 0.8},  // Cold Taiga M (= Cold Taiga)
+
 	{160, 0.25, 0.8},  // Mega Spruce Taiga
 	{161, 0.25, 0.8},  // Mega Spruce Taiga Hills
 	{162, 0.2, 0.3},   // Extreme Hills+ M (= Extreme Hills)
@@ -131,12 +147,14 @@ static const Biome BIOMES[] = {
 	{165, 2.0, 0.0},   // Mesa (Bryce) (= Mesa)
 	{166, 2.0, 0.0},   // Mesa Plateau F M (= Mesa Plateau)
 	{167, 2.0, 0.0},   // Mesa Plateau M (= Mesa Plateau)
+
+	{210, 0.0, 0.0, 255, 0, 0}, // "Unknown" biome
 };
 
 static const std::size_t BIOMES_SIZE = sizeof(BIOMES) / sizeof(Biome);
-static const int DEFAULT_BIOME = 21;		// Jungle
+static const int DEFAULT_BIOME = 210; // Unknown (used to be 21 jungle)
 
-Biome getBiome(uint8_t id);
+Biome getBiome(uint16_t id);
 
 } /* namespace render */
 } /* namespace mapcrafter */
