@@ -361,6 +361,11 @@ void LightingRenderMode::draw(RGBAImage& image, const BlockImage& block_image,
 
 		float factor = getLightingColor(pos, lighting_intensity);
 		blockImageMultiplyExcept(image, block_image.uv_image, FACE_UP_INDEX, factor);
+	} else if (block_image.lighting_type == LightingType::SMOOTH_BOTTOM) {
+		CornerValues left = getCornerColors(pos, CORNERS_LEFT, lighting_intensity);
+		CornerValues right = getCornerColors(pos, CORNERS_RIGHT, lighting_intensity);
+		CornerValues up = getCornerColors(pos, CORNERS_BOTTOM, lighting_intensity);
+		blockImageMultiply(image, block_image.uv_image, left, right, up);
 	}
 }
 
@@ -499,7 +504,6 @@ void LightingRenderMode::doSmoothLight(RGBAImage& image, const BlockImage& block
 	CornerValues left = {1.0, 1.0, 1.0, 1.0};
 	CornerValues right = {1.0, 1.0, 1.0, 1.0};
 	CornerValues up = {1.0, 1.0, 1.0, 1.0};
-	//lighting_water_intensity = lighting_intensity;
 
 	if (side_mask[0]) {
 		left = getCornerColors(pos, CORNERS_LEFT,
@@ -565,12 +569,12 @@ void LightingRenderMode::doSimpleLight(RGBAImage& image, const BlockImage& block
 	// (some waterlogged blocks are rendered as if they weren't)
 	
 	float intensity = lighting_intensity;
-	if (block_image.is_waterloggable) {
+	if (block_image.is_waterlogged) {
 		// TODO adapt
 		// all waterloggable blocks are assumed to be under water for now
 		intensity = lighting_water_intensity;
 	}
-	uint8_t factor = getLightingColor(pos, lighting_intensity) * 255;
+	uint8_t factor = getLightingColor(pos, intensity) * 255;
 
 	int size = image.getWidth();
 	for (int x = 0; x < size; x++) {

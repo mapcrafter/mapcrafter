@@ -563,6 +563,7 @@ enum class LightingType {
 	SIMPLE,
 	SMOOTH,
 	SMOOTH_TOP_REMAINING_SIMPLE,
+	SMOOTH_BOTTOM,
 };
 
 struct BlockImage {
@@ -571,7 +572,7 @@ struct BlockImage {
 
 	RGBAImage image, uv_image;
 	std::array<bool, 3> side_mask;
-	bool is_transparent, is_air, is_full_water;
+	bool is_transparent, is_air, is_full_water, is_ice;
 	
 	bool is_biome;
 	bool is_masked_biome;

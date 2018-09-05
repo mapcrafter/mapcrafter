@@ -50,6 +50,8 @@ renderer::LightingType as<renderer::LightingType>(const std::string& str) {
 		return renderer::LightingType::SIMPLE;
 	} else if (str == "smooth") {
 		return renderer::LightingType::SMOOTH;
+	} else if (str == "smooth_bottom") {
+		return renderer::LightingType::SMOOTH_BOTTOM;
 	} else {
 		throw std::invalid_argument("Must be 'none', 'simple' or 'smooth'!");
 	}
@@ -924,6 +926,8 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 			block.is_full_water = true;
 		}
 
+		block.is_ice = block_name == "minecraft:ice" || block_name == "minecraft:full_ice";
+
 		block.is_biome = block_info.count("biome_type");
 		if (block.is_biome) {
 			block.is_masked_biome = block_info["biome_type"] == "masked";
@@ -941,6 +945,8 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 			// required for tile renderer / render modes to know if a block is actually waterlogged
 			non_waterlogged.setProperty("was_waterlogged", "true");
 			block.non_waterlogged_id = block_registry.getBlockID(non_waterlogged);
+		} else {
+			block.is_waterlogged = false;
 		}
 		if (block_info.count("lighting_type")) {
 			block.lighting_specified = true;
@@ -1067,8 +1073,7 @@ void RenderedBlockImages::prepareBlockImages() {
 			if (!block.is_transparent) {
 				block.lighting_type = LightingType::SMOOTH;
 			} else {
-				// TODO adapt ice
-				if (block.is_full_water) {
+				if (block.is_full_water || block.is_ice) {
 					block.lighting_type = LightingType::SMOOTH;
 				} else if (block.is_waterlogged && block.has_water_top) {
 					block.lighting_type = LightingType::SMOOTH_TOP_REMAINING_SIMPLE;

@@ -58,9 +58,28 @@ TileRenderer::TileRenderer(const RenderView* render_view, mc::BlockStateRegistry
 		block.setProperty("up", up ? "true" : "false");
 		block.setProperty("south", south ? "true" : "false");
 		block.setProperty("west", west ? "true" : "false");
-
 		partial_full_water_ids.push_back(block_registry.getBlockID(block));
 	}
+
+	/*
+	for (uint8_t i = 0; i < 64; i++) {
+		bool north = i & 0x1;
+		bool south = i & 0x2;
+		bool east = i & 0x4;
+		bool west = i & 0x8;
+		bool up = i & 0x10;
+		bool down = i & 0x20;
+
+		mc::BlockState block("minecraft:full_ice");
+		block.setProperty("north", north ? "true" : "false");
+		block.setProperty("south", south ? "true" : "false");
+		block.setProperty("east", east ? "true" : "false");
+		block.setProperty("west", west ? "true" : "false");
+		block.setProperty("up", up ? "true" : "false");
+		block.setProperty("down", down ? "true" : "false");
+		partial_ice_ids.push_back(block_registry.getBlockID(block));
+	}
+	*/
 }
 
 TileRenderer::~TileRenderer() {
@@ -115,6 +134,9 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 				|| full_water_like_ids.count(id)
 				|| block_images->getBlockImage(id).is_waterloggable;
 		};
+		auto is_ice = [this](uint16_t id) -> bool {
+			return block_images->getBlockImage(id).is_ice;
+		};
 
 		if (full_water_ids.count(id)) {
 			uint16_t up = getBlock(top + mc::DIR_TOP).id;
@@ -126,13 +148,34 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 								| (is_full_water(west) << 2);
 			// skip water blocks that are completely empty
 			// (that commented thing hides the water surface)
-			if (index == 1+2+4 /*|| index == 2+4*/) {
+			if (index == 1+2+4 /*|| index % 2 == 0*/) {
 				continue;
 			}
 			assert(index < 8);
 			id = partial_full_water_ids[index];
 			block_image = &block_images->getBlockImage(id);
 		}
+
+		/*
+		if (block_image->is_ice) {
+			uint16_t north = getBlock(top + mc::DIR_NORTH).id;
+			uint16_t south = getBlock(top + mc::DIR_SOUTH).id;
+			uint16_t east = getBlock(top + mc::DIR_EAST).id;
+			uint16_t west = getBlock(top + mc::DIR_WEST).id;
+			uint16_t up = getBlock(top + mc::DIR_TOP).id;
+			uint16_t down = getBlock(top + mc::DIR_BOTTOM).id;
+
+			uint8_t index = is_ice(north)
+								| (is_ice(south) << 1)
+								| (is_ice(east) << 2)
+								| (is_ice(west) << 3)
+								| (is_ice(up) << 4)
+								| (is_ice(down) << 5);
+			assert(index < 64);
+			id = partial_ice_ids[index];
+			block_image = &block_images->getBlockImage(id);
+		}
+		*/
 
 		// when we have a block that is waterlogged:
 		// remove upper water texture if it's not the block at the water surface

@@ -93,7 +93,7 @@ protected:
 	// (for example ice: we don't want side faces of water next to ice)
 	std::set<uint16_t> full_water_like_ids;
 	// full water blocks will be replaced by these water blocks
-	std::vector<uint16_t> partial_full_water_ids;
+	std::vector<uint16_t> partial_full_water_ids, partial_ice_ids;
 };
 
 }
