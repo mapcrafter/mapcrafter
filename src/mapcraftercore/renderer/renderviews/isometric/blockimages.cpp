@@ -1961,9 +1961,9 @@ RGBAImage IsometricBlockImages::createBiomeBlock(uint16_t id, uint16_t data,
 	// leaves have the foliage colors
 	// for birches, the color x/y coordinate is flipped
 	if (id == 18)
-		color = biome.getColor(64, resources.getFoliageColors(), (data & util::binary<11>::value) == 2);
+		color = biome.getColor(64, ColorMapType::FOLIAGE, resources.getFoliageColors(), (data & util::binary<11>::value) == 2);
 	else
-		color = biome.getColor(64, resources.getGrassColors(), false);
+		color = biome.getColor(64, ColorMapType::GRASS, resources.getGrassColors(), false);
 
 	double r = (double) rgba_red(color) / 255;
 	double g = (double) rgba_green(color) / 255;

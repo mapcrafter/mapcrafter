@@ -19,6 +19,7 @@
 
 #include "biomes.h"
 
+#include "blockimages.h" // ColorMapType
 #include "image.h"
 #include "../util.h"
 
@@ -30,18 +31,20 @@ namespace mapcrafter {
 namespace renderer {
 
 
-Biome::Biome(uint16_t id, double temperature, double rainfall, uint8_t r, uint8_t g, uint8_t b)
+Biome::Biome(uint16_t id, double temperature, double rainfall, uint32_t green_tint, uint32_t water_tint)
 	: id(id), temperature(temperature), rainfall(rainfall),
-	  extra_r(r), extra_g(g), extra_b(b) {
+	  green_tint(green_tint), water_tint(water_tint) {
 }
 
 Biome& Biome::operator+=(const Biome& other) {
 	rainfall += other.rainfall;
 	temperature += other.temperature;
 
+	/*
 	extra_r += other.extra_r;
 	extra_g += other.extra_g;
 	extra_b += other.extra_b;
+	*/
 
 	return *this;
 }
@@ -53,9 +56,11 @@ Biome& Biome::operator/=(int n) {
 	rainfall /= n;
 	temperature /= n;
 
+	/*
 	extra_r /= n;
 	extra_g /= n;
 	extra_b /= n;
+	*/
 
 	return *this;
 }
@@ -66,8 +71,8 @@ Biome& Biome::operator/=(int n) {
 bool Biome::operator==(const Biome& other) const {
 	double epsilon = 0.1;
 	return std::abs(other.rainfall - rainfall) <= epsilon
-			&& std::abs(other.temperature - temperature) <= epsilon
-			&& extra_r == other.extra_r && extra_g == other.extra_g && extra_b == other.extra_b;
+			&& std::abs(other.temperature - temperature) <= epsilon;
+//			&& extra_r == other.extra_r && extra_g == other.extra_g && extra_b == other.extra_b;
 }
 
 /**
@@ -80,7 +85,11 @@ uint16_t Biome::getID() const {
 /**
  * Calculates the color of the biome with a biome color image.
  */
-uint32_t Biome::getColor(int block_y, const RGBAImage& colors, bool flip_xy) const {
+uint32_t Biome::getColor(int block_y, const ColorMapType& color_type, const RGBAImage& colors, bool flip_xy) const {
+	if (color_type == ColorMapType::WATER) {
+		return water_tint;
+	}
+
 	float elevation = std::max(block_y - 64, 0);
 	// x is temperature
 	double tmp_temperature = std::min(1.0, std::max(0.0, temperature - elevation*0.00166667f));
@@ -100,11 +109,14 @@ uint32_t Biome::getColor(int block_y, const RGBAImage& colors, bool flip_xy) con
 
 	// get color at this position
 	uint32_t color = colors.getPixel(x, y);
-	if (extra_r != 255 || extra_g != 255 || extra_b != 255) {
-		// multiply with fixed biome color values if specified
-		// necessary for the swampland biome
-		return rgba_multiply(color, (uint8_t) extra_r, (uint8_t) extra_g, (uint8_t) extra_b, 255);
+	if (id >= 165 && id <= 167) {
+		if (color_type == ColorMapType::GRASS) {
+			return rgba(0x90, 0x91, 0x4d, 0xff);
+		} else if (color_type == ColorMapType::FOLIAGE) {
+			return rgba(0x9e, 0x81, 0x4d, 0xff);
+		}
 	}
+	color = rgba_multiply(color, rgba_red(green_tint), rgba_green(green_tint), rgba_blue(green_tint), rgba_alpha(green_tint));
 	return color;
 }
 

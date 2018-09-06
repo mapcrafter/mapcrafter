@@ -186,6 +186,7 @@ enum class ColorMapType {
 	GRASS,
 	FOLIAGE,
 	FOLIAGE_FLIPPED,
+	WATER
 };
 
 /**
@@ -311,7 +312,7 @@ private:
 	ShulkerTextures shulker_textures;
 	BedTextures bed_textures;
 
-	RGBAImage foliage_colors, foliage_flipped_colors, grass_colors;
+	RGBAImage foliage_colors, foliage_flipped_colors, grass_colors, water_colors;
 };
 
 /**
@@ -554,7 +555,7 @@ void blockImageMultiplyExcept(RGBAImage& block, const RGBAImage& uv_mask,
 void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
 		const CornerValues& factors_left, const CornerValues& factors_right, const CornerValues& factors_up);
 void blockImageTint(RGBAImage& block, const RGBAImage& mask,
-		uint8_t r, uint8_t g, uint8_t b);
+		uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask);
 std::array<bool, 3> blockImageGetSideMask(const RGBAImage& uv);
 

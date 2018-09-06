@@ -31,6 +31,9 @@ namespace mapcrafter {
 namespace renderer {
 
 bool TileImage::operator<(const TileImage& other) const {
+	if (pos == other.pos) {
+		return z_index < other.z_index;
+	}
 	return pos < other.pos;
 }
 
@@ -80,6 +83,8 @@ TileRenderer::TileRenderer(const RenderView* render_view, mc::BlockStateRegistry
 		partial_ice_ids.push_back(block_registry.getBlockID(block));
 	}
 	*/
+
+	waterlog_id = block_registry.getBlockID(mc::BlockState("minecraft:waterlog"));
 }
 
 TileRenderer::~TileRenderer() {
@@ -187,22 +192,31 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 			}
 		}
 
-		TileImage tile_image;
-		tile_image.x = x;
-		tile_image.y = y;
-		tile_image.pos = top;
-		tile_image.image = block_image->image;
+		auto addTileImage = [this, x, y, top, &tile_images](uint16_t id, const BlockImage& block_image, int z_index) {
+			TileImage tile_image;
+			tile_image.x = x;
+			tile_image.y = y;
+			tile_image.image = block_image.image;
+			tile_image.pos = top;
+			tile_image.z_index = z_index;
 
-		if (block_image->is_biome) {
-			Biome biome = getBiomeOfBlock(top, current_chunk);
-			block_images->prepareBiomeBlockImage(top.y, tile_image.image, *block_image, biome);
+			if (block_image.is_biome) {
+				Biome biome = getBiomeOfBlock(top, current_chunk);
+				block_images->prepareBiomeBlockImage(top.y, tile_image.image, block_image, biome);
+			}
+
+			// let the render mode do their magic with the block image
+			//render_mode->draw(node.image, node.pos, id, data);
+			render_mode->draw(tile_image.image, block_image, tile_image.pos, id);
+
+			tile_images.insert(tile_image);
+		};
+
+		addTileImage(id, *block_image, 0);
+
+		if (block_image->has_water_top) {
+			addTileImage(waterlog_id, block_images->getBlockImage(waterlog_id), 1);
 		}
-
-		// let the render mode do their magic with the block image
-		//render_mode->draw(node.image, node.pos, id, data);
-		render_mode->draw(tile_image.image, *block_image, tile_image.pos, id);
-
-		tile_images.insert(tile_image);
 
 		// if this block is not transparent, then break
 		if (!block_image->is_transparent) {
@@ -221,6 +235,7 @@ Biome TileRenderer::getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* ch
 		return getBiome(DEFAULT_BIOME);
 	uint8_t biome_id = chunk->getBiomeAt(mc::LocalBlockPos(pos));
 	Biome biome = getBiome(biome_id);
+	return biome;
 	int count = 1;
 
 	// get average biome data to make smooth edges between

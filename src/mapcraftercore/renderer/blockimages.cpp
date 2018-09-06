@@ -37,8 +37,10 @@ renderer::ColorMapType as<renderer::ColorMapType>(const std::string& str) {
 		return renderer::ColorMapType::FOLIAGE_FLIPPED;
 	} else if (str == "grass") {
 		return renderer::ColorMapType::GRASS;
+	} else if (str == "water") {
+		return renderer::ColorMapType::WATER;
 	} else {
-		throw std::invalid_argument("Must be 'foliage', 'foliage_flipped' or 'grass'!");
+		throw std::invalid_argument("Must be 'foliage', 'foliage_flipped', 'grass' or 'water'!");
 	}
 }
 
@@ -393,7 +395,10 @@ const RGBAImage& TextureResources::getColorMap(ColorMapType type) const {
 		return foliage_flipped_colors;
 	} else if (type == ColorMapType::GRASS) {
 		return grass_colors;
+	} else if (type == ColorMapType::WATER) {
+		return water_colors;
 	}
+	assert(false);
 }
 
 bool TextureResources::loadChests(const std::string& normal_png,
@@ -947,6 +952,7 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 			block.non_waterlogged_id = block_registry.getBlockID(non_waterlogged);
 		} else {
 			block.is_waterlogged = false;
+			block.has_water_top = false;
 		}
 		if (block_info.count("lighting_type")) {
 			block.lighting_specified = true;
@@ -1008,7 +1014,7 @@ const BlockImage& RenderedBlockImages::getBlockImage(uint16_t id) const {
 }
 
 void RenderedBlockImages::prepareBiomeBlockImage(int y, RGBAImage& image, const BlockImage& block, const Biome& biome) {
-	uint32_t color = biome.getColor(y, resources.getColorMap(block.biome_color), false);
+	uint32_t color = biome.getColor(y, block.biome_color, resources.getColorMap(block.biome_color), false);
 
 	uint8_t r = rgba_red(color);
 	uint8_t g = rgba_green(color);
