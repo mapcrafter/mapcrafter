@@ -179,10 +179,12 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 	chunk_completely_contained = world_crop.isChunkCompletelyContained(chunkpos_original);
 
 	if (level.hasTag<nbt::TagString>("Status")) {
+		/*
 		const nbt::TagString& tag = level.findTag<nbt::TagString>("Status");
 		if (!(tag.payload == "fullchunk" || tag.payload == "postprocessed")) {
 			return true;
 		}
+		*/
 	}
 
 	if (level.hasArray<nbt::TagByteArray>("Biomes", 256)) {
