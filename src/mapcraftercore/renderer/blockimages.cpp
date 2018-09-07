@@ -719,42 +719,120 @@ void blockImageMultiplyExcept(RGBAImage& block, const RGBAImage& uv_mask,
 	}
 }
 
+/*
+inline uint32_t divide255(uint32_t v) {
+	return (v + 1 + (v >> 8)) >> 8;
+}
+*/
+
+inline uint32_t divide255(uint32_t v1, uint32_t v2) {
+	uint32_t t = v1 * v2 + 128;
+	return ((t >> 8) + t) >> 8;
+}
+
+inline uint32_t mix(uint32_t x, uint32_t y, uint32_t a) {
+	return ((x * (255-a)) + (y * a)) >> 8;
+}
+
 void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
 		const CornerValues& factors_left, const CornerValues& factors_right, const CornerValues& factors_up) {
 	assert(block.getWidth() == uv_mask.getWidth());
 	assert(block.getHeight() == uv_mask.getHeight());
+
+	uint32_t fl[4], fr[4], fu[4];
+	for (int i = 0; i < 4; i++) {
+		fl[i] = factors_left[i] * 255;
+		fr[i] = factors_right[i] * 255;
+		fu[i] = factors_up[i] * 255;
+	}
 	
 	for (size_t x = 0; x < block.getWidth(); x++) {
 		for (size_t y = 0; y < block.getHeight(); y++) {
 			uint32_t& pixel = block.pixel(x, y);
 			uint32_t uv_pixel = uv_mask.pixel(x, y);
+			/*
 			if (rgba_alpha(uv_pixel) == 0) {
 				continue;
 			}
+			*/
 
-			const CornerValues* vptr = nullptr;
+			//const CornerValues* vptr = nullptr;
+			uint32_t* f = nullptr;
 			uint8_t side = rgba_blue(uv_pixel);
 			if (side == FACE_LEFT_INDEX) {
-				//pixel = rgba_multiply(pixel, factor_left, factor_left, factor_left);
-				vptr = &factors_left;
+				//vptr = &factors_left;
+				f = fl;
 			} else if (side == FACE_RIGHT_INDEX) {
-				//pixel = rgba_multiply(pixel, factor_right, factor_right, factor_right);
-				vptr = &factors_right;
+				//vptr = &factors_right;
+				f = fr;
 			} else if (side == FACE_UP_INDEX) {
-				//pixel = rgba_multiply(pixel, factor_up, factor_up, factor_up);
-				vptr = &factors_up;
+				//vptr = &factors_up;
+				f = fu;
 			} else {
 				continue;
 			}
 
+			/*
 			const CornerValues& values = *vptr;
 			float u = (float) rgba_red(uv_pixel) / 255.0;
 			float v = (float) rgba_green(uv_pixel) / 255.0;
 			float ab = (1-u) * values[0] + u * values[1];
 			float cd = (1-u) * values[2] + u * values[3];
 			float x = (1-v) * ab + v * cd;
+			*/
+
+			uint32_t u = rgba_red(uv_pixel);
+			uint32_t v = rgba_green(uv_pixel);
+			
+			//uint32_t ab = divide255((255-u), f[0]) + divide255(u, f[1]);
+			//uint32_t cd = divide255((255-u), f[2]) + divide255(u, f[3]);
+			//uint32_t x = divide255((255-v), ab) + divide255(v,  cd);
+			
+			// jetzt sogar 34.17
+			// und mit noch mehr rgba_multiply sogar 35.28
+			uint32_t ab = mix(f[0], f[1], u); // divide255((255-u) * f[0], u * f[1]);
+			uint32_t cd = mix(f[2], f[3], u); // divide255((255-u) * f[2], u * f[3]);
+			uint32_t x = mix(ab, cd, v); // divide255((255-v) * ab, v * cd);
+
+			// OHNE BASIS
+			// 45.68
+			//pixel = rgba_multiply(pixel, 0.5);
+			
+			// 34.44
+			//float x = 0.5;
+			//pixel = rgba_multiply(pixel, x, x, x);
 		
-			pixel = rgba_multiply(pixel, x, x, x);
+			// FLOAT ALS BASIS
+			// 25.68
+			//pixel = rgba_multiply(pixel, x, x, x);
+			
+			// geht. aber vielleicht auch nicht mega viel schneller
+			//uint8_t factor = x * 255;
+			//pixel = rgba_multiply(pixel, factor, factor, factor);
+
+			// geht, 29.13
+			//int factor = x * 255;
+			//assert(factor >= 0 && factor <= 255);
+			//pixel = rgba_multiply(pixel, factor);
+			
+			// INTEGER ALS BASIS
+			//assert(x >= 0 && x <= 255);
+			
+			// geht, 28.93
+			//double factor = (double) x / 255;
+			//pixel = rgba_multiply(pixel, factor, factor, factor);
+
+			// geht, 28.00
+			//uint8_t factor = x;
+			//pixel = rgba_multiply(pixel, factor, factor, factor);
+
+			// geht, 29.83
+			// ohne uv-alpha check sogar 32.15
+			// ohne uv-alpha check und uint8_t 32.39
+			// ... div255 32.60
+			// ... anderes div255 32.88
+			// rgba_ inline: 33.64
+			pixel = rgba_multiply(pixel, x);
 		}
 	}
 }
@@ -1020,7 +1098,20 @@ void RenderedBlockImages::prepareBiomeBlockImage(int y, RGBAImage& image, const 
 	uint8_t g = rgba_green(color);
 	uint8_t b = rgba_blue(color);
 	uint8_t a = 255;
-	
+
+	if (block.is_masked_biome) {
+		blockImageTint(image, block.biome_mask, r, g, b, a);
+	} else {
+		blockImageTint(image, image, r, g, b, a);
+	}
+}
+
+void RenderedBlockImages::prepareBiomeBlockImage(RGBAImage& image, const BlockImage& block, uint32_t color) {
+	uint8_t r = rgba_red(color);
+	uint8_t g = rgba_green(color);
+	uint8_t b = rgba_blue(color);
+	uint8_t a = 255;
+
 	if (block.is_masked_biome) {
 		blockImageTint(image, block.biome_mask, r, g, b, a);
 	} else {

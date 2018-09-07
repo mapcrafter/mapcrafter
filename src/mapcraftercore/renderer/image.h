@@ -35,16 +35,50 @@ namespace renderer {
 
 typedef uint32_t RGBAPixel;
 
-RGBAPixel rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
-uint8_t rgba_red(RGBAPixel value);
-uint8_t rgba_green(RGBAPixel value);
-uint8_t rgba_blue(RGBAPixel value);
-uint8_t rgba_alpha(RGBAPixel value);
+/*
+inline RGBAPixel rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
+inline uint8_t rgba_red(RGBAPixel value);
+inline uint8_t rgba_green(RGBAPixel value);
+inline uint8_t rgba_blue(RGBAPixel value);
+inline uint8_t rgba_alpha(RGBAPixel value);
+*/
+
+inline RGBAPixel rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) {
+	return (a << 24) | (b << 16) | (g << 8) | r;
+}
+
+inline uint8_t rgba_red(RGBAPixel value) {
+	return value & 0xff;
+}
+
+inline uint8_t rgba_green(RGBAPixel value) {
+	return (value & 0xff00) >> 8;
+}
+
+inline uint8_t rgba_blue(RGBAPixel value) {
+	return (value & 0xff0000) >> 16;
+}
+
+inline uint8_t rgba_alpha(RGBAPixel value) {
+	return (value & 0xff000000) >> 24;
+}
+
+// http://hugi.scene.org/online/hugi21/co32bcol.htm
+inline uint32_t rgb_add(RGBAPixel v1, RGBAPixel v2) {
+	int b = (v1&0xff) + (v2&0xff); //split and add
+	int g = (v1&0xff00) + (v2&0xff00);
+	int r = (v1&0xff0000) + (v2&0xff0000);
+	if (b>0xff) b=0xff; //saturate
+	if (g>0xff00) g=0xff00;
+	if (r>0xff0000) r=0xff0000;
+	return b | g | r; //combine them back
+}
 
 RGBAPixel rgba_add_clamp(RGBAPixel value, int r, int g, int b, int a = 0);
 RGBAPixel rgba_add_clamp(RGBAPixel value, const std::tuple<int, int, int>& values);
 RGBAPixel rgba_multiply(RGBAPixel value, double r, double g, double b, double a = 1);
 RGBAPixel rgba_multiply(RGBAPixel value, uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
+RGBAPixel rgba_multiply(RGBAPixel value, uint32_t factor);
 
 int rgba_distance2(RGBAPixel value1, RGBAPixel value2);
 
@@ -65,8 +99,9 @@ public:
 	Pixel getPixel(int x, int y) const;
 	void setPixel(int x, int y, Pixel pixel);
 
-	const Pixel& pixel(int x, int y) const;
-	Pixel& pixel(int x, int y);
+	inline const Pixel& pixel(int x, int y) const;
+
+	inline Pixel& pixel(int x, int y);
 
 	void setSize(int width, int height);
 
@@ -192,14 +227,14 @@ Pixel Image<Pixel>::getPixel(int x, int y) const {
 }
 
 template <typename Pixel>
-void Image<Pixel>::setPixel(int x, int y, Pixel pixel) {
+inline void Image<Pixel>::setPixel(int x, int y, Pixel pixel) {
 	if (x >= width || x < 0 || y >= height || y < 0)
 		return;
 	data[y * width + x] = pixel;
 }
 
 template <typename Pixel>
-const Pixel& Image<Pixel>::pixel(int x, int y) const {
+inline const Pixel& Image<Pixel>::pixel(int x, int y) const {
 	return data[y * width + x];
 }
 

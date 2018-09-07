@@ -36,6 +36,7 @@
 namespace mapcrafter {
 namespace renderer {
 
+/*
 RGBAPixel rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 	return (a << 24) | (b << 16) | (g << 8) | r;
 }
@@ -55,6 +56,7 @@ uint8_t rgba_blue(RGBAPixel value) {
 uint8_t rgba_alpha(RGBAPixel value) {
 	return (value & 0xff000000) >> 24;
 }
+*/
 
 uint8_t clamp(int c) {
 	if (c < 0)
@@ -85,12 +87,33 @@ RGBAPixel rgba_multiply(RGBAPixel value, double r, double g, double b, double a)
 	return rgba(red * r, green * g, blue * b, alpha * a);
 }
 
+inline uint32_t divide255(uint32_t v1, uint32_t v2) {
+	//uint32_t t = v1 * v2 + 128;
+	//return ((t >> 8) + t) >> 8;
+	return (v1 * v2) >> 8;
+}
+
 RGBAPixel rgba_multiply(RGBAPixel value, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-	int red = (rgba_red(value) * r) / 255;
-	int green = (rgba_green(value) * g) / 255;
-	int blue = (rgba_blue(value) * b) / 255;
-	int alpha = (rgba_alpha(value) * a) / 255;
-	return rgba(red, green, blue, alpha);
+	//int red = (rgba_red(value) * r) / 255;
+	//int green = (rgba_green(value) * g) / 255;
+	//int blue = (rgba_blue(value) * b) / 255;
+	//int alpha = (rgba_alpha(value) * a) / 255;
+	//return rgba(red, green, blue, alpha);
+	
+	return rgba(
+		divide255(rgba_red(value), r),
+		divide255(rgba_green(value), g),
+		divide255(rgba_blue(value), b),
+		divide255(rgba_alpha(value), a)
+	);
+}
+
+RGBAPixel rgba_multiply(RGBAPixel value, uint32_t factor) {
+	uint32_t f = factor + 1;
+	uint32_t g = (((value & 0xff00) * f) >> 8) & 0xff00;
+	uint32_t br = (((value & 0xff00ff) * f) >> 8) & 0xff00ff;
+	uint32_t a = value & 0xff000000;
+	return a | g | br;
 }
 
 int rgba_distance2(RGBAPixel value1, RGBAPixel value2) {
