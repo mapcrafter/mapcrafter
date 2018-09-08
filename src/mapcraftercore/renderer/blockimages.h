@@ -608,6 +608,7 @@ public:
 	//virtual int getBlockSize() const {};
 
 	RenderedBlockImages(mc::BlockStateRegistry& block_registry);
+	~RenderedBlockImages();
 
 	void setBlockSideDarkening(float darken_left, float darken_right);
 
@@ -636,7 +637,8 @@ private:
 
 	int texture_size, block_size;
 	// Mapcrafter-local block ID -> BlockImage (image, uv_image, is_transparent, ...)
-	std::unordered_map<uint16_t, BlockImage> block_images;
+	//std::unordered_map<uint16_t, BlockImage> block_images;
+	std::vector<BlockImage*> block_images;
 	BlockImage unknown_block;
 };
 

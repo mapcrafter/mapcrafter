@@ -995,7 +995,8 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 
 		mc::BlockState block_state = mc::BlockState::parse(block_name, variant);
 		uint16_t id = block_registry.getBlockID(block_state);
-		BlockImage block;
+		BlockImage* b = new BlockImage();
+		BlockImage& block = *b;
 		block.image = image;
 		block.uv_image = image_uv;
 		block.is_air = block_info.count("is_air");
@@ -1038,7 +1039,10 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 		}
 		block.has_faulty_lighting = block_info.count("faulty_lighting");
 
-		block_images[id] = block;
+		if (block_images.size() < id + 1) {
+			block_images.resize(id + 1, nullptr);
+		}
+		block_images[id] = b;
 
 		auto properties = block_state.getProperties();
 		for (auto it = properties.begin(); it != properties.end(); ++it) {
@@ -1129,12 +1133,14 @@ int RenderedBlockImages::getBlockSize() const {
 
 void RenderedBlockImages::prepareBlockImages() {
 	uint16_t solid_id = block_registry.getBlockID(mc::BlockState("minecraft:unknown_block"));
-	assert(block_images.find(solid_id) != block_images.end());
-	const BlockImage& solid = block_images[solid_id];
+	assert(block_images.size() > solid_id && block_images[solid_id] != nullptr);
+	const BlockImage& solid = *block_images[solid_id];
 
-	for (auto it = block_images.begin(); it != block_images.end(); ++it) {
-		uint16_t id = it->first;
-		BlockImage& block = it->second;
+	for (uint16_t id = 0; id < block_images.size(); ++id) {
+		if (block_images[id] == nullptr) {
+			continue;
+		}
+		BlockImage& block = *block_images[id];
 		const mc::BlockState& block_state = block_registry.getBlockState(id);
 
 		// blockImageTest(image, image_uv);
@@ -1162,8 +1168,8 @@ void RenderedBlockImages::prepareBlockImages() {
 		if (block.is_biome && block.is_masked_biome) {
 			std::string mask_name = name + "_biome_mask";
 			uint16_t mask_id = block_registry.getBlockID(mc::BlockState::parse(mask_name, block_state.getVariantDescription()));
-			assert(block_images.find(mask_id) != block_images.end());
-			block.biome_mask = block_images[mask_id].image;
+			assert(block_images.size() > mask_id && block_images[mask_id] != nullptr);
+			block.biome_mask = block_images[mask_id]->image;
 		}
 
 		if (!block.lighting_specified) {
