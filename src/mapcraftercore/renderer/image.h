@@ -35,14 +35,6 @@ namespace renderer {
 
 typedef uint32_t RGBAPixel;
 
-/*
-inline RGBAPixel rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
-inline uint8_t rgba_red(RGBAPixel value);
-inline uint8_t rgba_green(RGBAPixel value);
-inline uint8_t rgba_blue(RGBAPixel value);
-inline uint8_t rgba_alpha(RGBAPixel value);
-*/
-
 inline RGBAPixel rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) {
 	return (a << 24) | (b << 16) | (g << 8) | r;
 }
@@ -64,22 +56,24 @@ inline uint8_t rgba_alpha(RGBAPixel value) {
 }
 
 // http://hugi.scene.org/online/hugi21/co32bcol.htm
-inline uint32_t rgb_add(RGBAPixel v1, RGBAPixel v2) {
-	int b = (v1&0xff) + (v2&0xff); //split and add
-	int g = (v1&0xff00) + (v2&0xff00);
-	int r = (v1&0xff0000) + (v2&0xff0000);
-	if (b>0xff) b=0xff; //saturate
-	if (g>0xff00) g=0xff00;
-	if (r>0xff0000) r=0xff0000;
-	return b | g | r; //combine them back
+inline RGBAPixel rgba_multiply(RGBAPixel v1, RGBAPixel v2) {
+	uint32_t r = (((v1 & 0xff) * (v2 & 0xff)) >> 8) & 0xff;
+	uint32_t g = (((v1 & 0xff00) * (v2 & 0xff00)) >> 16) & 0xff00;
+	uint32_t b = (((uint64_t) (v1 & 0xff0000) * (v2 & 0xff0000)) >> 24) & 0xff0000;
+	return (v1 & 0xff000000) | r | g | b;
+}
+
+// http://hugi.scene.org/online/hugi21/co32bcol.htm
+inline RGBAPixel rgba_multiply_scalar(RGBAPixel value, uint32_t factor) {
+	uint32_t g = (((value & 0xff00) * factor) >> 8) & 0xff00;
+	uint32_t br = (((value & 0xff00ff) * factor) >> 8) & 0xff00ff;
+	uint32_t a = value & 0xff000000;
+	return a | g | br;
 }
 
 RGBAPixel rgba_add_clamp(RGBAPixel value, int r, int g, int b, int a = 0);
 RGBAPixel rgba_add_clamp(RGBAPixel value, const std::tuple<int, int, int>& values);
 RGBAPixel rgba_multiply(RGBAPixel value, double r, double g, double b, double a = 1);
-RGBAPixel rgba_multiply(RGBAPixel value, uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
-RGBAPixel rgba_multiply(RGBAPixel value, uint32_t factor);
-
 int rgba_distance2(RGBAPixel value1, RGBAPixel value2);
 
 void blend(RGBAPixel& dest, const RGBAPixel& source);
@@ -105,7 +99,7 @@ public:
 
 	void setSize(int width, int height);
 
-protected:
+//protected:
 	int width;
 	int height;
 

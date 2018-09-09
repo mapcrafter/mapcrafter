@@ -554,8 +554,10 @@ void blockImageMultiplyExcept(RGBAImage& block, const RGBAImage& uv_mask,
 		uint8_t except_face, float factor);
 void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
 		const CornerValues& factors_left, const CornerValues& factors_right, const CornerValues& factors_up);
+void blockImageMultiply(RGBAImage& block, uint8_t factor);
 void blockImageTint(RGBAImage& block, const RGBAImage& mask,
-		uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+		uint32_t color);
+void blockImageTint(RGBAImage& block, uint32_t color);
 bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask);
 std::array<bool, 3> blockImageGetSideMask(const RGBAImage& uv);
 
@@ -629,6 +631,7 @@ public:
 
 private:
 	void prepareBlockImages();
+	void runBenchmark();
 
 	mc::BlockStateRegistry& block_registry;
 	TextureResources resources;

@@ -201,10 +201,10 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 			tile_image.z_index = z_index;
 
 			if (block_image.is_biome) {
-				Biome biome = getBiomeOfBlock(top, current_chunk);
-				block_images->prepareBiomeBlockImage(top.y, tile_image.image, block_image, biome);
+				//Biome biome = getBiomeOfBlock(top, current_chunk);
+				//block_images->prepareBiomeBlockImage(top.y, tile_image.image, block_image, biome);
 				
-				//block_images->prepareBiomeBlockImage(tile_image.image, block_image, getBiomeColor(top, block_image, current_chunk));
+				block_images->prepareBiomeBlockImage(tile_image.image, block_image, getBiomeColor(top, block_image, current_chunk));
 			}
 
 			// let the render mode do their magic with the block image
@@ -266,37 +266,38 @@ Biome TileRenderer::getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* ch
 }
 
 uint32_t TileRenderer::getBiomeColor(const mc::BlockPos& pos, const BlockImage& block, const mc::Chunk* chunk) {
-	uint32_t color = 0x0;
-	int radius = 2;
-	int factor = 255 / ((2*radius+1)*(2*radius+1));
+	const int radius = 2;
+	float f = ((2*radius+1)*(2*radius+1));
+	float r = 0.0, g = 0.0, b = 0.0;
 
+	int n = 0;
 	for (int dx = -radius; dx <= radius; dx++) {
 		for (int dz = -radius; dz <= radius; dz++) {
-			//uint8_t biome_id = chunk->getBiomeAt(mc::LocalBlockPos(pos));
-			//Biome biome = getBiome(biome_id);
 			mc::BlockPos other = pos + mc::BlockPos(dx, dz, 0);
 			mc::ChunkPos chunk_pos(other);
 			
 			const BlockImage* other_block;
-			uint8_t other_id;
+			uint16_t biome_id;
 			mc::LocalBlockPos local(other);
 			if (chunk_pos != chunk->getPos()) {
 				mc::Chunk* other_chunk = world->getChunk(chunk_pos);
-				if (other_chunk == nullptr)
-						continue;
-				other_id = other_chunk->getBiomeAt(local);
-				//other_block = &block_images->getBlockImage(other_chunk->getBlockID(local));
+				if (other_chunk == nullptr) {
+					f -= 1.0f;
+					continue;
+				}
+				biome_id = other_chunk->getBiomeAt(local);
 			} else {
-				other_id = chunk->getBiomeAt(local);
-				//other_block = &block_images->getBlockImage(chunk->getBlockID(local));
+				biome_id = chunk->getBiomeAt(local);
 			}
-			Biome biome = getBiome(other_id);
+			Biome biome = getBiome(biome_id);
 			uint32_t c = biome.getColor(pos.y, block.biome_color, block_images->getColorMap(block.biome_color), false);
-			color = rgb_add(color, rgba_multiply(c, factor)) & 0xffffff;
+			r += (float) rgba_red(c);
+			g += (float) rgba_green(c);
+			b += (float) rgba_blue(c);
 		}
 	}
 
-	return color | 0xff000000;
+	return rgba(r / f, g / f, b / f, 255);
 }
 
 /**

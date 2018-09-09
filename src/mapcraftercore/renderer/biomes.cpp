@@ -116,7 +116,7 @@ uint32_t Biome::getColor(int block_y, const ColorMapType& color_type, const RGBA
 			return rgba(0x9e, 0x81, 0x4d, 0xff);
 		}
 	}
-	color = rgba_multiply(color, rgba_red(green_tint), rgba_green(green_tint), rgba_blue(green_tint), rgba_alpha(green_tint));
+	color = rgba_multiply(color, green_tint);
 	return color;
 }
 

@@ -23,6 +23,7 @@
 #include "../util.h"
 #include "../mc/blockstate.h"
 
+#include <chrono>
 #include <map>
 #include <vector>
 
@@ -719,19 +720,20 @@ void blockImageMultiplyExcept(RGBAImage& block, const RGBAImage& uv_mask,
 	}
 }
 
-/*
-inline uint32_t divide255(uint32_t v) {
-	return (v + 1 + (v >> 8)) >> 8;
-}
-*/
+namespace {
 
+/*
 inline uint32_t divide255(uint32_t v1, uint32_t v2) {
 	uint32_t t = v1 * v2 + 128;
 	return ((t >> 8) + t) >> 8;
 }
+*/
 
 inline uint32_t mix(uint32_t x, uint32_t y, uint32_t a) {
+	// >> 8 = / 256, serves as approximation for division by 255
 	return ((x * (255-a)) + (y * a)) >> 8;
+}
+
 }
 
 void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
@@ -745,113 +747,126 @@ void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
 		fr[i] = factors_right[i] * 255;
 		fu[i] = factors_up[i] * 255;
 	}
+
 	
-	for (size_t x = 0; x < block.getWidth(); x++) {
-		for (size_t y = 0; y < block.getHeight(); y++) {
-			uint32_t& pixel = block.pixel(x, y);
-			uint32_t uv_pixel = uv_mask.pixel(x, y);
-			/*
-			if (rgba_alpha(uv_pixel) == 0) {
-				continue;
-			}
-			*/
+	size_t n = block.getWidth() * block.getHeight();
+	for (size_t i = 0; i < n; i++) {
+		uint32_t& pixel = block.data[i];
+		uint32_t uv_pixel = uv_mask.data[i];
+		if (rgba_alpha(uv_pixel) == 0) {
+			continue;
+		}
 
-			//const CornerValues* vptr = nullptr;
-			uint32_t* f = nullptr;
-			uint8_t side = rgba_blue(uv_pixel);
-			if (side == FACE_LEFT_INDEX) {
-				//vptr = &factors_left;
-				f = fl;
-			} else if (side == FACE_RIGHT_INDEX) {
-				//vptr = &factors_right;
-				f = fr;
-			} else if (side == FACE_UP_INDEX) {
-				//vptr = &factors_up;
-				f = fu;
-			} else {
-				continue;
-			}
+		//const CornerValues* vptr = nullptr;
+		uint32_t* f = nullptr;
+		uint8_t side = rgba_blue(uv_pixel);
+		if (side == FACE_LEFT_INDEX) {
+			//vptr = &factors_left;
+			f = fl;
+		} else if (side == FACE_RIGHT_INDEX) {
+			//vptr = &factors_right;
+			f = fr;
+		} else if (side == FACE_UP_INDEX) {
+			//vptr = &factors_up;
+			f = fu;
+		} else {
+			continue;
+		}
 
-			/*
-			const CornerValues& values = *vptr;
-			float u = (float) rgba_red(uv_pixel) / 255.0;
-			float v = (float) rgba_green(uv_pixel) / 255.0;
-			float ab = (1-u) * values[0] + u * values[1];
-			float cd = (1-u) * values[2] + u * values[3];
-			float x = (1-v) * ab + v * cd;
-			*/
+		/*
+		const CornerValues& values = *vptr;
+		float u = (float) rgba_red(uv_pixel) / 255.0;
+		float v = (float) rgba_green(uv_pixel) / 255.0;
+		float ab = (1-u) * values[0] + u * values[1];
+		float cd = (1-u) * values[2] + u * values[3];
+		float x = (1-v) * ab + v * cd;
+		*/
 
-			uint32_t u = rgba_red(uv_pixel);
-			uint32_t v = rgba_green(uv_pixel);
-			
-			//uint32_t ab = divide255((255-u), f[0]) + divide255(u, f[1]);
-			//uint32_t cd = divide255((255-u), f[2]) + divide255(u, f[3]);
-			//uint32_t x = divide255((255-v), ab) + divide255(v,  cd);
-			
-			// jetzt sogar 34.17
-			// und mit noch mehr rgba_multiply sogar 35.28
-			uint32_t ab = mix(f[0], f[1], u); // divide255((255-u) * f[0], u * f[1]);
-			uint32_t cd = mix(f[2], f[3], u); // divide255((255-u) * f[2], u * f[3]);
-			uint32_t x = mix(ab, cd, v); // divide255((255-v) * ab, v * cd);
-
-			// OHNE BASIS
-			// 45.68
-			//pixel = rgba_multiply(pixel, 0.5);
-			
-			// 34.44
-			//float x = 0.5;
-			//pixel = rgba_multiply(pixel, x, x, x);
+		uint32_t u = rgba_red(uv_pixel);
+		uint32_t v = rgba_green(uv_pixel);
 		
-			// FLOAT ALS BASIS
-			// 25.68
-			//pixel = rgba_multiply(pixel, x, x, x);
-			
-			// geht. aber vielleicht auch nicht mega viel schneller
-			//uint8_t factor = x * 255;
-			//pixel = rgba_multiply(pixel, factor, factor, factor);
+		//uint32_t ab = divide255((255-u), f[0]) + divide255(u, f[1]);
+		//uint32_t cd = divide255((255-u), f[2]) + divide255(u, f[3]);
+		//uint32_t x = divide255((255-v), ab) + divide255(v,  cd);
+		
+		// jetzt sogar 34.17
+		// und mit noch mehr rgba_multiply sogar 35.28
+		uint32_t ab = mix(f[0], f[1], u); // divide255((255-u) * f[0], u * f[1]);
+		uint32_t cd = mix(f[2], f[3], u); // divide255((255-u) * f[2], u * f[3]);
+		uint32_t x = mix(ab, cd, v); // divide255((255-v) * ab, v * cd);
 
-			// geht, 29.13
-			//int factor = x * 255;
-			//assert(factor >= 0 && factor <= 255);
-			//pixel = rgba_multiply(pixel, factor);
-			
-			// INTEGER ALS BASIS
-			//assert(x >= 0 && x <= 255);
-			
-			// geht, 28.93
-			//double factor = (double) x / 255;
-			//pixel = rgba_multiply(pixel, factor, factor, factor);
+		// OHNE BASIS
+		// 45.68
+		//pixel = rgba_multiply(pixel, 0.5);
+		
+		// 34.44
+		//float x = 0.5;
+		//pixel = rgba_multiply(pixel, x, x, x);
+	
+		// FLOAT ALS BASIS
+		// 25.68
+		//pixel = rgba_multiply(pixel, x, x, x);
+		
+		// geht. aber vielleicht auch nicht mega viel schneller
+		//uint8_t factor = x * 255;
+		//pixel = rgba_multiply(pixel, factor, factor, factor);
 
-			// geht, 28.00
-			//uint8_t factor = x;
-			//pixel = rgba_multiply(pixel, factor, factor, factor);
+		// geht, 29.13
+		//int factor = x * 255;
+		//assert(factor >= 0 && factor <= 255);
+		//pixel = rgba_multiply(pixel, factor);
+		
+		// INTEGER ALS BASIS
+		//assert(x >= 0 && x <= 255);
+		
+		// geht, 28.93
+		//double factor = (double) x / 255;
+		//pixel = rgba_multiply(pixel, factor, factor, factor);
 
-			// geht, 29.83
-			// ohne uv-alpha check sogar 32.15
-			// ohne uv-alpha check und uint8_t 32.39
-			// ... div255 32.60
-			// ... anderes div255 32.88
-			// rgba_ inline: 33.64
-			pixel = rgba_multiply(pixel, x);
+		// geht, 28.00
+		//uint8_t factor = x;
+		//pixel = rgba_multiply(pixel, factor, factor, factor);
+
+		// geht, 29.83
+		// ohne uv-alpha check sogar 32.15
+		// ohne uv-alpha check und uint8_t 32.39
+		// ... div255 32.60
+		// ... anderes div255 32.88
+		// rgba_ inline: 33.64
+		pixel = rgba_multiply_scalar(pixel, x);
+	}
+}
+
+void blockImageMultiply(RGBAImage& block, uint8_t factor) {
+	size_t n = block.getWidth() * block.getHeight();
+	for (size_t i = 0; i < n; i++) {
+		block.data[i] = rgba_multiply_scalar(block.data[i], factor);
+	}
+}
+
+void blockImageTint(RGBAImage& block, const RGBAImage& mask, uint32_t color) {
+	assert(block.getWidth() == mask.getWidth());
+	assert(block.getHeight() == mask.getHeight());
+
+	size_t n = block.getWidth() * block.getHeight();
+	for (size_t i = 0; i < n; i++) {
+		uint32_t& pixel = block.data[i];
+		uint32_t mask_pixel = mask.data[i];
+		/*
+		if (rgba_alpha(mask_pixel) == 0) {
+			continue;
+		}
+		*/
+		if ((mask_pixel & 0xff000000) > 0) {
+			pixel = rgba_multiply(mask_pixel, color);
 		}
 	}
 }
 
-void blockImageTint(RGBAImage& block, const RGBAImage& mask,
-		uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-	assert(block.getWidth() == mask.getWidth());
-	assert(block.getHeight() == mask.getHeight());
-	
-	for (size_t x = 0; x < block.getWidth(); x++) {
-		for (size_t y = 0; y < block.getHeight(); y++) {
-			uint32_t& pixel = block.pixel(x, y);
-			uint32_t mask_pixel = mask.pixel(x, y);
-			if (rgba_alpha(mask_pixel) == 0) {
-				continue;
-			}
-
-			pixel = rgba_multiply(mask_pixel, r, g, b, a);
-		}
+void blockImageTint(RGBAImage& block, uint32_t color) {
+	size_t n = block.getWidth() * block.getHeight();
+	for (size_t i = 0; i < n; i++) {
+		block.data[i] = rgba_multiply(block.data[i], color);
 	}
 }
 
@@ -899,6 +914,14 @@ std::array<bool, 3> blockImageGetSideMask(const RGBAImage& uv) {
 
 RenderedBlockImages::RenderedBlockImages(mc::BlockStateRegistry& block_registry)
 	: block_registry(block_registry) {
+}
+
+RenderedBlockImages::~RenderedBlockImages() {
+	for (auto it = block_images.begin(); it != block_images.end(); ++it) {
+		if (*it != nullptr) {
+			delete *it;
+		}
+	}
 }
 
 void RenderedBlockImages::setBlockSideDarkening(float darken_left, float darken_right) {
@@ -1054,12 +1077,15 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 	in.close();
 
 	prepareBlockImages();
+	//runBenchmark();
 	
 	return true;
 }
 
 RGBAImage RenderedBlockImages::exportBlocks() const {
+	/*
 	std::vector<RGBAImage> blocks;
+
 	for (auto it = block_images.begin(); it != block_images.end(); ++it) {
 		blocks.push_back(it->second.image);
 	}
@@ -1083,43 +1109,42 @@ RGBAImage RenderedBlockImages::exportBlocks() const {
 	}
 
 	return image;
+	*/
+	return RGBAImage(1, 1);
 }
 
 const BlockImage& RenderedBlockImages::getBlockImage(uint16_t id) const {
-	auto it = block_images.find(id);
-	if (it == block_images.end()) {
+	if (block_images.size() < id + 1) {
 		const mc::BlockState& block_state = block_registry.getBlockState(id);
+		
+		if (!block_state.hasProperty("waterlogged")) {
+			mc::BlockState test = mc::BlockState::parse(block_state.getName(), block_state.getVariantDescription());
+			test.setProperty("waterlogged", "false");
+			return getBlockImage(block_registry.getBlockID(test));
+		}
 		LOG(INFO) << "Unknown block " << block_state.getName() << " " << block_state.getVariantDescription();
+
 		return unknown_block;
 	}
-	return it->second;
+	return *block_images[id];
 }
 
 void RenderedBlockImages::prepareBiomeBlockImage(int y, RGBAImage& image, const BlockImage& block, const Biome& biome) {
 	uint32_t color = biome.getColor(y, block.biome_color, resources.getColorMap(block.biome_color), false);
 
-	uint8_t r = rgba_red(color);
-	uint8_t g = rgba_green(color);
-	uint8_t b = rgba_blue(color);
-	uint8_t a = 255;
-
 	if (block.is_masked_biome) {
-		blockImageTint(image, block.biome_mask, r, g, b, a);
+		blockImageTint(image, block.biome_mask, color);
 	} else {
-		blockImageTint(image, image, r, g, b, a);
+		blockImageTint(image, color);
 	}
 }
 
 void RenderedBlockImages::prepareBiomeBlockImage(RGBAImage& image, const BlockImage& block, uint32_t color) {
-	uint8_t r = rgba_red(color);
-	uint8_t g = rgba_green(color);
-	uint8_t b = rgba_blue(color);
-	uint8_t a = 255;
 
 	if (block.is_masked_biome) {
-		blockImageTint(image, block.biome_mask, r, g, b, a);
+		blockImageTint(image, block.biome_mask, color);
 	} else {
-		blockImageTint(image, image, r, g, b, a);
+		blockImageTint(image, color);
 	}
 }
 
@@ -1188,6 +1213,52 @@ void RenderedBlockImages::prepareBlockImages() {
 	}
 
 	unknown_block = solid;
+}
+
+void RenderedBlockImages::runBenchmark() {
+	LOG(INFO) << "Running benchmark";
+
+	typedef std::chrono::high_resolution_clock clock_;
+	typedef std::chrono::duration<double, std::ratio<1> > second_;
+
+	uint16_t id = block_registry.getBlockID(mc::BlockState::parse("minecraft:full_water", "up=false,south=false,west=false"));
+	assert(block_images.size() > id && block_images[id] != nullptr);
+	const BlockImage& solid = *block_images[id];
+
+	uint32_t color = rgba(0x30, 0x59, 0xad, 0xff);
+
+	CornerValues left = {1.0, 0.8, 0.5, 1.0};
+	CornerValues right = {1.0, 0.6, 0.3, 0.8};
+	CornerValues up = {0.5, 1.0, 0.6, 0.8};
+
+	std::chrono::time_point<clock_> begin = clock_::now();
+
+	for (size_t i = 0; i < 1000000; i++) {
+		RGBAImage image = solid.image;
+		
+		// 5.841s
+		//blockImageTint(image, image, 0x30, 0x59, 0xad, 0xff);
+		
+		// 3.441s
+		// 3.072s mit nicem rgba_multiply
+		// 2.876s mit alpha check als bitmaske und vergleich > 0
+		//blockImageTint(image, image, color);
+
+		// 1.597s (wenn alpha check weg!)
+		// 1.590s (sonst auch!)
+		// 1.105s mit nicem rgba_multiply
+		//blockImageTint(image, color);
+		
+		// 9.534s mit rgb_multiply_scalar
+		// 6.345s mit rgb_multiply_scalar inline
+		// 6.377s mit rgba_multiply_scalar ohne f+1
+		// 6.126s doch wenn der alpha check drin ist
+		blockImageMultiply(image, solid.uv_image, left, right, up);
+	}
+	
+	double elapsed = std::chrono::duration_cast<second_>(clock_::now() - begin).count();
+	LOG(INFO) << "took " << elapsed << "s";
+	exit(0);
 }
 
 }

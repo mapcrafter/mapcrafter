@@ -575,7 +575,12 @@ void LightingRenderMode::doSimpleLight(RGBAImage& image, const BlockImage& block
 		intensity = lighting_water_intensity;
 	}
 	uint8_t factor = getLightingColor(pos, intensity) * 255;
+	if (factor == 255) {
+		//blockImageTint(image, rgba(0xff, 0x00, 0x00));
+		return;
+	}
 
+	/*
 	int size = image.getWidth();
 	for (int x = 0; x < size; x++) {
 		for (int y = 0; y < size; y++) {
@@ -584,6 +589,16 @@ void LightingRenderMode::doSimpleLight(RGBAImage& image, const BlockImage& block
 				pixel = rgba_multiply(pixel, factor, factor, factor, 255);
 		}
 	}
+	*/
+
+	/*
+	size_t n = image.getWidth() * image.getHeight();
+	for (size_t i = 0; i < n; i++) {
+		image.data[i] = rgba_multiply_scalar(image.data[i], factor);
+	}
+	*/
+
+	blockImageMultiply(image, factor);
 }
 
 } /* namespace render */
