@@ -73,6 +73,8 @@ public:
 	 */
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
 
+	virtual bool isHidden(const mc::BlockPos& pos, const BlockImage& block_image) { return false; }
+
 	/**
 	 * This method is called by the tile renderer so you can modify block images that
 	 * are about to be rendered.
@@ -217,6 +219,8 @@ public:
 	 * true (= false is default).
 	 */
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+	virtual bool isHidden(const mc::BlockPos& pos, const BlockImage& block_image);
 
 	/**
 	 * Calls this method of each render mode.

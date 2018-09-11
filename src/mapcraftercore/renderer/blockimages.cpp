@@ -1033,7 +1033,9 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 			block.is_full_water = true;
 		}
 
-		block.is_ice = block_name == "minecraft:ice" || block_name == "minecraft:full_ice";
+		block.is_ice = block_name == "minecraft:ice"
+			|| block_name == "minecraft:blue_ice"
+			|| block_name == "minecraft:packed_ice";
 
 		block.is_biome = block_info.count("biome_type");
 		if (block.is_biome) {

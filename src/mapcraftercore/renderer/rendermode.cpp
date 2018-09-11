@@ -79,6 +79,13 @@ bool MultiplexingRenderMode::isHidden(const mc::BlockPos& pos, uint16_t id,
 	return false;
 }
 
+bool MultiplexingRenderMode::isHidden(const mc::BlockPos& pos, const BlockImage& block_image) {
+	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
+		if ((*it)->isHidden(pos, block_image))
+			return true;
+	return false;
+}
+
 void MultiplexingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
 	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)

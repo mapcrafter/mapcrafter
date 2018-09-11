@@ -130,7 +130,7 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 
 		uint16_t id = current_chunk->getBlockID(local);
 		const BlockImage* block_image = &block_images->getBlockImage(id);
-		if (block_image->is_air) {
+		if (block_image->is_air || render_mode->isHidden(top, *block_image)) {
 			continue;
 		}
 
