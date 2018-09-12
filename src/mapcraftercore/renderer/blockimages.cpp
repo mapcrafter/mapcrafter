@@ -870,6 +870,54 @@ void blockImageTint(RGBAImage& block, uint32_t color) {
 	}
 }
 
+void blockImageTintHighContrast(RGBAImage& block, uint32_t color) {
+	// get luminance of recolor:
+	// "10*r + 3*g + b" should actually be "3*r + 10*g + b"
+	// it was a typo, but doesn't look bad either
+	int luminance = (10 * rgba_red(color) + 3 * rgba_green(color) + rgba_blue(color)) / 14;
+
+	float alpha_factor = 3; // 3 is similar to alpha=85
+	// something like that would be possible too, but overlays won't look exactly like
+	// overlays with that alpha value, so don't use it for now
+	// alpha_factor = (float) 255.0 / rgba_alpha(color);
+
+	// try to do luminance-neutral additive/subtractive color
+	// instead of alpha blending (for better contrast)
+	// so first subtract luminance from each component
+	int nr = (rgba_red(color) - luminance) / alpha_factor;
+	int ng = (rgba_green(color) - luminance) / alpha_factor;
+	int nb = (rgba_blue(color) - luminance) / alpha_factor;
+
+	size_t n = block.getWidth() * block.getHeight();
+	for (size_t i = 0; i < n; i++) {
+		RGBAPixel& pixel = block.data[i];
+		if ((pixel & 0xff000000) > 0) {
+			pixel = rgba_add_clamp(pixel, nr, ng, nb, 0);
+		}
+	}
+}
+
+void blockImageTintHighContrast(RGBAImage& block, const RGBAImage& mask, int face, uint32_t color) {
+	assert(block.getWidth() == mask.getWidth());
+	assert(block.getHeight() == mask.getHeight());
+
+	// same as above
+	int luminance = (10 * rgba_red(color) + 3 * rgba_green(color) + rgba_blue(color)) / 14;
+	float alpha_factor = 3;
+	int nr = (rgba_red(color) - luminance) / alpha_factor;
+	int ng = (rgba_green(color) - luminance) / alpha_factor;
+	int nb = (rgba_blue(color) - luminance) / alpha_factor;
+
+	size_t n = block.getWidth() * block.getHeight();
+	for (size_t i = 0; i < n; i++) {
+		RGBAPixel& pixel = block.data[i];
+		RGBAPixel mask_pixel = mask.data[i];
+		if (rgba_blue(mask_pixel) == face) {
+			pixel = rgba_add_clamp(pixel, nr, ng, nb, 0);
+		}
+	}
+}
+
 bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask) {
 	assert(block.getWidth() == uv_mask.getWidth());
 	assert(block.getHeight() == uv_mask.getHeight());

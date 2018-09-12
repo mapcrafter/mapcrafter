@@ -543,6 +543,7 @@ protected:
 
 typedef std::array<float, 4> CornerValues;
 
+// TODO rename these maybe
 static const uint8_t FACE_LEFT_INDEX = ((float) 255.0 / 6.0) * 1;
 static const uint8_t FACE_RIGHT_INDEX = ((float) 255.0 / 6.0) * 4;
 static const uint8_t FACE_UP_INDEX = ((float) 255.0 / 6.0) * 2;
@@ -557,7 +558,10 @@ void blockImageMultiply(RGBAImage& block, const RGBAImage& uv_mask,
 void blockImageMultiply(RGBAImage& block, uint8_t factor);
 void blockImageTint(RGBAImage& block, const RGBAImage& mask,
 		uint32_t color);
+// TODO maybe this should be named something with multiply too
 void blockImageTint(RGBAImage& block, uint32_t color);
+void blockImageTintHighContrast(RGBAImage& block, uint32_t color);
+void blockImageTintHighContrast(RGBAImage& block, const RGBAImage& mask, int face, uint32_t color);
 bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask);
 std::array<bool, 3> blockImageGetSideMask(const RGBAImage& uv);
 

@@ -101,6 +101,10 @@ RGBAPixel SlimeOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint
 	return rgba(0, 0, 0, 0);
 }
 
+RGBAPixel SlimeOverlay::getBlockColor(const mc::BlockPos& pos, const BlockImage& block_image) {
+	return getBlockColor(pos, 0, 0);
+}
+
 }
 }
 
