@@ -71,7 +71,7 @@ void readPackedShorts(const std::vector<int64_t>& data, uint16_t* palette) {
 			palette[j++] = ((b[i+4] & 0x07) << 4) | ((b[i+3] & 0xf0) >> 4);
 			palette[j++] = ((b[i+5] & 0x03) << 5) | ((b[i+4] & 0xf8) >> 3);
 			palette[j++] = ((b[i+6] & 0x01) << 6) | ((b[i+5] & 0xfc) >> 2);
-			palette[j++] =  (b[i+6] & 0xfc) >> 1;
+			palette[j++] =  (b[i+6] & 0xfe) >> 1;
 			i += 7;
 		}
 		if (bits_per_entry == 8) {
