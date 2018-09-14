@@ -68,6 +68,8 @@ public:
 	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile);
 
 	virtual int getTileSize() const = 0;
+	virtual int getTileWidth() const;
+	virtual int getTileHeight() const;
 
 protected:
 	void renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockPos& dir, std::set<TileImage>& tile_images);

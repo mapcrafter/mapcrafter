@@ -99,7 +99,7 @@ void TileRenderer::setUsePreblitWater(bool use_preblit_water) {
 }
 
 void TileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
-	tile.setSize(getTileSize(), getTileSize());
+	tile.setSize(getTileWidth(), getTileHeight());
 
 	std::set<TileImage> tile_images;
 	renderTopBlocks(tile_pos, tile_images);
@@ -107,6 +107,14 @@ void TileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
 	for (auto it = tile_images.begin(); it != tile_images.end(); ++it) {
 		tile.alphaBlit(it->image, it->x, it->y);
 	}
+}
+
+int TileRenderer::getTileWidth() const {
+	return getTileSize();
+}
+
+int TileRenderer::getTileHeight() const {
+	return getTileSize();
 }
 
 void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockPos& dir, std::set<TileImage>& tile_images) {

@@ -35,6 +35,7 @@
 #include <fstream>
 #include <memory>
 #include <thread>
+#include <tuple>
 
 namespace mapcrafter {
 namespace renderer {
@@ -345,8 +346,10 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 	context.initializeTileRenderer();
 
 	// update map parameters in web config
+	int tile_w = context.tile_renderer->getTileWidth();
+	int tile_h = context.tile_renderer->getTileHeight();
 	web_config.setMapMaxZoom(map, context.tile_set->getDepth());
-	web_config.setMapTileSize(map, context.tile_renderer->getTileSize());
+	web_config.setMapTileSize(map, std::make_tuple<>(tile_w, tile_h));
 	web_config.writeConfigJS();
 
 	std::shared_ptr<thread::Dispatcher> dispatcher;

@@ -36,7 +36,7 @@ WebConfig::WebConfig(const MapcrafterConfig& config)
 		// EDIT: apparently it's also sad now if the tile size is 1 or something small
 		// seems like it's stuck in a loop trying to loading (many? tile size 1?) tiles
 		// -> greater values seem to work
-		map_tile_size[map_name] = 420;
+		map_tile_size[map_name] = std::make_tuple<>(420, 420);
 		map_max_zoom[map_name] = 0;
 		for (int i = 0; i < 4; i++)
 			map_last_rendered[map_name][i] = 0;
@@ -119,7 +119,8 @@ bool WebConfig::readConfigJS() {
 				config::INIConfigSection& root = config.getRootSection();
 
 				// we can calculate the tile size since there was only one render view
-				map_tile_size[map_name] = root.get<int>("texture_size", 12) * 32;
+				int s = root.get<int>("texture_size", 12) * 32;
+				map_tile_size[map_name] = std::make_tuple<>(s, s);
 				map_max_zoom[map_name] = root.get<int>("max_zoom");
 
 				std::string rotation_names[4] = {"tl", "tr", "br", "bl"};
@@ -184,11 +185,11 @@ void WebConfig::setTileSetTileOffset(const TileSetID& tile_set,
 	tile_set_tile_offset[tile_set] = tile_offset;
 }
 
-int WebConfig::getMapTileSize(const std::string& map) const {
+std::tuple<int, int> WebConfig::getMapTileSize(const std::string& map) const {
 	return map_tile_size.at(map);
 }
 
-void WebConfig::setMapTileSize(const std::string& map, int tile_size) {
+void WebConfig::setMapTileSize(const std::string& map, std::tuple<int, int> tile_size) {
 	map_tile_size[map] = tile_size;
 }
 
@@ -278,7 +279,12 @@ picojson::value WebConfig::getConfigJSON() const {
 			rotations_json.push_back(picojson::value((double) *it));
 		map_json["rotations"] = picojson::value(rotations_json);
 
-		map_json["tileSize"] = picojson::value((double) getMapTileSize(map_it->getShortName()));
+		std::tuple<int, int> tile_size = getMapTileSize(map_it->getShortName());
+		picojson::array tile_size_json;
+		tile_size_json.push_back(picojson::value((double) std::get<0>(tile_size)));
+		tile_size_json.push_back(picojson::value((double) std::get<1>(tile_size)));
+		map_json["tileSize"] = picojson::value(tile_size_json);
+
 		map_json["maxZoom"] = picojson::value((double) getMapMaxZoom(map_it->getShortName()));
 
 		picojson::array last_rendered_json;
@@ -354,8 +360,23 @@ void WebConfig::parseConfigJSON(const picojson::object& object) {
 			continue;
 		picojson::object map_json = util::json_get<picojson::object>(maps_json, map_name);
 
-		map_tile_size[map_name] = util::json_get<double>(map_json, "tileSize");
-		LOG(DEBUG) << "map " << map_name << " tile_size=" << map_tile_size[map_name];
+		picojson::value tile_size = util::json_get<picojson::value>(map_json, "tileSize");
+		// tileSize is array [w, h] in newer versions
+		if (tile_size.is<picojson::array>()) {
+			picojson::array& array = tile_size.get<picojson::array>();
+			if (array.size() != 2)  {
+				throw util::JSONError("Invalid 'tileSize' array!");
+			}
+			int w = array[0].get<double>();
+			int h = array[1].get<double>();
+			map_tile_size[map_name] = std::make_tuple<>(w, h);
+		} else {
+			// but also just one number for both sides is possible
+			int s = tile_size.get<double>();
+			map_tile_size[map_name] = std::make_tuple<>(s, s);
+		}
+		LOG(DEBUG) << "map " << map_name << " tile_size="
+			<< std::get<0>(map_tile_size[map_name]) << "x" << std::get<1>(map_tile_size[map_name]);
 
 		map_max_zoom[map_name] = util::json_get<double>(map_json, "maxZoom");
 		LOG(DEBUG) << "map " << map_name << " max_zoom=" << map_max_zoom[map_name];
