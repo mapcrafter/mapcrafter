@@ -627,6 +627,8 @@ public:
 
 	virtual int getTextureSize() const;
 	virtual int getBlockSize() const;
+	virtual int getBlockWidth() const;
+	virtual int getBlockHeight() const;
 
 	// TODO HACK
 	const RGBAImage& getColorMap(const ColorMapType& color_map) {
@@ -642,7 +644,8 @@ private:
 
 	float darken_left, darken_right;
 
-	int texture_size, block_size;
+	int texture_size;
+	int block_width, block_height;
 	// Mapcrafter-local block ID -> BlockImage (image, uv_image, is_transparent, ...)
 	//std::unordered_map<uint16_t, BlockImage> block_images;
 	std::vector<BlockImage*> block_images;

@@ -1,4 +1,4 @@
-4629 32
+24 24 32
 minecraft:acacia_button face=ceiling,facing=east,powered=false color=0,uv=1
 minecraft:acacia_button face=ceiling,facing=east,powered=true color=2,uv=3
 minecraft:acacia_button face=ceiling,facing=north,powered=false color=4,uv=5

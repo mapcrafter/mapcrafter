@@ -961,7 +961,7 @@ std::array<bool, 3> blockImageGetSideMask(const RGBAImage& uv) {
 }
 
 RenderedBlockImages::RenderedBlockImages(mc::BlockStateRegistry& block_registry)
-	: block_registry(block_registry) {
+	: block_registry(block_registry), darken_left(1.0), darken_right(1.0) {
 }
 
 RenderedBlockImages::~RenderedBlockImages() {
@@ -1012,23 +1012,23 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 	
 	std::getline(in, first_line);
 	std::vector<std::string> parts = util::split(first_line, ' ');
-	int block_count, columns;
 	bool ok = true;
+	int columns = 0;
 	try {
-		if (parts.size() == 2) {
-			block_count = util::as<int>(parts[0]);
-			columns = util::as<int>(parts[1]);
+		if (parts.size() == 3) {
+			block_width = util::as<int>(parts[0]);
+			block_height = util::as<int>(parts[1]);
+			columns = util::as<int>(parts[2]);
 		}
 	} catch (std::invalid_argument& e) {
 		ok = false;
 	}
-	if (!ok || parts.size() != 2) {
+	if (!ok || parts.size() != 3) {
 		LOG(ERROR) << "Invalid first line in block info file " << info_file << "!";
 		LOG(ERROR) << "Line 1: '" << first_line << "'";
 		return false;
 	}
 
-	block_size = blocks.getWidth() / columns;
 	int lineno = 2;
 	for (std::string line; std::getline(in, line); lineno++) {
 		line = util::trim(line);
@@ -1051,13 +1051,13 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 		int image_uv_index = util::as<int>(block_info["uv"]);
 
 		int x, y;
-		x = (image_index % columns) * block_size;
-		y = (image_index / columns) * block_size;
-		RGBAImage image = blocks.clip(x, y, block_size, block_size);
+		x = (image_index % columns) * block_width;
+		y = (image_index / columns) * block_height;
+		RGBAImage image = blocks.clip(x, y, block_width, block_height);
 
-		x = (image_uv_index % columns) * block_size;
-		y = (image_uv_index / columns) * block_size;
-		RGBAImage image_uv = blocks.clip(x, y, block_size, block_size);
+		x = (image_uv_index % columns) * block_width;
+		y = (image_uv_index / columns) * block_height;
+		RGBAImage image_uv = blocks.clip(x, y, block_width, block_height);
 
 		if (image.getWidth() != image_uv.getWidth() || image.getHeight() != image_uv.getHeight()) {
 			LOG(ERROR) << "Size mismatch of block " << block_name;
@@ -1203,7 +1203,15 @@ int RenderedBlockImages::getTextureSize() const {
 }
 
 int RenderedBlockImages::getBlockSize() const {
-	return block_size;
+	return block_width;
+}
+
+int RenderedBlockImages::getBlockWidth() const {
+	return block_width;
+}
+
+int RenderedBlockImages::getBlockHeight() const {
+	return block_height;
 }
 
 void RenderedBlockImages::prepareBlockImages() {

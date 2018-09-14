@@ -1,0 +1,16 @@
+set(SOURCE
+    ${SOURCE}
+    "${CMAKE_CURRENT_SOURCE_DIR}/rendermodes.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/renderview.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tilerenderer.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tileset.cpp"
+    PARENT_SCOPE
+)
+set(HEADERS
+    ${HEADERS}
+    "${CMAKE_CURRENT_SOURCE_DIR}/rendermodes.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/renderview.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tilerenderer.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tileset.h"
+    PARENT_SCOPE
+)

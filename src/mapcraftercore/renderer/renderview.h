@@ -118,7 +118,8 @@ public:
 enum class RenderViewType {
 	ISOMETRIC,
 	ISOMETRICNEW,
-	TOPDOWN
+	TOPDOWN,
+	SIDE
 };
 
 // TODO operator<< here but util::as in the config section file?
