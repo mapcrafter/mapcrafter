@@ -21,6 +21,7 @@
 
 #include "blockimages.h" // ColorMapType
 #include "image.h"
+#include "../mc/pos.h"
 #include "../util.h"
 
 #include <cmath>
@@ -30,6 +31,7 @@
 namespace mapcrafter {
 namespace renderer {
 
+const mc::JavaSimplexGenerator Biome::SWAMP_GRASS_NOISE;
 
 Biome::Biome(uint16_t id, double temperature, double rainfall, uint32_t green_tint, uint32_t water_tint)
 	: id(id), temperature(temperature), rainfall(rainfall),
@@ -82,15 +84,25 @@ uint16_t Biome::getID() const {
 	return id;
 }
 
+uint32_t Biome::getColor(int block_y, const ColorMapType& color_type, const RGBAImage& colors, bool flip_xy) const {
+	return getColor(mc::BlockPos(0, block_y, 0), color_type, colors, flip_xy);
+}
+
 /**
  * Calculates the color of the biome with a biome color image.
  */
-uint32_t Biome::getColor(int block_y, const ColorMapType& color_type, const RGBAImage& colors, bool flip_xy) const {
+uint32_t Biome::getColor(const mc::BlockPos& pos, const ColorMapType& color_type, const RGBAImage& colors, bool flip_xy) const {
 	if (color_type == ColorMapType::WATER) {
 		return water_tint;
 	}
 
-	float elevation = std::max(block_y - 64, 0);
+	// Swamp grass colors are a special case
+	if ((id == 6 || id == 134) && color_type == ColorMapType::GRASS) {
+		double v = SWAMP_GRASS_NOISE.getValue(pos.x * 0.0225, pos.z * 0.0225);
+		return v < -0.1 ? rgba(0x4C, 0x76, 0x3C) : rgba(0x6A, 0x70, 0x39);
+	}
+
+	float elevation = std::max(pos.y - 64, 0);
 	// x is temperature
 	double tmp_temperature = std::min(1.0, std::max(0.0, temperature - elevation*0.00166667f));
 	// y is temperature * rainfall

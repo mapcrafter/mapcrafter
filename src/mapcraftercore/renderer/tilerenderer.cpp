@@ -298,7 +298,7 @@ uint32_t TileRenderer::getBiomeColor(const mc::BlockPos& pos, const BlockImage& 
 				biome_id = chunk->getBiomeAt(local);
 			}
 			Biome biome = getBiome(biome_id);
-			uint32_t c = biome.getColor(pos.y, block.biome_color, block_images->getColorMap(block.biome_color), false);
+			uint32_t c = biome.getColor(other, block.biome_color, block_images->getColorMap(block.biome_color), false);
 			r += (float) rgba_red(c);
 			g += (float) rgba_green(c);
 			b += (float) rgba_blue(c);

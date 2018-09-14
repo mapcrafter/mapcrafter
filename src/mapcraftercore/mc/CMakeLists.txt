@@ -2,6 +2,7 @@ set(SOURCE
     ${SOURCE}
     "${CMAKE_CURRENT_SOURCE_DIR}/blockstate.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/chunk.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/java.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/nbt.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/pos.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/region.cpp"
@@ -15,6 +16,7 @@ set(HEADERS
     ${HEADERS}
     "${CMAKE_CURRENT_SOURCE_DIR}/blockstate.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/chunk.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/java.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/nbt.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/pos.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/region.h"

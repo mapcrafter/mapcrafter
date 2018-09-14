@@ -622,7 +622,7 @@ public:
 	virtual RGBAImage exportBlocks() const;
 
 	const BlockImage& getBlockImage(uint16_t id) const;
-	void prepareBiomeBlockImage(int y, RGBAImage& image, const BlockImage& block, const Biome& biome);
+	void prepareBiomeBlockImage(const mc::BlockPos& pos, RGBAImage& image, const BlockImage& block, const Biome& biome);
 	void prepareBiomeBlockImage(RGBAImage& image, const BlockImage& block, uint32_t color);
 
 	virtual int getTextureSize() const;

@@ -21,11 +21,16 @@
 #define BIOMES_H_
 
 #include "image.h"
+#include "../mc/java.h"
 
 #include <cstdint>
 #include <cstdlib>
 
 namespace mapcrafter {
+namespace mc {
+class BlockPos;
+}
+
 namespace renderer {
 
 class RGBAImage;
@@ -49,6 +54,8 @@ private:
 	double rainfall;
 
 	uint32_t green_tint, water_tint;
+
+	static const mc::JavaSimplexGenerator SWAMP_GRASS_NOISE;
 public:
 	Biome(uint16_t id = 0, double temperature = 0, double rainfall = 0,
 			uint32_t green_tint = one, uint32_t water_tint = default_water);
@@ -58,7 +65,8 @@ public:
 	bool operator==(const Biome& other) const;
 
 	uint16_t getID() const;
-	uint32_t getColor(int y, const ColorMapType& color_type, const RGBAImage& colors, bool flip_xy = false) const;
+	uint32_t getColor(int block_y, const ColorMapType& color_type, const RGBAImage& colors, bool flip_xy = false) const;
+	uint32_t getColor(const mc::BlockPos& pos, const ColorMapType& color_type, const RGBAImage& colors, bool flip_xy = false) const;
 
 	static bool isBiomeBlock(uint16_t id, uint16_t data);
 };

@@ -1179,8 +1179,8 @@ const BlockImage& RenderedBlockImages::getBlockImage(uint16_t id) const {
 	return *block_images[id];
 }
 
-void RenderedBlockImages::prepareBiomeBlockImage(int y, RGBAImage& image, const BlockImage& block, const Biome& biome) {
-	uint32_t color = biome.getColor(y, block.biome_color, resources.getColorMap(block.biome_color), false);
+void RenderedBlockImages::prepareBiomeBlockImage(const mc::BlockPos& pos, RGBAImage& image, const BlockImage& block, const Biome& biome) {
+	uint32_t color = biome.getColor(pos, block.biome_color, resources.getColorMap(block.biome_color), false);
 
 	if (block.is_masked_biome) {
 		blockImageTint(image, block.biome_mask, color);
