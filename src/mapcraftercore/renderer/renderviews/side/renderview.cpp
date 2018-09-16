@@ -51,5 +51,19 @@ RenderModeRenderer* SideRenderView::createRenderModeRenderer(
 	return nullptr;
 }
 
+void SideRenderView::configureBlockImages(BlockImages* images,
+		const config::WorldSection& world_config,
+		const config::MapSection& map_config) const {
+}
+
+void SideRenderView::configureTileRenderer(TileRenderer* tile_renderer,
+		const config::WorldSection& world_config,
+		const config::MapSection& map_config) const {
+	assert(tile_renderer != nullptr);
+	RenderView::configureTileRenderer(tile_renderer, world_config, map_config);
+
+	tile_renderer->setShadowEdges({2, 1, 2, 2, 2});
+}
+
 } /* namespace renderer */
 } /* namespace mapcrafter */

@@ -24,6 +24,7 @@
 #include "image.h"
 #include "../mc/worldcache.h" // mc::DIR_*
 
+#include <array>
 #include <vector>
 #include <boost/filesystem.hpp>
 
@@ -64,6 +65,7 @@ public:
 
 	void setRenderBiomes(bool render_biomes);
 	void setUsePreblitWater(bool use_preblit_water);
+	void setShadowEdges(std::array<uint8_t, 5> shadow_edges);
 
 	virtual void renderTile(const TilePos& tile_pos, RGBAImage& tile);
 
@@ -91,6 +93,9 @@ protected:
 
 	bool render_biomes;
 	bool use_preblit_water;
+	// factors for shadow edges:
+	// north, south, east, west, bottom
+	std::array<uint8_t, 5> shadow_edges;
 
 	// IDs of full water blocks appearing in minecraft worlds
 	std::set<uint16_t> full_water_ids;

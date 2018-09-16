@@ -42,7 +42,7 @@ TileRenderer::TileRenderer(const RenderView* render_view, mc::BlockStateRegistry
 	: block_registry(block_registry), images(images), block_images(dynamic_cast<RenderedBlockImages*>(images)),
 	  tile_width(tile_width), world(world), current_chunk(nullptr),
 	  render_mode(render_mode),
-	  render_biomes(true), use_preblit_water(false) {
+	  render_biomes(true), use_preblit_water(false), shadow_edges({0, 0, 0, 0, 0}) {
 	assert(block_images);
 	render_mode->initialize(render_view, images, world, &current_chunk);
 
@@ -96,6 +96,10 @@ void TileRenderer::setRenderBiomes(bool render_biomes) {
 
 void TileRenderer::setUsePreblitWater(bool use_preblit_water) {
 	this->use_preblit_water = use_preblit_water;
+}
+
+void TileRenderer::setShadowEdges(std::array<uint8_t, 5> shadow_edges) {
+	this->shadow_edges = shadow_edges;
 }
 
 void TileRenderer::renderTile(const TilePos& tile_pos, RGBAImage& tile) {
@@ -213,6 +217,26 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 				//block_images->prepareBiomeBlockImage(top.y, tile_image.image, block_image, biome);
 				
 				block_images->prepareBiomeBlockImage(tile_image.image, block_image, getBiomeColor(top, block_image, current_chunk));
+			}
+	
+			auto shadow_edge = [this, top](const mc::BlockPos& dir) {
+				const BlockImage& b = block_images->getBlockImage(getBlock(top + dir).id);
+				return b.is_transparent && !(b.is_full_water || b.is_waterlogged);
+			};
+			uint8_t north = shadow_edges[0] && shadow_edge(mc::DIR_NORTH);
+			uint8_t south = shadow_edges[1] && shadow_edge(mc::DIR_SOUTH);
+			uint8_t east = shadow_edges[2] && shadow_edge(mc::DIR_EAST);
+			uint8_t west = shadow_edges[3] && shadow_edge(mc::DIR_WEST);
+			uint8_t bottom = shadow_edges[4] && shadow_edge(mc::DIR_BOTTOM);
+
+			if (north + south + east + west + bottom != 0) {
+				north *= shadow_edges[0];
+				south *= shadow_edges[1];
+				east *= shadow_edges[2];
+				west *= shadow_edges[3];
+				bottom *= shadow_edges[4];
+				blockImageShadowEdges(tile_image.image, block_image.uv_image,
+						north, south, east, west, bottom);
 			}
 
 			// let the render mode do their magic with the block image

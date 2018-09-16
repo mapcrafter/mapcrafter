@@ -918,6 +918,50 @@ void blockImageTintHighContrast(RGBAImage& block, const RGBAImage& mask, int fac
 	}
 }
 
+void blockImageShadowEdges(RGBAImage& block, const RGBAImage& uv_mask,
+		uint8_t north, uint8_t south, uint8_t east, uint8_t west, uint8_t bottom) {
+	assert(block.getWidth() == uv_mask.getWidth());
+	assert(block.getHeight() == uv_mask.getHeight());
+
+	size_t n = block.getWidth() * block.getHeight();
+	for (size_t i = 0; i < n; i++) {
+		RGBAPixel& pixel = block.data[i];
+		const RGBAPixel& uv_pixel = uv_mask.data[i];
+
+		// TODO
+		// not really optimized yet, and quite dirty code
+		float u = (float) rgba_red(uv_pixel) / 255;
+		float v = (float) rgba_green(uv_pixel) / 255;
+		uint8_t face = rgba_blue(uv_pixel);
+
+		uint8_t alpha = 0;
+		#define setalpha(x) (alpha = std::max(alpha, (uint8_t) (x)))
+		auto genalpha = [&alpha, &face](int mask_face, int edge, float uv) {
+			float t = (float) (1 + edge) / 16.0;
+			if (edge && face == mask_face && uv < t) {
+				if (uv < t / 2.0) {
+					setalpha(64);
+				} else {
+					float a = (uv-t/2.0) / (t/2.0);
+					setalpha((float) (1-a) * 32.0 + a*16.0);
+				}
+			}
+		};
+
+		genalpha(FACE_UP_INDEX, north, v);
+		genalpha(FACE_UP_INDEX, south, 1.0 - v);
+		genalpha(FACE_UP_INDEX, east, 1.0 - u);
+		genalpha(FACE_UP_INDEX, west, u);
+
+		genalpha(FACE_LEFT_INDEX, bottom, 1.0 - v);
+		genalpha(FACE_RIGHT_INDEX, bottom, 1.0 - v);
+
+		#undef setalpha
+
+		pixel = rgba_multiply_scalar(pixel, 255 - alpha);
+	}
+}
+
 bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask) {
 	assert(block.getWidth() == uv_mask.getWidth());
 	assert(block.getHeight() == uv_mask.getHeight());

@@ -34,6 +34,14 @@ public:
 
 	virtual RenderModeRenderer* createRenderModeRenderer(
 			const RenderModeRendererType& renderer) const;
+
+	virtual void configureBlockImages(BlockImages* images,
+			const config::WorldSection& world_config,
+			const config::MapSection& map_config) const;
+
+	virtual void configureTileRenderer(TileRenderer* tile_renderer,
+			const config::WorldSection& world_config,
+			const config::MapSection& map_config) const;
 };
 
 } /* namespace renderer */

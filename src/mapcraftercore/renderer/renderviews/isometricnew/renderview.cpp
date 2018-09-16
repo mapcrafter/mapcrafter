@@ -90,6 +90,8 @@ void NewIsometricRenderView::configureTileRenderer(TileRenderer* tile_renderer,
 		const config::MapSection& map_config) const {
 	assert(tile_renderer != nullptr);
 	RenderView::configureTileRenderer(tile_renderer, world_config, map_config);
+
+	tile_renderer->setShadowEdges({2, 1, 2, 1, 2});
 }
 
 } /* namespace renderer */

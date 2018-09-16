@@ -140,7 +140,7 @@ static const Biome BIOMES[] = {
 	{130, 2.0, 0.0},   // Desert Lakes
 	{131, 0.25, 0.3},   // Gravelly Mountains
 	{132, 0.7, 0.8, one, default_water},   // Flower Forest
-	{133, 0.05, 0.8, one, default_water},  // Taiga Hills
+	{133, 0.05, 0.8, one, default_water},  // Taiga Mountains
 	//{134, 0.8, 0.9, 205, 128, 255}, // Swampland M (= Swampland)
 	//{134, 0.8, 0.9, 0x4C, 0x76, 0x3C}, // Swampland M (= Swampland) (greenish)
 	{134, 0.8, 0.9, rgba(0x6a, 0x70, 0x39, 0xff), rgba(0x6A, 0x70, 0x39, 0xff)}, // Swamp Hills (brownish)
