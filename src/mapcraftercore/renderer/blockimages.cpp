@@ -937,13 +937,24 @@ void blockImageShadowEdges(RGBAImage& block, const RGBAImage& uv_mask,
 		uint8_t alpha = 0;
 		#define setalpha(x) (alpha = std::max(alpha, (uint8_t) (x)))
 		auto genalpha = [&alpha, &face](int mask_face, int edge, float uv) {
-			float t = (float) (1 + edge) / 16.0;
+			// explanation of edge influence:
+			// edge=0: no edge
+			// edge=1: edge with threshold 2px
+			// edge=2: edge with threshold 3px
+			// edge=3: edge with threshold 3px, a bit darker (for stronger visual on leaves etc.)
+			float t = (float) (1 + std::min(2, edge)) / 16.0;
+			float strong = 64;
+			float weak = 32;
+			if (edge > 2) {
+				strong = 128;
+				weak = 64;
+			}
 			if (edge && face == mask_face && uv < t) {
 				if (uv < t / 2.0) {
-					setalpha(64);
+					setalpha(strong);
 				} else {
 					float a = (uv-t/2.0) / (t/2.0);
-					setalpha((float) (1-a) * 32.0 + a*16.0);
+					setalpha((float) (1-a) * weak + a*16.0);
 				}
 			}
 		};
@@ -959,6 +970,11 @@ void blockImageShadowEdges(RGBAImage& block, const RGBAImage& uv_mask,
 		#undef setalpha
 
 		pixel = rgba_multiply_scalar(pixel, 255 - alpha);
+		/*
+		if (alpha != 0) {
+			pixel = rgba_multiply(pixel, rgba(255 - alpha, 0, 0));
+		}
+		*/
 	}
 }
 
@@ -1156,6 +1172,11 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 		}
 		block.has_faulty_lighting = block_info.count("faulty_lighting");
 
+		block.shadow_edges = -1;
+		if (block_info.count("shadow_edges")) {
+			block.shadow_edges = util::as<int>(block_info["shadow_edges"]);
+		}
+
 		if (block_images.size() < id + 1) {
 			block_images.resize(id + 1, nullptr);
 		}
@@ -1311,6 +1332,10 @@ void RenderedBlockImages::prepareBlockImages() {
 					block.lighting_type = LightingType::SIMPLE;
 				}
 			}
+		}
+
+		if (block.shadow_edges == -1) {
+			block.shadow_edges = !block.is_transparent;
 		}
 	}
 

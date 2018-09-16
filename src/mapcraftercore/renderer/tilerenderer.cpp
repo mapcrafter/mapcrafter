@@ -218,25 +218,29 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 				
 				block_images->prepareBiomeBlockImage(tile_image.image, block_image, getBiomeColor(top, block_image, current_chunk));
 			}
-	
-			auto shadow_edge = [this, top](const mc::BlockPos& dir) {
-				const BlockImage& b = block_images->getBlockImage(getBlock(top + dir).id);
-				return b.is_transparent && !(b.is_full_water || b.is_waterlogged);
-			};
-			uint8_t north = shadow_edges[0] && shadow_edge(mc::DIR_NORTH);
-			uint8_t south = shadow_edges[1] && shadow_edge(mc::DIR_SOUTH);
-			uint8_t east = shadow_edges[2] && shadow_edge(mc::DIR_EAST);
-			uint8_t west = shadow_edges[3] && shadow_edge(mc::DIR_WEST);
-			uint8_t bottom = shadow_edges[4] && shadow_edge(mc::DIR_BOTTOM);
 
-			if (north + south + east + west + bottom != 0) {
-				north *= shadow_edges[0];
-				south *= shadow_edges[1];
-				east *= shadow_edges[2];
-				west *= shadow_edges[3];
-				bottom *= shadow_edges[4];
-				blockImageShadowEdges(tile_image.image, block_image.uv_image,
-						north, south, east, west, bottom);
+			if (block_image.shadow_edges > 0) {
+				auto shadow_edge = [this, top](const mc::BlockPos& dir) {
+					const BlockImage& b = block_images->getBlockImage(getBlock(top + dir).id);
+					//return b.is_transparent && !(b.is_full_water || b.is_waterlogged);
+					return b.shadow_edges == 0;
+				};
+				uint8_t north = shadow_edges[0] && shadow_edge(mc::DIR_NORTH);
+				uint8_t south = shadow_edges[1] && shadow_edge(mc::DIR_SOUTH);
+				uint8_t east = shadow_edges[2] && shadow_edge(mc::DIR_EAST);
+				uint8_t west = shadow_edges[3] && shadow_edge(mc::DIR_WEST);
+				uint8_t bottom = shadow_edges[4] && shadow_edge(mc::DIR_BOTTOM);
+
+				if (north + south + east + west + bottom != 0) {
+					int f = block_image.shadow_edges;
+					north *= shadow_edges[0] * f;
+					south *= shadow_edges[1] * f;
+					east *= shadow_edges[2] * f;
+					west *= shadow_edges[3] * f;
+					bottom *= shadow_edges[4] * f;
+					blockImageShadowEdges(tile_image.image, block_image.uv_image,
+							north, south, east, west, bottom);
+				}
 			}
 
 			// let the render mode do their magic with the block image

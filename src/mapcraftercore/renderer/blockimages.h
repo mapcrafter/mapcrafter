@@ -576,6 +576,8 @@ enum class LightingType {
 };
 
 struct BlockImage {
+	// TODO
+	// this needs some order and refactoring
 	BlockImage()
 		: lighting_specified(false) {}
 
@@ -596,6 +598,8 @@ struct BlockImage {
 	bool lighting_specified;
 	LightingType lighting_type;
 	bool has_faulty_lighting;
+
+	int shadow_edges;
 };
 
 class RenderedBlockImages : public BlockImages {
