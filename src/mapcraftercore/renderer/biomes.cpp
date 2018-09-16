@@ -106,7 +106,7 @@ uint32_t Biome::getColor(const mc::BlockPos& pos, const ColorMapType& color_type
 	// x is temperature
 	double tmp_temperature = std::min(1.0, std::max(0.0, temperature - elevation*0.00166667f));
 	// y is temperature * rainfall
-	double tmp_rainfall = std::min(1.0, std::max(0.0, rainfall * temperature));
+	double tmp_rainfall = std::min(1.0, std::max(0.0, rainfall)) * tmp_temperature;
 
 	// calculate positions
 	int x = 255 - (255 * tmp_temperature);
