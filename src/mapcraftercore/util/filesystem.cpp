@@ -126,7 +126,7 @@ fs::path findExecutableMapcrafterDir(fs::path executable) {
 	std::string filename = BOOST_FS_FILENAME(executable);
 	// TODO make it independent of name of the tool
 	if ((filename == "testconfig"
-			|| filename == "mapcrafter_markers"
+			|| filename == "mapcrafter-legacy-markers"
 			|| filename == "test") &&
 			BOOST_FS_FILENAME(executable.parent_path()) == "tools")
 		return executable.parent_path().parent_path();
@@ -136,12 +136,12 @@ fs::path findExecutableMapcrafterDir(fs::path executable) {
 PathList findResourceDirs(const fs::path& executable) {
 	fs::path mapcrafter_dir = findExecutableMapcrafterDir(executable);
 	PathList resources = {
-		mapcrafter_dir.parent_path() / "share" / "mapcrafter",
+		mapcrafter_dir.parent_path() / "share" / "mapcrafter-legacy",
 		mapcrafter_dir / "data",
 	};
 	fs::path home = findHomeDir();
 	if (!home.empty())
-		resources.insert(resources.begin(), home / ".mapcrafter");
+		resources.insert(resources.begin(), home / ".mapcrafter-legacy");
 
 	for (PathList::iterator it = resources.begin(); it != resources.end(); ) {
 		if (!fs::is_directory(*it))
@@ -171,13 +171,13 @@ PathList findTextureDirs(const fs::path& executable) {
 PathList findLoggingConfigFiles(const fs::path& executable) {
 	fs::path mapcrafter_dir = findExecutableMapcrafterDir(findExecutablePath());
 	PathList configs = {
-		mapcrafter_dir.parent_path().parent_path() / "etc" / "mapcrafter" / "logging.conf",
+		mapcrafter_dir.parent_path().parent_path() / "etc" / "mapcrafter-legacy" / "logging.conf",
 		mapcrafter_dir / "logging.conf",
 	};
 
 	fs::path home = findHomeDir();
 	if (!home.empty())
-		configs.insert(configs.begin(), home / ".mapcrafter" / "logging.conf");
+		configs.insert(configs.begin(), home / ".mapcrafter-legacy" / "logging.conf");
 
 	for (PathList::iterator it = configs.begin(); it != configs.end(); ) {
 		if (!fs::is_regular_file(*it))
