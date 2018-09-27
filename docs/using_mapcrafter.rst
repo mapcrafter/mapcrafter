@@ -26,11 +26,11 @@ to the path of the configuration file.
 
 Now it's time to render your first world::
 
-	mapcrafter -c render.conf
+	mapcrafter-legacy -c render.conf
 
 To improve the performance you can also render the map with multiple threads::
 
-	mapcrafter -c render.conf -j 2
+	mapcrafter-legacy -c render.conf -j 2
 
 2 is here the number of threads the renderer uses. You should use the count of
 your CPU cores.  With increasing thread count I/O (reading the world, writing
@@ -116,7 +116,7 @@ Renderer options
         This option is useful if you want to update only the template of your
         rendered map::
 
-            mapcrafter -c render.conf -r
+            mapcrafter-legacy -c render.conf -r
 
 .. cmdoption:: -a <maps>, --render-auto <maps>
 

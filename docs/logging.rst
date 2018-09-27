@@ -6,9 +6,9 @@ Mapcrafter has its own logging facility which is configurable with a global logg
 configuration file as well as with the normal render configuration files. You can
 configure Mapcrafter to log its output into a log file or a local syslog daemon.
 
-You can find your global logging configuration file with the ``mapcrafter --find-resources``
-command, but it's usually installed as ``/etc/mapcrafter/logging.conf`` or directly
-available as ``mapcrafter/src/logging.conf`` (if Mapcrafter is not system/user-wide
+You can find your global logging configuration file with the ``mapcrafter-legacy --find-resources``
+command, but it's usually installed as ``/etc/mapcrafter-legacy/logging.conf`` or directly
+available as ``mapcrafter-legacy/src/logging.conf`` (if Mapcrafter is not system/user-wide
 installed).
 
 Here is a very simple example of a logging configuration file:
@@ -22,7 +22,7 @@ Here is a very simple example of a logging configuration file:
     [log:file]
     type = file
     verbosity = INFO
-    file = /var/log/mapcrafter.log
+    file = /var/log/mapcrafter-legacy.log
     
     [log:syslog]
     type = syslog

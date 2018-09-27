@@ -5,6 +5,10 @@ Mapcrafter
 Welcome
 =======
 
+**Note, this is the documentation for the legacy version of Mapcrafter for rendering
+pre-1.13 Minecraft worlds. Find the documentation about the newest version at
+https://docs.mapcrafter.org**
+
 Mapcrafter is a high performance Minecraft map renderer written in C++. It renders
 Minecraft worlds to a bunch of images which are viewable like a Google Map
 in any webbrowser using Leaflet.js.

@@ -135,7 +135,7 @@ alphanumeric chars and underscores.
 When you have now your configuration file you can render your worlds with (see
 :ref:`command_line_options` for more options and usage)::
 
-    mapcrafter -c render.conf
+    mapcrafter-legacy -c render.conf
 
 There are tons of other options to customize your rendered maps. Before a
 reference of all available options, here is a quick overview of interesting

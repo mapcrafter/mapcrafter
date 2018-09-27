@@ -31,7 +31,7 @@ General Instructions
 At first you have to get the source code of Mapcrafter.  Clone it directly from
 GitHub if you want the newest version::
 
-    git clone https://github.com/mapcrafter/mapcrafter.git
+    git clone -b legacy https://github.com/mapcrafter/mapcrafter.git
 
 Make sure you have all requirements installed. If you are on a Debian-like
 Linux system, you can install these packages with apt::
@@ -51,14 +51,14 @@ commands::
     cmake .
     make
 
-If everything works, you should have an executable file ``mapcrafter`` in the
+If everything works, you should have an executable file ``mapcrafter-legacy`` in the
 ``src/`` directory.
 
 You can now install Mapcrafter system-wide for all users if you want::
 
     sudo make install
 
-If you get an error concerning ``libmapcraftercore.so`` not found, you have to run
+If you get an error concerning ``libmapcraftercore-legacy.so`` not found, you have to run
 ``ldconfig`` (as root).
 
 On CentOS and other RHEL and Fedora derived distributions, you may have to add
@@ -95,7 +95,7 @@ Or if you got portmaster installed::
 
 Once this is done compiling (takes a long time), you can go ahead with the normal steps::
 
-    git clone https://github.com/mapcrafter/mapcrafter.git
+    git clone -b legacy https://github.com/mapcrafter/mapcrafter.git
     cd mapcrafter
     cmake .
     make
@@ -124,7 +124,7 @@ and select install in the window that pops up, and accept the EULA.
 
 First you will have to clone the latest Mapcrafter source by running::
 
-    git clone https://github.com/mapcrafter/mapcrafter.git
+    git clone -b legacy https://github.com/mapcrafter/mapcrafter.git
 
 After this, install the dependencies using brew::
 
@@ -174,7 +174,7 @@ The commands above add the Mapcrafter Debian package repository to your package
 manager and import the public key which was used to sign the packages.
 
 Now you can run ``sudo apt-get update`` to tell your package manager about the
-sources and ``sudo apt-get install mapcrafter`` to install Mapcrafter.  During
+sources and ``sudo apt-get install mapcrafter-legacy`` to install Mapcrafter.  During
 this process it will automatically download a temporary Minecraft Jar file and
 unpack required texture files.
 
@@ -236,28 +236,28 @@ The template and texture files in these resource directories are expected by
 the renderer in ``template/``, the texture files in ``textures/``.
 
 You can get the paths to the resource directories of Mapcrafter by running
-``mapcrafter --find-resources``. For example, when I installed the Debian
+``mapcrafter-legaccy --find-resources``. For example, when I installed the Debian
 package::
 
-    $ mapcrafter --find-resources
+    $ mapcrafter-legacy --find-resources
     Your home directory: /home/moritz
-    Mapcrafter binary: /usr/bin/mapcrafter
+    Mapcrafter binary: /usr/bin/mapcrafter-legacy
     Resource directories:
-      1. /home/moritz/.mapcrafter
-      2. /usr/share/mapcrafter
+      1. /home/moritz/.mapcrafter-legacy
+      2. /usr/share/mapcrafter-legacy
     Template directories:
-      1. /usr/share/mapcrafter/template
+      1. /usr/share/mapcrafter-legacy/template
     Texture directories:
-      1. /usr/share/mapcrafter/textures
+      1. /usr/share/mapcrafter-legacy/textures
     Logging configuration file:
-      1. /etc/mapcrafter/logging.conf
+      1. /etc/mapcrafter-legacy/logging.conf
 
 You can see that Mapcrafter found a resource directory in the home directory
 but no ``template/`` or ``textures/`` directory in it. So it's just using the
-template and texture directories in ``/usr/share/mapcrafter``. The numbers in
+template and texture directories in ``/usr/share/mapcrafter-legacy``. The numbers in
 front of the paths are the order Mapcrafter is using these directories.  If you
 want to overwrite the default textures, you can just create a new texture
-directory ``.mapcrafter/textures`` in your home directory.
+directory ``.mapcrafter-legacy/textures`` in your home directory.
 
 Now you have to install the Minecraft texture files. You need the following
 files in your texture directory:
@@ -274,12 +274,12 @@ files in your texture directory:
 
 You can get those files from your Minecraft Jar file (default textures) or from
 another resource pack. To extract these texture files there is a python script
-``mapcrafter_textures.py`` (``src/tools/mapcrafter_textures.py`` in the
+``mapcrafter-legacy-textures.py`` (``src/tools/mapcrafter-legacy-textures.py`` in the
 Mapcrafter source if you didn't install Mapcrafter on your system). Run the
 python script with the Minecraft Jar file and the texture directory as
 arguments::
 
-    mapcrafter_textures.py /path/to/my/minecraft/jar/1.8.jar /my/texture/directory
+    mapcrafter-legacy-textures.py /path/to/my/minecraft/jar/1.8.jar /my/texture/directory
 
 You will probably find your Minecraft Jar file in
 ``~/.minecraft/versions/%version%/%version%.jar``.
