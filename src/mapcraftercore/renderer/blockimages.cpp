@@ -368,9 +368,11 @@ bool TextureResources::loadTextures(const std::string& texture_dir,
 			dir + "entity/bed/"))
 		ok = false;
 	*/
+	/*
 	if (!loadColors(dir + "colormap/foliage.png",
 			dir + "colormap/grass.png"))
 		ok = false;
+	*/
 	/*
 	if (!loadBlocks(dir + "blocks", dir + "endportal.png"))
 		ok = false;
