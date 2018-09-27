@@ -294,6 +294,43 @@ bool BedTextures::loadSingle(const std::string& filename, int color_index, int t
 	return true;
 }
 
+bool ColorMap::parse(const std::string& str) {
+	std::vector<std::string> parts = util::split(str, '|');
+	if (parts.size() != 3) {
+		return false;
+	}
+
+	for (size_t i = 0; i < 3; i++) {
+		std::string part = parts[i];
+		if (part.size() != 9 || part[0] != '#' || !util::isHexNumber(part.substr(1))) {
+			return false;
+		}
+		colors[i] = util::parseHexNumber(part.substr(1));
+	}
+
+	return true;
+}
+
+uint32_t ColorMap::getColor(float x, float y) const {
+	float r = 0, g = 0, b = 0, a = 0;
+	// factors are barycentric coordinates
+	// colors are colors of the colormap triangle points
+	float factors[] = {
+		x - y,
+		1.0 - x,
+		y
+	};
+
+	for (size_t i = 0; i < 3; i++) {
+		r += (float) rgba_red(colors[i]) * factors[i];
+		g += (float) rgba_green(colors[i]) * factors[i];
+		b += (float) rgba_blue(colors[i]) * factors[i];
+		a += (float) rgba_alpha(colors[i]) * factors[i];
+	}
+
+	return rgba(r, g, b, a);
+}
+
 TextureResources::TextureResources()
 	: texture_size(12), texture_blur(0) {
 }
@@ -1149,6 +1186,11 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 		if (block.is_biome) {
 			block.is_masked_biome = block_info["biome_type"] == "masked";
 			block.biome_color = util::as<ColorMapType>(block_info["biome_colors"]);
+			if (block_info.count("biome_colormap")) {
+				if (!block.biome_colormap.parse(block_info["biome_colormap"])) {
+					LOG(WARNING) << "Unable to parse colormap '" << block_info["biome_colormap"] << "'.";
+				}
+			}
 		}
 		block.is_waterloggable = block_info.count("is_waterloggable");
 		if (block.is_waterloggable) {
@@ -1242,16 +1284,6 @@ const BlockImage& RenderedBlockImages::getBlockImage(uint16_t id) const {
 		return unknown_block;
 	}
 	return *block_images[id];
-}
-
-void RenderedBlockImages::prepareBiomeBlockImage(const mc::BlockPos& pos, RGBAImage& image, const BlockImage& block, const Biome& biome) {
-	uint32_t color = biome.getColor(pos, block.biome_color, resources.getColorMap(block.biome_color), false);
-
-	if (block.is_masked_biome) {
-		blockImageTint(image, block.biome_mask, color);
-	} else {
-		blockImageTint(image, color);
-	}
 }
 
 void RenderedBlockImages::prepareBiomeBlockImage(RGBAImage& image, const BlockImage& block, uint32_t color) {

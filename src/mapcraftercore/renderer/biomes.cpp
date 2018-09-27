@@ -85,42 +85,21 @@ uint16_t Biome::getID() const {
 }
 
 uint32_t Biome::getColor(int block_y, const ColorMapType& color_type, const RGBAImage& colors, bool flip_xy) const {
-	return getColor(mc::BlockPos(0, block_y, 0), color_type, colors, flip_xy);
+	// old method, can be removed once not referenced anymore
+	return 0;
 }
 
 /**
  * Calculates the color of the biome with a biome color image.
  */
-uint32_t Biome::getColor(const mc::BlockPos& pos, const ColorMapType& color_type, const RGBAImage& colors, bool flip_xy) const {
+uint32_t Biome::getColor(const mc::BlockPos& pos, const ColorMapType& color_type,
+		const ColorMap& color_map) const {
+	// handle special cases first
+	// water is hardcoded
 	if (color_type == ColorMapType::WATER) {
 		return water_tint;
 	}
-
-	// Swamp grass colors are a special case
-	if ((id == 6 || id == 134) && color_type == ColorMapType::GRASS) {
-		double v = SWAMP_GRASS_NOISE.getValue(pos.x * 0.0225, pos.z * 0.0225);
-		return v < -0.1 ? rgba(0x4C, 0x76, 0x3C) : rgba(0x6A, 0x70, 0x39);
-	}
-
-	float elevation = std::max(pos.y - 64, 0);
-	// x is temperature
-	double tmp_temperature = std::min(1.0, std::max(0.0, temperature - elevation*0.00166667f));
-	// y is temperature * rainfall
-	double tmp_rainfall = std::min(1.0, std::max(0.0, rainfall)) * tmp_temperature;
-
-	// calculate positions
-	int x = 255 - (255 * tmp_temperature);
-	int y = 255 - (255 * tmp_rainfall);
-
-	// flip them, if needed
-	if (flip_xy) {
-		int tmp = x;
-		x = 255 - y;
-		y = 255 - tmp;
-	}
-
-	// get color at this position
-	uint32_t color = colors.getPixel(x, y);
+	// bandland grass colors
 	if (id >= 165 && id <= 167) {
 		if (color_type == ColorMapType::GRASS) {
 			return rgba(0x90, 0x91, 0x4d, 0xff);
@@ -128,6 +107,19 @@ uint32_t Biome::getColor(const mc::BlockPos& pos, const ColorMapType& color_type
 			return rgba(0x9e, 0x81, 0x4d, 0xff);
 		}
 	}
+	// swamp grass colors
+	if ((id == 6 || id == 134) && color_type == ColorMapType::GRASS) {
+		double v = SWAMP_GRASS_NOISE.getValue(pos.x * 0.0225, pos.z * 0.0225);
+		return v < -0.1 ? rgba(0x4C, 0x76, 0x3C) : rgba(0x6A, 0x70, 0x39);
+	}
+
+	float elevation = std::max(pos.y - 64, 0);
+	// x is temperature
+	float x = std::min(1.0, std::max(0.0, temperature - elevation*0.00166667f));
+	// y is temperature * rainfall
+	float y = std::min(1.0, std::max(0.0, rainfall)) * x;
+
+	uint32_t color = color_map.getColor(x, y);
 	color = rgba_multiply(color, green_tint);
 	return color;
 }

@@ -213,9 +213,6 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 			tile_image.z_index = z_index;
 
 			if (block_image.is_biome) {
-				//Biome biome = getBiomeOfBlock(top, current_chunk);
-				//block_images->prepareBiomeBlockImage(top.y, tile_image.image, block_image, biome);
-				
 				block_images->prepareBiomeBlockImage(tile_image.image, block_image, getBiomeColor(top, block_image, current_chunk));
 			}
 
@@ -326,7 +323,7 @@ uint32_t TileRenderer::getBiomeColor(const mc::BlockPos& pos, const BlockImage& 
 				biome_id = chunk->getBiomeAt(local);
 			}
 			Biome biome = getBiome(biome_id);
-			uint32_t c = biome.getColor(other, block.biome_color, block_images->getColorMap(block.biome_color), false);
+			uint32_t c = biome.getColor(other, block.biome_color, block.biome_colormap);
 			r += (float) rgba_red(c);
 			g += (float) rgba_green(c);
 			b += (float) rgba_blue(c);
