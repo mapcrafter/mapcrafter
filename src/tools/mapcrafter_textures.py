@@ -142,12 +142,12 @@ if __name__ == "__main__":
 	else:
 		for filename in glob.glob(os.path.join(args["outdir"], "blocks", "hardened_clay*.png")):
 			if os.path.exists(filename):
-				subprocess.check_call(["convert", filename, filename])
+				subprocess.check_call(["convert", "-strip", filename, filename])
 		
 		filename = os.path.join(args["outdir"], "blocks", "red_sand.png")
 		if os.path.exists(filename):
-			subprocess.check_call(["convert", filename, filename])
+			subprocess.check_call(["convert", "-strip", filename, filename])
 		
 		filename = os.path.join(args["outdir"], "blocks", "glass_pane_top_white.png")
 		if os.path.exists(filename):
-			subprocess.check_call(["convert", filename, "-type", "TrueColorMatte", "-define", "png:color-type=6", filename])
+			subprocess.check_call(["convert", "-strip", filename, "-type", "TrueColorMatte", "-define", "png:color-type=6", filename])
