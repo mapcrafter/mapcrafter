@@ -607,6 +607,8 @@ struct BlockImage {
 	bool has_water_top;
 	uint16_t non_waterlogged_id;
 
+	bool is_lily_pad;
+
 	bool lighting_specified;
 	LightingType lighting_type;
 	bool has_faulty_lighting;

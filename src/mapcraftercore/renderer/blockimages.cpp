@@ -1200,6 +1200,9 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 				|| block_state.getProperty("was_waterlogged") == "true";
 			block.has_water_top = block_state.getProperty("waterlogged", "true") == "true"
 				&& block_state.getProperty("was_waterlogged") != "true";
+			if (block.has_water_top) {
+				block_info["shadow_edges"] = "1";
+			}
 
 			mc::BlockState non_waterlogged = block_state;
 			non_waterlogged.setProperty("waterlogged", "false");
@@ -1210,6 +1213,7 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 			block.is_waterlogged = false;
 			block.has_water_top = false;
 		}
+		block.is_lily_pad = block_name == "minecraft:lily_pad";
 		if (block_info.count("lighting_type")) {
 			block.lighting_specified = true;
 			block.lighting_type = util::as<LightingType>(block_info["lighting_type"]);

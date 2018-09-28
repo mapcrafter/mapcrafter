@@ -105,6 +105,8 @@ protected:
 	// full water blocks will be replaced by these water blocks
 	std::vector<uint16_t> partial_full_water_ids, partial_ice_ids;
 
+	std::vector<uint16_t> lily_pad_ids;
+
 	uint16_t waterlog_id;
 };
 
