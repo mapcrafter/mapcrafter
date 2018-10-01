@@ -365,6 +365,7 @@ with the next two options:
       * Jungle wood and jungle leaves have id 17 and 18 and use data value 3 for first two bits (bitmask 3 = 0b11)
       * other bits are used otherwise -> ignore all those bits
 
+-----
 
 Map Options
 -----------
@@ -372,24 +373,34 @@ Map Options
 .. note::
 
     These options are for the maps. You can specify them in the map sections
-    (the ones starting with map:) or you can specify them in the global:map
-    section.  If you specify them in the global section, these options are
-    default values and inherited into the map sections if you do not overwrite
+    (the ones starting with ``map:``) or you can specify them in the ``global:map``
+    section.  If you specify them in the global section, these options become
+    default values and are inherited into the map sections if you do not overwrite
     them.
 
-``name = <name>``
+**Name:** ``name = <name>``
 
     **Default:** ``<name of the section>``
 
-    This is the name for the rendered map. You will see this name in the output
-    file, so you should use here an human-readable name. The belonging
-    configuration section to this map has also a name (in square brackets).
-    Since the name of the section is used for internal representation, the name
-    of the section should be unique and you should only use alphanumeric chars.
+    .. image:: img/map_name.png
+	     :align: center
 
-``render_view = isometric|topdown``
+    This is the name for the rendered map. You will see this name in the dropdown 
+    list of maps, so you should use a human-readable name (spaces, numbers, symbols, 
+    even unicode are all OK). 
+    
+    The configuration section for this map has also a name (in square brackets).
+    This section name is used for internal representation, command line arguments, 
+    and on-disk directory names, so the section name should be unique and only use
+    alphanumeric chars and underscore (definitely no spaces).
+
+
+**Render View:** ``render_view = isometric|topdown|side``
 
     **Default:** ``isometric``
+
+    .. image:: img/map_render_view.png
+	     :align: center
 
     This is the view that your world is rendered from. You can choose from
     different render views:
@@ -399,10 +410,19 @@ Map Options
       south-east (depending on the rotation of the world).
     ``topdown``
       A simple 2D top view.
+    ``side``
+      A 2.5D view similar to ``topdown``, but tilted.
 
-``render_mode = plain|daylight|nightlight|cave``
+
+**Render Mode:** ``render_mode = plain|daylight|nightlight|cave|cavelight``
 	
     **Default:** ``daylight``
+
+    .. image:: img/map_render_mode.png
+	     :align: center
+
+    .. image:: img/map_render_mode_cave.png
+	     :align: center
 
     This is the render mode to use when rendering the world. Possible
     render modes are:
@@ -410,12 +430,14 @@ Map Options
     ``plain``
         Plain render mode without lighting or other special magic.
     ``daylight``
-        Renders the world with lighting.
+        Renders the world with lighting. This looks better, but takes longer to render.
     ``nightlight``
-        Like ``daylight``, but renders at night.
+        Like ``daylight``, but renders at night. Hope your world has lots of torches!
     ``cave``
         Renders only caves and colors blocks depending on their height 
-        to make them easier to recognize.
+        to make them easier to recognize. You can see underground!
+    ``cavelight``
+        A combination of ``cave`` and ``daylight``.
 
 .. note::
 
@@ -423,9 +445,12 @@ Map Options
     Therefore you can still use it in old configuration files, but Mapcrafter
     will show a warning.
 
-``overlay = slime|spawnday|spawnnight``
+**Overlay:** ``overlay = slime|spawnday|spawnnight``
 
     **Default:** ``none``
+
+    .. image:: img/map_overlay.png
+	     :align: center
 
     Additionally to a render mode, you can specify an overlay. An overlay is a
     special render mode that is rendered on top of your map and the selected
@@ -435,11 +460,14 @@ Map Options
     ``none``
       Empty overlay.
     ``slime``
-      Highlights the chunks where slimes can spawn.
+      Highlights the chunks where slimes can spawn. Note that slimes only spawn
+      in swamps, but the overlay doesn't take that into account.
     ``spawnday``
-      Shows where monsters can spawn at day.
+      Shows where monsters can spawn at day. You'll need to find dark caves
+      to see this overlay (or use ``render_mode = cave``).
     ``spawnnight``
-      Shows where monsters can spawn at night.
+      Shows where monsters can spawn at night. This covers most of the map,
+      except for areas with torches or other light sources.
 
     At the moment there is only one overlay per map section allowed because the overlay
     is rendered just like a render mode on top of the world. If you want to render
@@ -447,9 +475,12 @@ Map Options
     future Mapcrafter versions so you will be able to dynamically switch multiple
     overlays on and off in the web interface.
 
-``rotations = [top-left] [top-right] [bottom-right] [bottom-left]``
+**Rotations** ``rotations = [top-left] [top-right] [bottom-right] [bottom-left]``
 
     **Default:** ``top-left``
+
+    .. image:: img/map_rotations.png
+	     :align: center
 
     This is a list of directions to render the world from. You can rotate the
     world by n*90 degrees. Later in the output file you can interactively
@@ -459,85 +490,76 @@ Map Options
     Top left means that north is on the top left side on the map (same thing
     for other directions).
 
-``texture_dir = <directory>``
-
-    **Default:** default texture directory (see :ref:`resources_textures`)
-
-    This is the directory with the Minecraft Texture files.  The renderer works
-    with the Minecraft 1.6 resource pack file format. You need here: 
-
-    * directory ``chest/`` with normal.png, normal_double.png and ender.png 
-    * directory ``colormap/`` with foliage.png and grass.png 
-    * directory ``blocks/`` from your texture pack
-    * endportal.png
-
-    See also :ref:`resources_textures` to see how to get these files.
-
-``texture_size = <number>``
+**Texture Size** ``texture_size = 16|12``
 
     **Default:** ``12``
 
-    This is the size (in pixels) of the block textures. The default texture
-    size is 12px (16px is the size of the default Minecraft Textures).
+    This is the size (in pixels) of the block textures. The default Minecraft
+    textures are 16px, which gives this highest level of detail.
 
     The size of a tile is ``32 * texture_size``, so the higher the texture
-    size, the more image data the renderer has to process. If you want a high
-    detail, use texture size 16, but texture size 12 looks still good and is
-    faster to render.
+    size, the more image data the renderer has to process and the more disk-space 
+    is required. If you want a high detail, use texture size 16, but texture 
+    size 12 looks still good and is faster to render.
 
-``texture_blur = <number>``
+    Mapcrafter's pre-rendered textures include sizes 16 and 12. If you want to 
+    use other sizes, you will need to generate them using 
+    `blockcrafter <https://github.com/mapcrafter/blockcrafter>`_.
 
-    **Default:** ``0``
-
-    You can apply a simple blur filter with a radius of ``<number>`` pixels to
-    the texture images. This might be useful if you are using a very low texture
-    size because areas with their blocks sometimes look a bit "tiled".
-
-``water_opacity = <number>``
-
-    **Default:** ``1.0``
-
-    With a factor from 0.0 to 1.0 you can modify the opacity of the used water texture
-    before your map is rendered. 0 means that it is completely transparent and 1 means
-    that the original opacity of the texture is kept. Also have a look at the
-    ``lighting_water_intensity`` option.
-
-.. note::
-
-    Don't actually set the water opacity to 0.0, that's a bad idea regarding performance.
-    If you don't want to render water, have a look at the ``block_mask`` option.
-
-``tile_width = <number>``
+**Tile Width** ``tile_width = <number>``
 
     **Default:** ``1``
 
-    This is a factor that is applied to the tile size. Every (square) tile is
-    usually one chunk wide, but you can increase that size. The wider a tile
-    is, the more blocks it contains and the longer it takes to render a tile,
-    but the less tiles are to render overall and the less overhead there is
-    when writing the tile images. Use this if your texture size is small and
-    you want to prevent that a lot of very small tiles are rendered.
+    This lets you reduce the number of tiles / files Mapcrafter saves by merging 
+    them together. Individual tiles will take longer to render, but fewer files 
+    will be written to disk.
 
-``image_format = png|jpeg``
+    This is a factor that is applied to the tile size. Every (square) tile is 
+    usually one chunk wide (1:1). That is, one image at highest zoom generated 
+    by Mapcrafter corresponds to one anvil chunk (or 16x16 Minecraft blocks). 
+    If you set ``tile_width = 2`` one mapcrafter tile will correspond to 2x2 
+    anvil chunks (32x32 blocks), which is a 1:2 factor. The largest recommended
+    factor is **16** (see note below about RAM usage), and the sweet spot is 
+    between 2 and 6.
+    
+    This will merge very small files if your ``texture_size`` is small. And can 
+    increase performance rendering to spinning disks (because a smaller 
+    number of larger files will be written) and Windows systems (which don't 
+    cope as well with large numbers of very small files). But, each change in
+    your Minecraft world will cause a larger area to be re-rendered.
+
+.. note::
+
+    A larger ``tile_width`` requires exponentially more RAM during rendering and 
+    viewing, as more tiles and chunks are kept in memory and browsers need to work
+    with very large images. ``tile_width = 16`` uses ~3GB RAM per thread and 
+    generates 6144x6144 tiles (~10MB PNGs).
+
+.. note::
+
+    If you change a map's ``tile_width``, you need to delete existing files
+    for your map so that smaller tiles are removed.
+    
+
+**Image Format** ``image_format = png|jpeg``
 
     **Default:** ``png``
     
     This is the image format the renderer uses for the tile images.
-    You can render your maps to PNGs or to JPEGs. PNGs are losless, 
+    You can render your maps to PNGs or to JPEGs. PNGs are lossless, 
     JPEGs are faster to write and need less disk space. Also consider
     the ``png_indexed`` and ``jpeg_quality`` options.
 
-``png_indexed = true|false``
+**PNG Indexed** ``png_indexed = true|false``
 
     **Default:** ``false``
 
     With this option you can make the renderer write indexed PNGs. Indexed PNGs
-    are using a color table with 256 colors (which is usually enough for this
-    kind of images) instead of writing the RGBA values for every pixel. Like
-    using JPEGs, this is another way of drastically reducing the needed disk
-    space of the rendered images.
+    use a color table with 256 colors instead of writing the RGBA values for 
+    every pixel. 256 colors is usually enough for Mapcrafter's images, and 
+    requires ~¼ of the disk-space.
 
-``jpeg_quality = <number between 0 and 100>``
+**JPEG Quality** ``jpeg_quality = <number between 0 and 100>``
 
     **Default:** ``85``
     
@@ -565,21 +587,16 @@ Map Options
     option. You might have to play around with this to find a configuration that you like.
     For me ``water_opacity=0.75`` and ``lighting_water_intensity=0.6`` didn't look bad.
 
-``render_unknown_blocks = true|false``
+**Render Unknown Blocks** ``render_unknown_blocks = true|false``
 
     **Default:** ``false``
 
-    With this option the renderer renders unknown blocks as red blocks (for
-    debugging purposes).
+    If ``true``, this option renders unknown blocks as red blocks (for debugging 
+    purposes). Otherwise, unknown blocks are not rendered.
 
-``render_leaves_transparent = true|false``
+    Since the Minecraft 1.13 overhaul of Mapcrafter, it is extremely rare for unknown
+    blocks to be encountered.
 
-    **Default:** ``true``
-
-    You can specifiy this to use the transparent leaf textures instead of the
-    opaque textures. Using transparent leaf textures can make the renderer a
-    bit slower because the renderer also has to scan the blocks after the
-    leaves to the ground.
 
 ``render_biomes = true|false``
 
@@ -588,27 +605,39 @@ Map Options
     This setting makes the renderer to use the original biome colors for blocks
     like grass and leaves. 
 
-..
-    At the moment the renderer does not use the biome colors for water because
-    the renderer preblits the water blocks (which is a great performance
-    improvement) and it is not very easy to preblit all biome color variants.
-    And also, there is not a big difference with different water colors.
 
-``use_image_mtimes = true|false``
+**Use Image Mtimes** ``use_image_mtimes = true|false``
 
     **Default:** ``true``
 
-    This setting specifies the way the renderer should check if tiles 
-    are required when rendering incremental. Different behaviors are:
+    This setting specifies the way the renderer should check if re-rendering 
+    tiles is required. This only applies when re-rendering an existing map.
+    Different behaviors are:
 
     Use the tile image modification times (``true``):
         The renderer checks the modification times of the already rendered 
-        tile images.  All tiles whoose chunk timestamps are newer than
-        this modification time are required.
+        tile images. Any tiles with chunk timestamps newer than
+        this modification time are re-rendered.
     Use the time of the last rendering (``false``):
         The renderer saves the time of the last rendering.  All tiles
-        whoose chunk timestamps are newer than this last-render-time are
-        required.
+        with chunk timestamps newer than this last-render-time are
+        re-rendered.
+
+    You can force re-rendering all tiles using the ``-f`` command line option.
+
+.. note::
+
+    **Obsolete Options**
+
+    Several options were removed in the Minecraft 1.13 overhaul in Mapcrafter 
+    vNext. Some of these have been moved into the `blockcrafter <https://github.com/mapcrafter/blockcrafter>`_
+    project.
+
+    Options moved to blockcrafter: ``texture_dir``, ``texture_blur``, 
+    ``water_opacity``, ``render_leaves_transparent``.
+
+
+-----
 
 .. _config_marker_options:
 
