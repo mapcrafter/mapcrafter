@@ -317,7 +317,7 @@ uint32_t ColorMap::getColor(float x, float y) const {
 	// colors are colors of the colormap triangle points
 	float factors[] = {
 		x - y,
-		1.0 - x,
+		1.0f - x,
 		y
 	};
 
