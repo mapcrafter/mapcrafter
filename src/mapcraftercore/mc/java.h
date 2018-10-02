@@ -58,8 +58,9 @@ protected:
 	static const int GRADIENTS[12][3];
 	static const int PERMUTATIONS[512];
 	
-	static constexpr double F2 = 0.5 * (sqrt(3) - 1.0);
-	static constexpr double G2 = (3.0 - sqrt(3)) / 6.0;
+	static constexpr double sqrt3 = 1.7320508075688772;
+	static constexpr double F2 = 0.5 * (sqrt3 - 1.0);
+	static constexpr double G2 = 3.0 - sqrt3 / 6.0;
 };
 
 }
