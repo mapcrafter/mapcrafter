@@ -158,32 +158,39 @@ General Options
 
 .. note::
 
-    These options are relevant for all worlds and maps, so you have to put them
+    These options are relevant for all worlds and maps, so you must put them
     in the header before the first section starts
 
-``output_dir = <directory>``
+**Output Dir:** ``output_dir = <directory>``
 
     **Required**
 
-    This is the directory where Mapcrafter saves the rendered map. Every time
-    you render your map the renderer copies the template files into this
-    directory and overwrites them, if they already exist. The renderer creates
-    an ``index.html`` file you can open with your webbrowser. If you want to
-    customize this HTML-File, you should do this directly in the template (see
-    ``template_dir``) because this file is overwritten every time you render
-    the map.
+    This is the directory where Mapcrafter saves your rendered map(s). Every time
+    you run Mapcrafter, the renderer copies the template files from ``template_dir``
+    into this directory and overwrites them, if they already exist. The renderer 
+    creates an ``index.html`` file you can open with your web-browser. If you want
+    to customize this HTML file, you should do this directly in the ``template_dir``
+    because this file is overwritten every time you render the map.
 
-``template_dir = <directory>``
+**Template Dir:** ``template_dir = <directory>``
 
     **Default:** default template directory (see :ref:`resources_textures`)
 
     This is the directory with the web template files. The renderer copies all
-    files, which are in this directory, to the output directory and replaces
-    the variables in the ``index.html`` file. The ``index.html`` file is also
-    the file in the output directory you can open with your webbrowser after
-    the rendering.
+    files from this directory to the output directory. It also replaces the
+    variables in the ``index.html`` file (see below). You should open the the
+    ``index.html`` file the output directory with your web-browser to see your
+    rendered map!
 
-``background_color = <hex color>``
+    =====================  ==================================================  ====================
+    Variable               Description                                         Example
+    =====================  ==================================================  ====================
+    ``{version}``          Mapcrafter version                                  2.4
+    ``{lastUpdate}``       Datestamp of last update. See ``use_image_mtimes``  01.10.2018, 21:12:44
+    ``{backgroundColor}``  Hex background colour. See ``background_color``     #D0D0D0
+    =====================  ==================================================  ====================
+
+**Background Color:** ``background_color = <hex color>``
 
     **Default:** ``#DDDDDD``
 
