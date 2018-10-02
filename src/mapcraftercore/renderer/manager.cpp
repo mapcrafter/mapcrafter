@@ -308,14 +308,6 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 
 	// create block images
 	TextureResources resources;
-	// if textures do not work, it does not make much sense
-	// to try the other rotations with the same broken textures
-	if (!resources.loadTextures(map_config.getTextureDir().string(),
-			map_config.getTextureSize(), map_config.getTextureBlur(),
-			map_config.getWaterOpacity())) {
-		LOG(ERROR) << "Skipping remaining rotations.";
-		return;
-	}
 
 	// create other stuff for the render dispatcher
 	std::shared_ptr<BlockImages> block_images(render_view->createBlockImages(block_registry));

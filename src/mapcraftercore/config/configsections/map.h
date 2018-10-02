@@ -101,7 +101,6 @@ public:
 	renderer::RenderModeType getRenderMode() const;
 	renderer::OverlayType getOverlay() const;
 	std::set<int> getRotations() const;
-	fs::path getTextureDir() const;
 	fs::path getBlockDir() const;
 	int getTextureSize() const;
 	int getTextureBlur() const;
@@ -144,7 +143,6 @@ private:
 	Field<std::string> rotations;
 	std::set<int> rotations_set;
 
-	Field<fs::path> texture_dir;
 	Field<fs::path> block_dir;
 	Field<int> texture_size, texture_blur, tile_width;
 	Field<double> water_opacity;

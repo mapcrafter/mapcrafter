@@ -35,6 +35,7 @@ namespace renderer {
 
 class RGBAImage;
 enum class ColorMapType;
+class ColorMap;
 
 static const uint32_t one = rgba(0xff, 0xff, 0xff, 0xff);
 static const uint32_t default_water = rgba(0x30, 0x59, 0xad, 0xff);
@@ -66,7 +67,8 @@ public:
 
 	uint16_t getID() const;
 	uint32_t getColor(int block_y, const ColorMapType& color_type, const RGBAImage& colors, bool flip_xy = false) const;
-	uint32_t getColor(const mc::BlockPos& pos, const ColorMapType& color_type, const RGBAImage& colors, bool flip_xy = false) const;
+	uint32_t getColor(const mc::BlockPos& pos, const ColorMapType& color_type,
+		const ColorMap& color_map) const;
 
 	static bool isBiomeBlock(uint16_t id, uint16_t data);
 };

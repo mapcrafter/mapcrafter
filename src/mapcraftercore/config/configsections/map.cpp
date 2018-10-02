@@ -154,7 +154,6 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  render_mode = " << render_mode << std::endl;
 	out << "  overlay = " << overlay << std::endl;
 	out << "  rotations = " << rotations << std::endl;
-	out << "  texture_dir = " << texture_dir << std::endl;
 	out << "  block_dir = " << block_dir << std::endl;
 	out << "  texture_size = " << texture_size << std::endl;
 	out << "  water_opacity = " << water_opacity << std::endl;
@@ -199,10 +198,6 @@ renderer::OverlayType MapSection::getOverlay() const {
 
 std::set<int> MapSection::getRotations() const {
 	return rotations_set;
-}
-
-fs::path MapSection::getTextureDir() const {
-	return texture_dir.getValue();
 }
 
 fs::path MapSection::getBlockDir() const {
@@ -289,11 +284,6 @@ void MapSection::preParse(const INIConfigSection& section,
 	render_mode.setDefault(renderer::RenderModeType::DAYLIGHT);
 	overlay.setDefault(renderer::OverlayType::NONE);
 	rotations.setDefault("top-left");
-
-	// check if we can find a default texture directory
-	fs::path texture_dir_found = util::findTextureDir();
-	if (!texture_dir_found.empty())
-		texture_dir.setDefault(texture_dir_found);
 	
 	fs::path block_dir_found = util::findBlockDir();
 	if (!block_dir_found.empty()) {
@@ -339,13 +329,6 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		overlay.load(key, value, validation);
 	} else if (key == "rotations") {
 		rotations.load(key, value ,validation);
-	} else if (key == "texture_dir") {
-		if (texture_dir.load(key, value, validation)) {
-			texture_dir.setValue(BOOST_FS_ABSOLUTE(texture_dir.getValue(), config_dir));
-			if (!fs::is_directory(texture_dir.getValue()))
-				validation.error("'texture_dir' must be an existing directory! '"
-						+ texture_dir.getValue().string() + "' does not exist!");
-		}
 	} else if (key == "block_dir") {
 		if (block_dir.load(key, value, validation)) {
 			block_dir.setValue(BOOST_FS_ABSOLUTE(block_dir.getValue(), config_dir));
@@ -415,7 +398,7 @@ void MapSection::postParse(const INIConfigSection& section,
 	// check if required options were specified
 	if (!isGlobal()) {
 		world.require(validation, "You have to specify a world ('world')!");
-		texture_dir.require(validation, "You have to specify a texture directory ('texture_dir')!");
+		block_dir.require(validation, "You have to specify a block directory ('block_dir')!");
 	}
 }
 

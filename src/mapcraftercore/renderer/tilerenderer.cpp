@@ -64,6 +64,12 @@ TileRenderer::TileRenderer(const RenderView* render_view, mc::BlockStateRegistry
 		partial_full_water_ids.push_back(block_registry.getBlockID(block));
 	}
 
+	for (uint16_t i = 0; i < 4; i++) {
+		mc::BlockState block("minecraft:lily_pad_rotated");
+		block.setProperty("rotation", util::str(i));
+		lily_pad_ids.push_back(block_registry.getBlockID(block));
+	}
+
 	/*
 	for (uint8_t i = 0; i < 64; i++) {
 		bool north = i & 0x1;
@@ -149,7 +155,7 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 		auto is_full_water = [this](uint16_t id) -> bool {
 			return full_water_ids.count(id)
 				|| full_water_like_ids.count(id)
-				|| block_images->getBlockImage(id).is_waterloggable;
+				|| block_images->getBlockImage(id).is_waterlogged;
 		};
 		auto is_ice = [this](uint16_t id) -> bool {
 			return block_images->getBlockImage(id).is_ice;
@@ -170,6 +176,16 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 			}
 			assert(index < 8);
 			id = partial_full_water_ids[index];
+			block_image = &block_images->getBlockImage(id);
+		}
+
+		if (block_image->is_lily_pad) {
+			// TODO this seems to be different than in Minecraft
+			// if anyone wants to fix this, go for it
+			long long pr = ((long long) top.x * 3129871LL) ^ ((long long) top.z * 116129781LL) ^ (long long)(top.y);
+			pr = pr * pr * 42317861LL + pr * 11LL;
+			uint16_t rotation = 3 & (pr >> 16);
+			id = lily_pad_ids[rotation];
 			block_image = &block_images->getBlockImage(id);
 		}
 
@@ -213,9 +229,6 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 			tile_image.z_index = z_index;
 
 			if (block_image.is_biome) {
-				//Biome biome = getBiomeOfBlock(top, current_chunk);
-				//block_images->prepareBiomeBlockImage(top.y, tile_image.image, block_image, biome);
-				
 				block_images->prepareBiomeBlockImage(tile_image.image, block_image, getBiomeColor(top, block_image, current_chunk));
 			}
 
@@ -326,7 +339,7 @@ uint32_t TileRenderer::getBiomeColor(const mc::BlockPos& pos, const BlockImage& 
 				biome_id = chunk->getBiomeAt(local);
 			}
 			Biome biome = getBiome(biome_id);
-			uint32_t c = biome.getColor(other, block.biome_color, block_images->getColorMap(block.biome_color), false);
+			uint32_t c = biome.getColor(other, block.biome_color, block.biome_colormap);
 			r += (float) rgba_red(c);
 			g += (float) rgba_green(c);
 			b += (float) rgba_blue(c);

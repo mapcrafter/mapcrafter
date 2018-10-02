@@ -26,5 +26,4 @@ install(TARGETS mapcrafter_markers DESTINATION bin)
 
 install(FILES logging.conf DESTINATION ../etc/mapcrafter)
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data/template" DESTINATION share/mapcrafter)
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data/textures" DESTINATION share/mapcrafter)
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data/blocks" DESTINATION share/mapcrafter)

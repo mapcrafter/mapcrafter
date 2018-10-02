@@ -189,6 +189,17 @@ enum class ColorMapType {
 	WATER
 };
 
+struct ColorMap {
+	ColorMap()
+		: colors({0, 0, 0}) {}
+
+	bool parse(const std::string& str);
+	uint32_t getColor(float x, float y) const;
+
+	// colors of colormap triangle points
+	std::array<uint32_t, 3> colors;
+};
+
 /**
  * This class is responsible for loading the required texture files from a texture dir.
  */
@@ -588,12 +599,15 @@ struct BlockImage {
 	bool is_biome;
 	bool is_masked_biome;
 	ColorMapType biome_color;
+	ColorMap biome_colormap;
 	RGBAImage biome_mask;
 
 	bool is_waterloggable;
 	bool is_waterlogged;
 	bool has_water_top;
 	uint16_t non_waterlogged_id;
+
+	bool is_lily_pad;
 
 	bool lighting_specified;
 	LightingType lighting_type;
@@ -628,7 +642,6 @@ public:
 	virtual RGBAImage exportBlocks() const;
 
 	const BlockImage& getBlockImage(uint16_t id) const;
-	void prepareBiomeBlockImage(const mc::BlockPos& pos, RGBAImage& image, const BlockImage& block, const Biome& biome);
 	void prepareBiomeBlockImage(RGBAImage& image, const BlockImage& block, uint32_t color);
 
 	virtual int getTextureSize() const;

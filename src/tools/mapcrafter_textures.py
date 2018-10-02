@@ -9,7 +9,7 @@ import sys
 import zipfile
 
 #dirs = ("", "entity", "entity/chest", "colormap", "blocks", "entity/shulker", "entity/bed")
-dirs = ("", "colormap",)
+dirs = ("", "colormap", "blocks")
 assets = "assets/minecraft/textures/"
 files = [
 	#("entity/chest/normal.png", assets + "entity/chest/normal.png"),
