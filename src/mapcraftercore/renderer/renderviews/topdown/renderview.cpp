@@ -19,10 +19,8 @@
 
 #include "renderview.h"
 
-#include "blockimages.h"
 #include "tileset.h"
 #include "tilerenderer.h"
-#include "rendermodes.h"
 #include "../../rendermode.h"
 #include "../../rendermodes/overlay.h"
 #include "../../../mc/blockstate.h"
@@ -41,15 +39,6 @@ TileSet* TopdownRenderView::createTileSet(int tile_width) const {
 TileRenderer* TopdownRenderView::createTileRenderer(mc::BlockStateRegistry& block_registry,
 		BlockImages* images, int tile_width, mc::WorldCache* world, RenderMode* render_mode) const {
 	return new TopdownTileRenderer(this, block_registry, images, tile_width, world, render_mode);
-}
-
-RenderModeRenderer* TopdownRenderView::createRenderModeRenderer(
-		const RenderModeRendererType& renderer) const {
-	if (renderer == RenderModeRendererType::LIGHTING)
-		return new TopdownLightingRenderer();
-	else if (renderer == RenderModeRendererType::OVERLAY)
-		return new TopdownOverlayRenderer();
-	return nullptr;
 }
 
 void TopdownRenderView::configureBlockImages(BlockImages* images,

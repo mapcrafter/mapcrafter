@@ -1,7 +1,5 @@
 set(SOURCE
     ${SOURCE}
-    "${CMAKE_CURRENT_SOURCE_DIR}/blockimages.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/rendermodes.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/renderview.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/tilerenderer.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/tileset.cpp"
@@ -9,8 +7,6 @@ set(SOURCE
 )
 set(HEADERS
     ${HEADERS}
-    "${CMAKE_CURRENT_SOURCE_DIR}/blockimages.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/rendermodes.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/renderview.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/tilerenderer.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/tileset.h"

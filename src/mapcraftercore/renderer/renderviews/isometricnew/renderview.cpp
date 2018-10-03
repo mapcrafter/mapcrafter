@@ -19,10 +19,8 @@
 
 #include "renderview.h"
 
-//#include "../isometric/blockimages.h"
 #include "tileset.h"
 #include "tilerenderer.h"
-#include "rendermodes.h"
 #include "../../rendermode.h"
 #include "../../blockimages.h"
 #include "../../../config/configsections/map.h"
@@ -46,15 +44,6 @@ TileSet* NewIsometricRenderView::createTileSet(int tile_width) const {
 TileRenderer* NewIsometricRenderView::createTileRenderer(mc::BlockStateRegistry& block_registry,
 		BlockImages* images, int tile_width, mc::WorldCache* world, RenderMode* render_mode) const {
 	return new NewIsometricTileRenderer(this, block_registry, images, tile_width, world, render_mode);
-}
-
-RenderModeRenderer* NewIsometricRenderView::createRenderModeRenderer(
-		const RenderModeRendererType& renderer) const {
-	if (renderer == RenderModeRendererType::LIGHTING)
-		return new NewIsometricLightingRenderer();
-	else if (renderer == RenderModeRendererType::OVERLAY)
-		return new NewIsometricOverlayRenderer();
-	return nullptr;
 }
 
 void NewIsometricRenderView::configureBlockImages(BlockImages* block_images,

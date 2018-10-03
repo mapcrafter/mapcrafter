@@ -38,55 +38,11 @@ Biome::Biome(uint16_t id, double temperature, double rainfall, uint32_t green_ti
 	  green_tint(green_tint), water_tint(water_tint) {
 }
 
-Biome& Biome::operator+=(const Biome& other) {
-	rainfall += other.rainfall;
-	temperature += other.temperature;
-
-	/*
-	extra_r += other.extra_r;
-	extra_g += other.extra_g;
-	extra_b += other.extra_b;
-	*/
-
-	return *this;
-}
-
-/**
- * Used to calculate average biome data, to create smooth biome edges.
- */
-Biome& Biome::operator/=(int n) {
-	rainfall /= n;
-	temperature /= n;
-
-	/*
-	extra_r /= n;
-	extra_g /= n;
-	extra_b /= n;
-	*/
-
-	return *this;
-}
-
-/**
- * Checks if two biomes are equal.
- */
-bool Biome::operator==(const Biome& other) const {
-	double epsilon = 0.1;
-	return std::abs(other.rainfall - rainfall) <= epsilon
-			&& std::abs(other.temperature - temperature) <= epsilon;
-//			&& extra_r == other.extra_r && extra_g == other.extra_g && extra_b == other.extra_b;
-}
-
 /**
  * Returns the biome ID.
  */
 uint16_t Biome::getID() const {
 	return id;
-}
-
-uint32_t Biome::getColor(int block_y, const ColorMapType& color_type, const RGBAImage& colors, bool flip_xy) const {
-	// old method, can be removed once not referenced anymore
-	return 0;
 }
 
 /**
@@ -122,17 +78,6 @@ uint32_t Biome::getColor(const mc::BlockPos& pos, const ColorMapType& color_type
 	uint32_t color = color_map.getColor(x, y);
 	color = rgba_multiply(color, green_tint);
 	return color;
-}
-
-bool Biome::isBiomeBlock(uint16_t id, uint16_t data) {
-	return id == 2 // grass block
-		|| id == 18 || id == 161 // leaves
-		|| id == 31 // grass
-		|| id == 106 // vines
-		|| id == 111 // lily pad
-		|| (id == 175 && ((data & util::binary<11>::value) == 2 || (data & util::binary<11>::value) == 3));
-
-	return false;
 }
 
 // array with all possible biomes with IDs 0 ... 255

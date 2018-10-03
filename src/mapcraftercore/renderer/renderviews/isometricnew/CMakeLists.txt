@@ -1,6 +1,5 @@
 set(SOURCE
     ${SOURCE}
-    "${CMAKE_CURRENT_SOURCE_DIR}/rendermodes.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/renderview.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/tilerenderer.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/tileset.cpp"

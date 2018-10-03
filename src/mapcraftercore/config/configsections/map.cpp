@@ -133,8 +133,7 @@ std::ostream& operator<<(std::ostream& out, ImageFormat image_format) {
 }
 
 MapSection::MapSection()
-	: texture_size(12), render_unknown_blocks(false),
-	  render_leaves_transparent(false), render_biomes(false) {
+	: texture_size(12), render_biomes(false) {
 }
 
 MapSection::~MapSection() {
@@ -156,14 +155,11 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  rotations = " << rotations << std::endl;
 	out << "  block_dir = " << block_dir << std::endl;
 	out << "  texture_size = " << texture_size << std::endl;
-	out << "  water_opacity = " << water_opacity << std::endl;
 	out << "  image_format = " << image_format << std::endl;
 	out << "  png_indexed = " << png_indexed << std::endl;
 	out << "  jpeg_quality = " << jpeg_quality << std::endl;
 	out << "  lighting_intensity = " << lighting_intensity << std::endl;
-	out << "  lighting_water_intensity = " << water_opacity << std::endl;
-	out << "  render_unknown_blocks = " << render_unknown_blocks << std::endl;
-	out << "  render_leaves_transparent = " << render_leaves_transparent << std::endl;
+	out << "  lighting_water_intensity = " << lighting_water_intensity << std::endl;
 	out << "  render_biomes = " << render_biomes << std::endl;
 	out << "  use_image_timestamps = " << use_image_mtimes << std::endl;
 }
@@ -208,14 +204,6 @@ int MapSection::getTextureSize() const {
 	return texture_size.getValue();
 }
 
-int MapSection::getTextureBlur() const {
-	return texture_blur.getValue();
-}
-
-double MapSection::getWaterOpacity() const {
-	return water_opacity.getValue();
-}
-
 int MapSection::getTileWidth() const {
 	return tile_width.getValue();
 }
@@ -244,14 +232,6 @@ double MapSection::getLightingIntensity() const {
 
 double MapSection::getLightingWaterIntensity() const {
 	return lighting_water_intensity.getValue();
-}
-
-bool MapSection::renderUnknownBlocks() const {
-	return render_unknown_blocks.getValue();
-}
-
-bool MapSection::renderLeavesTransparent() const {
-	return render_leaves_transparent.getValue();
 }
 
 bool MapSection::renderBiomes() const {
@@ -291,8 +271,6 @@ void MapSection::preParse(const INIConfigSection& section,
 	}
 
 	texture_size.setDefault(12);
-	texture_blur.setDefault(0);
-	water_opacity.setDefault(1.0);
 	tile_width.setDefault(1);
 
 	image_format.setDefault(ImageFormat::PNG);
@@ -301,8 +279,6 @@ void MapSection::preParse(const INIConfigSection& section,
 
 	lighting_intensity.setDefault(1.0);
 	lighting_water_intensity.setDefault(0.85);
-	render_unknown_blocks.setDefault(false);
-	render_leaves_transparent.setDefault(true);
 	render_biomes.setDefault(true);
 	use_image_mtimes.setDefault(true);
 }
@@ -343,10 +319,6 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		if (texture_size.load(key, value, validation)
 				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 128))
 			validation.error("'texture_size' must be a number between 1 and 32!");
-	} else if (key == "water_opacity") {
-		if (water_opacity.load(key, value, validation)
-				&& (water_opacity.getValue() < 0 || water_opacity.getValue() > 1.0))
-			validation.error("'water_opacity' must be a number between 0.0 and 1.0!");
 	} else if (key == "tile_width") {
 		tile_width.load(key, value, validation);
 		if (tile_width.getValue() < 1)
@@ -363,10 +335,6 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		lighting_intensity.load(key, value, validation);
 	} else if (key == "lighting_water_intensity") {
 		lighting_water_intensity.load(key, value, validation);
-	} else if (key == "render_unknown_blocks") {
-		render_unknown_blocks.load(key, value, validation);
-	} else if (key == "render_leaves_transparent") {
-		render_leaves_transparent.load(key, value, validation);
 	} else if (key == "render_biomes") {
 		render_biomes.load(key, value, validation);
 	} else if (key == "use_image_mtimes") {

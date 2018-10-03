@@ -12,10 +12,6 @@ add_custom_target(gen_texture_code
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-add_executable(mapcrafter_export mapcrafter_export.cpp)
-target_link_libraries(mapcrafter_export mapcraftercore "${Boost_PROGRAM_OPTIONS_LIBRARY}")
-install(TARGETS mapcrafter_export DESTINATION bin)
-
 add_executable(mapcrafter mapcrafter.cpp)
 target_link_libraries(mapcrafter mapcraftercore "${Boost_PROGRAM_OPTIONS_LIBRARY}")
 install(TARGETS mapcrafter DESTINATION bin)

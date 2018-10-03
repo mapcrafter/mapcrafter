@@ -61,16 +61,8 @@ public:
 	Biome(uint16_t id = 0, double temperature = 0, double rainfall = 0,
 			uint32_t green_tint = one, uint32_t water_tint = default_water);
 
-	Biome& operator+=(const Biome& other);
-	Biome& operator/=(int n);
-	bool operator==(const Biome& other) const;
-
 	uint16_t getID() const;
-	uint32_t getColor(int block_y, const ColorMapType& color_type, const RGBAImage& colors, bool flip_xy = false) const;
-	uint32_t getColor(const mc::BlockPos& pos, const ColorMapType& color_type,
-		const ColorMap& color_map) const;
-
-	static bool isBiomeBlock(uint16_t id, uint16_t data);
+	uint32_t getColor(const mc::BlockPos& pos, const ColorMapType& color_type, const ColorMap& color_map) const;
 };
 
 // different Minecraft Biomes

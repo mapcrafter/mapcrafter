@@ -306,14 +306,9 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 		return;
 	}
 
-	// create block images
-	TextureResources resources;
-
 	// create other stuff for the render dispatcher
 	std::shared_ptr<BlockImages> block_images(render_view->createBlockImages(block_registry));
 	render_view->configureBlockImages(block_images.get(), world_config, map_config);
-	block_images->setRotation(rotation);
-	block_images->generateBlocks(resources);
 
 	RenderedBlockImages* new_block_images = dynamic_cast<RenderedBlockImages*>(block_images.get());
 	if (new_block_images != nullptr) {

@@ -78,9 +78,7 @@ protected:
 	virtual void renderTopBlocks(const TilePos& tile_pos, std::set<TileImage>& tile_images) {}
 
 	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
-	Biome getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk);
 	uint32_t getBiomeColor(const mc::BlockPos& pos, const BlockImage& block, const mc::Chunk* chunk);
-	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 	mc::BlockStateRegistry& block_registry;
 

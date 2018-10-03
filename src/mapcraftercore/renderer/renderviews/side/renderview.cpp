@@ -21,7 +21,6 @@
 
 #include "tileset.h"
 #include "tilerenderer.h"
-#include "rendermodes.h"
 #include "../../rendermode.h"
 #include "../../rendermodes/overlay.h"
 #include "../../../mc/blockstate.h"
@@ -40,15 +39,6 @@ TileSet* SideRenderView::createTileSet(int tile_width) const {
 TileRenderer* SideRenderView::createTileRenderer(mc::BlockStateRegistry& block_registry,
 		BlockImages* images, int tile_width, mc::WorldCache* world, RenderMode* render_mode) const {
 	return new SideTileRenderer(this, block_registry, images, tile_width, world, render_mode);
-}
-
-RenderModeRenderer* SideRenderView::createRenderModeRenderer(
-		const RenderModeRendererType& renderer) const {
-	if (renderer == RenderModeRendererType::LIGHTING)
-		return new SideLightingRenderer();
-	else if (renderer == RenderModeRendererType::OVERLAY)
-		return new SideOverlayRenderer();
-	return nullptr;
 }
 
 void SideRenderView::configureBlockImages(BlockImages* images,
