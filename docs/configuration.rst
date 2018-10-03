@@ -17,7 +17,7 @@ Mapcrafter render something (let's call it ``render.conf``):
     # Directory where mapcrafter will save rendered maps
     output_dir = /home/user/myworld_mapcrafter
 
-    # Directory of you Minecraft world
+    # Directory of your Minecraft world
     [world:myworld]
     input_dir = /home/user/.minecraft/worlds/myworld
 
