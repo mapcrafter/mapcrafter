@@ -236,7 +236,6 @@ General Options
 
 -----
 
-
 World Options
 -------------
 
@@ -285,6 +284,11 @@ World Options
     
     You can specify the default center of the map with this option. Just specify a
     position in your Minecraft world you want as center when you open the map.
+    It's best to read positions from a ``render_view = topdown`` or using the ``F3``
+    debug screen within Minecraft, as the isometric maps have an offset of ~64 due 
+    to the map height.
+
+    This is useful if you want to crop your map and focus on the cropped part (see below).
 
     This is useful if you want to crop your map and focus on the cropped part (see below).
 
@@ -442,6 +446,8 @@ extra header line).
     versions, the presence of mods or custom resource packs will change these.
 
 
+
+    TODO: image
 
 ``block_mask = <block mask>``
 
