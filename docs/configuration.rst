@@ -6,20 +6,24 @@ To tell the Mapcrafter which maps to render, simple INI-like configuration
 files are used. With configuration files it is possible to render maps with
 multiple rotations and render modes into one output file. 
 
-A First Example
-===============
+Basic Example
+=============
 
-Here is a simple example of a configuration file (let's call it ``render.conf``):
+Here is the most basic example of a configuration file which will make 
+Mapcrafter render something (let's call it ``render.conf``):
 
 .. code-block:: ini
 
-    output_dir = myworld_mapcrafter
+    # Directory where mapcrafter will save rendered maps
+    output_dir = /home/user/myworld_mapcrafter
 
+    # Directory of you Minecraft world
     [world:myworld]
-    input_dir = worlds/myworld
+    input_dir = /home/user/.minecraft/worlds/myworld
 
+    # One map to render, called "My World"
     [map:myworld_isometric_day]
-    world = myworld
+    world = My World
 
 As you can see the configuration files consist of different types of sections
 (e.g. ``[section]``) and containing assignments of configuration options to
@@ -153,6 +157,9 @@ things you can do:
 Available Options
 =================
 
+This is a reference section for all available options for Mapcrafter.
+
+
 General Options
 ---------------
 
@@ -161,7 +168,7 @@ General Options
     These options are relevant for all worlds and maps, so you must put them
     in the header before the first section starts
 
-**Output Dir:** ``output_dir = <directory>``
+**Output Directory:** ``output_dir = <directory>``
 
     **Required**
 
@@ -172,7 +179,7 @@ General Options
     to customize this HTML file, you should do this directly in the ``template_dir``
     because this file is overwritten every time you render the map.
 
-**Template Dir:** ``template_dir = <directory>``
+**Template Directory:** ``template_dir = <directory>``
 
     **Default:** default template directory (see :ref:`resources_textures`)
 
@@ -202,25 +209,27 @@ General Options
     are not completely used, you have to re-render your maps which use JPEGs
     if you change the background color.
 
+-----
+
 World Options
 -------------
 
 .. note::
 
-    These options are for the worlds. You can specify them in the world
-    sections (the ones starting with world:) or you can specify them in the
-    global:world section.  If you specify them in the global section, these
+    These options are for worlds. You can specify them in the world
+    sections (starting with ``world:``) or you can specify them in the
+    ``global:world`` section.  If you specify them in the global section, these
     options are default values and inherited into the world sections if you do
     not overwrite them.
 
-``input_dir = <directory>``
+**Input Directory:** ``input_dir = <directory>``
 
     **Required**
 
     This is the directory of your Minecraft world. The directory should contain
     a directory ``region/`` with the .mca region files.
 
-``dimension = nether|overworld|end``
+**Dimension:** ``dimension = nether|overworld|end``
 
     **Default**: ``overworld``
     
@@ -232,10 +241,10 @@ World Options
 
 .. note::
 
-    If you want to render The Nether and want to see something, you should use the cave
-    render mode or use the crop_max_y option to remove the top bedrock layers.
+    If you want to render The Nether and want to see something, you should use 
+    ``render_mode = cave`` or the ``crop_max_y`` option to remove the top bedrock layers.
 
-``world_name = <name>``
+**World Name:** ``world_name = <name>``
 
     **Default**: ``<name of the world section>``
     
@@ -243,22 +252,31 @@ World Options
     You don't usually need to specify this manually unless your server uses different
     world names and you want to use the mapcrafter-playermarkers script.
 
-``default_view = <x>,<z>,<y>``
+**Default View:** ``default_view = <x>,<z>,<y>``
 
-    **Default**: Center of the map
+    **Default**: Center of the map (0,0,64)
     
     You can specify the default center of the map with this option. Just specify a
     position in your Minecraft world you want as center when you open the map.
+    It's best to read positions from a ``render_view = topdown`` or using the ``F3``
+    debug screen within Minecraft, as the isometric maps have an offset of ~64 due 
+    to the map height.
 
-``default_zoom = <zoomlevel>``
+    This is useful if you want to crop your map and focus on the cropped part (see below).
+
+**Default Zoom:** ``default_zoom = <zoomlevel>``
 
     **Default**: ``0``
     
     This is the default zoom level shown when you open the map. The default zoom level
     is 0 (completely zoomed out) and the maximum zoom level (completely zoomed in) is the 
-    one Mapcrafter shows when rendering your map.
+    one Mapcrafter shows when rendering your map in your web-browser's address.
 
-``default_rotation = top-left|top-right|bottom-right|bottom-left``
+    .. image:: img/world_zoom_url.png
+       :align: center
+       :alt: The zoom level can be found in your browser address bar.
+
+**Default Rotation:** ``default_rotation = top-left|top-right|bottom-right|bottom-left``
 
     **Default**: First available rotation of the map
     
@@ -266,21 +284,39 @@ World Options
     four available rotations. If a map doesn't have this rotation, the first available
     rotation will be shown. 
 
+Cropping Your World
+~~~~~~~~~~~~~~~~~~~
+
 By using the following options you can crop your world and render only 
-a specific part of it. With these two options you can skip blocks above or
-below a specific level:
+a specific part of it. 
+
+**Vertical Cropping**
+
+With these two options you can skip blocks above or below a specific level:
 
 ``crop_min_y = <number>``
 
     **Default:** -infinity
 
     This is the minimum y-coordinate of blocks Mapcrafter will render.
+    0 is the lowest y-coordinate. In the overworld, bedrock kicks in at 4-8
+    and sealevel is 64.
 
 ``crop_max_y = <number>``
 
     **Default:** infinity
 
     This is the maximum y-coordinate of blocks Mapcrafter will render.
+    256 is the highest y-coordinate. In the overworld, most interesting things 
+    happen below 128. For example, if you specify 32, you will "cut open" your world
+    to see underground structures (see also ``render_mode = cave``).
+
+    .. image:: img/world_crop_level32.png
+       :align: center
+       :alt: A world cropped at level 32 to show underground structures (crop_max_y = 32).
+
+
+**Horizontal Cropping**
 
 Furthermore there are two different types of world cropping:
 
@@ -288,13 +324,17 @@ Furthermore there are two different types of world cropping:
 
   * You can specify limits for the x- and z-coordinates.
     The renderer will render only blocks contained in these boundaries.
-    You can use the following options whereas all options are optional
-    and default to infinite (or -infinite for minimum limits):
+    All are optional and default to infinite (or -infinite for minimum limits):
     
     * ``crop_min_x`` (minimum limit of x-coordinate)
     * ``crop_max_x`` (maximum limit of x-coordinate)
     * ``crop_min_z`` (minimum limit of z-coordinate)
     * ``crop_max_z`` (maximum limit of z-coordinate)
+
+    .. image:: img/world_crop_rectangular.png
+       :align: center
+       :alt: A rectangular cropped world.
+
 
 2. Circular cropping:
 
@@ -305,6 +345,10 @@ Furthermore there are two different types of world cropping:
     * ``crop_center_z`` (**required**, z-coordinate of the center)
     * ``crop_radius`` (**required**, radius of the circle)
 
+    .. image:: img/world_crop_circular.png
+       :align: center
+       :alt: A circular cropped world.
+
 .. note::
 
     The renderer automatically centers circular cropped worlds and rectangular
@@ -314,14 +358,17 @@ Furthermore there are two different types of world cropping:
     
     Changing the center of an already rendered map is complicated and 
     therefore not supported by the renderer. Due to that you should 
-    completely rerender the map when you want to change the boundaries of 
+    completely re-render the map when you want to change the boundaries of 
     a cropped world. This also means that you should delete the already 
-    rendered map (delete <output_dir>/<map_name>).
+    rendered map (delete ``<output_dir>/<map_name>``).
 
-The provided options for world cropping are very versatile as you can see
+
+**Other Cropping Options**
+
+The options for world cropping are very versatile as you can see
 with the next two options:
 
-``crop_unpopulated_chunks = true|false``
+**Crop Unpopulated Chunks:** ``crop_unpopulated_chunks = true|false``
 
     **Default:** ``false``
     
@@ -329,6 +376,8 @@ with the next two options:
     your world, e.g. no trees, ores and other structures, you can skip rendering
     them with this option. If you are afraid someone might use this to find
     rare ores such as Diamond or Emerald, you should not enable this option.
+
+    TODO: image
 
 ``block_mask = <block mask>``
 
@@ -379,7 +428,7 @@ Map Options
 
 .. note::
 
-    These options are for the maps. You can specify them in the map sections
+    These options are for maps. You can specify them in the map sections
     (the ones starting with ``map:``) or you can specify them in the ``global:map``
     section.  If you specify them in the global section, these options become
     default values and are inherited into the map sections if you do not overwrite
@@ -390,7 +439,8 @@ Map Options
     **Default:** ``<name of the section>``
 
     .. image:: img/map_name.png
-	     :align: center
+       :align: center
+       :alt: Your map name appears in the drop down list of maps.
 
     This is the name for the rendered map. You will see this name in the dropdown 
     list of maps, so you should use a human-readable name (spaces, numbers, symbols, 
@@ -407,7 +457,8 @@ Map Options
     **Default:** ``isometric``
 
     .. image:: img/map_render_view.png
-	     :align: center
+       :align: center
+       :alt: Render Views of isometric, topdown and side.
 
     This is the view that your world is rendered from. You can choose from
     different render views:
@@ -426,10 +477,12 @@ Map Options
     **Default:** ``daylight``
 
     .. image:: img/map_render_mode.png
-	     :align: center
+       :align: center
+       :alt: Render Modes of plain, daylight and nightlight, cave and cavelight.
 
     .. image:: img/map_render_mode_cave.png
-	     :align: center
+       :align: center
+       :alt: Render Modes of plain, daylight and nightlight, cave and cavelight.
 
     This is the render mode to use when rendering the world. Possible
     render modes are:
@@ -457,7 +510,8 @@ Map Options
     **Default:** ``none``
 
     .. image:: img/map_overlay.png
-	     :align: center
+       :align: center
+       :alt: Slime, spawnday and spawnnight overlays. Note dark caves in spawnday and torches in spawnnight.
 
     Additionally to a render mode, you can specify an overlay. An overlay is a
     special render mode that is rendered on top of your map and the selected
@@ -487,7 +541,8 @@ Map Options
     **Default:** ``top-left``
 
     .. image:: img/map_rotations.png
-	     :align: center
+       :align: center
+       :alt: 4 different isometric rotations of the same village.
 
     This is a list of directions to render the world from. You can rotate the
     world by n*90 degrees. Later in the output file you can interactively
@@ -529,10 +584,10 @@ Map Options
     factor is **16** (see note below about RAM usage), and the sweet spot is 
     between 2 and 6.
     
-    This will merge very small files if your ``texture_size`` is small. And can 
+    This will merge small files if your ``texture_size`` is small. And can 
     increase performance rendering to spinning disks (because a smaller 
     number of larger files will be written) and Windows systems (which don't 
-    cope as well with large numbers of very small files). But, each change in
+    cope as well with lots of very small files). But, each change in
     your Minecraft world will cause a larger area to be re-rendered.
 
 .. note::
@@ -540,7 +595,7 @@ Map Options
     A larger ``tile_width`` requires exponentially more RAM during rendering and 
     viewing, as more tiles and chunks are kept in memory and browsers need to work
     with very large images. ``tile_width = 16`` uses ~3GB RAM per thread and 
-    generates 6144x6144 tiles (~10MB PNGs).
+    generates 6144x6144 tiles (~10MB PNGs) and has noticeable lag in browser.
 
 .. note::
 
