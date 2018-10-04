@@ -330,8 +330,6 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 			LOG(ERROR) << "Skipping remaining rotations.";
 			return;
 		}
-		new_block_images->exportBlocks().writePNG("blocks.png");
-		//return;
 	}
 
 	RenderContext context;
