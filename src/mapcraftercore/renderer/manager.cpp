@@ -212,6 +212,20 @@ bool RenderManager::scanWorlds() {
 			LOG(FATAL) << "Unable to load world " << tile_set_it->world_name << "!";
 			return false;
 		}
+		int world_version = world.getMinecraftVersion();
+		if (world_version == -1) {
+			LOG(WARNING) << "Unable to determine Minecraft version of world '"
+				<< tile_set_it->world_name << "'. Maybe level.dat doesn't exist in world directory?";
+			LOG(WARNING) << "Note that rendering of pre-1.13 worlds is not supported, "
+				<< "in case Mapcrafter fails to read the world.";
+			LOG(WARNING) << "See Mapcrafter legacy for rendering of older worlds. TODO";
+		} else if (world_version < 1451) {
+			// 1451 is 17w47a, should be first version of flattening and world change affected
+			LOG(ERROR) << "Rendering of world '" << tile_set_it->world_name << "'  is not supported.";
+			LOG(ERROR) << "Mapcrafter supports only worlds of Minecraft 1.13 and newer";
+			LOG(ERROR) << "See Mapcrafter legacy for rendering of older worlds. TODO";
+			return false;
+		}
 
 		// create a tile set for this world
 		std::shared_ptr<TileSet> tile_set(render_view->createTileSet(tile_set_it->tile_width));

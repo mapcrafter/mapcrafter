@@ -160,5 +160,28 @@ bool World::getRegion(const RegionPos& pos, RegionFile& region) const {
 	return true;
 }
 
+int World::getMinecraftVersion() const {
+	fs::path level_dat = world_dir / "level.dat";
+	if (!fs::is_regular_file(level_dat)) {
+		return -1;
+	}
+
+	nbt::NBTFile nbt;
+	try {
+		nbt.readNBT(level_dat.string().c_str());
+		const nbt::TagCompound& data_tag = nbt.findTag<nbt::TagCompound>("Data");
+		if (!data_tag.hasTag<nbt::TagCompound>("Version")) {
+			LOG(WARNING) << "World seems to be very old, no Minecraft version can be found in level.dat.";
+			return 0;
+		}
+		const nbt::TagCompound& version_tag = data_tag.findTag<nbt::TagCompound>("Version");
+		const nbt::TagInt& id_tag = version_tag.findTag<nbt::TagInt>("Id");
+		return id_tag.payload;
+	} catch (nbt::NBTError& e) {
+		LOG(WARNING) << "Unable to read level.dat file: " << e.what();
+		return -1;
+	}
+}
+
 }
 }
