@@ -53,9 +53,9 @@ void OverlayRenderMode::draw(RGBAImage& image, const BlockImage& block_image, co
 		} else {
 			mc::Block top, left, right;
 			RGBAPixel color_top, color_left, color_right;
-			top = getBlock(pos + mc::DIR_TOP, mc::GET_ID | mc::GET_DATA);
-			left = getBlock(pos + mc::DIR_WEST, mc::GET_ID | mc::GET_DATA);
-			right = getBlock(pos + mc::DIR_SOUTH, mc::GET_ID | mc::GET_DATA);
+			top = getBlock(pos + mc::DIR_TOP, mc::GET_ID);
+			left = getBlock(pos + mc::DIR_WEST, mc::GET_ID);
+			right = getBlock(pos + mc::DIR_SOUTH, mc::GET_ID);
 			color_top = getBlockColor(pos + mc::DIR_TOP, block_images->getBlockImage(top.id));
 			color_left = getBlockColor(pos + mc::DIR_WEST, block_images->getBlockImage(left.id));
 			color_right = getBlockColor(pos + mc::DIR_SOUTH, block_images->getBlockImage(right.id));

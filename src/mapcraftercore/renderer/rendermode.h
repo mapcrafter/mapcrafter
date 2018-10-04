@@ -114,7 +114,7 @@ public:
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 protected:
-	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
+	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID);
 
 	BlockImages* images;
 	RenderedBlockImages* block_images;

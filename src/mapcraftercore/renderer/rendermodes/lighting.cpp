@@ -158,7 +158,7 @@ LightingData LightingData::estimate(const mc::Block& block,
 	mc::Block above;
 	while (++off.y) {
 		above = world->getBlock(block.pos + off, current_chunk,
-				mc::GET_ID | mc::GET_DATA | mc::GET_SKY_LIGHT);
+				mc::GET_ID | mc::GET_SKY_LIGHT);
 		const BlockImage& above_block = block_images->getBlockImage(above.id);
 		/*
 		if (isSpecialTransparent(above.id))
@@ -182,7 +182,7 @@ LightingData LightingData::estimate(const mc::Block& block,
 		for (int dz = -1; dz <= 1; dz++)
 			for (int dy = -1; dy <= 1; dy++) {
 				mc::Block other = world->getBlock(block.pos + mc::BlockPos(dx, dz, dy),
-						current_chunk, mc::GET_ID | mc::GET_DATA | mc::GET_BLOCK_LIGHT);
+						current_chunk, mc::GET_ID | mc::GET_BLOCK_LIGHT);
 				const BlockImage& other_block = block_images->getBlockImage(other.id);
 				/*
 				if ((other.id == 0
@@ -269,7 +269,7 @@ LightingColor LightingRenderMode::calculateLightingColor(const LightingData& lig
 }
 
 LightingData LightingRenderMode::getBlockLight(const mc::BlockPos& pos) {
-	mc::Block block = getBlock(pos, mc::GET_ID | mc::GET_DATA | mc::GET_LIGHT);
+	mc::Block block = getBlock(pos, mc::GET_ID | mc::GET_LIGHT);
 	LightingData light = LightingData::estimate(block, block_images, world, *current_chunk);
 
 	// TODO also move this to LightingData class?
