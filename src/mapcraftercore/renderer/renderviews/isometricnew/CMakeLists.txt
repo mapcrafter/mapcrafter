@@ -7,7 +7,6 @@ set(SOURCE
 )
 set(HEADERS
     ${HEADERS}
-    "${CMAKE_CURRENT_SOURCE_DIR}/rendermodes.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/renderview.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/tilerenderer.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/tileset.h"
