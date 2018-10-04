@@ -111,6 +111,42 @@ var TopdownRenderView = {
 };
 
 /**
+ * Functions to convert Minecraft x, z, y (side render view) <-> Leaflet latitute/longitude.
+ */
+var SideRenderView = {
+	mcToLatLng: function(x, z, y, lmap, mapConfig, tileOffset, tileWidth) {
+		var mapWidth = mapConfig.tileSize[0] * Math.pow(2, mapConfig.maxZoom);
+		var mapHeight = mapConfig.tileSize[1] * Math.pow(2, mapConfig.maxZoom);
+		var blockWidth = mapConfig.tileSize[0] / (16.0 * tileWidth);
+		var blockHeight = mapConfig.tileSize[1] / (8.0 * tileWidth);
+	
+		// leaflet x = x * blockWidth
+		// leaflet y = z * blockHeight / 2 + (255 - y) * blockHeight / 2
+		var point = L.point(x, z).scaleBy(L.point(blockWidth, blockHeight / 2))
+			.add(L.point(mapWidth / 2, mapHeight / 2))
+			.add(L.point(0, (255 - y) * blockHeight / 2))
+			.add(L.point(-tileOffset[0] * mapConfig.tileSize[0], -tileOffset[1] * mapConfig.tileSize[1]));
+		return lmap.unproject(point, mapConfig.maxZoom);
+	},
+
+	latLngToMC: function(latLng, y, lmap, mapConfig, tileOffset, tileWidth) {
+		var mapWidth = mapConfig.tileSize[0] * Math.pow(2, mapConfig.maxZoom);
+		var mapHeight = mapConfig.tileSize[1] * Math.pow(2, mapConfig.maxZoom);
+		var blockWidth = mapConfig.tileSize[0] / (16.0 * tileWidth);
+		var blockHeight = mapConfig.tileSize[1] / (8.0 * tileWidth);
+
+		// x = leaflet x / blockWidth
+		// z = (leaflet y - (255 - y) * blockHeight / 2) / (blockHeight / 2)
+		var point = lmap.project(latLng, mapConfig.maxZoom)
+			.add(L.point(tileOffset[0] * mapConfig.tileSize[0], tileOffset[1] * mapConfig.tileSize[1]))
+			.add(L.point(-mapWidth / 2, -mapHeight / 2));
+		var x = point.x / blockWidth;
+		var z = (point.y - (255 - y) * blockHeight / 2) / (blockHeight / 2);
+		return [x, z, y];
+	}
+};
+
+/**
  * This is the main class which manages the whole map ui.
  */
 function MapcrafterUI(config) {
@@ -242,6 +278,8 @@ MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 		oldMapLayer = this.layers[this.currentMap][this.currentRotation];
 		oldView = this.latLngToMC(this.lmap.getCenter(), oldMapConfig.worldSeaLevel);
 		oldZoom = this.lmap.getZoom();
+		// reset zoom, that seems to be important for leaflet
+		this.lmap.setZoom(0);
 	}
 	
 	// set the new map and rotation
@@ -252,7 +290,7 @@ MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 	if(oldMapLayer != null)
 		this.lmap.removeLayer(oldMapLayer);
 	this.lmap.addLayer(this.layers[this.currentMap][this.currentRotation]);
-	//this.lmap.invalidateSize();
+	this.lmap.invalidateSize();
 	
 	// check whether we are switching to a completely different map
 	if(oldMapLayer == null || oldMapConfig.world != mapConfig.world) {
@@ -277,7 +315,10 @@ MapcrafterUI.prototype.setMapAndRotation = function(map, rotation) {
 
 	} else {
 		// same world, we can set the view to the view of the old map
-		this.lmap.setView(this.mcToLatLng(oldView[0], oldView[1], oldView[2]), oldZoom, {animate: false});
+		// but make sure that we set a valid zoom level
+		var newZoom = Math.round(oldZoom / oldMapConfig.maxZoom * mapConfig.maxZoom);
+		this.lmap.setZoom(newZoom, {animate : false});
+		this.lmap.setView(this.mcToLatLng(oldView[0], oldView[1], oldView[2]), newZoom, {animate: false});
 	}
 	
 	// call handlers
@@ -403,9 +444,13 @@ MapcrafterUI.prototype.mcToLatLng = function(x, z, y) {
 	}
 	
 	// do the conversion depending on the current render view
-	if (mapConfig.renderView == "isometric")
+	if (mapConfig.renderView == "isometric") {
 		return IsometricRenderView.mcToLatLng(x, z, y, this.lmap, mapConfig, tileOffset, tileWidth);
-	return TopdownRenderView.mcToLatLng(x, z, y, this.lmap, mapConfig, tileOffset, tileWidth);
+	} else if (mapConfig.renderView == "topdown") {
+		return TopdownRenderView.mcToLatLng(x, z, y, this.lmap, mapConfig, tileOffset, tileWidth);
+	} else if (mapConfig.renderView == "side") {
+		return SideRenderView.mcToLatLng(x, z, y, this.lmap, mapConfig, tileOffset, tileWidth);
+	}
 };
 
 /**
@@ -420,10 +465,13 @@ MapcrafterUI.prototype.latLngToMC = function(latLng, y) {
 
 	// do the conversion depending on the current render view
 	var mc;
-	if (mapConfig.renderView == "isometric")
+	if (mapConfig.renderView == "isometric") {
 		mc = IsometricRenderView.latLngToMC(latLng, y, this.lmap, mapConfig, tileOffset, tileWidth);
-	else
+	} else if (mapConfig.renderView == "topdown") {
 		mc = TopdownRenderView.latLngToMC(latLng, y, this.lmap, mapConfig, tileOffset, tileWidth);
+	} else if (mapConfig.renderView == "side") {
+		mc = SideRenderView.latLngToMC(latLng, y, this.lmap, mapConfig, tileOffset, tileWidth);
+	}
 	var x = mc[0], z = mc[1];
 	
 	// rotate the position in the other direction back from map rotation

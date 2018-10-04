@@ -37,10 +37,10 @@ void SideTileSet::mapChunkToTiles(const mc::ChunkPos& chunk,
 	for (int i = 0; i < mc::CHUNK_HEIGHT; i++) {
 		// make sure we render towards -infinity
 		int x = std::floor((float) chunk.x / getTileWidth());
-		int y = std::floor((float) (chunk.z + mc::CHUNK_HEIGHT - i + 1) / getTileWidth());
-		tiles.insert(TilePos(x, y+1));
-		tiles.insert(TilePos(x, y));
-		tiles.insert(TilePos(x, y-1));
+		int y0 = std::floor((float) (chunk.z + mc::CHUNK_HEIGHT-i-1 + 1) / getTileWidth());
+		int y1 = std::floor((float) (chunk.z + mc::CHUNK_HEIGHT-i-1 + 0) / getTileWidth());
+		tiles.insert(TilePos(x, y0));
+		tiles.insert(TilePos(x, y1));
 	}
 }
 
