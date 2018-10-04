@@ -119,10 +119,11 @@ var SideRenderView = {
 		var mapHeight = mapConfig.tileSize[1] * Math.pow(2, mapConfig.maxZoom);
 		var blockWidth = mapConfig.tileSize[0] / (16.0 * tileWidth);
 		var blockHeight = mapConfig.tileSize[1] / (8.0 * tileWidth);
-	
+
+		// (z-1) because in the tile renderer we also subtract blockHeight/2 from y
 		// leaflet x = x * blockWidth
-		// leaflet y = z * blockHeight / 2 + (255 - y) * blockHeight / 2
-		var point = L.point(x, z).scaleBy(L.point(blockWidth, blockHeight / 2))
+		// leaflet y = (z - 1) * blockHeight / 2 + (255 - y) * blockHeight / 2
+		var point = L.point(x, z - 1).scaleBy(L.point(blockWidth, blockHeight / 2))
 			.add(L.point(mapWidth / 2, mapHeight / 2))
 			.add(L.point(0, (255 - y) * blockHeight / 2))
 			.add(L.point(-tileOffset[0] * mapConfig.tileSize[0], -tileOffset[1] * mapConfig.tileSize[1]));
@@ -136,13 +137,13 @@ var SideRenderView = {
 		var blockHeight = mapConfig.tileSize[1] / (8.0 * tileWidth);
 
 		// x = leaflet x / blockWidth
-		// z = (leaflet y - (255 - y) * blockHeight / 2) / (blockHeight / 2)
+		// (z - 1) = (leaflet y - (255 - y) * blockHeight / 2) / (blockHeight / 2)
 		var point = lmap.project(latLng, mapConfig.maxZoom)
 			.add(L.point(tileOffset[0] * mapConfig.tileSize[0], tileOffset[1] * mapConfig.tileSize[1]))
 			.add(L.point(-mapWidth / 2, -mapHeight / 2));
 		var x = point.x / blockWidth;
 		var z = (point.y - (255 - y) * blockHeight / 2) / (blockHeight / 2);
-		return [x, z, y];
+		return [x, z + 1, y];
 	}
 };
 
