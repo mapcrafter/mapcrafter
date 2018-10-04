@@ -2,27 +2,25 @@
 # Build Image
 #
 
-FROM ubuntu:18.04 as builder
+FROM alpine:3.8 as builder
 
 # Add the git repo
 ADD . /git/mapcrafter
 
 # Dependencies needed for building Mapcrafter
-RUN apt-get update && \
-    apt-get -y install \
+# (not sure how many of these are actually needed)
+RUN apk add \
         cmake \
-        build-essential \
+        gcc \
+        make \
+        g++ \
+        zlib-dev \
         libpng-dev \
-        libjpeg-dev \
-        libboost-iostreams-dev \
-        libboost-system-dev \
-        libboost-filesystem-dev \
-        libboost-program-options-dev \
-        libboost-test-dev \
+        libjpeg-turbo-dev \
+        boost-dev \
         wget \
         python \
         imagemagick
-
 
 # Textures
 # With thanks to https://mcversions.net/ for the jar link
@@ -36,30 +34,26 @@ RUN cd /git/mapcrafter && \
     cmake .. && \
     make && \
     mkdir /tmp/mapcrafter && \
-    make DESTDIR=/tmp/mapcrafter install && \
-    ldconfig
+    make DESTDIR=/tmp/mapcrafter install
 
 
 #
 # Final Image
 #
 
-FROM ubuntu:18.04
+FROM alpine:3.8
 
 # Mapcrafter, built in previous stage
 COPY --from=builder /tmp/mapcrafter/ /
 
 # Depedencies needed for running Mapcrafter
-RUN apt-get update && \
-    apt-get -y install \
-        libpng16-16 \
-        libjpeg-turbo-progs \
-        libboost-iostreams1.65.1 \
-        libboost-system1.65.1 \
-        libboost-filesystem1.65.1 \
-        libboost-program-options1.65.1 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    ldconfig
+RUN apk add \
+        libpng \
+        libjpeg-turbo \
+        boost \
+        boost-iostreams \
+        boost-system \
+        boost-filesystem \
+        boost-program_options
 
 ENTRYPOINT ["mapcrafter"]
