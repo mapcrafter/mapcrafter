@@ -1,4 +1,8 @@
-FROM ubuntu:18.04
+#
+# Build Image
+#
+
+FROM ubuntu:18.04 as builder
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV HOME /
@@ -7,8 +11,7 @@ ENV HOME /
 ADD . /git/mapcrafter
 
 
-# Download build and run dependencies
-# TODO: consider avoiding apt-get update
+# Build dependencies
 RUN apt-get update && \
     apt-get -y install cmake build-essential libpng-dev libjpeg-dev libboost-iostreams-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev libboost-test-dev wget python imagemagick && \
     apt-get clean && \
@@ -26,7 +29,27 @@ RUN cd /git/mapcrafter && \
     mkdir build && cd build && \
     cmake .. && \
     make && \
-    make install && \
+    mkdir /tmp/mapcrafter && \
+    make DESTDIR=/tmp/mapcrafter install && \
+    ldconfig
+
+#ENTRYPOINT ["mapcrafter"]
+
+
+#
+# Final Image
+#
+
+FROM ubuntu:18.04
+
+# Mapcrafter, built in previous stage
+COPY --from=builder /tmp/mapcrafter/ /
+
+# Run Depedencies
+RUN apt-get update && \
+    apt-get -y install libpng-dev libjpeg-dev libboost-iostreams-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     ldconfig
 
 ENTRYPOINT ["mapcrafter"]
