@@ -553,6 +553,16 @@ void RenderManager::initializeMap(const std::string& map) {
  */
 void RenderManager::increaseMaxZoom(const fs::path& dir,
 		std::string image_format, int jpeg_quality) const {
+	// find out tile size by reading old base.png image
+	RGBAImage old_base;
+	if (image_format == "png") {
+		old_base.readPNG((dir / "base.png").string());
+	} else {
+		old_base.readJPEG((dir / "base.jpg").string());
+	}
+	int w = old_base.getWidth();
+	int h = old_base.getHeight();
+
 	if (fs::exists(dir / "1")) {
 		// at first rename the directories 1 2 3 4 (zoom level 0) and make new directories
 		util::moveFile(dir / "1", dir / "1_");
@@ -603,20 +613,19 @@ void RenderManager::increaseMaxZoom(const fs::path& dir,
 		img4.readJPEG((dir / "4/1.jpg").string());
 	}
 
-	int s = img1.getWidth();
 	// create images for the new directories
-	RGBAImage new1(s, s), new2(s, s), new3(s, s), new4(s, s);
+	RGBAImage new1(w, h), new2(w, h), new3(w, h), new4(w, h);
 	RGBAImage old1, old2, old3, old4;
 	// resize the old images...
 	img1.resize(old1, 0, 0, InterpolationType::HALF);
-	img2.resize(old2, 0, 0, InterpolationType::HALF);	
+	img2.resize(old2, 0, 0, InterpolationType::HALF);
 	img3.resize(old3, 0, 0, InterpolationType::HALF);
 	img4.resize(old4, 0, 0, InterpolationType::HALF);
 
 	// ...to blit them to the images of the new directories
-	new1.simpleAlphaBlit(old1, s/2, s/2);
-	new2.simpleAlphaBlit(old2, 0, s/2);
-	new3.simpleAlphaBlit(old3, s/2, 0);
+	new1.simpleAlphaBlit(old1, w/2, h/2);
+	new2.simpleAlphaBlit(old2, 0, h/2);
+	new3.simpleAlphaBlit(old3, w/2, 0);
 	new4.simpleAlphaBlit(old4, 0, 0);
 
 	// now save the new images in the output directory
@@ -633,11 +642,11 @@ void RenderManager::increaseMaxZoom(const fs::path& dir,
 	}
 
 	// don't forget the base.png
-	RGBAImage base(2*s, 2*s);
+	RGBAImage base(2*h, 2*h);
 	base.simpleAlphaBlit(new1, 0, 0);
-	base.simpleAlphaBlit(new2, s, 0);
-	base.simpleAlphaBlit(new3, 0, s);
-	base.simpleAlphaBlit(new4, s, s);
+	base.simpleAlphaBlit(new2, w, 0);
+	base.simpleAlphaBlit(new3, 0, h);
+	base.simpleAlphaBlit(new4, w, h);
 	base = base.resize(0, 0, InterpolationType::HALF);
 	if (image_format == "png")
 		base.writePNG((dir / "base.png").string());
