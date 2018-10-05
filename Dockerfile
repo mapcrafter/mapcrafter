@@ -45,6 +45,9 @@ RUN apk add \
         boost-iostreams \
         boost-system \
         boost-filesystem \
-        boost-program_options
+        boost-program_options \
+        shadow
 
-ENTRYPOINT ["mapcrafter"]
+# Entrypoint
+ADD entrypoint.sh /
+ENTRYPOINT ["/entrypoint.sh"]
