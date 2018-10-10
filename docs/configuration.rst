@@ -184,18 +184,10 @@ General Options
     **Default:** default template directory (see :ref:`resources_textures`)
 
     This is the directory with the web template files. The renderer copies all
-    files from this directory to the output directory. It also replaces the
-    variables in the ``index.html`` file (see below). You should open the the
+    files from this directory to the output directory. You should open the the
     ``index.html`` file the output directory with your web-browser to see your
     rendered map!
 
-    =====================  ==================================================  ====================
-    Variable               Description                                         Example
-    =====================  ==================================================  ====================
-    ``{version}``          Mapcrafter version                                  2.4
-    ``{lastUpdate}``       Datestamp of last update. See ``use_image_mtimes``  01.10.2018, 21:12:44
-    ``{backgroundColor}``  Hex background colour. See ``background_color``     #D0D0D0
-    =====================  ==================================================  ====================
 
 **Background Color:** ``background_color = <hex color>``
 
