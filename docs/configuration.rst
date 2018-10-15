@@ -308,7 +308,8 @@ Cropping Your World
 ~~~~~~~~~~~~~~~~~~~
 
 By using the following options you can crop your world and render only 
-a specific part of it. 
+a specific part of it. You can combine vertical, horizontal and block mask
+options in the same map.
 
 **Vertical Cropping**
 
@@ -392,31 +393,57 @@ Furthermore there are two different types of world cropping:
     rendered map (delete ``<output_dir>/<map_name>``).
 
 
-**Other Cropping Options**
+**Block Mask Cropping**
 
-The options for world cropping are very versatile as you can see
-with the next two options:
+Block mask is an extremely powerful cropping tool to hide or show specific block
+types. It's use requires a little knowledge about how Minecraft stores block information,
+and how Mapcrafter works with blocks.
 
-**Crop Unpopulated Chunks:** ``crop_unpopulated_chunks = true|false``
+Minecraft stores two pieces of information about each block: a *block id* and optional
+*block data*. You can find details of *block ids* in the of `data values <https://minecraft.gamepedia.com/Java_Edition_data_values>`_
+on the Minecraft wiki. *Block data* is different for each *block id* and can be
+found on each block page on the Minecraft wiki. Since the *"flattening"* in Minecraft 
+1.13, there are now many more *block ids* and less usage of *block data*.
 
-    **Default:** ``false``
-    
-    If you are bored of the chunks with unpopulated terrain at the edges of
-    your world, e.g. no trees, ores and other structures, you can skip rendering
-    them with this option. If you are afraid someone might use this to find
-    rare ores such as Diamond or Emerald, you should not enable this option.
+Eg: `Wood <https://minecraft.gamepedia.com/Wood>`_ (which make up tree trunks) has
+*block id* of ``minecraft:oak_wood`` (plus 11 other variations), and *block data* 
+``axis`` of either ``x``, ``y`` or ``z``, which is the direction of the wood.
 
-    TODO: image
+Mapcrafter doesn't work with ``minecraft:oak_wood axis=x``, it translates those into
+simple numbers to render each block. You can find Mapcrafter ``blockid``'s by locating 
+the *block id* + *block data* in one of the `texture block files <https://github.com/mapcrafter/mapcrafter/blob/world113/src/data/blocks/isometric_0_16.txt>`_,
+and subtracting 2 from the line number. So the three axis of ``minecraft:oak_wood`` 
+= ``4137-4139``. (That magic number *2* comes from a zero indexed array with one 
+extra header line).
+
+.. code-block:: text
+
+    ....
+    line 4138 - minecraft:oak_trapdoor facing=west,....
+    line 4139 - minecraft:oak_wood axis=x color=4532,uv=4533
+    line 4140 - minecraft:oak_wood axis=y color=4534,uv=4535
+    line 4141 - minecraft:oak_wood axis=z color=4536,uv=4537
+    line 4142 - minecraft:observer facing=down,powered=false color=4538,uv=4539
+    ....
+
+.. note::
+
+    If you use Blockcrafter to create your own block data files and textures, the example
+    ``blockid`` numbers given here will not work! Nor will the linked texture block data 
+    file above. These examples only apply for vanilla Minecraft 1.13 - different Minecraft 
+    versions, the presence of mods or custom resource packs will change these.
+
+
 
 ``block_mask = <block mask>``
 
     **Default:** *show all blocks*
     
-    With the block mask option it is possible to hide or shown only specific blocks.
     The block mask is a space separated list of block groups you want to 
     hide/show. If a ``!`` precedes a block group, all blocks of this block group are
     hidden, otherwise they are shown. Per default, all blocks are shown.
-    Possible block groups are:
+    All block ids should be entered as decimal numbers, based on their
+    location in block data files. Possible block groups are:
     
     * All blocks:
       
@@ -444,11 +471,13 @@ with the next two options:
     
       * ``!* 1 3:2 7-9``
     
-    * Show all blocks except jungle wood and jungle leaves:
+    * Show all blocks except grass (in various forms), dirt and coarse dirt:
     
-      * ``!17:3b3 !18:3b3``
-      * Jungle wood and jungle leaves have id 17 and 18 and use data value 3 for first two bits (bitmask 3 = 0b11)
-      * other bits are used otherwise -> ignore all those bits
+      * ``!2376-2381 !1296 !2175``
+
+    .. image:: img/world_crop_blockmask.png
+       :align: center
+       :alt: A world with grass and dirt removed.
 
 -----
 
@@ -502,7 +531,7 @@ Map Options
       A 2.5D view similar to ``topdown``, but tilted.
 
 
-**Render Mode:** ``render_mode = plain|daylight|nightlight|cave|cavelight``
+**Render Mode:** ``render_mode = daylight|nightlight|plain|cave|cavelight``
 	
     **Default:** ``daylight``
 
@@ -517,12 +546,13 @@ Map Options
     This is the render mode to use when rendering the world. Possible
     render modes are:
 
-    ``plain``
-        Plain render mode without lighting or other special magic.
     ``daylight``
-        Renders the world with lighting. This looks better, but takes longer to render.
+        High quality render with daylight lighting.
     ``nightlight``
         Like ``daylight``, but renders at night. Hope your world has lots of torches!
+    ``plain``
+        Renders the world without any special lighting. Slightly faster than 
+        ``daylight`` but not as pretty.
     ``cave``
         Renders only caves and colors blocks depending on their height 
         to make them easier to recognize. You can see underground!
@@ -551,8 +581,9 @@ Map Options
     ``none``
       Empty overlay.
     ``slime``
-      Highlights the chunks where slimes can spawn. Note that slimes only spawn
-      in swamps, but the overlay doesn't take that into account.
+      Highlights the chunks where slimes can spawn. Note that other conditions
+      need to be met for slimes to spawn in the overlay areas (eg: swamps or
+      flat worlds).
     ``spawnday``
       Shows where monsters can spawn at day. You'll need to find dark caves
       to see this overlay (or use ``render_mode = cave``).
@@ -582,7 +613,7 @@ Map Options
     Top left means that north is on the top left side on the map (same thing
     for other directions).
 
-**Texture Size** ``texture_size = 16|12``
+**Texture Size** ``texture_size = 16|12|blockcrafter``
 
     **Default:** ``12``
 
@@ -595,7 +626,7 @@ Map Options
     size 12 looks still good and is faster to render.
 
     Mapcrafter's pre-rendered textures include sizes 16 and 12. If you want to 
-    use other sizes, you will need to generate them using 
+    use other sizes, or custom resource packs you will need to generate them using 
     `blockcrafter <https://github.com/mapcrafter/blockcrafter>`_.
 
 **Tile Width** ``tile_width = <number>``
@@ -728,6 +759,7 @@ Map Options
     Options moved to blockcrafter: ``texture_dir``, ``texture_blur``, 
     ``water_opacity``, ``render_leaves_transparent``.
 
+    Options removed entirely: ``crop_unpopulated_chunks``.
 
 -----
 
