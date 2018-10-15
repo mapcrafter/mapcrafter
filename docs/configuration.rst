@@ -14,7 +14,7 @@ Mapcrafter render something (let's call it ``render.conf``):
 
 .. code-block:: ini
 
-    # Directory where mapcrafter will save rendered maps
+    # Directory where Mapcrafter will save rendered maps
     output_dir = /home/user/myworld_mapcrafter
 
     # Directory of your Minecraft world
@@ -154,6 +154,37 @@ things you can do:
 * Different image formats
 * Custom lighting intensity
 
+
+Mapcrafter URLs
+=================
+
+Mapcrafter maps are displayed in your web-browser. The URL in your browser's
+address bar can be shared with others or linked to from other websites (if
+your maps are hosted on a public web server). The URL includes details of which
+map is selected, and the position and zoom of your current display. You can
+read the zoom level or map position from the URL (see `Cropping Your World`_).
+
+`Here is an example URL <https://minecraft.ligos.net/worlds/Mapcrafter_Test/index.html#MapcrafterTest_Overworld_isometric/0/5/369/1059/64>`_, 
+which shows the village used throughout this page:
+
+``https://../index.html#MapcrafterTest_Overworld_isometric/0/5/369/1059/64``
+
+Here are the parts of the URL:
+
+``{index.html}#{Map}/{Orientation}/{Zoom}/{X}/{Z}/{Y}``
+
+=========================  ======================================================================
+Part                       Description                                       
+=========================  ======================================================================
+``{index.html}``           Path to mapcrafter index.html file, which includes the domain name.
+``{Map}``                  Map being displayed, see ``map:<name>``.
+``{Orientation}``          The displayed orientation (isometric maps only). see ``rotations``.
+``{Zoom}``                 Current zoom level, see ``default_zoom``.
+``{X}``, ``{Y}``, ``{Z}``  Current co-ordinates of the center of your screen, see `Cropping Your World`_.
+=========================  ======================================================================
+
+----
+
 Available Options
 =================
 
@@ -203,6 +234,7 @@ General Options
 
 -----
 
+
 World Options
 -------------
 
@@ -250,9 +282,6 @@ World Options
     
     You can specify the default center of the map with this option. Just specify a
     position in your Minecraft world you want as center when you open the map.
-    It's best to read positions from a ``render_view = topdown`` or using the ``F3``
-    debug screen within Minecraft, as the isometric maps have an offset of ~64 due 
-    to the map height.
 
     This is useful if you want to crop your map and focus on the cropped part (see below).
 
@@ -343,11 +372,20 @@ Furthermore there are two different types of world cropping:
 
 .. note::
 
+    It's best to read positions from a ``render_view = topdown``, from 
+    `Mapcrafter URLs`_, or using the ``F3`` debug screen within Minecraft, 
+    as the x and z co-ordinates in bottom left of isometric maps can be 
+    misleading. 
+
+.. note::
+
     The renderer automatically centers circular cropped worlds and rectangular
     cropped worlds which have all four limits specified so the maximum
     zoom level of the rendered map does not unnecessarily become as high as 
     the original map. 
-    
+
+.. note::
+
     Changing the center of an already rendered map is complicated and 
     therefore not supported by the renderer. Due to that you should 
     completely re-render the map when you want to change the boundaries of 
@@ -414,6 +452,7 @@ with the next two options:
       * other bits are used otherwise -> ignore all those bits
 
 -----
+
 
 Map Options
 -----------
