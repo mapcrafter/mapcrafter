@@ -445,7 +445,6 @@ extra header line).
 
 
 
-    TODO: image
 
 ``block_mask = <block mask>``
 
