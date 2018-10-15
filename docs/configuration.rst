@@ -155,6 +155,8 @@ things you can do:
 * Custom lighting intensity
 
 
+.. _Mapcrafter URL:
+
 Mapcrafter URLs
 =================
 
@@ -176,7 +178,7 @@ Here are the parts of the URL:
 =========================  ======================================================================
 Part                       Description                                       
 =========================  ======================================================================
-``{index.html}``           Path to mapcrafter index.html file, which includes the domain name.
+``{index.html}``           Path to Mapcrafter index.html file, which includes the domain name.
 ``{Map}``                  Map being displayed, see ``map:<name>``.
 ``{Orientation}``          The displayed orientation (isometric maps only). see ``rotations``.
 ``{Zoom}``                 Current zoom level, see ``default_zoom``.
@@ -208,7 +210,7 @@ General Options
     into this directory and overwrites them, if they already exist. The renderer 
     creates an ``index.html`` file you can open with your web-browser. If you want
     to customize this HTML file, you should do this directly in the ``template_dir``
-    because this file is overwritten every time you render the map.
+    because this file is overwritten every time you render the map (see :doc:`hacking`).
 
 **Template Directory:** ``template_dir = <directory>``
 
@@ -274,7 +276,8 @@ World Options
     
     This is another name of the world, the name of the world the server uses.
     You don't usually need to specify this manually unless your server uses different
-    world names and you want to use the mapcrafter-playermarkers script.
+    world names and you want to use the `mapcrafter-playermarkers 
+    <https://github.com/mapcrafter/mapcrafter-playermarkers>`_ script.
 
 **Default View:** ``default_view = <x>,<z>,<y>``
 
@@ -290,12 +293,8 @@ World Options
     **Default**: ``0``
     
     This is the default zoom level shown when you open the map. The default zoom level
-    is 0 (completely zoomed out) and the maximum zoom level (completely zoomed in) is the 
-    one Mapcrafter shows when rendering your map in your web-browser's address.
-
-    .. image:: img/world_zoom_url.png
-       :align: center
-       :alt: The zoom level can be found in your browser address bar.
+    is 0 (completely zoomed out) and the maximum zoom level (completely zoomed in) can
+    be read from the `Mapcrafter URL`_ in your web-browser.
 
 **Default Rotation:** ``default_rotation = top-left|top-right|bottom-right|bottom-left``
 
@@ -603,14 +602,14 @@ Map Options
 
     **Default:** ``1``
 
-    This lets you reduce the number of tiles / files Mapcrafter saves by merging 
+    This lets you reduce the number of tiles / files Mapcrafter renders by merging 
     them together. Individual tiles will take longer to render, but fewer files 
     will be written to disk.
 
     This is a factor that is applied to the tile size. Every (square) tile is 
     usually one chunk wide (1:1). That is, one image at highest zoom generated 
     by Mapcrafter corresponds to one anvil chunk (or 16x16 Minecraft blocks). 
-    If you set ``tile_width = 2`` one mapcrafter tile will correspond to 2x2 
+    If you set ``tile_width = 2`` one Mapcrafter tile will correspond to 2x2 
     anvil chunks (32x32 blocks), which is a 1:2 factor. The largest recommended
     factor is **16** (see note below about RAM usage), and the sweet spot is 
     between 2 and 6.
