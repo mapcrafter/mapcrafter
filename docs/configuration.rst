@@ -710,17 +710,6 @@ Map Options
     option. You might have to play around with this to find a configuration that you like.
     For me ``water_opacity=0.75`` and ``lighting_water_intensity=0.6`` didn't look bad.
 
-**Render Unknown Blocks** ``render_unknown_blocks = true|false``
-
-    **Default:** ``false``
-
-    If ``true``, this option renders unknown blocks as red blocks (for debugging 
-    purposes). Otherwise, unknown blocks are not rendered.
-
-    Since the Minecraft 1.13 overhaul of Mapcrafter, it is extremely rare for unknown
-    blocks to be encountered.
-
-
 ``render_biomes = true|false``
 
     **Default:** ``true``
@@ -759,7 +748,8 @@ Map Options
     Options moved to blockcrafter: ``texture_dir``, ``texture_blur``, 
     ``water_opacity``, ``render_leaves_transparent``.
 
-    Options removed entirely: ``crop_unpopulated_chunks``.
+    Options removed entirely: ``crop_unpopulated_chunks`` (now always true), 
+    ``render_unknown_blocks`` (now always true).
 
 -----
 
