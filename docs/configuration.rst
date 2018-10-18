@@ -641,22 +641,20 @@ Map Options
     usually one chunk wide (1:1). That is, one image at highest zoom generated 
     by Mapcrafter corresponds to one anvil chunk (or 16x16 Minecraft blocks). 
     If you set ``tile_width = 2`` one Mapcrafter tile will correspond to 2x2 
-    anvil chunks (32x32 blocks), which is a 1:2 factor. The largest recommended
-    factor is **16** (see note below about RAM usage), and the sweet spot is 
-    between 2 and 6.
+    anvil chunks (32x32 blocks), which is a 1:2 factor. So a larger
+    ``tile_width`` will create a smaller number of larger image files, and each 
+    change in your Minecraft world will cause a larger area to be re-rendered.
     
-    This will merge small files if your ``texture_size`` is small. And can 
-    increase performance rendering to spinning disks (because a smaller 
-    number of larger files will be written) and Windows systems (which don't 
-    cope as well with lots of very small files). But, each change in
-    your Minecraft world will cause a larger area to be re-rendered.
+    Usually ``tile_width = 1`` works very well. But there are some circumstances
+    where a larger tile width is beneficial, including: smaller ``texture_size``
+    values, rendering to slower hard disks, and Windows systems. These all benefit 
+    from fewer files of larger size. 
 
 .. note::
 
-    A larger ``tile_width`` requires exponentially more RAM during rendering and 
+    A larger ``tile_width`` requires considerably more RAM during rendering and 
     viewing, as more tiles and chunks are kept in memory and browsers need to work
-    with very large images. ``tile_width = 16`` uses ~3GB RAM per thread and 
-    generates 6144x6144 tiles (~10MB PNGs) and has noticeable lag in browser.
+    with larger images. Please increase this slowly and test carefully!
 
 .. note::
 
@@ -690,7 +688,7 @@ Map Options
     between 0 and 100, where 0 is the worst quality which needs the least disk space
     and 100 is the best quality which needs the most disk space.
 
-``lighting_intensity = <number>``
+**Lighting Intensity** ``lighting_intensity = <number>``
 
     **Default:** ``1.0``
     
@@ -698,19 +696,20 @@ Map Options
     lighting to the rendered map. You can specify a value from 0.0 to 1.0, 
     where 1.0 means full lighting and 0.0 means no lighting.
 
-``lighting_water_intensity = <number>``
+**Lighting Water Intensity** ``lighting_water_intensity = <number>``
 
-    **Default:** ``1.0``
+    **Default:** ``0.85``
 
     This is like the normal lighting intensity option, but used for blocks that are under
     water. Usually the effect of opaque looking deep water is created by rendering just
     the top water layer and then applying the lighting effect on the (dark) floor of the
     water. By decreasing the lighting intensity for blocks under water you can make the
-    water look "more transparent". Use this option together with the ``water_opacity``
-    option. You might have to play around with this to find a configuration that you like.
+    water look "more transparent".
+
+    You might have to play around with this to find a configuration that you like.
     For me ``water_opacity=0.75`` and ``lighting_water_intensity=0.6`` didn't look bad.
 
-``render_biomes = true|false``
+**Render Biomes** ``render_biomes = true|false``
 
     **Default:** ``true``
 
@@ -742,14 +741,15 @@ Map Options
     **Obsolete Options**
 
     Several options were removed in the Minecraft 1.13 overhaul in Mapcrafter 
-    vNext. Some of these have been moved into the `blockcrafter <https://github.com/mapcrafter/blockcrafter>`_
-    project.
+    vNext. Some of these have been moved into the `blockcrafter 
+    <https://github.com/mapcrafter/blockcrafter>`_ project.
 
     Options moved to blockcrafter: ``texture_dir``, ``texture_blur``, 
     ``water_opacity``, ``render_leaves_transparent``.
 
-    Options removed entirely: ``crop_unpopulated_chunks`` (now always true), 
-    ``render_unknown_blocks`` (now always true).
+    Options removed entirely: ``crop_unpopulated_chunks`` (unpopulated chunks
+    are always cropped), ``render_unknown_blocks`` (unknown blocks are extremely
+    rare, and always rendered).
 
 -----
 
