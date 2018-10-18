@@ -601,9 +601,15 @@ Map Options
 
     **Default:** ``top-left``
 
-    .. image:: img/map_rotations.png
-       :align: center
-       :alt: 4 different isometric rotations of the same village.
+    +----------------------------------------------+----------------------------------------------+
+    | .. image:: img/map_rotations_topleft.png     | .. image:: img/map_rotations_topright.png    |
+    |                                              |                                              |
+    | **top-left**                                 | **top-right**                                |
+    +----------------------------------------------+----------------------------------------------+
+    | .. image:: img/map_rotations_bottomright.png | .. image:: img/map_rotations_bottomleft.png  |  
+    |                                              |                                              |
+    | **bottom-right**                             | **bottom-left**                              |
+    +----------------------------------------------+----------------------------------------------+
 
     This is a list of directions to render the world from. You can rotate the
     world by n*90 degrees. Later in the output file you can interactively
