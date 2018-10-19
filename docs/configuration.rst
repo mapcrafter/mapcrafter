@@ -518,19 +518,20 @@ Map Options
     This is the view that your world is rendered from. You can choose from
     different render views:
 
-    ==============  ======================
-    **Isometric**   .. image:: img/map_render_view_isometric.png
-                    
-                    A 3D isometric view with up to 4 rotations.
+    :Isometric:
+        .. image:: img/map_render_view_isometric.png
 
-    **Topdown**     .. image:: img/map_render_view_topdown.png
-                    
-                    A simple 2D top view.
+        A 3D isometric view with up to 4 rotations.
+    
+    :Topdown:
+        .. image:: img/map_render_view_topdown.png
 
-    **Side**        .. image:: img/map_render_view_side.png
-                    
-                    A 2.5D view similar to ``topdown``, but tilted.
-    ==============  ======================
+        A simple 2D top view.
+
+    :Side:
+        .. image:: img/map_render_view_side.png
+
+        A 2.5D view similar to ``topdown``, but tilted.
 
 
 **Render Mode:** ``render_mode = daylight|nightlight|plain|cave|cavelight``
@@ -540,35 +541,34 @@ Map Options
     This is the render mode to use when rendering the world. Possible
     render modes are:
 
-    ================= ===========================================
-    **Daylight**      .. image:: img/map_render_mode_daylight.png
+    :Daylight:      
+        .. image:: img/map_render_mode_daylight.png
 
-                      High quality render with daylight lighting. 
+        High quality render with daylight lighting.
     
-    **Plain**         .. image:: img/map_render_mode_plain.png
+    :Plain:
+        .. image:: img/map_render_mode_plain.png
 
-                      Renders the world without any special lighting.
+        Renders the world without any special lighting.                     
+        Slightly faster than ``daylight`` but not as pretty.
+
+    :Nightlight:    
+        .. image:: img/map_render_mode_nightlight.png
                       
-                      Slightly faster than ``daylight`` but not as pretty.
-
-    **Nightlight**    .. image:: img/map_render_mode_nightlight.png
-                      
-                      Like ``daylight``, but renders at night.
-
-                      Hope your world has lots of torches!
+        Like ``daylight``, but renders at night.
+        Hope your world has lots of torches!
     
-    **Cave Light**    .. image:: img/map_render_mode_cavelight.png
+    :Cave Light:    
+        .. image:: img/map_render_mode_cavelight.png
                       
-                      Renders only underground caves so you can 
-                      see underground.
+        Renders only underground caves so you can see underground.
+        Blocks are colored based on their height to make them easier
+        to recognize.
 
-                      Blocks are colored based on their height
-                      to make them easier to recognize.
+    :Cave:          
+        .. image:: img/map_render_mode_cave.png
 
-    **Cave**          .. image:: img/map_render_mode_cave.png
-
-                      Same as ``cavelight`` but with ``plain`` lighting.
-    ================= ===========================================
+        Same as ``cavelight`` but with ``plain`` lighting.
 
 .. note::
 
@@ -585,31 +585,26 @@ Map Options
     render mode. The following overlays are used to show some interesting
     additional data extracted from the Minecraft world data:
 
-    ================  ======================
-    **Slime**         .. image:: img/map_overlay_spawnslime.png
+    :Slime:
+        .. image:: img/map_overlay_spawnslime.png
                     
-                      Highlights the chunks where slimes can spawn. 
-                      
-                      Other conditions need to be met for 
-                      slimes to spawn in the overlay areas (eg: swamps 
-                      or flat worlds).
+        Highlights the chunks where slimes can spawn. 
+        Note that other conditions need to be met for slimes to spawn 
+        in the overlay areas (eg: swamps or flat worlds).
 
-    **Spawnday**      .. image:: img/map_overlay_spawnday.png
+    :Spawnday:
+        .. image:: img/map_overlay_spawnday.png
                     
-                      Shows where monsters can spawn at day. 
+        Shows where monsters can spawn at day. 
+        You'll need to find dark caves to see this overlay (or use 
+        ``render_mode = cave``).
 
-                      You'll need to find dark caves to see this 
-                      overlay (or use ``render_mode = cave``).
-
-    **Spawnnight**    .. image:: img/map_overlay_spawnnight.png
+    :Spawnnight:    
+        .. image:: img/map_overlay_spawnnight.png
                     
-                      Shows where monsters can spawn at night. 
+        Shows where monsters can spawn at night. 
+        This covers most of the map, except for areas with light sources.
     
-                      This covers most of the map, except for 
-                      areas with light sources.
-    ================  ======================
-
-
 
     At the moment there is only one overlay per map section allowed because the overlay
     is rendered just like a render mode on top of the world. If you want to render
