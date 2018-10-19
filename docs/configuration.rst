@@ -575,10 +575,17 @@ Map Options
         Renders only underground caves so you can see underground.
         Blocks are colored based on their height to make them easier
         to recognize.
+<<<<<<< HEAD
 
     :Cave:          
         .. image:: img/map_render_mode_cave.png
 
+=======
+
+    :Cave:          
+        .. image:: img/map_render_mode_cave.png
+
+>>>>>>> Change render view, render mode and overlay to use reStructured field lists rather than tables, for better html output.
         Same as ``cavelight`` but with ``plain`` lighting.
 
 .. note::
