@@ -91,6 +91,7 @@ TileRenderer::TileRenderer(const RenderView* render_view, mc::BlockStateRegistry
 	*/
 
 	waterlog_id = block_registry.getBlockID(mc::BlockState("minecraft:waterlog"));
+	waterlog_block_image = &block_images->getBlockImage(waterlog_id);
 }
 
 TileRenderer::~TileRenderer() {
@@ -232,6 +233,16 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 				block_images->prepareBiomeBlockImage(tile_image.image, block_image, getBiomeColor(top, block_image, current_chunk));
 			}
 
+			if (block_image.has_water_top) {
+				// get waterlog block image and biomize it
+				RGBAImage waterlog = waterlog_block_image->image;
+				const RGBAImage& waterlog_uv = waterlog_block_image->uv_image;
+				block_images->prepareBiomeBlockImage(waterlog, *waterlog_block_image, getBiomeColor(top, *waterlog_block_image, current_chunk));
+
+				// blend waterlog water surface on top of block
+				blockImageBlendTop(tile_image.image, block_image.uv_image, waterlog, waterlog_uv);
+			}
+
 			if (block_image.shadow_edges > 0) {
 				auto shadow_edge = [this, top](const mc::BlockPos& dir) {
 					const BlockImage& b = block_images->getBlockImage(getBlock(top + dir).id);
@@ -265,11 +276,7 @@ void TileRenderer::renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockP
 
 		addTileImage(id, *block_image, 0);
 
-		if (block_image->has_water_top) {
-			addTileImage(waterlog_id, block_images->getBlockImage(waterlog_id), 1);
-		}
-
-		// if this block is not transparent, then break
+		// if this block is not transparent, then stop looking for more blocks
 		if (!block_image->is_transparent) {
 			break;
 		}

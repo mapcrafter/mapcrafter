@@ -94,6 +94,8 @@ void blockImageTint(RGBAImage& block, const RGBAImage& mask,
 void blockImageTint(RGBAImage& block, uint32_t color);
 void blockImageTintHighContrast(RGBAImage& block, uint32_t color);
 void blockImageTintHighContrast(RGBAImage& block, const RGBAImage& mask, int face, uint32_t color);
+void blockImageBlendTop(RGBAImage& block, const RGBAImage& uv_mask,
+		const RGBAImage& top, const RGBAImage& top_uv_mask);
 void blockImageShadowEdges(RGBAImage& block, const RGBAImage& uv_mask,
 		uint8_t north, uint8_t south, uint8_t east, uint8_t west, uint8_t bottom);
 bool blockImageIsTransparent(RGBAImage& block, const RGBAImage& uv_mask);

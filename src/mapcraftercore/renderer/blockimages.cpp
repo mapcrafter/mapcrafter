@@ -378,6 +378,33 @@ void blockImageTintHighContrast(RGBAImage& block, const RGBAImage& mask, int fac
 	}
 }
 
+void blockImageBlendTop(RGBAImage& block, const RGBAImage& uv_mask,
+		const RGBAImage& top, const RGBAImage& top_uv_mask) {
+	assert(block.getWidth() == uv_mask.getWidth());
+	assert(block.getHeight() == uv_mask.getHeight());
+	assert(top.getWidth() == top_uv_mask.getWidth());
+	assert(top.getHeight() == top_uv_mask.getHeight());
+	assert(block.getWidth() == top.getWidth());
+	assert(block.getHeight() == top.getHeight());
+
+	size_t n = block.getWidth() * block.getHeight();
+	for (size_t i = 0; i < n; i++) {
+		RGBAPixel& pixel = block.data[i];
+		const RGBAPixel& uv_pixel = uv_mask.data[i];
+		const RGBAPixel& top_pixel = top.data[i];
+		const RGBAPixel& top_uv_pixel = top_uv_mask.data[i];
+
+		// basically what we want to do is:
+		// compare uv-coords of block vs. waterlog pixels
+		// if the uv-coords are the same and both textures pointing up, don't show water here
+		
+		// because we assume that top texture contains only the up-texture, "!=" does the job
+		if (uv_pixel != top_uv_pixel) {
+			blend(pixel, top_pixel);
+		}
+	}
+}
+
 void blockImageShadowEdges(RGBAImage& block, const RGBAImage& uv_mask,
 		uint8_t north, uint8_t south, uint8_t east, uint8_t west, uint8_t bottom) {
 	assert(block.getWidth() == uv_mask.getWidth());
