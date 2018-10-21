@@ -180,7 +180,7 @@ Part                       Description
 =========================  ======================================================================
 ``{index.html}``           Path to Mapcrafter index.html file, which includes the domain name.
 ``{Map}``                  Map being displayed, see ``map:<name>``.
-``{Orientation}``          The displayed orientation (isometric maps only). see ``rotations``.
+``{Orientation}``          The displayed orientation. see ``rotations``.
 ``{Zoom}``                 Current zoom level, see ``default_zoom``.
 ``{X}``, ``{Y}``, ``{Z}``  Current co-ordinates of the center of your screen, see `Cropping Your World`_.
 =========================  ======================================================================
@@ -217,7 +217,7 @@ General Options
     **Default:** default template directory (see :ref:`resources_textures`)
 
     This is the directory with the web template files. The renderer copies all
-    files from this directory to the output directory. You should open the the
+    files from this directory to the output directory. You should open the
     ``index.html`` file the output directory with your web-browser to see your
     rendered map!
 
@@ -374,8 +374,9 @@ Furthermore there are two different types of world cropping:
 
     It's best to read positions from a ``render_view = topdown``, from 
     `Mapcrafter URLs`_, or using the ``F3`` debug screen within Minecraft, 
-    as the x and z co-ordinates in bottom left of isometric maps can be 
-    misleading. 
+    as the x and z co-ordinates in bottom left of isometric maps might 
+    not be what you expect (they assume a specific `y` coordinate which 
+    usually isn't the block / hight you are pointing at). 
 
 .. note::
 
