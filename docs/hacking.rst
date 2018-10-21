@@ -4,7 +4,7 @@ Hacking Mapcrafter
 
 This page is all about making changes beyond the normal configuration file
 options. It assumes some knowledge of the internals of Mapcrafter,
-Blockcrafer, C++, Javascript and HTML.
+Blockcrafter, C++, Javascript and HTML.
 
 This page is a work-in-progress.
 
