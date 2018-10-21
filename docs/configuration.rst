@@ -400,6 +400,13 @@ Block mask is an extremely powerful cropping tool to hide or show specific block
 types. It's use requires a little knowledge about how Minecraft stores block information,
 and how Mapcrafter works with blocks.
 
+.. note::
+
+    Using numeric *block ids*, as described below, is a temporary thing. It works today,
+    but at some point, it will no longer be supported. Minecraft textual block ids 
+    (eg: ``minecraft:oak_wood``) will be implemented in the future. Beware!
+
+
 Minecraft stores two pieces of information about each block: a *block id* and optional
 *block data*. You can find details of *block ids* in the of `data values <https://minecraft.gamepedia.com/Java_Edition_data_values>`_
 on the Minecraft wiki. *Block data* is different for each *block id* and can be
