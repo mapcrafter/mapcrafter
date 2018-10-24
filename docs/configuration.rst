@@ -790,19 +790,33 @@ Marker Options
 .. note::
 
     These options are for the marker groups. You can specify them in the marker
-    sections (the ones starting with marker:) or you can specify them in the 
-    global:marker section.  If you specify them in the global section, these
+    sections (the ones starting with ``marker:``) or you can specify them in the 
+    ``global:marker`` section.  If you specify them in the global section, these
     options are default values and inherited into the marker sections if you 
     do not overwrite them.
 
-``name = <name>``
+.. note::
 
-    **Default:** *Name of the section*
+    Marker options have no direct effect in Mapcrafter. You must use the separate 
+    ``mapcrafter_markers`` executable. See :doc:`markers` for more information.
+
+**Name:** ``name = <name>``
+
+    **Default:** ``<name of the section>``
     
-    This is the name of the marker group. You can use a human-readable
-    name since this name is displayed in the webinterface.
+    .. image:: img/markers_list.png
+       :align: center
+       :alt: The names of marker groups.
 
-``prefix = <prefix>``
+    This is the name of the marker group. You should use a human-readable
+    name  (spaces, numbers, symbols, even unicode are all OK) since this 
+    name is displayed in the web-browser.
+
+    The configuration section for each marker group has also a name (in square brackets).
+    This section name is used for internal identifiers, so should be unique and only use
+    alphanumeric chars and underscore (definitely no spaces).
+
+**Matching Prefix:** ``prefix = <prefix>``
 
     **Default:** *Empty*
     
@@ -811,7 +825,9 @@ Marker Options
     all signs whose text starts with ``[home]`` are displayed as markers
     of this group.
 
-``postfix = <postfix>``
+    If you leave this empty, the marker section will match all signs.
+
+**Matching Postfix:** ``postfix = <postfix>``
 
     **Default:** *Empty*
     
@@ -820,12 +836,19 @@ Marker Options
 
 .. note::
 
-    Note that prefix and postfix may not overlap in the text sign to be
+    Note that ``prefix`` and ``postfix`` may not overlap in the text sign to be
     matched. Example: If you have prefix ``foo`` and postfix ``oo bar`` and
     your sign text says ``foo bar``, it won't be matched. A sign with text
     ``foo ooaoo bar`` would be matched.
 
-``title_format = <format>``
+.. note::
+
+    Marker configuration sections will only match each sign in your world once.
+    You should order your ``[marker:..]`` sections to be from most specific to
+    most generic. See :doc:`markers` for an example.
+
+
+**Title Format:** ``title_format = <format>``
 
     **Default:** ``%(text)``
     
@@ -854,45 +877,52 @@ Marker Options
     You can use different placeholders and other text in this format
     string as well, for example ``Marker at x=%(x), y=%(y), z=%(z): %(text)``.
 
-``text_format = <format>``
+    TODO: find out if newlines can be rendered.
 
-    **Default:** *Format of the title*
+**Text Format:** ``text_format = <format>``
+
+    **Default:** *Same as title_format*
     
     You can change the text shown in the marker popup windows as well.
     You can use the same placeholders you can use for the marker title.
 
-``icon = <icon>``
+    TODO: find out if HTML is rendered.
+
+**Icon:** ``icon = <icon>``
 
     **Default:** *Default Leaflet marker icon*
 
-    This is the icon used for the markers of this marker group. You
-    do not necessarily need to specify a custom icon, you can also
-    use the default icon.
-    
+    This is the icon used for the markers of this marker group. 
+    If left blank, the default Leaflet marker icon is used (a blue
+    map marker).
+
+    When using a custom icon, you should also specify the size of your 
+    custom icon in ``icon_size``.
+
     You can put your own icons into the ``static/markers/`` directory
     of your template directory. Then you only need to specify the
     filename of the icon, the path ``static/markers/`` is automatically
-    prepended. You should also specify the size of your custom icon.
+    prepended. 
 
-``icon_size = <size>``
+**Icon Size:** ``icon_size = <size>``
 
     **Default:** ``[24, 24]``
 
     This is the size of your icon. Specify it like ``[width, height]``.
     The icon size defaults to 24x24 pixels.
 
-``match_empty = true|false``
+**Match Empty Signs:** ``match_empty = true|false``
 
     **Default:** ``false``
     
     This option specifies whether empty signs can be matched as markers.
-    You have to set this to ``true`` if you set the prefix to an empty
-    string to show all remaining unmatched signs as markers and if you
-    want to show even empty signs as markers.
+    You have to set this to ``true`` and ``prefix`` to empty to 
+    match empty signs.
 
-``show_default = true|false``
+**Show Markers By Default:** ``show_default = true|false``
 
     **Default:** ``true``
     
     With this option you can hide a marker group in the web interface by
-    default.
+    default. If ``true``, the markers appear when you map loads. If ``false``
+    the markers are hidden until you click on the marker list.
