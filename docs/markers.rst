@@ -8,6 +8,11 @@ Mapcrafter allows you to add different markers easily to your rendered
 maps. Markers are organized in marker groups, this allows you show
 and hide different marker groups on the rendered map.
 
+.. image:: img/markers_map.png
+    :align: center
+    :alt: A map with markers.
+    
+    
 Automatically Generated Markers
 ===============================
 
