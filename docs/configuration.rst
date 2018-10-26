@@ -25,121 +25,156 @@ Mapcrafter render something (let's call it ``render.conf``):
     [map:myworld_isometric_day]
     world = My World
 
-As you can see the configuration files consist of different types of sections
-(e.g. ``[section]``) and containing assignments of configuration options to
-specific values (e.g. ``key = value``).  The sections have their names in
-square brackets, where the prefix with the colon shows the type of the section.
+Once you replace the sample `output_dir` and `input_dir`, you can run Mapcrafter
+like so: ::
 
-There are three types (actually four, but more about that later) of sections:
+    $ mapcrafter -c render.conf
 
-* World sections (e.g. sections starting with ``world:``)
-* Map sections (e.g. sections starting with ``map:``)
-* Marker sections (e.g. sections starting with ``marker:``, also see :ref:`markers`)
-
-Every world section represents a Minecraft world you want to render and needs a
-directory where it can find the Minecraft world (``input_dir`` of the world
-section ``myworld`` in the example above).
-
-Every map section represents an actual rendered map of a Minecraft world. You
-can specify things like rotation of the world, render view, render mode, texture
-pack, texture size, etc. for each map.
-
-In this example you can see that we have a world ``myworld`` in the directory
-``worlds/myworld/`` which is rendered as the map ``myworld_isometric_day``.  The
-directory ``output/`` is set as output directory. After the rendering you can
-open the ``index.html`` file in this directory and view your rendered map.
-
-As you can see the configuration option ``output_dir`` is not contained in any
-section - it's in the so called *root section*. That's because all maps are
-rendered into this directory and viewable via one ``index.html`` file, so the
-``output_dir`` option is the same for all maps in this configuration file.
-
-Also keep in mind that you can choose the section names (but not the section
-types!) on your own, though it is recommended to use some kind of a fixed
-format (for example ``<world name>_<render view>_<render mode>`` for maps) to
-keep things consistent.
-
-Let's have a look at a more advanced configuration file.
+If all went well, you should be able to open `/home/user/.minecraft/worlds/myworld/index.html`
+in your web-browser and see your map!
 
 A More Advanced Example
 =======================
 
+Configuration files are very versatile. Each configuration file lets you render 
+to exactly one output directory, but can read from multiple Minecraft worlds 
+(either totally different worlds, or different dimensions of the same world), 
+and have many rendered maps (eg: one isometric, another top-town, and yet another 
+with night-lighting).
+
+A more complex example and walk-through is given below, with comments to summarise
+each section. Scroll down for a reference of all possible options.
+
 .. code-block:: ini
 
-    output_dir = output
+    # Directory where Mapcrafter will save rendered maps
+    output_dir = /home/user/myworld_mapcrafter
+
+
+    # Directory of your Minecraft worlds.
+    [world:world]
+    input_dir = /home/user/.minecraft/worlds/world
+
+    # This is the same world as above, but the end dimension.
+    [world:world_end]
+    input_dir = /home/user/.minecraft/worlds/world
+    dimension = end
     
+    # This is a completely different world.
+    [world:creative]
+    input_dir = /home/user/.minecraft/worlds/creative
+
+
+    # Global options set defaults for all below map sections.    
     [global:map]
     world = world
     render_view = isometric
     render_mode = daylight
     rotations = top-left bottom-right
     texture_size = 12
+    image_format = png
+
     
-    [world:world]
-    input_dir = worlds/world
-    
-    [world:creative]
-    input_dir = worlds/creative
-    
+    # A map which picks up all defaults, with a nice name.
     [map:world_isometric_day]
     name = Normal World - Day
     
+    # This map renders at night time.
     [map:world_isometric_night]
     name = Normal World - Night
     render_mode = nightlight
     
+    # Cave render mode shows underground caves and structures.
     [map:world_isometric_cave]
     name = Normal World - Cave
     render_mode = cave
 
+    # A shrunken top-down map.
+    # NOTE: texture_size = 6 requires blockcrafter; scroll down more more details.
     [map:world_topdown_day]
     name = Normal World - Topdown overview
     render_view = topdown
     texture_size = 6
     texture_blur = 2
     tile_width = 3
+
+    # A world of The End dimension.
+    [map:world_isometric_end]
+    name = Normal World - The End
+    world = world_end
     
+
+    # The creative world, with custom spritemaps and all 4 rotations.
+    # NOTE: Use Blockcrafter to generate custom spritemaps.
     [map:creative_isometric_day]
     name = Creative World - Day
     world = creative
     render_mode = daylight
     rotations = top-left top-right bottom-right bottom-left
-    texture_dir = textures/special_textures
+    block_dir = data/special_blocks
     texture_size = 16
     
+    # The creative world, rendered at night.
     [map:creative_isometric_night]
     name = Creative World - Night
     world = creative
     render_mode = nightlight
     rotations = top-left top-right bottom-right bottom-left
-    texture_dir = textures/special_textures
+    block_dir = data/special_blocks
     texture_size = 16
 
-Here we have some more worlds and maps defined. We have a "normal" world which
-is rendered with the day, night, cave render mode, and also with the top view
-and a lower texture size as overview map. Also we have a "creative" world which
-is rendered with a special texture pack, higher texture size and all available
-world rotations with the day and night render mode (super fancy!).
 
-As you can see there is a new section ``global:map``. This section is used to
-set default values for all map sections. Because of this in this example every
-map has the world ``world``, the 3D isometric render view, the daylight render
-mode, the world rotations top-left and top-right and the 12px texture size as
-default. Of course you can overwrite these settings in every map section.  There
-is also a global section ``global:world`` for worlds, but at the moment there is
-only one configuration option for worlds (``input_dir``), so it doesn't make
-much sense setting a default value here.
+Configuration files consist of several sections (e.g. ``[section]``) and 
+*key+value* pairs (e.g. ``key = value``). Sections are named after a colon
+(eg: ``[section:name]``). Lines starting with a hash (``#``) are ignored and can
+be used as comments or notes.
+
+There are four sections which can configure Mapcrafter output:
+
+* The General section (values entered before any section),
+* World sections (e.g. sections starting with ``world:``),
+* Map sections (e.g. sections starting with ``map:``),
+* and Marker sections (e.g. sections starting with ``marker:``, also see :ref:`markers`).
+
+The *General* section specifies the ``output_dir`` where your map(s) will be
+rendered. A single ``index.html`` will created in this folder, which you can
+open in your web-browser and view all maps in your config. See `General Options`_ 
+for more details.
+
+Every *World* section represents a Minecraft world you want to render and needs 
+an ``input_dir``. You can also choose the dimension to render and a variety of 
+cropping options. See `World Options`_ for more details.
+
+Every *Map* section represents an actual rendered map of a Minecraft world. You
+can specify things like rotation of the world, render view, render mode, spritemaps, 
+texture size, etc. Each ``[map:...]`` will render a unique map you can
+view in your web-browser. Oh, and you need at least one map, or Mapcrafter
+can't render anything! See `Map Options`_ for more details.
+
+Marker sections allow you to add map markers based on Minecraft signs. It is
+are outlined in more detail in :ref:`markers`.
+
+Section names (eg: ``[map:a_section_name]``) are up to you. But it is
+recommended to use a fixed and consistent format (for example 
+``<world name>_<render view>_<render mode>`` for maps). Section names are also 
+used as internal identifiers in Mapcrafter and HTML files, and should only 
+contain letters, numbers and underscores (definitely no quotes or spaces).
+
+You can define defaults for each section using the special ``[global:<section name>]``
+section, eg: ``[global:map]``. So, if you prefer to use PNGs rather than JPEGs, 
+you can set ``image_format = png`` once in ``[global:map]`` rather than in every 
+``[map:...]`` you configure.
 
 Furthermore every map has as option ``name`` a name which is used in the web
 interface of the output HTML-File. This can be anything suitable to identify
-this map. In contrast to that the world and map names in the sections are used
-for internal representation and therefore should be unique and contain only
-alphanumeric chars and underscores.
+this map, including spaces, symbols and even Unicode. 
 
 When you have now your configuration file you can render your worlds with (see
-:ref:`command_line_options` for more options and usage)::
+:ref:`command_line_options` for more options and usage): ::
 
-    mapcrafter -c render.conf
+    $ mapcrafter -c render.conf
+
+----
 
 There are tons of other options to customize your rendered maps. Before a
 reference of all available options, here is a quick overview of interesting
@@ -149,7 +184,7 @@ things you can do:
 * World cropping (only render specific parts of your world)
 * Block mask (skip rendering / render only specific types blocks)
 * Different render views, render modes, overlays
-* Use custom texture packs, texture sizes, apply a blur effect to textures
+* Use custom texture packs, or texture sizes
 * Custom tile widths
 * Different image formats
 * Custom lighting intensity
@@ -436,7 +471,7 @@ extra header line).
 
 .. note::
 
-    If you use Blockcrafter to create your own block data files and textures, the example
+    If you use Blockcrafter to create your own block data files and spritemaps, the example
     ``blockid`` numbers given here will not work! Nor will the linked texture block data 
     file above. These examples only apply for vanilla Minecraft 1.13 - different Minecraft 
     versions, the presence of mods or custom resource packs will change these.
@@ -654,9 +689,27 @@ Map Options
     is required. If you want a high detail, use texture size 16, but texture 
     size 12 looks still good and is faster to render.
 
-    Mapcrafter's pre-rendered textures include sizes 16 and 12. If you want to 
+    Mapcrafter's pre-rendered spritemaps include sizes 16 and 12. If you want to 
     use other sizes, or custom resource packs you will need to generate them using 
-    `blockcrafter <https://github.com/mapcrafter/blockcrafter>`_.
+    `Blockcrafter <https://github.com/mapcrafter/blockcrafter>`_.
+
+
+**Block Directory** ``block_dir = <directory>``
+
+    **Default:** ``data/blocks``
+
+    This is the folder where spritemaps files are located. You can set this
+    to use textures from a custom resource pack. 
+
+    The standard Minecraft spritemaps are included with Mapcrafter, if you want to
+    use spritemaps from a custom resource pack, you should use `Blockcrafter 
+    <https://github.com/mapcrafter/blockcrafter>`_ to render new spritemaps.
+    
+    You can use the following command to find the location of the ``block_dir``
+    Mapcrafter is using::
+
+        $ mapcrafter --find-resources
+
 
 **Tile Width** ``tile_width = <number>``
 
@@ -779,7 +832,9 @@ Map Options
     Options removed entirely: ``crop_unpopulated_chunks`` (unpopulated chunks
     are always cropped), ``render_unknown_blocks`` (unknown blocks are extremely
     rare, and always rendered).
-
+    
+    ``texture_dir`` should now use ``block_dir`` to pick up custom textures.
+    
 -----
 
 .. _config_marker_options:
@@ -790,19 +845,33 @@ Marker Options
 .. note::
 
     These options are for the marker groups. You can specify them in the marker
-    sections (the ones starting with marker:) or you can specify them in the 
-    global:marker section.  If you specify them in the global section, these
+    sections (the ones starting with ``marker:``) or you can specify them in the 
+    ``global:marker`` section.  If you specify them in the global section, these
     options are default values and inherited into the marker sections if you 
     do not overwrite them.
 
-``name = <name>``
+.. note::
 
-    **Default:** *Name of the section*
+    Marker options have no direct effect in Mapcrafter. You must use the separate 
+    ``mapcrafter_markers`` executable. See :doc:`markers` for more information.
+
+**Name:** ``name = <name>``
+
+    **Default:** ``<name of the section>``
     
-    This is the name of the marker group. You can use a human-readable
-    name since this name is displayed in the webinterface.
+    .. image:: img/markers_list.png
+       :align: center
+       :alt: The names of marker groups.
 
-``prefix = <prefix>``
+    This is the name of the marker group. You should use a human-readable
+    name  (spaces, numbers, symbols, even unicode are all OK) since this 
+    name is displayed in the web-browser.
+
+    The configuration section for each marker group has also a name (in square brackets).
+    This section name is used for internal identifiers, so should be unique and only use
+    alphanumeric chars and underscore (definitely no spaces).
+
+**Matching Prefix:** ``prefix = <prefix>``
 
     **Default:** *Empty*
     
@@ -811,7 +880,9 @@ Marker Options
     all signs whose text starts with ``[home]`` are displayed as markers
     of this group.
 
-``postfix = <postfix>``
+    If you leave this empty, the marker section will match all signs.
+
+**Matching Postfix:** ``postfix = <postfix>``
 
     **Default:** *Empty*
     
@@ -820,12 +891,19 @@ Marker Options
 
 .. note::
 
-    Note that prefix and postfix may not overlap in the text sign to be
+    Note that ``prefix`` and ``postfix`` may not overlap in the text sign to be
     matched. Example: If you have prefix ``foo`` and postfix ``oo bar`` and
     your sign text says ``foo bar``, it won't be matched. A sign with text
     ``foo ooaoo bar`` would be matched.
 
-``title_format = <format>``
+.. note::
+
+    Marker configuration sections will only match each sign in your world once.
+    You should order your ``[marker:..]`` sections to be from most specific to
+    most generic. See :doc:`markers` for an example.
+
+
+**Title Format:** ``title_format = <format>``
 
     **Default:** ``%(text)``
     
@@ -854,45 +932,52 @@ Marker Options
     You can use different placeholders and other text in this format
     string as well, for example ``Marker at x=%(x), y=%(y), z=%(z): %(text)``.
 
-``text_format = <format>``
+    TODO: find out if newlines can be rendered.
 
-    **Default:** *Format of the title*
+**Text Format:** ``text_format = <format>``
+
+    **Default:** *Same as title_format*
     
     You can change the text shown in the marker popup windows as well.
     You can use the same placeholders you can use for the marker title.
 
-``icon = <icon>``
+    TODO: find out if HTML is rendered.
+
+**Icon:** ``icon = <icon>``
 
     **Default:** *Default Leaflet marker icon*
 
-    This is the icon used for the markers of this marker group. You
-    do not necessarily need to specify a custom icon, you can also
-    use the default icon.
-    
+    This is the icon used for the markers of this marker group. 
+    If left blank, the default Leaflet marker icon is used (a blue
+    map marker).
+
+    When using a custom icon, you should also specify the size of your 
+    custom icon in ``icon_size``.
+
     You can put your own icons into the ``static/markers/`` directory
     of your template directory. Then you only need to specify the
     filename of the icon, the path ``static/markers/`` is automatically
-    prepended. You should also specify the size of your custom icon.
+    prepended. 
 
-``icon_size = <size>``
+**Icon Size:** ``icon_size = <size>``
 
     **Default:** ``[24, 24]``
 
     This is the size of your icon. Specify it like ``[width, height]``.
     The icon size defaults to 24x24 pixels.
 
-``match_empty = true|false``
+**Match Empty Signs:** ``match_empty = true|false``
 
     **Default:** ``false``
     
     This option specifies whether empty signs can be matched as markers.
-    You have to set this to ``true`` if you set the prefix to an empty
-    string to show all remaining unmatched signs as markers and if you
-    want to show even empty signs as markers.
+    You have to set this to ``true`` and ``prefix`` to empty to 
+    match empty signs.
 
-``show_default = true|false``
+**Show Markers By Default:** ``show_default = true|false``
 
     **Default:** ``true``
     
     With this option you can hide a marker group in the web interface by
-    default.
+    default. If ``true``, the markers appear when you map loads. If ``false``
+    the markers are hidden until you click on the marker list.
