@@ -33,6 +33,8 @@ like so: ::
 If all went well, you should be able to open `/home/user/.minecraft/worlds/myworld/index.html`
 in your web-browser and see your map!
 
+(See :ref:`command_line_options` for more details).
+
 A More Advanced Example
 =======================
 
@@ -42,8 +44,8 @@ to exactly one output directory, but can read from multiple Minecraft worlds
 and have many rendered maps (eg: one isometric, another top-town, and yet another 
 with night-lighting).
 
-A more complex example and walk-through is given below, with comments to summarise
-each section. Scroll down for a reference of all possible options.
+A more complex example, with comments to summarise each section, is given below. 
+Scroll down for a reference of all possible options.
 
 .. code-block:: ini
 
@@ -124,6 +126,23 @@ each section. Scroll down for a reference of all possible options.
     texture_size = 16
 
 
+There are tons of other options to customize your rendered maps. Before a
+reference of fundamentals and all available options, here is a quick overview 
+of interesting things you can do:
+
+* Default view / zoom level / rotation in web interface
+* World cropping (only render specific parts of your world)
+* Block mask (skip rendering / render only specific types blocks)
+* Different render views, render modes, overlays
+* Use custom texture packs, or texture sizes
+* Custom tile widths
+* Different image formats
+* Custom lighting intensity
+
+
+Configuration File Fundamentals
+===============================
+
 Configuration files consist of several sections (e.g. ``[section]``) and 
 *key+value* pairs (e.g. ``key = value``). Sections are named after a colon
 (eg: ``[section:name]``). Lines starting with a hash (``#``) are ignored and can
@@ -168,26 +187,6 @@ you can set ``image_format = png`` once in ``[global:map]`` rather than in every
 Furthermore every map has as option ``name`` a name which is used in the web
 interface of the output HTML-File. This can be anything suitable to identify
 this map, including spaces, symbols and even Unicode. 
-
-When you have now your configuration file you can render your worlds with (see
-:ref:`command_line_options` for more options and usage): ::
-
-    $ mapcrafter -c render.conf
-
-----
-
-There are tons of other options to customize your rendered maps. Before a
-reference of all available options, here is a quick overview of interesting
-things you can do:
-
-* Default view / zoom level / rotation in web interface
-* World cropping (only render specific parts of your world)
-* Block mask (skip rendering / render only specific types blocks)
-* Different render views, render modes, overlays
-* Use custom texture packs, or texture sizes
-* Custom tile widths
-* Different image formats
-* Custom lighting intensity
 
 
 .. _Mapcrafter URL:
