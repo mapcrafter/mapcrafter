@@ -103,9 +103,9 @@ each section. Scroll down for a reference of all possible options.
     name = Normal World - The End
     world = world_end
     
-    
-    # The creative world, with custom texture blocks and all 4 rotations.
-    # Use Blockcrafter to generate custom blocks.
+
+    # The creative world, with custom spritemaps and all 4 rotations.
+    # NOTE: Use Blockcrafter to generate custom spritemaps.
     [map:creative_isometric_day]
     name = Creative World - Day
     world = creative
@@ -146,8 +146,8 @@ an ``input_dir``. You can also choose the dimension to render and a variety of
 cropping options. See `World Options`_ for more details.
 
 Every *Map* section represents an actual rendered map of a Minecraft world. You
-can specify things like rotation of the world, render view, render mode, texture
-blocks, texture size, etc. Each ``[map:...]`` will render a unique map you can
+can specify things like rotation of the world, render view, render mode, spritemaps, 
+texture size, etc. Each ``[map:...]`` will render a unique map you can
 view in your web-browser. Oh, and you need at least one map, or Mapcrafter
 can't render anything! See `Map Options`_ for more details.
 
@@ -471,7 +471,7 @@ extra header line).
 
 .. note::
 
-    If you use Blockcrafter to create your own block data files and textures, the example
+    If you use Blockcrafter to create your own block data files and spritemaps, the example
     ``blockid`` numbers given here will not work! Nor will the linked texture block data 
     file above. These examples only apply for vanilla Minecraft 1.13 - different Minecraft 
     versions, the presence of mods or custom resource packs will change these.
@@ -689,7 +689,7 @@ Map Options
     is required. If you want a high detail, use texture size 16, but texture 
     size 12 looks still good and is faster to render.
 
-    Mapcrafter's pre-rendered textures include sizes 16 and 12. If you want to 
+    Mapcrafter's pre-rendered spritemaps include sizes 16 and 12. If you want to 
     use other sizes, or custom resource packs you will need to generate them using 
     `Blockcrafter <https://github.com/mapcrafter/blockcrafter>`_.
 
@@ -698,12 +698,12 @@ Map Options
 
     **Default:** ``data/blocks``
 
-    This is the folder where texture block files are located. You can set this
+    This is the folder where spritemaps files are located. You can set this
     to use textures from a custom resource pack. 
 
-    The standard Minecraft textures are included with Mapcrafter, if you want to
-    use textures from a custom resource pack, you should use `Blockcrafter 
-    <https://github.com/mapcrafter/blockcrafter>`_ to render texture block files.
+    The standard Minecraft spritemaps are included with Mapcrafter, if you want to
+    use spritemaps from a custom resource pack, you should use `Blockcrafter 
+    <https://github.com/mapcrafter/blockcrafter>`_ to render new spritemaps.
     
     You can use the following command to find the location of the ``block_dir``
     Mapcrafter is using::
@@ -832,7 +832,9 @@ Map Options
     Options removed entirely: ``crop_unpopulated_chunks`` (unpopulated chunks
     are always cropped), ``render_unknown_blocks`` (unknown blocks are extremely
     rare, and always rendered).
-
+    
+    ``texture_dir`` should now use ``block_dir`` to pick up custom textures.
+    
 -----
 
 .. _config_marker_options:
