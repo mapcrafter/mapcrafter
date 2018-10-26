@@ -101,7 +101,6 @@ public:
 	renderer::RenderModeType getRenderMode() const;
 	renderer::OverlayType getOverlay() const;
 	std::set<int> getRotations() const;
-	fs::path getTextureDir() const;
 	fs::path getBlockDir() const;
 	int getTextureSize() const;
 	int getTextureBlur() const;
@@ -115,8 +114,6 @@ public:
 
 	double getLightingIntensity() const;
 	double getLightingWaterIntensity() const;
-	bool renderUnknownBlocks() const;
-	bool renderLeavesTransparent() const;
 	bool renderBiomes() const;
 	bool useImageModificationTimes() const;
 
@@ -144,7 +141,6 @@ private:
 	Field<std::string> rotations;
 	std::set<int> rotations_set;
 
-	Field<fs::path> texture_dir;
 	Field<fs::path> block_dir;
 	Field<int> texture_size, texture_blur, tile_width;
 	Field<double> water_opacity;
@@ -155,7 +151,7 @@ private:
 
 	Field<double> lighting_intensity, lighting_water_intensity;
 	Field<bool> cave_high_contrast;
-	Field<bool> render_unknown_blocks, render_leaves_transparent, render_biomes, use_image_mtimes;
+	Field<bool> render_biomes, use_image_mtimes;
 
 	std::set<TileSetID> tile_sets;
 };

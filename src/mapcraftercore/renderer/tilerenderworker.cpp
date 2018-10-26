@@ -115,14 +115,21 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 
 		/*
 		// draws a border on the tile
-		int size = settings.tile_size;
-		for (int x = 0; x < size; x++)
-			for (int y = 0; y < size; y++) {
-				if (x < 5 || x > size-5)
-					tile.setPixel(x, y, rgba(0, 0, 255, 255));
-				if (y < 5 || y > size-5)
-					tile.setPixel(x, y, rgba(0, 0, 255, 255));
+		uint32_t color = rgba(0, 0, 255, 255);
+		if (tile.getTilePos() == TilePos(0, 0)) {
+			color = rgba(255, 0, 0, 255);
+		}
+		int border = 1;
+		for (int x = 0; x < image.getWidth(); x++) {
+			for (int y = 0; y < image.getHeight(); y++) {
+				if (x < border || x+1 > image.getWidth() - border) {
+					image.setPixel(x, y, color);
+				}
+				if (y < border || y+1 > image.getHeight() - border) {
+					image.setPixel(x, y, color);
+				}
 			}
+		}
 		*/
 
 		// save it

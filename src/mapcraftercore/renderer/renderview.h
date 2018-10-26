@@ -72,19 +72,6 @@ public:
 			RenderMode* render_mode) const = 0;
 
 	/**
-	 * Creates an instance of the render view specific render mode renderer class.
-	 *
-	 * Have a look at each base render mode: There is an abstract class / interface
-	 * (like OverlayRenderer or LightingRenderer) that you have to implement for
-	 * the render view.
-	 *
-	 * Sorry for the ugly "const RenderModeRendererType& renderer" reference thingy.
-	 * Ähm, ya know, circular dependencies and forward declarations and stuff.
-	 */
-	virtual RenderModeRenderer* createRenderModeRenderer(
-			const RenderModeRendererType& renderer) const = 0;
-
-	/**
 	 * Configures a block images object by calling some (eventually per render view
 	 * specific) methods of the block images and passing information from the world- and
 	 * map configuration. It is possible to call these methods manually (for example

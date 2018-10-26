@@ -77,10 +77,8 @@ protected:
 	void renderBlocks(int x, int y, mc::BlockPos top, const mc::BlockPos& dir, std::set<TileImage>& tile_images);
 	virtual void renderTopBlocks(const TilePos& tile_pos, std::set<TileImage>& tile_images) {}
 
-	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
-	Biome getBiomeOfBlock(const mc::BlockPos& pos, const mc::Chunk* chunk);
+	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID);
 	uint32_t getBiomeColor(const mc::BlockPos& pos, const BlockImage& block, const mc::Chunk* chunk);
-	uint16_t checkNeighbors(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 	mc::BlockStateRegistry& block_registry;
 
@@ -105,7 +103,10 @@ protected:
 	// full water blocks will be replaced by these water blocks
 	std::vector<uint16_t> partial_full_water_ids, partial_ice_ids;
 
+	std::vector<uint16_t> lily_pad_ids;
+
 	uint16_t waterlog_id;
+	const BlockImage* waterlog_block_image;
 };
 
 }

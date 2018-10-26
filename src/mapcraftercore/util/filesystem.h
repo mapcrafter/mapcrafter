@@ -67,10 +67,8 @@ PathList findResourceDirs(const fs::path& executable);
 PathList findTemplateDirs(const fs::path& executable);
 
 /**
- * Returns all possible Mapcrafter texture directories.
+ * Returns all possible Mapcrafter block directories.
  */
-PathList findTextureDirs(const fs::path& executable);
-
 PathList findBlockDirs(const fs::path& executable);
 
 /**
@@ -84,10 +82,8 @@ PathList findLoggingConfigFiles(const fs::path& executable);
 fs::path findTemplateDir();
 
 /**
- * Returns the first existing texture directory.
+ * Returns the first existing block directory.
  */
-fs::path findTextureDir();
-
 fs::path findBlockDir();
 
 /**

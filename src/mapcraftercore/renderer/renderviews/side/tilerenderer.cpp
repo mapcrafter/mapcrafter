@@ -56,11 +56,11 @@ int SideTileRenderer::getTileSize() const {
 }
 
 int SideTileRenderer::getTileWidth() const {
-	return block_images->getBlockWidth() * 16;
+	return block_images->getBlockWidth() * 16 * tile_width;
 }
 
 int SideTileRenderer::getTileHeight() const {
-	return block_images->getBlockHeight() * 8;
+	return block_images->getBlockHeight() * 8 * tile_width;
 }
 
 void SideTileRenderer::renderTopBlocks(const TilePos& tile_pos, std::set<TileImage>& tile_images) {
@@ -76,7 +76,7 @@ void SideTileRenderer::renderTopBlocks(const TilePos& tile_pos, std::set<TileIma
 			for (int z = 0; z < 16 + 1; z++) {
 				for (int x = 0; x < 16; x++) {
 					int px = dx + x * block_width;
-					int py = dz + z * block_height/2 - block_height/2;
+					int py = dz + z * block_height / 2 - block_height / 2;
 					renderBlocks(px, py, blockpos + mc::BlockPos(x, z, 0), mc::BlockPos(0, -1, -1), tile_images);
 				}
 			}
