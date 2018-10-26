@@ -11,13 +11,13 @@ and hide different marker groups on the rendered map.
 .. image:: img/markers_map.png
     :align: center
     :alt: A map with markers.
-    
+
     
 Automatically Generated Markers
 ===============================
 
-Mapcrafter is able to automatically generate markers from `signs <TODO link to minecraft signs>`_ you place
-in your Minecraft world.
+Mapcrafter is able to automatically generate markers from `signs <https://minecraft.gamepedia.com/Sign>`_ 
+you place in your Minecraft world.
 
 A special marker section type is used to configure automatically generated
 marker groups. Here is an example:
@@ -193,11 +193,9 @@ Here are the available options for the markers:
 ``text``
 
 	**Default:** *Title of the marker*
-
-	This is the text of the marker popup window.
-	If you do not specify anything, the title of the marker is used.
-
-    TODO: work out if HTML is possible here.
+    
+    This is the text of the marker popup window. If you do not specify 
+    anything, the title of the marker is used. HTML can be used for formatting.
 
 ``icon``
 
