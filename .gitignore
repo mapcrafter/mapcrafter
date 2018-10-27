@@ -16,3 +16,4 @@ gmon.out
 
 # OSX
 .DS_Store
+docs/_build/
