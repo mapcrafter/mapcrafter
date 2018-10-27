@@ -26,14 +26,13 @@ Mapcrafter render something (let's call it ``render.conf``):
     world = My World
 
 Once you replace the sample `output_dir` and `input_dir`, you can run Mapcrafter
-like so: ::
+like so (see :ref:`command_line_options` for more details): ::
 
     $ mapcrafter -c render.conf
 
 If all went well, you should be able to open `/home/user/.minecraft/worlds/myworld/index.html`
 in your web-browser and see your map!
 
-(See :ref:`command_line_options` for more details).
 
 A More Advanced Example
 =======================
@@ -125,6 +124,8 @@ Scroll down for a reference of all possible options.
     block_dir = data/special_blocks
     texture_size = 16
 
+You can find other `example maps <https://github.com/mapcrafter/mapcrafter/wiki/Example-maps>`_ 
+on the Github Wiki. Other configuration examples may be available there.
 
 There are tons of other options to customize your rendered maps. Before a
 reference of fundamentals and all available options, here is a quick overview 
