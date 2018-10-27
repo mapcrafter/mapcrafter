@@ -931,16 +931,13 @@ Marker Options
     You can use different placeholders and other text in this format
     string as well, for example ``Marker at x=%(x), y=%(y), z=%(z): %(text)``.
 
-    TODO: find out if newlines can be rendered.
-
 **Text Format:** ``text_format = <format>``
 
     **Default:** *Same as title_format*
     
-    You can change the text shown in the marker popup windows as well.
-    You can use the same placeholders you can use for the marker title.
-
-    TODO: find out if HTML is rendered.
+    You can change the text shown in the marker popup windows as well. 
+    You can use the same placeholders you can use for the marker title. 
+    And, you can use HTML for formatting.
 
 **Icon:** ``icon = <icon>``
 
