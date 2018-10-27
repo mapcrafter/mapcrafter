@@ -489,7 +489,6 @@ extra header line).
 
 -----
 
-
 Map Options
 -----------
 
