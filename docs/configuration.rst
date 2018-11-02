@@ -105,8 +105,8 @@ Scroll down for a reference of all possible options.
     world = world_end
     
 
-    # The creative world, with custom spritemaps and all 4 rotations.
-    # NOTE: Use Blockcrafter to generate custom spritemaps.
+    # The creative world, with custom block sprites and all 4 rotations.
+    # NOTE: Use Blockcrafter to generate custom sprites.
     [map:creative_isometric_day]
     name = Creative World - Day
     world = creative
@@ -145,11 +145,12 @@ Configuration File Fundamentals
 ===============================
 
 Configuration files consist of several sections (e.g. ``[section]``) and 
-*key+value* pairs (e.g. ``key = value``). Sections are named after a colon
-(eg: ``[section:name]``). Lines starting with a hash (``#``) are ignored and can
-be used as comments or notes.
+*key+value* pairs (e.g. ``key = value``). Sections have two parts to them:
+their type and their name, separated by a colon (eg: ``[type:name]``). 
+Lines starting with a hash (``#``) are ignored and can be used as comments 
+or notes.
 
-There are four sections which can configure Mapcrafter output:
+There are four section types which can configure Mapcrafter output:
 
 * The General section (values entered before any section),
 * World sections (e.g. sections starting with ``world:``),
@@ -166,28 +167,29 @@ an ``input_dir``. You can also choose the dimension to render and a variety of
 cropping options. See `World Options`_ for more details.
 
 Every *Map* section represents an actual rendered map of a Minecraft world. You
-can specify things like rotation of the world, render view, render mode, spritemaps, 
+can specify things like rotation of the world, render view, render mode, block sprites, 
 texture size, etc. Each ``[map:...]`` will render a unique map you can
 view in your web-browser. Oh, and you need at least one map, or Mapcrafter
 can't render anything! See `Map Options`_ for more details.
 
 Marker sections allow you to add map markers based on Minecraft signs. It is
-are outlined in more detail in :ref:`markers`.
+outlined in more detail in :ref:`markers`.
 
-Section names (eg: ``[map:a_section_name]``) are up to you. But it is
-recommended to use a fixed and consistent format (for example 
+Section names (eg: ``[map:a_section_name]``) are up to you. They are used to
+refer back to other section (eg: in a ``map`` section, to specify which ``world``
+to render). So it is recommended to use a fixed and consistent format (for example 
 ``<world name>_<render view>_<render mode>`` for maps). Section names are also 
 used as internal identifiers in Mapcrafter and HTML files, and should only 
 contain letters, numbers and underscores (definitely no quotes or spaces).
 
-You can define defaults for each section using the special ``[global:<section name>]``
+You can define defaults for each section using the special ``[global:<section type>]``
 section, eg: ``[global:map]``. So, if you prefer to use PNGs rather than JPEGs, 
 you can set ``image_format = png`` once in ``[global:map]`` rather than in every 
 ``[map:...]`` you configure.
 
-Furthermore every map has as option ``name`` a name which is used in the web
-interface of the output HTML-File. This can be anything suitable to identify
-this map, including spaces, symbols and even Unicode. 
+In addition to the section name ``[section:name]``, you can set a "pretty" name
+for each map using the ``name`` option. This is used in the web interface 
+to identify your map. It can be anything including spaces, symbols and even Unicode. 
 
 
 .. _Mapcrafter URL:
@@ -471,7 +473,7 @@ extra header line).
 
 .. note::
 
-    If you use Blockcrafter to create your own block data files and spritemaps, the example
+    If you use Blockcrafter to create your own block data files and block sprites, the example
     ``blockid`` numbers given here will not work! Nor will the linked texture block data 
     file above. These examples only apply for vanilla Minecraft 1.13 - different Minecraft 
     versions, the presence of mods or custom resource packs will change these.
@@ -689,7 +691,7 @@ Map Options
     is required. If you want a high detail, use texture size 16, but texture 
     size 12 looks still good and is faster to render.
 
-    Mapcrafter's pre-rendered spritemaps include sizes 16 and 12. If you want to 
+    Mapcrafter's pre-rendered block sprites include sizes 16 and 12. If you want to 
     use other sizes, or custom resource packs you will need to generate them using 
     `Blockcrafter <https://github.com/mapcrafter/blockcrafter>`_.
 
@@ -698,12 +700,12 @@ Map Options
 
     **Default:** ``data/blocks``
 
-    This is the folder where spritemaps files are located. You can set this
+    This is the folder where block sprite files are located. You can set this
     to use textures from a custom resource pack. 
 
-    The standard Minecraft spritemaps are included with Mapcrafter, if you want to
-    use spritemaps from a custom resource pack, you should use `Blockcrafter 
-    <https://github.com/mapcrafter/blockcrafter>`_ to render new spritemaps.
+    The standard Minecraft block sprites are included with Mapcrafter, if you 
+    want to use sprites from a custom resource pack, you should use `Blockcrafter 
+    <https://github.com/mapcrafter/blockcrafter>`_ to render new images.
     
     You can use the following command to find the location of the ``block_dir``
     Mapcrafter is using::
@@ -820,20 +822,24 @@ Map Options
 
 .. note::
 
-    **Obsolete Options**
+    **Obsolete and Changed Options**
 
-    Several options were removed in the Minecraft 1.13 overhaul in Mapcrafter 
-    vNext. Some of these have been moved into the `blockcrafter 
+    Several options were removed or changed in the Minecraft 1.13 overhaul in 
+    Mapcrafter vNext. Some of these have been moved into the `BlockCrafter 
     <https://github.com/mapcrafter/blockcrafter>`_ project.
 
-    Options moved to blockcrafter: ``texture_dir``, ``texture_blur``, 
-    ``water_opacity``, ``render_leaves_transparent``.
+    Instead of ``texture_dir``, you should use ``block_dir`` to pick up custom 
+    textures or sprites.
+
+    Options moved to BlockCrafter: ``texture_blur``, ``water_opacity``, 
+    ``render_leaves_transparent``. However, these are not currently configurable
+    in BlockCrafter.
 
     Options removed entirely: ``crop_unpopulated_chunks`` (unpopulated chunks
     are always cropped), ``render_unknown_blocks`` (unknown blocks are extremely
     rare, and always rendered).
     
-    ``texture_dir`` should now use ``block_dir`` to pick up custom textures.
+    
     
 -----
 
