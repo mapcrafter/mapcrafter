@@ -825,7 +825,7 @@ Map Options
     **Obsolete and Changed Options**
 
     Several options were removed or changed in the Minecraft 1.13 overhaul in 
-    Mapcrafter vNext. Some of these have been moved into the `BlockCrafter 
+    Mapcrafter 3.0. Some of these have been moved into the `BlockCrafter 
     <https://github.com/mapcrafter/blockcrafter>`_ project.
 
     Instead of ``texture_dir``, you should use ``block_dir`` to pick up custom 
