@@ -74,6 +74,7 @@ Documentation Contents
    configuration
    logging
    markers
+   hacking
 
 Indices and tables
 ==================
