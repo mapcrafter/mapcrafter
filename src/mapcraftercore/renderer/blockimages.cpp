@@ -558,7 +558,7 @@ bool RenderedBlockImages::loadBlockImages(fs::path path, std::string view, int r
 	std::string first_line;
 	
 	std::getline(in, first_line);
-	std::vector<std::string> parts = util::split(first_line, ' ');
+	std::vector<std::string> parts = util::split(util::trim(first_line), ' ');
 	bool ok = true;
 	int columns = 0;
 	try {
