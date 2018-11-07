@@ -335,3 +335,4 @@ thread](http://www.minecraftforum.net/topic/1632003-mapcrafter-fast-minecraft-ma
   * Render Minecraft Worlds to tiles and an HTML-File to view them like a
     Google Map
   * Incremental rendering, multithreading
+
