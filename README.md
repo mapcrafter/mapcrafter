@@ -1,5 +1,7 @@
 # Mapcrafter [![Build Status](https://travis-ci.org/mapcrafter/mapcrafter.svg?branch=master)](https://travis-ci.org/mapcrafter/mapcrafter) #
 
+**For Minecraft 1.13, see issue [#113](https://github.com/mapcrafter/mapcrafter/issues/275). TL;DR: Minecraft 1.13 support is pretty much complete, few small features and full documentation are still in progress. Can be built from source from `world113` branch or [nightly packages](https://mapcrafter.org/downloads/nightly) can be used.**
+
 by Moritz Hilscher
 
 *Due to my university studies and other projects, unfortunately I'm not able to develop new features for Mapcrafter anymore. I'll try to keep up with the issues on GitHub from time to time, so if you're experiencing a problem, don't mind reporting it. You can still submit feature requests in case I or someone else decides to do some work on Mapcrafter. I'm happy about PRs too. If you want to work on Mapcrafter and need help with something just ask me (Mail, IRC, GitHub), I can tell you a bit about how the project is structured.*
