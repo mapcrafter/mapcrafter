@@ -11,6 +11,8 @@ import zipfile
 #dirs = ("", "entity", "entity/chest", "colormap", "blocks", "entity/shulker", "entity/bed")
 dirs = ("", "colormap", "blocks")
 assets = "assets/minecraft/textures/"
+# block assets dir name changed since v1.13 and we also keep old paths for backwards compatibility
+blockdirs = (assets + "block/", assets + "blocks/")
 files = [
 	#("entity/chest/normal.png", assets + "entity/chest/normal.png"),
 	#("entity/chest/normal_double.png", assets + "entity/chest/normal_double.png"),
@@ -90,23 +92,20 @@ if __name__ == "__main__":
 	print("Extracting block images:")
 	found, extracted, skipped = 0, 0, 0
 	for info in jar.infolist():
-		if info.filename.startswith("assets/minecraft/textures/blocks/") and info.filename != "assets/minecraft/textures/blocks/":
-			filename = info.filename.replace("assets/minecraft/textures/", "")
+		if info.filename.startswith(tuple(blockdirs)) and not info.filename in blockdirs:
+			filename = info.filename.replace(assets, "")
 			# unpack only PNGs, no other files (or directory entries)
 			if not filename.endswith(".png"):
 				continue
-			# make sure to not unpack subdirectories
-			base_path = os.path.dirname(filename)
-			if base_path != os.path.dirname("blocks/test.png"):
+			# make sure to not unpack subdirectories						
+			if not filename.count("/") == 1:
 				continue
-
-			filename = os.path.join(args["outdir"], filename)
+			# remove basename from path and add the actual basename that mapcrafter is using
+			filename = os.path.join(args["outdir"], "blocks/" + filename.rsplit("/", 1)[1])
 			found += 1
-			
 			if os.path.exists(filename) and not args["force"]:
 				skipped += 1
 				continue
-			
 			fin = jar.open(info)
 			fout = open(filename, "wb")
 			fout.write(fin.read())
