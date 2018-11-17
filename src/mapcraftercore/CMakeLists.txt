@@ -3,6 +3,7 @@ set(CMAKE_REQUIRED_FLAGS -std=c++0x)
 CHECK_CXX_SOURCE_COMPILES("int main() { void* p = nullptr; }" HAVE_NULLPTR)
 CHECK_CXX_SOURCE_COMPILES("enum class Test { A=0, B=1, C=3 }; int main() { Test::A < Test::C; }" HAVE_ENUM_CLASS_COMPARISON)
 CHECK_CXX_SOURCE_COMPILES("enum class Test; enum class Test { A, B }; int main() { Test::A == Test::B; }" HAVE_ENUM_CLASS_FORWARD_DECLARATION)
+set(CMAKE_REQUIRED_FLAGS)
 
 INCLUDE(CheckIncludeFiles)
 CHECK_INCLUDE_FILES("endian.h" HAVE_ENDIAN_H)
