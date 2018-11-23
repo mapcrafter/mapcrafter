@@ -79,21 +79,21 @@ Here is an example ``markers.js`` file:
                 "world" : [
                     // example marker, pretty format:
                     {
-                        // position ([x, z, y])
-                        "pos" : [35, -21, 64],
+                        // position ([x, y, z])
+                        "pos" : [35, 64, -21],
                         // title when you hover over the marker
                         "title" : "Sign1",
                         // text in the marker popup window
-                        "text" : "Hello."
+                        "text" : "Hello.",
                         // override the icon of a single marker (optional)
                         "icon" : "player.png",
                         // override the size of the marker icon (optional)
                         "iconSize" : [16, 32]
                     },
                     // more markers:
-                    {"pos" : [100, 100, 64], "title" : "Test1"},
-                    {"pos" : [100, 200, 64], "title" : "Test2"},
-                    {"pos" : [500, 30, 64], "title" : "Test2"},
+                    {"pos" : [100, 64, 100], "title" : "Test1"},
+                    {"pos" : [100, 64, 200], "title" : "Test2"},
+                    {"pos" : [500, 64, 30], "title" : "Test2"},
                 ],
             },
         },
@@ -106,10 +106,10 @@ Here is an example ``markers.js`` file:
             "iconSize" : [32, 32],
             "markers" : {
                 "world" : [
-                    {"pos" : [42, 73, 64], "title" : "Steve's home"},    
+                    {"pos" : [42, 64, 73], "title" : "Steve's home"},    
                 ],
                 "world2" : [
-                    {"pos" : [73, 42, 64], "title" : "Steve's other home"},    
+                    {"pos" : [73, 64, 42], "title" : "Steve's other home"},    
                 ],
             },
         },
