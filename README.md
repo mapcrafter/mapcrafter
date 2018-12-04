@@ -1,4 +1,6 @@
 # Mapcrafter [![Build Status](https://travis-ci.org/mapcrafter/mapcrafter.svg?branch=master)](https://travis-ci.org/mapcrafter/mapcrafter) #
+[![Code Quality: Cpp](https://img.shields.io/lgtm/grade/cpp/g/mapcrafter/mapcrafter.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/mapcrafter/mapcrafter/context:cpp)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/mapcrafter/mapcrafter.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/mapcrafter/mapcrafter/alerts)
 
 **For Minecraft 1.13, see issue [#113](https://github.com/mapcrafter/mapcrafter/issues/275). TL;DR: Minecraft 1.13 support is pretty much complete, few small features and full documentation are still in progress. Can be built from source from `world113` branch or [nightly packages](https://mapcrafter.org/downloads/nightly) can be used.**
 
