@@ -937,6 +937,8 @@ Marker Options
     
     You can use different placeholders and other text in this format
     string as well, for example ``Marker at x=%(x), y=%(y), z=%(z): %(text)``.
+    
+    You can add line breaks to marker text with ``<br>``.
 
 **Text Format:** ``text_format = <format>``
 
