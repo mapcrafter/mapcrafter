@@ -173,8 +173,8 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 		const nbt::TagString& tag = level.findTag<nbt::TagString>("Status");
 		// completely generated chunks in fresh 1.13 worlds usually have status 'fullchunk' or 'postprocessed'
 		// however, chunks of converted <1.13 worlds don't use these, but the state 'mobs_spawned'
-			if (!(tag.payload == "fullchunk" || tag.payload == "full" || tag.payload == "postprocessed" || tag.payload == "mobs_spawned")) {
-				return true;
+		if (!(tag.payload == "fullchunk" || tag.payload == "full" || tag.payload == "postprocessed" || tag.payload == "mobs_spawned")) {
+			return true;
 		}
 	}
 
@@ -268,13 +268,11 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 			continue;
 		}
 
-		if(section_tag.hasArray<nbt::TagByteArray>("BlockLight", 2048))
-		{
+		if (section_tag.hasArray<nbt::TagByteArray>("BlockLight", 2048)) {
 			const nbt::TagByteArray& block_light = section_tag.findTag<nbt::TagByteArray>("BlockLight");
 			std::copy(block_light.payload.begin(), block_light.payload.end(), section.block_light);
 		}
-		if(section_tag.hasArray<nbt::TagByteArray>("SkyLight", 2048))
-		{
+		if (section_tag.hasArray<nbt::TagByteArray>("SkyLight", 2048)) {
 			const nbt::TagByteArray& sky_light = section_tag.findTag<nbt::TagByteArray>("SkyLight");
 			std::copy(sky_light.payload.begin(), sky_light.payload.end(), section.sky_light);
 		}
