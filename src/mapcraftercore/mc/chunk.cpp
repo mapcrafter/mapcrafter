@@ -271,10 +271,14 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 		if (section_tag.hasArray<nbt::TagByteArray>("BlockLight", 2048)) {
 			const nbt::TagByteArray& block_light = section_tag.findTag<nbt::TagByteArray>("BlockLight");
 			std::copy(block_light.payload.begin(), block_light.payload.end(), section.block_light);
+		} else {
+			std::fill(&section.block_light[0], &section.block_light[2048], 0);
 		}
 		if (section_tag.hasArray<nbt::TagByteArray>("SkyLight", 2048)) {
 			const nbt::TagByteArray& sky_light = section_tag.findTag<nbt::TagByteArray>("SkyLight");
 			std::copy(sky_light.payload.begin(), sky_light.payload.end(), section.sky_light);
+		} else {
+			std::fill(&section.sky_light[0], &section.sky_light[2048], 0);
 		}
 
 		// add this section to the section list
