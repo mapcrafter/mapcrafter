@@ -173,7 +173,7 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 		const nbt::TagString& tag = level.findTag<nbt::TagString>("Status");
 		// completely generated chunks in fresh 1.13 worlds usually have status 'fullchunk' or 'postprocessed'
 		// however, chunks of converted <1.13 worlds don't use these, but the state 'mobs_spawned'
-		if (!(tag.payload == "fullchunk" || tag.payload == "postprocessed" || tag.payload == "mobs_spawned")) {
+		if (!(tag.payload == "fullchunk" || tag.payload == "full" || tag.payload == "postprocessed" || tag.payload == "mobs_spawned")) {
 			return true;
 		}
 	}
@@ -210,8 +210,6 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 		if (!section_tag.hasTag<nbt::TagByte>("Y")
 		//		|| !section_tag.hasArray<nbt::TagByteArray>("Blocks", 4096)
 		//		|| !section_tag.hasArray<nbt::TagByteArray>("Data", 2048)
-				|| !section_tag.hasArray<nbt::TagByteArray>("BlockLight", 2048)
-				|| !section_tag.hasArray<nbt::TagByteArray>("SkyLight", 2048)
 				|| !section_tag.hasArray<nbt::TagLongArray>("BlockStates")
 				|| !section_tag.hasTag<nbt::TagList>("Palette"))
 			continue;
@@ -248,9 +246,6 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 			palette_lookup[i] = block_registry.getBlockID(block);
 		}
 
-		const nbt::TagByteArray& block_light = section_tag.findTag<nbt::TagByteArray>("BlockLight");
-		const nbt::TagByteArray& sky_light = section_tag.findTag<nbt::TagByteArray>("SkyLight");
-
 		// create a ChunkSection-object
 		ChunkSection section;
 		section.y = y.payload;
@@ -273,8 +268,18 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 			continue;
 		}
 
-		std::copy(block_light.payload.begin(), block_light.payload.end(), section.block_light);
-		std::copy(sky_light.payload.begin(), sky_light.payload.end(), section.sky_light);
+		if (section_tag.hasArray<nbt::TagByteArray>("BlockLight", 2048)) {
+			const nbt::TagByteArray& block_light = section_tag.findTag<nbt::TagByteArray>("BlockLight");
+			std::copy(block_light.payload.begin(), block_light.payload.end(), section.block_light);
+		} else {
+			std::fill(&section.block_light[0], &section.block_light[2048], 0);
+		}
+		if (section_tag.hasArray<nbt::TagByteArray>("SkyLight", 2048)) {
+			const nbt::TagByteArray& sky_light = section_tag.findTag<nbt::TagByteArray>("SkyLight");
+			std::copy(sky_light.payload.begin(), sky_light.payload.end(), section.sky_light);
+		} else {
+			std::fill(&section.sky_light[0], &section.sky_light[2048], 0);
+		}
 
 		// add this section to the section list
 		section_offsets[section.y] = sections.size();
