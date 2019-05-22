@@ -42,7 +42,7 @@ Linux system, you can install these packages with apt::
 
 If you are on an RPM based system such as Fedora, you can install these packages with yum::
 
-    sudo yum install boost-devel libjpeg-devel libpng-devel gcc-c++ make cmake
+    sudo yum install boost-devel libpng-devel libjpeg-devel libpng-devel gcc-c++ make cmake
 
 Then you can go into the directory with the Mapcrafter source (for example
 ``mapcrafter/``, not ``mapcrafter/src/``) and build it with the following
