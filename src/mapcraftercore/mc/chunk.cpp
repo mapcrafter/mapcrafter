@@ -36,7 +36,7 @@ void readPackedShorts(const std::vector<int64_t>& data, uint16_t* palette) {
 	const uint8_t* b = reinterpret_cast<const uint8_t*>(&data.front());
 	int bits_per_entry = data.size() * 64 / (16*16*16);
 
-	int i = 0, j = 0;
+	unsigned int i = 0, j = 0;
 	while (i < data.size() * sizeof(int64_t)) {
 		if (bits_per_entry == 4) {
 			for (int k = 0; k < 4; k++) {
@@ -188,8 +188,7 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 			|| level.hasArray<nbt::TagLongArray>("Biomes", 0)) {
 		std::fill(biomes, biomes + BIOMES_ARRAY_SIZE, 0);
 	} else if (level.hasArray<nbt::TagByteArray>("Biomes", 256) || level.hasArray<nbt::TagIntArray>("Biomes", 256)) {
-		LOG(WARNING << "Out dated chunk " << chunkpos << ": Old biome data found!";
-	}
+		LOG(WARNING) << "Out dated chunk " << chunkpos << ": Old biome data found!";
 	} else {
 		LOG(WARNING) << "Corrupt chunk " << chunkpos << ": No biome data found!";
 		//level.dump(std::cout);
