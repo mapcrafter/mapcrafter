@@ -63,7 +63,7 @@ Compile and install Blockcrafter (downloading the modules it needs) via pip:
 .. code-block:: shell
   
     $ cd /home/user/blockcrafter
-    $ pip3 install .
+    $ sudo pip3 install .
 
 Then install `Pyglet <https://pypi.org/project/pyglet/>`_ as a VisPy backend:
 
@@ -75,13 +75,13 @@ And then you can run Blockcrafter! For example:
 
 .. code-block:: shell
   
-    $ mapcrafter-export 
+    $ blockcrafter-export 
         -a /home/user/.minecraft/versions/1.13.2.jar 
         -o /home/user/blocks 
         -v isometric 
         -t 8
 
-You should see a blank window labelled "*VisPy canvas*" while Blockcrafter is rendering,
+You might see a blank window labelled "*VisPy canvas*" while Blockcrafter is rendering,
 don't close it! Depending on your GPU, it can take a few minutes to render each view -
 please be patient. 
 
@@ -89,7 +89,7 @@ To render a custom resource pack, use an extra ``-a`` option like so:
 
 .. code-block:: shell
   
-    $ mapcrafter-export -a 1.13.2.jar -a custom_resources.zip ...
+    $ blockcrafter-export -a 1.13.2.jar -a custom_resources.zip ...
 
 See the `Blockcrafter Github <https://github.com/mapcrafter/blockcrafter>`_ site for
 further command line options.
@@ -132,7 +132,7 @@ And then you can run Blockcrafter! For example:
 
 .. code-block:: shell
 
-    $ mapcrafter-export 
+    $ blockcrafter-export 
         -a /home/user/.minecraft/versions/1.13.2.jar 
         -o /home/user/blocks 
         -v isometric 
@@ -146,7 +146,7 @@ To render a custom resource pack, use an extra ``-a`` option like so:
 
 .. code-block:: shell
   
-    $ mapcrafter-export -a 1.13.2.jar -a custom_resources.zip ...
+    $ blockcrafter-export -a 1.13.2.jar -a custom_resources.zip ...
 
 See the `Blockcrafter Github <https://github.com/mapcrafter/blockcrafter>`_ site for
 further command line options.
@@ -188,7 +188,7 @@ To render a custom resource pack, use an extra ``-a`` option like so:
 
 .. code-block:: shell
   
-    PS> mapcrafter-export -a 1.13.2.jar -a custom_resources.zip ...
+    PS> blockcrafter-export -a 1.13.2.jar -a custom_resources.zip ...
 
 See the `Blockcrafter Github <https://github.com/mapcrafter/blockcrafter>`_ site for
 further command line options.
@@ -197,7 +197,7 @@ further command line options.
 Installing Block Sprite files
 =============================
 
-Once BlockCrafter has created your new block sprite files, you simply copy
+Once Blockcrafter has created your new block sprite files, you simply copy
 them into the Mapcrafter *block directory*, or specify a custom ``block_dir``
 for your map.
 
