@@ -24,7 +24,7 @@ This page steps you through the basics. You can find more information on the
 Installing and Using Blockcrafter
 =================================
 
-Blockcrafter is a `Python 3 <https://www.python.org/>`_ app, which uses 
+Blockcrafter is a `Python 3 <https://www.python.org/>`_ application, which uses 
 `VisPy <http://vispy.org>`_ to render images. To use it, you'll need:
 
 * Either the `Docker images <https://hub.docker.com/r/mapcrafter/blockcrafter/>`_, OR build from source (see below).
@@ -49,7 +49,7 @@ Note that Python 2 is installed by default on Ubuntu, but Blockcrafter requires 
 
 .. code-block:: shell
     
-    $ sudo apt install python3 python3-pip3
+    $ sudo apt install python3 python3-pip
 
 Then download / clone the Blockcrafter repository:
 
@@ -69,7 +69,7 @@ Then install `Pyglet <https://pypi.org/project/pyglet/>`_ as a VisPy backend:
 
 .. code-block:: shell
    
-    $ sudo pip3 install Pyglet
+    $ sudo pip3 install pyglet
 
 And then you can run Blockcrafter! For example:
 
@@ -155,7 +155,7 @@ further command line options.
 From Source on Windows
 ----------------------
 
-Download and install the latest version of `Python3 for Windows 
+Download and install the latest version of `Python 3 for Windows 
 <https://www.python.org/downloads/windows/>`_ (version 3.7.1 has been tested).
 Python 3.4+ is highly recommended (as it contains `pip <https://pip.pypa.io/en/stable/>`_).
 
@@ -168,7 +168,7 @@ Open a powershell console in the folder you just created to install Python modul
 .. code-block:: shell
 
     PS> py -m pip install .
-    PS> py -m pip install Pyglet --user
+    PS> py -m pip install pyglet --user
 
 And then you can run Blockcrafter! For example:
 
