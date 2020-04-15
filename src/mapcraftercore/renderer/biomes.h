@@ -158,6 +158,9 @@ static const Biome BIOMES[] = {
 	{166, 2.0, 0.0},   // Modified Wooden Badlands Plateau
 	{167, 2.0, 0.0},   // Modified Badlands Plateau
 
+	{168, 0.95, 0.9},  // Bamboo Jungle
+	{169, 0.95, 0.9},  // Bamboo Jungle Hills
+
 	{210, 0.0, 0.0, unknown_tint, unknown_tint}, // "Unknown" biome
 };
 
