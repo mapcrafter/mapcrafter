@@ -139,7 +139,7 @@ def main():
 
     mem = final_cropped_img_size[0]*final_cropped_img_size[1]*px_size # bytes!
     print("The image size will be {0}x{1}".format(final_cropped_img_size[0],final_cropped_img_size[1]))
-    print("A total of {0} MB of memory will be used.".format(mem/1024**2))
+    print("A total of {0} MB of memory will be used.".format(mem//1024**2))
     if mem/1024.**2. > options.memory_limit:
         print("Warning! The expected RAM usage exceeds the spicifyed limit. Exiting.")
         sys.exit(1)
