@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # From Minecraft Overviewer (https://github.com/overviewer/Minecraft-Overviewer)
 # png-it.py script -- modified version which works with mapcrafter maps
@@ -68,11 +68,11 @@ def main():
     try:
         image = Image.open(join(tileset, "base.png"))
         if image.size[0] != image.size[1]:
-            print "Error! Invalid image size {0} of base.png tile!".format(image.size)
+            print("Error! Invalid image size {0} of base.png tile!".format(image.size))
             sys.exit(1)
         tile_size = image.size
     except IOError:
-        print "Error! Can't open base.png tile in tileset to determine tile size!"
+        print("Error! Can't open base.png tile in tileset to determine tile size!")
         sys.exit(1)
 
     # create a list with all the images in the zoom level
@@ -83,7 +83,7 @@ def main():
     
     all_images = glob(path)
     if not all_images:
-        print "Error! No images found in this zoom level. Is this really an overviewer tile set directory?"
+        print("Error! No images found in this zoom level. Is this really an overviewer tile set directory?")
         sys.exit(1)
 
     # autocrop will calculate the center and crop values automagically
@@ -92,7 +92,7 @@ def main():
         max_x = max_y = 0
         counter = 0
         total = len(all_images)
-        print "Checking tiles for autocrop calculations:"
+        print("Checking tiles for autocrop calculations:")
         # get the maximun and minimun tiles coordinates of the map
         for path in all_images:
             t = get_tuple_coords(options, path)
@@ -102,7 +102,7 @@ def main():
             max_x = max(max_x, c[0])
             max_y = max(max_y, c[1])
             counter += 1
-            if (counter % 100 == 0 or counter == total or counter == 1): print "Checked {0} of {1}".format(counter, total)
+            if (counter % 100 == 0 or counter == total or counter == 1): print("Checked {0} of {1}".format(counter, total))
         
         # the center of the map will be in the middle of the occupied zone
         center = (int((min_x + max_x)/2.), int((min_y + max_y)/2.))
@@ -138,10 +138,10 @@ def main():
     final_cropped_img_size = (final_img_size[0] - 2*crop[0]*tile_size[0],final_img_size[1] - 2*crop[1]*tile_size[1])
 
     mem = final_cropped_img_size[0]*final_cropped_img_size[1]*px_size # bytes!
-    print "The image size will be {0}x{1}".format(final_cropped_img_size[0],final_cropped_img_size[1])
-    print "A total of {0} MB of memory will be used.".format(mem/1024**2)
+    print("The image size will be {0}x{1}".format(final_cropped_img_size[0],final_cropped_img_size[1]))
+    print("A total of {0} MB of memory will be used.".format(mem//1024**2))
     if mem/1024.**2. > options.memory_limit:
-        print "Warning! The expected RAM usage exceeds the spicifyed limit. Exiting."
+        print("Warning! The expected RAM usage exceeds the spicifyed limit. Exiting.")
         sys.exit(1)
 
     # Create a new huge image
@@ -150,7 +150,7 @@ def main():
     # Paste ALL the images
     total = len(all_images)
     counter = 0
-    print "Pasting images:"
+    print("Pasting images:")
     for path in all_images:
         
         img = Image.open(path)
@@ -158,9 +158,9 @@ def main():
         x, y = get_cropped_centered_img_coords(options, tile_size, center_vector, crop, t)
         final_img.paste(img, (x, y))
         counter += 1
-        if (counter % 100 == 0 or counter == total or counter == 1): print "Pasted {0} of {1}".format(counter, total)
-    print "Done!"
-    print "Saving image... (this can take a while)"
+        if (counter % 100 == 0 or counter == total or counter == 1): print("Pasted {0} of {1}".format(counter, total))
+    print("Done!")
+    print("Saving image... (this can take a while)")
     final_img.save(options.output, "PNG")
 
 
