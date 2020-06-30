@@ -80,7 +80,7 @@ static const Biome BIOMES[] = {
 	//{6, 0.8, 0.9, 0x4C, 0x76, 0x3C}, // Swampland (greenish)
 	{6, 0.8, 0.9, rgba(0x6a, 0x70, 0x39, 0xff), rgba(0x6A, 0x70, 0x39, 0xff)}, // Swampland (brownish)
 	{7, 0.5, 0.5, one, default_water},     // River
-	{8, 2.0, 0.0},     // Nether
+	{8, 2.0, 0.0},     // Nether Wastes
 	{9, 0.5, 0.5},     // The End
 
 	{10, 0.0, 0.5, one, rgba(0x2b, 0x2a, 0x98, 0xff)},    // Frozen Ocean
@@ -160,6 +160,10 @@ static const Biome BIOMES[] = {
 
 	{168, 0.95, 0.9},  // Bamboo Jungle
 	{169, 0.95, 0.9},  // Bamboo Jungle Hills
+
+	{170, 2.0, 0.0},   // Soul Sand Valley
+	{171, 2.0, 0.0},   // Crimson Forest
+	{172, 2.0, 0.0},   // Warped Forest
 
 	{210, 0.0, 0.0, unknown_tint, unknown_tint}, // "Unknown" biome
 };

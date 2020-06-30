@@ -116,7 +116,27 @@ void readPackedShorts(const std::vector<int64_t>& data, uint16_t* palette) {
 	assert(j == 16*16*16);
 }
 
+void readPackedShorts_v116(const std::vector<int64_t>& data, uint16_t* palette, uint32_t num_palette) {
+	uint32_t bits_per_value = 4;
+	while ((1 << bits_per_value) < num_palette) {
+		bits_per_value += 1;
+	}
+	std::fill(palette, &palette[4096], 0);
+	uint32_t shorts_per_long = 64 / bits_per_value;
+	uint16_t mask = (1 << bits_per_value) - 1;
+
+	for (uint32_t i=0; i<shorts_per_long; i++) {
+		uint32_t j = 0;
+		for( uint32_t k=i; k<4096; k+=shorts_per_long) {
+			assert(j < data.size());
+			palette[k] = (uint16_t)(data[j] >> (bits_per_value * i)) & mask;
+			j++;
+		}
+		assert(j <= data.size());
+	}
 }
+
+} // namespace
 
 Chunk::Chunk()
 	: chunkpos(42, 42), rotation(0), air_id(0) {
@@ -146,6 +166,13 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 
 	nbt::NBTFile nbt;
 	nbt.readNBT(data, len, compression);
+
+	// Make sure we know which data format this chunk is built of
+	if (!nbt.hasTag<nbt::TagInt>("DataVersion")) {
+		LOG(ERROR) << "Corrupt chunk: No version tag found!";
+		return false;
+	}
+	int data_version = nbt.findTag<nbt::TagInt>("DataVersion").payload;
 
 	// find "level" tag
 	if (!nbt.hasTag<nbt::TagCompound>("Level")) {
@@ -252,7 +279,11 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 		ChunkSection section;
 		section.y = y.payload;
 
-		readPackedShorts(blockstates.payload, section.block_ids);
+		if (data_version >= 2529){
+			readPackedShorts_v116(blockstates.payload, section.block_ids, palette.payload.size());
+		} else {
+			readPackedShorts(blockstates.payload, section.block_ids);
+		}
 		
 		int bits_per_entry = blockstates.payload.size() * 64 / (16*16*16);
 		bool ok = true;
