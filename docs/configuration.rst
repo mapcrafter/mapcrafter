@@ -473,10 +473,10 @@ extra header line).
 
 .. note::
 
-    If you use Blockcrafter to create your own block data files and block sprites, the example
-    ``blockid`` numbers given here will not work! Nor will the linked texture block data 
-    file above. These examples only apply for vanilla Minecraft 1.13 - different Minecraft 
-    versions, the presence of mods or custom resource packs will change these.
+    If you use :doc:`blockcrafter` to create your own block data files and block sprites, 
+    the example ``blockid`` numbers given here will not work! Nor will the linked texture 
+    block data file above. These examples only apply for vanilla Minecraft 1.13 - different 
+    Minecraft versions, the presence of mods or custom resource packs will change these.
 
 
 
@@ -693,7 +693,7 @@ Map Options
 
     Mapcrafter's pre-rendered block sprites include sizes 16 and 12. If you want to 
     use other sizes, or custom resource packs you will need to generate them using 
-    `Blockcrafter <https://github.com/mapcrafter/blockcrafter>`_.
+    :doc:`blockcrafter`.
 
 
 **Block Directory** ``block_dir = <directory>``
@@ -704,8 +704,8 @@ Map Options
     to use textures from a custom resource pack. 
 
     The standard Minecraft block sprites are included with Mapcrafter, if you 
-    want to use sprites from a custom resource pack, you should use `Blockcrafter 
-    <https://github.com/mapcrafter/blockcrafter>`_ to render new images.
+    want to use sprites from a custom resource pack, you should use :doc:`blockcrafter`
+    to render new images.
     
     You can use the following command to find the location of the ``block_dir``
     Mapcrafter is using::
@@ -831,7 +831,7 @@ Map Options
     Instead of ``texture_dir``, you should use ``block_dir`` to pick up custom 
     textures or sprites.
 
-    Options moved to BlockCrafter: ``texture_blur``, ``water_opacity``, 
+    Options moved to :doc:`blockcrafter`: ``texture_blur``, ``water_opacity``, 
     ``render_leaves_transparent``. However, these are not currently configurable
     in BlockCrafter.
 
@@ -937,6 +937,8 @@ Marker Options
     
     You can use different placeholders and other text in this format
     string as well, for example ``Marker at x=%(x), y=%(y), z=%(z): %(text)``.
+    
+    You can add line breaks to marker text with ``<br>``.
 
 **Text Format:** ``text_format = <format>``
 
