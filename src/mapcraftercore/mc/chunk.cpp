@@ -116,13 +116,10 @@ void readPackedShorts(const std::vector<int64_t>& data, uint16_t* palette) {
 	assert(j == 16*16*16);
 }
 
-void readPackedShorts_v116(const std::vector<int64_t>& data, uint16_t* palette, uint32_t num_palette) {
-	uint32_t bits_per_value = 4;
-	while ((1 << bits_per_value) < num_palette) {
-		bits_per_value += 1;
-	}
+void readPackedShorts_v116(const std::vector<int64_t>& data, uint16_t* palette) {
+	uint32_t shorts_per_long = (4096 + data.size() - 1) / data.size();
+	uint32_t bits_per_value = 64 / shorts_per_long;
 	std::fill(palette, &palette[4096], 0);
-	uint32_t shorts_per_long = 64 / bits_per_value;
 	uint16_t mask = (1 << bits_per_value) - 1;
 
 	for (uint32_t i=0; i<shorts_per_long; i++) {
@@ -280,7 +277,7 @@ bool Chunk::readNBT(mc::BlockStateRegistry& block_registry, const char* data, si
 		section.y = y.payload;
 
 		if (data_version >= 2529){
-			readPackedShorts_v116(blockstates.payload, section.block_ids, palette.payload.size());
+			readPackedShorts_v116(blockstates.payload, section.block_ids);
 		} else {
 			readPackedShorts(blockstates.payload, section.block_ids);
 		}
