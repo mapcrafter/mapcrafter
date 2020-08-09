@@ -77,87 +77,27 @@ public:
 	uint8_t getSkyLight() const;
 	uint8_t getLightLevel(bool day) const;
 
-	static LightingData estimate(const mc::Block& block, BlockImages* images,
+	static LightingData estimate(const mc::Block& block, RenderedBlockImages* block_images,
 			mc::WorldCache* world, mc::Chunk* current_chunk);
 
 protected:
 	uint8_t block_light, sky_light;
 };
 
-typedef double LightingColor;
+typedef float LightingColor;
 
 // corner colors of a face
 // - defined as array with corners top left / top right / bottom left / bottom right
 typedef std::array<LightingColor, 4> CornerColors;
 
-class LightingRenderer : public RenderModeRenderer {
-public:
-	virtual ~LightingRenderer();
-
-	/**
-	 * Adds smooth lighting to the left face of a block image, but only a part of the
-	 * face (specify y_start, y_end, used for slab lighting for example).
-	 */
-	virtual void lightLeft(RGBAImage& image, const CornerColors& colors,
-			int y_start, int y_end) const = 0;
-
-	/**
-	 * Adds smooth lighting to the left face of a block image.
-	 */
-	virtual void lightLeft(RGBAImage& image, const CornerColors& colors) const = 0;
-
-	/**
-	 * Adds smooth lighting to the right face of a block image, but only a part of the
-	 * face (specify y_start, y_end, used for slab lighting for example).
-	 */
-	virtual void lightRight(RGBAImage& image, const CornerColors& colors,
-			int y_start, int y_end) const = 0;
-
-	/**
-	 * Adds smooth lighting to the right face of a block image.
-	 */
-	virtual void lightRight(RGBAImage& image, const CornerColors& colors) const = 0;
-
-	/**
-	 * Adds smooth lighting to the top face of a block image.
-	 */
-	virtual void lightTop(RGBAImage& image, const CornerColors& colors, int yoff = 0) const = 0;
-
-	/**
-	 * Adds "simple" lighting to a block by just tinting all pixels. This is used for
-	 * transparent pixels for example.
-	 */
-	virtual void lightAllSimple(RGBAImage& image, LightingColor color) const;
-
-	static const RenderModeRendererType TYPE;
-
-protected:
-	/**
-	 * Draws the bottom triangle with the given colors.
-	 * This is the triangle with corners top left, bottom left and bottom right.
-	 */
-	void drawBottomTriangle(RGBAImage& image, int size, double c1, double c2, double c3) const;
-	
-	/**
-	 * Draws the top triangle with the given colors.
-	 * This is the triangle with corners top left, top right and bottom right.
-	 */
-	void drawTopTriangle(RGBAImage& image, int size, double c1, double c2, double c3) const;
-	
-	/**
-	 * Draws the shade of the corners by drawing two triangles with the supplied colors.
-	 */
-	void createShade(RGBAImage& image, const CornerColors& corners) const;
-};
-
-class LightingRenderMode : public BaseRenderMode<LightingRenderer> {
+class LightingRenderMode : public BaseRenderMode {
 public:
 	LightingRenderMode(bool day, double lighting_intensity,
 			double lighting_water_intensity, bool simulate_sun_light);
 	virtual ~LightingRenderMode();
 
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
-	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	virtual void draw(RGBAImage& image, const BlockImage& block_image, const mc::BlockPos& pos, uint16_t id);
 
 private:
 	bool day;
@@ -200,19 +140,14 @@ private:
 	 * Applies the smooth lighting to a block by adding lighting to the top, left and
 	 * right face (if not covered by another, not transparent, block).
 	 */
-	void doSmoothLight(RGBAImage& image, const mc::BlockPos& pos,
-			uint16_t id, uint16_t data);
-
-	/**
-	 * Applies the smooth lighting to a slab (not double slabs).
-	 */
-	void doSlabLight(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	void doSmoothLight(RGBAImage& image, const BlockImage& block_image, const mc::BlockPos& pos,
+			uint16_t id, bool use_bottom_corners);
 
 	/**
 	 * Applies a simple lighting to a block by coloring the whole block with the lighting
 	 * color of the block.
 	 */
-	void doSimpleLight(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	void doSimpleLight(RGBAImage& image, const BlockImage& block_image, const mc::BlockPos& pos, uint16_t id);
 };
 
 } /* namespace render */

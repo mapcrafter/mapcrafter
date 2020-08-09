@@ -358,13 +358,13 @@ bool TagCompound::hasTag(const std::string& name) const {
 
 Tag& TagCompound::findTag(const std::string& name) {
 	if (!hasTag(name))
-		throw TagNotFound();
+		throw TagNotFound(std::string("Unable to find tag '") + name + "'");
 	return *payload[name];
 }
 
 const Tag& TagCompound::findTag(const std::string& name) const {
 	if (!hasTag(name))
-		throw TagNotFound();
+		throw TagNotFound(std::string("Unable to find (const) tag '") + name + "'");
 	return *payload.at(name);
 }
 
@@ -484,6 +484,8 @@ Tag* createTag(int8_t type) {
 		return new TagCompound;
 	case TagIntArray::TAG_TYPE:
 		return new TagIntArray;
+	case TagLongArray::TAG_TYPE:
+		return new TagLongArray;
 	default:
 		return nullptr;
 	}

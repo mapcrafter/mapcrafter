@@ -20,6 +20,7 @@
 #ifndef OTHER_H_
 #define OTHER_H_
 
+#include <map>
 #include <string>
 #include <sstream>
 #include <boost/filesystem.hpp>
@@ -93,6 +94,9 @@ std::string replaceAll(const std::string& str, const std::string& from, const st
 
 bool startswith(const std::string& str, const std::string& start);
 bool endswith(const std::string& str, const std::string& end);
+
+std::vector<std::string> split(const std::string& str, char delimiter);
+std::map<std::string, std::string> parseProperties(std::string str);
 
 /**
  * TODO this is unused, maybe use it for the config option values? ... or remove it

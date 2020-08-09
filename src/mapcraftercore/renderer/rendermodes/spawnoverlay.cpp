@@ -34,12 +34,16 @@ SpawnOverlay::~SpawnOverlay() {
 RGBAPixel SpawnOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) {
 	// TODO more options
 	// TODO also mobs can't spawn on specific blocks?
-	mc::Block block = getBlock(pos, mc::GET_ID | mc::GET_DATA | mc::GET_LIGHT);
-	LightingData light = LightingData::estimate(block, images, world, *current_chunk);
+	mc::Block block = getBlock(pos, mc::GET_ID | mc::GET_LIGHT);
+	LightingData light = LightingData::estimate(block, block_images, world, *current_chunk);
 	uint8_t light_level = light.getLightLevel(day);
 	if (light_level < 8)
 		return rgba(255, 0, 0, 85);
 	return rgba(0, 0, 0, 0);
+}
+
+RGBAPixel SpawnOverlay::getBlockColor(const mc::BlockPos& pos, const BlockImage& block_image) {
+	return getBlockColor(pos, 0, 0);
 }
 
 }

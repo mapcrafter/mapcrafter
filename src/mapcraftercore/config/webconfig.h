@@ -53,8 +53,8 @@ public:
 	void setTileSetTileOffset(const TileSetID& tile_set,
 			const renderer::TilePos& tile_offset);
 
-	int getMapTileSize(const std::string& map) const;
-	void setMapTileSize(const std::string& map, int tile_size);
+	std::tuple<int, int> getMapTileSize(const std::string& map) const;
+	void setMapTileSize(const std::string& map, std::tuple<int, int> tile_size);
 
 	int getMapMaxZoom(const std::string& map) const;
 	void setMapMaxZoom(const std::string& map, int max_zoom);
@@ -71,7 +71,7 @@ private:
 	std::map<TileSetID, renderer::TilePos> tile_set_tile_offset;
 
 	// tile size of map
-	std::map<std::string, int> map_tile_size;
+	std::map<std::string, std::tuple<int, int>> map_tile_size;
 	// max zoom of map (= max max zoom level of the world at time of rendering)
 	std::map<std::string, int> map_max_zoom;
 	// last render time of map/rotation

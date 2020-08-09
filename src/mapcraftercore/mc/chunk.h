@@ -30,24 +30,28 @@
 namespace mapcrafter {
 namespace mc {
 
+class BlockStateRegistry;
+
 // chunk height in sections, 16 per default
 const int CHUNK_HEIGHT = 16;
+const int BIOMES_ARRAY_SIZE = 1024;
 
 /**
  * A 16x16x16 section of a chunk.
  */
 struct ChunkSection {
 	uint8_t y;
-	uint8_t blocks[16 * 16 * 16];
-	uint8_t add[16 * 16 * 8];
-	uint8_t data[16 * 16 * 8];
 	uint8_t block_light[16 * 16 * 8];
 	uint8_t sky_light[16 * 16 * 8];
+	uint16_t block_ids[16 * 16 * 16];
 
-	/**
-	 * Returns one of the data arrays (1: block data, 2: block light, 3: sky light).
-	 */
-	const uint8_t* getArray(int i) const;
+	inline const uint8_t* getArray(int index) const {
+		if (index == 0) {
+			return block_light;
+		} else {
+			return sky_light;
+		}
+	}
 };
 
 /**
@@ -75,7 +79,7 @@ public:
 	 * Reads the NBT data of the chunk from a buffer. You need to specify a compression
 	 * type of the raw data.
 	 */
-	bool readNBT(const char* data, size_t len,
+	bool readNBT(BlockStateRegistry& block_registry, const char* data, size_t len,
 			nbt::Compression compression = nbt::Compression::ZLIB);
 
 	/**
@@ -92,16 +96,6 @@ public:
 	 * Returns the block ID at a specific position (local coordinates).
 	 */
 	uint16_t getBlockID(const LocalBlockPos& pos, bool force = false) const;
-
-	/**
-	 * Returns the block data value at a specific position (local coordinates).
-	 */
-	uint8_t getBlockData(const LocalBlockPos& pos, bool force = false) const;
-
-	/**
-	 * Returns some additional block data, originally stored somewhere else (e.g. in an NBT tag)
-	 */
-	uint16_t getBlockExtraData(const LocalBlockPos& pos, uint16_t id) const;
 
 	/**
 	 * Returns the block light at a specific position (local coordinates).
@@ -134,9 +128,7 @@ private:
 	// whether the chunk is completely contained (according x- and z-coordinates, not y)
 	bool chunk_completely_contained;
 
-	// whether ores, trees, other special structures are already populated in this chunk
-	// read from the chunk nbt format (Level["TerrainPopulated"])
-	bool terrain_populated;
+	uint16_t air_id;
 
 	// the index of the chunk sections in the sections array
 	// or -1 if section does not exist
@@ -144,8 +136,8 @@ private:
 	// the array with the sections, see indexes above
 	std::vector<ChunkSection> sections;
 
-	// the biomes in this chunk, as index z*16+x
-	uint8_t biomes[256];
+	// the biomes in this chunk, as index y * 16 + z * 4 + x
+	uint32_t biomes[BIOMES_ARRAY_SIZE];
 
 	// extra_data (e.g. from attributes read from NBT data, like beds) are stored in this map
 	std::unordered_map<int, uint16_t> extra_data_map;
@@ -155,12 +147,12 @@ private:
 	 * part of the world and therefore not rendered.
 	 */
 	bool checkBlockWorldCrop(int x, int z, int y) const;
+	
 	/**
 	 * Returns a specific block data (block data value, block light, sky light) at a
 	 * specific position. The parameter array specifies which one:
-	 *   0: block data value,
-	 *   1: block light,
-	 *   2: sky light
+	 *   0: block light,
+	 *   1: sky light
 	 */
 	uint8_t getData(const LocalBlockPos& pos, int array, bool force = false) const;
 

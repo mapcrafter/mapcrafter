@@ -27,13 +27,18 @@ namespace renderer {
 
 class TopdownRenderView : public RenderView {
 public:
-	virtual BlockImages* createBlockImages() const;
+	virtual BlockImages* createBlockImages(mc::BlockStateRegistry& block_registry) const;
 	virtual TileSet* createTileSet(int tile_width) const;
-	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
-			mc::WorldCache* world, RenderMode* render_mode) const;
+	virtual TileRenderer* createTileRenderer(mc::BlockStateRegistry& block_registry,
+			BlockImages* images, int tile_width, mc::WorldCache* world, RenderMode* render_mode) const;
+	
+	virtual void configureBlockImages(BlockImages* images,
+		const config::WorldSection& world_config,
+		const config::MapSection& map_config) const;
 
-	virtual RenderModeRenderer* createRenderModeRenderer(
-			const RenderModeRendererType& renderer) const;
+	virtual void configureTileRenderer(TileRenderer* tile_renderer,
+			const config::WorldSection& world_config,
+			const config::MapSection& map_config) const;
 };
 
 } /* namespace renderer */

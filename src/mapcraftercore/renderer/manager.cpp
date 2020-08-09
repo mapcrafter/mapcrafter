@@ -23,6 +23,7 @@
 #include "tilerenderworker.h"
 #include "renderview.h"
 #include "../config/loggingconfig.h"
+#include "../mc/blockstate.h"
 #include "../thread/impl/singlethread.h"
 #include "../thread/impl/multithreading.h"
 #include "../thread/dispatcher.h"
@@ -34,6 +35,7 @@
 #include <fstream>
 #include <memory>
 #include <thread>
+#include <tuple>
 
 namespace mapcrafter {
 namespace renderer {
@@ -210,6 +212,20 @@ bool RenderManager::scanWorlds() {
 			LOG(FATAL) << "Unable to load world " << tile_set_it->world_name << "!";
 			return false;
 		}
+		int world_version = world.getMinecraftVersion();
+		if (world_version == -1) {
+			LOG(WARNING) << "Unable to determine Minecraft version of world '"
+				<< tile_set_it->world_name << "'. Maybe level.dat doesn't exist in world directory?";
+			LOG(WARNING) << "Note that rendering of pre-1.13 worlds is not supported, "
+				<< "in case Mapcrafter fails to read the world.";
+			LOG(WARNING) << "See Mapcrafter legacy for rendering of older worlds. TODO";
+		} else if (world_version < 1451) {
+			// 1451 is 17w47a, should be first version of flattening and world change affected
+			LOG(ERROR) << "Rendering of world '" << tile_set_it->world_name << "'  is not supported.";
+			LOG(ERROR) << "Mapcrafter supports only worlds of Minecraft 1.13 and newer";
+			LOG(ERROR) << "See Mapcrafter legacy for rendering of older worlds. TODO";
+			return false;
+		}
 
 		// create a tile set for this world
 		std::shared_ptr<TileSet> tile_set(render_view->createTileSet(tile_set_it->tile_width));
@@ -267,6 +283,9 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 
 	config::MapSection map_config = config.getMap(map);
 	config::WorldSection world_config = config.getWorld(map_config.getWorld());
+
+	// TODO keep block state registry global per map. or are there any reasons to make more global?
+	mc::BlockStateRegistry block_registry;
 	std::shared_ptr<RenderView> render_view(createRenderView(map_config.getRenderView()));
 
 	// output a small notice if we render this map incrementally
@@ -301,22 +320,17 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 		return;
 	}
 
-	// create block images
-	TextureResources resources;
-	// if textures do not work, it does not make much sense
-	// to try the other rotations with the same broken textures
-	if (!resources.loadTextures(map_config.getTextureDir().string(),
-			map_config.getTextureSize(), map_config.getTextureBlur(),
-			map_config.getWaterOpacity())) {
-		LOG(ERROR) << "Skipping remaining rotations.";
-		return;
-	}
-
 	// create other stuff for the render dispatcher
-	std::shared_ptr<BlockImages> block_images(render_view->createBlockImages());
+	std::shared_ptr<BlockImages> block_images(render_view->createBlockImages(block_registry));
 	render_view->configureBlockImages(block_images.get(), world_config, map_config);
-	block_images->setRotation(rotation);
-	block_images->generateBlocks(resources);
+
+	RenderedBlockImages* new_block_images = dynamic_cast<RenderedBlockImages*>(block_images.get());
+	if (new_block_images != nullptr) {
+		if (!new_block_images->loadBlockImages(map_config.getBlockDir().string(), util::str(map_config.getRenderView()), rotation, map_config.getTextureSize())) {
+			LOG(ERROR) << "Skipping remaining rotations.";
+			return;
+		}
+	}
 
 	RenderContext context;
 	context.output_dir = output_dir;
@@ -326,12 +340,15 @@ void RenderManager::renderMap(const std::string& map, int rotation, int threads,
 	context.render_view = render_view.get();
 	context.block_images = block_images.get();
 	context.tile_set = tile_set;
+	context.block_registry = &block_registry;
 	context.world = worlds[map_config.getWorld()][rotation];
 	context.initializeTileRenderer();
 
 	// update map parameters in web config
+	int tile_w = context.tile_renderer->getTileWidth();
+	int tile_h = context.tile_renderer->getTileHeight();
 	web_config.setMapMaxZoom(map, context.tile_set->getDepth());
-	web_config.setMapTileSize(map, context.tile_renderer->getTileSize());
+	web_config.setMapTileSize(map, std::make_tuple<>(tile_w, tile_h));
 	web_config.writeConfigJS();
 
 	std::shared_ptr<thread::Dispatcher> dispatcher;
@@ -534,6 +551,16 @@ void RenderManager::initializeMap(const std::string& map) {
  */
 void RenderManager::increaseMaxZoom(const fs::path& dir,
 		std::string image_format, int jpeg_quality) const {
+	// find out tile size by reading old base.png image
+	RGBAImage old_base;
+	if (image_format == "png") {
+		old_base.readPNG((dir / "base.png").string());
+	} else {
+		old_base.readJPEG((dir / "base.jpg").string());
+	}
+	int w = old_base.getWidth();
+	int h = old_base.getHeight();
+
 	if (fs::exists(dir / "1")) {
 		// at first rename the directories 1 2 3 4 (zoom level 0) and make new directories
 		util::moveFile(dir / "1", dir / "1_");
@@ -584,20 +611,19 @@ void RenderManager::increaseMaxZoom(const fs::path& dir,
 		img4.readJPEG((dir / "4/1.jpg").string());
 	}
 
-	int s = img1.getWidth();
 	// create images for the new directories
-	RGBAImage new1(s, s), new2(s, s), new3(s, s), new4(s, s);
+	RGBAImage new1(w, h), new2(w, h), new3(w, h), new4(w, h);
 	RGBAImage old1, old2, old3, old4;
 	// resize the old images...
 	img1.resize(old1, 0, 0, InterpolationType::HALF);
-	img2.resize(old2, 0, 0, InterpolationType::HALF);	
+	img2.resize(old2, 0, 0, InterpolationType::HALF);
 	img3.resize(old3, 0, 0, InterpolationType::HALF);
 	img4.resize(old4, 0, 0, InterpolationType::HALF);
 
 	// ...to blit them to the images of the new directories
-	new1.simpleAlphaBlit(old1, s/2, s/2);
-	new2.simpleAlphaBlit(old2, 0, s/2);
-	new3.simpleAlphaBlit(old3, s/2, 0);
+	new1.simpleAlphaBlit(old1, w/2, h/2);
+	new2.simpleAlphaBlit(old2, 0, h/2);
+	new3.simpleAlphaBlit(old3, w/2, 0);
 	new4.simpleAlphaBlit(old4, 0, 0);
 
 	// now save the new images in the output directory
@@ -614,11 +640,11 @@ void RenderManager::increaseMaxZoom(const fs::path& dir,
 	}
 
 	// don't forget the base.png
-	RGBAImage base(2*s, 2*s);
+	RGBAImage base(2*h, 2*h);
 	base.simpleAlphaBlit(new1, 0, 0);
-	base.simpleAlphaBlit(new2, s, 0);
-	base.simpleAlphaBlit(new3, 0, s);
-	base.simpleAlphaBlit(new4, s, s);
+	base.simpleAlphaBlit(new2, w, 0);
+	base.simpleAlphaBlit(new3, 0, h);
+	base.simpleAlphaBlit(new4, w, h);
 	base = base.resize(0, 0, InterpolationType::HALF);
 	if (image_format == "png")
 		base.writePNG((dir / "base.png").string());

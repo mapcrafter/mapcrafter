@@ -28,18 +28,16 @@
 namespace mapcrafter {
 namespace renderer {
 
-class CaveRenderMode : public BaseRenderMode<> {
+class CaveRenderMode : public BaseRenderMode {
 public:
 	CaveRenderMode(const std::vector<mc::BlockPos>& hidden_dirs);
 	virtual ~CaveRenderMode();
 
-	virtual bool isHidden(const mc::BlockPos& pos,
-			uint16_t id, uint16_t data);
+	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+	virtual bool isHidden(const mc::BlockPos& pos, const BlockImage& block_image);
 
 protected:
-	bool isLight(const mc::BlockPos& pos);
-	bool isTransparentBlock(const mc::Block& block) const;
-
 	// we want to hide some additional cave blocks to be able to look "inside" the caves,
 	// so it's possible to specify directions where cave blocks must touch transparent
 	// blocks (or air), there must be a transparent block in at least one directions

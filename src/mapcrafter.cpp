@@ -145,11 +145,11 @@ int main(int argc, char** argv) {
 		if (templates.size() == 0)
 			std::cout << "  Nothing found." << std::endl;
 
-		util::PathList textures = util::findTextureDirs(mapcrafter_bin);
-		std::cout << "Texture directories:" << std::endl;
-		for (size_t i = 0; i < textures.size(); i++)
-			std::cout << "  " << i+1 << ". " << BOOST_FS_ABSOLUTE1(textures[i]).string() << std::endl;
-		if (textures.size() == 0)
+		util::PathList blocks = util::findBlockDirs(mapcrafter_bin);
+		std::cout << "Block directories:" << std::endl;
+		for (size_t i = 0; i < blocks.size(); i++)
+			std::cout << "  " << i+1 << ". " << BOOST_FS_ABSOLUTE1(blocks[i]).string() << std::endl;
+		if (blocks.size() == 0)
 			std::cout << "  Nothing found." << std::endl;
 
 		util::PathList configs = util::findLoggingConfigFiles(mapcrafter_bin);

@@ -30,19 +30,6 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace renderer {
 
-class JavaRandom {
-public:
-	JavaRandom();
-	~JavaRandom();
-
-	void setSeed(long long seed);
-	int next(int bits);
-	int nextInt(int max);
-
-protected:
-	long long seed;
-};
-
 class SlimeOverlay : public OverlayRenderMode {
 public:
 	SlimeOverlay(fs::path world_dir, int rotation);
@@ -52,6 +39,8 @@ public:
 
 protected:
 	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, const BlockImage& block_image);
 
 	fs::path world_dir;
 	int rotation;

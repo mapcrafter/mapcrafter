@@ -53,6 +53,10 @@ template <>
 renderer::RenderViewType as<renderer::RenderViewType>(const std::string& from) {
 	if (from == "isometric")
 		return renderer::RenderViewType::ISOMETRIC;
+	else if (from == "isometricnew")
+		return renderer::RenderViewType::ISOMETRICNEW;
+	else if (from == "side")
+		return renderer::RenderViewType::SIDE;
 	else if (from == "topdown")
 		return renderer::RenderViewType::TOPDOWN;
 	throw std::invalid_argument("Must be 'isometric' or 'topdown'!");
@@ -129,8 +133,7 @@ std::ostream& operator<<(std::ostream& out, ImageFormat image_format) {
 }
 
 MapSection::MapSection()
-	: texture_size(12), render_unknown_blocks(false),
-	  render_leaves_transparent(false), render_biomes(false) {
+	: texture_size(12), render_biomes(false) {
 }
 
 MapSection::~MapSection() {
@@ -150,16 +153,13 @@ void MapSection::dump(std::ostream& out) const {
 	out << "  render_mode = " << render_mode << std::endl;
 	out << "  overlay = " << overlay << std::endl;
 	out << "  rotations = " << rotations << std::endl;
-	out << "  texture_dir = " << texture_dir << std::endl;
+	out << "  block_dir = " << block_dir << std::endl;
 	out << "  texture_size = " << texture_size << std::endl;
-	out << "  water_opacity = " << water_opacity << std::endl;
 	out << "  image_format = " << image_format << std::endl;
 	out << "  png_indexed = " << png_indexed << std::endl;
 	out << "  jpeg_quality = " << jpeg_quality << std::endl;
 	out << "  lighting_intensity = " << lighting_intensity << std::endl;
-	out << "  lighting_water_intensity = " << water_opacity << std::endl;
-	out << "  render_unknown_blocks = " << render_unknown_blocks << std::endl;
-	out << "  render_leaves_transparent = " << render_leaves_transparent << std::endl;
+	out << "  lighting_water_intensity = " << lighting_water_intensity << std::endl;
 	out << "  render_biomes = " << render_biomes << std::endl;
 	out << "  use_image_timestamps = " << use_image_mtimes << std::endl;
 }
@@ -196,20 +196,12 @@ std::set<int> MapSection::getRotations() const {
 	return rotations_set;
 }
 
-fs::path MapSection::getTextureDir() const {
-	return texture_dir.getValue();
+fs::path MapSection::getBlockDir() const {
+	return block_dir.getValue();
 }
 
 int MapSection::getTextureSize() const {
 	return texture_size.getValue();
-}
-
-int MapSection::getTextureBlur() const {
-	return texture_blur.getValue();
-}
-
-double MapSection::getWaterOpacity() const {
-	return water_opacity.getValue();
 }
 
 int MapSection::getTileWidth() const {
@@ -242,14 +234,6 @@ double MapSection::getLightingWaterIntensity() const {
 	return lighting_water_intensity.getValue();
 }
 
-bool MapSection::renderUnknownBlocks() const {
-	return render_unknown_blocks.getValue();
-}
-
-bool MapSection::renderLeavesTransparent() const {
-	return render_leaves_transparent.getValue();
-}
-
 bool MapSection::renderBiomes() const {
 	return render_biomes.getValue();
 }
@@ -280,14 +264,13 @@ void MapSection::preParse(const INIConfigSection& section,
 	render_mode.setDefault(renderer::RenderModeType::DAYLIGHT);
 	overlay.setDefault(renderer::OverlayType::NONE);
 	rotations.setDefault("top-left");
+	
+	fs::path block_dir_found = util::findBlockDir();
+	if (!block_dir_found.empty()) {
+		block_dir.setDefault(block_dir_found);
+	}
 
-	// check if we can find a default texture directory
-	fs::path texture_dir_found = util::findTextureDir();
-	if (!texture_dir_found.empty())
-		texture_dir.setDefault(texture_dir_found);
 	texture_size.setDefault(12);
-	texture_blur.setDefault(0);
-	water_opacity.setDefault(1.0);
 	tile_width.setDefault(1);
 
 	image_format.setDefault(ImageFormat::PNG);
@@ -295,9 +278,7 @@ void MapSection::preParse(const INIConfigSection& section,
 	jpeg_quality.setDefault(85);
 
 	lighting_intensity.setDefault(1.0);
-	lighting_water_intensity.setDefault(1.0);
-	render_unknown_blocks.setDefault(false);
-	render_leaves_transparent.setDefault(true);
+	lighting_water_intensity.setDefault(0.85);
 	render_biomes.setDefault(true);
 	use_image_mtimes.setDefault(true);
 }
@@ -309,7 +290,12 @@ bool MapSection::parseField(const std::string key, const std::string value,
 	} else if (key == "world") {
 		world.load(key, value, validation);
 	} else if (key == "render_view") {
-		render_view.load(key, value, validation);
+		if (render_view.load(key, value, validation)) {
+			if (render_view.getValue() == renderer::RenderViewType::ISOMETRICNEW) {
+				validation.error("Using 'isometricnew' for 'render_view' is not necessary anymore! "
+						"Just use 'isometric' or 'topdown'.");
+			}
+		}
 	} else if (key == "render_mode" || key == "rendermode") {
 		render_mode.load(key, value, validation);
 		if (key == "rendermode")
@@ -319,23 +305,20 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		overlay.load(key, value, validation);
 	} else if (key == "rotations") {
 		rotations.load(key, value ,validation);
-	} else if (key == "texture_dir") {
-		if (texture_dir.load(key, value, validation)) {
-			texture_dir.setValue(BOOST_FS_ABSOLUTE(texture_dir.getValue(), config_dir));
-			if (!fs::is_directory(texture_dir.getValue()))
-				validation.error("'texture_dir' must be an existing directory! '"
-						+ texture_dir.getValue().string() + "' does not exist!");
+	} else if (key == "block_dir") {
+		if (block_dir.load(key, value, validation)) {
+			block_dir.setValue(BOOST_FS_ABSOLUTE(block_dir.getValue(), config_dir));
+			if (!fs::is_directory(block_dir.getValue())) {
+				validation.error("'block_dir' must be an existing directory! '"
+						+ block_dir.getValue().string() + "' does not exist!");
+			}
 		}
 	} else if (key == "texture_blur") {
 		texture_blur.load(key, value, validation);
 	} else if (key == "texture_size") {
 		if (texture_size.load(key, value, validation)
-				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 32))
+				&& (texture_size.getValue() <= 0  || texture_size.getValue() > 128))
 			validation.error("'texture_size' must be a number between 1 and 32!");
-	} else if (key == "water_opacity") {
-		if (water_opacity.load(key, value, validation)
-				&& (water_opacity.getValue() < 0 || water_opacity.getValue() > 1.0))
-			validation.error("'water_opacity' must be a number between 0.0 and 1.0!");
 	} else if (key == "tile_width") {
 		tile_width.load(key, value, validation);
 		if (tile_width.getValue() < 1)
@@ -352,10 +335,6 @@ bool MapSection::parseField(const std::string key, const std::string value,
 		lighting_intensity.load(key, value, validation);
 	} else if (key == "lighting_water_intensity") {
 		lighting_water_intensity.load(key, value, validation);
-	} else if (key == "render_unknown_blocks") {
-		render_unknown_blocks.load(key, value, validation);
-	} else if (key == "render_leaves_transparent") {
-		render_leaves_transparent.load(key, value, validation);
 	} else if (key == "render_biomes") {
 		render_biomes.load(key, value, validation);
 	} else if (key == "use_image_mtimes") {
@@ -387,7 +366,7 @@ void MapSection::postParse(const INIConfigSection& section,
 	// check if required options were specified
 	if (!isGlobal()) {
 		world.require(validation, "You have to specify a world ('world')!");
-		texture_dir.require(validation, "You have to specify a texture directory ('texture_dir')!");
+		block_dir.require(validation, "You have to specify a block directory ('block_dir')!");
 	}
 }
 

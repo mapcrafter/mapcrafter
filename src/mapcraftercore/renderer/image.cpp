@@ -36,26 +36,6 @@
 namespace mapcrafter {
 namespace renderer {
 
-RGBAPixel rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-	return (a << 24) | (b << 16) | (g << 8) | r;
-}
-
-uint8_t rgba_red(RGBAPixel value) {
-	return value & 0xff;
-}
-
-uint8_t rgba_green(RGBAPixel value) {
-	return (value & 0xff00) >> 8;
-}
-
-uint8_t rgba_blue(RGBAPixel value) {
-	return (value & 0xff0000) >> 16;
-}
-
-uint8_t rgba_alpha(RGBAPixel value) {
-	return (value & 0xff000000) >> 24;
-}
-
 uint8_t clamp(int c) {
 	if (c < 0)
 		return 0;
@@ -83,14 +63,6 @@ RGBAPixel rgba_multiply(RGBAPixel value, double r, double g, double b, double a)
 	uint8_t blue = rgba_blue(value);
 	uint8_t alpha = rgba_alpha(value);
 	return rgba(red * r, green * g, blue * b, alpha * a);
-}
-
-RGBAPixel rgba_multiply(RGBAPixel value, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-	int red = (rgba_red(value) * r) / 255;
-	int green = (rgba_green(value) * g) / 255;
-	int blue = (rgba_blue(value) * b) / 255;
-	int alpha = (rgba_alpha(value) * a) / 255;
-	return rgba(red, green, blue, alpha);
 }
 
 int rgba_distance2(RGBAPixel value1, RGBAPixel value2) {

@@ -30,27 +30,27 @@
 namespace mapcrafter {
 namespace mc {
 
+class BlockStateRegistry;
+
 /**
  * A block with id/data/biome/lighting data.
  */
 struct Block {
 	Block();
-	Block(const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	Block(const mc::BlockPos& pos, uint16_t id);
 
 	// which block does this data belong to (set by getBlock-method)
 	mc::BlockPos pos;
-	uint16_t id, data;
+	uint16_t id;
 	uint8_t biome;
 	uint8_t block_light, sky_light;
 	// which of the fields above are set? (set by getBlock-method)
 	int fields_set;
-
-	bool isFullWater() const;
-	bool isStairs() const;
 };
 
 const int GET_ID = 1;
-const int GET_DATA = 2;
+// obsolete
+//const int GET_DATA = 2; 
 const int GET_BIOME = 4;
 const int GET_BLOCK_LIGHT = 8;
 const int GET_SKY_LIGHT = 16;
@@ -126,6 +126,7 @@ struct CacheEntry {
  */
 class WorldCache {
 private:
+	mc::BlockStateRegistry& block_registry;
 	World world;
 
 	CacheEntry<RegionPos, RegionFile> regioncache[RSIZE];
@@ -143,15 +144,14 @@ private:
 	int getChunkCacheIndex(const ChunkPos& pos) const;
 
 public:
-	WorldCache();
-	WorldCache(const World& world);
+	WorldCache(mc::BlockStateRegistry& block_registry, const World& world);
 
 	const World& getWorld() const;
 
 	RegionFile* getRegion(const RegionPos& pos);
 	Chunk* getChunk(const ChunkPos& pos);
 
-	Block getBlock(const mc::BlockPos& pos, const mc::Chunk* chunk, int get = GET_ID | GET_DATA);
+	Block getBlock(const mc::BlockPos& pos, const mc::Chunk* chunk, int get = GET_ID);
 
 	const CacheStats& getRegionCacheStats() const;
 	const CacheStats& getChunkCacheStats() const;

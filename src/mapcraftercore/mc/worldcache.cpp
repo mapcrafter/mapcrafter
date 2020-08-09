@@ -19,37 +19,24 @@
 
 #include "worldcache.h"
 
+#include "blockstate.h"
+
 namespace mapcrafter {
 namespace mc {
 
 Block::Block()
 //	: Block(mc::BlockPos(0, 0, 0), 0, 0) { /* gcc 4.4 being stupid :/ */
-	: pos(mc::BlockPos(0, 0, 0)), id(0), data(0), biome(0),
+	: pos(mc::BlockPos(0, 0, 0)), id(0), biome(0),
 	  block_light(0), sky_light(15), fields_set(0) {
 }
 
-Block::Block(const mc::BlockPos& pos, uint16_t id, uint16_t data)
-	: pos(pos), id(id), data(data), biome(0),
-	  block_light(0), sky_light(15), fields_set(GET_ID | GET_DATA) {
+Block::Block(const mc::BlockPos& pos, uint16_t id)
+	: pos(pos), id(id), biome(0),
+	  block_light(0), sky_light(15), fields_set(GET_ID) {
 }
 
-bool Block::isFullWater() const {
-	return (id == 8 || id == 9) && (data & 0x7) == 0;
-}
-
-bool Block::isStairs() const {
-	return id == 53 || id == 67 || id == 108 || id == 109 || id == 114 || id == 128 || id == 134 || id == 135 || id == 136 || id == 156 || id == 163 || id == 164 || id == 180 || id == 203;
-}
-
-WorldCache::WorldCache() {
-	for (int i = 0; i < RSIZE; i++)
-		regioncache[i].used = false;
-	for (int i = 0; i < CSIZE; i++)
-		chunkcache[i].used = false;
-}
-
-WorldCache::WorldCache(const World& world)
-	: world(world) {
+WorldCache::WorldCache(mc::BlockStateRegistry& block_registry, const World& world)
+	: block_registry(block_registry), world(world) {
 	for (int i = 0; i < RSIZE; i++)
 		regioncache[i].used = false;
 	for (int i = 0; i < CSIZE; i++)
@@ -127,7 +114,7 @@ Chunk* WorldCache::getChunk(const ChunkPos& pos) {
 	if (chunks_broken.count(pos))
 		return nullptr;
 
-	int status = region->loadChunk(pos, entry.value);
+	int status = region->loadChunk(pos, block_registry, entry.value);
 	// the chunk does not exist, chunk in cache was not modified
 	if (status == RegionFile::CHUNK_DOES_NOT_EXIST)
 		return nullptr;
@@ -167,16 +154,16 @@ Block WorldCache::getBlock(const mc::BlockPos& pos, const mc::Chunk* chunk, int 
 		if (get & GET_ID) {
 			block.id = mychunk->getBlockID(local);
 			block.fields_set |= GET_ID;
-		} if (get & GET_DATA) {
-			block.data = mychunk->getBlockData(local);
-			block.fields_set |= GET_DATA;
-		} if (get & GET_BIOME) {
+		}
+		if (get & GET_BIOME) {
 			block.biome = mychunk->getBiomeAt(local);
 			block.fields_set |= GET_BIOME;
-		} if (get & GET_BLOCK_LIGHT) {
+		}
+		if (get & GET_BLOCK_LIGHT) {
 			block.block_light = mychunk->getBlockLight(local);
 			block.fields_set |= GET_BLOCK_LIGHT;
-		} if (get & GET_SKY_LIGHT) {
+		}
+		if (get & GET_SKY_LIGHT) {
 			block.sky_light = mychunk->getSkyLight(local);
 			block.fields_set |= GET_SKY_LIGHT;
 		}

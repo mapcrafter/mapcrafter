@@ -140,6 +140,22 @@ public:
 	 */
 	bool getRegion(const RegionPos& pos, RegionFile& region) const;
 
+	/**
+	 * Returns the Minecraft version ID the world is running with. Returns -1 if no
+	 * level.dat or the specific tag can be found.
+	 *
+	 * The ID is the value of tag "Id" in tag "Version" of the level.dat,
+	 * like example below:
+	 *
+	 * TAG_Compound("Version"): 3 entries
+	 * {
+	 *   TAG_Int("Id"): 1628 <--- This number
+	 *   TAG_String("Name"): 1.13.1
+	 *   TAG_Byte("Snapshot"): 0
+	 * }
+	 */
+	int getMinecraftVersion() const;
+
 private:
 	// world directory, region directory
 	fs::path world_dir, region_dir;

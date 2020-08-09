@@ -28,6 +28,7 @@ namespace mapcrafter {
 
 // some forward declarations
 namespace mc {
+class BlockStateRegistry;
 class WorldCache;
 }
 
@@ -56,7 +57,7 @@ public:
 	/**
 	 * Creates an instance of the render view specific block image class.
 	 */
-	virtual BlockImages* createBlockImages() const = 0;
+	virtual BlockImages* createBlockImages(mc::BlockStateRegistry& block_registry) const = 0;
 
 	/**
 	 * Creates an instance of the render view specific tile set class.
@@ -66,21 +67,9 @@ public:
 	/**
 	 * Creates an instance of the render view specific tile renderer class.
 	 */
-	virtual TileRenderer* createTileRenderer(BlockImages* images, int tile_width,
-			mc::WorldCache* world, RenderMode* render_mode) const = 0;
-
-	/**
-	 * Creates an instance of the render view specific render mode renderer class.
-	 *
-	 * Have a look at each base render mode: There is an abstract class / interface
-	 * (like OverlayRenderer or LightingRenderer) that you have to implement for
-	 * the render view.
-	 *
-	 * Sorry for the ugly "const RenderModeRendererType& renderer" reference thingy.
-	 * Ähm, ya know, circular dependencies and forward declarations and stuff.
-	 */
-	virtual RenderModeRenderer* createRenderModeRenderer(
-			const RenderModeRendererType& renderer) const = 0;
+	virtual TileRenderer* createTileRenderer(mc::BlockStateRegistry& block_registry,
+			BlockImages* images, int tile_width, mc::WorldCache* world,
+			RenderMode* render_mode) const = 0;
 
 	/**
 	 * Configures a block images object by calling some (eventually per render view
@@ -115,7 +104,9 @@ public:
 
 enum class RenderViewType {
 	ISOMETRIC,
-	TOPDOWN
+	ISOMETRICNEW,
+	TOPDOWN,
+	SIDE
 };
 
 // TODO operator<< here but util::as in the config section file?

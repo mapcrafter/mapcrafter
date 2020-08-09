@@ -2,6 +2,7 @@
 Mapcrafter
 ==========
 
+
 Welcome
 =======
 
@@ -71,8 +72,10 @@ Documentation Contents
    installation
    using_mapcrafter
    configuration
-   logging
    markers
+   blockcrafter
+   logging
+   hacking
 
 Indices and tables
 ==================

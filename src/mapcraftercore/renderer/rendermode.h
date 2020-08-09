@@ -21,6 +21,8 @@
 #define RENDERMODE_H_
 
 #include "renderview.h"
+// TODO forward-declare once template is gone!
+#include "../renderer/blockimages.h"
 #include "../mc/worldcache.h"
 
 #include <iostream>
@@ -45,6 +47,7 @@ class Chunk;
 namespace renderer {
 
 class BlockImages;
+class BlockImage;
 class RGBAImage;
 
 /**
@@ -70,89 +73,24 @@ public:
 	 */
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
 
+	virtual bool isHidden(const mc::BlockPos& pos, const BlockImage& block_image) { return false; }
+
 	/**
 	 * This method is called by the tile renderer so you can modify block images that
 	 * are about to be rendered.
 	 */
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id,
 			uint16_t data) = 0;
-};
 
-#ifdef HAVE_ENUM_CLASS_FORWARD_DECLARATION
-
-enum class RenderModeRendererType {
-	DUMMY,
-	LIGHTING,
-	OVERLAY
-};
-
-#else
-
-/**
- * Types of render mode renderers that are available for render modes.
- *
- * THIS IS A TERRIBLE, TERRIBLE WORKAROUND:
- * 
- * - Sorry, I would use an enum class, but gcc 4.4 (Ubuntu 12.04) doesn't allow enum
- *   class forward declaration (needed in renderview.h <-> rendermode.h).
- * - Also mingw-w64 has a problem with those extern static members, that's why I'm
- *   using an enum class like usual for other platforms.
- */
-class RenderModeRendererType {
-public:
-	RenderModeRendererType(const RenderModeRendererType& type) : type(type.type) {}
-
-	bool operator!=(const RenderModeRendererType other) const { return type != other.type; }
-	bool operator==(const RenderModeRendererType other) const { return type == other.type; }
-
-	static const RenderModeRendererType DUMMY;
-	static const RenderModeRendererType LIGHTING;
-	static const RenderModeRendererType OVERLAY;
-
-private:
-	RenderModeRendererType(int type) : type(type) {}
-	
-	int type;
-};
-
-#endif
-
-/**
- * Empty class just to have a base class for the rendering part of each render mode.
- */
-class RenderModeRenderer {
-public:
-	virtual ~RenderModeRenderer();
-
-	// every render mode renderer needs a ...
-	// static const RenderModeRendererType TYPE;
-};
-
-/**
- * An empty dummy render mode renderer for render modes that don't have a rendering part.
- */
-class DummyRenderer : public RenderModeRenderer {
-public:
-	virtual ~DummyRenderer();
-
-	static const RenderModeRendererType TYPE;
+	virtual void draw(RGBAImage& image, const BlockImage& block_image,
+			const mc::BlockPos& pos, uint16_t id) {}
 };
 
 /**
  * The base render mode class already implements handling of the initialize-method and
  * some other stuff (a comfortable getBlock-method that takes the current_chunk into
  * account).
- *
- * Also there is a per render view specific renderer for each render mode that wants to
- * modify the block images that are about to be rendered. The base render mode class is
- * a template class with the abstract renderer class as template argument. Each render
- * view has to provide an implementation of this renderer class. The base render mode
- * class calls the createRenderModeRenderer-method of the render view, casts the
- * obtained renderer to the specified template class and stores it in the 'renderer'
- * variable. If a base render mode doesn't need a renderer, just specify the
- * DummyRenderer class as renderer in the template.
  */
-template <typename Renderer = DummyRenderer>
 class BaseRenderMode : public RenderMode {
 public:
 	BaseRenderMode();
@@ -176,12 +114,10 @@ public:
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
 protected:
-	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID | mc::GET_DATA);
-
-	RenderModeRenderer* renderer_ptr;
-	Renderer* renderer;
+	mc::Block getBlock(const mc::BlockPos& pos, int get = mc::GET_ID);
 
 	BlockImages* images;
+	RenderedBlockImages* block_images;
 	mc::WorldCache* world;
 	mc::Chunk** current_chunk;
 };
@@ -211,10 +147,14 @@ public:
 	 */
 	virtual bool isHidden(const mc::BlockPos& pos, uint16_t id, uint16_t data);
 
+	virtual bool isHidden(const mc::BlockPos& pos, const BlockImage& block_image);
+
 	/**
 	 * Calls this method of each render mode.
 	 */
 	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+
+	virtual void draw(RGBAImage& image, const BlockImage& block_image, const mc::BlockPos& pos, uint16_t id);
 
 protected:
 	std::vector<RenderMode*> render_modes;
@@ -247,48 +187,6 @@ std::ostream& operator<<(std::ostream& out, OverlayType overlay);
  */
 RenderMode* createRenderMode(const config::WorldSection& world_config,
 		const config::MapSection& map_config, int rotation);
-
-template <typename Renderer>
-BaseRenderMode<Renderer>::BaseRenderMode()
-	: renderer_ptr(nullptr), images(nullptr), world(nullptr), current_chunk(nullptr) {
-}
-
-template <typename Renderer>
-BaseRenderMode<Renderer>::~BaseRenderMode() {
-	if (renderer_ptr != nullptr)
-		delete renderer_ptr;
-}
-
-template <typename Renderer>
-void BaseRenderMode<Renderer>::initialize(const RenderView* render_view, 
-		BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk) {
-	// create the render mode renderer by calling the render view factory method
-	// for this renderer type
-	this->renderer_ptr = render_view->createRenderModeRenderer(Renderer::TYPE);
-	// try to cast it to the right subclass, make sure that works if there is a renderer
-	this->renderer = dynamic_cast<Renderer*>(renderer_ptr);
-	if (Renderer::TYPE != RenderModeRendererType::DUMMY)
-		assert(renderer);
-	this->images = images;
-	this->world = world;
-	this->current_chunk = current_chunk;
-}
-
-template <typename Renderer>
-bool BaseRenderMode<Renderer>::isHidden(const mc::BlockPos& pos, uint16_t id,
-		uint16_t data) {
-	return false;
-}
-
-template <typename Renderer>
-void BaseRenderMode<Renderer>::draw(RGBAImage& image, const mc::BlockPos& pos,
-		uint16_t id, uint16_t data) {
-}
-
-template <typename Renderer>
-mc::Block BaseRenderMode<Renderer>::getBlock(const mc::BlockPos& pos, int get) {
-	return world->getBlock(pos, *current_chunk, get);
-}
 
 } /* namespace render */
 } /* namespace mapcrafter */

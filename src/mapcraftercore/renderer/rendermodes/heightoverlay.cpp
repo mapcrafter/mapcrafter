@@ -51,5 +51,9 @@ RGBAPixel HeightOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uin
 	return rgba(r, g, b, 85);
 }
 
+RGBAPixel HeightOverlay::getBlockColor(const mc::BlockPos& pos, const BlockImage& block_image) {
+	return getBlockColor(pos, 0, 0);
+}
+
 } /* namespace renderer */
 } /* namespace mapcrafter */

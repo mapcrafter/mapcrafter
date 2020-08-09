@@ -11,6 +11,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+
 import sys, os
 
 has_sphinx_theme = True
@@ -47,7 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Mapcrafter'
-copyright = u'2012-2014, Moritz Hilscher'
+copyright = u'2012-2018, Moritz Hilscher'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

@@ -8,11 +8,16 @@ Mapcrafter allows you to add different markers easily to your rendered
 maps. Markers are organized in marker groups, this allows you show
 and hide different marker groups on the rendered map.
 
+.. image:: img/markers_map.png
+    :align: center
+    :alt: A map with markers.
+
+    
 Automatically Generated Markers
 ===============================
 
-Mapcrafter is able to automatically generate markers from specific signs
-in your Minecraft world.
+Mapcrafter is able to automatically generate markers from `signs <https://minecraft.gamepedia.com/Sign>`_ 
+you place in your Minecraft world.
 
 A special marker section type is used to configure automatically generated
 marker groups. Here is an example:
@@ -27,14 +32,14 @@ marker groups. Here is an example:
 
 This section defines a marker group showing different homes in your 
 Minecraft world. Every sign that starts with the prefix ``[home]`` is 
-shown on the map as marker of this marker group.
+shown on the map as marker in the *Homes* group.
 
 See :ref:`config_marker_options` for a reference of marker section options.
 
 To automatically generate these markers, use the ``mapcrafter_markers``
 program with your configuration file::
 
-    mapcrafter_markers -c render.conf
+    $ mapcrafter_markers -c render.conf
 
 This program generates your defined marker groups and writes them to a
 ``markers-generated.js`` file in your output directory. You do not need
@@ -43,18 +48,46 @@ to worry about manually specified markers being overwritten.
 If you have a very big world and want some progress information, use
 the verbose flag::
 
-    mapcrafter_markers -v -c render.conf
+    $ mapcrafter_markers -v -c render.conf
+
+The same markers and marker groups are applied to all maps in your configuration;
+you cannot apply markers to just one map when you have many.
+
+Marker configuration sections will only match each sign in your world once.
+You should order your ``[marker:..]`` sections to be from most specific to
+most generic: 
+
+.. code-block:: ini
+
+    # Matches all signs starting with "["
+    [marker:bracket]
+    prefix = [
+
+    # Will not match anything because all signs starting with "[" were matched above.
+    [marker:homes]
+    prefix = [home]
+
+    # Will match all signs.
+    # Always put this last or it will match everything!
+    [marker:all]    
+    prefix = 
+    # If false, it will not match blank signs.
+    match_empty = true      
+
 
 Manually Specifying Markers
 ===========================
 
-Of course it is still possible to add markers manually to your map.
-You can do this by editing the ``markers.js`` file in your output directory
-(it is not overwritten by Mapcrafter if it already exists).
-The ``markers.js`` file is a Javascript file which is included
-by the web interface and contains definitions for the map markers.
+You can also add markers manually to your map. These markers are not tied to
+signs (or any other entity) in your Minecraft world; you have total control
+over them!
 
-Here is an example ``markers.js`` file:
+You define markers by editing the ``markers.js`` file in your output directory 
+(it is not overwritten by  Mapcrafter if it already exists). The ``markers.js`` 
+file is a Javascript  file which is included by the web interface and contains 
+definitions for the map markers.
+
+Here is an example ``markers.js`` file in (mostly) `JSON format <https://en.wikipedia.org/wiki/JSON>`_:
 
 .. code-block:: javascript
 
@@ -65,7 +98,7 @@ Here is an example ``markers.js`` file:
         {
             // id of the marker group, without spaces/other special chars
             "id" : "signs",
-            // name of the marker group, displayed in the webinterface
+            // name of the marker group, displayed in the web-interface
             "name" : "Signs",
             // icon of the markers belonging to that group (optional)
             "icon" : "sign.png",
@@ -90,7 +123,7 @@ Here is an example ``markers.js`` file:
                         // override the size of the marker icon (optional)
                         "iconSize" : [16, 32]
                     },
-                    // more markers:
+                    // more markers (compact format, without custom icon):
                     {"pos" : [100, 100, 64], "title" : "Test1"},
                     {"pos" : [100, 200, 64], "title" : "Test2"},
                     {"pos" : [500, 30, 64], "title" : "Test2"},
@@ -115,20 +148,21 @@ Here is an example ``markers.js`` file:
         },
     ];
 
-As you can see there is a bit Javascript syntax involved here. Do not forget
-quotation marks around strings or the commas after array elements. The
-lines starting with a ``//`` are comments and ignored by Javascript.
+As you can see there is a bit `Javascript syntax <https://en.wikipedia.org/wiki/JSON>`_ 
+involved here. Do not forget quotation marks around strings or the commas 
+after array elements. The lines starting with a ``//`` are comments and 
+ignored by Javascript.
 
 The file has a Javascript-Array called ``MAPCRAFTER_MARKERS`` which
 contains the different marker groups. The elements are associative 
 Javascript-Arrays and contain the options of the different marker groups.
 
-These options are similar to the marker section configuration options.
+These options are similar to the :ref:`config_marker_options` configuration section.
 Every marker group has an unique ID and a name displayed in the web interface.
 You can also use an icon with a specific size (optional).
 
 The actual markers are specified per world in an associative array with
-the name ``markers``. You have to use as world name your world section
+the name ``markers``. You must the same world name your world section
 name.
 
 The definition of markers is also done with associative arrays::
@@ -159,9 +193,9 @@ Here are the available options for the markers:
 ``text``
 
 	**Default:** *Title of the marker*
-
-	This is the text of the marker popup window.
-	If you do not specify a text, the title of the marker is used as text.
+    
+    This is the text of the marker popup window. If you do not specify 
+    anything, the title of the marker is used. HTML can be used for formatting.
 
 ``icon``
 
@@ -183,6 +217,7 @@ Here are the available options for the markers:
 
     This option may be used independently of the marker icon override.
 
+
 Custom Leaflet Marker Objects
 =============================
 
@@ -190,8 +225,7 @@ Furthermore you can customize your markers by specifying a function which
 creates the actual Leaflet marker objects with the marker data. This function
 is called for every marker in the marker group and should return a marker-like
 object displayable by Leaflet. Please have a look at the
-`Leaflet API <http://leafletjs.com/reference.html>`_ to find out what you
-can do with Leaflet:
+`Leaflet API <http://leafletjs.com/reference.html>`_ for more information.
 
 Here is a simple example which shows two areas on the map:
 
@@ -231,7 +265,7 @@ Here is a simple example which shows two areas on the map:
         },
     },
 
-As you can see you can use the ``ui.mcToLatLng`` method to convert Minecraft
+You should use the ``ui.mcToLatLng`` method to convert Minecraft
 coordinates (x, z and then y) to Leaflet latitude/longitute coordinates.
 You can also use arbitrary data in the associative marker arrays and access
 them with the ``markerInfo`` parameter of your function (same with ``groupInfo``

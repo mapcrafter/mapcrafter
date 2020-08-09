@@ -40,21 +40,35 @@ namespace fs = boost::filesystem;
 namespace mapcrafter {
 namespace renderer {
 
-#ifndef HAVE_ENUM_CLASS_FORWARD_DECLARATION
-
-const RenderModeRendererType RenderModeRendererType::DUMMY(0);
-const RenderModeRendererType RenderModeRendererType::LIGHTING(1);
-const RenderModeRendererType RenderModeRendererType::OVERLAY(2);
-
-#endif
-
-RenderModeRenderer::~RenderModeRenderer() {
+BaseRenderMode::BaseRenderMode()
+	: images(nullptr), block_images(nullptr), world(nullptr),
+	current_chunk(nullptr) {
 }
 
-DummyRenderer::~DummyRenderer() {
+BaseRenderMode::~BaseRenderMode() {
 }
 
-const RenderModeRendererType DummyRenderer::TYPE = RenderModeRendererType::DUMMY;
+void BaseRenderMode::initialize(const RenderView* render_view, 
+		BlockImages* images, mc::WorldCache* world, mc::Chunk** current_chunk) {
+	this->images = images;
+	this->block_images = dynamic_cast<RenderedBlockImages*>(images);
+	assert(this->block_images != nullptr);
+	this->world = world;
+	this->current_chunk = current_chunk;
+}
+
+bool BaseRenderMode::isHidden(const mc::BlockPos& pos, uint16_t id,
+		uint16_t data) {
+	return false;
+}
+
+void BaseRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
+		uint16_t id, uint16_t data) {
+}
+
+mc::Block BaseRenderMode::getBlock(const mc::BlockPos& pos, int get) {
+	return world->getBlock(pos, *current_chunk, get);
+}
 
 MultiplexingRenderMode::~MultiplexingRenderMode() {
 	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
@@ -79,10 +93,24 @@ bool MultiplexingRenderMode::isHidden(const mc::BlockPos& pos, uint16_t id,
 	return false;
 }
 
+bool MultiplexingRenderMode::isHidden(const mc::BlockPos& pos, const BlockImage& block_image) {
+	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
+		if ((*it)->isHidden(pos, block_image))
+			return true;
+	return false;
+}
+
 void MultiplexingRenderMode::draw(RGBAImage& image, const mc::BlockPos& pos,
 		uint16_t id, uint16_t data) {
 	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
 		(*it)->draw(image, pos, id, data);
+}
+
+
+void MultiplexingRenderMode::draw(RGBAImage& image, const BlockImage& block_image,
+		const mc::BlockPos& pos, uint16_t id) {
+	for (auto it = render_modes.begin(); it != render_modes.end(); ++it)
+		(*it)->draw(image, block_image, pos, id);
 }
 
 std::ostream& operator<<(std::ostream& out, RenderModeType render_mode) {

@@ -211,5 +211,38 @@ bool endswith(const std::string& str, const std::string& end) {
 	return str.substr(str.size() - end.size(), end.size()) == end;
 }
 
+std::vector<std::string> split(const std::string& str, char delimiter) {
+	std::vector<std::string> splitted;
+
+	std::istringstream ss(str);
+	for (std::string token; std::getline(ss, token, delimiter);) {
+		splitted.push_back(token);
+	}
+
+	return splitted;
+}
+
+std::map<std::string, std::string> parseProperties(std::string str) {
+	std::map<std::string, std::string> properties;
+
+	// '-' stands for no properties
+	if (str == "-") {
+		return properties;
+	}
+
+	std::vector<std::string> parts = util::split(str, ',');
+	for (auto it = parts.begin(); it != parts.end(); ++it) {
+		if (*it == "") {
+			continue;
+		}
+		size_t index = it->find('=');
+		assert(index != std::string::npos);
+		std::string key = it->substr(0, index);
+		std::string value = it->substr(index + 1);
+		properties[key] = value;
+	}
+	return properties;
+}
+
 } /* namespace util */
 } /* namespace mapcrafter */

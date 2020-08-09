@@ -32,29 +32,6 @@ namespace renderer {
 
 class RGBAImage;
 
-class OverlayRenderer : public RenderModeRenderer {
-public:
-	OverlayRenderer();
-	virtual ~OverlayRenderer();
-
-	// TODO
-	// DEPRECATED
-	void setHighContrast(bool high_contrast);
-
-	virtual void tintBlock(RGBAImage& image, RGBAPixel color) const;
-
-	virtual void tintLeft(RGBAImage& image, RGBAPixel color) const = 0;
-	virtual void tintRight(RGBAImage& image, RGBAPixel color) const = 0;
-	virtual void tintTop(RGBAImage& image, RGBAPixel color, int offset) const = 0;
-
-	static const RenderModeRendererType TYPE;
-
-protected:
-	std::tuple<int, int, int> getRecolor(RGBAPixel color) const;
-
-	bool high_contrast;
-};
-
 enum class OverlayMode {
 	PER_BLOCK,
 	PER_FACE,
@@ -65,15 +42,15 @@ enum class OverlayMode {
  * the function that returns the color for each block. Return something with alpha == 0
  * if there should be no color.
  */
-class OverlayRenderMode : public BaseRenderMode<OverlayRenderer> {
+class OverlayRenderMode : public BaseRenderMode {
 public:
 	OverlayRenderMode(OverlayMode overlay_mode);
 	virtual ~OverlayRenderMode();
 
-	virtual void draw(RGBAImage& image, const mc::BlockPos& pos, uint16_t id, uint16_t data);
+	virtual void draw(RGBAImage& image, const BlockImage& block_image, const mc::BlockPos& pos, uint16_t id);
 
 protected:
-	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, uint16_t id, uint16_t data) = 0;
+	virtual RGBAPixel getBlockColor(const mc::BlockPos& pos, const BlockImage& block_image) { return 0; }
 
 private:
 	OverlayMode overlay_mode;

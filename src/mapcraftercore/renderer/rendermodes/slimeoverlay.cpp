@@ -19,6 +19,7 @@
 
 #include "slimeoverlay.h"
 
+#include "../../mc/java.h"
 #include "../../mc/nbt.h"
 #include "../../util.h"
 
@@ -26,36 +27,6 @@ namespace nbt = mapcrafter::mc::nbt;
 
 namespace mapcrafter {
 namespace renderer {
-
-JavaRandom::JavaRandom()
-	: seed(0) {
-}
-
-JavaRandom::~JavaRandom() {
-}
-
-void JavaRandom::setSeed(long long seed) {
-	this->seed = (seed ^ 0x5DEECE66DLL) & ((1LL << 48) - 1);
-}
-
-int JavaRandom::next(int bits) {
-	seed = (seed * 0x5DEECE66DLL + 0xBLL) & ((1LL << 48) - 1);
-	return (int) (seed >> (48 - bits));
-}
-
-int JavaRandom::nextInt(int max) {
-	// invalid max
-	if (max <= 0)
-		return -1;
-	if ((max & -max) == max) // i.e., n is a power of 2
-		return (int) ((max * (long long) next(31)) >> 31);
-	int bits, val;
-	do {
-		bits = next(31);
-		val = bits % max;
-	} while (bits - val + (max - 1) < 0);
-	return val;
-}
 
 SlimeOverlay::SlimeOverlay(fs::path world_dir, int rotation)
 	: OverlayRenderMode(OverlayMode::PER_BLOCK), world_dir(world_dir),
@@ -83,7 +54,7 @@ bool SlimeOverlay::isSlimeChunk(const mc::ChunkPos& chunk, long long world_seed)
 		+ (long long) (chunkz * chunkz) * 0x4307a7LL
 		+ (long long) (chunkz * 0x5f24f)) ^ 0x3ad8025f;
 
-	JavaRandom random;
+	mc::JavaRandom random;
 	random.setSeed(seed);
 	return random.nextInt(10) == 0;
 }
@@ -99,6 +70,10 @@ RGBAPixel SlimeOverlay::getBlockColor(const mc::BlockPos& pos, uint16_t id, uint
 	if (isSlimeChunk(chunk, world_seed))
 		return rgba(60, 200, 20, 255);
 	return rgba(0, 0, 0, 0);
+}
+
+RGBAPixel SlimeOverlay::getBlockColor(const mc::BlockPos& pos, const BlockImage& block_image) {
+	return getBlockColor(pos, 0, 0);
 }
 
 }

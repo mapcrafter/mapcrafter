@@ -160,12 +160,19 @@ PathList findTemplateDirs(const fs::path& executable) {
 	return templates;
 }
 
-PathList findTextureDirs(const fs::path& executable) {
-	PathList textures, resources = findResourceDirs(executable);
-	for (PathList::iterator it = resources.begin(); it != resources.end(); ++it)
-		if (fs::is_directory(*it / "textures"))
-			textures.push_back(*it / "textures");
-	return textures;
+PathList findDirs(const fs::path& executable, std::string dir_name) {
+	PathList resources = findResourceDirs(executable);
+	PathList dirs;
+	for (PathList::iterator it = resources.begin(); it != resources.end(); ++it) {
+		if (fs::is_directory(*it / dir_name)) {
+			dirs.push_back(*it / dir_name);
+		}
+	}
+	return dirs;
+}
+
+PathList findBlockDirs(const fs::path& executable) {
+	return findDirs(executable, "blocks");
 }
 
 PathList findLoggingConfigFiles(const fs::path& executable) {
@@ -195,10 +202,11 @@ fs::path findTemplateDir() {
 	return fs::path();
 }
 
-fs::path findTextureDir() {
-	PathList textures = findTextureDirs(findExecutablePath());
-	if (textures.size())
-		return *textures.begin();
+fs::path findBlockDir() {
+	PathList dirs = findBlockDirs(findExecutablePath());
+	if (dirs.size()) {
+		return *dirs.begin();
+	}
 	return fs::path();
 }
 

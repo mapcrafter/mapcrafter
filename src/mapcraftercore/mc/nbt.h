@@ -68,7 +68,8 @@ enum class TagType : int8_t {
 	TAG_STRING = 8,
 	TAG_LIST = 9,
 	TAG_COMPOUND = 10,
-	TAG_INT_ARRAY = 11
+	TAG_INT_ARRAY = 11,
+	TAG_LONG_ARRAY = 12,
 };
 
 enum class Compression {
@@ -88,6 +89,7 @@ static const char* TAG_NAMES[] = {
 	"TAG_List",
 	"TAG_Compound",
 	"TAG_Int_Array",
+	"TAG_Long_Array",
 };
 
 template <typename T>
@@ -98,8 +100,9 @@ void dumpTag(std::ostream& stream, const std::string& indendation, T tag) {
 template <typename T, typename P>
 void dumpTag(std::ostream& stream, const std::string& indendation, T tag, P payloadrepr) {
 	const char* type = "TAG_Unknown";
-	if (tag.getType() >= 0 && tag.getType() <= 11)
+	if (tag.getType() >= 0 && static_cast<uint8_t>(tag.getType()) < sizeof(TAG_NAMES) / sizeof(TAG_NAMES[0])) {
 		type = TAG_NAMES[tag.getType()];
+	}
 	stream << indendation << type;
 	if (tag.isNamed())
 		stream << "(\"" << tag.getName() << "\")";
@@ -130,14 +133,14 @@ public:
 	T& cast() {
 		if (type == T::TAG_TYPE)
 			return dynamic_cast<T&>(*this);
-		throw InvalidTagCast();
+		throw InvalidTagCast("Invalid tag cast");
 	}
 
 	template <typename T>
 	const T& cast() const {
 		if (type == T::TAG_TYPE)
 			return dynamic_cast<const T&>(*this);
-		throw InvalidTagCast();
+		throw InvalidTagCast("Invalid tag cast");
 	}
 
 	bool isWriteType() const;
@@ -244,6 +247,7 @@ public:
 
 typedef TagArray<int8_t, TagType::TAG_BYTE_ARRAY> TagByteArray;
 typedef TagArray<int32_t, TagType::TAG_INT_ARRAY> TagIntArray;
+typedef TagArray<int64_t, TagType::TAG_LONG_ARRAY> TagLongArray;
 
 class TagString: public Tag {
 public:
@@ -314,8 +318,9 @@ public:
 	template <typename T>
 	bool hasArray(const std::string& name, int32_t len = -1) const {
 		static_assert(std::is_same<T, TagByteArray>::value
-				|| std::is_same<T, TagIntArray>::value,
-			"Only TagByteArray and TagIntArray are allowed as template argument!");
+				|| std::is_same<T, TagIntArray>::value
+				|| std::is_same<T, TagLongArray>::value,
+			"Only TagByteArray, TagIngArray and TagLongArray are allowed as template argument!");
 		if (!hasTag<T>(name))
 			return false;
 		T& tag = payload.at(name)->cast<T>();

@@ -26,15 +26,16 @@
 #include "tilerenderer.h"
 #include "tileset.h"
 #include "../mc/worldcache.h"
+#include "../mc/blockstate.h"
 #include "../util.h"
 
 namespace mapcrafter {
 namespace renderer {
 
 void RenderContext::initializeTileRenderer() {
-	world_cache.reset(new mc::WorldCache(world));
+	world_cache.reset(new mc::WorldCache(*block_registry, world));
 	render_mode.reset(createRenderMode(world_config, map_config, world.getRotation()));
-	tile_renderer.reset(render_view->createTileRenderer(block_images,
+	tile_renderer.reset(render_view->createTileRenderer(*block_registry, block_images,
 			map_config.getTileWidth(), world_cache.get(), render_mode.get()));
 	render_view->configureTileRenderer(tile_renderer.get(), world_config, map_config);
 }
@@ -114,14 +115,21 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 
 		/*
 		// draws a border on the tile
-		int size = settings.tile_size;
-		for (int x = 0; x < size; x++)
-			for (int y = 0; y < size; y++) {
-				if (x < 5 || x > size-5)
-					tile.setPixel(x, y, rgba(0, 0, 255, 255));
-				if (y < 5 || y > size-5)
-					tile.setPixel(x, y, rgba(0, 0, 255, 255));
+		uint32_t color = rgba(0, 0, 255, 255);
+		if (tile.getTilePos() == TilePos(0, 0)) {
+			color = rgba(255, 0, 0, 255);
+		}
+		int border = 1;
+		for (int x = 0; x < image.getWidth(); x++) {
+			for (int y = 0; y < image.getHeight(); y++) {
+				if (x < border || x+1 > image.getWidth() - border) {
+					image.setPixel(x, y, color);
+				}
+				if (y < border || y+1 > image.getHeight() - border) {
+					image.setPixel(x, y, color);
+				}
 			}
+		}
 		*/
 
 		// save it
@@ -136,8 +144,9 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 		// and blit it to the properly position
 		//int size = render_context.map_config.getTextureSize() * 32 * TILE_WIDTH;
 		// TODO
-		int size = render_context.tile_renderer->getTileSize();
-		image.setSize(size, size);
+		int w = render_context.tile_renderer->getTileWidth();
+		int h = render_context.tile_renderer->getTileHeight();
+		image.setSize(w, h);
 
 		RGBAImage other;
 		RGBAImage resized;
@@ -150,19 +159,19 @@ void TileRenderWorker::renderRecursive(const TilePath& tile, RGBAImage& image) {
 		if (render_context.tile_set->hasTile(tile + 2)) {
 			renderRecursive(tile + 2, other);
 			other.resize(resized, 0, 0, InterpolationType::HALF);
-			image.simpleAlphaBlit(resized, size / 2, 0);
+			image.simpleAlphaBlit(resized, w / 2, 0);
 			other.clear();
 		}
 		if (render_context.tile_set->hasTile(tile + 3)) {
 			renderRecursive(tile + 3, other);
 			other.resize(resized, 0, 0, InterpolationType::HALF);
-			image.simpleAlphaBlit(resized, 0, size / 2);
+			image.simpleAlphaBlit(resized, 0, h / 2);
 			other.clear();
 		}
 		if (render_context.tile_set->hasTile(tile + 4)) {
 			renderRecursive(tile + 4, other);
 			other.resize(resized, 0, 0, InterpolationType::HALF);
-			image.simpleAlphaBlit(resized, size / 2, size / 2);
+			image.simpleAlphaBlit(resized, w / 2, h / 2);
 		}
 
 		/*
