@@ -383,14 +383,6 @@ MapcrafterUI.prototype.addControl = function(control, position, index) {
 				wrapper.setAttribute("class", "control-wrapper control-wrapper-invisible");
 				wrapper.setAttribute("id", "control-wrapper-" + control.getName());
 			}
-
-			// just a dirty hack to prevent the map getting all mouse click events
-			wrapper.onmouseover = function() {
-				map.dragging.disable();
-			};
-			wrapper.onmouseout = function() {
-				map.dragging.enable();
-			};
 			
 			control.ui = self;
 			control.create(wrapper);
