@@ -385,10 +385,10 @@ MapcrafterUI.prototype.addControl = function(control, position, index) {
 			}
 
 			// just a dirty hack to prevent the map getting all mouse click events
-			wrapper.onmouseover = function() {
+			wrapper.onpointerover = function() {
 				map.dragging.disable();
 			};
-			wrapper.onmouseout = function() {
+			wrapper.onpointerout = function() {
 				map.dragging.enable();
 			};
 			
