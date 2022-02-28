@@ -77,11 +77,13 @@ void imageResizeHalf(const RGBAImage& image, RGBAImage& dest) {
 
 	for (int x = 0; x < width - 1; x += 2) {
 		for (int y = 0; y < height - 1; y += 2) {
-			RGBAPixel p1 = (image.pixel(x, y) >> 2) & 0x3f3f3f3f;
-			RGBAPixel p2 = (image.pixel(x + 1, y) >> 2) & 0x3f3f3f3f;
-			RGBAPixel p3 = (image.pixel(x, y + 1) >> 2) & 0x3f3f3f3f;
-			RGBAPixel p4 = (image.pixel(x + 1, y + 1) >> 2) & 0x3f3f3f3f;
-			dest.pixel(x / 2, y / 2) = p1 + p2 + p3 + p4;
+			RGBAPixel p1 = image.pixel(x, y);
+			RGBAPixel p2 = image.pixel(x + 1, y);
+			RGBAPixel p3 = image.pixel(x, y + 1);
+			RGBAPixel p4 = image.pixel(x + 1, y + 1);
+			RGBAPixel highBits = ((p1 >> 2) & 0x3f3f3f3f) + ((p2 >> 2) & 0x3f3f3f3f) + ((p3 >> 2) & 0x3f3f3f3f) + ((p4 >> 2) & 0x3f3f3f3f);
+			RGBAPixel lowBits = (((p1 & 0x03030303) + (p2 & 0x03030303) + (p3 & 0x03030303) + (p4 & 0x03030303)) >> 2) & 0x03030303;
+			dest.pixel(x >> 1, y >> 1) = highBits + lowBits;
 		}
 	}
 }
