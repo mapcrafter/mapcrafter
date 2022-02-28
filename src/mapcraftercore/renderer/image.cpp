@@ -439,13 +439,13 @@ RGBAPixel blurKernel(const RGBAImage& image, int x, int y, int radius) {
 			if (x2 < 0 || y2 < 0 || x2 >= image.getWidth() || y2 >= image.getHeight())
 				continue;
 			RGBAPixel pixel = image.getPixel(x2, y2);
-			r += rgba_red(pixel);
-			g += rgba_green(pixel);
-			b += rgba_blue(pixel);
+			r += (int) rgba_red(pixel) * (int) rgba_alpha(pixel);
+			g += (int) rgba_green(pixel) * (int) rgba_alpha(pixel);
+			b += (int) rgba_blue(pixel) * (int) rgba_alpha(pixel);
 			a += rgba_alpha(pixel);
 			count++;
 		}
-	return rgba(r / count, g / count, b / count, a / count);
+	return a ? rgba(r / a, g / a, b / a, a / count) : 0;
 }
 
 void RGBAImage::blur(RGBAImage& dest, int radius) const {
