@@ -72,8 +72,8 @@ void TileRenderWorker::saveTile(const TilePath& tile, const RGBAImage& image) {
 	if (tile.getDepth() == 0)
 		filename = std::string("base") + suffix;
 	fs::path file = render_context.output_dir / filename;
-	if (!fs::exists(file.branch_path()))
-		fs::create_directories(file.branch_path());
+	if (!fs::exists(file.parent_path()))
+		fs::create_directories(file.parent_path());
 
 	if ((png && !png_indexed) && !image.writePNG(file.string()))
 		LOG(WARNING) << "Unable to write '" << file.string() << "'.";
